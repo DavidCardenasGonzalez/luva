@@ -10,7 +10,7 @@
     "watch": "tsc -w",
     "cdk": "cdk",
     "synth": "cdk synth",
-    "deploy": "cdk deploy"
+    "deploy": "cdk deploy --profile david"
   },
   "devDependencies": {
     "@types/node": "^18",

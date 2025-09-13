@@ -1,28 +1,41 @@
 import { useRef } from 'react';
+import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
 
 export interface Recording {
-  blob: Blob;
+  uri: string;
   durationMs: number;
+  contentType: string; // 'audio/m4a'
 }
 
 export default function useAudioRecorder() {
-  const isRecording = useRef(false);
+  const recordingRef = useRef<Audio.Recording | null>(null);
 
   return {
-    isRecording: () => isRecording.current,
+    isRecording: () => !!recordingRef.current,
     async start() {
-      // TODO: implement with expo-av or native module
-      isRecording.current = true;
+      const { status } = await Audio.requestPermissionsAsync();
+      if (!status || status !== 'granted') throw new Error('Microphone permission denied');
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+      const rec = new Audio.Recording();
+      await rec.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+      await rec.startAsync();
+      recordingRef.current = rec;
     },
     async stop(): Promise<Recording> {
-      isRecording.current = false;
-      // Placeholder 1-second silent wav (empty Blob)
-      return { blob: new Blob(), durationMs: 1000 };
+      const rec = recordingRef.current;
+      if (!rec) throw new Error('Not recording');
+      await rec.stopAndUnloadAsync();
+      recordingRef.current = null;
+      const uri = rec.getURI()!;
+      // duration isn't always available; attempt stat for size/time if needed
+      return { uri, durationMs: 0, contentType: 'audio/m4a' };
     },
     async recordOnce(): Promise<Recording> {
       await this.start();
+      // Simple 3-second capture; in UI you can add a toggle to stop
+      await new Promise((r) => setTimeout(r, 3000));
       return this.stop();
     },
   };
 }
-

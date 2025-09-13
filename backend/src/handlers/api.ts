@@ -1,10 +1,13 @@
 import type { APIGatewayProxyEventV2 as Event, APIGatewayProxyResultV2 as Result } from 'aws-lambda';
 import { randomUUID } from 'crypto';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { EvaluationResponse, ApiResponse, SessionStartResponse, CardItem } from '../types';
 
 const s3 = new S3Client({});
+const ssm = new SSMClient({});
+let OPENAI_API_KEY_CACHE: string | undefined;
 
 function json(statusCode: number, data: unknown): ApiResponse {
   return {
@@ -40,7 +43,7 @@ export const handler = async (event: any): Promise<Result> => {
     const sessionTranscribe = path.match(/^\/v1\/sessions\/([^/]+)\/transcribe$/);
     if (method === 'POST' && sessionTranscribe) {
       const sessionId = sessionTranscribe[1];
-      const transcript = await transcribeMock(sessionId);
+      const transcript = await transcribeWhisper(sessionId);
       return json(200, { transcript });
     }
 
@@ -97,6 +100,54 @@ async function startSession(): Promise<{ sessionId: string; uploadUrl: string; }
 async function transcribeMock(sessionId: string): Promise<string> {
   // Placeholder: In real impl, fetch S3 object and call Whisper
   return `Transcription for session ${sessionId} (mock)`;
+}
+
+async function transcribeWhisper(sessionId: string): Promise<string> {
+  const audioBucket = process.env.AUDIO_BUCKET;
+  if (!audioBucket) throw new Error('AUDIO_BUCKET not set');
+  const key = `sessions/${sessionId}/audio.m4a`;
+  const body = await getObjectBuffer(audioBucket, key);
+  const apiKey = await getOpenAIKey();
+
+  // Use Node 18+ fetch + FormData/Blob
+  const form = new FormData();
+  const file = new Blob([body], { type: 'audio/m4a' });
+  form.append('file', file as any, 'audio.m4a');
+  form.append('model', 'whisper-1');
+
+  const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: form as any,
+  } as any);
+  if (!res.ok) {
+    const txt = await res.text();
+    console.error('Whisper error', res.status, txt);
+    throw new Error('TRANSCRIBE_FAILED');
+  }
+  const data: any = await res.json();
+  return data.text || '';
+}
+
+async function getObjectBuffer(bucket: string, key: string): Promise<Buffer> {
+  const out = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+  const stream = out.Body as any; // Readable
+  const chunks: Uint8Array[] = [];
+  for await (const chunk of stream) chunks.push(chunk as Uint8Array);
+  return Buffer.concat(chunks);
+}
+
+async function getOpenAIKey(): Promise<string> {
+  if (OPENAI_API_KEY_CACHE) return OPENAI_API_KEY_CACHE;
+  const name = process.env.OPENAI_KEY_PARAM;
+  console.log('Fetching OpenAI key from SSM param', name);
+  if (!name) throw new Error('OPENAI_KEY_PARAM not set');
+  const out = await ssm.send(new GetParameterCommand({ Name: name, WithDecryption: true }));
+  console.log('SSM get param result', out);
+  const value = out.Parameter?.Value;
+  if (!value || value === 'SET_IN_SSM') throw new Error('OpenAI key not configured');
+  OPENAI_API_KEY_CACHE = value;
+  return value;
 }
 
 function evaluateMock(transcript: string): EvaluationResponse {
@@ -166,4 +217,3 @@ function mockStories() {
     },
   ];
 }
-

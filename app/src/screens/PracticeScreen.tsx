@@ -19,20 +19,38 @@ export default function PracticeScreen() {
   const [transcript, setTranscript] = useState('');
   const [state, setState] = useState<'idle'|'recording'|'uploading'|'transcribing'|'evaluating'|'done'>('idle');
   const [feedback, setFeedback] = useState<EvalRes | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const run = async () => {
     setFeedback(null);
     setTranscript('');
     setState('recording');
     const rec = await recorder.recordOnce();
+    console.log('Recorded', rec);
 
     setState('uploading');
     const startBody: any = {};
     if (cardId) startBody.cardId = cardId;
     if (storyId) { startBody.storyId = storyId; startBody.sceneIndex = sceneIndex ?? 0; }
-    const started = await api.post<{ sessionId: string; uploadUrl: string }>(`/sessions/start`, startBody);
-    await uploader.put(started.uploadUrl, rec.blob, 'audio/m4a');
-
+    let started;
+    try {
+      started = await api.post<{ sessionId: string; uploadUrl: string }>(`/sessions/start`, startBody);
+    } catch (error) {
+      console.error('Error starting session:', error);
+      setState('idle');
+      return;
+    }
+    console.log('Uploading to', started.uploadUrl);
+    try {
+      // Important: content type must match the presigned URL (backend signs audio/mp4)
+      await uploader.put(started.uploadUrl, { uri: rec.uri }, 'audio/mp4');
+    } catch (e: any) {
+      console.error('Upload failed:', e);
+      setError(e?.message || 'Upload failed');
+      setState('idle');
+      return;
+    }
+    console.log('Uploaded');
     setState('transcribing');
     const tr = await api.post<{ transcript: string }>(`/sessions/${started.sessionId}/transcribe`);
     setTranscript(tr.transcript);
@@ -72,6 +90,7 @@ export default function PracticeScreen() {
           <Text>Register: {feedback.feedback.register.join('; ')}</Text>
         </View>
       )}
+      {error ? <Text style={{ marginTop: 12, color: 'red' }}>Error: {error}</Text> : null}
     </View>
   );
 }

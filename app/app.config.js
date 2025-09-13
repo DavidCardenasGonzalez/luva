@@ -8,16 +8,12 @@ module.exports = {
     scheme: 'myapp',
     version: '1.0.0',
     orientation: 'portrait',
-    icon: './assets/icon.png',
     updates: { fallbackToCacheTimeout: 0 },
     assetBundlePatterns: ['**/*'],
     ios: { supportsTablet: true },
-    android: {
-      adaptiveIcon: {
-        foregroundImage: './assets/adaptive-icon.png',
-        backgroundColor: '#FFFFFF',
-      },
-    },
+    // Icons temporarily disabled until assets are added
+    // icon: './assets/icon.png',
+    android: {},
     plugins: [],
     extra: {
       API_BASE_URL: process.env.API_BASE_URL,
@@ -27,4 +23,3 @@ module.exports = {
     },
   },
 };
-
