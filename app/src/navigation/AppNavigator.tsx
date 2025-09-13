@@ -14,8 +14,8 @@ import * as Linking from 'expo-linking';
 export type RootStackParamList = {
   Home: undefined;
   Deck: undefined;
-  CardDetail: { id: string; label: string; example: string };
-  Practice: { cardId?: string; storyId?: string; sceneIndex?: number; prompt?: string; label?: string; example?: string };
+  CardDetail: { id: string; label: string; example: string; options: Record<'a'|'b'|'c', string>; answer: 'a'|'b'|'c'; explanation: string };
+  Practice: { cardId?: string; storyId?: string; sceneIndex?: number; prompt?: string; label?: string; example?: string; options?: Record<'a'|'b'|'c', string>; answer?: 'a'|'b'|'c'; explanation?: string };
   Stories: undefined;
   StoryScene: { storyId: string; sceneIndex: number };
   Profile: undefined;

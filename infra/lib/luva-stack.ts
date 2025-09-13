@@ -138,12 +138,14 @@ export class LuvaStack extends Stack {
       handler: 'handler',
       runtime: Runtime.NODEJS_18_X,
       memorySize: 256,
-      timeout: Duration.seconds(15),
+      timeout: Duration.seconds(30),
       logGroup: apiFnLogGroup,
       environment: {
         TABLE_NAME: table.tableName,
         AUDIO_BUCKET: audioRawBucket.bucketName,
         OPENAI_KEY_PARAM: openAiKeyParam.parameterName,
+        OPENAI_CHAT_MODEL: 'gpt-5-nano',
+        EVAL_TIMEOUT_MS: '20000',
         STAGE: 'prod',
       },
     });

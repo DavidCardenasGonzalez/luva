@@ -25,25 +25,44 @@ function badRequest(message: string): ApiResponse { return json(400, { message }
 
 const ROUTE_PREFIX = '/v1';
 
-export const handler = async (event: any): Promise<Result> => {
+export const handler = async (event: any, context?: any): Promise<Result> => {
   const method: string = event.httpMethod || event.requestContext?.http?.method || 'GET';
   const rawPath: string = event.resource && event.path ? event.path : event.requestContext?.http?.path || '/';
   const path = rawPath.startsWith(ROUTE_PREFIX) ? rawPath : `${ROUTE_PREFIX}${rawPath}`;
+  const reqId: string | undefined = event.requestContext?.requestId || event.requestContext?.http?.requestId || context?.awsRequestId;
+  const stage = process.env.STAGE || 'dev';
+
+  const log = (scope: string, extra?: Record<string, unknown>) => {
+    try {
+      console.log(JSON.stringify({ scope, method, path, reqId, stage, ...extra }));
+    } catch {
+      // fallback minimal log
+      console.log(`[${scope}] ${method} ${path} ${reqId || ''}`);
+    }
+  };
+
+  log('request.received');
 
   try {
     if (method === 'GET' && path === `${ROUTE_PREFIX}/cards`) {
+      log('cards.list');
       return json(200, { items: mockCards(), nextCursor: null });
     }
 
     if (method === 'POST' && path === `${ROUTE_PREFIX}/sessions/start`) {
+      log('sessions.start.begin');
       const { uploadUrl, sessionId } = await startSession();
+      log('sessions.start.success', { sessionId });
       return json(200, { sessionId, uploadUrl } satisfies SessionStartResponse);
     }
 
     const sessionTranscribe = path.match(/^\/v1\/sessions\/([^/]+)\/transcribe$/);
     if (method === 'POST' && sessionTranscribe) {
       const sessionId = sessionTranscribe[1];
+      log('sessions.transcribe.begin', { sessionId });
+      const t0 = Date.now();
       const transcript = await transcribeWhisper(sessionId);
+      log('sessions.transcribe.success', { sessionId, ms: Date.now() - t0, length: transcript?.length || 0 });
       return json(200, { transcript });
     }
 
@@ -52,8 +71,19 @@ export const handler = async (event: any): Promise<Result> => {
       const sessionId = sessionEvaluate[1];
       const body = parseBody(event.body);
       const transcript = body?.transcript ?? '';
-      const evalResponse = evaluateMock(transcript);
-      return json(200, evalResponse satisfies EvaluationResponse);
+      const label = body?.label as string | undefined;
+      const example = body?.example as string | undefined;
+      try {
+        log('sessions.evaluate.begin', { sessionId, hasLabel: !!label, exampleProvided: !!example, tLen: transcript?.length || 0 });
+        const t0 = Date.now();
+        const evalResponse = await evaluateAI(transcript, { label, example });
+        log('sessions.evaluate.success', { sessionId, ms: Date.now() - t0, score: (evalResponse as any)?.score });
+        return json(200, evalResponse as any);
+      } catch (e) {
+        log('sessions.evaluate.error', { sessionId, error: (e as any)?.message || 'unknown' });
+        const fallback = evaluateMock(transcript);
+        return json(200, fallback);
+      }
     }
 
     const cardComplete = path.match(/^\/v1\/cards\/([^/]+)\/complete$/);
@@ -77,7 +107,7 @@ export const handler = async (event: any): Promise<Result> => {
 
     return notFound();
   } catch (err: any) {
-    console.error('Error', err);
+    log('request.unhandledError', { error: err?.message || 'unknown' });
     return json(500, { message: 'Internal error', code: 'INTERNAL_ERROR' });
   }
 };
@@ -94,6 +124,7 @@ async function startSession(): Promise<{ sessionId: string; uploadUrl: string; }
   const key = `sessions/${sessionId}/audio.m4a`;
   const cmd = new PutObjectCommand({ Bucket: audioBucket, Key: key, ContentType: 'audio/mp4' });
   const uploadUrl = await getSignedUrl(s3, cmd, { expiresIn: 60 * 10 });
+  console.log(JSON.stringify({ scope: 'sessions.start.presigned', sessionId, bucket: audioBucket, key }));
   return { sessionId, uploadUrl };
 }
 
@@ -106,6 +137,7 @@ async function transcribeWhisper(sessionId: string): Promise<string> {
   const audioBucket = process.env.AUDIO_BUCKET;
   if (!audioBucket) throw new Error('AUDIO_BUCKET not set');
   const key = `sessions/${sessionId}/audio.m4a`;
+  console.log(JSON.stringify({ scope: 'transcribe.fetchS3.begin', sessionId, bucket: audioBucket, key }));
   const body = await getObjectBuffer(audioBucket, key);
   const apiKey = await getOpenAIKey();
 
@@ -115,6 +147,7 @@ async function transcribeWhisper(sessionId: string): Promise<string> {
   form.append('file', file as any, 'audio.m4a');
   form.append('model', 'whisper-1');
 
+  const t0 = Date.now();
   const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}` },
@@ -122,10 +155,11 @@ async function transcribeWhisper(sessionId: string): Promise<string> {
   } as any);
   if (!res.ok) {
     const txt = await res.text();
-    console.error('Whisper error', res.status, txt);
+    console.error(JSON.stringify({ scope: 'transcribe.whisper.error', status: res.status, body: txt?.slice(0, 200) }));
     throw new Error('TRANSCRIBE_FAILED');
   }
   const data: any = await res.json();
+  console.log(JSON.stringify({ scope: 'transcribe.whisper.success', ms: Date.now() - t0, textLen: (data?.text || '').length }));
   return data.text || '';
 }
 
@@ -168,6 +202,78 @@ function evaluateMock(transcript: string): EvaluationResponse {
     ],
     nextHint: "Remember separable: 'set it up'.",
   };
+}
+
+async function evaluateAI(transcript: string, context: { label?: string; example?: string }): Promise<EvaluationResponse & { errors?: string[]; improvements?: string[] }> {
+  const apiKey = await getOpenAIKey();
+  const model = process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini';
+  const timeoutMs = Number(process.env.EVAL_TIMEOUT_MS || 8000);
+  const sys = `Eres un profesor de inglés (B2/B2+) que habla español. Evalúa la respuesta del alumno y devuelve SOLO JSON (sin texto adicional) con estas claves:
+  - correctness: número 0-100 que indique qué tan correcta es la respuesta.
+  - errors: arreglo con hasta 3 puntos breves y accionables en español (errores o aspectos a mejorar: gramática/uso/collocations). Estos se mostrarán en rojo.
+  - improvements: arreglo con 1–2 reformulaciones más naturales en inglés (frases concisas), sin explicaciones.
+Además, si se proporciona una 'expresión objetivo' (Target item), verifica explícitamente que el alumno la haya usado de manera adecuada en su oración. Si no la usó o la usó mal, menciona eso en errors. Sé breve y específico. No incluyas texto fuera del JSON. Los mensajes de errors van en español; las oraciones en improvements van en inglés.`;
+  const user = `Student transcript: ${transcript}\n` + (context.label ? `Target item: ${context.label}\n` : '') + (context.example ? `Example context: ${context.example}\n` : '');
+
+  console.log(JSON.stringify({ scope: 'evaluate.openai.begin', model, tLen: transcript?.length || 0, hasLabel: !!context.label, hasExample: !!context.example }));
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), timeoutMs);
+  let res: Response;
+  try {
+    res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: sys },
+          { role: 'user', content: user },
+        ],
+      }),
+      signal: ac.signal,
+    });
+  } catch (e: any) {
+    clearTimeout(to);
+    if (e?.name === 'AbortError') {
+      console.error(JSON.stringify({ scope: 'evaluate.openai.timeout', timeoutMs }));
+      return evaluateMock(transcript);
+    }
+    console.error(JSON.stringify({ scope: 'evaluate.openai.fetchError', message: e?.message || 'unknown' }));
+    return evaluateMock(transcript);
+  } finally {
+    clearTimeout(to);
+  }
+  if (!res.ok) {
+    const txt = await res.text();
+    console.error(JSON.stringify({ scope: 'evaluate.openai.httpError', status: res.status, body: txt?.slice(0, 200) }));
+    return evaluateMock(transcript);
+  }
+  const data: any = await res.json();
+  const text = data.choices?.[0]?.message?.content || '{}';
+  let parsed: any = {};
+  try { parsed = JSON.parse(text); } catch {}
+  const correctness = Math.max(0, Math.min(100, Number(parsed.correctness ?? 0)));
+  const errors: string[] = Array.isArray(parsed.errors) ? parsed.errors.slice(0, 5) : [];
+  const improvements: string[] = Array.isArray(parsed.improvements) ? parsed.improvements.slice(0, 2) : [];
+  const result = correctness >= 85 ? 'correct' : correctness >= 60 ? 'partial' : 'incorrect';
+  console.log(JSON.stringify({ scope: 'evaluate.openai.success', score: correctness, errors: errors.length, improvements: improvements.length }));
+  return {
+    score: correctness,
+    result,
+    feedback: {
+      grammar: errors,
+      wording: [],
+      naturalness: [],
+      register: [],
+    },
+    suggestions: improvements,
+    nextHint: undefined,
+    errors,
+    improvements,
+  } as any;
 }
 
 function mockCards(): CardItem[] {

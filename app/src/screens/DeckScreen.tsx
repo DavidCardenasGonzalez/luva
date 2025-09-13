@@ -15,7 +15,7 @@ export default function DeckScreen({ navigation }: Props) {
         data={items}
         keyExtractor={(i) => String(i.id)}
         renderItem={({ item }) => (
-          <Pressable onPress={() => navigation.navigate('CardDetail', { id: String(item.id), label: item.label, example: item.example })}>
+          <Pressable onPress={() => navigation.navigate('CardDetail', { id: String(item.id), label: item.label, example: item.example, options: item.options, answer: item.answer, explanation: item.explanation })}>
             <View style={{ paddingVertical: 10, borderBottomWidth: 1, borderColor: '#eee' }}>
               <Text style={{ fontWeight: '600' }}>{item.label}</Text>
               <Text style={{ color: '#555' }} numberOfLines={1}>{item.example}</Text>
