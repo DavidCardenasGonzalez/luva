@@ -1,0 +1,62 @@
+{
+  "info": {
+    "name": "Luva API v1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET /cards",
+      "request": { "method": "GET", "url": "{{baseUrl}}/cards" }
+    },
+    {
+      "name": "POST /sessions/start",
+      "request": { "method": "POST", "url": "{{baseUrl}}/sessions/start" }
+    },
+    {
+      "name": "POST /sessions/{id}/transcribe",
+      "request": { "method": "POST", "url": "{{baseUrl}}/sessions/{{sessionId}}/transcribe" }
+    },
+    {
+      "name": "POST /sessions/{id}/evaluate",
+      "request": {
+        "method": "POST",
+        "header": [{"key":"Content-Type","value":"application/json"}],
+        "body": { "mode": "raw", "raw": "{\n  \"transcript\": \"I set up the router\"\n}" },
+        "url": "{{baseUrl}}/sessions/{{sessionId}}/evaluate"
+      }
+    },
+    {
+      "name": "POST /cards/{cardId}/complete",
+      "request": {
+        "method": "POST",
+        "header": [{"key":"Content-Type","value":"application/json"}],
+        "body": { "mode": "raw", "raw": "{\n  \"result\": \"correct\",\n  \"score\": 90\n}" },
+        "url": "{{baseUrl}}/cards/{{cardId}}/complete"
+      }
+    },
+    {
+      "name": "GET /stories",
+      "request": { "method": "GET", "url": "{{baseUrl}}/stories" }
+    },
+    {
+      "name": "POST /stories/{storyId}/advance",
+      "request": {
+        "method": "POST",
+        "header": [{"key":"Content-Type","value":"application/json"}],
+        "body": { "mode": "raw", "raw": "{\n  \"sessionId\": \"abc\",\n  \"transcript\": \"I would like a table for two\"\n}" },
+        "url": "{{baseUrl}}/stories/{{storyId}}/advance"
+      }
+    },
+    {
+      "name": "GET /me/progress",
+      "request": { "method": "GET", "url": "{{baseUrl}}/me/progress" }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "https://YOUR_APIGW_ID.execute-api.us-east-1.amazonaws.com/prod/v1" },
+    { "key": "sessionId", "value": "test-session" },
+    { "key": "cardId", "value": "pv_set_up_001" },
+    { "key": "storyId", "value": "restaurant_rush" }
+  ]
+}
+

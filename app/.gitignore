@@ -1,0 +1,14 @@
+node_modules/
+.expo/
+.expo-shared/
+web-build/
+android/.gradle/
+android/app/build/
+ios/build/
+ios/Pods/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+npm-debug.log*
+
