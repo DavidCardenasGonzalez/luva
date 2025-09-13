@@ -14,8 +14,8 @@ import * as Linking from 'expo-linking';
 export type RootStackParamList = {
   Home: undefined;
   Deck: undefined;
-  CardDetail: { cardId: string; prompt: string };
-  Practice: { cardId?: string; storyId?: string; sceneIndex?: number; prompt?: string };
+  CardDetail: { id: string; label: string; example: string };
+  Practice: { cardId?: string; storyId?: string; sceneIndex?: number; prompt?: string; label?: string; example?: string };
   Stories: undefined;
   StoryScene: { storyId: string; sceneIndex: number };
   Profile: undefined;
@@ -50,4 +50,3 @@ export default function AppNavigator() {
     </NavigationContainer>
   );
 }
-

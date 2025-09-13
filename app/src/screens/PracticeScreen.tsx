@@ -13,7 +13,7 @@ type EvalRes = {
 
 export default function PracticeScreen() {
   const route = useRoute<any>();
-  const { cardId, storyId, sceneIndex, prompt } = route.params || {};
+  const { cardId, storyId, sceneIndex, prompt, label, example } = route.params || {};
   const recorder = useAudioRecorder();
   const uploader = useUploadToS3();
   const [transcript, setTranscript] = useState('');
@@ -55,6 +55,8 @@ export default function PracticeScreen() {
   return (
     <View style={{ padding: 16 }}>
       <Text style={{ fontSize: 18, fontWeight: '600' }}>Practice</Text>
+      {label ? <Text style={{ marginTop: 8, fontWeight: '600' }}>{label}</Text> : null}
+      {example ? <Text style={{ marginTop: 6, color: '#555' }}>{example}</Text> : null}
       {prompt ? <Text style={{ marginTop: 8 }}>{prompt}</Text> : null}
       <Text style={{ marginTop: 8 }}>State: {state}</Text>
       <View style={{ height: 12 }} />
