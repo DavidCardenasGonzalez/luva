@@ -1,26 +1,35 @@
-import React from 'react';
-import { View, Text, FlatList } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, FlatList, Pressable, Button } from 'react-native';
+import { useCards, Card } from '../hooks/useCards';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
 
-const mockCards = [
-  { cardId: 'pv_set_up_001', type: 'phrasal', prompt: "What does 'set up' mean?" },
-  { cardId: 'st_inversion_001', type: 'structure', prompt: 'Never had I...' },
-];
+type Props = NativeStackScreenProps<RootStackParamList, 'Deck'>;
 
-export default function DeckScreen() {
+export default function DeckScreen({ navigation }: Props) {
+  const [filter, setFilter] = useState<Card['type'] | undefined>(undefined);
+  const { items } = useCards(filter);
   return (
     <View style={{ padding: 16 }}>
       <Text style={{ fontSize: 18, fontWeight: '600' }}>Cards</Text>
+      <View style={{ flexDirection: 'row', gap: 8, marginVertical: 8 }}>
+        <Button title="All" onPress={() => setFilter(undefined)} />
+        <Button title="Phrasal" onPress={() => setFilter('phrasal')} />
+        <Button title="Structure" onPress={() => setFilter('structure')} />
+        <Button title="Vocab" onPress={() => setFilter('vocab')} />
+      </View>
       <FlatList
-        data={mockCards}
+        data={items}
         keyExtractor={(i) => i.cardId}
         renderItem={({ item }) => (
-          <View style={{ paddingVertical: 8 }}>
-            <Text style={{ fontWeight: '500' }}>{item.type}</Text>
-            <Text>{item.prompt}</Text>
-          </View>
+          <Pressable onPress={() => navigation.navigate('CardDetail', { cardId: item.cardId, prompt: item.prompt })}>
+            <View style={{ paddingVertical: 10, borderBottomWidth: 1, borderColor: '#eee' }}>
+              <Text style={{ fontWeight: '600' }}>{item.prompt}</Text>
+              <Text style={{ color: '#555' }}>{item.type} • {item.difficulty}</Text>
+            </View>
+          </Pressable>
         )}
       />
     </View>
   );
 }
-
