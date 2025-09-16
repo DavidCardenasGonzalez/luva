@@ -28,6 +28,9 @@ coverage/
 **/.env.*
 !**/.env.example
 
+# Local sandbox secrets
+scripts/environment.local.json
+
 # CDK
 infra/cdk.out/
 infra/cdk.context.json
@@ -47,4 +50,3 @@ app/ios/Pods/
 # IDEs
 .vscode/
 .idea/
-

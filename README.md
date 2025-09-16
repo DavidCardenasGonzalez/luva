@@ -8,6 +8,7 @@ Monorepo
 - backend/ — Lambdas Node/TypeScript (mocks) + tests
 - app/ — React Native (TypeScript) con pantallas y hooks stub
 - seed/ — generador de 100 cartas y 5 historias
+- scripts/ — utilidades locales (p.ej., evaluate-sandbox)
 - docs/ — colección Postman/Insomnia
 
 Estado
@@ -30,3 +31,7 @@ Docs rápidas
 - Endpoints bajo `/v1` (ver `docs/luva.postman_collection.json`).
 - Contratos principales: `/cards`, `/sessions/start|transcribe|evaluate`, `/stories`, `/me/progress`.
 
+Sandbox evaluación local
+- Ejecuta evaluaciones fuera de Lambda para probar prompts/modelos:
+  `node scripts/evaluate-sandbox.js --text "I would like some water" --label "by contrast" --example "By contrast, sales fell" --model gpt-5-nano`
+- API key: exporta `OPENAI_API_KEY` o reemplaza el placeholder en el archivo (solo local, no lo subas).

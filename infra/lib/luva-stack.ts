@@ -144,7 +144,7 @@ export class LuvaStack extends Stack {
         TABLE_NAME: table.tableName,
         AUDIO_BUCKET: audioRawBucket.bucketName,
         OPENAI_KEY_PARAM: openAiKeyParam.parameterName,
-        OPENAI_CHAT_MODEL: 'gpt-5-nano',
+        OPENAI_CHAT_MODEL: 'gpt-4.1-nano',
         EVAL_TIMEOUT_MS: '20000',
         STAGE: 'prod',
       },
