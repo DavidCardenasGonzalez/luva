@@ -290,7 +290,7 @@ Devuelve SOLO JSON (sin texto extra) con estas claves:
 
 Responde únicamente el JSON, da tu respuesta de una forma amable.`;
 
-  const user = `${context.example}`;
+  const user = `${transcript}`;
   // Use Responses API for GPT-5 family, else fallback to Chat Completions
   const useResponses =
     /gpt-5/i.test(model) || process.env.OPENAI_USE_RESPONSES === "1";

@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, Button, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import useAudioRecorder from '../shared/useAudioRecorder';
 import useUploadToS3 from '../shared/useUploadToS3';
-import { useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { api } from '../api/api';
+import CardStatusSelector from '../components/CardStatusSelector';
+import { CARD_STATUS_LABELS, useCardProgress } from '../progress/CardProgressProvider';
 
 type EvalRes = {
   score: number;
@@ -16,9 +18,11 @@ type EvalRes = {
 
 export default function PracticeScreen() {
   const route = useRoute<any>();
+  const navigation = useNavigation<any>();
   const { cardId, storyId, sceneIndex, prompt, label, example, options, answer, explanation } = route.params || {};
   const recorder = useAudioRecorder();
   const uploader = useUploadToS3();
+  const { statusFor } = useCardProgress();
   const [transcript, setTranscript] = useState('');
   const [state, setState] = useState<'idle'|'recording'|'uploading'|'transcribing'|'evaluating'|'done'>('idle');
   const [feedback, setFeedback] = useState<EvalRes | null>(null);
@@ -182,6 +186,29 @@ export default function PracticeScreen() {
           })()}
         </View>
       )}
+      {cardId && feedback?.result === 'correct' ? (
+        <View style={{ marginTop: 16, padding: 18, borderRadius: 12, backgroundColor: '#f0fdf4', borderWidth: 1, borderColor: '#bbf7d0' }}>
+          <Text style={{ fontSize: 18, fontWeight: '700', color: '#047857' }}>✅ ¡Lograste esta card!</Text>
+          <Text style={{ color: '#065f46', marginTop: 8 }}>
+            Ahora decide si quieres seguir reforzándola o marcarla como aprendida.
+          </Text>
+          <Text style={{ marginTop: 12, color: '#047857', fontWeight: '600' }}>
+            Estado actual: {CARD_STATUS_LABELS[statusFor(cardId)]}
+          </Text>
+          <CardStatusSelector
+            cardId={String(cardId)}
+            title="Actualiza tu progreso"
+            allowedStatuses={['learning', 'learned']}
+            style={{ marginTop: 12 }}
+            onStatusChange={() => {
+              navigation.navigate('Deck');
+            }}
+          />
+          <Text style={{ color: '#047857', fontSize: 12, marginTop: 6 }}>
+            Puedes volver a cambiarlo más adelante desde el deck.
+          </Text>
+        </View>
+      ) : null}
       {(state === 'recording' || (canRecord && (!feedback || feedback.result !== 'correct'))) && (
         <View style={{ marginTop: 16 }}>
           {feedback && feedback.result !== 'correct' ? (
