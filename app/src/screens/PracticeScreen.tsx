@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, Text, Button, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import useAudioRecorder from '../shared/useAudioRecorder';
 import useUploadToS3 from '../shared/useUploadToS3';
@@ -6,6 +6,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { api } from '../api/api';
 import CardStatusSelector from '../components/CardStatusSelector';
 import { CARD_STATUS_LABELS, useCardProgress } from '../progress/CardProgressProvider';
+import * as Speech from 'expo-speech';
 
 type EvalRes = {
   score: number;
@@ -31,6 +32,20 @@ export default function PracticeScreen() {
   const [canRecord, setCanRecord] = useState<boolean>(false);
   const [userText, setUserText] = useState<string>('');
 
+  const speakLabel = useCallback(() => {
+    if (!label) return;
+    const speechSegments = [label];
+    if (example) speechSegments.push(example);
+    const speechText = speechSegments.join('. ');
+    console.log('[Practice] Reproduciendo palabra', speechText);
+    try {
+      Speech.stop();
+      Speech.speak(speechText, { language: 'en-US', pitch: 1.05 });
+    } catch (err: any) {
+      console.warn('[Practice] Error al reproducir', err?.message || err);
+    }
+  }, [label, example]);
+
   // Press-and-hold: start on pressIn, stop & process on pressOut
   const run = async () => {
     if (!selected) {
@@ -39,11 +54,22 @@ export default function PracticeScreen() {
     // Mantener el feedback y transcript actual visibles para evitar saltos de layout.
     setState('recording');
     setCanRecord(false);
-    await recorder.start();
+    try {
+      await recorder.start();
+    } catch (err: any) {
+      console.error('[Practice] No se pudo iniciar la grabación', err?.message || err);
+      setError(err?.message || 'No se pudo iniciar la grabación');
+      setState('idle');
+    }
   };
 
   const onRelease = async () => {
     try {
+      if (!recorder.isRecording()) {
+        console.warn('[Practice] onRelease sin grabación activa');
+        setState('idle');
+        return;
+      }
       const rec = await recorder.stop();
       console.log('Recorded', rec);
 
@@ -122,8 +148,33 @@ export default function PracticeScreen() {
         scrollEnabled={state !== 'recording'}
       >
       <Text style={{ fontSize: 18, fontWeight: '600' }}>Práctica</Text>
-      {label ? <Text style={{ marginTop: 8, fontWeight: '600' }}>{label}</Text> : null}
-      {example ? <Text style={{ marginTop: 6, color: '#555' }}>{example}</Text> : null}
+      {label ? (
+        <View style={{ marginTop: 12, padding: 16, borderRadius: 16, backgroundColor: '#eef2ff' }}>
+          <Text style={{ fontSize: 12, fontWeight: '600', color: '#4c1d95', letterSpacing: 0.5 }}>Palabra clave</Text>
+          <View style={{ marginTop: 6, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text style={{ fontSize: 24, fontWeight: '800', color: '#312e81', flexShrink: 1 }}>{label}</Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Pronunciar ${label}`}
+              onPress={speakLabel}
+              style={({ pressed }) => ({
+                marginLeft: 12,
+                width: 44,
+                height: 44,
+                borderRadius: 22,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: pressed ? '#c7d2fe' : '#a5b4fc',
+              })}
+            >
+              <Text style={{ fontSize: 22, color: '#1e1b4b' }}>🔊</Text>
+            </Pressable>
+          </View>
+          {example ? (
+            <Text style={{ marginTop: 10, color: '#4338ca', fontSize: 16, lineHeight: 22 }}>{example}</Text>
+          ) : null}
+        </View>
+      ) : null}
       {prompt ? <Text style={{ marginTop: 8 }}>{prompt}</Text> : null}
       {options && (
         <View style={{ marginTop: 12 }}>

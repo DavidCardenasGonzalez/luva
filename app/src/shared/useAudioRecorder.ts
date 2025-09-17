@@ -1,6 +1,5 @@
 import { useRef } from 'react';
 import { Audio } from 'expo-av';
-import * as FileSystem from 'expo-file-system';
 
 export interface Recording {
   uri: string;
