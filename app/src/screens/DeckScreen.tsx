@@ -11,8 +11,6 @@ import {
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Deck'>;
 
-type FilterKey = 'all' | CardProgressStatus;
-
 const STATUS_ORDER: CardProgressStatus[] = ['todo', 'learning', 'learned'];
 const STATUS_COLORS: Record<CardProgressStatus, string> = {
   todo: '#f97316',
@@ -20,17 +18,10 @@ const STATUS_COLORS: Record<CardProgressStatus, string> = {
   learned: '#22c55e',
 };
 
-const FILTER_LABELS: Record<FilterKey, string> = {
-  all: 'Todas',
-  todo: CARD_STATUS_LABELS.todo,
-  learning: CARD_STATUS_LABELS.learning,
-  learned: CARD_STATUS_LABELS.learned,
-};
-
 export default function DeckScreen({ navigation }: Props) {
   const { items } = useLearningItems();
   const { statusFor, statuses } = useCardProgress();
-  const [filter, setFilter] = useState<FilterKey>('all');
+  const [activeStatuses, setActiveStatuses] = useState<CardProgressStatus[]>(['todo']);
 
   const { totals, percentages, filteredItems } = useMemo(() => {
     const counts: Record<CardProgressStatus, number> = { todo: 0, learning: 0, learned: 0 };
@@ -42,9 +33,20 @@ export default function DeckScreen({ navigation }: Props) {
       learning: totalCount ? Math.round((counts.learning / totalCount) * 100) : 0,
       learned: totalCount ? Math.round((counts.learned / totalCount) * 100) : 0,
     };
-    const filtered = filter === 'all' ? list : list.filter((card) => card.status === filter);
+    const activeSet = new Set(activeStatuses.length ? activeStatuses : STATUS_ORDER);
+    const filtered = list.filter((card) => activeSet.has(card.status));
     return { totals: counts, percentages: pct, filteredItems: filtered };
-  }, [items, statuses, statusFor, filter]);
+  }, [items, statuses, statusFor, activeStatuses]);
+
+  const toggleStatus = (status: CardProgressStatus) => {
+    setActiveStatuses((prev) => {
+      if (prev.includes(status)) {
+        if (prev.length === 1) return prev; // evitar dejar sin filtros
+        return prev.filter((s) => s !== status);
+      }
+      return [...prev, status];
+    });
+  };
 
   return (
     <View style={{ flex: 1, padding: 16 }}>
@@ -76,22 +78,22 @@ export default function DeckScreen({ navigation }: Props) {
       </View>
 
       <View style={{ marginTop: 16, flexDirection: 'row', flexWrap: 'wrap' }}>
-        {(Object.keys(FILTER_LABELS) as FilterKey[]).map((key) => {
-          const active = filter === key;
+        {STATUS_ORDER.map((status) => {
+          const active = activeStatuses.includes(status);
           return (
             <Pressable
-              key={key}
-              onPress={() => setFilter(key)}
+              key={status}
+              onPress={() => toggleStatus(status)}
               style={({ pressed }) => ({
                 marginRight: 8,
                 marginBottom: 8,
                 paddingVertical: 6,
                 paddingHorizontal: 14,
                 borderRadius: 999,
-                backgroundColor: active ? '#1d4ed8' : pressed ? '#e5e7eb' : '#f1f5f9',
+                backgroundColor: active ? STATUS_COLORS[status] : pressed ? '#e5e7eb' : '#f1f5f9',
               })}
             >
-              <Text style={{ color: active ? 'white' : '#1f2937', fontWeight: active ? '700' : '500' }}>{FILTER_LABELS[key]}</Text>
+              <Text style={{ color: active ? 'white' : '#1f2937', fontWeight: active ? '700' : '500' }}>{CARD_STATUS_LABELS[status]}</Text>
             </Pressable>
           );
         })}
@@ -106,7 +108,7 @@ export default function DeckScreen({ navigation }: Props) {
               <Text style={{ fontWeight: '600' }}>{item.label}</Text>
               <Text style={{ color: '#555' }} numberOfLines={1}>{item.example}</Text>
               <Text style={{ marginTop: 4, color: '#2563eb', fontSize: 12 }}>
-                Estado: {CARD_STATUS_LABELS[statusFor(item.id)]}
+                Estado: {CARD_STATUS_LABELS[item.status as CardProgressStatus]}
               </Text>
             </View>
           </Pressable>

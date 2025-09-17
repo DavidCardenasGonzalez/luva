@@ -9,7 +9,7 @@ Monorepo
 - app/ — React Native (TypeScript) con pantallas y hooks stub
 - seed/ — generador de 100 cartas y 5 historias
 - scripts/ — utilidades locales (p.ej., evaluate-sandbox)
-- docs/ — colección Postman/Insomnia
+- docs/ — colección Postman/Insomnia y [Prompt Development Notes](docs/prompt-development-notes.md)
 
 Estado
 - Primera versión esqueleto con mocks y contratos. Preparada para iterar.
