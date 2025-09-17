@@ -22,15 +22,11 @@ try {
   const secretsFile = path.join(__dirname, "environment.local.json");
   const raw = fs.readFileSync(secretsFile, "utf8");
   const data = JSON.parse(raw);
-  console.log(`Cargando variables de entorno desde ${data}`);
+  console.log(`Cargando variables de entorno desde ${secretsFile}`);
   if (data && typeof data === "object") {
     for (const [key, value] of Object.entries(data)) {
-      console.log(
-        `(Usando ${key} de environment.local.json) con valor: ${
-          value ? "***" : "(vacío)"
-        }`
-      );
       if (!process.env[key] && typeof value === "string" && value) {
+        console.log(`Usando ${key} definido en environment.local.json`);
         process.env[key] = value;
       }
     }

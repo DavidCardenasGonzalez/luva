@@ -4,10 +4,11 @@ export type LearningItemOptionKey = 'a' | 'b' | 'c';
 export type LearningItem = {
   id: number;
   label: string;
-  example: string;
+  examples: string[];
   options: Record<LearningItemOptionKey, string>;
   answer: LearningItemOptionKey;
   explanation: string;
+  prompt?: string;
 };
 
 export function useLearningItems() {

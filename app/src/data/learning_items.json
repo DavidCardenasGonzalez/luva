@@ -2,1201 +2,1701 @@
   {
     "id": 1,
     "label": "abandon",
-    "example": "He decided to abandon the project after many failures.",
+    "examples": [
+      "He decided to abandon the project after many failures.",
+      "Many villages were abandoned during the drought.",
+      "They won't abandon their values under pressure."
+    ],
     "options": {
       "a": "dejar atrás o renunciar",
       "b": "acoger con entusiasmo",
       "c": "mejorar gradualmente"
     },
     "answer": "a",
-    "explanation": "Dejar atrás o renunciar a algo o alguien por completo (p. ej., abandonar un proyecto, una idea o un lugar), normalmente de forma definitiva."
+    "explanation": "Dejar atrás o renunciar a algo o alguien por completo (p. ej., abandonar un proyecto, una idea o un lugar), normalmente de forma definitiva.",
+    "prompt": "explica una situación en la que un estudiante abandona la universidad porque perdió la motivación."
   },
   {
     "id": 2,
     "label": "absorb",
-    "example": "The sponge can absorb a lot of water.",
+    "examples": [
+      "The sponge can absorb a lot of water.",
+      "Plants absorb sunlight to produce energy.",
+      "She absorbed the main points of the lecture quickly."
+    ],
     "options": {
       "a": "arrojar con fuerza",
       "b": "tomar o empapar",
       "c": "observar a distancia"
     },
     "answer": "b",
-    "explanation": "Tomar, captar o empapar una sustancia o información (p. ej., una esponja absorbe agua; un alumno absorbe conocimiento)."
+    "explanation": "Tomar, captar o empapar una sustancia o información (p. ej., una esponja absorbe agua; un alumno absorbe conocimiento).",
+    "prompt": "describe una escena donde un niño absorbe rápidamente todo lo que escucha en clase y sorprende a su profesor."
   },
   {
     "id": 3,
     "label": "abstract",
-    "example": "Her explanation was too abstract for the children.",
+    "examples": [
+      "Her explanation was too abstract for the children.",
+      "The painting is highly abstract and open to interpretation.",
+      "Try to avoid abstract terms in this instruction manual."
+    ],
     "options": {
       "a": "decorativo y colorido",
       "b": "directo y práctico",
       "c": "teórico, no concreto"
     },
     "answer": "c",
-    "explanation": "De carácter teórico o conceptual, no concreto ni tangible; puede referirse a ideas generales o a arte no figurativo."
+    "explanation": "De carácter teórico o conceptual, no concreto ni tangible; puede referirse a ideas generales o a arte no figurativo.",
+    "prompt": "inventa una situación donde alguien intenta explicar un concepto abstracto como 'libertad' a un niño pequeño."
   },
   {
     "id": 4,
     "label": "accommodate",
-    "example": "The hotel can accommodate up to 500 guests.",
+    "examples": [
+      "The hotel can accommodate up to 500 guests.",
+      "We accommodated their request by changing the schedule.",
+      "The system was redesigned to accommodate new users."
+    ],
     "options": {
       "a": "proporcionar espacio o adaptarse",
       "b": "exigir un reembolso",
       "c": "interrumpir un proceso"
     },
     "answer": "a",
-    "explanation": "Proporcionar espacio o capacidad; también, adaptarse a necesidades o circunstancias (p. ej., alojar huéspedes; ajustar un plan)."
+    "explanation": "Proporcionar espacio o capacidad; también, adaptarse a necesidades o circunstancias (p. ej., alojar huéspedes; ajustar un plan).",
+    "prompt": "cuenta una historia donde un hotel debe acomodar a un grupo inesperado de turistas en plena temporada alta."
   },
   {
     "id": 5,
     "label": "accomplish",
-    "example": "She managed to accomplish all her goals this year.",
+    "examples": [
+      "She managed to accomplish all her goals this year.",
+      "We accomplished more than we expected.",
+      "He is determined to accomplish the task on time."
+    ],
     "options": {
       "a": "intentar sin éxito",
       "b": "delegar responsabilidades",
       "c": "lograr o completar con éxito"
     },
     "answer": "c",
-    "explanation": "Lograr o completar con éxito una tarea u objetivo tras esfuerzo y planificación."
+    "explanation": "Lograr o completar con éxito una tarea u objetivo tras esfuerzo y planificación.",
+    "prompt": "describe una situación en la que alguien logra terminar un maratón después de entrenar durante meses."
   },
   {
     "id": 6,
     "label": "accurate",
-    "example": "This report is accurate and up to date.",
+    "examples": [
+      "This report is accurate and up to date.",
+      "Make sure your measurements are accurate.",
+      "Her predictions were surprisingly accurate."
+    ],
     "options": {
       "a": "correcto y sin errores",
       "b": "difícil de leer",
       "c": "incompleto por naturaleza"
     },
     "answer": "a",
-    "explanation": "Correcto, preciso y libre de errores; coincide fielmente con los hechos o mediciones."
+    "explanation": "Correcto, preciso y libre de errores; coincide fielmente con los hechos o mediciones.",
+    "prompt": "imagina que entregas un informe financiero y explicas por qué es importante que los números sean accurate."
   },
   {
     "id": 7,
     "label": "accuse",
-    "example": "They accuse him of breaking the law.",
+    "examples": [
+      "They accuse him of breaking the law.",
+      "She was accused of plagiarism by the committee.",
+      "Don't accuse people without solid evidence."
+    ],
     "options": {
       "a": "reconocer un mérito",
       "b": "cargar a alguien de una falta",
       "c": "defender públicamente"
     },
     "answer": "b",
-    "explanation": "Atribuir oficialmente o afirmar que alguien ha cometido una falta o delito."
+    "explanation": "Atribuir oficialmente o afirmar que alguien ha cometido una falta o delito.",
+    "prompt": "cuenta una escena donde un periodista acusa a un político de corrupción en una conferencia de prensa."
   },
   {
     "id": 8,
     "label": "acknowledge",
-    "example": "She refused to acknowledge her mistake.",
+    "examples": [
+      "She refused to acknowledge her mistake.",
+      "Please acknowledge receipt of this email.",
+      "He acknowledged that the plan had flaws."
+    ],
     "options": {
       "a": "admitir o reconocer como verdadero",
       "b": "ocultar deliberadamente",
       "c": "inventar una excusa"
     },
     "answer": "a",
-    "explanation": "Admitir o reconocer como cierto o válido; también, dar las gracias o confirmar recepción."
+    "explanation": "Admitir o reconocer como cierto o válido; también, dar las gracias o confirmar recepción.",
+    "prompt": "inventa una situación donde alguien debe reconocer públicamente que cometió un error en su trabajo."
   },
   {
     "id": 9,
     "label": "acquire",
-    "example": "The company hopes to acquire new clients.",
+    "examples": [
+      "The company hopes to acquire new clients.",
+      "He acquired valuable skills during the internship.",
+      "They recently acquired a small startup."
+    ],
     "options": {
       "a": "descartar por completo",
       "b": "reducir a la mitad",
       "c": "obtener o conseguir"
     },
     "answer": "c",
-    "explanation": "Obtener, conseguir o comprar algo, especialmente habilidades, bienes o conocimiento."
+    "explanation": "Obtener, conseguir o comprar algo, especialmente habilidades, bienes o conocimiento.",
+    "prompt": "describe cómo una persona adquiere nuevas habilidades al trabajar en una empresa extranjera."
   },
   {
     "id": 10,
     "label": "adapt",
-    "example": "You need to adapt to the new schedule.",
+    "examples": [
+      "You need to adapt to the new schedule.",
+      "The software was adapted for mobile devices.",
+      "They quickly adapted after the policy change."
+    ],
     "options": {
       "a": "resistir con fuerza",
       "b": "ajustarse a nuevas condiciones",
       "c": "duplicar el esfuerzo"
     },
     "answer": "b",
-    "explanation": "Ajustarse o modificar(se) para encajar nuevas condiciones, requisitos o entornos."
+    "explanation": "Ajustarse o modificar(se) para encajar nuevas condiciones, requisitos o entornos.",
+    "prompt": "imagina que te mudas a otro país y tienes que adaptarte a un estilo de vida completamente diferente."
   },
   {
     "id": 11,
     "label": "adequate",
-    "example": "The resources are adequate for the task.",
+    "examples": [
+      "The resources are adequate for the task.",
+      "The lighting is adequate for reading.",
+      "We don’t have adequate evidence yet."
+    ],
     "options": {
       "a": "suficiente o apropiado",
       "b": "excesivo y costoso",
       "c": "mínimo e insuficiente"
     },
     "answer": "a",
-    "explanation": "Suficiente, apropiado o aceptable para un fin, aunque no necesariamente excelente."
+    "explanation": "Suficiente, apropiado o aceptable para un fin, aunque no necesariamente excelente.",
+    "prompt": "explica una situación donde los recursos en una escuela son adecuados pero no abundantes."
   },
   {
     "id": 12,
     "label": "adjust",
-    "example": "He adjusted the settings to improve performance.",
+    "examples": [
+      "He adjusted the settings to improve performance.",
+      "She quickly adjusted to the new environment.",
+      "Please adjust the seat for better comfort."
+    ],
     "options": {
       "a": "intercambiar por otro",
       "b": "modificar ligeramente",
       "c": "reiniciar desde cero"
     },
     "answer": "b",
-    "explanation": "Modificar ligeramente algo para mejorar su funcionamiento, precisión o comodidad."
+    "explanation": "Modificar ligeramente algo para mejorar su funcionamiento, precisión o comodidad.",
+    "prompt": "describe cómo alguien ajusta la temperatura del aire acondicionado para sentirse más cómodo."
   },
   {
     "id": 13,
     "label": "administration",
-    "example": "She works in the university administration.",
+    "examples": [
+      "She works in the university administration.",
+      "The new administration changed several policies.",
+      "Good administration is key for success."
+    ],
     "options": {
       "a": "gestión de una organización o gobierno",
       "b": "construcción de edificios",
       "c": "investigación de campo"
     },
     "answer": "a",
-    "explanation": "Gestión y dirección de una organización, institución o gobierno; también, periodo de un gobierno."
+    "explanation": "Gestión y dirección de una organización, institución o gobierno; también, periodo de un gobierno.",
+    "prompt": "imagina que hablas sobre una administración universitaria que implementa un nuevo reglamento."
   },
   {
     "id": 14,
     "label": "adopt",
-    "example": "We will adopt a new strategy next quarter.",
+    "examples": [
+      "We will adopt a new strategy next quarter.",
+      "They adopted a child from another country.",
+      "Many companies adopt new technologies quickly."
+    ],
     "options": {
       "a": "rechazar por sistema",
       "b": "tomar o aceptar como propio",
       "c": "aplazar indefinidamente"
     },
     "answer": "b",
-    "explanation": "Tomar, aceptar o implementar como propio un método, idea o norma; también, asumir legalmente la tutela de un menor o mascota."
+    "explanation": "Tomar, aceptar o implementar como propio un método, idea o norma; también, asumir legalmente la tutela de un menor o mascota.",
+    "prompt": "cuenta una historia donde una familia adopta un niño y cómo cambia su vida."
   },
   {
     "id": 15,
     "label": "advance",
-    "example": "These measures will advance our goals.",
+    "examples": [
+      "These measures will advance our goals.",
+      "Technology has advanced rapidly in recent years.",
+      "They advanced the date of the meeting."
+    ],
     "options": {
       "a": "retroceder de nivel",
       "b": "detener un proyecto",
       "c": "avanzar o progresar"
     },
     "answer": "c",
-    "explanation": "Progresar o moverse hacia adelante; también, realizar adelantos en conocimiento o adelantar una fecha."
+    "explanation": "Progresar o moverse hacia adelante; también, realizar adelantos en conocimiento o adelantar una fecha.",
+    "prompt": "explica una situación en la que la tecnología avanza tan rápido que la gente tiene que ponerse al día."
   },
   {
     "id": 16,
     "label": "advocate",
-    "example": "They advocate for better working conditions.",
+    "examples": [
+      "They advocate for better working conditions.",
+      "She is an advocate of animal rights.",
+      "The lawyer advocated on behalf of his client."
+    ],
     "options": {
       "a": "apoyar públicamente; defensor",
       "b": "ignorar por conveniencia",
       "c": "copiar sin permiso"
     },
     "answer": "a",
-    "explanation": "Apoyar o defender públicamente una causa; como sustantivo, persona que promueve o representa esa causa."
+    "explanation": "Apoyar o defender públicamente una causa; como sustantivo, persona que promueve o representa esa causa.",
+    "prompt": "describe cómo un estudiante se convierte en un advocate por el medio ambiente en su escuela."
   },
   {
     "id": 17,
     "label": "affordable",
-    "example": "The plan offers affordable prices for families.",
+    "examples": [
+      "The plan offers affordable prices for families.",
+      "They found an affordable apartment downtown.",
+      "Healthy food should be affordable for everyone."
+    ],
     "options": {
       "a": "lujoso y exclusivo",
       "b": "razonable de precio",
       "c": "extremadamente raro"
     },
     "answer": "b",
-    "explanation": "De precio razonable y accesible según el presupuesto del público objetivo."
+    "explanation": "De precio razonable y accesible según el presupuesto del público objetivo.",
+    "prompt": "imagina que hablas de un nuevo plan telefónico que es affordable para estudiantes."
   },
   {
     "id": 18,
     "label": "aftermath",
-    "example": "In the aftermath of the storm, repairs were needed.",
+    "examples": [
+      "In the aftermath of the storm, repairs were needed.",
+      "The aftermath of the war lasted for decades.",
+      "There was confusion in the aftermath of the announcement."
+    ],
     "options": {
       "a": "consecuencias posteriores a un evento",
       "b": "preparativos iniciales",
       "c": "predicción futura"
     },
     "answer": "a",
-    "explanation": "Conjunto de consecuencias o efectos que siguen a un suceso, normalmente negativo (p. ej., desastre, crisis)."
+    "explanation": "Conjunto de consecuencias o efectos que siguen a un suceso, normalmente negativo (p. ej., desastre, crisis).",
+    "prompt": "cuenta cómo una comunidad se organiza en el aftermath de un terremoto."
   },
   {
     "id": 19,
     "label": "agenda",
-    "example": "Let’s review the agenda for today’s meeting.",
+    "examples": [
+      "Let’s review the agenda for today’s meeting.",
+      "The politician had his own hidden agenda.",
+      "The teacher prepared an agenda for the class."
+    ],
     "options": {
       "a": "lista de temas por tratar",
       "b": "registro de entradas y salidas",
       "c": "resumen financiero anual"
     },
     "answer": "a",
-    "explanation": "Lista ordenada de asuntos a discutir en una reunión; también, plan o intención (a veces oculta)."
+    "explanation": "Lista ordenada de asuntos a discutir en una reunión; también, plan o intención (a veces oculta).",
+    "prompt": "describe una reunión de trabajo donde alguien reparte la agenda y todos comentan los puntos a tratar."
   },
   {
     "id": 20,
     "label": "aggressive",
-    "example": "His aggressive tone made everyone uncomfortable.",
+    "examples": [
+      "His aggressive tone made everyone uncomfortable.",
+      "The company launched an aggressive marketing campaign.",
+      "Some animals become aggressive when they feel threatened."
+    ],
     "options": {
       "a": "amable y cooperativo",
       "b": "forzado o confrontativo",
       "c": "lento y metódico"
     },
     "answer": "b",
-    "explanation": "De comportamiento enérgico, confrontativo o competitivo; puede ser positivo (proactivo) o negativo (hostil)."
+    "explanation": "De comportamiento enérgico, confrontativo o competitivo; puede ser positivo (proactivo) o negativo (hostil).",
+    "prompt": "cuenta una escena en la que un vendedor usa una estrategia de ventas demasiado aggressive y molesta a los clientes."
   },
   {
     "id": 21,
     "label": "agriculture",
-    "example": "Agriculture is essential to the country’s economy.",
+    "examples": [
+      "Agriculture is essential to the country’s economy.",
+      "Modern agriculture relies on technology.",
+      "He studied agriculture at university."
+    ],
     "options": {
       "a": "ciencia de la agricultura",
       "b": "estudio del clima",
       "c": "arte culinario avanzado"
     },
     "answer": "a",
-    "explanation": "Actividad y ciencia de cultivar la tierra y criar ganado para producir alimentos y materias primas."
+    "explanation": "Actividad y ciencia de cultivar la tierra y criar ganado para producir alimentos y materias primas.",
+    "prompt": "describe cómo la agricultura ayuda a una comunidad rural a sobrevivir después de una crisis económica."
   },
   {
     "id": 22,
     "label": "aid",
-    "example": "They provided medical aid after the accident.",
+    "examples": [
+      "They provided medical aid after the accident.",
+      "The country sent food aid to the region.",
+      "She gave aid to the injured man."
+    ],
     "options": {
       "a": "ayuda o apoyo",
       "b": "crítica pública",
       "c": "competencia directa"
     },
     "answer": "a",
-    "explanation": "Ayuda, asistencia o socorro, especialmente en contextos médicos, humanitarios o financieros."
+    "explanation": "Ayuda, asistencia o socorro, especialmente en contextos médicos, humanitarios o financieros.",
+    "prompt": "cuenta una situación donde un grupo de voluntarios ofrece aid a las víctimas de un huracán."
   },
   {
     "id": 23,
     "label": "alert",
-    "example": "The guards stayed alert during the night.",
+    "examples": [
+      "The guards stayed alert during the night.",
+      "She was alert to every detail in the exam.",
+      "Drivers must remain alert on the highway."
+    ],
     "options": {
       "a": "somnoliento y distraído",
       "b": "atento y vigilante",
       "c": "temeroso y evasivo"
     },
     "answer": "b",
-    "explanation": "Atento, vigilante y rápido para notar riesgos o cambios; también, aviso o señal de advertencia."
+    "explanation": "Atento, vigilante y rápido para notar riesgos o cambios; también, aviso o señal de advertencia.",
+    "prompt": "describe un escenario donde un guardia permanece alert y logra evitar un robo."
   },
   {
     "id": 24,
     "label": "alien",
-    "example": "The concept felt alien to many employees.",
+    "examples": [
+      "The concept felt alien to many employees.",
+      "She moved to a new city and felt alien at first.",
+      "This custom is completely alien to me."
+    ],
     "options": {
       "a": "familiar y cotidiano",
       "b": "extranjero o desconocido",
       "c": "antiguo y obsoleto"
     },
     "answer": "b",
-    "explanation": "Ajeno, extranjero o desconocido; no familiar cultural o conceptualmente."
+    "explanation": "Ajeno, extranjero o desconocido; no familiar cultural o conceptualmente.",
+    "prompt": "imagina que llegas a un país nuevo y todo te resulta alien al principio."
   },
   {
     "id": 25,
     "label": "alongside",
-    "example": "She worked alongside senior engineers.",
+    "examples": [
+      "She worked alongside senior engineers.",
+      "He ran alongside his friend during the race.",
+      "We studied alongside each other for years."
+    ],
     "options": {
       "a": "lejos de",
       "b": "debajo de",
       "c": "junto a; en conjunto con"
     },
     "answer": "c",
-    "explanation": "Junto a o en paralelo con alguien o algo; colaborando o de forma simultánea."
+    "explanation": "Junto a o en paralelo con alguien o algo; colaborando o de forma simultánea.",
+    "prompt": "explica una situación donde trabajas alongside un compañero en un proyecto difícil."
   },
   {
     "id": 26,
     "label": "alter",
-    "example": "We need to alter the plan slightly.",
+    "examples": [
+      "We need to alter the plan slightly.",
+      "She altered the dress to fit better.",
+      "The climate has been altered by pollution."
+    ],
     "options": {
       "a": "cambiar",
       "b": "descartar por completo",
       "c": "duplicar el tamaño"
     },
     "answer": "a",
-    "explanation": "Cambiar o modificar una parte sin transformar completamente el conjunto."
+    "explanation": "Cambiar o modificar una parte sin transformar completamente el conjunto.",
+    "prompt": "describe cómo alteras un plan de viaje porque el clima cambió de repente."
   },
   {
     "id": 27,
     "label": "alternative",
-    "example": "Let’s consider an alternative solution.",
+    "examples": [
+      "Let’s consider an alternative solution.",
+      "She chose an alternative career path.",
+      "We need alternative sources of energy."
+    ],
     "options": {
       "a": "opción diferente",
       "b": "repetición exacta",
       "c": "error evidente"
     },
     "answer": "a",
-    "explanation": "Opción distinta disponible cuando la principal no conviene o se busca variedad."
+    "explanation": "Opción distinta disponible cuando la principal no conviene o se busca variedad.",
+    "prompt": "inventa una situación en la que un grupo busca una alternative solución a un problema ambiental."
   },
   {
     "id": 28,
     "label": "ambiguous",
-    "example": "The instructions were ambiguous and confusing.",
+    "examples": [
+      "The instructions were ambiguous and confusing.",
+      "His answer was ambiguous and left us unsure.",
+      "Ambiguous signs caused drivers to get lost."
+    ],
     "options": {
       "a": "único significado",
       "b": "varios posibles significados",
       "c": "muy detallado"
     },
     "answer": "b",
-    "explanation": "Que admite más de una interpretación; poco claro o deliberadamente impreciso."
+    "explanation": "Que admite más de una interpretación; poco claro o deliberadamente impreciso.",
+    "prompt": "cuenta una situación donde unas instrucciones ambiguas causan un error en el trabajo."
   },
   {
     "id": 29,
     "label": "ambitious",
-    "example": "She has an ambitious plan for the team.",
+    "examples": [
+      "She has an ambitious plan for the team.",
+      "He is an ambitious young lawyer.",
+      "The project was ambitious but successful."
+    ],
     "options": {
       "a": "sin metas claras",
       "b": "con fuerte deseo de éxito",
       "c": "limitado y modesto"
     },
     "answer": "b",
-    "explanation": "Con fuerte deseo de lograr metas altas; proyecto o meta de gran alcance o exigencia."
+    "explanation": "Con fuerte deseo de lograr metas altas; proyecto o meta de gran alcance o exigencia.",
+    "prompt": "describe un plan ambitious que tienes para mejorar tu vida en los próximos años."
   },
   {
     "id": 30,
     "label": "amend",
-    "example": "The committee decided to amend the proposal.",
+    "examples": [
+      "The committee decided to amend the proposal.",
+      "They amended the law to include new rights.",
+      "I want to amend my previous statement."
+    ],
     "options": {
       "a": "mejorar mediante cambios",
       "b": "rechazar de inmediato",
       "c": "publicar sin revisión"
     },
     "answer": "a",
-    "explanation": "Corregir o mejorar mediante cambios formales en documentos, leyes o planes."
+    "explanation": "Corregir o mejorar mediante cambios formales en documentos, leyes o planes.",
+    "prompt": "imagina que un gobierno decide amend una ley para proteger mejor el medio ambiente."
   },
   {
     "id": 31,
     "label": "analogy",
-    "example": "He used an analogy to clarify the concept.",
+    "examples": [
+      "He used an analogy to clarify the concept.",
+      "Teachers often use analogies in class.",
+      "This analogy helped me understand the problem."
+    ],
     "options": {
       "a": "comparación con fin explicativo",
       "b": "cita textual extensa",
       "c": "medición numérica exacta"
     },
     "answer": "a",
-    "explanation": "Comparación entre elementos similares que ayuda a explicar un concepto o proceso."
+    "explanation": "Comparación entre elementos similares que ayuda a explicar un concepto o proceso.",
+    "prompt": "cuenta cómo un profesor usa una analogy con deportes para explicar matemáticas."
   },
   {
     "id": 32,
     "label": "analyze",
-    "example": "We need to analyze the data carefully.",
+    "examples": [
+      "We need to analyze the data carefully.",
+      "She analyzed the results of the experiment.",
+      "He analyzed the situation before acting."
+    ],
     "options": {
       "a": "rechazar sin revisar",
       "b": "examinar en detalle",
       "c": "distribuir al azar"
     },
     "answer": "b",
-    "explanation": "Examinar en detalle datos o hechos para entender, explicar o tomar decisiones."
+    "explanation": "Examinar en detalle datos o hechos para entender, explicar o tomar decisiones.",
+    "prompt": "explica una situación donde un científico debe analyze resultados de un experimento importante."
   },
   {
     "id": 33,
     "label": "ancestor",
-    "example": "He traced his ancestor back to the 1800s.",
+    "examples": [
+      "He traced his ancestor back to the 1800s.",
+      "Our ancestors lived in small villages.",
+      "She discovered an ancestor in her family tree."
+    ],
     "options": {
       "a": "persona de la que se desciende",
       "b": "familiar político",
       "c": "amigo cercano"
     },
     "answer": "a",
-    "explanation": "Persona de la cual se desciende en generaciones anteriores (p. ej., bisabuelos)."
+    "explanation": "Persona de la cual se desciende en generaciones anteriores (p. ej., bisabuelos).",
+    "prompt": "describe cómo alguien descubre un ancestor famoso al investigar su árbol genealógico."
   },
   {
     "id": 34,
     "label": "annual",
-    "example": "This is our annual performance review.",
+    "examples": [
+      "This is our annual performance review.",
+      "The festival is an annual event.",
+      "He received an annual bonus at work."
+    ],
     "options": {
       "a": "cada seis meses",
       "b": "una vez al año",
       "c": "cada dos años"
     },
     "answer": "b",
-    "explanation": "Que ocurre una vez por año; también, informe o evento correspondiente al año."
+    "explanation": "Que ocurre una vez por año; también, informe o evento correspondiente al año.",
+    "prompt": "inventa una situación donde tu empresa organiza un evento annual para todos los empleados."
   },
   {
     "id": 35,
     "label": "anticipate",
-    "example": "We anticipate a rise in demand.",
+    "examples": [
+      "We anticipate a rise in demand.",
+      "She anticipated the teacher’s question.",
+      "They anticipated problems with the plan."
+    ],
     "options": {
       "a": "esperar o prever",
       "b": "evitar a toda costa",
       "c": "olvidar por completo"
     },
     "answer": "a",
-    "explanation": "Esperar, prever o prepararse con antelación para algo probable."
+    "explanation": "Esperar, prever o prepararse con antelación para algo probable.",
+    "prompt": "cuenta cómo un equipo anticipate dificultades en un proyecto y prepara soluciones."
   },
   {
     "id": 36,
     "label": "anxiety",
-    "example": "Public speaking causes him anxiety.",
+    "examples": [
+      "Public speaking causes him anxiety.",
+      "She felt anxiety before the exam.",
+      "Traveling alone gave him anxiety."
+    ],
     "options": {
       "a": "alivio profundo",
       "b": "entusiasmo contagioso",
       "c": "preocupación o inquietud"
     },
     "answer": "c",
-    "explanation": "Estado de preocupación, nerviosismo o inquietud, a menudo con síntomas físicos."
+    "explanation": "Estado de preocupación, nerviosismo o inquietud, a menudo con síntomas físicos.",
+    "prompt": "describe cómo un estudiante siente anxiety antes de presentar un examen importante."
   },
   {
     "id": 37,
     "label": "apparent",
-    "example": "It became apparent that we needed more time.",
+    "examples": [
+      "It became apparent that we needed more time.",
+      "The solution was apparent to everyone.",
+      "Her disappointment was apparent on her face."
+    ],
     "options": {
       "a": "claramente visible o entendido",
       "b": "totalmente secreto",
       "c": "parcialmente legal"
     },
     "answer": "a",
-    "explanation": "Claro o evidente a simple vista; también, que parece ser pero podría no estar confirmado."
+    "explanation": "Claro o evidente a simple vista; también, que parece ser pero podría no estar confirmado.",
+    "prompt": "explica una situación donde es apparent que una persona está triste aunque no lo diga."
   },
   {
     "id": 38,
     "label": "appeal",
-    "example": "The design may appeal to younger users.",
+    "examples": [
+      "The design may appeal to younger users.",
+      "He appealed the court’s decision.",
+      "The idea appealed to the investors."
+    ],
     "options": {
       "a": "ser atractivo; pedir revisión",
       "b": "ocultar información",
       "c": "dispersar recursos"
     },
     "answer": "a",
-    "explanation": "Resultar atractivo o interesante; también, solicitar la revisión de una decisión oficial."
+    "explanation": "Resultar atractivo o interesante; también, solicitar la revisión de una decisión oficial.",
+    "prompt": "imagina que una empresa lanza un producto que appeal especialmente a los jóvenes."
   },
   {
     "id": 39,
     "label": "applicant",
-    "example": "Each applicant must submit a resume.",
+    "examples": [
+      "Each applicant must submit a resume.",
+      "There were many applicants for the job.",
+      "The applicant answered the questions well."
+    ],
     "options": {
       "a": "reclutador en jefe",
       "b": "persona que solicita algo",
       "c": "empleado temporal"
     },
     "answer": "b",
-    "explanation": "Persona que solicita un empleo, plaza, préstamo u otro beneficio."
+    "explanation": "Persona que solicita un empleo, plaza, préstamo u otro beneficio.",
+    "prompt": "describe cómo un applicant se prepara para una entrevista de trabajo importante."
   },
   {
     "id": 40,
     "label": "approach",
-    "example": "We need a different approach to this problem.",
+    "examples": [
+      "We need a different approach to this problem.",
+      "The train is approaching the station.",
+      "Her approach to teaching is very effective."
+    ],
     "options": {
       "a": "acercarse; método",
       "b": "celebración oficial",
       "c": "castigo ejemplar"
     },
     "answer": "a",
-    "explanation": "Acercarse en distancia o tiempo; también, método o forma de abordar un problema."
+    "explanation": "Acercarse en distancia o tiempo; también, método o forma de abordar un problema.",
+    "prompt": "cuenta una historia donde un equipo usa un approach creativo para resolver un problema complicado."
   },
   {
     "id": 41,
     "label": "appropriate",
-    "example": "This tone is appropriate for a formal email.",
+    "examples": [
+      "This tone is appropriate for a formal email.",
+      "It wasn’t appropriate to laugh during the ceremony.",
+      "She wore appropriate clothes for the interview."
+    ],
     "options": {
       "a": "adecuado o propio",
       "b": "demasiado informal",
       "c": "fuera de contexto"
     },
     "answer": "a",
-    "explanation": "Adecuado o correcto para una situación, normas o contexto."
+    "explanation": "Adecuado o correcto para una situación, normas o contexto.",
+    "prompt": "describe una entrevista de trabajo en la que alguien debe usar un lenguaje appropriate para impresionar al reclutador."
   },
   {
     "id": 42,
     "label": "approval",
-    "example": "We need management’s approval before moving on.",
+    "examples": [
+      "We need management’s approval before moving on.",
+      "She gave her approval for the project.",
+      "The plan is waiting for government approval."
+    ],
     "options": {
       "a": "desacuerdo formal",
       "b": "acuerdo u permiso oficial",
       "c": "revisión preliminar"
     },
     "answer": "b",
-    "explanation": "Aceptación o permiso oficial para proceder con una acción."
+    "explanation": "Aceptación o permiso oficial para proceder con una acción.",
+    "prompt": "cuenta cómo un estudiante espera la approval de su profesor antes de comenzar un proyecto."
   },
   {
     "id": 43,
     "label": "arbitrary",
-    "example": "The rule seemed arbitrary and unfair.",
+    "examples": [
+      "The rule seemed arbitrary and unfair.",
+      "His decision was completely arbitrary.",
+      "The punishment was arbitrary and harsh."
+    ],
     "options": {
       "a": "basado en elección o capricho",
       "b": "resultado de un consenso",
       "c": "respaldado por evidencia"
     },
     "answer": "a",
-    "explanation": "Basado en elección personal o azar, sin criterio objetivo consistente."
+    "explanation": "Basado en elección personal o azar, sin criterio objetivo consistente.",
+    "prompt": "describe una situación donde un jefe impone una regla arbitrary que confunde a todos."
   },
   {
     "id": 44,
     "label": "architectural",
-    "example": "The city is famous for its architectural heritage.",
+    "examples": [
+      "The city is famous for its architectural heritage.",
+      "The building has unique architectural features.",
+      "She studies architectural design at university."
+    ],
     "options": {
       "a": "relacionado con el diseño de edificios",
       "b": "centrado en paisajismo",
       "c": "sobre ingeniería química"
     },
     "answer": "a",
-    "explanation": "Relativo al diseño, estilo o técnica de construcción de edificios."
+    "explanation": "Relativo al diseño, estilo o técnica de construcción de edificios.",
+    "prompt": "imagina que visitas una ciudad con un architectural estilo muy diferente al de tu país."
   },
   {
     "id": 45,
     "label": "arise",
-    "example": "New problems may arise during testing.",
+    "examples": [
+      "New problems may arise during testing.",
+      "Conflicts often arise in big families.",
+      "An opportunity arose to work abroad."
+    ],
     "options": {
       "a": "desaparecer sin rastro",
       "b": "surgir o presentarse",
       "c": "duplicarse en tamaño"
     },
     "answer": "b",
-    "explanation": "Surgir, aparecer o resultar como consecuencia de algo."
+    "explanation": "Surgir, aparecer o resultar como consecuencia de algo.",
+    "prompt": "explica una situación donde surgen problemas (arise) inesperados en un proyecto escolar."
   },
   {
     "id": 46,
     "label": "arm",
-    "example": "They decided to arm the guards for safety.",
+    "examples": [
+      "They decided to arm the guards for safety.",
+      "He armed himself with knowledge before the debate.",
+      "The soldiers were armed with modern weapons."
+    ],
     "options": {
       "a": "proveer con armas",
       "b": "desarmar por completo",
       "c": "entrenar en informática"
     },
     "answer": "a",
-    "explanation": "Proveer de armas o equipo para defensa u ofensiva; prepararse para un conflicto."
+    "explanation": "Proveer de armas o equipo para defensa u ofensiva; prepararse para un conflicto.",
+    "prompt": "imagina un escenario donde un grupo de guardias se arma (arm) para proteger un edificio importante."
   },
   {
     "id": 47,
     "label": "assess",
-    "example": "We must assess the risks before investing.",
+    "examples": [
+      "We must assess the risks before investing.",
+      "The teacher assessed the students’ essays.",
+      "They assessed the damage after the storm."
+    ],
     "options": {
       "a": "ignorar señales",
       "b": "evaluar o valorar",
       "c": "celebrar un logro"
     },
     "answer": "b",
-    "explanation": "Evaluar el valor, calidad, impacto o riesgo de algo con base en criterios."
+    "explanation": "Evaluar el valor, calidad, impacto o riesgo de algo con base en criterios.",
+    "prompt": "cuenta cómo un médico assess la condición de un paciente después de un accidente."
   },
   {
     "id": 48,
     "label": "assessment",
-    "example": "The assessment will take place next week.",
+    "examples": [
+      "The assessment will take place next week.",
+      "Her assessment of the situation was accurate.",
+      "Students must complete an assessment at the end of the course."
+    ],
     "options": {
       "a": "evaluación o prueba",
       "b": "ceremonia de graduación",
       "c": "manual de instrucciones"
     },
     "answer": "a",
-    "explanation": "Proceso y resultado de evaluar; puede ser una prueba, informe o valoración."
+    "explanation": "Proceso y resultado de evaluar; puede ser una prueba, informe o valoración.",
+    "prompt": "describe cómo los estudiantes se preparan para un assessment final en su curso de inglés."
   },
   {
     "id": 49,
     "label": "asset",
-    "example": "Her communication skills are a real asset.",
+    "examples": [
+      "Her communication skills are a real asset.",
+      "The company’s assets include several buildings.",
+      "He proved to be an asset to the team."
+    ],
     "options": {
       "a": "costo inesperado",
       "b": "persona o cosa valiosa",
       "c": "regla estricta"
     },
     "answer": "b",
-    "explanation": "Persona, cualidad o bien valioso que aporta ventaja o utilidad."
+    "explanation": "Persona, cualidad o bien valioso que aporta ventaja o utilidad.",
+    "prompt": "explica cómo una persona con buenas habilidades sociales puede ser un asset en un equipo de trabajo."
   },
   {
     "id": 50,
     "label": "assign",
-    "example": "The manager will assign tasks to the team.",
+    "examples": [
+      "The manager will assign tasks to the team.",
+      "She was assigned to a new project.",
+      "The teacher assigned homework for the weekend."
+    ],
     "options": {
       "a": "asignar una tarea o recurso",
       "b": "copiar información",
       "c": "cancelar un proyecto"
     },
     "answer": "a",
-    "explanation": "Destinar o repartir tareas, recursos o responsabilidades a alguien."
+    "explanation": "Destinar o repartir tareas, recursos o responsabilidades a alguien.",
+    "prompt": "cuenta cómo un profesor assign tareas diferentes a cada estudiante según sus habilidades."
   },
   {
     "id": 51,
     "label": "assist",
-    "example": "Can you assist me with this report?",
+    "examples": [
+      "Can you assist me with this report?",
+      "Nurses assist doctors during surgery.",
+      "He assisted the old man across the street."
+    ],
     "options": {
       "a": "criticar sin ayudar",
       "b": "ayudar",
       "c": "delegar en otro"
     },
     "answer": "b",
-    "explanation": "Ayudar o apoyar a alguien para lograr una tarea."
+    "explanation": "Ayudar o apoyar a alguien para lograr una tarea.",
+    "prompt": "describe cómo un voluntario assist a una persona mayor a cruzar la calle."
   },
   {
     "id": 52,
     "label": "associate",
-    "example": "People often associate success with hard work.",
+    "examples": [
+      "People often associate success with hard work.",
+      "She is an associate at the law firm.",
+      "He associated the smell with his childhood home."
+    ],
     "options": {
       "a": "conectar mentalmente; colega",
       "b": "negar una relación",
       "c": "excluir deliberadamente"
     },
     "answer": "a",
-    "explanation": "Relacionar mentalmente; como sustantivo, colega o miembro con rango inferior."
+    "explanation": "Relacionar mentalmente; como sustantivo, colega o miembro con rango inferior.",
+    "prompt": "explica cómo muchas personas associate el verano con vacaciones en la playa."
   },
   {
     "id": 53,
     "label": "assume",
-    "example": "Don’t assume he knows the details.",
+    "examples": [
+      "Don’t assume he knows the details.",
+      "She assumed he was telling the truth.",
+      "He assumed the role of leader in the group."
+    ],
     "options": {
       "a": "suponer sin prueba",
       "b": "medir con precisión",
       "c": "confirmar oficialmente"
     },
     "answer": "a",
-    "explanation": "Dar por cierto sin pruebas completas; también, tomar un cargo o responsabilidad."
+    "explanation": "Dar por cierto sin pruebas completas; también, tomar un cargo o responsabilidad.",
+    "prompt": "inventa una situación donde alguien assume algo sin comprobar y se equivoca."
   },
   {
     "id": 54,
     "label": "assure",
-    "example": "I assure you everything is under control.",
+    "examples": [
+      "I assure you everything is under control.",
+      "He assured her that he would be on time.",
+      "The company assures customers of quality service."
+    ],
     "options": {
       "a": "garantizar; afirmar con certeza",
       "b": "dudar en público",
       "c": "sugerir con cautela"
     },
     "answer": "a",
-    "explanation": "Garantizar o afirmar con certeza para dar confianza o eliminar dudas."
+    "explanation": "Garantizar o afirmar con certeza para dar confianza o eliminar dudas.",
+    "prompt": "describe cómo un doctor assure a un paciente nervioso antes de una cirugía."
   },
   {
     "id": 55,
     "label": "astonishing",
-    "example": "The speed of the progress is astonishing.",
+    "examples": [
+      "The speed of the progress is astonishing.",
+      "Her performance was astonishing to the audience.",
+      "The discovery was truly astonishing."
+    ],
     "options": {
       "a": "moderado y esperado",
       "b": "muy sorprendente",
       "c": "claramente insuficiente"
     },
     "answer": "b",
-    "explanation": "Que causa gran sorpresa o asombro por ser inusual o impresionante."
+    "explanation": "Que causa gran sorpresa o asombro por ser inusual o impresionante.",
+    "prompt": "cuenta una historia donde un atleta logra un resultado astonishing en una competencia."
   },
   {
     "id": 56,
     "label": "attachment",
-    "example": "Please see the attachment for details.",
+    "examples": [
+      "Please see the attachment for details.",
+      "She feels a strong attachment to her hometown.",
+      "There was an attachment missing from the email."
+    ],
     "options": {
       "a": "archivo adjunto; vínculo afectivo",
       "b": "mensaje de error",
       "c": "contrato verbal"
     },
     "answer": "a",
-    "explanation": "Archivo enviado junto a un correo; también, vínculo emocional fuerte entre personas."
+    "explanation": "Archivo enviado junto a un correo; también, vínculo emocional fuerte entre personas.",
+    "prompt": "explica una situación donde alguien envía un correo importante con un attachment."
   },
   {
     "id": 57,
     "label": "attempt",
-    "example": "They made an attempt to fix the issue.",
+    "examples": [
+      "They made an attempt to fix the issue.",
+      "She attempted to climb the mountain.",
+      "The attempt was unsuccessful but brave."
+    ],
     "options": {
       "a": "esfuerzo por hacer algo",
       "b": "logro garantizado",
       "c": "pausa indefinida"
     },
     "answer": "a",
-    "explanation": "Esfuerzo por lograr algo, aunque pueda fallar."
+    "explanation": "Esfuerzo por lograr algo, aunque pueda fallar.",
+    "prompt": "describe un intento (attempt) fallido de arreglar algo en tu casa."
   },
   {
     "id": 58,
     "label": "attain",
-    "example": "She hopes to attain fluency this year.",
+    "examples": [
+      "She hopes to attain fluency this year.",
+      "He attained his dream job at last.",
+      "The team attained their goal after months of work."
+    ],
     "options": {
       "a": "alcanzar o conseguir",
       "b": "posponer por miedo",
       "c": "evitar por principio"
     },
     "answer": "a",
-    "explanation": "Alcanzar una meta, nivel o estado tras esfuerzo continuo."
+    "explanation": "Alcanzar una meta, nivel o estado tras esfuerzo continuo.",
+    "prompt": "explica cómo alguien logra attain fluidez en inglés después de mucho estudio."
   },
   {
     "id": 59,
     "label": "attitude",
-    "example": "His positive attitude helps the whole team.",
+    "examples": [
+      "His positive attitude helps the whole team.",
+      "She showed a bad attitude during the meeting.",
+      "The coach liked his determined attitude."
+    ],
     "options": {
       "a": "manera de pensar",
       "b": "falta de recursos",
       "c": "conocimiento técnico"
     },
     "answer": "a",
-    "explanation": "Modo estable de pensar y sentir que guía el comportamiento."
+    "explanation": "Modo estable de pensar y sentir que guía el comportamiento.",
+    "prompt": "describe cómo una attitude positiva ayuda a un grupo a superar una crisis."
   },
   {
     "id": 60,
     "label": "authentic",
-    "example": "This is an authentic Italian recipe.",
+    "examples": [
+      "This is an authentic Italian recipe.",
+      "His emotions seemed authentic.",
+      "The museum has authentic ancient artifacts."
+    ],
     "options": {
       "a": "genuino; real",
       "b": "experimental y riesgoso",
       "c": "idéntico pero falso"
     },
     "answer": "a",
-    "explanation": "Genuino, real y no falsificado; fiel al origen o tradición."
+    "explanation": "Genuino, real y no falsificado; fiel al origen o tradición.",
+    "prompt": "cuenta una experiencia donde probaste comida authentic de otro país."
   },
   {
     "id": 61,
     "label": "authority",
-    "example": "She is an authority on climate science.",
+    "examples": [
+      "She is an authority on climate science.",
+      "The teacher spoke with authority.",
+      "The local authority approved the project."
+    ],
     "options": {
       "a": "poder experto; control oficial",
       "b": "rumor popular",
       "c": "voto de protesta"
     },
     "answer": "a",
-    "explanation": "Poder o derecho para mandar u opinar con legitimidad; también, persona experta reconocida."
+    "explanation": "Poder o derecho para mandar u opinar con legitimidad; también, persona experta reconocida.",
+    "prompt": "describe cómo una autoridad escolar toma una decisión importante sobre los estudiantes."
   },
   {
     "id": 62,
     "label": "availability",
-    "example": "Please confirm your availability on Friday.",
+    "examples": [
+      "Please confirm your availability on Friday.",
+      "The product’s availability is limited.",
+      "Check the doctor’s availability before booking."
+    ],
     "options": {
       "a": "escasez inevitable",
       "b": "estar disponible para usarse",
       "c": "costo de mantenimiento"
     },
     "answer": "b",
-    "explanation": "Condición de poder usarse o estar libre para atender una solicitud."
+    "explanation": "Condición de poder usarse o estar libre para atender una solicitud.",
+    "prompt": "explica cómo confirmas tu availability para una reunión de trabajo."
   },
   {
     "id": 63,
     "label": "aware",
-    "example": "Are you aware of the new policy?",
+    "examples": [
+      "Are you aware of the new policy?",
+      "She was fully aware of the risks.",
+      "He is not aware of the situation."
+    ],
     "options": {
       "a": "consciente de una situación",
       "b": "indiferente por completo",
       "c": "sorprendido sin razón"
     },
     "answer": "a",
-    "explanation": "Consciente, informado o atento a un hecho o situación."
+    "explanation": "Consciente, informado o atento a un hecho o situación.",
+    "prompt": "inventa una situación donde un trabajador no estaba aware de una regla y comete un error."
   },
   {
     "id": 64,
     "label": "awkward",
-    "example": "There was an awkward silence after his joke.",
+    "examples": [
+      "There was an awkward silence after his joke.",
+      "She felt awkward at the party.",
+      "The meeting ended in an awkward way."
+    ],
     "options": {
       "a": "fluido y natural",
       "b": "torpe o incómodo",
       "c": "divertido y casual"
     },
     "answer": "b",
-    "explanation": "Torpe, poco hábil o socialmente incómodo; situación difícil de manejar."
+    "explanation": "Torpe, poco hábil o socialmente incómodo; situación difícil de manejar.",
+    "prompt": "cuenta una escena awkward que ocurre durante una primera cita."
   },
   {
     "id": 65,
     "label": "back up",
-    "example": "Remember to back up your files regularly.",
+    "examples": [
+      "Remember to back up your files regularly.",
+      "He backed up his argument with evidence.",
+      "Can you back me up in this discussion?"
+    ],
     "options": {
       "a": "respaldar; hacer copia",
       "b": "enviar por correo",
       "c": "eliminar permanentemente"
     },
     "answer": "a",
-    "explanation": "Hacer copia de seguridad de datos o respaldar a una persona/idea para prevenir pérdidas o dar apoyo."
+    "explanation": "Hacer copia de seguridad de datos o respaldar a una persona/idea para prevenir pérdidas o dar apoyo.",
+    "prompt": "describe cómo alguien back up sus archivos para no perderlos en un accidente."
   },
   {
     "id": 66,
     "label": "break down",
-    "example": "My car might break down in this heat.",
+    "examples": [
+      "My car might break down in this heat.",
+      "She broke down in tears after the news.",
+      "The machine broke down during production."
+    ],
     "options": {
       "a": "funcionar a la perfección",
       "b": "dejar de funcionar; desmoronarse",
       "c": "avanzar rápidamente"
     },
     "answer": "b",
-    "explanation": "Dejar de funcionar por avería; también, colapsar emocionalmente o descomponer en partes."
+    "explanation": "Dejar de funcionar por avería; también, colapsar emocionalmente o descomponer en partes.",
+    "prompt": "explica una situación donde tu coche break down en medio de la carretera."
   },
   {
     "id": 67,
     "label": "break up",
-    "example": "They decided to break up after the trip.",
+    "examples": [
+      "They decided to break up after the trip.",
+      "The meeting broke up late.",
+      "The teacher had to break up the fight."
+    ],
     "options": {
       "a": "terminar una relación; separarse",
       "b": "volver a intentarlo",
       "c": "mudarse juntos"
     },
     "answer": "a",
-    "explanation": "Terminar una relación sentimental; también, dividir en partes o dispersar (p. ej., una reunión)."
+    "explanation": "Terminar una relación sentimental; también, dividir en partes o dispersar (p. ej., una reunión).",
+    "prompt": "cuenta cómo una pareja decide break up después de muchos desacuerdos."
   },
   {
     "id": 68,
     "label": "bring about",
-    "example": "The new law will bring about big changes.",
+    "examples": [
+      "The new law will bring about big changes.",
+      "Her speech brought about a new perspective.",
+      "The invention brought about a revolution."
+    ],
     "options": {
       "a": "causar o provocar",
       "b": "prohibir temporalmente",
       "c": "disfrazar una intención"
     },
     "answer": "a",
-    "explanation": "Provocar que algo ocurra, especialmente cambios o resultados significativos."
+    "explanation": "Provocar que algo ocurra, especialmente cambios o resultados significativos.",
+    "prompt": "describe cómo una nueva tecnología puede bring about un gran cambio en la educación."
   },
   {
     "id": 69,
     "label": "bring up",
-    "example": "Don’t bring up that topic at dinner.",
+    "examples": [
+      "Don’t bring up that topic at dinner.",
+      "She was brought up in the countryside.",
+      "He brought up an interesting point."
+    ],
     "options": {
       "a": "mencionar; criar",
       "b": "escribir en secreto",
       "c": "reírse de alguien"
     },
     "answer": "a",
-    "explanation": "Mencionar un tema en conversación; también, criar a un niño hasta su madurez."
+    "explanation": "Mencionar un tema en conversación; también, criar a un niño hasta su madurez.",
+    "prompt": "inventa una conversación donde alguien bring up un tema incómodo en la mesa."
   },
   {
     "id": 70,
     "label": "call off",
-    "example": "They had to call off the event due to rain.",
+    "examples": [
+      "They had to call off the event due to rain.",
+      "The strike was called off after negotiations.",
+      "She called off the wedding at the last moment."
+    ],
     "options": {
       "a": "posponer una hora",
       "b": "cancelar",
       "c": "acelerar la agenda"
     },
     "answer": "b",
-    "explanation": "Cancelar un evento o plan programado."
+    "explanation": "Cancelar un evento o plan programado.",
+    "prompt": "explica cómo una empresa decide call off una reunión por una emergencia."
   },
   {
     "id": 71,
     "label": "carry on",
-    "example": "Please carry on with your work.",
+    "examples": [
+      "Please carry on with your work.",
+      "She carried on talking despite the interruption.",
+      "Life must carry on after difficulties."
+    ],
     "options": {
       "a": "continuar",
       "b": "dividir en partes",
       "c": "detener por completo"
     },
     "answer": "a",
-    "explanation": "Seguir adelante con una actividad; continuar pese a dificultades."
+    "explanation": "Seguir adelante con una actividad; continuar pese a dificultades.",
+    "prompt": "describe cómo una persona decide carry on con sus estudios a pesar de los problemas."
   },
   {
     "id": 72,
     "label": "carry out",
-    "example": "They will carry out the plan tomorrow.",
+    "examples": [
+      "They will carry out the plan tomorrow.",
+      "Scientists carried out an important experiment.",
+      "The police carried out an investigation."
+    ],
     "options": {
       "a": "proponer una idea",
       "b": "posponer indefinidamente",
       "c": "realizar o ejecutar"
     },
     "answer": "c",
-    "explanation": "Realizar o ejecutar una tarea, plan o experimento según lo planeado."
+    "explanation": "Realizar o ejecutar una tarea, plan o experimento según lo planeado.",
+    "prompt": "cuenta cómo un grupo de estudiantes carry out un experimento en el laboratorio."
   },
   {
     "id": 73,
     "label": "catch up",
-    "example": "I need to catch up on my emails.",
+    "examples": [
+      "I need to catch up on my emails.",
+      "She ran fast to catch up with her friends.",
+      "Let’s catch up over coffee soon."
+    ],
     "options": {
       "a": "igualar el nivel; ponerse al día",
       "b": "descansar sin interrupción",
       "c": "perder el ritmo"
     },
     "answer": "a",
-    "explanation": "Ponerse al día o alcanzar el nivel/ritmo de otros para no quedarse atrás."
+    "explanation": "Ponerse al día o alcanzar el nivel/ritmo de otros para no quedarse atrás.",
+    "prompt": "explica cómo un estudiante intenta catch up con las clases después de estar enfermo."
   },
   {
     "id": 74,
     "label": "check out",
-    "example": "We should check out that new café.",
+    "examples": [
+      "We should check out that new café.",
+      "He checked out of the hotel at noon.",
+      "Check out this amazing website."
+    ],
     "options": {
       "a": "examinar; dejar un hotel",
       "b": "cerrar permanentemente",
       "c": "pagar doble"
     },
     "answer": "a",
-    "explanation": "Examinar o probar algo nuevo; también, registrarse para salir de un hotel o devolver un préstamo."
+    "explanation": "Examinar o probar algo nuevo; también, registrarse para salir de un hotel o devolver un préstamo.",
+    "prompt": "describe cómo unos amigos deciden check out un nuevo restaurante en su ciudad."
   },
   {
     "id": 75,
     "label": "come across",
-    "example": "I came across an old photo yesterday.",
+    "examples": [
+      "I came across an old photo yesterday.",
+      "She came across as confident in the interview.",
+      "They came across a hidden path in the forest."
+    ],
     "options": {
       "a": "encontrar por casualidad",
       "b": "descartar por costumbre",
       "c": "archivar oficialmente"
     },
     "answer": "a",
-    "explanation": "Encontrar algo por casualidad; también, dar cierta impresión a otros (p. ej., parecer amable)."
+    "explanation": "Encontrar algo por casualidad; también, dar cierta impresión a otros (p. ej., parecer amable).",
+    "prompt": "cuenta una historia donde alguien come across un objeto valioso por accidente."
   },
   {
     "id": 76,
     "label": "come up with",
-    "example": "Can you come up with a solution?",
+    "examples": [
+      "Can you come up with a solution?",
+      "She came up with a brilliant idea.",
+      "They came up with a new plan."
+    ],
     "options": {
       "a": "rechazar seriamente",
       "b": "inventar o idear",
       "c": "repasar en voz alta"
     },
     "answer": "b",
-    "explanation": "Idear o proponer una solución/idea de manera creativa."
+    "explanation": "Idear o proponer una solución/idea de manera creativa.",
+    "prompt": "describe cómo un grupo de amigos come up with una idea para un negocio."
   },
   {
     "id": 77,
     "label": "cut back on",
-    "example": "We should cut back on expenses.",
+    "examples": [
+      "We should cut back on expenses.",
+      "He cut back on sugar for health reasons.",
+      "The company cut back on staff last year."
+    ],
     "options": {
       "a": "reducir consumo",
       "b": "duplicar compras",
       "c": "cancelar todo"
     },
     "answer": "a",
-    "explanation": "Reducir el uso, gasto o consumo de algo para ahorrar o mejorar hábitos."
+    "explanation": "Reducir el uso, gasto o consumo de algo para ahorrar o mejorar hábitos.",
+    "prompt": "cuenta cómo una familia decide cut back on gastos para ahorrar para un viaje."
   },
   {
     "id": 78,
     "label": "do without",
-    "example": "I can do without dessert tonight.",
+    "examples": [
+      "I can do without dessert tonight.",
+      "They had to do without electricity for a week.",
+      "She learned to do without luxury items."
+    ],
     "options": {
       "a": "renunciar temporalmente; arreglárselas sin",
       "b": "compartir generosamente",
       "c": "guardar para después"
     },
     "answer": "a",
-    "explanation": "Arreglárselas sin algo habitual, por necesidad o decisión personal."
+    "explanation": "Arreglárselas sin algo habitual, por necesidad o decisión personal.",
+    "prompt": "explica cómo una familia aprende a do without internet durante unas vacaciones en la montaña."
   },
   {
     "id": 79,
     "label": "dress up",
-    "example": "We have to dress up for the gala.",
+    "examples": [
+      "We have to dress up for the gala.",
+      "The children dressed up as superheroes.",
+      "He likes to dress up for special occasions."
+    ],
     "options": {
       "a": "ponerse ropa elegante",
       "b": "lavar a mano",
       "c": "probarse tallas"
     },
     "answer": "a",
-    "explanation": "Vestirse con ropa elegante o de disfraces; arreglarse especialmente para un evento."
+    "explanation": "Vestirse con ropa elegante o de disfraces; arreglarse especialmente para un evento.",
+    "prompt": "describe cómo unos amigos dress up con disfraces para una fiesta temática."
   },
   {
     "id": 80,
     "label": "drop by",
-    "example": "Feel free to drop by anytime.",
+    "examples": [
+      "Feel free to drop by anytime.",
+      "She dropped by her friend’s office.",
+      "He promised to drop by later."
+    ],
     "options": {
       "a": "visitar brevemente",
       "b": "mudarse de ciudad",
       "c": "cancelar una reunión"
     },
     "answer": "a",
-    "explanation": "Visitar sin cita y por poco tiempo, de manera informal."
+    "explanation": "Visitar sin cita y por poco tiempo, de manera informal.",
+    "prompt": "inventa una escena donde un vecino drop by sin avisar y trae una sorpresa."
   },
   {
     "id": 81,
     "label": "end up",
-    "example": "We ended up choosing the cheaper option.",
+    "examples": [
+      "We ended up choosing the cheaper option.",
+      "He ended up living in another country.",
+      "They ended up as best friends."
+    ],
     "options": {
       "a": "terminar en cierto estado o lugar",
       "b": "intentar otra cosa",
       "c": "debatir sin fin"
     },
     "answer": "a",
-    "explanation": "Terminar en un lugar o estado como resultado de circunstancias, a menudo imprevistas."
+    "explanation": "Terminar en un lugar o estado como resultado de circunstancias, a menudo imprevistas.",
+    "prompt": "cuenta una historia donde alguien end up en un lugar inesperado durante un viaje."
   },
   {
     "id": 82,
     "label": "fall apart",
-    "example": "The old book started to fall apart.",
+    "examples": [
+      "The old book started to fall apart.",
+      "Her plan fell apart after the accident.",
+      "He fell apart when he heard the news."
+    ],
     "options": {
       "a": "mejorar con el tiempo",
       "b": "romperse; colapsar",
       "c": "endurecerse"
     },
     "answer": "b",
-    "explanation": "Deshacerse en piezas o venirse abajo emocionalmente/organizativamente."
+    "explanation": "Deshacerse en piezas o venirse abajo emocionalmente/organizativamente.",
+    "prompt": "describe cómo un proyecto fall apart porque nadie trabajó en equipo."
   },
   {
     "id": 83,
     "label": "figure out",
-    "example": "We need to figure out how this works.",
+    "examples": [
+      "We need to figure out how this works.",
+      "She figured out the answer quickly.",
+      "He can’t figure out why it failed."
+    ],
     "options": {
       "a": "entender o resolver",
       "b": "ignorar a propósito",
       "c": "aplazar la decisión"
     },
     "answer": "a",
-    "explanation": "Comprender el funcionamiento o resolver un problema mediante razonamiento."
+    "explanation": "Comprender el funcionamiento o resolver un problema mediante razonamiento.",
+    "prompt": "explica cómo un estudiante intenta figure out un problema de matemáticas difícil."
   },
   {
     "id": 84,
     "label": "find out",
-    "example": "I just found out about the change.",
+    "examples": [
+      "I just found out about the change.",
+      "She found out the truth yesterday.",
+      "He found out that his friend was moving."
+    ],
     "options": {
       "a": "descubrir información",
       "b": "inventar un rumor",
       "c": "transmitir en vivo"
     },
     "answer": "a",
-    "explanation": "Descubrir o enterarse de información antes desconocida."
+    "explanation": "Descubrir o enterarse de información antes desconocida.",
+    "prompt": "inventa una situación donde alguien find out un secreto familiar."
   },
   {
     "id": 85,
     "label": "get along",
-    "example": "Do you get along with your coworkers?",
+    "examples": [
+      "Do you get along with your coworkers?",
+      "They get along very well despite differences.",
+      "She doesn’t get along with her neighbors."
+    ],
     "options": {
       "a": "llevarse bien",
       "b": "competir agresivamente",
       "c": "evitar el contacto"
     },
     "answer": "a",
-    "explanation": "Mantener relaciones armoniosas o llevarse bien con otras personas."
+    "explanation": "Mantener relaciones armoniosas o llevarse bien con otras personas.",
+    "prompt": "describe cómo dos compañeros de trabajo aprenden a get along después de un conflicto."
   },
   {
     "id": 86,
     "label": "get by",
-    "example": "We can get by with one car.",
+    "examples": [
+      "We can get by with one car.",
+      "She gets by on very little money.",
+      "He learned enough Spanish to get by."
+    ],
     "options": {
       "a": "administrarse con dificultad",
       "b": "despegar con éxito",
       "c": "rendir cuentas"
     },
     "answer": "a",
-    "explanation": "Sobrevivir o manejarse con recursos limitados; salir adelante."
+    "explanation": "Sobrevivir o manejarse con recursos limitados; salir adelante.",
+    "prompt": "cuenta cómo una familia logra get by con poco dinero durante una crisis."
   },
   {
     "id": 87,
     "label": "get over",
-    "example": "It took her months to get over the flu.",
+    "examples": [
+      "It took her months to get over the flu.",
+      "He finally got over his fear of flying.",
+      "She can’t get over how beautiful it was."
+    ],
     "options": {
       "a": "recuperarse de",
       "b": "contagiar a otros",
       "c": "evitar por miedo"
     },
     "answer": "a",
-    "explanation": "Superar una enfermedad, pérdida o dificultad emocional."
+    "explanation": "Superar una enfermedad, pérdida o dificultad emocional.",
+    "prompt": "describe cómo alguien logra get over una ruptura amorosa después de mucho tiempo."
   },
   {
     "id": 88,
     "label": "give up",
-    "example": "Don’t give up on your dreams.",
+    "examples": [
+      "Don’t give up on your dreams.",
+      "He gave up smoking last year.",
+      "She gave up after many failed attempts."
+    ],
     "options": {
       "a": "ceder voluntariamente",
       "b": "continuar con esfuerzo",
       "c": "organizar mejor"
     },
     "answer": "a",
-    "explanation": "Renunciar a un intento, hábito o posesión; dejar de esforzarse."
+    "explanation": "Renunciar a un intento, hábito o posesión; dejar de esforzarse.",
+    "prompt": "cuenta una historia donde alguien decide no give up a pesar de las dificultades."
   },
   {
     "id": 89,
     "label": "go ahead",
-    "example": "Go ahead and start without me.",
+    "examples": [
+      "Go ahead and start without me.",
+      "She went ahead with her plan.",
+      "The project will go ahead as scheduled."
+    ],
     "options": {
       "a": "proceder",
       "b": "retroceder",
       "c": "dividir el trabajo"
     },
     "answer": "a",
-    "explanation": "Proceder con permiso o sin esperar más; empezar una acción."
+    "explanation": "Proceder con permiso o sin esperar más; empezar una acción.",
+    "prompt": "explica cómo un grupo decide go ahead con un proyecto aunque hay dudas."
   },
   {
     "id": 90,
     "label": "go over",
-    "example": "Let’s go over the plan once more.",
+    "examples": [
+      "Let’s go over the plan once more.",
+      "The teacher went over the answers.",
+      "She went over the report carefully."
+    ],
     "options": {
       "a": "revisar en detalle",
       "b": "apresurar sin revisar",
       "c": "ocultar errores"
     },
     "answer": "a",
-    "explanation": "Revisar cuidadosamente punto por punto; repasar."
+    "explanation": "Revisar cuidadosamente punto por punto; repasar.",
+    "prompt": "describe cómo un profesor go over los resultados de un examen con su clase."
   },
   {
     "id": 91,
     "label": "grow up",
-    "example": "She grew up in a small town.",
+    "examples": [
+      "She grew up in a small town.",
+      "He grew up watching cartoons.",
+      "They grew up together as neighbors."
+    ],
     "options": {
       "a": "madurar; hacerse adulto",
       "b": "bajar de categoría",
       "c": "romper relaciones"
     },
     "answer": "a",
-    "explanation": "Hacerse adulto; madurar en comportamiento o visión."
+    "explanation": "Hacerse adulto; madurar en comportamiento o visión.",
+    "prompt": "cuenta cómo un niño grow up en una familia muy unida."
   },
   {
     "id": 92,
     "label": "hand in",
-    "example": "Please hand in your assignments today.",
+    "examples": [
+      "Please hand in your assignments today.",
+      "She handed in her resignation.",
+      "He handed in the lost wallet to the police."
+    ],
     "options": {
       "a": "entregar",
       "b": "guardar para luego",
       "c": "corregir errores"
     },
     "answer": "a",
-    "explanation": "Entregar formalmente un trabajo, documento o renuncia a una autoridad."
+    "explanation": "Entregar formalmente un trabajo, documento o renuncia a una autoridad.",
+    "prompt": "describe cómo un estudiante hand in su tarea tarde y explica la razón."
   },
   {
     "id": 93,
     "label": "hang out",
-    "example": "We usually hang out after work.",
+    "examples": [
+      "We usually hang out after work.",
+      "She hangs out with her friends on weekends.",
+      "They like to hang out at the park."
+    ],
     "options": {
       "a": "pasar el rato socialmente",
       "b": "entrenar intensamente",
       "c": "estudiar en silencio"
     },
     "answer": "a",
-    "explanation": "Pasar el rato de manera relajada con amigos o en un lugar."
+    "explanation": "Pasar el rato de manera relajada con amigos o en un lugar.",
+    "prompt": "cuenta cómo un grupo de amigos hang out en un café todos los viernes."
   },
   {
     "id": 94,
     "label": "hold on",
-    "example": "Hold on, I’ll be right back.",
+    "examples": [
+      "Hold on, I’ll be right back.",
+      "She held on to the railing.",
+      "Hold on, this will only take a minute."
+    ],
     "options": {
       "a": "esperar un momento",
       "b": "hablar más alto",
       "c": "cortar la llamada"
     },
     "answer": "a",
-    "explanation": "Esperar brevemente; también, aferrarse físicamente o mantenerse firme en una idea."
+    "explanation": "Esperar brevemente; también, aferrarse físicamente o mantenerse firme en una idea.",
+    "prompt": "inventa una conversación telefónica donde alguien pide hold on un momento."
   },
   {
     "id": 95,
     "label": "keep up with",
-    "example": "It’s hard to keep up with the news.",
+    "examples": [
+      "It’s hard to keep up with the news.",
+      "She works hard to keep up with her studies.",
+      "He runs fast to keep up with his teammates."
+    ],
     "options": {
       "a": "seguir el ritmo; mantenerse al nivel",
       "b": "ignorar por completo",
       "c": "contradecir a propósito"
     },
     "answer": "a",
-    "explanation": "Seguir el ritmo de cambios o actividades para no quedarse atrás."
+    "explanation": "Seguir el ritmo de cambios o actividades para no quedarse atrás.",
+    "prompt": "explica cómo un estudiante trata de keep up with sus clases de inglés avanzadas."
   },
   {
     "id": 96,
     "label": "lay off",
-    "example": "The company will lay off 50 workers.",
+    "examples": [
+      "The company will lay off 50 workers.",
+      "He was laid off during the crisis.",
+      "The factory laid off staff last year."
+    ],
     "options": {
       "a": "contratar personal",
       "b": "despedir de un trabajo",
       "c": "aumentar salarios"
     },
     "answer": "b",
-    "explanation": "Despedir empleados por recorte o reestructuración; también, dejar de hacer algo (uso informal)."
+    "explanation": "Despedir empleados por recorte o reestructuración; también, dejar de hacer algo (uso informal).",
+    "prompt": "describe cómo una empresa tiene que lay off empleados por problemas financieros."
   },
   {
     "id": 97,
     "label": "let down",
-    "example": "I won’t let you down again.",
+    "examples": [
+      "I won’t let you down again.",
+      "He felt let down by his friends.",
+      "The movie really let me down."
+    ],
     "options": {
       "a": "cumplir una promesa",
       "b": "decepcionar",
       "c": "alentar con fuerza"
     },
     "answer": "b",
-    "explanation": "Defraudar expectativas o no cumplir una promesa."
+    "explanation": "Defraudar expectativas o no cumplir una promesa.",
+    "prompt": "inventa una situación donde un amigo te let down al no llegar a una cita importante."
   },
   {
     "id": 98,
     "label": "look into",
-    "example": "We will look into the complaint.",
+    "examples": [
+      "We will look into the complaint.",
+      "The police looked into the case.",
+      "She promised to look into the issue."
+    ],
     "options": {
       "a": "investigar",
       "b": "rechazar sin leer",
       "c": "resumir en una página"
     },
     "answer": "a",
-    "explanation": "Investigar o examinar un asunto para comprenderlo y decidir acciones."
+    "explanation": "Investigar o examinar un asunto para comprenderlo y decidir acciones.",
+    "prompt": "describe cómo un detective decide look into un caso misterioso."
   },
   {
     "id": 99,
     "label": "look forward to",
-    "example": "I look forward to meeting you.",
+    "examples": [
+      "I look forward to meeting you.",
+      "She looks forward to the holidays.",
+      "We look forward to your reply."
+    ],
     "options": {
       "a": "anticipar con gusto",
       "b": "temer el resultado",
       "c": "olvidar a propósito"
     },
     "answer": "a",
-    "explanation": "Esperar con ganas o ilusión un evento futuro."
+    "explanation": "Esperar con ganas o ilusión un evento futuro.",
+    "prompt": "cuenta cómo un estudiante look forward to sus vacaciones después de los exámenes."
   },
   {
     "id": 100,
     "label": "make up",
-    "example": "They made up after the argument.",
+    "examples": [
+      "They made up after the argument.",
+      "She made up an excuse for being late.",
+      "He is good at making up interesting stories."
+    ],
     "options": {
       "a": "arreglar una cita",
       "b": "inventar; reconciliarse",
       "c": "ahorrar dinero"
     },
     "answer": "b",
-    "explanation": "Inventar una historia o excusa; también, reconciliarse después de un conflicto o completar una cantidad."
+    "explanation": "Inventar una historia o excusa; también, reconciliarse después de un conflicto o completar una cantidad.",
+    "prompt": "inventa una situación donde dos amigos make up después de una gran pelea."
   }
 ]

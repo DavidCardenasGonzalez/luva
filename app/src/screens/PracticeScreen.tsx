@@ -20,7 +20,17 @@ type EvalRes = {
 export default function PracticeScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
-  const { cardId, storyId, sceneIndex, prompt, label, example, options, answer, explanation } = route.params || {};
+  const {
+    cardId,
+    storyId,
+    sceneIndex,
+    prompt,
+    label,
+    examples,
+    options,
+    answer,
+    explanation,
+  } = route.params || {};
   const recorder = useAudioRecorder();
   const uploader = useUploadToS3();
   const { statusFor } = useCardProgress();
@@ -35,7 +45,9 @@ export default function PracticeScreen() {
   const speakLabel = useCallback(() => {
     if (!label) return;
     const speechSegments = [label];
-    if (example) speechSegments.push(example);
+    if (examples?.length) {
+      speechSegments.push(...examples);
+    }
     const speechText = speechSegments.join('. ');
     console.log('[Practice] Reproduciendo palabra', speechText);
     try {
@@ -44,7 +56,7 @@ export default function PracticeScreen() {
     } catch (err: any) {
       console.warn('[Practice] Error al reproducir', err?.message || err);
     }
-  }, [label, example]);
+  }, [label, examples]);
 
   // Press-and-hold: start on pressIn, stop & process on pressOut
   const run = async () => {
@@ -85,7 +97,6 @@ export default function PracticeScreen() {
       setState('idle');
       return;
     }
-    console.log('Uploading to', started.uploadUrl);
     try {
       // Important: content type must match the presigned URL (backend signs audio/mp4)
       await uploader.put(started.uploadUrl, { uri: rec.uri }, 'audio/mp4');
@@ -109,7 +120,11 @@ export default function PracticeScreen() {
     }
 
     setState('evaluating');
-    const ev = await api.post<EvalRes>(`/sessions/${started.sessionId}/evaluate`, { transcript: finalTranscript, label, example });
+    const ev = await api.post<EvalRes>(`/sessions/${started.sessionId}/evaluate`, {
+      transcript: finalTranscript,
+      label,
+      example: examples?.[0],
+    });
     console.log('Evaluation:', ev);
     setFeedback(ev);
     if (ev.result !== 'correct') {
@@ -170,12 +185,25 @@ export default function PracticeScreen() {
               <Text style={{ fontSize: 22, color: '#1e1b4b' }}>🔊</Text>
             </Pressable>
           </View>
-          {example ? (
-            <Text style={{ marginTop: 10, color: '#4338ca', fontSize: 16, lineHeight: 22 }}>{example}</Text>
+          {examples?.length ? (
+            <View style={{ marginTop: 12 }}>
+              {examples.map((ex, idx) => (
+                <Text
+                  key={idx}
+                  style={{
+                    marginTop: idx === 0 ? 0 : 6,
+                    color: '#4338ca',
+                    fontSize: 16,
+                    lineHeight: 22,
+                  }}
+                >
+                  • {ex}
+                </Text>
+              ))}
+            </View>
           ) : null}
         </View>
       ) : null}
-      {prompt ? <Text style={{ marginTop: 8 }}>{prompt}</Text> : null}
       {options && (
         <View style={{ marginTop: 12 }}>
           <Text style={{ marginBottom: 8 }}>¿Cuál es la mejor definición?</Text>
@@ -188,7 +216,11 @@ export default function PracticeScreen() {
             <View style={{ marginTop: 8 }}>
               <Text style={{ color: answer && selected === answer ? '#16a34a' : '#dc2626', fontWeight: '600' }}>{answer && selected === answer ? '¡Correcto!' : 'Incorrecto'}</Text>
               {explanation ? <Text style={{ marginTop: 4, color: '#555' }}>{explanation}</Text> : null}
-              <Text style={{ marginTop: 8, fontWeight: '600' }}>¿Puedes usarlo en una oración?</Text>
+              <Text style={{ marginTop: 8, fontWeight: '600' }}>
+                {prompt
+                  ? `Úsalo en una oración, por ejemplo: ${prompt}`
+                  : '¿Puedes usarlo en una oración?'}
+              </Text>
             </View>
           )}
         </View>
@@ -282,7 +314,11 @@ export default function PracticeScreen() {
                   setState('evaluating');
                   const started = await api.post<{ sessionId: string; uploadUrl: string }>(`/sessions/start`, { cardId, storyId, sceneIndex });
                   setTranscript(userText.trim());
-                  const ev = await api.post<EvalRes>(`/sessions/${started.sessionId}/evaluate`, { transcript: userText.trim(), label, example });
+                  const ev = await api.post<EvalRes>(`/sessions/${started.sessionId}/evaluate`, {
+                    transcript: userText.trim(),
+                    label,
+                    example: examples?.[0],
+                  });
                   setFeedback(ev);
                   if (cardId) {
                     const combinedResult = selected && answer && selected === answer ? ev.result : 'incorrect';

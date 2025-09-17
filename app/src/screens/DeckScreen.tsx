@@ -103,10 +103,24 @@ export default function DeckScreen({ navigation }: Props) {
         data={filteredItems}
         keyExtractor={(i) => String(i.id)}
         renderItem={({ item }) => (
-          <Pressable onPress={() => navigation.navigate('CardDetail', { id: String(item.id), label: item.label, example: item.example, options: item.options, answer: item.answer, explanation: item.explanation })}>
+          <Pressable
+            onPress={() =>
+              navigation.navigate('CardDetail', {
+                id: String(item.id),
+                label: item.label,
+                examples: item.examples,
+                options: item.options,
+                answer: item.answer,
+                explanation: item.explanation,
+                prompt: item.prompt,
+              })
+            }
+          >
             <View style={{ paddingVertical: 10, borderBottomWidth: 1, borderColor: '#eee' }}>
               <Text style={{ fontWeight: '600' }}>{item.label}</Text>
-              <Text style={{ color: '#555' }} numberOfLines={1}>{item.example}</Text>
+              <Text style={{ color: '#555' }} numberOfLines={1}>
+                {item.examples?.[0] || ''}
+              </Text>
               <Text style={{ marginTop: 4, color: '#2563eb', fontSize: 12 }}>
                 Estado: {CARD_STATUS_LABELS[item.status as CardProgressStatus]}
               </Text>

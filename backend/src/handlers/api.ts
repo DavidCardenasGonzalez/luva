@@ -281,11 +281,11 @@ async function evaluateAI(
   const model = process.env.OPENAI_CHAT_MODEL || "gpt-4o-mini";
   const timeoutMs = Number(process.env.EVAL_TIMEOUT_MS || 8000);
   const sys = `Eres un profesor de inglés que habla español. 
-  El alumno va a dar un ejemplo del uso de ${context.label} debe evaluar su respuesta.
+  El alumno va a dar un ejemplo del uso de ${context.label}; debes evaluar su respuesta.
 
 Devuelve SOLO JSON (sin texto extra) con estas claves:
   - correctness: número 0-100 que indique qué tan correcta es la respuesta.
-  - errors: arreglo con hasta 3 puntos breves y accionables en español (solo si hay errores reales, no inventes errores).
+  - errors: arreglo con hasta 3 puntos breves y accionables en español (solo si hay errores reales, no inventes errores). Cuando detectes un problema de estructura o de colocación clave, indica claramente qué parte de la estructura está mal y ofrece una guía corta para corregirla (por ejemplo “Estructura: falta el auxiliar ...” o “Estructura: orden incorrecto, debería ser ...”).
   - improvements: arreglo con 1 reformulación más natural para un nativo en inglés (frase concisa), sin explicaciones. Opcional si ya está perfecto.
 
 Responde únicamente el JSON, da tu respuesta de una forma amable.`;
