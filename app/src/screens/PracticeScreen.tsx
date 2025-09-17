@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View, Text, Button, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import useAudioRecorder from '../shared/useAudioRecorder';
 import useUploadToS3 from '../shared/useUploadToS3';
@@ -7,6 +7,7 @@ import { api } from '../api/api';
 import CardStatusSelector from '../components/CardStatusSelector';
 import { CARD_STATUS_LABELS, useCardProgress } from '../progress/CardProgressProvider';
 import * as Speech from 'expo-speech';
+import { Audio } from 'expo-av';
 
 type EvalRes = {
   score: number;
@@ -42,21 +43,39 @@ export default function PracticeScreen() {
   const [canRecord, setCanRecord] = useState<boolean>(false);
   const [userText, setUserText] = useState<string>('');
 
+  const speakSegments = useCallback(
+    async (segments: (string | undefined | null)[], scope: string, language: string = 'en-US') => {
+      const filtered = segments
+        .map((s) => (s || '').trim())
+        .filter((s) => s.length > 0);
+      if (!filtered.length) return;
+      const speechText = filtered.join('. ');
+      console.log(`[Practice] Reproduciendo ${scope}`, speechText);
+      try {
+        try {
+          await Audio.setAudioModeAsync({
+            allowsRecordingIOS: false,
+            playsInSilentModeIOS: true,
+            staysActiveInBackground: false,
+            playThroughEarpieceAndroid: false,
+            defaultToSpeaker: true,
+          });
+        } catch (audioErr) {
+          console.warn('[Practice] No se pudo configurar audio mode para speech', audioErr);
+        }
+        Speech.stop();
+        Speech.speak(speechText, { language, pitch: 1.05 });
+      } catch (err: any) {
+        console.warn('[Practice] Error al reproducir', err?.message || err);
+      }
+    },
+    []
+  );
+
   const speakLabel = useCallback(() => {
     if (!label) return;
-    const speechSegments = [label];
-    if (examples?.length) {
-      speechSegments.push(...examples);
-    }
-    const speechText = speechSegments.join('. ');
-    console.log('[Practice] Reproduciendo palabra', speechText);
-    try {
-      Speech.stop();
-      Speech.speak(speechText, { language: 'en-US', pitch: 1.05 });
-    } catch (err: any) {
-      console.warn('[Practice] Error al reproducir', err?.message || err);
-    }
-  }, [label, examples]);
+    void speakSegments([label, ...(examples || [])], 'palabra');
+  }, [label, examples, speakSegments]);
 
   // Press-and-hold: start on pressIn, stop & process on pressOut
   const run = async () => {
@@ -150,6 +169,28 @@ export default function PracticeScreen() {
     }
   };
 
+  const errorsList = useMemo(() => {
+    if (!feedback) return [] as string[];
+    const errs = (feedback.errors && feedback.errors.length ? feedback.errors : feedback.feedback.grammar) || [];
+    return Array.isArray(errs) ? errs.filter((e): e is string => typeof e === 'string' && e.trim().length > 0) : [];
+  }, [feedback]);
+
+  const improvementsList = useMemo(() => {
+    if (!feedback) return [] as string[];
+    const sugg = feedback.improvements && feedback.improvements.length ? feedback.improvements : feedback.suggestions || [];
+    return Array.isArray(sugg) ? sugg.filter((s): s is string => typeof s === 'string' && s.trim().length > 0) : [];
+  }, [feedback]);
+
+  const speakErrors = useCallback(() => {
+    if (!errorsList.length) return;
+    void speakSegments(errorsList, 'feedback.errores', 'es-ES');
+  }, [errorsList, speakSegments]);
+
+  const speakImprovements = useCallback(() => {
+    if (!improvementsList.length) return;
+    void speakSegments(improvementsList, 'feedback.reformulaciones');
+  }, [improvementsList, speakSegments]);
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -242,31 +283,51 @@ export default function PracticeScreen() {
           </View>
           <Text style={{ marginTop: 6, color: '#6b7280' }}>Puntaje: {feedback.score}/100</Text>
 
-          {(() => {
-            const errs = (feedback.errors && feedback.errors.length ? feedback.errors : feedback.feedback.grammar) || [];
-            if (!errs.length) return null;
-            return (
-              <View style={{ marginTop: 12 }}>
-                <Text style={{ fontWeight: '600', marginBottom: 6 }}>Detalles a mejorar</Text>
-                {errs.map((e, i) => (
-                  <Text key={i} style={{ color: '#dc2626', marginBottom: 4 }}>• {e}</Text>
-                ))}
+          {errorsList.length ? (
+            <View style={{ marginTop: 12 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                <Text style={{ fontWeight: '600', flex: 1 }}>Detalles a mejorar</Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Escuchar detalles a mejorar"
+                  onPress={speakErrors}
+                  style={({ pressed }) => ({
+                    padding: 6,
+                    borderRadius: 999,
+                    backgroundColor: pressed ? '#fee2e2' : '#fef2f2',
+                  })}
+                >
+                  <Text style={{ fontSize: 18 }}>🔊</Text>
+                </Pressable>
               </View>
-            );
-          })()}
+              {errorsList.map((e, i) => (
+                <Text key={i} style={{ color: '#dc2626', marginBottom: 4 }}>• {e}</Text>
+              ))}
+            </View>
+          ) : null}
 
-          {(() => {
-            const sugg = (feedback.improvements && feedback.improvements.length ? feedback.improvements : (feedback.suggestions || []));
-            if (!sugg.length) return null;
-            return (
-              <View style={{ marginTop: 12 }}>
-                <Text style={{ fontWeight: '600', marginBottom: 6 }}>Reformulaciones más naturales</Text>
-                {sugg.map((s, i) => (
-                  <Text key={i} style={{ marginBottom: 4 }}>• {s}</Text>
-                ))}
+          {improvementsList.length ? (
+            <View style={{ marginTop: 12 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                <Text style={{ fontWeight: '600', flex: 1 }}>Reformulaciones más naturales</Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Escuchar reformulaciones sugeridas"
+                  onPress={speakImprovements}
+                  style={({ pressed }) => ({
+                    padding: 6,
+                    borderRadius: 999,
+                    backgroundColor: pressed ? '#e0f2fe' : '#f0f9ff',
+                  })}
+                >
+                  <Text style={{ fontSize: 18 }}>🔊</Text>
+                </Pressable>
               </View>
-            );
-          })()}
+              {improvementsList.map((s, i) => (
+                <Text key={i} style={{ marginBottom: 4 }}>• {s}</Text>
+              ))}
+            </View>
+          ) : null}
         </View>
       )}
       {cardId && feedback?.result === 'correct' ? (
