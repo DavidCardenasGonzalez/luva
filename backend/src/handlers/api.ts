@@ -1,8 +1,10 @@
-import type {
+﻿import type {
   APIGatewayProxyEventV2 as Event,
   APIGatewayProxyResultV2 as Result,
 } from "aws-lambda";
 import { randomUUID } from "crypto";
+import fs from "fs";
+import path from "path";
 import {
   S3Client,
   PutObjectCommand,
@@ -15,12 +17,260 @@ import {
   ApiResponse,
   SessionStartResponse,
   CardItem,
+  StoryDefinition,
+  StorySummaryItem,
+  StoryAdvanceRequest,
+  StoryAdvancePayload,
+  StoryMission,
+  StoryRequirement,
+  StoryAdvanceRequirementState,
+  EvalResult
 } from "../types";
+import { STORIES_SEED } from "../data/stories-seed";
 
 const s3 = new S3Client({});
 const ssm = new SSMClient({});
 let OPENAI_API_KEY_CACHE: string | undefined;
+const STORIES_PATH_CANDIDATES: (string | undefined)[] = [
+  process.env.STORIES_PATH,
+  path.resolve(__dirname, '../../data/stories.json'),
+  path.resolve(__dirname, '../data/stories.json'),
+  path.resolve(process.cwd(), 'data/stories.json'),
+];
+let STORIES_CACHE: StoryDefinition[] | null = null;
 
+function sanitizeStoriesList(input: any[], fallbackPrefix: string): StoryDefinition[] {
+  const sanitized: StoryDefinition[] = [];
+  input.forEach((story, index) => {
+    const fallbackId = `${fallbackPrefix}_${index}`;
+    const normalized = sanitizeStoryDefinition(story, fallbackId);
+    if (normalized) sanitized.push(normalized);
+  });
+  return sanitized;
+}
+
+function readStoriesFromDisk(): StoryDefinition[] | undefined {
+  for (const candidate of STORIES_PATH_CANDIDATES) {
+    if (!candidate) continue;
+    try {
+      if (!fs.existsSync(candidate)) continue;
+      const raw = fs.readFileSync(candidate, 'utf8');
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) {
+        console.warn(
+          JSON.stringify({ scope: 'stories.load.invalidFormat', path: candidate })
+        );
+        continue;
+      }
+      const sanitized = sanitizeStoriesList(parsed, 'file');
+      if (sanitized.length) {
+        console.log(
+          JSON.stringify({ scope: 'stories.load.success', path: candidate, items: sanitized.length })
+        );
+        return sanitized;
+      }
+    } catch (err) {
+      console.error(
+        JSON.stringify({
+          scope: 'stories.load.error',
+          message: (err as Error)?.message || 'unknown',
+          path: candidate,
+        })
+      );
+    }
+  }
+  return undefined;
+}
+
+function loadStories(): StoryDefinition[] {
+  if (STORIES_CACHE) return STORIES_CACHE;
+  const fromDisk = readStoriesFromDisk();
+  if (fromDisk && fromDisk.length) {
+    STORIES_CACHE = fromDisk;
+    return STORIES_CACHE;
+  }
+  const fallbackStories = sanitizeStoriesList(STORIES_SEED, 'seed');
+  STORIES_CACHE = fallbackStories;
+  return STORIES_CACHE;
+}
+
+function listStorySummaries(): StorySummaryItem[] {
+  return loadStories().map((story) => ({
+    storyId: story.storyId,
+    title: story.title,
+    summary: story.summary,
+    level: story.level,
+    tags: story.tags || [],
+    unlockCost: story.unlockCost ?? 0,
+    locked: false,
+    missionsCount: story.missions?.length || 0,
+  }));
+}
+
+function getStory(storyId: string): StoryDefinition | undefined {
+  return loadStories().find((s) => s.storyId === storyId);
+}
+
+function initialRequirementStates(mission: StoryMission): StoryAdvanceRequirementState[] {
+  return (mission.requirements || []).map((req) => ({
+    requirementId: req.requirementId,
+    text: req.text,
+    met: false,
+  }));
+}
+
+type StoryMessage = { role: 'user' | 'assistant'; content: string };
+const STORY_HISTORY_LIMIT = 20;
+
+type StorySessionState = {
+  storyId?: string;
+  missionIndex: number;
+  history: StoryMessage[];
+  requirements: StoryAdvanceRequirementState[];
+  story?: StoryDefinition;
+  lastUpdated: number;
+};
+
+const STORY_SESSIONS = new Map<string, StorySessionState>();
+function pruneStorySessions(maxEntries: number = 200, ttlMs: number = 1000 * 60 * 30) {
+  const now = Date.now();
+  for (const [id, session] of STORY_SESSIONS) {
+    if (session.lastUpdated + ttlMs < now) {
+      STORY_SESSIONS.delete(id);
+    }
+  }
+  if (STORY_SESSIONS.size > maxEntries) {
+    const entries = Array.from(STORY_SESSIONS.entries()).sort((a, b) => a[1].lastUpdated - b[1].lastUpdated);
+    for (let i = 0; i < entries.length && STORY_SESSIONS.size > maxEntries; i++) {
+      STORY_SESSIONS.delete(entries[i][0]);
+    }
+  }
+}
+
+function mergeHistory(base: StoryMessage[] = [], additions: StoryMessage[] = []): StoryMessage[] {
+  const merged: StoryMessage[] = [...base];
+  for (const message of additions) {
+    if (!message) continue;
+    const trimmed = (message.content || '').trim();
+    if (!trimmed) continue;
+    const normalized: StoryMessage = { role: message.role, content: trimmed };
+    if (normalized.role !== 'user' && normalized.role !== 'assistant') {
+      continue;
+    }
+    const last = merged[merged.length - 1];
+    if (!last || last.role !== normalized.role || last.content !== normalized.content) {
+      merged.push(normalized);
+      if (merged.length > STORY_HISTORY_LIMIT) {
+        merged.splice(0, merged.length - STORY_HISTORY_LIMIT);
+      }
+    }
+  }
+  return merged;
+}
+
+function appendHistoryEntry(history: StoryMessage[] = [], message: StoryMessage): StoryMessage[] {
+  return mergeHistory(history, [message]);
+}
+
+function sanitizeSessionContext(input: any): { storyId?: string; sceneIndex?: number; story?: StoryDefinition } {
+  if (!input || typeof input !== 'object') return {};
+  const rawStoryId = typeof input.storyId === 'string' ? input.storyId : undefined;
+  const rawSceneIndex =
+    input.sceneIndex ?? input.missionIndex ?? input.scene_index ?? input.scene ?? input.stepIndex;
+  const sceneIndex = Number.isFinite(Number(rawSceneIndex))
+    ? Math.max(0, Math.floor(Number(rawSceneIndex)))
+    : undefined;
+  const storyFromBody = input.storyDefinition
+    ? sanitizeStoryDefinition(input.storyDefinition, rawStoryId)
+    : undefined;
+  return {
+    storyId: storyFromBody?.storyId ?? rawStoryId,
+    sceneIndex,
+    story: storyFromBody,
+  };
+}
+function sanitizeHistory(history?: StoryAdvanceRequest['history']): StoryMessage[] {
+  if (!Array.isArray(history)) return [];
+  return history
+    .filter((msg): msg is StoryMessage => !!msg && (msg.role === 'user' || msg.role === 'assistant') && typeof msg.content === 'string')
+    .map((msg) => ({ role: msg.role, content: msg.content.trim() }));
+}
+
+function sanitizeStoryRequirement(input: any): StoryRequirement | undefined {
+  if (!input) return undefined;
+  const requirementId =
+    typeof input.requirementId === 'string'
+      ? input.requirementId
+      : typeof input.requirement_id === 'string'
+      ? input.requirement_id
+      : undefined;
+  const text =
+    typeof input.text === 'string'
+      ? input.text
+      : typeof input.description === 'string'
+      ? input.description
+      : undefined;
+  if (!requirementId || !text) return undefined;
+  return { requirementId, text };
+}
+
+function sanitizeStoryMission(input: any): StoryMission | undefined {
+  if (!input) return undefined;
+  const missionIdRaw = input.missionId ?? input.id;
+  const missionId =
+    typeof missionIdRaw === 'string'
+      ? missionIdRaw
+      : typeof missionIdRaw === 'number'
+      ? String(missionIdRaw)
+      : undefined;
+  const title = typeof input.title === 'string' ? input.title : undefined;
+  const aiRole =
+    typeof input.aiRole === 'string'
+      ? input.aiRole
+      : typeof input.ai_role === 'string'
+      ? input.ai_role
+      : undefined;
+  if (!missionId || !title || !aiRole) return undefined;
+  const sceneSummary =
+    typeof input.sceneSummary === 'string'
+      ? input.sceneSummary
+      : typeof input.scene_summary === 'string'
+      ? input.scene_summary
+      : undefined;
+  const requirementsRaw = Array.isArray(input.requirements) ? input.requirements : [];
+  const requirements = requirementsRaw
+    .map((req: any) => sanitizeStoryRequirement(req))
+    .filter((req: StoryRequirement | undefined): req is StoryRequirement => !!req);
+  return {
+    missionId,
+    title,
+    sceneSummary,
+    aiRole,
+    requirements,
+  };
+}
+
+function sanitizeStoryDefinition(input: any, fallbackId?: string): StoryDefinition | undefined {
+  if (!input) return undefined;
+  const storyId = typeof input.storyId === 'string' ? input.storyId : fallbackId;
+  const title = typeof input.title === 'string' ? input.title : undefined;
+  const summary = typeof input.summary === 'string' ? input.summary : undefined;
+  if (!storyId || !title || !summary) return undefined;
+  const missionsRaw = Array.isArray(input.missions) ? input.missions : [];
+  const missions = missionsRaw
+    .map((mission: any) => sanitizeStoryMission(mission))
+    .filter((mission: StoryMission | undefined): mission is StoryMission => !!mission);
+  if (!missions.length) return undefined;
+  return {
+    storyId,
+    title,
+    summary,
+    level: typeof input.level === 'string' ? input.level : undefined,
+    tags: Array.isArray(input.tags) ? input.tags.map(String) : [],
+    unlockCost: typeof input.unlockCost === 'number' ? input.unlockCost : 0,
+    missions,
+  };
+}
 function json(statusCode: number, data: unknown): ApiResponse {
   return {
     statusCode,
@@ -78,7 +328,8 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
 
     if (method === "POST" && path === `${ROUTE_PREFIX}/sessions/start`) {
       log("sessions.start.begin");
-      const { uploadUrl, sessionId } = await startSession();
+      const startBody = parseBody(event.body);
+      const { uploadUrl, sessionId } = await startSession(startBody);
       log("sessions.start.success", { sessionId });
       return json(200, { sessionId, uploadUrl } satisfies SessionStartResponse);
     }
@@ -127,21 +378,67 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       // Normally update streak/points in DynamoDB
       return json(200, {
         newPoints: 5,
-        unlocked: { stories: ["restaurant_rush"] },
+        unlocked: { stories: ["london_trip"] },
       });
     }
 
     if (method === "GET" && path === `${ROUTE_PREFIX}/stories`) {
-      return json(200, { items: mockStories() });
+      return json(200, { items: listStorySummaries() });
+    }
+
+    const storyDetail = path.match(/^\/v1\/stories\/([^/]+)$/);
+    if (method === "GET" && storyDetail) {
+      const storyId = storyDetail[1];
+      const story = getStory(storyId);
+      if (!story) {
+        return notFound();
+      }
+      return json(200, {
+        storyId: story.storyId,
+        title: story.title,
+        summary: story.summary,
+        level: story.level,
+        missions: story.missions?.map((mission) => ({
+          missionId: mission.missionId,
+          title: mission.title,
+          sceneSummary: mission.sceneSummary,
+          aiRole: mission.aiRole,
+          requirements: initialRequirementStates(mission),
+        })) || [],
+      });
     }
 
     const storyAdvance = path.match(/^\/v1\/stories\/([^/]+)\/advance$/);
     if (method === "POST" && storyAdvance) {
-      return json(200, {
-        sceneIndex: 1,
-        feedback: ["Good intent recognized"],
-        done: false,
-      });
+      let storyId = storyAdvance[1];
+      const body = parseBody(event.body) as StoryAdvanceRequest;
+      if (!body || typeof body.transcript !== 'string' || !body.transcript.trim()) {
+        return badRequest('Missing transcript');
+      }
+      if (!body.sessionId || typeof body.sessionId !== 'string') {
+        return badRequest('Missing sessionId');
+      }
+      const sessionState = STORY_SESSIONS.get(body.sessionId);
+      if (!storyId && sessionState?.storyId) {
+        storyId = sessionState.storyId;
+      }
+      const fallbackStory = sanitizeStoryDefinition(body.storyDefinition, storyId);
+      let story = storyId ? getStory(storyId) : undefined;
+      if (!story && sessionState?.story) {
+        story = sessionState.story;
+      }
+      if (!story && fallbackStory) {
+        story = fallbackStory;
+      }
+      if (!story) {
+        return notFound();
+      }
+      const payload = await advanceStoryMission(story, body);
+      if (sessionState) {
+        sessionState.story = story;
+        sessionState.storyId = story.storyId;
+      }
+      return json(200, payload);
     }
 
     if (method === "GET" && path === `${ROUTE_PREFIX}/me/progress`) {
@@ -168,7 +465,7 @@ function parseBody(body: any): any {
   }
 }
 
-async function startSession(): Promise<{
+async function startSession(body?: any): Promise<{
   sessionId: string;
   uploadUrl: string;
 }> {
@@ -182,6 +479,32 @@ async function startSession(): Promise<{
     ContentType: "audio/mp4",
   });
   const uploadUrl = await getSignedUrl(s3, cmd, { expiresIn: 60 * 10 });
+  try {
+    const context = sanitizeSessionContext(body);
+    if (context.storyId || context.story) {
+      const storedStory =
+        context.story ||
+        (context.storyId ? getStory(context.storyId) : undefined) ||
+        (body?.storyDefinition ? sanitizeStoryDefinition(body.storyDefinition, context.storyId) : undefined) ||
+        undefined;
+      STORY_SESSIONS.set(sessionId, {
+        storyId: storedStory?.storyId || context.storyId,
+        missionIndex: context.sceneIndex ?? 0,
+        history: [],
+        requirements: [],
+        story: storedStory,
+        lastUpdated: Date.now(),
+      });
+      pruneStorySessions();
+    }
+  } catch (err) {
+    console.warn(
+      JSON.stringify({
+        scope: 'sessions.start.context_error',
+        message: (err as Error)?.message || 'unknown',
+      })
+    );
+  }
   console.log(
     JSON.stringify({
       scope: "sessions.start.presigned",
@@ -280,15 +603,15 @@ async function evaluateAI(
   const apiKey = await getOpenAIKey();
   const model = process.env.OPENAI_CHAT_MODEL || "gpt-4o-mini";
   const timeoutMs = Number(process.env.EVAL_TIMEOUT_MS || 8000);
-  const sys = `Eres un profesor de inglés que habla español. 
+  const sys = `Eres un profesor de inglÃ©s que habla espaÃ±ol. 
   El alumno va a dar un ejemplo del uso de ${context.label}; debes evaluar su respuesta.
 
 Devuelve SOLO JSON (sin texto extra) con estas claves:
-  - correctness: número 0-100 que indique qué tan correcta es la respuesta.
-  - errors: arreglo con hasta 3 puntos breves y accionables en español (solo si hay errores reales, no inventes errores). Cuando detectes un problema de estructura o de colocación clave, indica claramente qué parte de la estructura está mal y ofrece una guía corta para corregirla (por ejemplo “Estructura: falta el auxiliar ...” o “Estructura: orden incorrecto, debería ser ...”).
-  - improvements: arreglo con 1 reformulación más natural para un nativo en inglés (frase concisa), sin explicaciones. Opcional si ya está perfecto.
+  - correctness: nÃºmero 0-100 que indique quÃ© tan correcta es la respuesta.
+  - errors: arreglo con hasta 3 puntos breves y accionables en espaÃ±ol (solo si hay errores reales, no inventes errores). Cuando detectes un problema de estructura o de colocaciÃ³n clave, indica claramente quÃ© parte de la estructura estÃ¡ mal y ofrece una guÃ­a corta para corregirla (por ejemplo â€œEstructura: falta el auxiliar ...â€ o â€œEstructura: orden incorrecto, deberÃ­a ser ...â€).
+  - improvements: arreglo con 1 reformulaciÃ³n mÃ¡s natural para un nativo en inglÃ©s (frase concisa), sin explicaciones. Opcional si ya estÃ¡ perfecto.
 
-Responde únicamente el JSON, da tu respuesta de una forma amable.`;
+Responde Ãºnicamente el JSON, da tu respuesta de una forma amable.`;
 
   const user = `${transcript}`;
   // Use Responses API for GPT-5 family, else fallback to Chat Completions
@@ -475,6 +798,283 @@ Responde únicamente el JSON, da tu respuesta de una forma amable.`;
   } as any;
 }
 
+async function advanceStoryMission(
+  story: StoryDefinition,
+  body: StoryAdvanceRequest
+): Promise<StoryAdvancePayload> {
+  const missions = story.missions || [];
+  const rawIndex = typeof body.sceneIndex === 'number' ? body.sceneIndex : Number(body.sceneIndex);
+  const targetIndex = Number.isFinite(rawIndex)
+    ? Math.max(0, Math.min(missions.length - 1, Math.floor(rawIndex)))
+    : 0;
+  let mission = missions[targetIndex];
+  if (!mission && body.missionDefinition) {
+    const fallbackMission = sanitizeStoryMission(body.missionDefinition);
+    if (fallbackMission) {
+      missions[targetIndex] = fallbackMission;
+      mission = fallbackMission;
+    }
+  }
+  if (!mission) {
+    throw new Error('STORY_MISSION_NOT_FOUND');
+  }
+
+  const transcript = (body.transcript || '').trim();
+  const requestHistory = sanitizeHistory(body.history).slice(-STORY_HISTORY_LIMIT);
+  const sessionId = typeof body.sessionId === 'string' ? body.sessionId : undefined;
+  let sessionState = sessionId ? STORY_SESSIONS.get(sessionId) : undefined;
+
+  if (!sessionState && sessionId) {
+    sessionState = {
+      storyId: story.storyId,
+      missionIndex: targetIndex,
+      history: requestHistory,
+      requirements: [],
+      lastUpdated: Date.now(),
+      story,
+    };
+    STORY_SESSIONS.set(sessionId, sessionState);
+    pruneStorySessions();
+  }
+
+  if (sessionState) {
+    sessionState.storyId = sessionState.storyId || story.storyId;
+    sessionState.story = sessionState.story || story;
+    sessionState.missionIndex = targetIndex;
+    if (requestHistory.length) {
+      sessionState.history = mergeHistory(sessionState.history, requestHistory);
+    }
+  }
+
+  let conversationHistory: StoryMessage[] = sessionState
+    ? sessionState.history
+    : requestHistory;
+  conversationHistory = appendHistoryEntry(conversationHistory, {
+    role: 'user',
+    content: transcript,
+  });
+  if (sessionState) {
+    sessionState.history = conversationHistory;
+  }
+
+  const evaluation = await evaluateAI(transcript, {
+    label: mission.title,
+    example: mission.sceneSummary,
+  });
+  const scoreRaw = (evaluation as any)?.score ?? evaluation.score ?? 0;
+  const correctness = Math.max(0, Math.min(100, Math.round(scoreRaw)));
+  const result: EvalResult =
+    correctness >= 85 ? 'correct' : correctness >= 60 ? 'partial' : 'incorrect';
+  const errorsRaw = (evaluation as any)?.errors || evaluation.feedback?.grammar || [];
+  const improvementsRaw =
+    (evaluation as any)?.improvements || (evaluation as any)?.suggestions || [];
+  const errors = Array.isArray(errorsRaw) ? errorsRaw.slice(0, 3) : [];
+  const reformulations = Array.isArray(improvementsRaw)
+    ? improvementsRaw.slice(0, 2)
+    : [];
+
+  const historyForEvaluation = conversationHistory;
+  let requirements = alignRequirementStates(mission, []);
+  let aiReply = 'Thanks for sharing! Could you add a bit more detail?';
+  try {
+    const reqEval = await evaluateStoryRequirementsAndReply(
+      story,
+      mission,
+      transcript,
+      historyForEvaluation
+    );
+    requirements = alignRequirementStates(mission, reqEval.requirements);
+    if (typeof reqEval.aiReply === 'string' && reqEval.aiReply.trim().length) {
+      aiReply = reqEval.aiReply.trim();
+    }
+  } catch (err) {
+    console.error(
+      JSON.stringify({
+        scope: 'stories.advance.requirements_error',
+        message: (err as Error)?.message || 'unknown',
+      })
+    );
+  }
+
+  conversationHistory = appendHistoryEntry(conversationHistory, {
+    role: 'assistant',
+    content: aiReply,
+  });
+  if (sessionState) {
+    sessionState.history = conversationHistory;
+  }
+
+  const missionCompleted =
+    result === 'correct' && requirements.every((req) => req.met);
+  const nextIndex = missionCompleted ? targetIndex + 1 : targetIndex;
+  const storyCompleted = missionCompleted && nextIndex >= missions.length;
+
+  if (sessionState) {
+    sessionState.requirements = requirements;
+    sessionState.missionIndex = storyCompleted ? nextIndex : targetIndex;
+    sessionState.story = story;
+    if (storyCompleted && sessionId) {
+      STORY_SESSIONS.delete(sessionId);
+    }
+  }
+
+  return {
+    sceneIndex: storyCompleted ? targetIndex : nextIndex,
+    missionCompleted,
+    storyCompleted,
+    requirements,
+    aiReply,
+    correctness,
+    result,
+    errors,
+    reformulations,
+  };
+}
+async function evaluateStoryRequirementsAndReply(
+  story: StoryDefinition,
+  mission: StoryMission,
+  transcript: string,
+  history: StoryMessage[]
+): Promise<{ requirements: any[]; aiReply: string }> {
+  const apiKey = await getOpenAIKey();
+  const model =
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini';
+  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
+  const useResponses =
+    /gpt-5/i.test(model) || process.env.OPENAI_USE_RESPONSES === '1';
+  const conversation = [...history, { role: 'user', content: transcript }];
+  const conversationText = conversation
+    .map((msg) => `${msg.role === 'user' ? 'Student' : 'Guide'}: ${msg.content}`)
+    .join('\n')
+    .trim();
+  const requirementsList = (mission.requirements || [])
+    .map((req, index) => `${index + 1}. ${req.requirementId}: ${req.text}`)
+    .join('\n');
+  const systemPrompt = `You are an English coach and role-player helping a student complete a mission.\nReturn ONLY JSON with this exact shape:\n{\n  "ai_reply": "string",\n  "requirements": [\n    {"requirementId": "string", "met": boolean, "feedback": "string"}\n  ]\n}\nRules:\n- Keep the requirements array in the same order they are listed.\n- Use short Spanish feedback.\n- Mark met=true if the requirement is already covered anywhere in the conversation.\n- If something is missing, explain briefly what is missing in Spanish.\n- The ai_reply must be in English (max 80 words) and stay in character: ${mission.aiRole}.\n- Never add extra keys or text outside the JSON.`;
+  const userPrompt = `Story: ${story.title}\nMission: ${mission.title}\nMission summary: ${mission.sceneSummary || 'No summary provided.'}\nMission requirements:\n${requirementsList || 'No explicit requirements listed.'}\n\nFull conversation (latest line is the student message):\n${conversationText || 'Student has not spoken yet.'}`;
+
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), timeoutMs);
+  let raw = '';
+  try {
+    if (useResponses) {
+      const res = await fetch('https://api.openai.com/v1/responses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          instructions: systemPrompt,
+          input: [
+            {
+              role: 'user',
+              content: [{ type: 'input_text', text: userPrompt }],
+            },
+          ],
+          response_format: { type: 'json_object' },
+          max_output_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 600),
+        }),
+        signal: ac.signal,
+      });
+      const payload: any = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const reason = payload?.error?.message || res.statusText;
+        throw new Error(`STORY_MODEL_HTTP_${res.status}_${reason}`);
+      }
+      if (Array.isArray(payload?.output)) {
+        for (const item of payload.output) {
+          if (item?.type === 'message' && Array.isArray(item.content)) {
+            const texts = item.content
+              .filter((c: any) => c?.type === 'output_text' && typeof c.text === 'string')
+              .map((c: any) => c.text);
+            if (texts.length) {
+              raw = texts.join('\n');
+              break;
+            }
+          }
+        }
+      }
+      if (!raw && payload?.output_text) {
+        raw = payload.output_text;
+      }
+    } else {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          response_format: { type: 'json_object' },
+        }),
+        signal: ac.signal,
+      });
+      if (!res.ok) {
+        const bodyTxt = await res.text();
+        throw new Error(`STORY_MODEL_HTTP_${res.status}_${bodyTxt.slice(0, 120)}`);
+      }
+      const data: any = await res.json();
+      raw = data.choices?.[0]?.message?.content || '';
+    }
+  } catch (err) {
+    if ((err as any)?.name === 'AbortError') {
+      throw new Error('STORY_MODEL_TIMEOUT');
+    }
+    throw err;
+  } finally {
+    clearTimeout(to);
+  }
+
+  if (!raw) {
+    throw new Error('STORY_MODEL_EMPTY_RESPONSE');
+  }
+
+  let parsed: any;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    throw new Error('STORY_MODEL_BAD_JSON');
+  }
+
+  const requirements = Array.isArray(parsed?.requirements) ? parsed.requirements : [];
+  const aiReply = typeof parsed?.ai_reply === 'string' ? parsed.ai_reply : '';
+  return { requirements, aiReply };
+}
+
+function alignRequirementStates(
+  mission: StoryMission,
+  rawStates: any[]
+): StoryAdvanceRequirementState[] {
+  return (mission.requirements || []).map((req, index) => {
+    const match = Array.isArray(rawStates)
+      ? rawStates.find((item) =>
+          item?.requirementId === req.requirementId ||
+          item?.requirement_id === req.requirementId ||
+          item?.index === index
+        )
+      : undefined;
+    const met = !!(match?.met ?? match?.completed ?? false);
+    let feedback: string | undefined;
+    if (typeof match?.feedback === 'string') feedback = match.feedback;
+    else if (typeof match?.note === 'string') feedback = match.note;
+    else if (typeof match?.explanation === 'string') feedback = match.explanation;
+    if (!feedback && met) feedback = 'Listo, requisito cubierto.';
+    if (!feedback && !met) feedback = 'Aun falta mencionar este punto.';
+    return {
+      requirementId: req.requirementId,
+      text: req.text,
+      met,
+      feedback,
+    };
+  });
+}
 function mockCards(): CardItem[] {
   return [
     {
@@ -511,15 +1111,24 @@ function mockCards(): CardItem[] {
   ];
 }
 
-function mockStories() {
-  return [
-    {
-      storyId: "restaurant_rush",
-      title: "Restaurant Rush",
-      unlockCost: 50,
-      tags: ["food", "service"],
-      sceneOrder: [0, 1, 2, 3],
-      locked: false,
-    },
-  ];
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

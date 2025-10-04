@@ -1,0 +1,52 @@
+﻿[
+  {
+    "storyId": "london_trip",
+    "title": "Viaje a Londres",
+    "summary": "Un emocionante viaje a la capital inglesa.",
+    "level": "B2",
+    "tags": ["travel", "city", "speaking"],
+    "unlockCost": 0,
+    "missions": [
+      {
+        "missionId": "london_trip_taxi",
+        "title": "Pedir un taxi",
+        "sceneSummary": "Habla con un taxista para llegar al hotel cerca del estadio del Arsenal.",
+        "aiRole": "Eres un taxista en Londres. Responde a las preguntas del pasajero de manera clara y amigable, proporcionando información útil sobre el viaje y los lugares turísticos cercanos.",
+        "requirements": [
+          {
+            "requirementId": "taxi_price",
+            "text": "Pregunta cuánto cuesta el viaje hasta el hotel que está a unas cuadras del estadio del Arsenal."
+          },
+          {
+            "requirementId": "taxi_payment",
+            "text": "Pregunta si se puede pagar con tarjeta o solo en efectivo."
+          },
+          {
+            "requirementId": "taxi_suggestions",
+            "text": "Pregunta al taxista por lugares turísticos que puedas visitar durante tu estadía."
+          }
+        ]
+      },
+      {
+        "missionId": "london_trip_thames",
+        "title": "Paseo por el río Támesis",
+        "sceneSummary": "Consulta con un guía sobre los paseos en barco por el Támesis.",
+        "aiRole": "Eres un guía turístico en Londres. Responde a las preguntas del pasajero de manera clara y amigable, proporcionando información útil sobre los paseos en barco y los lugares de interés cercanos.",
+        "requirements": [
+          {
+            "requirementId": "thames_schedule",
+            "text": "Pregunta por los horarios de los paseos en barco por el río Támesis."
+          },
+          {
+            "requirementId": "thames_discounts",
+            "text": "Pregunta si hay descuentos para estudiantes o grupos."
+          },
+          {
+            "requirementId": "thames_landmarks",
+            "text": "Pregunta qué puntos de interés se pueden ver durante el paseo."
+          }
+        ]
+      }
+    ]
+  }
+]
