@@ -157,7 +157,21 @@ export default function StorySceneScreen() {
           transcript: trimmed,
           history: historyPayload,
         });
-        setRequirements(payload.requirements.map((req) => ({ ...req })));
+        console.log('Advance payload', payload);
+        setRequirements((prev) => {
+          const prevById = new Map(prev.map((item) => [item.requirementId, item]));
+          return payload.requirements.map((req) => {
+            const prevReq = prevById.get(req.requirementId);
+            if (prevReq?.met) {
+              return {
+                ...req,
+                met: true,
+                feedback: req.feedback || prevReq.feedback,
+              };
+            }
+            return { ...req };
+          });
+        });
         appendMessage({ id: `ai-${Date.now()}`, role: 'assistant', text: payload.aiReply });
         setAnalysis({
           correctness: payload.correctness,

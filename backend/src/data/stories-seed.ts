@@ -14,7 +14,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         title: 'Pedir un taxi',
         sceneSummary: 'Habla con un taxista para llegar al hotel cerca del estadio del Arsenal.',
         aiRole:
-          'Eres un taxista en Londres. Responde a las preguntas del pasajero de manera clara y amigable, proporcionando información útil sobre el viaje y los lugares turísticos cercanos.',
+          'Eres un taxista en Londres.',
         requirements: [
           {
             requirementId: 'taxi_price',
@@ -35,7 +35,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         title: 'Paseo por el río Támesis',
         sceneSummary: 'Consulta con un guía sobre los paseos en barco por el Támesis.',
         aiRole:
-          'Eres un guía turístico en Londres. Responde a las preguntas del pasajero de manera clara y amigable, proporcionando información útil sobre los paseos en barco y los lugares de interés cercanos.',
+          'Eres un guía turístico en Londres.',
         requirements: [
           {
             requirementId: 'thames_schedule',

@@ -803,7 +803,8 @@ async function advanceStoryMission(
   body: StoryAdvanceRequest
 ): Promise<StoryAdvancePayload> {
   const missions = story.missions || [];
-  const rawIndex = typeof body.sceneIndex === 'number' ? body.sceneIndex : Number(body.sceneIndex);
+  const rawIndex =
+    typeof body.sceneIndex === 'number' ? body.sceneIndex : Number(body.sceneIndex);
   const targetIndex = Number.isFinite(rawIndex)
     ? Math.max(0, Math.min(missions.length - 1, Math.floor(rawIndex)))
     : 0;
@@ -846,9 +847,7 @@ async function advanceStoryMission(
     }
   }
 
-  let conversationHistory: StoryMessage[] = sessionState
-    ? sessionState.history
-    : requestHistory;
+  let conversationHistory: StoryMessage[] = sessionState ? sessionState.history : requestHistory;
   conversationHistory = appendHistoryEntry(conversationHistory, {
     role: 'user',
     content: transcript,
@@ -857,40 +856,74 @@ async function advanceStoryMission(
     sessionState.history = conversationHistory;
   }
 
-  const evaluation = await evaluateAI(transcript, {
-    label: mission.title,
-    example: mission.sceneSummary,
-  });
-  const scoreRaw = (evaluation as any)?.score ?? evaluation.score ?? 0;
-  const correctness = Math.max(0, Math.min(100, Math.round(scoreRaw)));
-  const result: EvalResult =
-    correctness >= 85 ? 'correct' : correctness >= 60 ? 'partial' : 'incorrect';
-  const errorsRaw = (evaluation as any)?.errors || evaluation.feedback?.grammar || [];
-  const improvementsRaw =
-    (evaluation as any)?.improvements || (evaluation as any)?.suggestions || [];
-  const errors = Array.isArray(errorsRaw) ? errorsRaw.slice(0, 3) : [];
-  const reformulations = Array.isArray(improvementsRaw)
-    ? improvementsRaw.slice(0, 2)
-    : [];
-
-  const historyForEvaluation = conversationHistory;
+  let correctness = 0;
+  let result: EvalResult = 'incorrect';
+  let errors: string[] = [];
+  let reformulations: string[] = [];
+  const missionRequirementIds = new Set(
+    (mission.requirements || []).map((item) => item.requirementId)
+  );
   let requirements = alignRequirementStates(mission, []);
-  let aiReply = 'Thanks for sharing! Could you add a bit more detail?';
+  const previousRequirements =
+    sessionState?.requirements &&
+    sessionState.requirements.every((req) => missionRequirementIds.has(req.requirementId))
+      ? sessionState.requirements
+      : [];
   try {
-    const reqEval = await evaluateStoryRequirementsAndReply(
+    const missionEval = await evaluateStoryMissionProgress(
       story,
       mission,
-      transcript,
-      historyForEvaluation
+      conversationHistory,
+      transcript
     );
-    requirements = alignRequirementStates(mission, reqEval.requirements);
-    if (typeof reqEval.aiReply === 'string' && reqEval.aiReply.trim().length) {
-      aiReply = reqEval.aiReply.trim();
+    const rawScore = Number(missionEval.score ?? (missionEval as any).correctness ?? 0);
+    correctness = Math.max(0, Math.min(100, Math.round(rawScore)));
+    const rawResult = (missionEval.result || (missionEval as any).status || '')
+      .toString()
+      .toLowerCase();
+    if (rawResult === 'correct' || rawResult === 'partial' || rawResult === 'incorrect') {
+      result = rawResult as EvalResult;
+    } else {
+      result = correctness >= 85 ? 'correct' : correctness >= 60 ? 'partial' : 'incorrect';
+    }
+    if (Array.isArray(missionEval.errors)) {
+      errors = missionEval.errors.slice(0, 3).map((item) => String(item));
+    }
+    const alternatives =
+      missionEval.alternatives ??
+      (missionEval as any).improvements ??
+      (missionEval as any).suggestions ??
+      [];
+    if (Array.isArray(alternatives)) {
+      reformulations = alternatives.slice(0, 2).map((item) => String(item));
+    }
+    if (Array.isArray(missionEval.requirements)) {
+      requirements = alignRequirementStates(mission, missionEval.requirements);
     }
   } catch (err) {
     console.error(
       JSON.stringify({
-        scope: 'stories.advance.requirements_error',
+        scope: 'stories.advance.progress_error',
+        message: (err as Error)?.message || 'unknown',
+      })
+    );
+  }
+
+  requirements = mergeRequirementProgress(previousRequirements, requirements);
+
+  let aiReply = 'Thanks for sharing! Could you add a bit more detail?';
+  try {
+    aiReply = await generateStoryReply(
+      story,
+      mission,
+      conversationHistory,
+      requirements,
+      { result, correctness }
+    );
+  } catch (err) {
+    console.error(
+      JSON.stringify({
+        scope: 'stories.advance.reply_error',
         message: (err as Error)?.message || 'unknown',
       })
     );
@@ -904,8 +937,7 @@ async function advanceStoryMission(
     sessionState.history = conversationHistory;
   }
 
-  const missionCompleted =
-    result === 'correct' && requirements.every((req) => req.met);
+  const missionCompleted = requirements.every((req) => req.met);
   const nextIndex = missionCompleted ? targetIndex + 1 : targetIndex;
   const storyCompleted = missionCompleted && nextIndex >= missions.length;
 
@@ -930,19 +962,32 @@ async function advanceStoryMission(
     reformulations,
   };
 }
-async function evaluateStoryRequirementsAndReply(
+
+
+async function evaluateStoryMissionProgress(
   story: StoryDefinition,
   mission: StoryMission,
-  transcript: string,
-  history: StoryMessage[]
-): Promise<{ requirements: any[]; aiReply: string }> {
+  history: StoryMessage[],
+  transcript: string
+): Promise<{
+  requirements: any[];
+  score: number;
+  result?: string;
+  errors: string[];
+  alternatives: string[];
+  objectivesMet: boolean;
+  correctness?: number;
+  status?: string;
+  suggestions?: string[];
+  improvements?: string[];
+}> {
   const apiKey = await getOpenAIKey();
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini';
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
   const useResponses =
     /gpt-5/i.test(model) || process.env.OPENAI_USE_RESPONSES === '1';
-  const conversation = [...history, { role: 'user', content: transcript }];
+  const conversation = history.slice(-STORY_HISTORY_LIMIT);
   const conversationText = conversation
     .map((msg) => `${msg.role === 'user' ? 'Student' : 'Guide'}: ${msg.content}`)
     .join('\n')
@@ -950,8 +995,48 @@ async function evaluateStoryRequirementsAndReply(
   const requirementsList = (mission.requirements || [])
     .map((req, index) => `${index + 1}. ${req.requirementId}: ${req.text}`)
     .join('\n');
-  const systemPrompt = `You are an English coach and role-player helping a student complete a mission.\nReturn ONLY JSON with this exact shape:\n{\n  "ai_reply": "string",\n  "requirements": [\n    {"requirementId": "string", "met": boolean, "feedback": "string"}\n  ]\n}\nRules:\n- Keep the requirements array in the same order they are listed.\n- Use short Spanish feedback.\n- Mark met=true if the requirement is already covered anywhere in the conversation.\n- If something is missing, explain briefly what is missing in Spanish.\n- The ai_reply must be in English (max 80 words) and stay in character: ${mission.aiRole}.\n- Never add extra keys or text outside the JSON.`;
-  const userPrompt = `Story: ${story.title}\nMission: ${mission.title}\nMission summary: ${mission.sceneSummary || 'No summary provided.'}\nMission requirements:\n${requirementsList || 'No explicit requirements listed.'}\n\nFull conversation (latest line is the student message):\n${conversationText || 'Student has not spoken yet.'}`;
+  const systemPrompt = `You are an English coach evaluating the student's latest message inside a role-play mission.
+Return ONLY JSON with this exact shape:{
+  "score": number,
+  "result": "correct" | "partial" | "incorrect",
+  "errors": string[],
+  "alternatives": string[],
+  "requirements": [
+    {"requirementId": "string", "met": boolean, "feedback": "string"}
+  ],
+  "objectives_met": boolean
+}
+
+Rules:
+- Just evaluate the last student message English, don’t evaluate if the message helps to achieve the requirements.
+- Use Spanish for errors and feedback texts.
+- Evaluate the student's last message using the full conversation context (only to interpret meaning, not for grading progress).
+- Link errors to issues in the last message (max 3).
+- Provide up to 2 natural English alternatives for the last message.
+- Keep the requirements array in the original order.
+- objectives_met must be true only if every requirement is met across the conversation.
+- Do not include any extra keys or commentary.
+
+Language evaluation rubric (for the last message only):
+- correct: No significant grammar or usage errors; natural and fluent.
+- partial: Understandable but with 1–2 noticeable grammar or word choice issues.
+- incorrect: Serious grammatical or lexical errors that make the message hard to understand.
+
+Scoring:
+- Start from 100 and subtract 10–40 points per error depending on severity.
+`;
+
+  const userPrompt = `Story: ${story.title}\nMission: ${mission.title}\nRole: ${mission.aiRole}\nMission summary: ${mission.sceneSummary || 'No summary provided.'}\nObjectives:\n${requirementsList || 'No explicit objectives listed.'}\n\nFull conversation so far (Student is the learner, Guide is the coach):\n
+  ${conversationText || 'No prior conversation.'}\n\nLast student message to evaluate:\n${transcript || '<empty>'}`;
+  console.log(
+    JSON.stringify({
+      scope: 'stories.evaluate.begin',
+      storyId: story.storyId,
+      missionId: mission.missionId,
+      userPrompt,
+      systemPrompt,
+    })
+  );
 
   const ac = new AbortController();
   const to = setTimeout(() => ac.abort(), timeoutMs);
@@ -1013,6 +1098,7 @@ async function evaluateStoryRequirementsAndReply(
             { role: 'user', content: userPrompt },
           ],
           response_format: { type: 'json_object' },
+          max_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 600),
         }),
         signal: ac.signal,
       });
@@ -1043,9 +1129,178 @@ async function evaluateStoryRequirementsAndReply(
     throw new Error('STORY_MODEL_BAD_JSON');
   }
 
+  const score = Math.max(0, Math.min(100, Number(parsed?.score ?? parsed?.correctness ?? 0)));
+  const result = typeof parsed?.result === 'string' ? parsed.result : undefined;
+  const errors = Array.isArray(parsed?.errors)
+    ? parsed.errors.slice(0, 3).map((item: any) => String(item))
+    : [];
+  const alternatives = Array.isArray(parsed?.alternatives)
+    ? parsed.alternatives.slice(0, 2).map((item: any) => String(item))
+    : [];
   const requirements = Array.isArray(parsed?.requirements) ? parsed.requirements : [];
-  const aiReply = typeof parsed?.ai_reply === 'string' ? parsed.ai_reply : '';
-  return { requirements, aiReply };
+  const objectivesMet =
+    typeof parsed?.objectives_met === 'boolean'
+      ? parsed.objectives_met
+      : requirements.length
+      ? requirements.every((item: any) => !!(item?.met ?? item?.completed ?? false))
+      : true;
+
+  return {
+    requirements,
+    score,
+    result,
+    errors,
+    alternatives,
+    objectivesMet,
+    correctness: score,
+    status: result,
+    suggestions: alternatives,
+    improvements: alternatives,
+  };
+}
+
+async function generateStoryReply(
+  story: StoryDefinition,
+  mission: StoryMission,
+  history: StoryMessage[],
+  requirements: StoryAdvanceRequirementState[],
+  evaluation: { result: EvalResult; correctness: number }
+): Promise<string> {
+  const apiKey = await getOpenAIKey();
+  const model =
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini';
+  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
+  const useResponses =
+    /gpt-5/i.test(model) || process.env.OPENAI_USE_RESPONSES === '1';
+  const conversation = history.slice(-STORY_HISTORY_LIMIT);
+  const conversationText = conversation
+    .map((msg) => `${msg.role === 'user' ? 'Student' : 'Guide'}: ${msg.content}`)
+    .join('\n')
+    .trim();
+  const systemPrompt = `You are ${mission.aiRole}. Continue the role-play in English as the guide.\n
+  Stay coherent with the scene, be encouraging, and keep the reply under 10 words.\nTry to use a B2 level of English.`;
+  const userPrompt = `Story: ${story.title}\nMission: ${mission.title}\nMission summary: ${mission.sceneSummary || 'No summary provided.'}
+  ${conversationText || 'No prior conversation.'}\n\nWrite the next Guide message in English, sounding natural and aligned with ${mission.aiRole}.`;
+  console.log(
+    JSON.stringify({
+      scope: 'stories.reply.openai.begin',
+      storyId: story.storyId,
+      missionId: mission.missionId,
+      userPrompt,
+      systemPrompt,
+    })
+  );
+
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), timeoutMs);
+  let raw = '';
+  try {
+    if (useResponses) {
+      const res = await fetch('https://api.openai.com/v1/responses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          instructions: systemPrompt,
+          input: [
+            {
+              role: 'user',
+              content: [{ type: 'input_text', text: userPrompt }],
+            },
+          ],
+          max_output_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 400),
+        }),
+        signal: ac.signal,
+      });
+      const payload: any = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const reason = payload?.error?.message || res.statusText;
+        throw new Error(`STORY_MODEL_HTTP_${res.status}_${reason}`);
+      }
+      if (Array.isArray(payload?.output)) {
+        for (const item of payload.output) {
+          if (item?.type === 'message' && Array.isArray(item.content)) {
+            const texts = item.content
+              .filter((c: any) => c?.type === 'output_text' && typeof c.text === 'string')
+              .map((c: any) => c.text);
+            if (texts.length) {
+              raw = texts.join('\n');
+              break;
+            }
+          }
+        }
+      }
+      if (!raw && payload?.output_text) {
+        raw = payload.output_text;
+      }
+    } else {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          max_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 400),
+        }),
+        signal: ac.signal,
+      });
+      if (!res.ok) {
+        const bodyTxt = await res.text();
+        throw new Error(`STORY_MODEL_HTTP_${res.status}_${bodyTxt.slice(0, 120)}`);
+      }
+      const data: any = await res.json();
+      raw = data.choices?.[0]?.message?.content || '';
+    }
+  } catch (err) {
+    if ((err as any)?.name === 'AbortError') {
+      throw new Error('STORY_MODEL_TIMEOUT');
+    }
+    throw err;
+  } finally {
+    clearTimeout(to);
+  }
+
+  if (!raw) {
+    throw new Error('STORY_MODEL_EMPTY_RESPONSE');
+  }
+
+  return raw.trim();
+}
+
+
+function mergeRequirementProgress(
+  previous: StoryAdvanceRequirementState[],
+  current: StoryAdvanceRequirementState[]
+): StoryAdvanceRequirementState[] {
+  if (!previous.length) return current;
+  const prevById = new Map(previous.map((item) => [item.requirementId, item]));
+  return current.map((state) => {
+    const prev = prevById.get(state.requirementId);
+    if (!prev) return state;
+    if (prev.met && !state.met) {
+      return {
+        ...state,
+        met: true,
+        feedback: prev.feedback || state.feedback,
+      };
+    }
+    if (prev.met && state.met) {
+      return {
+        ...state,
+        feedback: state.feedback || prev.feedback,
+      };
+    }
+    return state;
+  });
 }
 
 function alignRequirementStates(
