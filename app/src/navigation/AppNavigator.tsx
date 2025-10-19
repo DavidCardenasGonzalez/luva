@@ -6,6 +6,7 @@ import DeckScreen from '../screens/DeckScreen';
 import CardDetailScreen from '../screens/CardDetailScreen';
 import PracticeScreen from '../screens/PracticeScreen';
 import StoriesScreen from '../screens/StoriesScreen';
+import StoryMissionsScreen from '../screens/StoryMissionsScreen';
 import StorySceneScreen from '../screens/StorySceneScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import AuthCallbackScreen from '../screens/AuthCallbackScreen';
@@ -35,6 +36,7 @@ export type RootStackParamList = {
     explanation?: string;
   };
   Stories: undefined;
+  StoryMissions: { storyId: string };
   StoryScene: { storyId: string; sceneIndex: number };
   Profile: undefined;
   AuthCallback: undefined;
@@ -61,6 +63,7 @@ export default function AppNavigator() {
         <Stack.Screen name="CardDetail" component={CardDetailScreen} />
         <Stack.Screen name="Practice" component={PracticeScreen} />
         <Stack.Screen name="Stories" component={StoriesScreen} />
+        <Stack.Screen name="StoryMissions" component={StoryMissionsScreen} />
         <Stack.Screen name="StoryScene" component={StorySceneScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="AuthCallback" component={AuthCallbackScreen} />

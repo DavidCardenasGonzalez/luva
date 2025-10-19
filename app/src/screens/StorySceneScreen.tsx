@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ import {
   StoryRequirementState,
   useStoryDetail,
 } from '../hooks/useStories';
+import { useStoryProgress } from '../progress/StoryProgressProvider';
 
 type StoryMessage = {
   id: string;
@@ -56,6 +57,7 @@ export default function StorySceneScreen() {
   const storyId: string | undefined = route.params?.storyId;
   const initialSceneIndex: number = route.params?.sceneIndex ?? 0;
   const { story, loading, error } = useStoryDetail(storyId);
+  const { markMissionCompleted, isMissionCompleted, storyCompleted: isStoryCompleted } = useStoryProgress();
   const [sceneIndex, setSceneIndex] = useState<number>(initialSceneIndex);
 
   useEffect(() => {
@@ -118,18 +120,20 @@ export default function StorySceneScreen() {
 
   useEffect(() => {
     if (!mission) return;
+    const missionDone = storyId ? isMissionCompleted(storyId, mission.missionId) : false;
+    const storyDone = storyId ? isStoryCompleted(storyId) : false;
     setRequirements(mission.requirements.map((req) => ({ ...req, met: req.met ?? false })));
     setMessages([]);
     setAnalysis(null);
-    setMissionCompleted(false);
-    setStoryCompleted(false);
+    setMissionCompleted(missionDone);
+    setStoryCompleted(storyDone);
     setPendingNext(null);
     setUserText('');
     setErrorMessage(null);
     setRetryState('none');
     setLastAttemptSnapshot(null);
     setFlowState('idle');
-  }, [mission?.missionId]);
+  }, [isMissionCompleted, isStoryCompleted, mission, storyId]);
 
   useEffect(() => {
     scrollRef.current?.scrollToEnd({ animated: true });
@@ -222,6 +226,9 @@ export default function StorySceneScreen() {
         });
         setMissionCompleted(payload.missionCompleted);
         setStoryCompleted(payload.storyCompleted);
+        if (payload.missionCompleted && storyId && mission?.missionId) {
+          await markMissionCompleted(storyId, mission.missionId, payload.storyCompleted);
+        }
         if (payload.missionCompleted && payload.sceneIndex !== sceneIndex) {
           setPendingNext(payload.sceneIndex);
         } else {
@@ -247,7 +254,9 @@ export default function StorySceneScreen() {
     [
       analysis,
       appendMessage,
+      markMissionCompleted,
       messages,
+      mission,
       missionCompleted,
       missionDefinitionPayload,
       pendingNext,
@@ -544,6 +553,20 @@ export default function StorySceneScreen() {
                 })}
               >
                 <Text style={{ color: 'white', fontWeight: '700' }}>Ir a la siguiente misión</Text>
+              </Pressable>
+            ) : null}
+            {storyId ? (
+              <Pressable
+                onPress={() => navigation.navigate('StoryMissions', { storyId })}
+                style={({ pressed }) => ({
+                  marginTop: 12,
+                  paddingVertical: 10,
+                  borderRadius: 999,
+                  alignItems: 'center',
+                  backgroundColor: pressed ? '#e2e8f0' : '#f1f5f9',
+                })}
+              >
+                <Text style={{ color: '#1e293b', fontWeight: '700' }}>Ver listado de misiones</Text>
               </Pressable>
             ) : null}
             {storyCompleted ? (
