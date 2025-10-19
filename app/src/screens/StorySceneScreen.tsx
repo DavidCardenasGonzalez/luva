@@ -36,6 +36,20 @@ type StoryAdvancePayload = {
   reformulations: string[];
 };
 
+type StoryAttemptSnapshot = {
+  messages: StoryMessage[];
+  requirements: StoryRequirementState[];
+  analysis: {
+    correctness: number;
+    result: 'correct' | 'partial' | 'incorrect';
+    errors: string[];
+    reformulations: string[];
+  } | null;
+  missionCompleted: boolean;
+  storyCompleted: boolean;
+  pendingNext: number | null;
+};
+
 export default function StorySceneScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
@@ -95,6 +109,8 @@ export default function StorySceneScreen() {
   const [flowState, setFlowState] = useState<'idle' | 'recording' | 'uploading' | 'transcribing' | 'evaluating'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [userText, setUserText] = useState<string>('');
+  const [retryState, setRetryState] = useState<'none' | 'optional' | 'required'>('none');
+  const [lastAttemptSnapshot, setLastAttemptSnapshot] = useState<StoryAttemptSnapshot | null>(null);
 
   const recorder = useAudioRecorder();
   const uploader = useUploadToS3();
@@ -110,12 +126,16 @@ export default function StorySceneScreen() {
     setPendingNext(null);
     setUserText('');
     setErrorMessage(null);
+    setRetryState('none');
+    setLastAttemptSnapshot(null);
     setFlowState('idle');
   }, [mission?.missionId]);
 
   useEffect(() => {
     scrollRef.current?.scrollToEnd({ animated: true });
   }, [messages.length]);
+
+  const retryBlocked = retryState === 'required';
 
   const statusLabel = useMemo(() => {
     switch (flowState) {
@@ -145,6 +165,27 @@ export default function StorySceneScreen() {
         setFlowState('idle');
         return;
       }
+      if (retryState === 'required') {
+        setErrorMessage('Debes volver a intentar antes de continuar.');
+        setFlowState('idle');
+        return;
+      }
+      const snapshot: StoryAttemptSnapshot = {
+        messages: messages.map((msg) => ({ ...msg })),
+        requirements: requirements.map((req) => ({ ...req })),
+        analysis: analysis
+          ? {
+              correctness: analysis.correctness,
+              result: analysis.result,
+              errors: [...analysis.errors],
+              reformulations: [...analysis.reformulations],
+            }
+          : null,
+        missionCompleted,
+        storyCompleted,
+        pendingNext,
+      };
+      setRetryState('none');
       setFlowState('evaluating');
       const historyPayload = [...messages, { id: `pending-${Date.now()}`, role: 'user', text: trimmed }].map(
         ({ role, text }) => ({ role, content: text })
@@ -186,6 +227,16 @@ export default function StorySceneScreen() {
         } else {
           setPendingNext(null);
         }
+        if (payload.result === 'incorrect') {
+          setRetryState('required');
+          setLastAttemptSnapshot(snapshot);
+        } else if (payload.result === 'partial') {
+          setRetryState('optional');
+          setLastAttemptSnapshot(snapshot);
+        } else {
+          setRetryState('none');
+          setLastAttemptSnapshot(null);
+        }
       } catch (err: any) {
         console.error('Story advance error', err);
         setErrorMessage(err?.message || 'No pudimos analizar tu respuesta.');
@@ -193,11 +244,53 @@ export default function StorySceneScreen() {
         setFlowState('idle');
       }
     },
-    [appendMessage, messages, missionDefinitionPayload, sceneIndex, storyDefinitionPayload, storyId]
+    [
+      analysis,
+      appendMessage,
+      messages,
+      missionCompleted,
+      missionDefinitionPayload,
+      pendingNext,
+      requirements,
+      retryState,
+      sceneIndex,
+      storyCompleted,
+      storyDefinitionPayload,
+      storyId,
+    ]
   );
+
+  const handleRetry = useCallback(() => {
+    if (!lastAttemptSnapshot) {
+      return;
+    }
+    setMessages(lastAttemptSnapshot.messages.map((msg) => ({ ...msg })));
+    setRequirements(lastAttemptSnapshot.requirements.map((req) => ({ ...req })));
+    setAnalysis(
+      lastAttemptSnapshot.analysis
+        ? {
+            correctness: lastAttemptSnapshot.analysis.correctness,
+            result: lastAttemptSnapshot.analysis.result,
+            errors: [...lastAttemptSnapshot.analysis.errors],
+            reformulations: [...lastAttemptSnapshot.analysis.reformulations],
+          }
+        : null
+    );
+    setMissionCompleted(lastAttemptSnapshot.missionCompleted);
+    setStoryCompleted(lastAttemptSnapshot.storyCompleted);
+    setPendingNext(lastAttemptSnapshot.pendingNext);
+    setLastAttemptSnapshot(null);
+    setRetryState('none');
+    setErrorMessage(null);
+    setFlowState('idle');
+  }, [lastAttemptSnapshot]);
 
   const handleRecordPressIn = useCallback(async () => {
     try {
+      if (retryState === 'required') {
+        setErrorMessage('Debes volver a intentar antes de continuar.');
+        return;
+      }
       setErrorMessage(null);
       setFlowState('recording');
       await recorder.start();
@@ -206,7 +299,7 @@ export default function StorySceneScreen() {
       setErrorMessage(err?.message || 'No pudimos iniciar la grabación.');
       setFlowState('idle');
     }
-  }, [recorder]);
+  }, [recorder, retryState]);
 
   const handleRecordRelease = useCallback(async () => {
     try {
@@ -237,6 +330,10 @@ export default function StorySceneScreen() {
     const trimmed = userText.trim();
     if (!trimmed) return;
     try {
+      if (retryState === 'required') {
+        setErrorMessage('Debes volver a intentar antes de continuar.');
+        return;
+      }
       setFlowState('evaluating');
       setErrorMessage(null);
       const session = await api.post<{ sessionId: string; uploadUrl: string }>(`/sessions/start`, {
@@ -250,7 +347,7 @@ export default function StorySceneScreen() {
       setErrorMessage(err?.message || 'No pudimos analizar tu texto.');
       setFlowState('idle');
     }
-  }, [handleAdvance, sceneIndex, storyId, userText]);
+  }, [handleAdvance, retryState, sceneIndex, storyId, userText]);
 
   if (!storyId) {
     return (
@@ -372,11 +469,21 @@ export default function StorySceneScreen() {
             <Text style={{ fontWeight: '700', color: '#1e293b' }}>
               Correctness: {analysis.correctness}% ({analysis.result === 'correct' ? 'Correcto' : analysis.result === 'partial' ? 'Parcial' : 'Reintenta'})
             </Text>
+            {retryState === 'optional' ? (
+              <Text style={{ marginTop: 8, color: '#1e293b' }}>
+                Resultado parcial. Puedes volver a intentar o seguir la conversación.
+              </Text>
+            ) : null}
+            {retryState === 'required' ? (
+              <Text style={{ marginTop: 8, color: '#dc2626' }}>
+                Resultado incorrecto. Debes volver a intentar antes de continuar.
+              </Text>
+            ) : null}
             {analysis.errors.length ? (
               <View style={{ marginTop: 10 }}>
                 <Text style={{ fontWeight: '600', color: '#dc2626', marginBottom: 4 }}>Errores detectados</Text>
                 {analysis.errors.map((errText, idx) => (
-                  <Text key={idx} style={{ color: '#dc2626', marginBottom: 2 }}>• {errText}</Text>
+                  <Text key={idx} style={{ color: '#dc2626', marginBottom: 2 }}>- {errText}</Text>
                 ))}
               </View>
             ) : null}
@@ -384,9 +491,29 @@ export default function StorySceneScreen() {
               <View style={{ marginTop: 10 }}>
                 <Text style={{ fontWeight: '600', color: '#2563eb', marginBottom: 4 }}>Reformulaciones sugeridas</Text>
                 {analysis.reformulations.map((line, idx) => (
-                  <Text key={idx} style={{ color: '#1f2937', marginBottom: 2 }}>• {line}</Text>
+                  <Text key={idx} style={{ color: '#1f2937', marginBottom: 2 }}>- {line}</Text>
                 ))}
               </View>
+            ) : null}
+            {retryState !== 'none' ? (
+              <Pressable
+                onPress={handleRetry}
+                disabled={flowState !== 'idle'}
+                style={({ pressed }) => ({
+                  marginTop: 12,
+                  paddingVertical: 10,
+                  borderRadius: 999,
+                  alignItems: 'center',
+                  backgroundColor:
+                    flowState !== 'idle'
+                      ? '#cbd5f5'
+                      : pressed
+                      ? '#1d4ed8'
+                      : '#2563eb',
+                })}
+              >
+                <Text style={{ color: 'white', fontWeight: '700' }}>Volver a intentar</Text>
+              </Pressable>
             ) : null}
           </View>
         ) : null}
@@ -454,7 +581,7 @@ export default function StorySceneScreen() {
             }}
           />
           <Pressable
-            disabled={flowState !== 'idle' || !userText.trim().length}
+            disabled={flowState !== 'idle' || !userText.trim().length || retryBlocked}
             onPress={handleSendText}
             style={({ pressed }) => ({
               marginTop: 12,
@@ -462,7 +589,7 @@ export default function StorySceneScreen() {
               borderRadius: 10,
               alignItems: 'center',
               backgroundColor:
-                flowState !== 'idle' || !userText.trim().length
+                flowState !== 'idle' || !userText.trim().length || retryBlocked
                   ? '#cbd5f5'
                   : pressed
                   ? '#2563eb'
@@ -476,15 +603,17 @@ export default function StorySceneScreen() {
         <View style={{ marginTop: 16, padding: 16, backgroundColor: 'white', borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0' }}>
           <Text style={{ fontWeight: '600', color: '#1e293b', marginBottom: 8 }}>Grabar mensaje</Text>
           <Pressable
-            onPressIn={flowState === 'idle' ? handleRecordPressIn : undefined}
+            onPressIn={flowState === 'idle' && !retryBlocked ? handleRecordPressIn : undefined}
             onPressOut={handleRecordRelease}
-            disabled={flowState !== 'idle' && flowState !== 'recording'}
+            disabled={retryBlocked || (flowState !== 'idle' && flowState !== 'recording')}
             style={({ pressed }) => ({
               paddingVertical: 14,
               borderRadius: 999,
               alignItems: 'center',
               backgroundColor:
-                flowState === 'recording'
+                retryBlocked
+                  ? '#cbd5f5'
+                  : flowState === 'recording'
                   ? '#dc2626'
                   : pressed
                   ? '#7c3aed'
@@ -509,9 +638,5 @@ export default function StorySceneScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-
-
-
 
 

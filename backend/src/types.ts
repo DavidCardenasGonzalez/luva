@@ -47,6 +47,8 @@ export interface StoryMission {
   title: string;
   sceneSummary?: string;
   aiRole: string;
+  caracterName?: string;
+  caracterPrompt?: string;
   requirements: StoryRequirement[];
 }
 
