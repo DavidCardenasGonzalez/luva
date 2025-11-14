@@ -869,6 +869,11 @@ async function advanceStoryMission(
     sessionState.requirements.every((req) => missionRequirementIds.has(req.requirementId))
       ? sessionState.requirements
       : [];
+  let clientPersistedRequirements =
+    Array.isArray(body.persistedRequirements) && body.persistedRequirements.length
+      ? alignRequirementStates(mission, body.persistedRequirements)
+      : [];
+  const persistedMissionCompleted = body.persistedMissionCompleted === true;
   try {
     const missionEval = await evaluateStoryMissionProgress(
       story,
@@ -910,6 +915,18 @@ async function advanceStoryMission(
   }
 
   requirements = mergeRequirementProgress(previousRequirements, requirements);
+  if (clientPersistedRequirements.length) {
+    requirements = mergeRequirementProgress(clientPersistedRequirements, requirements);
+  }
+  if (persistedMissionCompleted && (!clientPersistedRequirements.length || clientPersistedRequirements.some((req) => !req.met))) {
+    clientPersistedRequirements = (mission.requirements || []).map((req) => ({
+      requirementId: req.requirementId,
+      text: req.text,
+      met: true,
+      feedback: 'Listo, requisito cubierto.',
+    }));
+    requirements = mergeRequirementProgress(clientPersistedRequirements, requirements);
+  }
 
   let aiReply = 'Thanks for sharing! Could you add a bit more detail?';
   try {
@@ -937,7 +954,15 @@ async function advanceStoryMission(
     sessionState.history = conversationHistory;
   }
 
-  const missionCompleted = requirements.every((req) => req.met);
+  let missionCompleted = requirements.every((req) => req.met);
+  if (!missionCompleted && persistedMissionCompleted) {
+    requirements = requirements.map((req) => ({
+      ...req,
+      met: true,
+      feedback: req.feedback || 'Listo, requisito cubierto.',
+    }));
+    missionCompleted = true;
+  }
   const nextIndex = missionCompleted ? targetIndex + 1 : targetIndex;
   const storyCompleted = missionCompleted && nextIndex >= missions.length;
 
@@ -947,6 +972,24 @@ async function advanceStoryMission(
     sessionState.story = story;
     if (storyCompleted && sessionId) {
       STORY_SESSIONS.delete(sessionId);
+    }
+  }
+
+  let conversationFeedback: { summary: string; improvements: string[] } | null = null;
+  if (missionCompleted) {
+    try {
+      conversationFeedback = await generateStoryMissionFeedback(
+        story,
+        mission,
+        conversationHistory
+      );
+    } catch (err) {
+      console.error(
+        JSON.stringify({
+          scope: 'stories.advance.feedback_error',
+          message: (err as Error)?.message || 'unknown',
+        })
+      );
     }
   }
 
@@ -960,6 +1003,7 @@ async function advanceStoryMission(
     result,
     errors,
     reformulations,
+    conversationFeedback,
   };
 }
 
@@ -1277,6 +1321,162 @@ async function generateStoryReply(
 }
 
 
+async function generateStoryMissionFeedback(
+  story: StoryDefinition,
+  mission: StoryMission,
+  history: StoryMessage[]
+): Promise<{ summary: string; improvements: string[] }> {
+  console.log(
+    JSON.stringify({
+      scope: 'stories.feedback.generate.begin',
+      storyId: story.storyId,
+      missionId: mission.missionId,
+    })
+  );
+  const apiKey = await getOpenAIKey();
+  const model =
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini';
+  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
+  const useResponses =
+    /gpt-5/i.test(model) || process.env.OPENAI_USE_RESPONSES === '1';
+  const conversation = history.slice(-STORY_HISTORY_LIMIT);
+  const conversationText = conversation
+    .map((msg) => `${msg.role === 'user' ? 'Student' : 'Guide'}: ${msg.content}`)
+    .join('\n')
+    .trim();
+  const systemPrompt = `You are an encouraging English coach. Summarize the completed mission in Spanish and highlight improvement points.
+Return ONLY JSON with the exact shape:
+{
+  "summary": "2 sentences in Spanish highlighting what went well in the mission",
+  "improvements": ["short Spanish bullet point", "..."]
+}
+
+Rules:
+- Base the feedback on the entire conversation, not just the last message.
+- Keep improvements to 3-5 concise actionable points focused on English skills.
+- If there are no issues, still include at least one suggestion to keep improving.
+- Do not add any extra commentary outside the JSON.`;
+  const userPrompt = `Story: ${story.title}
+Mission: ${mission.title}
+Mission summary: ${mission.sceneSummary || 'No summary provided.'}
+
+Full conversation transcript:
+${conversationText || 'No conversation available.'}`;
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), timeoutMs);
+  let raw = '';
+  try {
+    if (useResponses) {
+      const res = await fetch('https://api.openai.com/v1/responses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          instructions: systemPrompt,
+          input: [
+            {
+              role: 'user',
+              content: [{ type: 'input_text', text: userPrompt }],
+            },
+          ],
+          max_output_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 400),
+        }),
+        signal: ac.signal,
+      });
+      const payload: any = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const reason = payload?.error?.message || res.statusText;
+        throw new Error(`STORY_FEEDBACK_HTTP_${res.status}_${reason}`);
+      }
+      if (Array.isArray(payload?.output)) {
+        for (const item of payload.output) {
+          if (item?.type === 'message' && Array.isArray(item.content)) {
+            const texts = item.content
+              .filter((c: any) => c?.type === 'output_text' && typeof c.text === 'string')
+              .map((c: any) => c.text);
+            if (texts.length) {
+              raw = texts.join('\n');
+              break;
+            }
+          }
+        }
+      }
+      if (!raw && typeof payload?.output_text === 'string') {
+        raw = payload.output_text;
+      }
+    } else {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          max_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 400),
+        }),
+        signal: ac.signal,
+      });
+      if (!res.ok) {
+        const bodyTxt = await res.text();
+        throw new Error(`STORY_FEEDBACK_HTTP_${res.status}_${bodyTxt.slice(0, 120)}`);
+      }
+      const data: any = await res.json();
+      raw = data.choices?.[0]?.message?.content || '';
+    }
+  } catch (err) {
+    if ((err as any)?.name === 'AbortError') {
+      throw new Error('STORY_FEEDBACK_TIMEOUT');
+    }
+    throw err;
+  } finally {
+    clearTimeout(to);
+  }
+
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    throw new Error('STORY_FEEDBACK_EMPTY_RESPONSE');
+  }
+
+  let parsed: any;
+  try {
+    parsed = JSON.parse(trimmed);
+  } catch {
+    console.error(
+      JSON.stringify({
+        scope: 'stories.feedback.bad_json',
+        sample: trimmed.slice(0, 160),
+      })
+    );
+    throw new Error('STORY_FEEDBACK_BAD_JSON');
+  }
+  const summary =
+    typeof parsed?.summary === 'string' && parsed.summary.trim()
+      ? parsed.summary.trim()
+      : '';
+  const improvements = Array.isArray(parsed?.improvements)
+    ? parsed.improvements
+        .map((item: unknown) => String(item || '').trim())
+        .filter(Boolean)
+        .slice(0, 5)
+    : [];
+  if (!summary && !improvements.length) {
+    throw new Error('STORY_FEEDBACK_INVALID');
+  }
+  return {
+    summary,
+    improvements: improvements.length ? improvements : ['Sigue practicando para mantener tu progreso.'],
+  };
+}
+
+
 function mergeRequirementProgress(
   previous: StoryAdvanceRequirementState[],
   current: StoryAdvanceRequirementState[]
@@ -1365,10 +1565,6 @@ function mockCards(): CardItem[] {
     },
   ];
 }
-
-
-
-
 
 
 

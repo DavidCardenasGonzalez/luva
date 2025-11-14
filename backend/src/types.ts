@@ -80,6 +80,8 @@ export interface StoryAdvanceRequest {
   history?: Array<{ role: 'user' | 'assistant'; content: string }>;
   storyDefinition?: StoryDefinition;
   missionDefinition?: StoryMission;
+  persistedRequirements?: StoryAdvanceRequirementState[];
+  persistedMissionCompleted?: boolean;
 }
 
 export interface StoryAdvanceRequirementState {
@@ -99,5 +101,8 @@ export interface StoryAdvancePayload {
   result: EvalResult;
   errors: string[];
   reformulations: string[];
+  conversationFeedback?: {
+    summary: string;
+    improvements: string[];
+  } | null;
 }
-

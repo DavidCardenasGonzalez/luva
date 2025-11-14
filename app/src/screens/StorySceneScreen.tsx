@@ -35,6 +35,10 @@ type StoryAdvancePayload = {
   result: 'correct' | 'partial' | 'incorrect';
   errors: string[];
   reformulations: string[];
+  conversationFeedback?: {
+    summary: string;
+    improvements: string[];
+  } | null;
 };
 
 type StoryAttemptSnapshot = {
@@ -49,6 +53,10 @@ type StoryAttemptSnapshot = {
   missionCompleted: boolean;
   storyCompleted: boolean;
   pendingNext: number | null;
+  conversationFeedback: {
+    summary: string;
+    improvements: string[];
+  } | null;
 };
 
 export default function StorySceneScreen() {
@@ -108,6 +116,7 @@ export default function StorySceneScreen() {
   const [missionCompleted, setMissionCompleted] = useState<boolean>(false);
   const [storyCompleted, setStoryCompleted] = useState<boolean>(false);
   const [pendingNext, setPendingNext] = useState<number | null>(null);
+  const [conversationFeedback, setConversationFeedback] = useState<{ summary: string; improvements: string[] } | null>(null);
   const [flowState, setFlowState] = useState<'idle' | 'recording' | 'uploading' | 'transcribing' | 'evaluating'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [userText, setUserText] = useState<string>('');
@@ -128,6 +137,7 @@ export default function StorySceneScreen() {
     setMissionCompleted(missionDone);
     setStoryCompleted(storyDone);
     setPendingNext(null);
+    setConversationFeedback(null);
     setUserText('');
     setErrorMessage(null);
     setRetryState('none');
@@ -181,13 +191,19 @@ export default function StorySceneScreen() {
           ? {
               correctness: analysis.correctness,
               result: analysis.result,
-              errors: [...analysis.errors],
-              reformulations: [...analysis.reformulations],
-            }
+            errors: [...analysis.errors],
+            reformulations: [...analysis.reformulations],
+          }
           : null,
         missionCompleted,
         storyCompleted,
         pendingNext,
+        conversationFeedback: conversationFeedback
+          ? {
+              summary: conversationFeedback.summary,
+              improvements: [...conversationFeedback.improvements],
+            }
+          : null,
       };
       setRetryState('none');
       setFlowState('evaluating');
@@ -196,11 +212,18 @@ export default function StorySceneScreen() {
       );
       appendMessage({ id: `user-${Date.now()}`, role: 'user', text: trimmed });
       try {
+        const persistedRequirementPayload = requirements.map((req) => ({
+          requirementId: req.requirementId,
+          met: !!req.met,
+          feedback: req.feedback,
+        }));
         const payload = await api.post<StoryAdvancePayload>(`/stories/${storyId}/advance`, {
           sessionId,
           sceneIndex,
           transcript: trimmed,
           history: historyPayload,
+          persistedRequirements: persistedRequirementPayload,
+          persistedMissionCompleted: missionCompleted,
         });
         console.log('Advance payload', payload);
         setRequirements((prev) => {
@@ -224,8 +247,9 @@ export default function StorySceneScreen() {
           errors: payload.errors || [],
           reformulations: payload.reformulations || [],
         });
-        setMissionCompleted(payload.missionCompleted);
-        setStoryCompleted(payload.storyCompleted);
+        setMissionCompleted((prev) => prev || payload.missionCompleted);
+        setStoryCompleted((prev) => prev || payload.storyCompleted);
+        setConversationFeedback(payload.conversationFeedback ?? null);
         if (payload.missionCompleted && storyId && mission?.missionId) {
           await markMissionCompleted(storyId, mission.missionId, payload.storyCompleted);
         }
@@ -259,6 +283,7 @@ export default function StorySceneScreen() {
       mission,
       missionCompleted,
       missionDefinitionPayload,
+      conversationFeedback,
       pendingNext,
       requirements,
       retryState,
@@ -288,6 +313,14 @@ export default function StorySceneScreen() {
     setMissionCompleted(lastAttemptSnapshot.missionCompleted);
     setStoryCompleted(lastAttemptSnapshot.storyCompleted);
     setPendingNext(lastAttemptSnapshot.pendingNext);
+    setConversationFeedback(
+      lastAttemptSnapshot.conversationFeedback
+        ? {
+            summary: lastAttemptSnapshot.conversationFeedback.summary,
+            improvements: [...lastAttemptSnapshot.conversationFeedback.improvements],
+          }
+        : null
+    );
     setLastAttemptSnapshot(null);
     setRetryState('none');
     setErrorMessage(null);
@@ -530,6 +563,22 @@ export default function StorySceneScreen() {
         {missionCompleted ? (
           <View style={{ marginTop: 16, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: '#bbf7d0', backgroundColor: '#f0fdf4' }}>
             <Text style={{ fontWeight: '700', color: '#15803d' }}>¡Misión completada!</Text>
+            {conversationFeedback ? (
+              <View style={{ marginTop: 10 }}>
+                <Text style={{ fontWeight: '600', color: '#14532d' }}>Feedback general</Text>
+                {conversationFeedback.summary ? (
+                  <Text style={{ marginTop: 6, color: '#166534' }}>{conversationFeedback.summary}</Text>
+                ) : null}
+                {conversationFeedback.improvements.length ? (
+                  <View style={{ marginTop: 8 }}>
+                    <Text style={{ fontWeight: '600', color: '#166534', marginBottom: 4 }}>Puntos a mejorar</Text>
+                    {conversationFeedback.improvements.map((item, idx) => (
+                      <Text key={idx} style={{ color: '#166534', marginBottom: 2 }}>- {item}</Text>
+                    ))}
+                  </View>
+                ) : null}
+              </View>
+            ) : null}
             {storyCompleted ? (
               <Text style={{ marginTop: 6, color: '#166534' }}>
                 Terminaste toda la historia. Puedes regresar al listado cuando quieras.
@@ -661,5 +710,3 @@ export default function StorySceneScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-

@@ -3986,7 +3986,7 @@
       "He was attributed with solving the problem quickly."
     ],
     "options": {
-      "a": "cualidad o característica de algo; atribuir o reconocer como propio",
+      "a": "cualidad o característica de algo; (v.) atribuir o reconocer como propio",
       "b": "un tipo de objeto decorativo",
       "c": "una forma de medir distancia"
     },
@@ -7515,7 +7515,7 @@
   },
   {
     "id": 443,
-    "label": "abandon",
+    "label": "abandon (v.)",
     "examples": [
       "She decided to abandon her old car last year.",
       "They are about to abandon the project due to lack of funds.",
@@ -7532,7 +7532,7 @@
   },
   {
     "id": 444,
-    "label": "abstract",
+    "label": "abstract (adj.)",
     "examples": [
       "The artist created an abstract painting full of colors and shapes.",
       "Her speech was quite abstract and hard to understand.",
@@ -7549,7 +7549,7 @@
   },
   {
     "id": 445,
-    "label": "acceptable",
+    "label": "acceptable (adj.)",
     "examples": [
       "Her work was acceptable to the manager.",
       "The results are acceptable for the experiment.",
@@ -7566,7 +7566,7 @@
   },
   {
     "id": 446,
-    "label": "accountant",
+    "label": "accountant (n.)",
     "examples": [
       "The accountant reviewed the company's financial statements last week.",
       "She will become an accountant after finishing her degree in finance.",
@@ -7583,7 +7583,7 @@
   },
   {
     "id": 447,
-    "label": "accuse",
+    "label": "accuse (v.)",
     "examples": [
       "She accused him of stealing her wallet.",
       "The police accused the suspect of the crime last night.",
@@ -7600,7 +7600,7 @@
   },
   {
     "id": 448,
-    "label": "acre",
+    "label": "acre (n.)",
     "examples": [
       "They bought an acre of land to build a house.",
       "The farmer owns fifty acres of farmland.",
@@ -7617,7 +7617,7 @@
   },
   {
     "id": 449,
-    "label": "activate",
+    "label": "activate (v.)",
     "examples": [
       "The teacher activated the new software during class.",
       "She activates her gym membership every January.",
@@ -7634,7 +7634,7 @@
   },
   {
     "id": 450,
-    "label": "adequate",
+    "label": "adequate (adj.)",
     "examples": [
       "The shelter provides adequate protection from the rain.",
       "Her preparation was adequate for the exam.",
@@ -7651,7 +7651,7 @@
   },
   {
     "id": 451,
-    "label": "adjust",
+    "label": "adjust (v.)",
     "examples": [
       "I need to adjust the settings on my phone.",
       "She adjusted her schedule to fit in the meeting.",
@@ -7668,7 +7668,7 @@
   },
   {
     "id": 452,
-    "label": "affordable",
+    "label": "affordable (adj.)",
     "examples": [
       "The hotel offers affordable rates for students.",
       "She believes that education should be affordable for everyone.",
@@ -7685,7 +7685,7 @@
   },
   {
     "id": 453,
-    "label": "afterwards",
+    "label": "afterwards (adv.)",
     "examples": [
       "She arrived home afterwards and relaxed.",
       "We went to the park and then had dinner afterwards.",
@@ -7702,7 +7702,7 @@
   },
   {
     "id": 454,
-    "label": "aggressive",
+    "label": "aggressive (adj.)",
     "examples": [
       "The dog was aggressive towards strangers last night.",
       "She has an aggressive approach to her studies, always pushing herself.",
@@ -7719,7 +7719,7 @@
   },
   {
     "id": 455,
-    "label": "AIDS",
+    "label": "AIDS (n.)",
     "examples": [
       "Many people with AIDS need lifelong medication.",
       "She was diagnosed with AIDS last year.",
@@ -7736,7 +7736,7 @@
   },
   {
     "id": 456,
-    "label": "aircraft",
+    "label": "aircraft (n.)",
     "examples": [
       "The aircraft landed smoothly after the storm.",
       "They saw several aircraft flying overhead during the parade.",
@@ -7753,7 +7753,7 @@
   },
   {
     "id": 457,
-    "label": "alien",
+    "label": "alien (n.)",
     "examples": [
       "The alien visited Earth last year.",
       "She felt like an alien in the new country.",
@@ -7770,7 +7770,7 @@
   },
   {
     "id": 458,
-    "label": "alternative",
+    "label": "alternative (adj./n.)",
     "examples": [
       "You should consider an alternative solution to the problem.",
       "We have several alternative options for our vacation plans.",
@@ -7787,7 +7787,7 @@
   },
   {
     "id": 459,
-    "label": "altogether",
+    "label": "altogether (adv.)",
     "examples": [
       "We were altogether exhausted after the hike.",
       "She has altogether different ideas about the project.",
@@ -7804,7 +7804,7 @@
   },
   {
     "id": 460,
-    "label": "amusing",
+    "label": "amusing (adj.)",
     "examples": [
       "The comedian's jokes were truly amusing last night.",
       "She finds reading funny stories quite amusing.",
@@ -7821,7 +7821,7 @@
   },
   {
     "id": 461,
-    "label": "anger",
+    "label": "anger (n.)",
     "examples": [
       "She felt a surge of anger when she heard the news.",
       "His anger was evident during the argument.",
@@ -7838,7 +7838,7 @@
   },
   {
     "id": 462,
-    "label": "annual",
+    "label": "annual (adj.)",
     "examples": [
       "The company holds an annual meeting every January.",
       "She receives an annual bonus at the end of the year.",
@@ -7855,7 +7855,7 @@
   },
   {
     "id": 463,
-    "label": "anticipate",
+    "label": "anticipate (v.)",
     "examples": [
       "She anticipates a positive response from her boss.",
       "They are anticipating their vacation next month.",
@@ -7872,7 +7872,7 @@
   },
   {
     "id": 464,
-    "label": "apology",
+    "label": "apology (n.)",
     "examples": [
       "She apologized for being late to the meeting.",
       "He offered an apology after the mistake was discovered.",
@@ -7889,7 +7889,7 @@
   },
   {
     "id": 465,
-    "label": "applicant",
+    "label": "applicant (n.)",
     "examples": [
       "The applicant submitted his resume yesterday.",
       "She is an excellent applicant for the position.",
@@ -7906,7 +7906,7 @@
   },
   {
     "id": 466,
-    "label": "approach",
+    "label": "approach (v./n.)",
     "examples": [
       "She decided to approach the problem differently.",
       "The company is adopting a new approach to marketing.",
@@ -7923,7 +7923,7 @@
   },
   {
     "id": 467,
-    "label": "appropriate",
+    "label": "appropriate (adj.)",
     "examples": [
       "She wore an appropriate dress for the wedding.",
       "It's not appropriate to interrupt during the meeting.",
@@ -7940,7 +7940,7 @@
   },
   {
     "id": 468,
-    "label": "arbitrary",
+    "label": "arbitrary (adj.)",
     "examples": [
       "The teacher's grading seemed arbitrary and unfair.",
       "She made an arbitrary decision without consulting anyone.",
@@ -7957,7 +7957,7 @@
   },
   {
     "id": 469,
-    "label": "architectural",
+    "label": "architectural (adj.)",
     "examples": [
       "The building has an architectural design that blends modern and traditional styles.",
       "She studied architectural engineering at university last year.",
@@ -7974,7 +7974,7 @@
   },
   {
     "id": 470,
-    "label": "arise",
+    "label": "arise (v.)",
     "examples": [
       "A problem may arise unexpectedly during the project.",
       "Difficulties arose when we tried to implement the new system.",
@@ -7991,7 +7991,7 @@
   },
   {
     "id": 471,
-    "label": "armed",
+    "label": "armed (adj.)",
     "examples": [
       "The soldiers were armed with rifles during the patrol.",
       "She felt armed with confidence before giving her speech.",
@@ -8008,7 +8008,7 @@
   },
   {
     "id": 472,
-    "label": "arms",
+    "label": "arms (n.)",
     "examples": [
       "The soldiers carried their arms into the battlefield.",
       "She has many arms in her sculpture collection.",
@@ -8025,7 +8025,7 @@
   },
   {
     "id": 473,
-    "label": "arrange",
+    "label": "arrange (v.)",
     "examples": [
       "She arranged her books on the shelf yesterday.",
       "We are arranging a meeting for next week.",
@@ -8042,7 +8042,7 @@
   },
   {
     "id": 474,
-    "label": "arrest",
+    "label": "arrest (v.)",
     "examples": [
       "The police arrested the suspect last night.",
       "She was arrested for shoplifting yesterday.",
@@ -8059,7 +8059,7 @@
   },
   {
     "id": 475,
-    "label": "ashamed",
+    "label": "ashamed (adj.)",
     "examples": [
       "She felt ashamed after forgetting her lines during the play.",
       "He was ashamed of his behavior at the party.",
@@ -8076,7 +8076,7 @@
   },
   {
     "id": 476,
-    "label": "assess",
+    "label": "assess (v.)",
     "examples": [
       "The teacher will assess the students' understanding after the test.",
       "She assessed the damage before making a decision.",
@@ -8093,7 +8093,7 @@
   },
   {
     "id": 477,
-    "label": "assign",
+    "label": "assign (v.)",
     "examples": [
       "The teacher assigned homework to the students yesterday.",
       "She will assign the project to her team next week.",
@@ -8110,7 +8110,7 @@
   },
   {
     "id": 478,
-    "label": "association",
+    "label": "association (n.)",
     "examples": [
       "The charity is part of a local association.",
       "She felt a strong association between the two ideas.",
@@ -8127,7 +8127,7 @@
   },
   {
     "id": 479,
-    "label": "assumption",
+    "label": "assumption (n.)",
     "examples": [
       "She made an assumption that he would arrive on time.",
       "His assumption turned out to be incorrect.",
@@ -8144,7 +8144,7 @@
   },
   {
     "id": 480,
-    "label": "attachment",
+    "label": "attachment (n.)",
     "examples": [
       "She felt a strong attachment to her childhood home.",
       "Please send the attachment with the report.",
@@ -8161,7 +8161,7 @@
   },
   {
     "id": 481,
-    "label": "attitude",
+    "label": "attitude (n.)",
     "examples": [
       "She always has a positive attitude at work.",
       "His attitude changed after the meeting.",
@@ -8178,7 +8178,7 @@
   },
   {
     "id": 482,
-    "label": "audio",
+    "label": "audio (adj.)",
     "examples": [
       "The audio quality of the recording was excellent.",
       "She prefers listening to audio books during her commute.",
@@ -8195,7 +8195,7 @@
   },
   {
     "id": 483,
-    "label": "authorities",
+    "label": "authorities (n.)",
     "examples": [
       "The authorities issued a new safety regulation last week.",
       "Citizens protested against the authorities' decision.",
@@ -8212,7 +8212,7 @@
   },
   {
     "id": 484,
-    "label": "authority",
+    "label": "authority (n.)",
     "examples": [
       "The police have the authority to arrest suspects.",
       "She gained authority after years of experience.",
@@ -8229,7 +8229,7 @@
   },
   {
     "id": 485,
-    "label": "automatically",
+    "label": "automatically (adv.)",
     "examples": [
       "The machine turns on automatically when you press the button.",
       "She automatically knew the answer without thinking.",
@@ -8246,7 +8246,7 @@
   },
   {
     "id": 486,
-    "label": "awareness",
+    "label": "awareness (n.)",
     "examples": [
       "She has a strong awareness of environmental issues.",
       "During the meeting, his awareness of the company's goals was evident.",
@@ -8280,7 +8280,7 @@
   },
   {
     "id": 488,
-    "label": "bacteria",
+    "label": "bacteria (n.)",
     "examples": [
       "Scientists discovered bacteria in the water sample last week.",
       "She has a bacteria infection that requires antibiotics.",
@@ -8297,7 +8297,7 @@
   },
   {
     "id": 489,
-    "label": "badge",
+    "label": "badge (n.)",
     "examples": [
       "She received a badge for her volunteer work.",
       "He wore a badge that identified him as a manager.",
@@ -8314,7 +8314,7 @@
   },
   {
     "id": 490,
-    "label": "ballet",
+    "label": "ballet (n.)",
     "examples": [
       "She attended a ballet last night and loved the performance.",
       "He has been practicing ballet for five years.",
@@ -8331,7 +8331,7 @@
   },
   {
     "id": 491,
-    "label": "ban",
+    "label": "ban (v./n.)",
     "examples": [
       "The school banned smoking on campus last year.",
       "They are banning plastic bags to protect the environment.",
@@ -8348,7 +8348,7 @@
   },
   {
     "id": 492,
-    "label": "basement",
+    "label": "basement (n.)",
     "examples": [
       "We stored the old furniture in the basement.",
       "The children played hide and seek in the basement last night.",
@@ -8365,7 +8365,7 @@
   },
   {
     "id": 493,
-    "label": "battle",
+    "label": "battle (n./v.)",
     "examples": [
       "The army prepared for the upcoming battle.",
       "She has been battling a serious illness for months.",
@@ -8382,7 +8382,7 @@
   },
   {
     "id": 494,
-    "label": "beat",
+    "label": "beat (v.)",
     "examples": [
       "She beat her opponent in the race last year.",
       "He is beating the drum loudly to attract attention.",
@@ -8399,7 +8399,7 @@
   },
   {
     "id": 495,
-    "label": "being",
+    "label": "being (n.)",
     "examples": [
       "She is a kind being who always helps others.",
       "The being in the story was a mysterious creature.",
@@ -8416,7 +8416,7 @@
   },
   {
     "id": 496,
-    "label": "beneficial",
+    "label": "beneficial (adj.)",
     "examples": [
       "Regular exercise is beneficial for your health.",
       "The new policy proved beneficial to small businesses.",
@@ -8450,7 +8450,7 @@
   },
   {
     "id": 498,
-    "label": "bias",
+    "label": "bias (n.)",
     "examples": [
       "She showed a bias towards her friend's opinion during the meeting.",
       "The study revealed a bias in the sample selection.",
@@ -8467,7 +8467,7 @@
   },
   {
     "id": 499,
-    "label": "bid",
+    "label": "bid (n./v.)",
     "examples": [
       "She placed a bid at the auction yesterday.",
       "He bid $100 for the antique vase.",
@@ -8484,7 +8484,7 @@
   },
   {
     "id": 500,
-    "label": "bill",
+    "label": "bill (n.)",
     "examples": [
       "I received the bill for dinner yesterday.",
       "She proposed a new bill in the parliament.",
@@ -8501,7 +8501,7 @@
   },
   {
     "id": 501,
-    "label": "biological",
+    "label": "biological (adj.)",
     "examples": [
       "The biological processes in the body are complex.",
       "She has a biological connection to the scientist.",
@@ -8518,7 +8518,7 @@
   },
   {
     "id": 502,
-    "label": "blind",
+    "label": "blind (adj.)",
     "examples": [
       "She was blind to the dangers around her.",
       "The room was completely blind without the curtains.",
@@ -8535,7 +8535,7 @@
   },
   {
     "id": 503,
-    "label": "bold",
+    "label": "bold (adj.)",
     "examples": [
       "She was too bold to back down from the challenge.",
       "His bold design made the poster stand out.",
@@ -8552,7 +8552,7 @@
   },
   {
     "id": 504,
-    "label": "bombing",
+    "label": "bombing (n.)",
     "examples": [
       "The bombing of the city caused widespread destruction.",
       "There has been a bombing in the downtown area today.",
@@ -8569,7 +8569,7 @@
   },
   {
     "id": 505,
-    "label": "bound",
+    "label": "bound (adj.)",
     "examples": [
       "The package is bound to arrive tomorrow.",
       "She was bound by her promise to help.",
@@ -8586,7 +8586,7 @@
   },
   {
     "id": 506,
-    "label": "brick",
+    "label": "brick (n.)",
     "examples": [
       "He built a wall with bricks last summer.",
       "She bought a new brick for the fireplace.",
@@ -8603,7 +8603,7 @@
   },
   {
     "id": 507,
-    "label": "brief",
+    "label": "brief (adj.)",
     "examples": [
       "She gave a brief summary of the meeting.",
       "His explanation was too brief to understand fully.",
@@ -8620,7 +8620,7 @@
   },
   {
     "id": 508,
-    "label": "broad",
+    "label": "broad (adj.)",
     "examples": [
       "The room has a broad view of the city skyline.",
       "She has a broad knowledge of history and literature.",
@@ -8637,7 +8637,7 @@
   },
   {
     "id": 509,
-    "label": "broadly",
+    "label": "broadly (adv.)",
     "examples": [
       "She speaks broadly about her experiences during the interview.",
       "The project was broadly successful, despite some minor issues.",
@@ -8654,7 +8654,7 @@
   },
   {
     "id": 510,
-    "label": "budget",
+    "label": "budget (n.)",
     "examples": [
       "We need to stick to our budget this month to save money.",
       "The government announced a new budget for healthcare.",
@@ -8671,7 +8671,7 @@
   },
   {
     "id": 511,
-    "label": "burn",
+    "label": "burn (v.)",
     "examples": [
       "The candle burned brightly all night.",
       "He burned the old papers in the fireplace.",
@@ -8688,7 +8688,7 @@
   },
   {
     "id": 512,
-    "label": "cabin",
+    "label": "cabin (n.)",
     "examples": [
       "They stayed in a cozy cabin during the winter vacation.",
       "The ship's captain showed us to our cabin before departure.",
@@ -8705,7 +8705,7 @@
   },
   {
     "id": 513,
-    "label": "cable",
+    "label": "cable (n.)",
     "examples": [
       "I plugged the cable into the computer to connect it to the monitor.",
       "The electrician installed a new cable to improve the internet speed.",
@@ -8722,7 +8722,7 @@
   },
   {
     "id": 514,
-    "label": "calculate",
+    "label": "calculate (v.)",
     "examples": [
       "She calculated the total cost before paying.",
       "He is calculating the best route to the hotel.",
@@ -8739,7 +8739,7 @@
   },
   {
     "id": 515,
-    "label": "canal",
+    "label": "canal (n.)",
     "examples": [
       "The river was converted into a canal for boats.",
       "They built a canal to irrigate the farmland.",
@@ -8756,7 +8756,7 @@
   },
   {
     "id": 516,
-    "label": "cancel",
+    "label": "cancel (v.)",
     "examples": [
       "They decided to cancel the meeting due to the weather.",
       "She canceled her subscription last week.",
@@ -8773,7 +8773,7 @@
   },
   {
     "id": 517,
-    "label": "candle",
+    "label": "candle (n.)",
     "examples": [
       "She lit a candle to create a cozy atmosphere.",
       "The candle burned down completely during the power outage.",
@@ -8790,7 +8790,7 @@
   },
   {
     "id": 518,
-    "label": "capable",
+    "label": "capable (adj.)",
     "examples": [
       "She is capable of solving complex problems.",
       "He proved he was capable during the interview.",
@@ -8807,7 +8807,7 @@
   },
   {
     "id": 519,
-    "label": "carbon",
+    "label": "carbon (n.)",
     "examples": [
       "The factory releases a lot of carbon into the atmosphere.",
       "Humans need to reduce carbon emissions to combat climate change.",
@@ -8824,7 +8824,7 @@
   },
   {
     "id": 520,
-    "label": "cast",
+    "label": "cast (v.)",
     "examples": [
       "He cast the fishing line into the lake yesterday.",
       "The sculptor cast the statue in bronze last year.",
@@ -8841,7 +8841,7 @@
   },
   {
     "id": 521,
-    "label": "cave",
+    "label": "cave (n.)",
     "examples": [
       "We explored the dark cave during our hike.",
       "The cave was filled with ancient paintings.",
@@ -8858,7 +8858,7 @@
   },
   {
     "id": 522,
-    "label": "cell",
+    "label": "cell (n.)",
     "examples": [
       "The scientist studied a single cell under the microscope.",
       "She charged her phone's cell last night.",
@@ -8875,7 +8875,7 @@
   },
   {
     "id": 523,
-    "label": "certificate",
+    "label": "certificate (n.)",
     "examples": [
       "She received a certificate after completing the course.",
       "The company issued a certificate of employment.",
@@ -8892,7 +8892,7 @@
   },
   {
     "id": 524,
-    "label": "chain",
+    "label": "chain (n.)",
     "examples": [
       "She wore a gold chain around her neck.",
       "The bakery is part of a chain of stores across the country.",
@@ -8909,7 +8909,7 @@
   },
   {
     "id": 525,
-    "label": "chairman",
+    "label": "chairman (n.)",
     "examples": [
       "The chairman called the meeting to order yesterday.",
       "She was elected as the chairman of the committee last year.",
@@ -8926,7 +8926,7 @@
   },
   {
     "id": 526,
-    "label": "challenge",
+    "label": "challenge (n./v.)",
     "examples": [
       "She faced a tough challenge at work yesterday.",
       "The new puzzle was a real challenge for the kids.",
@@ -8943,7 +8943,7 @@
   },
   {
     "id": 527,
-    "label": "championship",
+    "label": "championship (n.)",
     "examples": [
       "She won the championship last year in tennis.",
       "The team trained hard for the upcoming championship.",
@@ -8960,7 +8960,7 @@
   },
   {
     "id": 528,
-    "label": "characteristic",
+    "label": "characteristic (n.)",
     "examples": [
       "Her smile is a characteristic of her friendly personality.",
       "The new model has several characteristic features that set it apart.",
@@ -8977,7 +8977,7 @@
   },
   {
     "id": 529,
-    "label": "chart",
+    "label": "chart (n.)",
     "examples": [
       "The weather chart shows sunny days ahead.",
       "She created a chart to organize her project tasks.",
@@ -8994,7 +8994,7 @@
   },
   {
     "id": 530,
-    "label": "cheek",
+    "label": "cheek (n.)",
     "examples": [
       "She slapped her cheek in frustration.",
       "He has a tattoo on his right cheek.",
@@ -9011,7 +9011,7 @@
   },
   {
     "id": 531,
-    "label": "chief",
+    "label": "chief (adj.)",
     "examples": [
       "She is the chief engineer on the project.",
       "The chief reason for the delay was the weather.",
@@ -9028,7 +9028,7 @@
   },
   {
     "id": 532,
-    "label": "childhood",
+    "label": "childhood (n.)",
     "examples": [
       "She loved her childhood memories of playing in the park.",
       "During his childhood, he learned to play the piano.",
@@ -9045,7 +9045,7 @@
   },
   {
     "id": 533,
-    "label": "circuit",
+    "label": "circuit (n.)",
     "examples": [
       "We followed the circuit around the city to see all the landmarks.",
       "The electrical circuit was shorted, causing the fuse to blow.",
@@ -9062,7 +9062,7 @@
   },
   {
     "id": 534,
-    "label": "circumstance",
+    "label": "circumstance (n.)",
     "examples": [
       "Under normal circumstances, we would agree.",
       "She explained the situation in detail, considering all circumstances.",
@@ -9079,7 +9079,7 @@
   },
   {
     "id": 535,
-    "label": "citizen",
+    "label": "citizen (n.)",
     "examples": [
       "She became a citizen after living in the country for five years.",
       "The citizens gathered to discuss the new law.",
@@ -9096,7 +9096,7 @@
   },
   {
     "id": 536,
-    "label": "clarify",
+    "label": "clarify (v.)",
     "examples": [
       "Can you clarify your last statement?",
       "She clarified the instructions for the project.",
@@ -9113,7 +9113,7 @@
   },
   {
     "id": 537,
-    "label": "classify",
+    "label": "classify (v.)",
     "examples": [
       "She classified the books into genres yesterday.",
       "The data is classified into different categories for analysis.",
@@ -9130,7 +9130,7 @@
   },
   {
     "id": 538,
-    "label": "clerk",
+    "label": "clerk (n.)",
     "examples": [
       "The clerk processed my payment quickly.",
       "She works as a clerk at the bank every day.",
@@ -9147,7 +9147,7 @@
   },
   {
     "id": 539,
-    "label": "cliff",
+    "label": "cliff (n.)",
     "examples": [
       "The hikers reached the edge of the cliff and looked down.",
       "A sudden gust of wind caused her to stumble near the cliff.",
@@ -9164,7 +9164,7 @@
   },
   {
     "id": 540,
-    "label": "clinic",
+    "label": "clinic (n.)",
     "examples": [
       "She went to the clinic for a check-up last week.",
       "The clinic offers free health services to the community.",
@@ -9181,7 +9181,7 @@
   },
   {
     "id": 541,
-    "label": "clip",
+    "label": "clip (n.)",
     "examples": [
       "I watched a funny clip on YouTube yesterday.",
       "Please clip the papers together before submitting.",
@@ -9198,7 +9198,7 @@
   },
   {
     "id": 542,
-    "label": "collector",
+    "label": "collector (n.)",
     "examples": [
       "The stamp collector spends hours organizing his albums.",
       "She is a debt collector working for a finance company.",
@@ -9215,7 +9215,7 @@
   },
   {
     "id": 543,
-    "label": "colony",
+    "label": "colony (n.)",
     "examples": [
       "The British established a colony in Australia during the 18th century.",
       "Many animals live in colonies to protect themselves from predators.",
@@ -9232,7 +9232,7 @@
   },
   {
     "id": 544,
-    "label": "colorful",
+    "label": "colorful (adj.)",
     "examples": [
       "The garden was colorful with many blooming flowers.",
       "She wore a colorful dress to the party last night.",
@@ -9249,7 +9249,7 @@
   },
   {
     "id": 545,
-    "label": "comic",
+    "label": "comic (adj./n.)",
     "examples": [
       "The comic strip was hilarious and made me laugh out loud.",
       "She has a comic talent that entertains everyone at parties.",
@@ -9266,7 +9266,7 @@
   },
   {
     "id": 546,
-    "label": "commander",
+    "label": "commander (n.)",
     "examples": [
       "The general commanded his troops during the battle.",
       "She commands a team of engineers at the company.",
@@ -9283,7 +9283,7 @@
   },
   {
     "id": 547,
-    "label": "commission",
+    "label": "commission (n.)",
     "examples": [
       "She received a commission for designing the logo.",
       "The artist was given a commission to paint the mural.",
@@ -9300,7 +9300,7 @@
   },
   {
     "id": 548,
-    "label": "comparative",
+    "label": "comparative (adj.)",
     "examples": [
       "This car is more economical than that one.",
       "Her dress is more colorful today.",
@@ -9317,7 +9317,7 @@
   },
   {
     "id": 549,
-    "label": "competition",
+    "label": "competition (n.)",
     "examples": [
       "The athletes trained hard for the upcoming competition.",
       "She enjoys competing with her friends in chess.",
@@ -9334,7 +9334,7 @@
   },
   {
     "id": 550,
-    "label": "component",
+    "label": "component (n.)",
     "examples": [
       "The computer's components include the CPU and RAM.",
       "She studied each component of the engine carefully.",
@@ -9351,7 +9351,7 @@
   },
   {
     "id": 551,
-    "label": "compose",
+    "label": "compose (v.)",
     "examples": [
       "She composed a beautiful song for the concert.",
       "He is composing a new novel this year.",
@@ -9368,7 +9368,7 @@
   },
   {
     "id": 552,
-    "label": "composer",
+    "label": "composer (n.)",
     "examples": [
       "The composer wrote a beautiful symphony last year.",
       "She is a talented composer of film scores.",
@@ -9385,7 +9385,7 @@
   },
   {
     "id": 553,
-    "label": "compound",
+    "label": "compound (n.)",
     "examples": [
       "The chemist created a new compound in the lab.",
       "She combined sugar and lemon to make a compound for the recipe.",
@@ -9402,7 +9402,7 @@
   },
   {
     "id": 554,
-    "label": "comprehensive",
+    "label": "comprehensive (adj.)",
     "examples": [
       "The report provides a comprehensive overview of the market.",
       "She has a comprehensive understanding of the subject.",
@@ -9419,7 +9419,7 @@
   },
   {
     "id": 555,
-    "label": "comprise",
+    "label": "comprise (v.)",
     "examples": [
       "The team comprises five members.",
       "This book comprises ten chapters.",
@@ -9436,7 +9436,7 @@
   },
   {
     "id": 556,
-    "label": "compulsory",
+    "label": "compulsory (adj.)",
     "examples": [
       "Wearing a seatbelt is compulsory in many countries.",
       "The students found the exam to be compulsory for graduation.",
@@ -9453,7 +9453,7 @@
   },
   {
     "id": 557,
-    "label": "concentration",
+    "label": "concentration (n.)",
     "examples": [
       "She lost her concentration during the exam.",
       "The concentration of salt in the water is high.",
@@ -9470,7 +9470,7 @@
   },
   {
     "id": 558,
-    "label": "concern",
+    "label": "concern (n./v.)",
     "examples": [
       "The issue is a major concern for the community.",
       "She expressed concern about the project's deadline.",
@@ -9487,7 +9487,7 @@
   },
   {
     "id": 559,
-    "label": "conclusion",
+    "label": "conclusion (n.)",
     "examples": [
       "After reviewing all the evidence, the jury reached a conclusion.",
       "Her conclusion was that they needed more time to decide.",
@@ -9504,7 +9504,7 @@
   },
   {
     "id": 560,
-    "label": "confidence",
+    "label": "confidence (n.)",
     "examples": [
       "She gained confidence after practicing every day.",
       "His confidence in her abilities was evident.",
@@ -9521,7 +9521,7 @@
   },
   {
     "id": 561,
-    "label": "confusing",
+    "label": "confusing (adj.)",
     "examples": [
       "The instructions were confusing, so I didn't understand what to do.",
       "His explanation was confusing and left everyone puzzled.",
@@ -9538,7 +9538,7 @@
   },
   {
     "id": 562,
-    "label": "consequently",
+    "label": "consequently (adv.)",
     "examples": [
       "She didn't study; consequently, she failed the exam.",
       "The project was delayed; consequently, the launch was postponed.",
@@ -9555,7 +9555,7 @@
   },
   {
     "id": 563,
-    "label": "conservation",
+    "label": "conservation (n.)",
     "examples": [
       "The conservation of wildlife is crucial for maintaining biodiversity.",
       "She studied the conservation of historical buildings to preserve their integrity.",
@@ -9572,7 +9572,7 @@
   },
   {
     "id": 564,
-    "label": "conservative",
+    "label": "conservative (adj.)",
     "examples": [
       "She is very conservative in her financial decisions.",
       "The politician's views are quite conservative on social issues.",
@@ -9589,7 +9589,7 @@
   },
   {
     "id": 565,
-    "label": "considerably",
+    "label": "considerably (adv.)",
     "examples": [
       "The price increased considerably last year.",
       "She was considerably more experienced than the others.",
@@ -9606,7 +9606,7 @@
   },
   {
     "id": 566,
-    "label": "consideration",
+    "label": "consideration (n.)",
     "examples": [
       "She gave careful consideration to the job offer before deciding.",
       "The committee's consideration of the proposal took several weeks.",
@@ -9623,7 +9623,7 @@
   },
   {
     "id": 567,
-    "label": "consistently",
+    "label": "consistently (adv.)",
     "examples": [
       "She has been arriving on time consistently for months.",
       "The team performs consistently well during competitions.",
@@ -9640,7 +9640,7 @@
   },
   {
     "id": 568,
-    "label": "conspiracy",
+    "label": "conspiracy (n.)",
     "examples": [
       "The conspiracy was uncovered by the police last night.",
       "They suspected a conspiracy to overthrow the government.",
@@ -9657,7 +9657,7 @@
   },
   {
     "id": 569,
-    "label": "constant",
+    "label": "constant (adj.)",
     "examples": [
       "The weather has been constant all week.",
       "She is a constant source of support for her friends.",
@@ -9674,7 +9674,7 @@
   },
   {
     "id": 570,
-    "label": "constantly",
+    "label": "constantly (adv.)",
     "examples": [
       "She constantly checks her phone during class.",
       "He was constantly late for meetings last week.",
@@ -9691,7 +9691,7 @@
   },
   {
     "id": 571,
-    "label": "construct",
+    "label": "construct (v.)",
     "examples": [
       "They are going to construct a new bridge downtown.",
       "She constructed a detailed model of the solar system.",
@@ -9708,7 +9708,7 @@
   },
   {
     "id": 572,
-    "label": "consultant",
+    "label": "consultant (n.)",
     "examples": [
       "The company hired a consultant to improve their marketing strategy.",
       "She consulted with a financial advisor before making the investment.",
@@ -9725,7 +9725,7 @@
   },
   {
     "id": 573,
-    "label": "consume",
+    "label": "consume (v.)",
     "examples": [
       "She consumes a lot of energy every day.",
       "The factory consumes large amounts of water.",
@@ -9742,7 +9742,7 @@
   },
   {
     "id": 574,
-    "label": "contemporary",
+    "label": "contemporary (adj.)",
     "examples": [
       "She enjoys contemporary art exhibitions.",
       "The building has a contemporary design.",
@@ -9759,7 +9759,7 @@
   },
   {
     "id": 575,
-    "label": "content",
+    "label": "content (n.)",
     "examples": [
       "The content of the book was very informative.",
       "She seemed content with her exam results.",
@@ -9776,7 +9776,7 @@
   },
   {
     "id": 576,
-    "label": "contract",
+    "label": "contract (n.)",
     "examples": [
       "They signed a contract to buy the house.",
       "The company entered into a contract with the supplier.",
@@ -9793,7 +9793,7 @@
   },
   {
     "id": 577,
-    "label": "contradict",
+    "label": "contradict (v.)",
     "examples": [
       "She often contradicts her coworkers during meetings.",
       "His statements contradicted the evidence presented.",
@@ -9810,7 +9810,7 @@
   },
   {
     "id": 578,
-    "label": "contribute",
+    "label": "contribute (v.)",
     "examples": [
       "She contributes money to the charity every month.",
       "He contributed ideas during the team meeting.",
@@ -9827,7 +9827,7 @@
   },
   {
     "id": 579,
-    "label": "controversial",
+    "label": "controversial (adj.)",
     "examples": [
       "The new policy is quite controversial among employees.",
       "Her opinion on the matter remains controversial.",
@@ -9844,7 +9844,7 @@
   },
   {
     "id": 580,
-    "label": "controversy",
+    "label": "controversy (n.)",
     "examples": [
       "The controversy over climate change continues to divide scientists.",
       "She was involved in a controversy about her research findings.",
@@ -9861,7 +9861,7 @@
   },
   {
     "id": 581,
-    "label": "convenience",
+    "label": "convenience (n.)",
     "examples": [
       "I always choose the hotel based on its convenience location.",
       "The new app offers great convenience for online shopping.",
@@ -9878,7 +9878,7 @@
   },
   {
     "id": 582,
-    "label": "convention",
+    "label": "convention (n.)",
     "examples": [
       "The annual convention attracts thousands of delegates.",
       "They followed the traditional wedding convention in their community.",
@@ -9895,7 +9895,7 @@
   },
   {
     "id": 583,
-    "label": "conventional",
+    "label": "conventional (adj.)",
     "examples": [
       "She prefers conventional methods of teaching.",
       "The dress was quite conventional for the occasion.",
@@ -9912,7 +9912,7 @@
   },
   {
     "id": 584,
-    "label": "converge",
+    "label": "converge (v.)",
     "examples": [
       "The two roads converge at the town center.",
       "Their opinions on the project are beginning to converge.",
@@ -9929,7 +9929,7 @@
   },
   {
     "id": 585,
-    "label": "convert",
+    "label": "convert (v.)",
     "examples": [
       "She converted her garage into a home office.",
       "The church was converted into a museum last year.",
@@ -9946,7 +9946,7 @@
   },
   {
     "id": 586,
-    "label": "convey",
+    "label": "convey (v.)",
     "examples": [
       "She conveyed her feelings through a letter.",
       "The teacher conveyed the instructions clearly.",
@@ -9963,7 +9963,7 @@
   },
   {
     "id": 587,
-    "label": "convince",
+    "label": "convince (v.)",
     "examples": [
       "She convinced her parents to let her study abroad.",
       "He was convinced that he had seen the ghost.",
@@ -9980,7 +9980,7 @@
   },
   {
     "id": 588,
-    "label": "convincing",
+    "label": "convincing (adj.)",
     "examples": [
       "Her argument was very convincing during the debate.",
       "He gave a convincing presentation that persuaded everyone.",
@@ -9997,7 +9997,7 @@
   },
   {
     "id": 589,
-    "label": "cooperate",
+    "label": "cooperate (v.)",
     "examples": [
       "They decided to cooperate on the project to finish it faster.",
       "She cooperates with her colleagues to solve problems efficiently.",
@@ -10014,7 +10014,7 @@
   },
   {
     "id": 590,
-    "label": "coordinate",
+    "label": "coordinate (v.)",
     "examples": [
       "She coordinated the team to complete the project on time.",
       "They are coordinating their efforts for the upcoming event.",
@@ -10031,7 +10031,7 @@
   },
   {
     "id": 591,
-    "label": "core",
+    "label": "core (n.)",
     "examples": [
       "The core of the apple was bitter and hard.",
       "She focused on the core issues during the meeting.",
@@ -10048,7 +10048,7 @@
   },
   {
     "id": 592,
-    "label": "corporate",
+    "label": "corporate (adj.)",
     "examples": [
       "The corporate offices are located downtown.",
       "She works for a large corporate firm.",
@@ -10065,7 +10065,7 @@
   },
   {
     "id": 593,
-    "label": "corridor",
+    "label": "corridor (n.)",
     "examples": [
       "She walked down the corridor to her office every morning.",
       "The hotel corridor was decorated with paintings and lights.",
@@ -10082,7 +10082,7 @@
   },
   {
     "id": 594,
-    "label": "correspond",
+    "label": "correspond (v.)",
     "examples": [
       "The two shapes correspond perfectly in size and color.",
       "She corresponded with her pen pal every month.",
@@ -10099,7 +10099,7 @@
   },
   {
     "id": 595,
-    "label": "cosmetics",
+    "label": "cosmetics (n.)",
     "examples": [
       "She bought new cosmetics for her wedding day.",
       "The store sells a variety of cosmetics and skincare products.",
@@ -10116,7 +10116,7 @@
   },
   {
     "id": 596,
-    "label": "county",
+    "label": "county (n.)",
     "examples": [
       "The mayor visited the county to discuss new policies.",
       "She grew up in a small county in the south.",
@@ -10133,7 +10133,7 @@
   },
   {
     "id": 597,
-    "label": "cowboy",
+    "label": "cowboy (n.)",
     "examples": [
       "The cowboy rode his horse across the plains.",
       "She dressed up as a cowboy for the costume party.",
@@ -10150,7 +10150,7 @@
   },
   {
     "id": 598,
-    "label": "crack",
+    "label": "crack (v./n.)",
     "examples": [
       "He cracked the code after hours of trying.",
       "The glass cracked when it fell onto the floor.",
@@ -10167,7 +10167,7 @@
   },
   {
     "id": 599,
-    "label": "craft",
+    "label": "craft (n.)",
     "examples": [
       "She spent hours crafting a beautiful necklace.",
       "The artisan crafts pottery by hand.",
@@ -10184,7 +10184,7 @@
   },
   {
     "id": 600,
-    "label": "crawl",
+    "label": "crawl (v.)",
     "examples": [
       "The baby started to crawl across the floor.",
       "I had to crawl under the fence to get inside.",
@@ -10201,7 +10201,7 @@
   },
   {
     "id": 601,
-    "label": "creation",
+    "label": "creation (n.)",
     "examples": [
       "The artist's creation was displayed in the gallery.",
       "Her latest creation won the award for innovation.",
@@ -10218,7 +10218,7 @@
   },
   {
     "id": 602,
-    "label": "creature",
+    "label": "creature (n.)",
     "examples": [
       "The creature crawled out of the cave at dawn.",
       "She imagined a creature from her favorite fantasy novel.",
@@ -10235,7 +10235,7 @@
   },
   {
     "id": 603,
-    "label": "credit",
+    "label": "credit (n.)",
     "examples": [
       "She received credit for her innovative ideas at work.",
       "The student earned credit hours for completing the course.",
@@ -10252,7 +10252,7 @@
   },
   {
     "id": 604,
-    "label": "crime",
+    "label": "crime (n.)",
     "examples": [
       "He was arrested for committing a serious crime.",
       "The city has a high rate of crime in certain neighborhoods.",
@@ -10269,7 +10269,7 @@
   },
   {
     "id": 605,
-    "label": "criterion",
+    "label": "criterion (n.)",
     "examples": [
       "The company uses strict criteria for hiring new employees.",
       "Her performance met all the necessary criteria for promotion.",
@@ -10286,7 +10286,7 @@
   },
   {
     "id": 606,
-    "label": "critical",
+    "label": "critical (adj.)",
     "examples": [
       "The patient’s condition is critical and requires immediate attention.",
       "She was very critical of his performance during the meeting.",
@@ -10303,7 +10303,7 @@
   },
   {
     "id": 607,
-    "label": "criticism",
+    "label": "criticism (n.)",
     "examples": [
       "She received harsh criticism for her performance.",
       "The article was full of constructive criticism.",
@@ -10320,7 +10320,7 @@
   },
   {
     "id": 608,
-    "label": "cruise",
+    "label": "cruise (n./v.)",
     "examples": [
       "We went on a cruise to the Caribbean last summer.",
       "The car started to cruise at a steady speed on the highway.",
@@ -10337,7 +10337,7 @@
   },
   {
     "id": 609,
-    "label": "crush",
+    "label": "crush (v.)",
     "examples": [
       "She crushed the can and threw it away.",
       "The crowd crushed forward to see the celebrity.",
@@ -10354,7 +10354,7 @@
   },
   {
     "id": 610,
-    "label": "cure",
+    "label": "cure (n./v.)",
     "examples": [
       "The doctor gave her a new cure for her illness.",
       "Scientists are researching a cure for cancer.",
@@ -10371,7 +10371,7 @@
   },
   {
     "id": 611,
-    "label": "current",
+    "label": "current (adj.)",
     "examples": [
       "The current situation is difficult to change.",
       "She is following the current trends in fashion.",
@@ -10388,7 +10388,7 @@
   },
   {
     "id": 612,
-    "label": "curriculum",
+    "label": "curriculum (n.)",
     "examples": [
       "The school updated its curriculum for the new academic year.",
       "She studied the curriculum to prepare for her teaching certification.",
@@ -10405,7 +10405,7 @@
   },
   {
     "id": 613,
-    "label": "custom",
+    "label": "custom (n.)",
     "examples": [
       "In many countries, it's a custom to greet visitors warmly.",
       "She customized her laptop with new stickers and a personalized case.",
@@ -10422,7 +10422,7 @@
   },
   {
     "id": 614,
-    "label": "cute",
+    "label": "cute (adj.)",
     "examples": [
       "She has a cute puppy that everyone loves.",
       "That dress looks really cute on you.",
@@ -10456,7 +10456,7 @@
   },
   {
     "id": 616,
-    "label": "dare",
+    "label": "dare (v.)",
     "examples": [
       "She dared to speak in front of the crowd.",
       "He dared her to jump into the pool.",
@@ -10473,7 +10473,7 @@
   },
   {
     "id": 617,
-    "label": "darkness",
+    "label": "darkness (n.)",
     "examples": [
       "The room was filled with darkness after the lights went out.",
       "He felt a deep darkness in his heart after the loss.",
@@ -10490,7 +10490,7 @@
   },
   {
     "id": 618,
-    "label": "date",
+    "label": "date (n.)",
     "examples": [
       "We have a date tonight at the new restaurant.",
       "She marked the date of her graduation on the calendar.",
@@ -10507,7 +10507,7 @@
   },
   {
     "id": 619,
-    "label": "deadly",
+    "label": "deadly (adj.)",
     "examples": [
       "The venomous snake's bite was deadly.",
       "He was involved in a deadly accident last night.",
@@ -10524,7 +10524,7 @@
   },
   {
     "id": 620,
-    "label": "dealer",
+    "label": "dealer (n.)",
     "examples": [
       "The car dealer showed us the latest models yesterday.",
       "He is a drug dealer operating in the city.",
@@ -10541,7 +10541,7 @@
   },
   {
     "id": 621,
-    "label": "debate",
+    "label": "debate (n./v.)",
     "examples": [
       "They debated the new policy last night.",
       "She is debating whether to accept the job offer.",
@@ -10558,7 +10558,7 @@
   },
   {
     "id": 622,
-    "label": "debt",
+    "label": "debt (n.)",
     "examples": [
       "She still owes money from last year’s loan.",
       "He paid off his debt after years of saving.",
@@ -10575,7 +10575,7 @@
   },
   {
     "id": 623,
-    "label": "declare",
+    "label": "declare (v.)",
     "examples": [
       "The president will declare the new policy tomorrow.",
       "She declared her intention to run for mayor.",
@@ -10592,7 +10592,7 @@
   },
   {
     "id": 624,
-    "label": "decoration",
+    "label": "decoration (n.)",
     "examples": [
       "She added some decoration to the room for the party.",
       "The cake was beautifully decorated with flowers.",
@@ -10609,7 +10609,7 @@
   },
   {
     "id": 625,
-    "label": "defence",
+    "label": "defence (n.)",
     "examples": [
       "The army increased its defence against cyber attacks last year.",
       "She hired a lawyer for her legal defence during the trial.",
@@ -10626,7 +10626,7 @@
   },
   {
     "id": 626,
-    "label": "delay",
+    "label": "delay (v./n.)",
     "examples": [
       "The train was delayed due to heavy snow.",
       "She delayed her response until she thought it through.",
@@ -10643,7 +10643,7 @@
   },
   {
     "id": 627,
-    "label": "deliberate",
+    "label": "deliberate (adj.)",
     "examples": [
       "She made a deliberate choice to stay quiet during the meeting.",
       "His actions were deliberate, showing he planned everything carefully.",
@@ -10660,7 +10660,7 @@
   },
   {
     "id": 628,
-    "label": "delivery",
+    "label": "delivery (n.)",
     "examples": [
       "The delivery of the package was delayed due to bad weather.",
       "She is responsible for the delivery of the speeches during the event.",
@@ -10677,7 +10677,7 @@
   },
   {
     "id": 629,
-    "label": "demand",
+    "label": "demand (n./v.)",
     "examples": [
       "The workers demanded better wages during the meeting.",
       "She demanded an explanation for the delay.",
@@ -10694,7 +10694,7 @@
   },
   {
     "id": 630,
-    "label": "demonstrate",
+    "label": "demonstrate (v.)",
     "examples": [
       "She demonstrated her cooking skills at the competition.",
       "The scientist demonstrated the new theory with an experiment.",
@@ -10711,7 +10711,7 @@
   },
   {
     "id": 631,
-    "label": "demonstration",
+    "label": "demonstration (n.)",
     "examples": [
       "She gave a clear demonstration of the new software.",
       "The scientist's demonstration proved the theory was correct.",
@@ -10728,7 +10728,7 @@
   },
   {
     "id": 632,
-    "label": "deny",
+    "label": "deny (v.)",
     "examples": [
       "She denied stealing the money during the investigation.",
       "He denies ever having met her before.",
@@ -10745,7 +10745,7 @@
   },
   {
     "id": 633,
-    "label": "dependent",
+    "label": "dependent (adj.)",
     "examples": [
       "She is dependent on her parents for financial support.",
       "The outcome is dependent on how we handle the situation.",
@@ -10762,7 +10762,7 @@
   },
   {
     "id": 634,
-    "label": "depressed",
+    "label": "depressed (adj.)",
     "examples": [
       "She felt depressed after losing her job.",
       "The news made him depressed for days.",
@@ -10779,7 +10779,7 @@
   },
   {
     "id": 635,
-    "label": "depth",
+    "label": "depth (n.)",
     "examples": [
       "The lake's depth is over 200 meters.",
       "She explored the depth of her feelings during the therapy session.",
@@ -10796,7 +10796,7 @@
   },
   {
     "id": 636,
-    "label": "deserve",
+    "label": "deserve (v.)",
     "examples": [
       "She deserves a promotion for her hard work.",
       "They deserved the award after their performance.",
@@ -10813,7 +10813,7 @@
   },
   {
     "id": 637,
-    "label": "destruction",
+    "label": "destruction (n.)",
     "examples": [
       "The building's destruction was complete after the fire.",
       "They feared the destruction of their village during the war.",
@@ -10830,7 +10830,7 @@
   },
   {
     "id": 638,
-    "label": "detail",
+    "label": "detail (n.)",
     "examples": [
       "She paid attention to every detail in the report.",
       "Can you give me more details about the project?",
@@ -10847,7 +10847,7 @@
   },
   {
     "id": 639,
-    "label": "devote",
+    "label": "devote (v.)",
     "examples": [
       "She devotes her weekends to volunteering at the shelter.",
       "He devoted himself entirely to studying for the exam.",
@@ -10864,7 +10864,7 @@
   },
   {
     "id": 640,
-    "label": "differ",
+    "label": "differ (v.)",
     "examples": [
       "They differ in opinion about the project.",
       "Her results differ from last year's data.",
@@ -10881,7 +10881,7 @@
   },
   {
     "id": 641,
-    "label": "digest",
+    "label": "digest (v.)",
     "examples": [
       "I need to digest this information before the exam.",
       "She took a moment to digest the news.",
@@ -10898,7 +10898,7 @@
   },
   {
     "id": 642,
-    "label": "diminish",
+    "label": "diminish (v.)",
     "examples": [
       "The loud noise diminished after a few seconds.",
       "Her influence has diminished over the years.",
@@ -10915,7 +10915,7 @@
   },
   {
     "id": 643,
-    "label": "dinner",
+    "label": "dinner (n.)",
     "examples": [
       "We had a delicious dinner at the new restaurant last night.",
       "She is preparing dinner for her family this evening.",
@@ -10932,7 +10932,7 @@
   },
   {
     "id": 644,
-    "label": "disability",
+    "label": "disability (n.)",
     "examples": [
       "She was diagnosed with a disability last year.",
       "The building is accessible for people with disabilities.",
@@ -10949,7 +10949,7 @@
   },
   {
     "id": 645,
-    "label": "disabled",
+    "label": "disabled (adj.)",
     "examples": [
       "She became disabled after the accident last year.",
       "Many disabled people participate in adaptive sports.",
@@ -10966,7 +10966,7 @@
   },
   {
     "id": 646,
-    "label": "disappoint",
+    "label": "disappoint (v.)",
     "examples": [
       "I was disappointed when I didn't get the job.",
       "She disappointed her parents by dropping out of college.",
@@ -10983,7 +10983,7 @@
   },
   {
     "id": 647,
-    "label": "disappointment",
+    "label": "disappointment (n.)",
     "examples": [
       "She felt a deep disappointment after missing the concert.",
       "His failure to get the job was a huge disappointment.",
@@ -11000,7 +11000,7 @@
   },
   {
     "id": 648,
-    "label": "discourage",
+    "label": "discourage (v.)",
     "examples": [
       "The teacher's comments discourage students from participating.",
       "She was discouraged after failing the exam again.",
@@ -11017,7 +11017,7 @@
   },
   {
     "id": 649,
-    "label": "disorder",
+    "label": "disorder (n.)",
     "examples": [
       "The classroom was in disorder after the students left.",
       "He was diagnosed with a neurological disorder.",
@@ -11034,7 +11034,7 @@
   },
   {
     "id": 650,
-    "label": "display",
+    "label": "display (v./n.)",
     "examples": [
       "She displayed her artwork at the gallery yesterday.",
       "The monitor displays the current temperature clearly.",
@@ -11051,7 +11051,7 @@
   },
   {
     "id": 651,
-    "label": "distant",
+    "label": "distant (adj.)",
     "examples": [
       "The mountain peak is distant from the city.",
       "She felt distant during the conversation last night.",
@@ -11068,7 +11068,7 @@
   },
   {
     "id": 652,
-    "label": "distinct",
+    "label": "distinct (adj.)",
     "examples": [
       "The two species are distinct in appearance.",
       "Her opinions are quite distinct from his.",
@@ -11085,7 +11085,7 @@
   },
   {
     "id": 653,
-    "label": "distinguish",
+    "label": "distinguish (v.)",
     "examples": [
       "She can distinguish between the two similar shades of blue.",
       "It's difficult to distinguish his handwriting from hers.",
@@ -11102,7 +11102,7 @@
   },
   {
     "id": 654,
-    "label": "distract",
+    "label": "distract (v.)",
     "examples": [
       "She tried not to distract him during the exam.",
       "The bright lights distracted me from studying.",
@@ -11119,7 +11119,7 @@
   },
   {
     "id": 655,
-    "label": "distribute",
+    "label": "distribute (v.)",
     "examples": [
       "The teacher will distribute the test papers tomorrow.",
       "They distribute food to the homeless every weekend.",
@@ -11136,7 +11136,7 @@
   },
   {
     "id": 656,
-    "label": "distribution",
+    "label": "distribution (n.)",
     "examples": [
       "The distribution of books took several hours.",
       "They are responsible for the distribution of supplies.",
@@ -11153,7 +11153,7 @@
   },
   {
     "id": 657,
-    "label": "diverse",
+    "label": "diverse (adj.)",
     "examples": [
       "The students have diverse backgrounds and experiences.",
       "Her interests are quite diverse, ranging from music to sports.",
@@ -11170,7 +11170,7 @@
   },
   {
     "id": 658,
-    "label": "diversity",
+    "label": "diversity (n.)",
     "examples": [
       "The city celebrates its cultural diversity every year.",
       "She appreciates the diversity of opinions in the debate.",
@@ -11187,7 +11187,7 @@
   },
   {
     "id": 659,
-    "label": "divide",
+    "label": "divide (v.)",
     "examples": [
       "She divides the cake into eight pieces.",
       "The river divides the city into two parts.",
@@ -11204,7 +11204,7 @@
   },
   {
     "id": 660,
-    "label": "division",
+    "label": "division (n.)",
     "examples": [
       "The division of the company was finalized last month.",
       "She struggled with division in her math class.",
@@ -11221,7 +11221,7 @@
   },
   {
     "id": 661,
-    "label": "document",
+    "label": "document (n.)",
     "examples": [
       "She found the document on her desk this morning.",
       "He needs to document all his expenses for the trip.",
@@ -11238,7 +11238,7 @@
   },
   {
     "id": 662,
-    "label": "dominant",
+    "label": "dominant (adj.)",
     "examples": [
       "The dominant team won the championship easily.",
       "She has a dominant personality that influences everyone.",
@@ -11255,7 +11255,7 @@
   },
   {
     "id": 663,
-    "label": "dominate",
+    "label": "dominate (v.)",
     "examples": [
       "The company dominates the market with its innovative products.",
       "She dominated the game with her exceptional skills.",
@@ -11272,7 +11272,7 @@
   },
   {
     "id": 664,
-    "label": "donation",
+    "label": "donation (n.)",
     "examples": [
       "She made a donation to the local shelter last week.",
       "They are collecting donations for the new library.",
@@ -11289,7 +11289,7 @@
   },
   {
     "id": 665,
-    "label": "dot",
+    "label": "dot (n.)",
     "examples": [
       "She placed a dot on the map to mark the location.",
       "There was a small dot in the corner of the page.",
@@ -11323,7 +11323,7 @@
   },
   {
     "id": 667,
-    "label": "dramatic",
+    "label": "dramatic (adj.)",
     "examples": [
       "The play had a dramatic ending that surprised everyone.",
       "Her reaction was quite dramatic, drawing everyone's attention.",
@@ -11340,7 +11340,7 @@
   },
   {
     "id": 668,
-    "label": "drought",
+    "label": "drought (n.)",
     "examples": [
       "The crops failed due to a severe drought last summer.",
       "During the drought, many animals had to migrate to find water.",
@@ -11357,7 +11357,7 @@
   },
   {
     "id": 669,
-    "label": "dull",
+    "label": "dull (adj.)",
     "examples": [
       "The lecture was dull and uninteresting.",
       "He felt dull after staying up all night.",
@@ -11374,7 +11374,7 @@
   },
   {
     "id": 670,
-    "label": "dump",
+    "label": "dump (v.)",
     "examples": [
       "He dumped all the old clothes in the trash.",
       "They are planning to dump the waste into the river.",
@@ -11391,7 +11391,7 @@
   },
   {
     "id": 671,
-    "label": "duration",
+    "label": "duration (n.)",
     "examples": [
       "The movie's duration is two hours.",
       "She was surprised by the duration of the meeting.",
@@ -11408,7 +11408,7 @@
   },
   {
     "id": 672,
-    "label": "dynamic",
+    "label": "dynamic (adj.)",
     "examples": [
       "She is very dynamic in her approach to problem-solving.",
       "The market is dynamic and constantly changing.",
@@ -11425,7 +11425,7 @@
   },
   {
     "id": 673,
-    "label": "intermediate level. Below are additional vocabulary items (many from the Academic Word List) that B2 learners should become familiar with: abandon",
+    "label": "intermediate level. Below are additional vocabulary items (many from the Academic Word List) that B2 learners should become familiar with: abandon (v.)",
     "examples": [
       "After years of studying, she decided to abandon her research project.",
       "The boat was abandoned during the storm, leaving everything behind.",
@@ -11442,7 +11442,7 @@
   },
   {
     "id": 674,
-    "label": "accurate",
+    "label": "accurate (adj.)",
     "examples": [
       "Her report was very accurate and detailed.",
       "Please ensure all measurements are accurate before proceeding.",
@@ -11459,7 +11459,7 @@
   },
   {
     "id": 675,
-    "label": "allocate",
+    "label": "allocate (v.)",
     "examples": [
       "The company allocated funds for the new project last year.",
       "She is allocating her time between work and study.",
@@ -11476,7 +11476,7 @@
   },
   {
     "id": 676,
-    "label": "approximate",
+    "label": "approximate (adj.)",
     "examples": [
       "The measurements are approximate, so they might not be exact.",
       "She gave an approximate estimate of the project's cost.",
@@ -11493,7 +11493,7 @@
   },
   {
     "id": 677,
-    "label": "attain",
+    "label": "attain (v.)",
     "examples": [
       "She attained her goal after years of hard work.",
       "He hopes to attain a high level of proficiency in English.",
@@ -11510,7 +11510,7 @@
   },
   {
     "id": 678,
-    "label": "attribute",
+    "label": "attribute (n.)",
     "examples": [
       "She has many positive attributes that make her a great leader.",
       "The report attributes the success to careful planning.",
@@ -11527,7 +11527,7 @@
   },
   {
     "id": 679,
-    "label": "coincide",
+    "label": "coincide (v.)",
     "examples": [
       "The two events coincide exactly at noon.",
       "Her opinions often coincide with mine.",
@@ -11544,7 +11544,7 @@
   },
   {
     "id": 680,
-    "label": "commodity",
+    "label": "commodity (n.)",
     "examples": [
       "The country exports valuable commodities like coffee and gold.",
       "Oil is a major commodity traded on the global market.",
@@ -11561,7 +11561,7 @@
   },
   {
     "id": 681,
-    "label": "compatible",
+    "label": "compatible (adj.)",
     "examples": [
       "The new software is compatible with our existing system.",
       "These two devices are compatible and can be used together.",
@@ -11578,7 +11578,7 @@
   },
   {
     "id": 682,
-    "label": "conceive",
+    "label": "conceive (v.)",
     "examples": [
       "She conceived a new plan to improve the company.",
       "He struggled to conceive the complexity of the problem.",
@@ -11595,7 +11595,7 @@
   },
   {
     "id": 683,
-    "label": "concurrent",
+    "label": "concurrent (adj.)",
     "examples": [
       "The two events were concurrent, happening at the same time.",
       "She was conducting a concurrent experiment while teaching.",
@@ -11612,7 +11612,7 @@
   },
   {
     "id": 684,
-    "label": "confine",
+    "label": "confine (v.)",
     "examples": [
       "The prison confined the prisoners for years.",
       "She was confined to her room due to illness.",
@@ -11629,7 +11629,7 @@
   },
   {
     "id": 685,
-    "label": "constitute",
+    "label": "constitute (v.)",
     "examples": [
       "Women constitute a large portion of the workforce.",
       "The parts constitute the whole device.",
@@ -11646,7 +11646,7 @@
   },
   {
     "id": 686,
-    "label": "constrain",
+    "label": "constrain (v.)",
     "examples": [
       "The tight schedule constrained her ability to relax.",
       "Financial issues constrained the project's development.",
@@ -11663,7 +11663,7 @@
   },
   {
     "id": 687,
-    "label": "context",
+    "label": "context (n.)",
     "examples": [
       "The meaning of the word changes depending on the context.",
       "In a legal context, the term has a specific interpretation.",
@@ -11680,7 +11680,7 @@
   },
   {
     "id": 688,
-    "label": "convene",
+    "label": "convene (v.)",
     "examples": [
       "The committee will convene tomorrow to discuss the new policy.",
       "They convened at the town hall to address community concerns.",
@@ -11697,7 +11697,7 @@
   },
   {
     "id": 689,
-    "label": "currency",
+    "label": "currency (n.)",
     "examples": [
       "The country's currency is the euro.",
       "She exchanged her currency for dollars before traveling.",
@@ -11714,7 +11714,7 @@
   },
   {
     "id": 690,
-    "label": "decade",
+    "label": "decade (n.)",
     "examples": [
       "The company has been operating for over a decade.",
       "In the 1980s, many technological advances occurred within a decade.",
@@ -11731,7 +11731,7 @@
   },
   {
     "id": 691,
-    "label": "deduce",
+    "label": "deduce (v.)",
     "examples": [
       "She deduced the answer after analyzing the clues.",
       "From the evidence, he deduced that she was lying.",
@@ -11748,7 +11748,7 @@
   },
   {
     "id": 692,
-    "label": "displace",
+    "label": "displace (v.)",
     "examples": [
       "The new furniture displaced the old ones from the living room.",
       "Heavy floods displaced thousands of residents last year.",
@@ -11765,7 +11765,7 @@
   },
   {
     "id": 693,
-    "label": "element",
+    "label": "element (n.)",
     "examples": [
       "The periodic table lists all the chemical elements.",
       "She considered honesty an essential element of trust.",
@@ -11782,7 +11782,7 @@
   },
   {
     "id": 694,
-    "label": "emerge",
+    "label": "emerge (v.)",
     "examples": [
       "A new trend emerged in the fashion industry last year.",
       "The sun emerged from behind the clouds this morning.",
@@ -11799,7 +11799,7 @@
   },
   {
     "id": 695,
-    "label": "empirical",
+    "label": "empirical (adj.)",
     "examples": [
       "The scientist's conclusions were based on empirical data collected over years.",
       "She prefers empirical evidence rather than just theoretical assumptions.",
@@ -11816,7 +11816,7 @@
   },
   {
     "id": 696,
-    "label": "ensure",
+    "label": "ensure (v.)",
     "examples": [
       "She ensures that all the doors are locked before leaving.",
       "The company ensured the project was completed on time.",
@@ -11833,7 +11833,7 @@
   },
   {
     "id": 697,
-    "label": "equate",
+    "label": "equate (v.)",
     "examples": [
       "Many people tend to equate success with wealth.",
       "She equated his behavior with rudeness.",
@@ -11850,7 +11850,7 @@
   },
   {
     "id": 698,
-    "label": "erode",
+    "label": "erode (v.)",
     "examples": [
       "The river eroded the banks over the years.",
       "The constant wind erodes the cliffs gradually.",
@@ -11867,7 +11867,7 @@
   },
   {
     "id": 699,
-    "label": "eventually",
+    "label": "eventually (adv.)",
     "examples": [
       "She eventually finished her project after many delays.",
       "They will eventually arrive at the station, even if it rains.",
@@ -11884,7 +11884,7 @@
   },
   {
     "id": 700,
-    "label": "explicit",
+    "label": "explicit (adj.)",
     "examples": [
       "She gave an explicit instruction to follow the safety procedures.",
       "The teacher was explicit about the exam requirements.",
@@ -11901,7 +11901,7 @@
   },
   {
     "id": 701,
-    "label": "factor",
+    "label": "factor (n.)",
     "examples": [
       "The weather was a major factor in the decision to cancel the event.",
       "Several factors contributed to her success in the competition.",
@@ -12496,7 +12496,7 @@
   },
   {
     "id": 737,
-    "label": "absolute",
+    "label": "absolute (adj.)",
     "examples": [
       "She has absolute confidence in her abilities.",
       "The house was an absolute mess after the party.",
@@ -12513,7 +12513,7 @@
   },
   {
     "id": 738,
-    "label": "absorb",
+    "label": "absorb (v.)",
     "examples": [
       "The sponge absorbed all the water quickly.",
       "She absorbed the new information during the lecture.",
@@ -12530,7 +12530,7 @@
   },
   {
     "id": 740,
-    "label": "academic",
+    "label": "academic (adj.)",
     "examples": [
       "She excelled in academic achievements during university.",
       "The academic year starts in September and ends in June.",
@@ -12547,7 +12547,7 @@
   },
   {
     "id": 741,
-    "label": "accent",
+    "label": "accent (n.)",
     "examples": [
       "She put an accent on the word to emphasize its importance.",
       "His French accent made him sound very authentic.",
@@ -12564,7 +12564,7 @@
   },
   {
     "id": 743,
-    "label": "accidentally",
+    "label": "accidentally (adv.)",
     "examples": [
       "I accidentally broke the vase while cleaning.",
       "She accidentally sent the email to the wrong person.",
@@ -12581,7 +12581,7 @@
   },
   {
     "id": 744,
-    "label": "accommodate",
+    "label": "accommodate (v.)",
     "examples": [
       "The hotel can accommodate 200 guests.",
       "She tried to accommodate her schedule to fit the meeting.",
@@ -12598,7 +12598,7 @@
   },
   {
     "id": 745,
-    "label": "accomplish",
+    "label": "accomplish (v.)",
     "examples": [
       "She accomplished her goal after months of effort.",
       "They will accomplish the project by next week.",
@@ -12615,7 +12615,7 @@
   },
   {
     "id": 747,
-    "label": "accuracy",
+    "label": "accuracy (n.)",
     "examples": [
       "Her accuracy in measurements is impressive.",
       "The report was praised for its accuracy.",
@@ -12632,7 +12632,7 @@
   },
   {
     "id": 749,
-    "label": "accurately",
+    "label": "accurately (adv.)",
     "examples": [
       "She measured the ingredients accurately for the recipe.",
       "He completed the report accurately despite the tight deadline.",
@@ -12649,7 +12649,7 @@
   },
   {
     "id": 751,
-    "label": "acknowledge",
+    "label": "acknowledge (v.)",
     "examples": [
       "She acknowledged her mistake during the meeting.",
       "He finally acknowledged that he was wrong.",
@@ -12666,7 +12666,7 @@
   },
   {
     "id": 752,
-    "label": "acquire",
+    "label": "acquire (v.)",
     "examples": [
       "She acquired her first car last year.",
       "He is trying to acquire new language skills.",
@@ -12683,7 +12683,7 @@
   },
   {
     "id": 754,
-    "label": "addiction",
+    "label": "addiction (n.)",
     "examples": [
       "He struggled with his addiction to video games for years.",
       "Her addiction to sugar made it hard to quit sweets.",
@@ -12700,7 +12700,7 @@
   },
   {
     "id": 755,
-    "label": "additional",
+    "label": "additional (adj.)",
     "examples": [
       "She bought additional supplies for the project.",
       "There is an additional fee for late registration.",
@@ -12717,7 +12717,7 @@
   },
   {
     "id": 756,
-    "label": "additionally",
+    "label": "additionally (adv.)",
     "examples": [
       "She can speak French. Additionally, she is learning Spanish.",
       "The project was delayed. Additionally, the budget was cut.",
@@ -12734,7 +12734,7 @@
   },
   {
     "id": 758,
-    "label": "adequately",
+    "label": "adequately (adv.)",
     "examples": [
       "She explained the project adequately to the team.",
       "The room was adequately lit for reading.",
@@ -12751,7 +12751,7 @@
   },
   {
     "id": 760,
-    "label": "administration",
+    "label": "administration (n.)",
     "examples": [
       "The administration of the company decided to expand its services.",
       "She is responsible for the administration of the school’s finances.",
@@ -12768,7 +12768,7 @@
   },
   {
     "id": 761,
-    "label": "adopt",
+    "label": "adopt (v.)",
     "examples": [
       "They decided to adopt a puppy from the shelter.",
       "She adopted a new approach to solve the problem.",
@@ -12785,7 +12785,7 @@
   },
   {
     "id": 762,
-    "label": "advance",
+    "label": "advance (v./n.)",
     "examples": [
       "She decided to advance her career by taking additional courses.",
       "The army began to advance after the negotiations failed.",
@@ -12802,7 +12802,7 @@
   },
   {
     "id": 764,
-    "label": "aftermath",
+    "label": "aftermath (n.)",
     "examples": [
       "The aftermath of the earthquake was devastating for the city.",
       "In the aftermath of the scandal, many people lost trust in the company.",
@@ -12819,7 +12819,7 @@
   },
   {
     "id": 766,
-    "label": "aged",
+    "label": "aged (adj.)",
     "examples": [
       "The aged man sat quietly on the park bench.",
       "She bought an aged cheese for the recipe.",
@@ -12836,7 +12836,7 @@
   },
   {
     "id": 767,
-    "label": "agency",
+    "label": "agency (n.)",
     "examples": [
       "The travel agency booked our flights last week.",
       "She works for a government agency that helps the community.",
@@ -12853,7 +12853,7 @@
   },
   {
     "id": 768,
-    "label": "agenda",
+    "label": "agenda (n.)",
     "examples": [
       "We discussed the agenda for the meeting yesterday.",
       "She always keeps her agenda organized and up to date.",
@@ -12870,7 +12870,7 @@
   },
   {
     "id": 770,
-    "label": "agriculture",
+    "label": "agriculture (n.)",
     "examples": [
       "The farmer studied agriculture to improve crop yields.",
       "Agriculture has advanced significantly in the last century.",
@@ -12887,7 +12887,7 @@
   },
   {
     "id": 771,
-    "label": "aid",
+    "label": "aid (n./v.)",
     "examples": [
       "She always tries to aid her friends in difficult times.",
       "The new technology will aid in improving efficiency.",
@@ -12921,7 +12921,7 @@
   },
   {
     "id": 774,
-    "label": "alter",
+    "label": "alter (v.)",
     "examples": [
       "She decided to alter her plans after the meeting.",
       "The tailor will alter the dress to fit better.",
@@ -12938,7 +12938,7 @@
   },
   {
     "id": 777,
-    "label": "ambitious",
+    "label": "ambitious (adj.)",
     "examples": [
       "She is very ambitious and wants to become a CEO someday.",
       "His ambitious plan to climb the mountain was finally successful.",
@@ -12955,7 +12955,7 @@
   },
   {
     "id": 778,
-    "label": "ambulance",
+    "label": "ambulance (n.)",
     "examples": [
       "The paramedics arrived in an ambulance to take the injured to the hospital.",
       "She called an ambulance after the accident happened yesterday.",
@@ -12972,7 +12972,7 @@
   },
   {
     "id": 779,
-    "label": "amount",
+    "label": "amount (n.)",
     "examples": [
       "The amount of sugar in this recipe is too high.",
       "She was surprised by the amount of people at the party.",
@@ -12989,7 +12989,7 @@
   },
   {
     "id": 781,
-    "label": "analyst",
+    "label": "analyst (n.)",
     "examples": [
       "The analyst reviewed the market data carefully.",
       "She works as a financial analyst at the bank.",
@@ -13006,7 +13006,7 @@
   },
   {
     "id": 782,
-    "label": "ancestor",
+    "label": "ancestor (n.)",
     "examples": [
       "My ancestors came from Ireland centuries ago.",
       "She is researching her ancestors' history.",
@@ -13023,7 +13023,7 @@
   },
   {
     "id": 784,
-    "label": "angle",
+    "label": "angle (n.)",
     "examples": [
       "She looked at the painting from a different angle.",
       "The angle of the roof affects how much sunlight enters the house.",
@@ -13040,7 +13040,7 @@
   },
   {
     "id": 785,
-    "label": "animation",
+    "label": "animation (n.)",
     "examples": [
       "The animation in the movie was stunning and colorful.",
       "She studied animation to create her own cartoons.",
@@ -13057,7 +13057,7 @@
   },
   {
     "id": 786,
-    "label": "anniversary",
+    "label": "anniversary (n.)",
     "examples": [
       "They celebrated their 10th wedding anniversary last weekend.",
       "The company’s anniversary is in July, marking 50 years of operation.",
@@ -13074,7 +13074,7 @@
   },
   {
     "id": 788,
-    "label": "annually",
+    "label": "annually (adv.)",
     "examples": [
       "The company holds an annual meeting every December.",
       "She travels abroad annually for her job.",
@@ -13091,7 +13091,7 @@
   },
   {
     "id": 790,
-    "label": "anxiety",
+    "label": "anxiety (n.)",
     "examples": [
       "She felt a surge of anxiety before her speech.",
       "His anxiety about the exam made it hard to concentrate.",
@@ -13108,7 +13108,7 @@
   },
   {
     "id": 791,
-    "label": "anxious",
+    "label": "anxious (adj.)",
     "examples": [
       "She was anxious about her exam results.",
       "I'm feeling anxious before my presentation.",
@@ -13125,7 +13125,7 @@
   },
   {
     "id": 793,
-    "label": "apparent",
+    "label": "apparent (adj.)",
     "examples": [
       "It was apparent that she was upset.",
       "His innocence became apparent after the investigation.",
@@ -13142,7 +13142,7 @@
   },
   {
     "id": 794,
-    "label": "apparently",
+    "label": "apparently (adv.)",
     "examples": [
       "She is apparently upset about the news.",
       "He apparently forgot our meeting yesterday.",
@@ -13159,7 +13159,7 @@
   },
   {
     "id": 795,
-    "label": "appeal",
+    "label": "appeal (n./v.)",
     "examples": [
       "The charity made an appeal for donations yesterday.",
       "She appealed to the judge for mercy.",
@@ -13176,7 +13176,7 @@
   },
   {
     "id": 798,
-    "label": "appropriately",
+    "label": "appropriately (adv.)",
     "examples": [
       "She dressed appropriately for the interview.",
       "The teacher responded appropriately to the student's question.",
@@ -13193,7 +13193,7 @@
   },
   {
     "id": 799,
-    "label": "approval",
+    "label": "approval (n.)",
     "examples": [
       "She received approval from her manager to start the project.",
       "The plan is still waiting for official approval.",
@@ -13210,7 +13210,7 @@
   },
   {
     "id": 800,
-    "label": "approve",
+    "label": "approve (v.)",
     "examples": [
       "She approved the new policy after reviewing the proposal.",
       "The manager approved his vacation request yesterday.",
@@ -13227,7 +13227,7 @@
   },
   {
     "id": 804,
-    "label": "arrow",
+    "label": "arrow (n.)",
     "examples": [
       "He shot an arrow at the target yesterday.",
       "The arrow pointed north on the compass.",
@@ -13244,7 +13244,7 @@
   },
   {
     "id": 805,
-    "label": "artificial",
+    "label": "artificial (adj.)",
     "examples": [
       "The flowers looked artificial, but they were real.",
       "She prefers artificial sweeteners over sugar.",
@@ -13261,7 +13261,7 @@
   },
   {
     "id": 806,
-    "label": "artistic",
+    "label": "artistic (adj.)",
     "examples": [
       "She has an artistic talent for painting landscapes.",
       "The building's design is very artistic and innovative.",
@@ -13278,7 +13278,7 @@
   },
   {
     "id": 808,
-    "label": "aspect",
+    "label": "aspect (n.)",
     "examples": [
       "The new design has many aspects to consider.",
       "She focused on the cultural aspect of the project.",
@@ -13295,7 +13295,7 @@
   },
   {
     "id": 810,
-    "label": "assessment",
+    "label": "assessment (n.)",
     "examples": [
       "The teacher's assessment helped identify the students' strengths and weaknesses.",
       "She completed the assessment before starting the new project.",
@@ -13312,7 +13312,7 @@
   },
   {
     "id": 811,
-    "label": "asset",
+    "label": "asset (n.)",
     "examples": [
       "The company's assets include real estate and patents.",
       "Her communication skills are a valuable asset to the team.",
@@ -13329,7 +13329,7 @@
   },
   {
     "id": 813,
-    "label": "assistance",
+    "label": "assistance (n.)",
     "examples": [
       "She offered her assistance to complete the project.",
       "The team requested assistance during the emergency.",
@@ -13346,7 +13346,7 @@
   },
   {
     "id": 814,
-    "label": "associate",
+    "label": "associate (v.)",
     "examples": [
       "I always associate the smell of cookies with my grandmother's house.",
       "She associated his name with kindness and generosity.",
@@ -13363,7 +13363,7 @@
   },
   {
     "id": 815,
-    "label": "associated",
+    "label": "associated (adj.)",
     "examples": [
       "The two companies are associated in a joint project.",
       "She felt associated with the community after volunteering.",
@@ -13380,7 +13380,7 @@
   },
   {
     "id": 817,
-    "label": "assume",
+    "label": "assume (v.)",
     "examples": [
       "I assume you'll be there on time.",
       "She assumed the project would be easy.",
@@ -13397,7 +13397,7 @@
   },
   {
     "id": 819,
-    "label": "assure",
+    "label": "assure (v.)",
     "examples": [
       "She assured me that the project would be finished on time.",
       "He assures his clients of the quality of his work.",
@@ -13414,7 +13414,7 @@
   },
   {
     "id": 820,
-    "label": "astonishing",
+    "label": "astonishing (adj.)",
     "examples": [
       "The magician's performance was astonishing to everyone.",
       "She found the view from the mountain astonishing.",
@@ -13431,7 +13431,7 @@
   },
   {
     "id": 821,
-    "label": "athletic",
+    "label": "athletic (adj.)",
     "examples": [
       "She is very athletic and runs marathons regularly.",
       "The team looked athletic during the game yesterday.",
@@ -13448,7 +13448,7 @@
   },
   {
     "id": 823,
-    "label": "attempt",
+    "label": "attempt (n./v.)",
     "examples": [
       "She made an attempt to finish the project before the deadline.",
       "They are attempting to climb the mountain this summer.",
@@ -13465,7 +13465,7 @@
   },
   {
     "id": 826,
-    "label": "auction",
+    "label": "auction (n.)",
     "examples": [
       "They attended the auction to bid on rare paintings.",
       "The house was sold at auction last Saturday.",
@@ -13482,7 +13482,7 @@
   },
   {
     "id": 827,
-    "label": "audience",
+    "label": "audience (n.)",
     "examples": [
       "The audience clapped loudly after the performance.",
       "She prepared her speech for the upcoming audience.",
@@ -13499,7 +13499,7 @@
   },
   {
     "id": 829,
-    "label": "authentic",
+    "label": "authentic (adj.)",
     "examples": [
       "The painting is authentic and worth a lot of money.",
       "She only buys authentic designer clothes.",
@@ -13516,7 +13516,7 @@
   },
   {
     "id": 832,
-    "label": "automatic",
+    "label": "automatic (adj.)",
     "examples": [
       "The doors open automatically when you approach.",
       "She has an automatic response to emails.",
@@ -13533,7 +13533,7 @@
   },
   {
     "id": 833,
-    "label": "availability",
+    "label": "availability (n.)",
     "examples": [
       "The availability of seats influenced our decision to book early.",
       "She checked the availability of the product before purchasing.",
@@ -13550,7 +13550,7 @@
   },
   {
     "id": 834,
-    "label": "average",
+    "label": "average (adj./n.)",
     "examples": [
       "The average temperature in summer is 30°C.",
       "She scored above average on the test.",
@@ -13567,7 +13567,7 @@
   },
   {
     "id": 836,
-    "label": "awkward",
+    "label": "awkward (adj.)",
     "examples": [
       "He felt awkward during the interview because he was nervous.",
       "The chair was awkward to sit on because it was unstable.",
@@ -13601,7 +13601,7 @@
   },
   {
     "id": 840,
-    "label": "balanced",
+    "label": "balanced (adj.)",
     "examples": [
       "She maintained a balanced diet for better health.",
       "The scales are perfectly balanced now.",
@@ -13618,7 +13618,7 @@
   },
   {
     "id": 842,
-    "label": "balloon",
+    "label": "balloon (n.)",
     "examples": [
       "The children released the balloon into the sky.",
       "Sales of the product ballooned after the advertisement.",
@@ -13635,7 +13635,7 @@
   },
   {
     "id": 844,
-    "label": "barely",
+    "label": "barely (adv.)",
     "examples": [
       "She barely managed to finish her homework before the deadline.",
       "He was barely visible in the fog.",
@@ -13652,7 +13652,7 @@
   },
   {
     "id": 845,
-    "label": "bargain",
+    "label": "bargain (n.)",
     "examples": [
       "I got a great bargain on this laptop during the sale.",
       "They bargained with the seller to lower the price.",
@@ -13669,7 +13669,7 @@
   },
   {
     "id": 846,
-    "label": "barrier",
+    "label": "barrier (n.)",
     "examples": [
       "The fence acts as a barrier to keep animals in the yard.",
       "Language barriers can make communication difficult in foreign countries.",
@@ -13686,7 +13686,7 @@
   },
   {
     "id": 848,
-    "label": "basically",
+    "label": "basically (adv.)",
     "examples": [
       "She is basically done with her project.",
       "Basically, I agree with your point.",
@@ -13703,7 +13703,7 @@
   },
   {
     "id": 849,
-    "label": "basket",
+    "label": "basket (n.)",
     "examples": [
       "She put the apples in the basket.",
       "He carried a basket of flowers to the table.",
@@ -13720,7 +13720,7 @@
   },
   {
     "id": 850,
-    "label": "bat",
+    "label": "bat (n.)",
     "examples": [
       "He hit the ball with a bat during the game.",
       "A bat flew out of the cave at dusk.",
@@ -13737,7 +13737,7 @@
   },
   {
     "id": 852,
-    "label": "bear",
+    "label": "bear (v.)",
     "examples": [
       "She can't bear the noise anymore.",
       "He bore the pain silently during the surgery.",
@@ -13754,7 +13754,7 @@
   },
   {
     "id": 854,
-    "label": "beg",
+    "label": "beg (v.)",
     "examples": [
       "She begged her parents for a new phone.",
       "He was begging on the street for some change.",
@@ -13771,7 +13771,7 @@
   },
   {
     "id": 856,
-    "label": "bent",
+    "label": "bent (adj.)",
     "examples": [
       "The wire is bent after being hit by the hammer.",
       "She was bent over her desk all afternoon.",
@@ -13788,7 +13788,7 @@
   },
   {
     "id": 858,
-    "label": "besides",
+    "label": "besides (prep./adv.)",
     "examples": [
       "She has many hobbies besides reading and painting.",
       "Besides being a teacher, he also writes poetry.",
@@ -13805,7 +13805,7 @@
   },
   {
     "id": 862,
-    "label": "bitter",
+    "label": "bitter (adj.)",
     "examples": [
       "The coffee was so bitter that I couldn't drink it.",
       "She felt bitter after losing the game.",
@@ -13822,7 +13822,7 @@
   },
   {
     "id": 863,
-    "label": "blanket",
+    "label": "blanket (n.)",
     "examples": [
       "She spread a blanket over the picnic table.",
       "The fog blanketed the city in a thick haze.",
@@ -13839,7 +13839,7 @@
   },
   {
     "id": 865,
-    "label": "blow",
+    "label": "blow (n.)",
     "examples": [
       "The wind delivered a strong blow to the tree.",
       "He gave me a blow on the back during the fight.",
@@ -13856,7 +13856,7 @@
   },
   {
     "id": 868,
-    "label": "bond",
+    "label": "bond (n.)",
     "examples": [
       "They formed a strong bond during their childhood.",
       "She bought a bond to secure her financial future.",
@@ -13873,7 +13873,7 @@
   },
   {
     "id": 869,
-    "label": "boost",
+    "label": "boost (v./n.)",
     "examples": [
       "The company plans to boost sales this quarter.",
       "She took vitamins to boost her energy.",
@@ -13890,7 +13890,7 @@
   },
   {
     "id": 873,
-    "label": "briefly",
+    "label": "briefly (adv.)",
     "examples": [
       "She spoke briefly about her plans for the weekend.",
       "The meeting was briefly interrupted by a phone call.",
@@ -13907,7 +13907,7 @@
   },
   {
     "id": 875,
-    "label": "broadcast",
+    "label": "broadcast (v./n.)",
     "examples": [
       "The radio station broadcast the news at 6 pm.",
       "They will broadcast the live concert tomorrow.",
@@ -13924,7 +13924,7 @@
   },
   {
     "id": 876,
-    "label": "broadcaster",
+    "label": "broadcaster (n.)",
     "examples": [
       "The broadcaster announced the news at 6 pm.",
       "She works as a radio broadcaster for a local station.",
@@ -13941,7 +13941,7 @@
   },
   {
     "id": 879,
-    "label": "bullet",
+    "label": "bullet (n.)",
     "examples": [
       "The soldier fired a bullet at the target.",
       "She found a bullet in her shoe after the hike.",
@@ -13958,7 +13958,7 @@
   },
   {
     "id": 880,
-    "label": "bunch",
+    "label": "bunch (n.)",
     "examples": [
       "She picked a bunch of bananas from the market.",
       "There was a bunch of keys on the table.",
@@ -13975,7 +13975,7 @@
   },
   {
     "id": 882,
-    "label": "bush",
+    "label": "bush (n.)",
     "examples": [
       "The children played hide and seek behind the bushes.",
       "She planted a new bush in her garden last spring.",
@@ -14009,7 +14009,7 @@
   },
   {
     "id": 887,
-    "label": "cancer",
+    "label": "cancer (n.)",
     "examples": [
       "He was diagnosed with cancer last year.",
       "Researchers are studying new treatments for cancer.",
@@ -14026,7 +14026,7 @@
   },
   {
     "id": 890,
-    "label": "capacity",
+    "label": "capacity (n.)",
     "examples": [
       "The stadium has a seating capacity of 50,000 people.",
       "She demonstrated her capacity to handle stressful situations.",
@@ -14043,7 +14043,7 @@
   },
   {
     "id": 891,
-    "label": "capture",
+    "label": "capture (v.)",
     "examples": [
       "She captured the moment with her camera during the sunset.",
       "The army managed to capture the enemy base after a fierce battle.",
@@ -14060,7 +14060,7 @@
   },
   {
     "id": 894,
-    "label": "castle",
+    "label": "castle (n.)",
     "examples": [
       "They visited the castle during their vacation in Scotland.",
       "The children built a sandcastle on the beach yesterday.",
@@ -14077,7 +14077,7 @@
   },
   {
     "id": 895,
-    "label": "casual",
+    "label": "casual (adj.)",
     "examples": [
       "We had a casual meeting at the café yesterday.",
       "She prefers casual clothes for the weekend.",
@@ -14094,7 +14094,7 @@
   },
   {
     "id": 896,
-    "label": "catch",
+    "label": "catch (v.)",
     "examples": [
       "She managed to catch the train just in time.",
       "I caught a cold after staying out in the rain.",
@@ -14111,7 +14111,7 @@
   },
   {
     "id": 899,
-    "label": "certainty",
+    "label": "certainty (n.)",
     "examples": [
       "She spoke with certainty about the results.",
       "There is no certainty that he will arrive on time.",
@@ -14128,7 +14128,7 @@
   },
   {
     "id": 902,
-    "label": "chair",
+    "label": "chair (n.)",
     "examples": [
       "She sat in the chair and read her book.",
       "He was elected as the chair of the committee.",
@@ -14145,7 +14145,7 @@
   },
   {
     "id": 904,
-    "label": "challenging",
+    "label": "challenging (adj.)",
     "examples": [
       "The puzzle was challenging, but I enjoyed solving it.",
       "She finds math problems challenging and often seeks help.",
@@ -14162,7 +14162,7 @@
   },
   {
     "id": 907,
-    "label": "charming",
+    "label": "charming (adj.)",
     "examples": [
       "She has a charming smile that lights up the room.",
       "The small village is charming and full of character.",
@@ -14179,7 +14179,7 @@
   },
   {
     "id": 909,
-    "label": "chase",
+    "label": "chase (v./n.)",
     "examples": [
       "The police chased the suspect through the alley.",
       "She was chasing her dreams of becoming a singer.",
@@ -14196,7 +14196,7 @@
   },
   {
     "id": 911,
-    "label": "cheer",
+    "label": "cheer (v./n.)",
     "examples": [
       "They cheered loudly when the team scored.",
       "She cheered up after hearing the good news.",
@@ -14213,7 +14213,7 @@
   },
   {
     "id": 913,
-    "label": "chop",
+    "label": "chop (v.)",
     "examples": [
       "I will chop the vegetables for dinner.",
       "He chopped the wood into small pieces.",
@@ -14230,7 +14230,7 @@
   },
   {
     "id": 916,
-    "label": "cite",
+    "label": "cite (v.)",
     "examples": [
       "She cited several sources in her research paper.",
       "He was cited for speeding last night.",
@@ -14247,7 +14247,7 @@
   },
   {
     "id": 918,
-    "label": "civil",
+    "label": "civil (adj.)",
     "examples": [
       "The civil debate was respectful and well-mannered.",
       "She works in civil engineering, designing bridges and roads.",
@@ -14264,7 +14264,7 @@
   },
   {
     "id": 919,
-    "label": "civilization",
+    "label": "civilization (n.)",
     "examples": [
       "Ancient civilizations built impressive monuments.",
       "The civilization has advanced rapidly in recent decades.",
@@ -14281,7 +14281,7 @@
   },
   {
     "id": 926,
-    "label": "coincidence",
+    "label": "coincidence (n.)",
     "examples": [
       "It was a strange coincidence that we met there.",
       "The coincidence of their birthdays is quite rare.",
@@ -14298,7 +14298,7 @@
   },
   {
     "id": 933,
-    "label": "commitment",
+    "label": "commitment (n.)",
     "examples": [
       "She made a commitment to improve her skills.",
       "His commitment to the project was evident.",
@@ -14315,7 +14315,7 @@
   },
   {
     "id": 934,
-    "label": "committee",
+    "label": "committee (n.)",
     "examples": [
       "The committee will meet tomorrow to discuss the new policy.",
       "She was elected to the committee last year.",
@@ -14332,7 +14332,7 @@
   },
   {
     "id": 935,
-    "label": "commonly",
+    "label": "commonly (adv.)",
     "examples": [
       "She **commonly** visits her grandparents on Sundays.",
       "This restaurant **commonly** serves vegetarian dishes.",
@@ -14349,7 +14349,7 @@
   },
   {
     "id": 938,
-    "label": "complex",
+    "label": "complex (adj.)",
     "examples": [
       "The instructions were too complex for the children to understand.",
       "She prefers simple recipes over complex ones.",
@@ -14366,7 +14366,7 @@
   },
   {
     "id": 939,
-    "label": "complicated",
+    "label": "complicated (adj.)",
     "examples": [
       "The instructions were complicated and hard to follow.",
       "She found the math problem too complicated to solve quickly.",
@@ -14383,7 +14383,7 @@
   },
   {
     "id": 947,
-    "label": "concept",
+    "label": "concept (n.)",
     "examples": [
       "She has a clear concept of her goals.",
       "The concept of freedom varies across cultures.",
@@ -14400,7 +14400,7 @@
   },
   {
     "id": 949,
-    "label": "concerned",
+    "label": "concerned (adj.)",
     "examples": [
       "She is concerned about her future.",
       "The teacher was concerned with the students' progress.",
@@ -14417,7 +14417,7 @@
   },
   {
     "id": 950,
-    "label": "concert",
+    "label": "concert (n.)",
     "examples": [
       "They attended a concert last night.",
       "She is practicing for her upcoming concert.",
@@ -14434,7 +14434,7 @@
   },
   {
     "id": 951,
-    "label": "conclude",
+    "label": "conclude (v.)",
     "examples": [
       "She concluded her speech with a thank you.",
       "After reviewing the evidence, they concluded the case.",
@@ -14451,7 +14451,7 @@
   },
   {
     "id": 953,
-    "label": "concrete",
+    "label": "concrete (adj./n.)",
     "examples": [
       "The sculpture is made of concrete.",
       "She gave a concrete example during the lecture.",
@@ -14468,7 +14468,7 @@
   },
   {
     "id": 954,
-    "label": "conduct",
+    "label": "conduct (v.)",
     "examples": [
       "The scientist conducted an experiment in the lab.",
       "She conducts the choir during Sunday services.",
@@ -14485,7 +14485,7 @@
   },
   {
     "id": 955,
-    "label": "confess",
+    "label": "confess (v.)",
     "examples": [
       "She confessed to stealing the money.",
       "He confessed that he was nervous before the interview.",
@@ -14502,7 +14502,7 @@
   },
   {
     "id": 957,
-    "label": "conflict",
+    "label": "conflict (n./v.)",
     "examples": [
       "They had a conflict over the project deadline.",
       "The two countries are in conflict about border issues.",
@@ -14519,7 +14519,7 @@
   },
   {
     "id": 959,
-    "label": "confusion",
+    "label": "confusion (n.)",
     "examples": [
       "I was in confusion about which route to take.",
       "The instructions caused some confusion among the students.",
@@ -14536,7 +14536,7 @@
   },
   {
     "id": 960,
-    "label": "conscious",
+    "label": "conscious (adj.)",
     "examples": [
       "She was conscious of the risks involved in the project.",
       "He became conscious after hearing the loud noise.",
@@ -14553,7 +14553,7 @@
   },
   {
     "id": 961,
-    "label": "consequence",
+    "label": "consequence (n.)",
     "examples": [
       "The storm caused severe consequences for the city.",
       "Her actions had unexpected consequences.",
@@ -14570,7 +14570,7 @@
   },
   {
     "id": 965,
-    "label": "considerable",
+    "label": "considerable (adj.)",
     "examples": [
       "She has a considerable amount of experience in teaching.",
       "The project cost a considerable sum of money.",
@@ -14587,7 +14587,7 @@
   },
   {
     "id": 968,
-    "label": "consistent",
+    "label": "consistent (adj.)",
     "examples": [
       "She has been consistent in her workouts for months.",
       "His answers were not consistent with the facts.",
@@ -14604,7 +14604,7 @@
   },
   {
     "id": 975,
-    "label": "construction",
+    "label": "construction (n.)",
     "examples": [
       "The construction of the new bridge took two years.",
       "She is studying civil construction at university.",
@@ -14621,7 +14621,7 @@
   },
   {
     "id": 976,
-    "label": "consult",
+    "label": "consult (v.)",
     "examples": [
       "I need to consult my doctor about my symptoms.",
       "She consulted the map before starting the hike.",
@@ -14638,7 +14638,7 @@
   },
   {
     "id": 979,
-    "label": "consumption",
+    "label": "consumption (n.)",
     "examples": [
       "The company's consumption of energy has increased this year.",
       "Her consumption of sweets has decreased since she started dieting.",
@@ -14655,7 +14655,7 @@
   },
   {
     "id": 982,
-    "label": "contest",
+    "label": "contest (n.)",
     "examples": [
       "She entered the singing contest last year.",
       "They will contest the results of the election.",
@@ -14672,7 +14672,7 @@
   },
   {
     "id": 986,
-    "label": "contribution",
+    "label": "contribution (n.)",
     "examples": [
       "She made a significant contribution to the project last year.",
       "His contribution helped improve the community center.",
@@ -14689,7 +14689,7 @@
   },
   {
     "id": 995,
-    "label": "convinced",
+    "label": "convinced (adj.)",
     "examples": [
       "She is convinced that she will succeed.",
       "After hearing the evidence, he was convinced of her innocence.",
@@ -14706,7 +14706,7 @@
   },
   {
     "id": 998,
-    "label": "cope",
+    "label": "cope (v.)",
     "examples": [
       "She coped with the stress of her new job.",
       "He is coping better after the surgery.",
@@ -14723,7 +14723,7 @@
   },
   {
     "id": 1000,
-    "label": "cop",
+    "label": "cop (n.)",
     "examples": [
       "The cop stopped me for speeding last night.",
       "She called the cops when she saw the theft.",
@@ -14740,7 +14740,7 @@
   },
   {
     "id": 1001,
-    "label": "copper",
+    "label": "copper (n.)",
     "examples": [
       "The statue is made of pure copper.",
       "She bought a copper pot for cooking.",
@@ -14757,7 +14757,7 @@
   },
   {
     "id": 1003,
-    "label": "corporation",
+    "label": "corporation (n.)",
     "examples": [
       "The corporation announced new environmental policies last week.",
       "Many small businesses struggle to compete with large corporations.",
@@ -14774,7 +14774,7 @@
   },
   {
     "id": 1006,
-    "label": "correspondence",
+    "label": "correspondence (n.)",
     "examples": [
       "They maintained correspondence for years through letters.",
       "The correspondence between the two theories is quite strong.",
@@ -14791,7 +14791,7 @@
   },
   {
     "id": 1007,
-    "label": "corrupt",
+    "label": "corrupt (adj.)",
     "examples": [
       "The politician was accused of corrupt practices during the election.",
       "She refused to work with a corrupt organization that bribed officials.",
@@ -14808,7 +14808,7 @@
   },
   {
     "id": 1009,
-    "label": "council",
+    "label": "council (n.)",
     "examples": [
       "The city council approved the new park project last week.",
       "She attended a council meeting to discuss community issues.",
@@ -14825,7 +14825,7 @@
   },
   {
     "id": 1010,
-    "label": "counsel",
+    "label": "counsel (n./v.)",
     "examples": [
       "She sought counsel before making the decision.",
       "The lawyer will counsel the clients on their rights.",
@@ -14842,7 +14842,7 @@
   },
   {
     "id": 1011,
-    "label": "counter",
+    "label": "counter (n.)",
     "examples": [
       "She placed the groceries on the counter.",
       "He counted the votes at the election counter.",
@@ -14859,7 +14859,7 @@
   },
   {
     "id": 1013,
-    "label": "courage",
+    "label": "courage (n.)",
     "examples": [
       "She showed great courage during the rescue mission.",
       "It takes courage to speak in front of a large audience.",
@@ -14876,7 +14876,7 @@
   },
   {
     "id": 1014,
-    "label": "coverage",
+    "label": "coverage (n.)",
     "examples": [
       "The news coverage of the event was extensive.",
       "Her health insurance coverage includes dental and vision.",
@@ -14893,7 +14893,7 @@
   },
   {
     "id": 1018,
-    "label": "creativity",
+    "label": "creativity (n.)",
     "examples": [
       "She showed great creativity in designing the new product.",
       "His creativity allowed him to solve the problem quickly.",
@@ -14910,7 +14910,7 @@
   },
   {
     "id": 1020,
-    "label": "crew",
+    "label": "crew (n.)",
     "examples": [
       "The film crew set up the equipment early in the morning.",
       "The ship's crew was responsible for navigation and safety.",
@@ -14927,7 +14927,7 @@
   },
   {
     "id": 1022,
-    "label": "crisis",
+    "label": "crisis (n.)",
     "examples": [
       "The country is facing a severe economic crisis.",
       "She managed to stay calm during the personal crisis.",
@@ -14944,7 +14944,7 @@
   },
   {
     "id": 1024,
-    "label": "critically",
+    "label": "critically (adv.)",
     "examples": [
       "She critically analyzed the film's plot and characters.",
       "The doctor spoke critically about the patient's lifestyle choices.",
@@ -14961,7 +14961,7 @@
   },
   {
     "id": 1026,
-    "label": "criticize",
+    "label": "criticize (v.)",
     "examples": [
       "She criticized his behavior during the meeting.",
       "The movie was heavily criticized by the reviewers.",
@@ -14978,7 +14978,7 @@
   },
   {
     "id": 1027,
-    "label": "crop",
+    "label": "crop (n.)",
     "examples": [
       "The farmer harvested the crop last month.",
       "They are planting a new crop this spring.",
@@ -14995,7 +14995,7 @@
   },
   {
     "id": 1028,
-    "label": "crucial",
+    "label": "crucial (adj.)",
     "examples": [
       "It is crucial to finish the project on time.",
       "Her role was crucial in the success of the team.",
@@ -15012,7 +15012,7 @@
   },
   {
     "id": 1031,
-    "label": "cry",
+    "label": "cry (v.)",
     "examples": [
       "She started to cry after hearing the bad news.",
       "The baby cries loudly when he's hungry.",
@@ -15029,7 +15029,7 @@
   },
   {
     "id": 1032,
-    "label": "cue",
+    "label": "cue (n.)",
     "examples": [
       "She gave me a cue to start speaking.",
       "The actor forgot his cue during the play.",
@@ -15046,7 +15046,7 @@
   },
   {
     "id": 1034,
-    "label": "curious",
+    "label": "curious (adj.)",
     "examples": [
       "She was curious about the new technology.",
       "The children looked curious when they saw the strange animal.",
@@ -15063,7 +15063,7 @@
   },
   {
     "id": 1040,
-    "label": "database",
+    "label": "database (n.)",
     "examples": [
       "She stored all her photos in a database.",
       "The company updated its customer database last week.",
@@ -15080,7 +15080,7 @@
   },
   {
     "id": 1042,
-    "label": "deadline",
+    "label": "deadline (n.)",
     "examples": [
       "I need to finish this report before the deadline.",
       "The project was submitted just before the deadline.",
@@ -15097,7 +15097,7 @@
   },
   {
     "id": 1046,
-    "label": "decent",
+    "label": "decent (adj.)",
     "examples": [
       "She always dresses in a decent manner for work.",
       "The restaurant offers decent food at a reasonable price.",
@@ -15114,7 +15114,7 @@
   },
   {
     "id": 1047,
-    "label": "deck",
+    "label": "deck (n.)",
     "examples": [
       "He played a card from the deck.",
       "They decorated the deck with lights for the party.",
@@ -15131,7 +15131,7 @@
   },
   {
     "id": 1049,
-    "label": "decline",
+    "label": "decline (v./n.)",
     "examples": [
       "The company's sales declined last quarter.",
       "She politely declined the invitation to the party.",
@@ -15148,7 +15148,7 @@
   },
   {
     "id": 1051,
-    "label": "decrease",
+    "label": "decrease (v./n.)",
     "examples": [
       "The company plans to decrease its production next year.",
       "Her interest in the project decreased after the initial enthusiasm.",
@@ -15165,7 +15165,7 @@
   },
   {
     "id": 1052,
-    "label": "deeply",
+    "label": "deeply (adv.)",
     "examples": [
       "She deeply cares about her friends' feelings.",
       "He was deeply affected by the news.",
@@ -15182,7 +15182,7 @@
   },
   {
     "id": 1053,
-    "label": "defeat",
+    "label": "defeat (v./n.)",
     "examples": [
       "Our team managed to defeat the champions last night.",
       "She was defeated in the final round of the competition.",
@@ -15199,7 +15199,7 @@
   },
   {
     "id": 1055,
-    "label": "defend",
+    "label": "defend (v.)",
     "examples": [
       "She defended her thesis successfully last month.",
       "They will defend the castle against the invaders tomorrow.",
@@ -15216,7 +15216,7 @@
   },
   {
     "id": 1056,
-    "label": "defender",
+    "label": "defender (n.)",
     "examples": [
       "The lawyer will defend his client in court tomorrow.",
       "She defends her ideas confidently during the debate.",
@@ -15233,7 +15233,7 @@
   },
   {
     "id": 1058,
-    "label": "delete",
+    "label": "delete (v.)",
     "examples": [
       "I need to delete this email from my inbox.",
       "She deleted the files from her computer yesterday.",
@@ -15250,7 +15250,7 @@
   },
   {
     "id": 1060,
-    "label": "deliberately",
+    "label": "deliberately (adv.)",
     "examples": [
       "She deliberately ignored his comments during the meeting.",
       "He deliberately left the door open to surprise her.",
@@ -15267,7 +15267,7 @@
   },
   {
     "id": 1061,
-    "label": "delight",
+    "label": "delight (n./v.)",
     "examples": [
       "She felt a great delight when she received the news.",
       "The children delight in playing outside during summer.",
@@ -15284,7 +15284,7 @@
   },
   {
     "id": 1062,
-    "label": "delighted",
+    "label": "delighted (adj.)",
     "examples": [
       "She was delighted with her exam results.",
       "They are delighted to join us tonight.",
@@ -15301,7 +15301,7 @@
   },
   {
     "id": 1064,
-    "label": "democracy",
+    "label": "democracy (n.)",
     "examples": [
       "Many countries have adopted democracy in recent years.",
       "The democracy allows citizens to vote for their leaders.",
@@ -15318,7 +15318,7 @@
   },
   {
     "id": 1065,
-    "label": "democratic",
+    "label": "democratic (adj.)",
     "examples": [
       "The country adopted a democratic government last year.",
       "She believes in a democratic approach to decision-making.",
@@ -15335,7 +15335,7 @@
   },
   {
     "id": 1069,
-    "label": "depart",
+    "label": "depart (v.)",
     "examples": [
       "The train departs at 6 PM every day.",
       "She departed from the city yesterday morning.",
@@ -15352,7 +15352,7 @@
   },
   {
     "id": 1071,
-    "label": "deposit",
+    "label": "deposit (n./v.)",
     "examples": [
       "I need to make a deposit at the bank tomorrow.",
       "She deposited the money into her savings account.",
@@ -15369,7 +15369,7 @@
   },
   {
     "id": 1073,
-    "label": "depressing",
+    "label": "depressing (adj.)",
     "examples": [
       "The movie was so depressing that I left early.",
       "She felt depressed after hearing the bad news.",
@@ -15386,7 +15386,7 @@
   },
   {
     "id": 1074,
-    "label": "depression",
+    "label": "depression (n.)",
     "examples": [
       "She has been battling depression for years.",
       "The economy is facing a deep depression.",
@@ -15403,7 +15403,7 @@
   },
   {
     "id": 1076,
-    "label": "derive",
+    "label": "derive (v.)",
     "examples": [
       "She derived great satisfaction from helping others.",
       "The word 'biology' derives from Greek roots.",
@@ -15420,7 +15420,7 @@
   },
   {
     "id": 1078,
-    "label": "desperate",
+    "label": "desperate (adj.)",
     "examples": [
       "She was desperate to find her lost keys before the meeting.",
       "After days without food, he looked desperate for help.",
@@ -15437,7 +15437,7 @@
   },
   {
     "id": 1079,
-    "label": "desperately",
+    "label": "desperately (adv.)",
     "examples": [
       "She was desperately searching for her lost keys.",
       "They desperately needed help during the storm.",
@@ -15454,7 +15454,7 @@
   },
   {
     "id": 1082,
-    "label": "detailed",
+    "label": "detailed (adj.)",
     "examples": [
       "She provided a detailed report on the project.",
       "The instructions were very detailed and easy to follow.",
@@ -15471,7 +15471,7 @@
   },
   {
     "id": 1083,
-    "label": "detect",
+    "label": "detect (v.)",
     "examples": [
       "She detected a faint smell of gas in the kitchen.",
       "The machine detects errors automatically during operation.",
@@ -15488,7 +15488,7 @@
   },
   {
     "id": 1084,
-    "label": "determination",
+    "label": "determination (n.)",
     "examples": [
       "Her determination helped her finish the marathon.",
       "They showed great determination to succeed.",
@@ -15505,7 +15505,7 @@
   },
   {
     "id": 1088,
-    "label": "digital",
+    "label": "digital (adj.)",
     "examples": [
       "I prefer digital books over printed ones.",
       "The digital clock is more accurate than the analog one.",
@@ -15522,7 +15522,7 @@
   },
   {
     "id": 1089,
-    "label": "dilemma",
+    "label": "dilemma (n.)",
     "examples": [
       "She faced a dilemma about whether to accept the job offer.",
       "The company was in a dilemma over the new policy implementation.",
@@ -15539,7 +15539,7 @@
   },
   {
     "id": 1090,
-    "label": "dimension",
+    "label": "dimension (n.)",
     "examples": [
       "The room has three dimensions: length, width, and height.",
       "She considered all dimensions of the project before starting.",
@@ -15556,7 +15556,7 @@
   },
   {
     "id": 1094,
-    "label": "disagreement",
+    "label": "disagreement (n.)",
     "examples": [
       "They had a disagreement about the project deadline.",
       "There was a disagreement between the neighbors over the fence.",
@@ -15573,7 +15573,7 @@
   },
   {
     "id": 1106,
-    "label": "district",
+    "label": "district (n.)",
     "examples": [
       "The new shopping mall is in the downtown district.",
       "She lives in a quiet residential district outside the city.",
@@ -15590,7 +15590,7 @@
   },
   {
     "id": 1107,
-    "label": "disturb",
+    "label": "disturb (v.)",
     "examples": [
       "The loud noise disturbed my concentration during the exam.",
       "She didn't want to disturb her neighbors late at night.",
@@ -15607,7 +15607,7 @@
   },
   {
     "id": 1108,
-    "label": "dive",
+    "label": "dive (v./n.)",
     "examples": [
       "She dove into the pool yesterday to cool off.",
       "The bird dove from the tree to catch a fish.",
@@ -15624,7 +15624,7 @@
   },
   {
     "id": 1112,
-    "label": "divorce",
+    "label": "divorce (n./v.)",
     "examples": [
       "They decided to divorce after ten years of marriage.",
       "She is going through a divorce and feels overwhelmed.",
@@ -15641,7 +15641,7 @@
   },
   {
     "id": 1114,
-    "label": "domestic",
+    "label": "domestic (adj.)",
     "examples": [
       "She prefers domestic chores on weekends.",
       "The domestic market has grown significantly this year.",
@@ -15658,7 +15658,7 @@
   },
   {
     "id": 1121,
-    "label": "dramatically",
+    "label": "dramatically (adv.)",
     "examples": [
       "Sales increased dramatically after the new marketing campaign.",
       "The weather changed dramatically overnight.",
@@ -15675,7 +15675,7 @@
   },
   {
     "id": 1130,
-    "label": "adapt",
+    "label": "adapt (v.)",
     "examples": [
       "She adapted quickly to her new school environment.",
       "We need to adapt the recipe for the gluten-free diet.",
@@ -15692,7 +15692,7 @@
   },
   {
     "id": 1131,
-    "label": "advocate",
+    "label": "advocate (v./n.)",
     "examples": [
       "She advocates for animal rights in her community.",
       "He was an advocate of renewable energy during the conference.",
@@ -15709,7 +15709,7 @@
   },
   {
     "id": 1133,
-    "label": "ambiguous",
+    "label": "ambiguous (adj.)",
     "examples": [
       "Her ambiguous answer confused everyone at the meeting.",
       "The instructions were ambiguous, so I asked for clarification.",
@@ -15726,7 +15726,7 @@
   },
   {
     "id": 1134,
-    "label": "analyze",
+    "label": "analyze (v.)",
     "examples": [
       "She analyzed the data carefully before making a decision.",
       "The scientist is analyzing the sample in the lab.",
@@ -15743,7 +15743,7 @@
   },
   {
     "id": 1140,
-    "label": "cease",
+    "label": "cease (v.)",
     "examples": [
       "The factory ceased operations last year.",
       "She will cease to be involved in the project.",
@@ -15760,7 +15760,7 @@
   },
   {
     "id": 1141,
-    "label": "coherent",
+    "label": "coherent (adj.)",
     "examples": [
       "Her essay was very coherent and easy to follow.",
       "The speaker's argument was coherent throughout the debate.",
@@ -15777,7 +15777,7 @@
   },
   {
     "id": 1143,
-    "label": "commence",
+    "label": "commence (v.)",
     "examples": [
       "She commenced her new job yesterday.",
       "The show will commence at 8 pm.",
@@ -15794,7 +15794,7 @@
   },
   {
     "id": 1146,
-    "label": "compile",
+    "label": "compile (v.)",
     "examples": [
       "She compiled a list of all the books she wanted to read.",
       "The software developer compiled the code into a single executable file.",
@@ -15811,7 +15811,7 @@
   },
   {
     "id": 1147,
-    "label": "complement",
+    "label": "complement (v.)",
     "examples": [
       "She complemented her outfit with a stylish hat.",
       "The sauce complements the flavor of the dish perfectly.",
@@ -15828,7 +15828,7 @@
   },
   {
     "id": 1149,
-    "label": "concentrate",
+    "label": "concentrate (v.)",
     "examples": [
       "She needs to concentrate on her studies to pass the exam.",
       "He was concentrating hard on the puzzle.",
@@ -15845,7 +15845,7 @@
   },
   {
     "id": 1154,
-    "label": "confirm",
+    "label": "confirm (v.)",
     "examples": [
       "She confirmed her appointment with the doctor yesterday.",
       "The results confirm that the hypothesis was correct.",
@@ -15862,7 +15862,7 @@
   },
   {
     "id": 1155,
-    "label": "conflict",
+    "label": "conflict (n.)",
     "examples": [
       "The conflict between the two countries lasted for years.",
       "She often conflicts with her coworkers over project ideas.",
@@ -15879,7 +15879,7 @@
   },
   {
     "id": 1156,
-    "label": "consent",
+    "label": "consent (n./v.)",
     "examples": [
       "She asked for her parents' consent before going on the trip.",
       "They did not consent to the new policy.",
@@ -15896,7 +15896,7 @@
   },
   {
     "id": 1163,
-    "label": "converse",
+    "label": "converse (v.)",
     "examples": [
       "We often converse about our favorite books during lunch.",
       "She is conversing with her boss about the project deadlines.",
@@ -15913,7 +15913,7 @@
   },
   {
     "id": 1171,
-    "label": "denote",
+    "label": "denote (v.)",
     "examples": [
       "The red light denotes danger.",
       "Her smile denoted her happiness.",
@@ -15930,7 +15930,7 @@
   },
   {
     "id": 1174,
-    "label": "dispose of",
+    "label": "dispose of (v.)",
     "examples": [
       "I need to dispose of these old papers today.",
       "She disposed of the trash after dinner.",
@@ -15947,7 +15947,7 @@
   },
   {
     "id": 1175,
-    "label": "distort",
+    "label": "distort (v.)",
     "examples": [
       "The mirror distorted his reflection after the accident.",
       "She tends to distort the facts to make her story more exciting.",
@@ -15964,7 +15964,7 @@
   },
   {
     "id": 1176,
-    "label": "domain",
+    "label": "domain (n.)",
     "examples": [
       "The website's domain was hacked last night.",
       "She specializes in the medical domain.",
@@ -15981,7 +15981,7 @@
   },
   {
     "id": 1178,
-    "label": "enforce",
+    "label": "enforce (v.)",
     "examples": [
       "The government enforces new regulations on pollution.",
       "She enforced the rules strictly during the exam.",
@@ -15998,7 +15998,7 @@
   },
   {
     "id": 1180,
-    "label": "entity",
+    "label": "entity (n.)",
     "examples": [
       "The company is a legal entity recognized by law.",
       "She couldn't identify the entity responsible for the noise.",
@@ -16015,7 +16015,7 @@
   },
   {
     "id": 1183,
-    "label": "expand",
+    "label": "expand (v.)",
     "examples": [
       "The company plans to expand its operations next year.",
       "Her knowledge of the subject has expanded over time.",
@@ -16032,7 +16032,7 @@
   },
   {
     "id": 1184,
-    "label": "expert",
+    "label": "expert (n.)",
     "examples": [
       "She is an expert in computer programming.",
       "After years of study, he became an expert in French cuisine.",
@@ -16049,7 +16049,7 @@
   },
   {
     "id": 1185,
-    "label": "facilitate",
+    "label": "facilitate (v.)",
     "examples": [
       "The new software will facilitate data entry for users.",
       "She facilitated the meeting by organizing the agenda.",

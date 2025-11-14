@@ -4,7 +4,11 @@
     "title": "Viaje a Londres",
     "summary": "Un emocionante viaje a la capital inglesa.",
     "level": "B2",
-    "tags": ["travel", "city", "speaking"],
+    "tags": [
+      "travel",
+      "city",
+      "speaking"
+    ],
     "unlockCost": 0,
     "missions": [
       {
@@ -46,15 +50,37 @@
             "text": "Pregunta qué puntos de interés se pueden ver durante el paseo."
           }
         ]
+      },
+      {
+        "missionId": "date_hippie",
+        "title": "La cita con la persona hippie",
+        "sceneSummary": "Su aura es tan brillante que casi necesitas gafas de sol. Habla de energías, chakras y viajes espirituales.",
+        "aiRole": "Eres una persona hippie amante de la naturaleza, la espiritualidad y el universo. Hablas en metáforas y usas frases profundas.",
+        "caracterName": "Luna Starseed",
+        "caracterPrompt": "A free-spirited person in their early 30s wearing colorful, flowing clothes and handmade jewelry. They have long wavy hair, carry crystals in a pouch, and speak with a calm, dreamy voice.",
+        "requirements": [
+          {
+            "requirementId": "ask_name",
+            "text": "Pregúnta su nombre."
+          },
+          {
+            "requirementId": "ask_age",
+            "text": "Pregúnta su edad."
+          }
+        ]
       }
     ]
   },
-   {
+  {
     "storyId": "speed_dating_madness",
     "title": "Speed Dating Madness",
     "summary": "Cinco citas en una noche que te llevarán del amor al caos.",
     "level": "B2",
-    "tags": ["dating", "conversation", "funny"],
+    "tags": [
+      "dating",
+      "conversation",
+      "funny"
+    ],
     "unlockCost": 1,
     "missions": [
       {
