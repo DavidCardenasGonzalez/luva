@@ -5,7 +5,6 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
-  TextInput,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
@@ -18,6 +17,7 @@ import {
   useStoryDetail,
 } from '../hooks/useStories';
 import { useStoryProgress } from '../progress/StoryProgressProvider';
+import StoryMessageComposer from '../components/StoryMessageComposer';
 
 type StoryMessage = {
   id: string;
@@ -119,7 +119,6 @@ export default function StorySceneScreen() {
   const [conversationFeedback, setConversationFeedback] = useState<{ summary: string; improvements: string[] } | null>(null);
   const [flowState, setFlowState] = useState<'idle' | 'recording' | 'uploading' | 'transcribing' | 'evaluating'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [userText, setUserText] = useState<string>('');
   const [retryState, setRetryState] = useState<'none' | 'optional' | 'required'>('none');
   const [lastAttemptSnapshot, setLastAttemptSnapshot] = useState<StoryAttemptSnapshot | null>(null);
 
@@ -129,21 +128,24 @@ export default function StorySceneScreen() {
 
   useEffect(() => {
     if (!mission) return;
-    const missionDone = storyId ? isMissionCompleted(storyId, mission.missionId) : false;
-    const storyDone = storyId ? isStoryCompleted(storyId) : false;
     setRequirements(mission.requirements.map((req) => ({ ...req, met: req.met ?? false })));
     setMessages([]);
     setAnalysis(null);
-    setMissionCompleted(missionDone);
-    setStoryCompleted(storyDone);
     setPendingNext(null);
     setConversationFeedback(null);
-    setUserText('');
     setErrorMessage(null);
     setRetryState('none');
     setLastAttemptSnapshot(null);
     setFlowState('idle');
-  }, [isMissionCompleted, isStoryCompleted, mission, storyId]);
+  }, [mission?.missionId, storyId]);
+
+  useEffect(() => {
+    if (!mission || !storyId) return;
+    const missionDone = isMissionCompleted(storyId, mission.missionId);
+    const storyDone = isStoryCompleted(storyId);
+    setMissionCompleted(missionDone);
+    setStoryCompleted(storyDone);
+  }, [isMissionCompleted, isStoryCompleted, mission?.missionId, storyId]);
 
   useEffect(() => {
     scrollRef.current?.scrollToEnd({ animated: true });
@@ -207,6 +209,13 @@ export default function StorySceneScreen() {
       };
       setRetryState('none');
       setFlowState('evaluating');
+      const wasPreviouslyCompleted = missionCompleted || storyCompleted || conversationFeedback || pendingNext !== null;
+      if (wasPreviouslyCompleted) {
+        setMissionCompleted(false);
+        setStoryCompleted(false);
+        setConversationFeedback(null);
+        setPendingNext(null);
+      }
       const historyPayload = [...messages, { id: `pending-${Date.now()}`, role: 'user', text: trimmed }].map(
         ({ role, text }) => ({ role, content: text })
       );
@@ -223,7 +232,7 @@ export default function StorySceneScreen() {
           transcript: trimmed,
           history: historyPayload,
           persistedRequirements: persistedRequirementPayload,
-          persistedMissionCompleted: missionCompleted,
+          persistedMissionCompleted: wasPreviouslyCompleted ? false : missionCompleted,
         });
         console.log('Advance payload', payload);
         setRequirements((prev) => {
@@ -368,28 +377,32 @@ export default function StorySceneScreen() {
     }
   }, [handleAdvance, recorder, sceneIndex, storyId, uploader]);
 
-  const handleSendText = useCallback(async () => {
-    const trimmed = userText.trim();
-    if (!trimmed) return;
-    try {
-      if (retryState === 'required') {
-        setErrorMessage('Debes volver a intentar antes de continuar.');
-        return;
+  const handleSendText = useCallback(
+    async (textToSend: string) => {
+      const trimmed = textToSend.trim();
+      if (!trimmed) return false;
+      try {
+        if (retryState === 'required') {
+          setErrorMessage('Debes volver a intentar antes de continuar.');
+          return false;
+        }
+        setFlowState('evaluating');
+        setErrorMessage(null);
+        const session = await api.post<{ sessionId: string; uploadUrl: string }>(`/sessions/start`, {
+          storyId,
+          sceneIndex,
+        });
+        await handleAdvance(trimmed, session.sessionId);
+        return true;
+      } catch (err: any) {
+        console.error('Story text send error', err);
+        setErrorMessage(err?.message || 'No pudimos analizar tu texto.');
+        setFlowState('idle');
+        return false;
       }
-      setFlowState('evaluating');
-      setErrorMessage(null);
-      const session = await api.post<{ sessionId: string; uploadUrl: string }>(`/sessions/start`, {
-        storyId,
-        sceneIndex,
-      });
-      await handleAdvance(trimmed, session.sessionId);
-      setUserText('');
-    } catch (err: any) {
-      console.error('Story text send error', err);
-      setErrorMessage(err?.message || 'No pudimos analizar tu texto.');
-      setFlowState('idle');
-    }
-  }, [handleAdvance, retryState, sceneIndex, storyId, userText]);
+    },
+    [handleAdvance, retryState, sceneIndex, storyId]
+  );
 
   if (!storyId) {
     return (
@@ -635,73 +648,14 @@ export default function StorySceneScreen() {
           </View>
         ) : null}
 
-        <View style={{ marginTop: 24, padding: 16, backgroundColor: 'white', borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0' }}>
-          <Text style={{ fontWeight: '600', color: '#1e293b', marginBottom: 8 }}>Escribe tu mensaje (opcional)</Text>
-          <TextInput
-            value={userText}
-            onChangeText={setUserText}
-            placeholder="Escribe aquí tu intervención..."
-            multiline
-            style={{
-              borderWidth: 1,
-              borderColor: '#cbd5f5',
-              borderRadius: 10,
-              padding: 12,
-              minHeight: 60,
-              backgroundColor: '#f8fafc',
-              textAlignVertical: 'top',
-            }}
-          />
-          <Pressable
-            disabled={flowState !== 'idle' || !userText.trim().length || retryBlocked}
-            onPress={handleSendText}
-            style={({ pressed }) => ({
-              marginTop: 12,
-              paddingVertical: 12,
-              borderRadius: 10,
-              alignItems: 'center',
-              backgroundColor:
-                flowState !== 'idle' || !userText.trim().length || retryBlocked
-                  ? '#cbd5f5'
-                  : pressed
-                  ? '#2563eb'
-                  : '#3b82f6',
-            })}
-          >
-            <Text style={{ color: 'white', fontWeight: '700' }}>Enviar texto</Text>
-          </Pressable>
-        </View>
-
-        <View style={{ marginTop: 16, padding: 16, backgroundColor: 'white', borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0' }}>
-          <Text style={{ fontWeight: '600', color: '#1e293b', marginBottom: 8 }}>Grabar mensaje</Text>
-          <Pressable
-            onPressIn={flowState === 'idle' && !retryBlocked ? handleRecordPressIn : undefined}
-            onPressOut={handleRecordRelease}
-            disabled={retryBlocked || (flowState !== 'idle' && flowState !== 'recording')}
-            style={({ pressed }) => ({
-              paddingVertical: 14,
-              borderRadius: 999,
-              alignItems: 'center',
-              backgroundColor:
-                retryBlocked
-                  ? '#cbd5f5'
-                  : flowState === 'recording'
-                  ? '#dc2626'
-                  : pressed
-                  ? '#7c3aed'
-                  : flowState === 'idle'
-                  ? '#8b5cf6'
-                  : '#cbd5f5',
-            })}
-          >
-            <Text style={{ color: 'white', fontWeight: '700' }}>
-              {flowState === 'recording' ? 'Suelta para finalizar' : 'Mantén presionado para grabar'}
-            </Text>
-          </Pressable>
-          {statusLabel ? (
-            <Text style={{ marginTop: 8, color: '#475569' }}>{statusLabel}</Text>
-          ) : null}
-        </View>
+        <StoryMessageComposer
+          flowState={flowState}
+          retryBlocked={retryBlocked}
+          statusLabel={statusLabel}
+          onSendText={handleSendText}
+          onRecordPressIn={handleRecordPressIn}
+          onRecordRelease={handleRecordRelease}
+        />
 
         {errorMessage ? (
           <Text style={{ marginTop: 12, color: '#dc2626' }}>{errorMessage}</Text>

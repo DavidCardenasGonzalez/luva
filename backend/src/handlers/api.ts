@@ -1344,17 +1344,19 @@ async function generateStoryMissionFeedback(
     .map((msg) => `${msg.role === 'user' ? 'Student' : 'Guide'}: ${msg.content}`)
     .join('\n')
     .trim();
-  const systemPrompt = `You are an encouraging English coach. Summarize the completed mission in Spanish and highlight improvement points.
+  const systemPrompt = `You are an English coach. 
+  You need to evaluate a conversation for a Spanish speaker student with an AI.
+  the student is trying to complete a mission in a story-based language learning app made 
+  for Spanish speakers to improve their English skills from b1 to b2 level.
 Return ONLY JSON with the exact shape:
 {
-  "summary": "2 sentences in Spanish highlighting what went well in the mission",
-  "improvements": ["short Spanish bullet point", "..."]
+  "summary": "short Spanish summary of the student's overall performance in the conversation",
+  "improvements": ["short Spanish bullet with errors and suggestions to sound more natural", "..."]
 }
 
 Rules:
-- Base the feedback on the entire conversation, not just the last message.
-- Keep improvements to 3-5 concise actionable points focused on English skills.
-- If there are no issues, still include at least one suggestion to keep improving.
+- Base the feedback on the entire conversation.
+- Do not mention the AI role or behavior, focus only on the student's English.
 - Do not add any extra commentary outside the JSON.`;
   const userPrompt = `Story: ${story.title}
 Mission: ${mission.title}
@@ -1362,6 +1364,17 @@ Mission summary: ${mission.sceneSummary || 'No summary provided.'}
 
 Full conversation transcript:
 ${conversationText || 'No conversation available.'}`;
+  console.log(
+    JSON.stringify({
+      scope: 'stories.feedback.openai.begin',
+      storyId: story.storyId,
+      missionId: mission.missionId,
+      userPrompt,
+      systemPrompt,
+    })
+  );
+  console.log('systemPrompt:', systemPrompt);
+  console.log('userPrompt:', userPrompt);
   const ac = new AbortController();
   const to = setTimeout(() => ac.abort(), timeoutMs);
   let raw = '';
