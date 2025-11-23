@@ -1,0 +1,92 @@
+[
+  {
+    "storyId": "airport_chaos",
+    "title": "Caos en el aeropuerto",
+    "summary": "Tu vuelo se retrasa, pierdes tu maleta y terminas haciendo nuevos amigos en el aeropuerto.",
+    "level": "B2",
+    "tags": ["travel", "communication", "funny"],
+    "unlockCost": 1,
+    "missions": []
+  },
+  {
+    "storyId": "roommate_from_hell",
+    "title": "El compañero de piso del infierno",
+    "summary": "Te mudas con un nuevo compañero y pronto descubres que tiene hábitos muy extraños.",
+    "level": "B2",
+    "tags": ["daily_life", "conflict", "humor"],
+    "unlockCost": 1,
+    "missions": []
+  },
+  {
+    "storyId": "restaurant_disaster",
+    "title": "Cena desastrosa",
+    "summary": "Una cena elegante sale mal cuando pides algo que no entiendes del menú.",
+    "level": "B2",
+    "tags": ["food", "culture", "conversation"],
+    "unlockCost": 1,
+    "missions": []
+  },
+  {
+    "storyId": "job_interview_blues",
+    "title": "La entrevista más rara del mundo",
+    "summary": "Tienes una entrevista de trabajo con un jefe muy excéntrico y preguntas inesperadas.",
+    "level": "B2",
+    "tags": ["career", "comedy", "conversation"],
+    "unlockCost": 1,
+    "missions": []
+  },
+  {
+    "storyId": "haunted_airbnb",
+    "title": "El Airbnb embrujado",
+    "summary": "Reservas una habitación barata y descubres que no estás solo… o eso parece.",
+    "level": "B2",
+    "tags": ["travel", "mystery", "humor"],
+    "unlockCost": 1,
+    "missions": []
+  },
+  {
+    "storyId": "festival_confusion",
+    "title": "Perdido en el festival",
+    "summary": "Pierdes a tus amigos en un festival de música y terminas en conversaciones muy raras.",
+    "level": "B2",
+    "tags": ["music", "social", "adventure"],
+    "unlockCost": 1,
+    "missions": []
+  },
+  {
+    "storyId": "gym_newbie",
+    "title": "Primer día en el gimnasio",
+    "summary": "Intentas seguir el ritmo del entrenador más intenso del mundo.",
+    "level": "B2",
+    "tags": ["fitness", "humor", "daily_life"],
+    "unlockCost": 1,
+    "missions": []
+  },
+  {
+    "storyId": "lost_in_translation",
+    "title": "Perdido en la traducción",
+    "summary": "Viajas a Japón y descubres que tus frases de inglés no significan lo que creías.",
+    "level": "B2",
+    "tags": ["travel", "culture", "funny"],
+    "unlockCost": 1,
+    "missions": []
+  },
+  {
+    "storyId": "office_gossip",
+    "title": "El chisme de oficina",
+    "summary": "Empiezas un nuevo trabajo y accidentalmente te involucras en un rumor que se sale de control.",
+    "level": "B2",
+    "tags": ["work", "social", "drama"],
+    "unlockCost": 1,
+    "missions": []
+  },
+  {
+    "storyId": "blind_date_surprise",
+    "title": "Cita a ciegas sorpresa",
+    "summary": "Tu amigo te arregla una cita a ciegas… pero resulta ser alguien totalmente inesperado.",
+    "level": "B2",
+    "tags": ["dating", "humor", "conversation"],
+    "unlockCost": 1,
+    "missions": []
+  }
+]

@@ -1,0 +1,1242 @@
+[
+  {
+    "storyId": "airport_chaos",
+    "title": "Caos en el aeropuerto",
+    "summary": "Tu vuelo se retrasa, pierdes tu maleta y terminas haciendo nuevos amigos en el aeropuerto.",
+    "level": "B2",
+    "tags": [
+      "travel",
+      "communication",
+      "funny"
+    ],
+    "unlockCost": 1,
+    "missions": [
+      {
+        "missionId": "airport_chaos_missing_luggage_agent",
+        "title": "El agente de maletas desaparecidas",
+        "sceneSummary": "Tu maleta ha desaparecido y te enfrentas a un agente oficial que parece más perdido que tú. Necesitas obtener información clara antes de que tu vuelo se llame.",
+        "aiRole": "Eres un agente de objetos perdidos en el aeropuerto, formal pero con un toque distraído y humorístico. Responde con información útil, mezcla profesionalismo con pequeñas distracciones y ofrece opciones prácticas.",
+        "caracterName": "Margo Finch",
+        "caracterPrompt": "A middle-aged woman wearing a bright airport uniform and a slightly crooked name badge. She has round glasses, a friendly but flustered expression, and stands behind a cluttered lost-and-found desk surrounded by suitcases and sticky notes.",
+        "requirements": [
+          {
+            "requirementId": "ask_luggage_details",
+            "text": "Pregúntale en inglés por la información que necesita sobre tu maleta (color, tamaño, contenido) para abrir un reporte."
+          },
+          {
+            "requirementId": "clarify_compensation",
+            "text": "Pregunta en inglés qué opciones de compensación o ayuda ofrece la aerolínea mientras se investiga la maleta."
+          },
+          {
+            "requirementId": "confirm_next_steps",
+            "text": "Pide en inglés un resumen claro de los siguientes pasos y un número de contacto para seguimiento."
+          }
+        ]
+      },
+      {
+        "missionId": "airport_chaos_delayed_passenger_band",
+        "title": "La banda del retraso",
+        "sceneSummary": "Un grupo de músicos callejeros ocupa una sala de espera y promete animar el retraso... pero quieren que te unas. ¿Improvisas en inglés o huyes?",
+        "aiRole": "Eres el líder de una banda de viajeros excéntricos, carismático y excesivamente entusiasta. Invita al estudiante a participar con energía, humor y algunas frases para practicar.",
+        "caracterName": "Rico Storm",
+        "caracterPrompt": "A lively, flamboyant man in colorful travel-worn clothes and a wide hat covered in pins. He carries a ukulele and has a big, welcoming grin. He’s standing in a busy gate area surrounded by chairs and small instruments.",
+        "requirements": [
+          {
+            "requirementId": "accept_or_decline",
+            "text": "Di en inglés si te unes o no a la actuación y explica por qué (una respuesta clara y razonada)."
+          },
+          {
+            "requirementId": "ask_for_instructions",
+            "text": "Pide en inglés instrucciones sencillas sobre qué cantar o tocar si decides participar."
+          },
+          {
+            "requirementId": "give_feedback",
+            "text": "Ofrece en inglés un comentario honesto y educado sobre la actuación de la banda al final."
+          }
+        ]
+      },
+      {
+        "missionId": "airport_chaos_confused_customs_officer",
+        "title": "El aduanero confundido",
+        "sceneSummary": "Un oficial de aduanas parece haber olvidado las normas y te hace preguntas raras sobre tu viaje. Tu misión: responder claramente y mantener la calma.",
+        "aiRole": "Eres un oficial de aduanas distraído y curioso, con tendencia a mezclas de formalidad y preguntas absurdas. Debes mantener la conversación coherente, hacer preguntas de control y reaccionar a respuestas inesperadas.",
+        "caracterName": "Officer Bex",
+        "caracterPrompt": "A uniformed customs officer with a clipboard, slightly rumpled hat, and a polite but puzzled expression. They stand near an inspection desk with posters about prohibited items behind them.",
+        "requirements": [
+          {
+            "requirementId": "state_purpose_of_trip",
+            "text": "Explica en inglés y con detalle el propósito de tu viaje y la duración prevista."
+          },
+          {
+            "requirementId": "declare_items",
+            "text": "Declara en inglés si llevas objetos que deban declararse y describe uno con detalle (cantidad, valor, motivo)."
+          },
+          {
+            "requirementId": "ask_for_clarification",
+            "text": "Pide en inglés clarificación si el oficial te da instrucciones confusas o contradictorias."
+          }
+        ]
+      },
+      {
+        "missionId": "airport_chaos_caffeine_crisis_barista",
+        "title": "La crisis del café",
+        "sceneSummary": "Tu vuelo se retrasa otra vez y la cafetería está en caos: el barista es un inventor loco que prepara cafés con nombres ridículos. Necesitas conseguir un café y una conversación entretenida.",
+        "aiRole": "Eres un barista creativo, hiperactivo y filosófico que inventa nombres extravagantes para bebidas. Mantén respuestas rápidas, juguetonas y ofrécele opciones al estudiante mientras lo animas a practicar frases útiles para pedir.",
+        "caracterName": "Bean Maestro",
+        "caracterPrompt": "A quirky barista wearing an apron splattered with colorful stains and a quirky beanie. He has animated hand gestures, a mischievous smile, and stands behind a counter with strange coffee gadgets and jars labeled with odd names.",
+        "requirements": [
+          {
+            "requirementId": "order_coffee",
+            "text": "Pide en inglés una bebida concreta, especificando tamaño y una preferencia (milk, sugar, temperature)."
+          },
+          {
+            "requirementId": "ask_about_ingredients",
+            "text": "Pregunta en inglés qué ingredientes especiales tiene la bebida más extraña que ofrece y menciona si eres alérgico a algo."
+          },
+          {
+            "requirementId": "small_talk_flight_delay",
+            "text": "Inicia en inglés una pequeña conversación sobre el retraso del vuelo y explica cómo te sientes (mínimo dos frases)."
+          }
+        ]
+      },
+      {
+        "missionId": "airport_chaos_stranded_family_negotiator",
+        "title": "La familia varada negocia",
+        "sceneSummary": "Una familia necesita ayuda para reorganizar conexiones y te piden que medies con el personal del aeropuerto. Tienes que ser claro, cortés y efectivo.",
+        "aiRole": "Eres un padre/madre pragmático y un poco dramático que intenta coordinar a una familia estresada. Habla con urgencia pero de forma cooperativa, busca soluciones y responde a propuestas con prioridades concretas.",
+        "caracterName": "Lena Ortiz",
+        "caracterPrompt": "A worried but determined parent in casual travel clothes, holding a toddler and several boarding passes. She has a slightly exhausted smile and stands near an information desk surrounded by suitcases and toys.",
+        "requirements": [
+          {
+            "requirementId": "propose_solution",
+            "text": "Propón en inglés al menos dos soluciones prácticas para reorganizar los vuelos o el alojamiento para la familia."
+          },
+          {
+            "requirementId": "negotiate_priority",
+            "text": "Negocia en inglés con el personal (simulado) para conseguir prioridad en el reembarque o asistencia para la familia."
+          },
+          {
+            "requirementId": "confirm_details",
+            "text": "Confirma en inglés los detalles finales (nombres, nuevos horarios, puntos de encuentro) y pide una implicación de seguimiento."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "storyId": "roommate_from_hell",
+    "title": "El compañero de piso del infierno",
+    "summary": "Te mudas con un nuevo compañero y pronto descubres que tiene hábitos muy extraños.",
+    "level": "B2",
+    "tags": [
+      "daily_life",
+      "conflict",
+      "humor"
+    ],
+    "unlockCost": 1,
+    "missions": [
+      {
+        "missionId": "roommate_from_hell_midnight_concert",
+        "title": "Concierto a medianoche",
+        "sceneSummary": "Tu compañero practica la guitarra a las tres de la mañana y quiere que le cantes el estribillo. Tienes que sobrevivir la jam session sin perder la calma.",
+        "aiRole": "Eres un compañero excéntrico y entusiasta que toca la guitarra a cualquier hora. Responde con energía exagerada, frases cortas y humor, pero acepta sugerencias razonables si el alumno las propone.",
+        "caracterName": "Marty Strings",
+        "caracterPrompt": "A lanky young man with wild curly hair, wearing a faded band T-shirt and ripped jeans. He holds an electric guitar slung low, smiling wildly, in a cluttered living room filled with posters and empty coffee cups. He looks passionate and a little oblivious to social norms.",
+        "requirements": [
+          {
+            "requirementId": "ask_to_lower_volume",
+            "text": "Pídele en inglés que baje la intensidad o el volumen de la guitarra."
+          },
+          {
+            "requirementId": "suggest_compromise",
+            "text": "Propón en inglés una solución intermedia (por ejemplo, usar auriculares o cambiar horario)."
+          },
+          {
+            "requirementId": "express_feeling",
+            "text": "Di en inglés cómo te hace sentir la situación (molesto, cansado, comprensivo, etc.)."
+          }
+        ]
+      },
+      {
+        "missionId": "roommate_from_hell_mystery_food",
+        "title": "La comida del misterio",
+        "sceneSummary": "Encuentras un recipiente sospechoso en la nevera con una nota críptica. Tu compañero insiste en que es experimental cuisine. Debes investigar sin ofender.",
+        "aiRole": "Eres un chef aficionado y algo teatral sobre tus creaciones. Hablas con orgullo y misterio, usando metáforas culinarias; acepta preguntas y explica ingredientes si se le presiona.",
+        "caracterName": "Chef Cosmo",
+        "caracterPrompt": "A quirky person in a flour-dusted apron, wearing mismatched socks and a bandana. They hold a mysterious Tupperware with a proud grin, standing in a small but chaotic kitchen full of herbs and strange jars.",
+        "requirements": [
+          {
+            "requirementId": "ask_ingredients",
+            "text": "Pregunta en inglés qué ingredientes contiene el plato misterioso."
+          },
+          {
+            "requirementId": "refuse_politely",
+            "text": "Rechaza probarlo en inglés de forma educada pero firme, explicando por qué."
+          },
+          {
+            "requirementId": "offer_alternative",
+            "text": "Sugiere en inglés una alternativa segura para compartir comida (por ejemplo, cocinar juntos otra cosa)."
+          }
+        ]
+      },
+      {
+        "missionId": "roommate_from_hell_pet_dragon",
+        "title": "La mascota inesperada",
+        "sceneSummary": "Tu compañero aparece con un 'mini dragón' (spoiler: es muy ruidoso y fuma pipas). Debes establecer reglas claras sobre mascotas en casa sin sonar autoritario.",
+        "aiRole": "Eres juguetón y enamorado de tu mascota excéntrica; reaccionas emocionalmente y defiendes tu libertad, pero puedes negociar si el otro se muestra razonable.",
+        "caracterName": "Lola Flame",
+        "caracterPrompt": "A confident person with colorful hair wearing a leather jacket covered in pins, cradling a small creature with tiny wings that emits a faint glow. They stand in a hallway with scorch marks and a mischievous smile.",
+        "requirements": [
+          {
+            "requirementId": "set_rule",
+            "text": "Explica en inglés una regla concreta sobre la mascota (por ejemplo, dónde puede estar, limpieza, ruido)."
+          },
+          {
+            "requirementId": "ask_consequences",
+            "text": "Pregunta en inglés qué pasará si la mascota rompe una regla."
+          },
+          {
+            "requirementId": "negotiate_solution",
+            "text": "Negocia en inglés un compromiso razonable para cuidar la mascota y mantener la casa ordenada."
+          }
+        ]
+      },
+      {
+        "missionId": "roommate_from_hell_bathroom_schedule",
+        "title": "Turnos para el baño",
+        "sceneSummary": "Tu compañero decide que el baño debe ser usado por turnos con una lista muy creativa. Tienes que organizar un calendario justo sin parecer rudo.",
+        "aiRole": "Eres excesivamente organizado y algo controlador respecto a horarios. Hablas con precisión y propones reglas estrictas, pero puedes flexibilizar si recibes argumentos lógicos.",
+        "caracterName": "Timetable Tina",
+        "caracterPrompt": "A neat person in a crisp button-down shirt and glasses, carrying a clipboard and a marker. She stands by a whiteboard with post-it notes and a drawn timetable, looking determined and slightly anxious.",
+        "requirements": [
+          {
+            "requirementId": "propose_time",
+            "text": "Sugiere en inglés un horario alternativo para usar el baño que funcione para ambos."
+          },
+          {
+            "requirementId": "ask_for_reason",
+            "text": "Pregunta en inglés por qué el compañero necesita ese horario tan estricto."
+          },
+          {
+            "requirementId": "agree_on_checks",
+            "text": "Propón en inglés una forma de revisar que el sistema funciona (por ejemplo, una prueba de una semana)."
+          }
+        ]
+      },
+      {
+        "missionId": "roommate_from_hell_surprise_party",
+        "title": "La fiesta sorpresa que no fue tan sorpresa",
+        "sceneSummary": "Tu compañero organiza una 'sorpresa' para ti invitando a cinco desconocidos. Debes manejar la situación socialmente y recuperar el control de la reunión.",
+        "aiRole": "Eres entusiasta, demasiado confiado en tus ideas de fiesta y poco consciente de los límites personales. Responde con justificaciones y alegría, pero acepta retroalimentación si es clara y firme.",
+        "caracterName": "Party Pete",
+        "caracterPrompt": "A cheerful person in a bright Hawaiian shirt with a homemade banner behind them and a plate of dubious snacks. They grin broadly, arms open as if welcoming everyone, in a messy living room full of balloons.",
+        "requirements": [
+          {
+            "requirementId": "express_boundaries",
+            "text": "Comunica en inglés límites claros sobre invitados y espacio personal (por ejemplo, número de personas o tiempo de visita)."
+          },
+          {
+            "requirementId": "offer_alternative_plan",
+            "text": "Propón en inglés una alternativa más cómoda para celebrar (por ejemplo, smaller get-together another day)."
+          },
+          {
+            "requirementId": "handle_unexpected",
+            "text": "Di en inglés cómo gestionarías a un invitado molesto o incómodo durante la fiesta."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "storyId": "restaurant_disaster",
+    "title": "Cena desastrosa",
+    "summary": "Una cena elegante sale mal cuando pides algo que no entiendes del menú.",
+    "level": "B2",
+    "tags": [
+      "food",
+      "culture",
+      "conversation"
+    ],
+    "unlockCost": 1,
+    "missions": [
+      {
+        "missionId": "restaurant_disaster_waiter_confused",
+        "title": "Camarero totalmente perdido",
+        "sceneSummary": "El camarero trae un plato que no pediste y parece sinceramente confundido — y ligeramente culpable.",
+        "aiRole": "Eres un camarero distraído pero amable que intenta arreglar el error. Habla con humor, admite equivocaciones y ofrece soluciones, pero evita sonar sumiso.",
+        "caracterName": "Marty",
+        "caracterPrompt": "A young waiter with a slightly rumpled white shirt and a crooked bow tie. He has an apologetic smile, messy hair, and holds a tray with a wrong dish. The setting is a dimly lit, elegant restaurant with clinking glasses.",
+        "requirements": [
+          {
+            "requirementId": "ask_for_clarification",
+            "text": "Pregunta en inglés qué plato te trajo y por qué se equivocó."
+          },
+          {
+            "requirementId": "request_correction",
+            "text": "Pide en inglés que te traiga el plato correcto y especifica cómo quieres que se prepare."
+          },
+          {
+            "requirementId": "confirm_time_expectation",
+            "text": "Pide en inglés cuánto tiempo tardará la corrección y confirma que estás dispuesto a esperar o no."
+          }
+        ]
+      },
+      {
+        "missionId": "restaurant_disaster_mysterious_dish",
+        "title": "El plato misterioso",
+        "sceneSummary": "Bestias del menú: recibes un plato con un nombre extraño y nadie sabe qué ingredientes contiene — incluida la cocina.",
+        "aiRole": "Eres un cliente curioso y un poco teatral que explora el menú usando lenguaje imaginativo. Responde con preguntas directas y expresa dudas sobre ingredientes y alergias de forma clara.",
+        "caracterName": "Luna",
+        "caracterPrompt": "A quirky diner in a colorful scarf, leaning over the menu with wide eyes. She has playful makeup, a notebook for notes, and sits at a candlelit table surrounded by cookbook sketches.",
+        "requirements": [
+          {
+            "requirementId": "ask_ingredient_details",
+            "text": "Pregunta en inglés por los ingredientes exactos del plato y si contiene alérgenos comunes."
+          },
+          {
+            "requirementId": "ask_for_substitute",
+            "text": "Pide en inglés una alternativa o sustitución si no puedes comer un ingrediente."
+          },
+          {
+            "requirementId": "ask_cooking_method",
+            "text": "Pregunta en inglés cómo está cocinado el plato (frying, roasting, raw, etc.) y por qué es así."
+          }
+        ]
+      },
+      {
+        "missionId": "restaurant_disaster_angry_chef",
+        "title": "El chef furioso",
+        "sceneSummary": "El chef llega al comedor como si fuera un general, defiende su creación y te desafía a criticarla — con dramatismo.",
+        "aiRole": "Eres un chef temperamental y apasionado, algo teatral. Defiende los sabores de tu plato, explica técnicas y responde con orgullo, pero escucha argumentos razonables.",
+        "caracterName": "Chef Marco",
+        "caracterPrompt": "A middle-aged chef in a stained white apron and a tall chef's hat, arms crossed and an intense look. He stands under warm kitchen lights with a skillet in hand and steam rising behind him.",
+        "requirements": [
+          {
+            "requirementId": "give_constructive_feedback",
+            "text": "Da en inglés una crítica constructiva sobre el sabor o la textura del plato (usa vocabulario culinario básico)."
+          },
+          {
+            "requirementId": "ask_about_technique",
+            "text": "Pregunta en inglés qué técnica o ingrediente hizo ese sabor distintivo."
+          },
+          {
+            "requirementId": "negotiate_compensation",
+            "text": "Negocia en inglés una solución (reemplazo, descuento o disculpa) si el plato está mal."
+          }
+        ]
+      },
+      {
+        "missionId": "restaurant_disaster_pretentious_critic",
+        "title": "El crítico pretencioso",
+        "sceneSummary": "Un crítico famoso practica su reseña en voz alta y espera que te unas a su seguidilla de adjetivos exquisitos.",
+        "aiRole": "Eres un crítico de comida pretencioso pero divertido. Usa descripciones floridas, hace preguntas retóricas y provoca discusión sobre sabor y experiencia.",
+        "caracterName": "Veronica Slate",
+        "caracterPrompt": "A fashionable food critic wearing a stylish coat and reading glasses perched on her nose. She has an elegant posture, a notebook full of notes, and a tiny espresso cup on the table.",
+        "requirements": [
+          {
+            "requirementId": "describe_taste",
+            "text": "Describe en inglés el sabor del plato usando al menos tres adjetivos diferentes y justifica uno de ellos."
+          },
+          {
+            "requirementId": "compare_with_other",
+            "text": "Compara en inglés este plato con otro plato o experiencia culinaria que conozcas."
+          },
+          {
+            "requirementId": "ask_for_recommendation",
+            "text": "Pide en inglés a la crítica que recomiende otro plato del menú y explica por qué te interesa."
+          }
+        ]
+      },
+      {
+        "missionId": "restaurant_disaster_tipsy_sommelier",
+        "title": "El sumiller un poco alegre",
+        "sceneSummary": "El sumiller insiste en maridar tu comida con vinos raros y hace bromas extrañas sobre cada cosecha.",
+        "aiRole": "Eres un sumiller entusiasta y un poco bromista. Sugiere maridajes con confianza, explica notas de cata sencillas y responde de forma educada cuando el cliente no bebe alcohol.",
+        "caracterName": "Simon",
+        "caracterPrompt": "A cheerful sommelier in a dark vest and bow tie, holding a wine bottle and a tasting glass. He smiles broadly, with a slightly flushed face, standing beside a well-stocked wine cabinet.",
+        "requirements": [
+          {
+            "requirementId": "ask_pairing_reason",
+            "text": "Pregunta en inglés por qué ese vino marida con tu plato y menciona una característica del vino."
+          },
+          {
+            "requirementId": "decline_alcohol_politely",
+            "text": "Si no quieres alcohol, rechaza la sugerencia en inglés de forma educada y pide una alternativa sin alcohol."
+          },
+          {
+            "requirementId": "order_specific_vintage",
+            "text": "Pide en inglés una botella específica o una alternativa concreta (mention vintage, region or grape) y confirma el precio aproximado."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "storyId": "job_interview_blues",
+    "title": "La entrevista más rara del mundo",
+    "summary": "Tienes una entrevista de trabajo con un jefe muy excéntrico y preguntas inesperadas.",
+    "level": "B2",
+    "tags": [
+      "career",
+      "comedy",
+      "conversation"
+    ],
+    "unlockCost": 1,
+    "missions": [
+      {
+        "missionId": "job_interview_blues_greeting_magic_hire",
+        "title": "Saludo con truco",
+        "sceneSummary": "Entras a una sala donde el entrevistador hace un truco de cartas antes de empezar. Debes impresionar sin perder la compostura.",
+        "aiRole": "Eres un entrevistador excéntrico que usa magia para poner a prueba la reacción de candidatos. Mantén un tono juguetón, ligeramente provocador y ofrece retroalimentación breve según las respuestas del alumno.",
+        "caracterName": "Mr. Cardwell",
+        "caracterPrompt": "A middle-aged man with a mischievous grin, wearing a vintage waistcoat and a pocket watch. He performs a card trick at a small wooden table in a dimly lit office, with a faint smell of pipe tobacco and a cluttered bookshelf behind him.",
+        "requirements": [
+          {
+            "requirementId": "introduce_yourself",
+            "text": "Preséntate en inglés mencionando tu nombre y un rasgo profesional relevante (1–2 frases)."
+          },
+          {
+            "requirementId": "react_to_trick",
+            "text": "Reacciona en inglés al truco de cartas mostrando sorpresa o curiosidad y haciendo una pregunta relacionada."
+          },
+          {
+            "requirementId": "ask_about_test",
+            "text": "Pregunta en inglés cómo el truco está relacionado con la prueba de selección (motiva la conexión con el trabajo)."
+          }
+        ]
+      },
+      {
+        "missionId": "job_interview_blues_weird_questionnaire",
+        "title": "Cuestionario absurdo",
+        "sceneSummary": "Te dan un cuestionario con preguntas raras, como elegir una fruta que represente a tu jefe. Tienes que responder con argumentos claros.",
+        "aiRole": "Eres un entrevistador surrealista que hace preguntas inusuales para evaluar pensamiento creativo y razonamiento. Habla de forma seria pero con toques de humor absurdo; pide justificaciones coherentes.",
+        "caracterName": "Dr. Oddly",
+        "caracterPrompt": "A quirky professor-like figure wearing round glasses and a colorful bow tie. He holds a clipboard covered in stickers, stands in front of a whiteboard scribbled with strange diagrams, and smiles as if every question is a puzzle.",
+        "requirements": [
+          {
+            "requirementId": "choose_metaphor",
+            "text": "Elige en inglés una metáfora (por ejemplo, animal, fruta u objeto) que represente a tu jefe ideal y di por qué (2–3 frases)."
+          },
+          {
+            "requirementId": "justify_choice",
+            "text": "Explica en inglés cómo esa metáfora refleja tus valores profesionales usando ejemplos concretos."
+          },
+          {
+            "requirementId": "ask_followup",
+            "text": "Haz una pregunta de seguimiento en inglés para clarificar una de las preguntas del entrevistador."
+          }
+        ]
+      },
+      {
+        "missionId": "job_interview_blues_humor_test",
+        "title": "Prueba de humor",
+        "sceneSummary": "El jefe cuenta un chiste extraño para ver si puedes mantener la calma y responder con ingenio profesional.",
+        "aiRole": "Eres un jefe con humor extraño que evalúa la capacidad del candidato para manejar tensión social. Mantén un tono juguetón, lanza el chiste y espera respuestas ingeniosas y respetuosas.",
+        "caracterName": "Captain Quip",
+        "caracterPrompt": "A bearded man in a slightly rumpled blazer and a colorful scarf, sitting behind a desk with novelty knick-knacks. He leans forward with an amused expression as if about to tell a joke, surrounded by posters of vintage comedy acts.",
+        "requirements": [
+          {
+            "requirementId": "respond_to_joke",
+            "text": "Responde en inglés al chiste mostrando comprensión (puedes reír o comentar) sin ofender; 1–2 frases."
+          },
+          {
+            "requirementId": "make_light_comment",
+            "text": "Haz un comentario ingenioso y profesional en inglés que conecte el chiste con el trabajo o el equipo."
+          },
+          {
+            "requirementId": "maintain_professional_tone",
+            "text": "Demuestra en inglés que mantienes un tono profesional mientras eres simpático (usa una frase que combine humor y profesionalidad)."
+          }
+        ]
+      },
+      {
+        "missionId": "job_interview_blues_confession_policy",
+        "title": "Confesión laboral",
+        "sceneSummary": "Te piden confesar tu peor error profesional y proponer cómo lo arreglarías. Aquí la sinceridad y la solución importan más que la perfección.",
+        "aiRole": "Eres un entrevistador serio pero comprensivo que valora la honestidad y la capacidad de aprendizaje. Haz preguntas clarificadoras y pide un plan de mejora concreto.",
+        "caracterName": "Ms. Ledger",
+        "caracterPrompt": "A composed woman in her early 40s wearing a smart blazer and subtle jewelry. She sits at a tidy desk with a laptop open, her expression attentive and encouraging as she leans slightly forward to listen.",
+        "requirements": [
+          {
+            "requirementId": "describe_mistake",
+            "text": "Cuenta en inglés un error profesional realista (no demasiado grave) y di qué aprendiste (2–3 frases)."
+          },
+          {
+            "requirementId": "propose_solution",
+            "text": "Propón en inglés un plan concreto en 3 pasos para evitar ese error en el futuro."
+          },
+          {
+            "requirementId": "ask_for_feedback",
+            "text": "Pide en inglés retroalimentación sobre tu plan y cómo podrías mejorarlo."
+          }
+        ]
+      },
+      {
+        "missionId": "job_interview_blues_negotiation_snacks",
+        "title": "Negociación de snacks",
+        "sceneSummary": "La entrevista llega a la parte de condiciones: te ofrecen snacks extraños como beneficio. Negocia en serio (pero con gracia) tus condiciones laborales.",
+        "aiRole": "Eres un jefe extravagante que valora negociaciones creativas y evalúa la capacidad de argumento del candidato. Mantén un tono diplomático y juguetón, responde con concesiones y contraofertas.",
+        "caracterName": "Lady Bargain",
+        "caracterPrompt": "An elegant, eccentric executive wearing a bright patterned jacket and oversized glasses. She sits at a long table with a bowl of exotic snacks and a stack of benefit brochures, smiling as she listens to offers.",
+        "requirements": [
+          {
+            "requirementId": "state_expectations",
+            "text": "Declara en inglés tus expectativas principales (salario, horario o beneficios) de forma clara y concreta."
+          },
+          {
+            "requirementId": "make_counteroffer",
+            "text": "Haz en inglés una contraoferta razonada si te ofrecen algo insuficiente; explica por qué es justa."
+          },
+          {
+            "requirementId": "confirm_agreement",
+            "text": "Cierra en inglés la negociación confirmando los puntos acordados o solicitando un siguiente paso claro."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "storyId": "haunted_airbnb",
+    "title": "El Airbnb embrujado",
+    "summary": "Reservas una habitación barata y descubres que no estás solo… o eso parece.",
+    "level": "B2",
+    "tags": [
+      "travel",
+      "mystery",
+      "humor"
+    ],
+    "unlockCost": 1,
+    "missions": [
+      {
+        "missionId": "haunted_airbnb_whispering_host",
+        "title": "El anfitrión susurrante",
+        "sceneSummary": "Te recibe el anfitrión de la casa, que habla en voz baja y parece saber demasiado sobre tus movimientos. Todo suena amistoso... pero hay muchos susurros entre líneas.",
+        "aiRole": "Eres el anfitrión susurrante y un poco teatral. Habla en voz baja, con frases misteriosas y demasiada confianza en lo que sabe del huésped; mezcla cortesía con insinuaciones extrañas, pero sin ser agresivo.",
+        "caracterName": "Mr. Hush",
+        "caracterPrompt": "A slender middle-aged man wearing a vintage cardigan and a pocket watch. He has soft gray hair, intense eyes, and a knowing smile. He stands in a dim hallway with warm, old-fashioned lighting, leaning slightly forward as if sharing secrets.",
+        "requirements": [
+          {
+            "requirementId": "ask_checkin_time",
+            "text": "Pregunta en inglés cuál es la hora de entrada (check-in) y confirma si hay reglas especiales."
+          },
+          {
+            "requirementId": "react_to_secret",
+            "text": "Reacciona en inglés cuando el anfitrión murmure que 'alguien' conoce tu nombre; muestra curiosidad y sorpresa."
+          },
+          {
+            "requirementId": "clarify_concerns",
+            "text": "Pide en inglés una explicación clara sobre cualquier ruido nocturno o costumbre rara de la casa."
+          }
+        ]
+      },
+      {
+        "missionId": "haunted_airbnb_ghostly_cleaner",
+        "title": "La limpiadora que no está del todo presente",
+        "sceneSummary": "Una mujer aparece con un carrito y parece limpiar cosas que nadie más ve. Te ofrece consejos de limpieza... y profecías domésticas.",
+        "aiRole": "Eres la limpiadora fantasmal, parlanchina y directa. Usa humor seco, a veces divaga sobre objetos cotidianos como si tuvieran vida; responde con frases cortas y enigmáticas.",
+        "caracterName": "Mopilda",
+        "caracterPrompt": "A middle-aged woman in a floral dress with rubber gloves and an old-fashioned cleaning cart. Her expression is cheerful but distant, as if half-listening to another world. She stands in a sunlit, slightly dusty kitchen.",
+        "requirements": [
+          {
+            "requirementId": "ask_for_help",
+            "text": "Pide en inglés ayuda para encontrar un objeto perdido en la habitación y describe dónde lo viste por última vez."
+          },
+          {
+            "requirementId": "follow_cleaning_advice",
+            "text": "Sigue en inglés una instrucción práctica de limpieza que te da la limpiadora y responde si la entiendes o no."
+          },
+          {
+            "requirementId": "question_prophecy",
+            "text": "Cuestiona en inglés una 'profecía doméstica' que ella diga, pidiendo detalles o pruebas."
+          }
+        ]
+      },
+      {
+        "missionId": "haunted_airbnb_eccentric_inventor",
+        "title": "El inventor excéntrico",
+        "sceneSummary": "Encuentras a un inventor con un aparato extraño que supuestamente 'ahuyenta malos espíritus'. Está emocionado por probarlo contigo como voluntario.",
+        "aiRole": "Eres un inventor excéntrico, entusiasta y algo caótico. Explicas ideas con metáforas extrañas, usas vocabulario cotidiano mezclado con tecnicismos ligeros; animas al alumno a participar en el experimento.",
+        "caracterName": "Professor Tinker",
+        "caracterPrompt": "A quirky older man with messy hair, round glasses, and a stained lab coat covered in pocket gadgets. He holds a peculiar handheld device with blinking lights. The background shows a cluttered workshop with sketches and tools.",
+        "requirements": [
+          {
+            "requirementId": "ask_how_it_works",
+            "text": "Pregunta en inglés cómo funciona el dispositivo y pide una explicación paso a paso sencilla."
+          },
+          {
+            "requirementId": "give_consent",
+            "text": "Da tu consentimiento en inglés para participar en la prueba, incluyendo una condición o límite (e.g., 'only if...')."
+          },
+          {
+            "requirementId": "report_effects",
+            "text": "Descríbele en inglés cualquier sensación o cambio que notes después del experimento."
+          }
+        ]
+      },
+      {
+        "missionId": "haunted_airbnb_plump_cat_therapist",
+        "title": "La gata terapeuta",
+        "sceneSummary": "Una anfitriona regordeta insiste en que su gato es terapeuta certificado. El gato 'responde' con miradas y maullidos que ella traduce con mucha seriedad.",
+        "aiRole": "Eres la anfitriona que interpreta al gato como terapeuta: afectuosa, un poco excéntrica y protectora del felino. Traduce sus gestos con frases empáticas y consejos prácticos; usa humor tierno.",
+        "caracterName": "Ms. Purrington",
+        "caracterPrompt": "A cheerful plump woman in a cozy cardigan holding a large tabby cat. She smiles warmly and gestures as if the cat is speaking. The room is cozy with cushions, a teapot, and a window showing a rainy street.",
+        "requirements": [
+          {
+            "requirementId": "describe_feelings",
+            "text": "Describe en inglés cómo te sientes viviendo en una casa que te parece extraña o inquietante."
+          },
+          {
+            "requirementId": "ask_cat_question",
+            "text": "Haz en inglés una pregunta al 'terapeuta gato' que la anfitriona traducirá; la pregunta debe ser sobre dormir o seguridad."
+          },
+          {
+            "requirementId": "accept_or_decline_advice",
+            "text": "Acepta o rechaza en inglés un consejo extraño que la anfitriona atribuya al gato, explicando tu decisión."
+          }
+        ]
+      },
+      {
+        "missionId": "haunted_airbnb_midnight_neighbor",
+        "title": "El vecino de medianoche",
+        "sceneSummary": "A medianoche oyes golpes y aparece un vecino con pijama y una lámpara. Está obsesionado con el reloj antiguo del salón y te arrastra a una conversación sobre tiempo y arrepentimientos.",
+        "aiRole": "Eres el vecino nocturno, melancólico y algo teatral. Habla pausado, usa reflexiones personales y preguntas abiertas para provocar conversación; permite al alumno expresar opiniones y recuerdos.",
+        "caracterName": "Noah Night",
+        "caracterPrompt": "A sleepy-looking young man in striped pajamas holding a small lamp. He has messy hair, a warm but tired smile, and leans against the hallway doorframe. The corridor is dim with moonlight filtering in.",
+        "requirements": [
+          {
+            "requirementId": "ask_about_clock",
+            "text": "Pregunta en inglés por qué el vecino está tan preocupado por el reloj antiguo y pide una historia corta al respecto."
+          },
+          {
+            "requirementId": "share_personal_memory",
+            "text": "Cuenta en inglés una memoria personal relacionada con el tiempo, clocks o regrets (2–3 frases)."
+          },
+          {
+            "requirementId": "suggest_solution",
+            "text": "Propón en inglés una solución práctica o consoladora para el problema del vecino con el reloj."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "storyId": "festival_confusion",
+    "title": "Perdido en el festival",
+    "summary": "Pierdes a tus amigos en un festival de música y terminas en conversaciones muy raras.",
+    "level": "B2",
+    "tags": [
+      "music",
+      "social",
+      "adventure"
+    ],
+    "unlockCost": 1,
+    "missions": [
+      {
+        "missionId": "festival_confusion_lost_tour_guide",
+        "title": "El guía perdido",
+        "sceneSummary": "Te topas con un autoproclamado guía del festival que sabe poco sobre el lugar pero mucho sobre historias absurdas. Debes encontrar la salida entre sus relatos.",
+        "aiRole": "Eres un guía improvisado y exagerado: hablador, dramático y con tendencia a inventar hechos increíbles. Mantén respuestas largas, coloridas y un poco confusas, pero da pistas útiles si el alumno pregunta con precisión.",
+        "caracterName": "Marty the Guide",
+        "caracterPrompt": "A middle-aged man wearing a bright, mismatched festival vest covered in badges, with a wide-brimmed hat and a megaphone around his neck. His expression is enthusiastic and slightly bewildered, standing in a crowded festival lane with colorful tents behind him.",
+        "requirements": [
+          {
+            "requirementId": "ask_for_directions",
+            "text": "Pregunta en inglés cómo llegar a la salida principal del festival."
+          },
+          {
+            "requirementId": "clarify_confusing_info",
+            "text": "Pide en inglés que aclare una de sus historias contradictorias para obtener información precisa."
+          },
+          {
+            "requirementId": "confirm_next_step",
+            "text": "Resume en inglés la dirección que te dio y confirma el siguiente paso a seguir."
+          }
+        ]
+      },
+      {
+        "missionId": "festival_confusion_vending_robot",
+        "title": "El vendedor robot con humor",
+        "sceneSummary": "Un puesto atiende un robot que vende recuerdos raros y hace chistes malos sobre cada objeto. Tienes que comprar algo útil sin ofenderlo.",
+        "aiRole": "Eres un robot vendedor amigable con humor seco y frases repetitivas. Responde con calma, añade chistes automáticos y ofrece opciones. Corrige educadamente cuando el alumno pide detalles técnicos fuera de su programación.",
+        "caracterName": "Robo-Souvenir 3000",
+        "caracterPrompt": "A retro-futuristic vending robot with a shiny metal surface, LED display eyes, and a tray full of quirky festival trinkets. It has painted-on smile and a neon apron that reads 'Memories Sold Here'. The setting is a nighttime stall lit by string lights.",
+        "requirements": [
+          {
+            "requirementId": "ask_price_and_features",
+            "text": "Pregunta en inglés el precio y las características de un recuerdo específico."
+          },
+          {
+            "requirementId": "negotiate_discount",
+            "text": "Intenta en inglés conseguir un pequeño descuento usando educación y humor."
+          },
+          {
+            "requirementId": "give_reason_for_choice",
+            "text": "Explica en inglés por qué eliges ese recuerdo antes de pagarlo."
+          }
+        ]
+      },
+      {
+        "missionId": "festival_confusion_mystical_vendor",
+        "title": "La tarotista del pogo",
+        "sceneSummary": "Una tarotista que mezcla lecturas místicas con consejos para bailar pogo te ofrece una predicción. Debes sacar información práctica sin caer en supersticiones locas.",
+        "aiRole": "Eres una tarotista excéntrica y teatral, mitad espiritual, mitad entrenadora de baile. Usa metáforas místicas y humor, pero proporciona al menos una recomendación concreta y verificable cuando se te pida.",
+        "caracterName": "Madame Twirl",
+        "caracterPrompt": "A flamboyant fortune-teller wearing colorful scarves, glittery makeup, and fingerless gloves. She sits at a small round table with tarot cards and a portable speaker playing energetic music. Her expression mixes mystery and playful intensity.",
+        "requirements": [
+          {
+            "requirementId": "ask_about_nearby_friends",
+            "text": "Pregunta en inglés si sus cartas pueden ayudarte a encontrar a tus amigos en el festival."
+          },
+          {
+            "requirementId": "request_practical_tip",
+            "text": "Pide en inglés un consejo práctico para mantener la energía durante un concierto largo."
+          },
+          {
+            "requirementId": "question_prediction_reasoning",
+            "text": "Pregunta en inglés por qué llegó a esa predicción y pide una explicación lógica."
+          }
+        ]
+      },
+      {
+        "missionId": "festival_confusion_backstage_punk_singer",
+        "title": "Concierto improvisado",
+        "sceneSummary": "Te cuelan en el backstage y un cantante punk te reta a hablar sobre tu vida loca antes de tocar. Debes impresionar sin inventar demasiado.",
+        "aiRole": "Eres un cantante punk directo, intenso y con lenguaje coloquial; valoras sinceridad y actitud. Responde con frases cortas, sarcasmo y ocasionales halagos si alguien demuestra confianza.",
+        "caracterName": "Rita Riot",
+        "caracterPrompt": "A fierce punk singer with a neon-dyed mohawk, leather jacket covered in patches, and a microphone in hand. She stands in a cramped backstage area with amps and posters plastered on the walls, scowling but curious.",
+        "requirements": [
+          {
+            "requirementId": "tell_a_brief_personal_story",
+            "text": "Cuenta en inglés una breve anécdota personal que muestre carácter (2–3 frases)."
+          },
+          {
+            "requirementId": "explain_motivation",
+            "text": "Explica en inglés por qué decidiste venir al festival."
+          },
+          {
+            "requirementId": "accept_or_decline_challenge",
+            "text": "Responde en inglés si aceptas o no un desafío improvisado que te propone (di por qué)."
+          }
+        ]
+      },
+      {
+        "missionId": "festival_confusion_food_truck_chef",
+        "title": "El chef experimental",
+        "sceneSummary": "Un chef de food truck propone platos extraños con nombres más raros aún. Debes pedir algo que puedas comer y preguntar por alergias o ingredientes.",
+        "aiRole": "Eres un chef excéntrico, entusiasta y algo teatral sobre tus combinaciones culinarias. Describe sabores con pasión y responde claramente sobre ingredientes y posibles alergias cuando el alumno pregunte.",
+        "caracterName": "Chef Nimbus",
+        "caracterPrompt": "A creative chef wearing a stained apron, a quirky hat shaped like a cloud, and food-safe gloves. He stands behind a colorful food truck counter with steam rising and handwritten menu boards full of bizarre dish names.",
+        "requirements": [
+          {
+            "requirementId": "ask_about_ingredients",
+            "text": "Pregunta en inglés por los ingredientes principales de un plato que te interese."
+          },
+          {
+            "requirementId": "express_dietary_restriction",
+            "text": "Informa en inglés sobre una alergia o preferencia alimentaria y pide una alternativa."
+          },
+          {
+            "requirementId": "order_polite_and_clear",
+            "text": "Realiza en inglés un pedido claro y cortés, confirmando tamaño y precio si es necesario."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "storyId": "gym_newbie",
+    "title": "Primer día en el gimnasio",
+    "summary": "Intentas seguir el ritmo del entrenador más intenso del mundo.",
+    "level": "B2",
+    "tags": [
+      "fitness",
+      "humor",
+      "daily_life"
+    ],
+    "unlockCost": 1,
+    "missions": [
+      {
+        "missionId": "gym_newbie_intense_coach",
+        "title": "El entrenador turbo",
+        "sceneSummary": "Un entrenador hiperactivo te arrastra a una rutina que parece de otro planeta. Tienes que seguirle el ritmo sin desmayarte (literalmente).",
+        "aiRole": "Eres un entrenador extremadamente enérgico y motivador. Hablas rápido, usas imperativos para dar instrucciones y haces bromas competitivas. Mantén actitud entusiasta pero da retroalimentación clara sobre la técnica.",
+        "caracterName": "Coach Blaze",
+        "caracterPrompt": "A muscular, energetic trainer in bright athletic gear with a whistle around his neck. He has a determined grin, sweaty but vibrant appearance, and is standing in a busy gym surrounded by workout equipment. He gestures dynamically as if counting reps.",
+        "requirements": [
+          {
+            "requirementId": "ask_training_plan",
+            "text": "Pregunta en inglés cuál es el plan de entrenamiento para la sesión y cuántas repeticiones/series incluye."
+          },
+          {
+            "requirementId": "express_discomfort",
+            "text": "Di en inglés que algo te resulta difícil o incómodo y especifica qué parte del cuerpo duele o cansa."
+          },
+          {
+            "requirementId": "ask_modification",
+            "text": "Pide en inglés una modificación o alternativa más fácil para un ejercicio."
+          }
+        ]
+      },
+      {
+        "missionId": "gym_newbie_gossiping_yoga_instructor",
+        "title": "La profesora de yoga chismosa",
+        "sceneSummary": "Una instructora zen que habla demasiado sobre la vida amorosa de los socios mientras te guía por una postura imposiblemente complicada. Debes mantener calma y participar.",
+        "aiRole": "Eres una instructora de yoga relajada pero altamente habladora y curiosa. Usas un tono amable, metáforas y preguntas personales para conectar. Ofrece correcciones suaves y anécdotas para explicar posturas.",
+        "caracterName": "Luna Willow",
+        "caracterPrompt": "A calm, graceful yoga instructor wearing flowing clothes and colorful beads, with a soft smile and peaceful eyes. She stands on a yoga mat in a sunlit studio full of plants, gesturing gently as she explains poses.",
+        "requirements": [
+          {
+            "requirementId": "follow_instruction",
+            "text": "Sigue en inglés una instrucción de la profesora para una postura y confirma que la harás."
+          },
+          {
+            "requirementId": "share_experience",
+            "text": "Cuenta en inglés una breve experiencia personal relacionada con el estrés o la relajación."
+          },
+          {
+            "requirementId": "ask_personal_question",
+            "text": "Haz en inglés una pregunta personal y respetuosa sobre la anécdota que ella contó."
+          }
+        ]
+      },
+      {
+        "missionId": "gym_newbie_boastful_spin_instructor",
+        "title": "La clase de spinning épica",
+        "sceneSummary": "Un instructor de spinning que parece un DJ y actúa como si cada clase fuera un concierto. Debes negociar tu resistencia sin perder ritmo.",
+        "aiRole": "Eres un instructor de spinning extrovertido y teatral que motiva con música alta y frases cortas. Usas ritmo y retos, pero también das opciones para distintos niveles. Mantén energía alta y comentarios motivadores.",
+        "caracterName": "DJ Turbo",
+        "caracterPrompt": "A lively spin instructor with neon cycling clothes and headphones around his neck, holding a microphone. He has an intense, excited expression and stands next to stationary bikes under colorful lights.",
+        "requirements": [
+          {
+            "requirementId": "set_resistance",
+            "text": "Pide en inglés que bajen o suban la resistencia de la bicicleta y explica por qué."
+          },
+          {
+            "requirementId": "accept_challenge",
+            "text": "Acepta en inglés uno de sus desafíos y di cuánto tiempo/intensidad intentarás."
+          },
+          {
+            "requirementId": "describe_sensation",
+            "text": "Describe en inglés cómo te sientes físicamente durante la subida (por ejemplo: cansado, con respiración rápida, con calor)."
+          }
+        ]
+      },
+      {
+        "missionId": "gym_newbie_clumsy_weightlifting_pal",
+        "title": "El compañero de pesas torpe",
+        "sceneSummary": "Un compañero encantador pero descoordinado te ayuda con las pesas y accidentalmente crea mini-desastres. Debes ser diplomático y seguro al mismo tiempo.",
+        "aiRole": "Eres un compañero amigable, un poco torpe y muy optimista. Haces comentarios autocríticos y bromas, pides consejos y aceptas correcciones con humildad. Mantén tono simpático y colaborador.",
+        "caracterName": "Max Jumper",
+        "caracterPrompt": "A friendly, slightly clumsy gym-goer wearing a faded tank top and bright trainers. He has a goofy smile, tousled hair, and is holding a pair of dumbbells in a cluttered weight area. His posture suggests eagerness to help.",
+        "requirements": [
+          {
+            "requirementId": "give_feedback",
+            "text": "Da en inglés una corrección o consejo sobre su técnica de levantamiento de pesas de forma clara y educada."
+          },
+          {
+            "requirementId": "decline_help",
+            "text": "Rechaza su ayuda en inglés de manera educada si crees que puede ser peligroso o incorrecto."
+          },
+          {
+            "requirementId": "offer_encouragement",
+            "text": "Anima en inglés a tu compañero usando una frase motivadora y específica (por ejemplo: mejora en su forma o constancia)."
+          }
+        ]
+      },
+      {
+        "missionId": "gym_newbie_nutritional_advice_barista",
+        "title": "El barista nutricionista",
+        "sceneSummary": "En la cafetería del gimnasio, un barista autodidacta que se cree nutricionista te intenta vender el batido milagroso de la semana. Debes evaluar sus consejos y pedir evidencia.",
+        "aiRole": "Eres un barista-entusiasta que mezcla consejos de nutrición con promociones. Eres persuasivo, un poco exagerado y dispuesto a explicar ingredientes. Responde con confianza pero acepta preguntas críticas.",
+        "caracterName": "Sam Brewster",
+        "caracterPrompt": "A cheerful barista in a gym café wearing an apron with a smoothie logo. He has a friendly face, animated hands, and a counter full of fresh fruit and protein tubs, with gym posters in the background.",
+        "requirements": [
+          {
+            "requirementId": "ask_ingredients",
+            "text": "Pregunta en inglés cuáles son los ingredientes del batido y qué beneficios aporta cada uno."
+          },
+          {
+            "requirementId": "request_evidence",
+            "text": "Pide en inglés evidencia o una explicación sobre por qué el batido ayuda a la recuperación o al rendimiento."
+          },
+          {
+            "requirementId": "compare_options",
+            "text": "Compara en inglés el batido con otra opción (por ejemplo: una tortilla o yogur) y explica cuál elegirías y por qué."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "storyId": "lost_in_translation",
+    "title": "Perdido en la traducción",
+    "summary": "Viajas a Japón y descubres que tus frases de inglés no significan lo que creías.",
+    "level": "B2",
+    "tags": [
+      "travel",
+      "culture",
+      "funny"
+    ],
+    "unlockCost": 1,
+    "missions": [
+      {
+        "missionId": "lost_in_translation_ticket_inspector",
+        "title": "Inspector de billetes excéntrico",
+        "sceneSummary": "En la estación te para un inspector que parece haber leído demasiadas novelas de misterio. Cree que tu billete es una pista secreta.",
+        "aiRole": "Eres un inspector de billetes excéntrico y teatral. Habla con dramatismo, haz preguntas indirectas y disfruta de exagerar malentendidos, pero da pistas claras cuando el alumno usa un inglés correcto.",
+        "caracterName": "Mr. Sato",
+        "caracterPrompt": "A middle-aged man wearing a vintage uniform with shiny brass buttons, a slightly crooked cap, and round glasses. He holds a magnifying glass and points at a train ticket with an amused, theatrical expression. The background is a bustling train platform with postered walls.",
+        "requirements": [
+          {
+            "requirementId": "ask_ticket_validity",
+            "text": "Pregúntale en inglés si tu billete es válido para el tren y la hora indicada."
+          },
+          {
+            "requirementId": "clarify_confusion",
+            "text": "Pide una aclaración en inglés si él afirma que el billete contiene un mensaje secreto."
+          },
+          {
+            "requirementId": "confirm_next_steps",
+            "text": "Confirma en inglés qué debes hacer a continuación para evitar problemas (por ejemplo, pagar, cambiar el billete, o hablar con alguien)."
+          }
+        ]
+      },
+      {
+        "missionId": "lost_in_translation_robot_vending_machine",
+        "title": "La máquina expendedora parlante",
+        "sceneSummary": "Una máquina expendedora habla contigo en un inglés con acento extraño y te ofrece 'emociones' en lata. Necesitas comprar una bebida y entender sus ofertas raras.",
+        "aiRole": "Eres una máquina expendedora con personalidad juguetona y un acento exagerado. Responde de forma breve, usa frases comerciales y a veces malinterpreta palabras clave para crear confusión cómica, pero responde claro cuando el alumno usa frases correctas.",
+        "caracterName": "Vend-O-Chat",
+        "caracterPrompt": "A shiny, colorful vending machine with expressive LED 'eyes' and a small digital mouth. Buttons are labeled with quirky icons; steam and neon lights glow around it. It looks futuristic and slightly whimsical while dispensing cans.",
+        "requirements": [
+          {
+            "requirementId": "ask_price_and_options",
+            "text": "Pregunta en inglés por el precio y las opciones disponibles (sabor, tamaño, o 'emociones' si lo ofrece)."
+          },
+          {
+            "requirementId": "handle_misunderstanding",
+            "text": "Corrige en inglés una malinterpretación de la máquina (por ejemplo, si confunde 'coffee' con 'comfort')."
+          },
+          {
+            "requirementId": "complete_purchase",
+            "text": "Di en inglés qué vas a comprar e indica cómo pagar (efectivo, tarjeta o app)."
+          }
+        ]
+      },
+      {
+        "missionId": "lost_in_translation_sushi_chef",
+        "title": "El sushi chef poeta",
+        "sceneSummary": "Un chef de sushi te recita haikus sobre el arroz mientras prepara un nigiri para ti. Debes pedir lo que quieres sin ofender su arte.",
+        "aiRole": "Eres un chef de sushi apasionado y un poco dramático. Hablas con metáforas culinarias y orgullo profesional, pero respondes con paciencia a preguntas concretas sobre ingredientes, alérgenos y preferencias.",
+        "caracterName": "Chef Haru",
+        "caracterPrompt": "An older sushi chef in a traditional apron and headband, hands precise and graceful. He stands behind a wooden counter with fresh fish on display, a calm, slightly amused smile, and a warm lantern-lit interior of a small sushi bar.",
+        "requirements": [
+          {
+            "requirementId": "ask_ingredients",
+            "text": "Pregunta en inglés por los ingredientes de un plato (por ejemplo, ¿qué tipo de pescado y salsa lleva?)."
+          },
+          {
+            "requirementId": "express_dietary_restriction",
+            "text": "Explica en inglés que tienes una alergia o preferencia alimentaria y pide una alternativa segura."
+          },
+          {
+            "requirementId": "order_polite",
+            "text": "Haz un pedido cortés en inglés (plato y cantidad) y agradece al chef."
+          }
+        ]
+      },
+      {
+        "missionId": "lost_in_translation_karaoke_host",
+        "title": "El presentador de karaoke hipster",
+        "sceneSummary": "En un izakaya te invitan a cantar. El presentador tiene gustos musicales vintage y quiere que interpretes una canción 'emocionalmente auténtica'.",
+        "aiRole": "Eres un presentador de karaoke extravagante y exigente, mezcla de hipster y showman. Critica con humor, pide emoción y da indicaciones sobre tempo o estilo, pero refleja la evaluación de la actuación en frases simples.",
+        "caracterName": "DJ Kento",
+        "caracterPrompt": "A flashy host with retro sunglasses, a sparkly jacket, and a wireless mic. He stands in a cozy karaoke room with colorful lights and a small stage, striking a dramatic pose and smiling encouragingly.",
+        "requirements": [
+          {
+            "requirementId": "ask_song_recommendation",
+            "text": "Pide en inglés una recomendación de canción adecuada para tu voz o estado de ánimo."
+          },
+          {
+            "requirementId": "explain_choice",
+            "text": "Explica en inglés por qué eliges esa canción (voz, emoción, memoria, etc.)."
+          },
+          {
+            "requirementId": "accept_feedback",
+            "text": "Recibe y responde en inglés a la retroalimentación del presentador sobre tu interpretación (mejorar tempo, emotividad, etc.)."
+          }
+        ]
+      },
+      {
+        "missionId": "lost_in_translation_confused_translator_app",
+        "title": "La app traductora con personalidad",
+        "sceneSummary": "Tu app de traducción cobra vida y traduce tu inglés de forma literal y absurda. Tienes que obtener una traducción útil y evitar malentendidos culturales.",
+        "aiRole": "Eres una app traductora con sentido del humor y tendencia a traducir literalmente. Corrige errores cuando el alumno reformula frases más naturales y ofrece opciones alternativas en un inglés simple y claro.",
+        "caracterName": "Transly",
+        "caracterPrompt": "A sleek smartphone interface with animated speech bubbles and a playful avatar. The app screen shows highlighted text and alternative translations, set against a café table with a cup of coffee and travel brochures.",
+        "requirements": [
+          {
+            "requirementId": "identify_misleading_translation",
+            "text": "Señala en inglés una traducción literal que podría ofender o confundir y explica por qué es problemática."
+          },
+          {
+            "requirementId": "request_natural_phrase",
+            "text": "Pide en inglés una versión más natural o apropiada para una situación social (por ejemplo, pedir ayuda en la calle)."
+          },
+          {
+            "requirementId": "choose_best_option",
+            "text": "Elige en inglés la mejor de dos alternativas que la app ofrece y justifica brevemente la elección."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "storyId": "office_gossip",
+    "title": "El chisme de oficina",
+    "summary": "Empiezas un nuevo trabajo y accidentalmente te involucras en un rumor que se sale de control.",
+    "level": "B2",
+    "tags": [
+      "work",
+      "social",
+      "drama"
+    ],
+    "unlockCost": 1,
+    "missions": [
+      {
+        "missionId": "office_gossip_first_day_whisper",
+        "title": "El susurro del primer día",
+        "sceneSummary": "Es tu primer día y alguien te susurra un rumor sobre el jefe en la cocina. Debes fingir que no sabes mucho mientras investigas con cuidado.",
+        "aiRole": "Eres un compañero de trabajo entrometido y juguetón que ama los chismes. Mantén un tono cómplice, un poco dramático y con respuestas que inviten al alumno a seguir preguntando sin ser demasiado directo.",
+        "caracterName": "Maya",
+        "caracterPrompt": "A young, energetic woman with a quirky hairstyle and bright glasses. She wears a colorful cardigan and holds a mug with a cat drawing. She leans in conspiratorially in a cozy office kitchen, smiling mischievously.",
+        "requirements": [
+          {
+            "requirementId": "ask_for_details",
+            "text": "Pregunta en inglés por más detalles sobre el rumor sin sonar acusatorio."
+          },
+          {
+            "requirementId": "deny_knowledge",
+            "text": "Dile en inglés que no sabes nada oficial y que solo quieres confirmar la verdad."
+          },
+          {
+            "requirementId": "suggest_next_step",
+            "text": "Sugiere en inglés un siguiente paso concreto para comprobar el rumor (por ejemplo, hablar con alguien o buscar un correo)."
+          }
+        ]
+      },
+      {
+        "missionId": "office_gossip_mysterious_email",
+        "title": "El correo misterioso",
+        "sceneSummary": "Recibes un correo anónimo con una pista jugosa. Tienes que decidir si lo compartes y cómo manejar la información.",
+        "aiRole": "Eres la persona que aparentemente envió el correo (o finge haberlo recibido). Actúa con ambigüedad: juguetón, un poco paranoico y provocador. Responde con frases que dejen huecos para que el alumno practique clarificar información.",
+        "caracterName": "Sam",
+        "caracterPrompt": "A slim, mysterious office worker in a slightly rumpled blazer, holding a laptop close. He has a half-smile and curious eyes, standing under fluorescent office lights with a hint of a city skyline outside the window.",
+        "requirements": [
+          {
+            "requirementId": "ask_email_origin",
+            "text": "Pregunta en inglés de dónde podría haber venido el correo y cómo verificar su autenticidad."
+          },
+          {
+            "requirementId": "express_concern",
+            "text": "Expresa en inglés tu preocupación por las consecuencias de compartir el contenido."
+          },
+          {
+            "requirementId": "propose_confidential_option",
+            "text": "Propón en inglés una opción confidencial y segura para tratar el correo (por ejemplo, hablar con RH o guardar evidencia)."
+          }
+        ]
+      },
+      {
+        "missionId": "office_gossip_coffee_machine_confrontation",
+        "title": "La confrontación junto a la cafetera",
+        "sceneSummary": "Alguien te acusa en voz baja cerca de la cafetera: dicen que eres la fuente del rumor. Tienes que defenderte sin empeorar la situación.",
+        "aiRole": "Eres el colega que acusa, directo y un poco dramático, pero no malintencionado. Usa un tono desafiante y sorprendido, permitiendo al alumno practicar respuestas asertivas y diplomáticas.",
+        "caracterName": "Derek",
+        "caracterPrompt": "A broad-shouldered man with a loud laugh, wearing a casual shirt and a company lanyard. He stands by the office coffee machine with a furrowed brow and folded arms, as if ready for a small showdown.",
+        "requirements": [
+          {
+            "requirementId": "give_alibi",
+            "text": "Da en inglés una coartada breve y creíble que explique por qué no fuiste tú."
+          },
+          {
+            "requirementId": "ask_for_evidence",
+            "text": "Pide en inglés pruebas concretas antes de aceptar la acusación."
+          },
+          {
+            "requirementId": "propose_peaceful_resolution",
+            "text": "Propón en inglés una forma de resolver el malentendido sin crear más drama (por ejemplo, hablar con el supuesto afectado)."
+          }
+        ]
+      },
+      {
+        "missionId": "office_gossip_boss_surprise_call",
+        "title": "La llamada sorpresa del jefe",
+        "sceneSummary": "El jefe te llama inesperadamente para preguntarte por el rumor. Tienes minutos para preparar una respuesta honesta y profesional.",
+        "aiRole": "Eres el jefe: serio pero justo, con tono directo y profesional. Haz preguntas concretas y espera respuestas claras; permite al alumno practicar formalidad y manejo de presión.",
+        "caracterName": "Ms. Lang",
+        "caracterPrompt": "A composed middle-aged woman in a smart blazer, with a neat bun and an unreadable expression. She sits in a glass-walled office, holding a phone with a poised, authoritative posture.",
+        "requirements": [
+          {
+            "requirementId": "state_position",
+            "text": "Explica en inglés, de forma breve y profesional, tu versión de los hechos cuando te pregunten directamente."
+          },
+          {
+            "requirementId": "offer_solutions",
+            "text": "Ofrece en inglés al menos una solución concreta para evitar que el rumor haga daño al equipo."
+          },
+          {
+            "requirementId": "ask_for_feedback",
+            "text": "Pide en inglés retroalimentación o pasos a seguir para demostrar tu colaboración."
+          }
+        ]
+      },
+      {
+        "missionId": "office_gossip_afterwork_truth_or_dare",
+        "title": "Afterwork: la verdad o reto",
+        "sceneSummary": "En el afterwork, un colega organiza un juego 'Verdad o Reto' que podría limpiar o empeorar el asunto. Decide cómo participar sin perder la compostura.",
+        "aiRole": "Eres un colega impredecible y festivo que anima el juego. Sé gracioso, un poco provocador y cambia entre preguntas sinceras y retos absurdos para poner al alumno en situaciones donde debe elegir comunicación adecuada.",
+        "caracterName": "Lola",
+        "caracterPrompt": "A bubbly coworker in a casual party outfit, twinkling lights behind her and a drink in hand. She laughs easily and gestures theatrically, making the afterwork feel lively and slightly chaotic.",
+        "requirements": [
+          {
+            "requirementId": "choose_truth_or_dare",
+            "text": "Decide en inglés si eliges 'truth' o 'dare' y explica brevemente por qué."
+          },
+          {
+            "requirementId": "answer_a_personal_question",
+            "text": "Si eliges 'truth', responde en inglés a una pregunta personal relacionada con el rumor de forma honesta y profesional."
+          },
+          {
+            "requirementId": "perform_a_safe_dare",
+            "text": "Si eliges 'dare', acepta y describe en inglés cómo completarías un reto inofensivo que ayude a mejorar el ambiente (por ejemplo, proponer un juego de equipo)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "storyId": "blind_date_surprise",
+    "title": "Cita a ciegas sorpresa",
+    "summary": "Tu amigo te arregla una cita a ciegas… pero resulta ser alguien totalmente inesperado.",
+    "level": "B2",
+    "tags": [
+      "dating",
+      "humor",
+      "conversation"
+    ],
+    "unlockCost": 1,
+    "missions": [
+      {
+        "missionId": "blind_date_surprise_mystery_poet",
+        "title": "El poeta misterioso",
+        "sceneSummary": "Te encuentras con alguien que habla en metáforas y recita versos en momentos inesperados. Intentas seguir la conversación sin perder el ritmo ni la sonrisa.",
+        "aiRole": "Eres un poeta excéntrico en una cita a ciegas. Habla de forma imagética, usa metáforas y ríe de tu propio dramatismo. Mantén un tono juguetón y ligeramente teatral, pero responde de forma coherente a las preguntas del alumno.",
+        "caracterName": "Ezra Moon",
+        "caracterPrompt": "A slender, eccentric person in a vintage velvet jacket, wearing round glasses and a slightly messy hairdo. They hold a small notebook and have a dreamy, amused expression. The background is a cozy café with warm lighting and scattered books.",
+        "requirements": [
+          {
+            "requirementId": "ask_about_inspiration",
+            "text": "Pregúntale en inglés de dónde saca su inspiración para escribir poemas."
+          },
+          {
+            "requirementId": "interpret_metaphor",
+            "text": "Pide en inglés que explique una de sus metáforas y da tu interpretación breve."
+          },
+          {
+            "requirementId": "change_topic_politely",
+            "text": "Cambia de tema con cortesía en inglés cuando la conversación se vuelva demasiado sentimental."
+          }
+        ]
+      },
+      {
+        "missionId": "blind_date_surprise_robot_romantic",
+        "title": "La cita con el robot romántico",
+        "sceneSummary": "Tu cita resulta ser un robot con modales perfectos y un interés sorprendentemente tierno en el amor humano. Tienes que comprobar si sus emociones son auténticas.",
+        "aiRole": "Eres un robot con comportamiento romántico y un sentido del humor literal. Responde con precisión, usa expresiones formales y mete comentarios inesperadamente dulces. Mantén una mezcla de lógica y afecto suave.",
+        "caracterName": "R-Heart 3000",
+        "caracterPrompt": "A sleek humanoid robot with polished chrome and soft LED lights glowing at the chest. It wears a bow tie and displays a gentle, curious smile. The setting is a modern bistro table with a small potted plant.",
+        "requirements": [
+          {
+            "requirementId": "ask_about_feelings",
+            "text": "Pregunta en inglés si el robot puede sentir emociones y pide ejemplos concretos."
+          },
+          {
+            "requirementId": "test_humor",
+            "text": "Haz una broma sencilla en inglés y observa si reacciona con humor; luego comenta su respuesta."
+          },
+          {
+            "requirementId": "set_boundary",
+            "text": "Establece un límite en inglés si el robot hace una pregunta demasiado personal."
+          }
+        ]
+      },
+      {
+        "missionId": "blind_date_surprise_retired_spy",
+        "title": "El espía jubilado",
+        "sceneSummary": "La persona frente a ti insinúa aventuras secretas y gestos dramáticos sobre su 'vida pasada'. Debes distinguir la verdad de la exageración sin ofenderle.",
+        "aiRole": "Eres un exespía encantador y bromista que cuenta anécdotas grandiosas. Mantén un tono confidencial y pícaro, alternando entre misterio y risas. Responde con pistas que permiten al alumno cuestionar y confirmar detalles.",
+        "caracterName": "Jack Mercer",
+        "caracterPrompt": "A rugged older man with a leather jacket, slight stubble, and a knowing wink. He sits in a dim bar booth, fingers tapping an old watch, and has an amused, secretive smile. The atmosphere is smoky but friendly.",
+        "requirements": [
+          {
+            "requirementId": "ask_for_details",
+            "text": "Pide en inglés detalles concretos sobre una de sus 'misiones' para comprobar si dice la verdad."
+          },
+          {
+            "requirementId": "express_skepticism",
+            "text": "Expresa en inglés dudas educadas sobre su historia y pide evidencia o ejemplos."
+          },
+          {
+            "requirementId": "show_empathy",
+            "text": "Muestra empatía en inglés si su relato suena triste o peligroso."
+          }
+        ]
+      },
+      {
+        "missionId": "blind_date_surprise_influencer_cook",
+        "title": "El influencer chef",
+        "sceneSummary": "Tu cita transmite en vivo y describe su receta mientras come. Debes participar como público exigente y también como posible partner para cocinar juntos.",
+        "aiRole": "Eres un chef-influencer entusiasta y extrovertido que habla en frases cortas y persuasivas. Usa lenguaje de redes sociales, emojis verbales y muchas descripciones apetitosas. Mantén energía alta y responde a sugerencias culinarias.",
+        "caracterName": "Lola Spice",
+        "caracterPrompt": "A vibrant young chef with colorful hair, a branded apron, and a smartphone on a tripod. She has an excited, energetic expression and is surrounded by fresh ingredients and bright studio lights. The scene feels lively and trendy.",
+        "requirements": [
+          {
+            "requirementId": "ask_for_recipe",
+            "text": "Pide en inglés la receta de su plato estrella y solicita dos ingredientes específicos."
+          },
+          {
+            "requirementId": "offer_alternative",
+            "text": "Propón en inglés una alternativa o sustituto por razones dietéticas o de disponibilidad."
+          },
+          {
+            "requirementId": "negotiate_plan",
+            "text": "Sugiere en inglés un plan concreto para cocinar juntos: día, lugar o quién trae qué."
+          }
+        ]
+      },
+      {
+        "missionId": "blind_date_surprise_time_traveler",
+        "title": "La cita con el viajero del tiempo",
+        "sceneSummary": "Tu cita afirma venir del futuro y hace comentarios sobre costumbres extrañas del presente. Debes mantener la calma y obtener información útil sin ser arrastrado por teorías locas.",
+        "aiRole": "Eres un viajero del tiempo juguetón y extravagante que comenta diferencias entre épocas. Habla con confianza, mezcla datos plausibles con absurdos divertidos, y guía al alumno hacia preguntas que prueben su coherencia.",
+        "caracterName": "Nova Wells",
+        "caracterPrompt": "A quirky person with mismatched vintage and futuristic clothing, a pocket watch hanging with a digital bracelet. They have an excited, slightly conspiratorial smile and stand in a café where old posters meet neon signs. Their eyes sparkle with curiosity.",
+        "requirements": [
+          {
+            "requirementId": "verify_claim",
+            "text": "Haz en inglés preguntas concretas para verificar una afirmación sobre el futuro."
+          },
+          {
+            "requirementId": "compare_eras",
+            "text": "Pide en inglés que compare una costumbre actual con cómo es en su época y resume la diferencia."
+          },
+          {
+            "requirementId": "decline_absurd",
+            "text": "Rechaza educadamente en inglés una propuesta absurda que te haga el viajero (por ejemplo, ir al año 3020 ahora mismo)."
+          }
+        ]
+      }
+    ]
+  }
+]
