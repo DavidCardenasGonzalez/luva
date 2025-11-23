@@ -601,8 +601,13 @@ async function evaluateAI(
   EvaluationResponse & { errors?: string[]; improvements?: string[] }
 > {
   const apiKey = await getOpenAIKey();
-  const model = process.env.OPENAI_CHAT_MODEL || "gpt-4o-mini";
+  const model = process.env.OPENAI_CHAT_MODEL || "gpt-5-nano";
   const timeoutMs = Number(process.env.EVAL_TIMEOUT_MS || 8000);
+  const isGpt5 = /gpt-5/i.test(model);
+  const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
+  const reasoningConfig = isGpt5
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || "low" }
+    : undefined;
   const sys = `Eres un profesor de inglÃ©s que habla espaÃ±ol. 
   El alumno va a dar un ejemplo del uso de ${context.label}; debes evaluar su respuesta.
 
@@ -615,8 +620,6 @@ Responde Ãºnicamente el JSON, da tu respuesta de una forma amable.`;
 
   const user = `${transcript}`;
   // Use Responses API for GPT-5 family, else fallback to Chat Completions
-  const useResponses =
-    /gpt-5/i.test(model) || process.env.OPENAI_USE_RESPONSES === "1";
   console.log(
     JSON.stringify({
       scope: "evaluate.openai.begin",
@@ -633,23 +636,25 @@ Responde Ãºnicamente el JSON, da tu respuesta de una forma amable.`;
   let contentText = "";
   try {
     if (useResponses) {
+      const body: Record<string, any> = {
+        model,
+        instructions: sys,
+        input: [
+          {
+            role: "user",
+            content: [{ type: "input_text", text: user }],
+          },
+        ],
+        max_output_tokens: Number(process.env.EVAL_MAX_OUTPUT_TOKENS || 512),
+      };
+      if (reasoningConfig) body.reasoning = reasoningConfig;
       const res = await fetch("https://api.openai.com/v1/responses", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${apiKey}`,
         },
-        body: JSON.stringify({
-          model,
-          instructions: sys,
-          input: [
-            {
-              role: "user",
-              content: [{ type: "input_text", text: user }],
-            },
-          ],
-          max_output_tokens: Number(process.env.EVAL_MAX_OUTPUT_TOKENS || 512),
-        }),
+        body: JSON.stringify(body),
         signal: ac.signal,
       });
       const full: any = await res.json().catch(() => ({}));
@@ -1027,10 +1032,13 @@ async function evaluateStoryMissionProgress(
 }> {
   const apiKey = await getOpenAIKey();
   const model =
-    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini';
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || 'gpt-5-nano';
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
-  const useResponses =
-    /gpt-5/i.test(model) || process.env.OPENAI_USE_RESPONSES === '1';
+  const isGpt5 = /gpt-5/i.test(model);
+  const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
+  const reasoningConfig = isGpt5
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'low' }
+    : undefined;
   const conversation = history.slice(-STORY_HISTORY_LIMIT);
   const conversationText = conversation
     .map((msg) => `${msg.role === 'user' ? 'Student' : 'Guide'}: ${msg.content}`)
@@ -1087,24 +1095,26 @@ Scoring:
   let raw = '';
   try {
     if (useResponses) {
+      const body: Record<string, any> = {
+        model,
+        instructions: systemPrompt,
+        input: [
+          {
+            role: 'user',
+            content: [{ type: 'input_text', text: userPrompt }],
+          },
+        ],
+        response_format: { type: 'json_object' },
+        max_output_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 600),
+      };
+      if (reasoningConfig) body.reasoning = reasoningConfig;
       const res = await fetch('https://api.openai.com/v1/responses', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${apiKey}`,
         },
-        body: JSON.stringify({
-          model,
-          instructions: systemPrompt,
-          input: [
-            {
-              role: 'user',
-              content: [{ type: 'input_text', text: userPrompt }],
-            },
-          ],
-          response_format: { type: 'json_object' },
-          max_output_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 600),
-        }),
+        body: JSON.stringify(body),
         signal: ac.signal,
       });
       const payload: any = await res.json().catch(() => ({}));
@@ -1212,19 +1222,28 @@ async function generateStoryReply(
 ): Promise<string> {
   const apiKey = await getOpenAIKey();
   const model =
-    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini';
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || 'gpt-5-nano';
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
-  const useResponses =
-    /gpt-5/i.test(model) || process.env.OPENAI_USE_RESPONSES === '1';
+  const isGpt5 = /gpt-5/i.test(model);
+  const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
+  const reasoningConfig = isGpt5
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'low' }
+    : undefined;
   const conversation = history.slice(-STORY_HISTORY_LIMIT);
   const conversationText = conversation
     .map((msg) => `${msg.role === 'user' ? 'Student' : 'Guide'}: ${msg.content}`)
     .join('\n')
     .trim();
-  const systemPrompt = `You are ${mission.aiRole}. Continue the role-play in English as the guide.\n
-  Stay coherent with the scene, be encouraging, and keep the reply under 10 words.\nTry to use a B2 level of English.`;
+  const systemPrompt = `
+  You are ${mission.aiRole}. Continue the role-play in English as the guide.
+  Stay coherent with the character, but do NOT force the role into every response.
+  Keep a natural, human-like conversation.
+  Do not exaggerate or overuse personality traits. The conversation should feel balanced,
+  natural, and focused on what the user is asking. Keep the reply under 10 words.
+  Ask questions when needed. Use B2 English.
+  `;
   const userPrompt = `Story: ${story.title}\nMission: ${mission.title}\nMission summary: ${mission.sceneSummary || 'No summary provided.'}
-  ${conversationText || 'No prior conversation.'}\n\nWrite the next Guide message in English, sounding natural and aligned with ${mission.aiRole}.`;
+  ${conversationText || 'No prior conversation.'}\n\nWrite the next Guide message in English, sounding natural and aligned with ${mission.aiRole} but do NOT force this role or its interests into every answer.`;
   console.log(
     JSON.stringify({
       scope: 'stories.reply.openai.begin',
@@ -1240,23 +1259,25 @@ async function generateStoryReply(
   let raw = '';
   try {
     if (useResponses) {
+      const body: Record<string, any> = {
+        model,
+        instructions: systemPrompt,
+        input: [
+          {
+            role: 'user',
+            content: [{ type: 'input_text', text: userPrompt }],
+          },
+        ],
+        max_output_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 400),
+      };
+      if (reasoningConfig) body.reasoning = reasoningConfig;
       const res = await fetch('https://api.openai.com/v1/responses', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${apiKey}`,
         },
-        body: JSON.stringify({
-          model,
-          instructions: systemPrompt,
-          input: [
-            {
-              role: 'user',
-              content: [{ type: 'input_text', text: userPrompt }],
-            },
-          ],
-          max_output_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 400),
-        }),
+        body: JSON.stringify(body),
         signal: ac.signal,
       });
       const payload: any = await res.json().catch(() => ({}));
@@ -1335,10 +1356,13 @@ async function generateStoryMissionFeedback(
   );
   const apiKey = await getOpenAIKey();
   const model =
-    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini';
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || 'gpt-5-nano';
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
-  const useResponses =
-    /gpt-5/i.test(model) || process.env.OPENAI_USE_RESPONSES === '1';
+  const isGpt5 = /gpt-5/i.test(model);
+  const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
+  const reasoningConfig = isGpt5
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'low' }
+    : undefined;
   const conversation = history.slice(-STORY_HISTORY_LIMIT);
   const conversationText = conversation
     .map((msg) => `${msg.role === 'user' ? 'Student' : 'Guide'}: ${msg.content}`)
@@ -1380,23 +1404,25 @@ ${conversationText || 'No conversation available.'}`;
   let raw = '';
   try {
     if (useResponses) {
+      const body: Record<string, any> = {
+        model,
+        instructions: systemPrompt,
+        input: [
+          {
+            role: 'user',
+            content: [{ type: 'input_text', text: userPrompt }],
+          },
+        ],
+        max_output_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 400),
+      };
+      if (reasoningConfig) body.reasoning = reasoningConfig;
       const res = await fetch('https://api.openai.com/v1/responses', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${apiKey}`,
         },
-        body: JSON.stringify({
-          model,
-          instructions: systemPrompt,
-          input: [
-            {
-              role: 'user',
-              content: [{ type: 'input_text', text: userPrompt }],
-            },
-          ],
-          max_output_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 400),
-        }),
+        body: JSON.stringify(body),
         signal: ac.signal,
       });
       const payload: any = await res.json().catch(() => ({}));
@@ -1578,11 +1604,6 @@ function mockCards(): CardItem[] {
     },
   ];
 }
-
-
-
-
-
 
 
 
