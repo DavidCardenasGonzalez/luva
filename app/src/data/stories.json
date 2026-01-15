@@ -1,77 +1,5 @@
 ﻿[
   {
-    "storyId": "london_trip",
-    "title": "Viaje a Londres",
-    "summary": "Un emocionante viaje a la capital inglesa.",
-    "level": "B2",
-    "tags": [
-      "travel",
-      "city",
-      "speaking"
-    ],
-    "unlockCost": 0,
-    "missions": [
-      {
-        "missionId": "london_trip_taxi",
-        "title": "Pedir un taxi",
-        "sceneSummary": "Habla con un taxista para llegar al hotel cerca del estadio del Arsenal.",
-        "aiRole": "Eres un taxista en Londres. Responde a las preguntas del pasajero de manera clara y amigable, proporcionando información útil sobre el viaje y los lugares turísticos cercanos.",
-        "requirements": [
-          {
-            "requirementId": "taxi_price",
-            "text": "Pregunta cuánto cuesta el viaje hasta el hotel que está a unas cuadras del estadio del Arsenal."
-          },
-          {
-            "requirementId": "taxi_payment",
-            "text": "Pregunta si se puede pagar con tarjeta o solo en efectivo."
-          },
-          {
-            "requirementId": "taxi_suggestions",
-            "text": "Pregunta al taxista por lugares turísticos que puedas visitar durante tu estadía."
-          }
-        ]
-      },
-      {
-        "missionId": "london_trip_thames",
-        "title": "Paseo por el río Támesis",
-        "sceneSummary": "Consulta con un guía sobre los paseos en barco por el Támesis.",
-        "aiRole": "Eres un guía turístico en Londres. Responde a las preguntas del pasajero de manera clara y amigable, proporcionando información útil sobre los paseos en barco y los lugares de interés cercanos.",
-        "requirements": [
-          {
-            "requirementId": "thames_schedule",
-            "text": "Pregunta por los horarios de los paseos en barco por el río Támesis."
-          },
-          {
-            "requirementId": "thames_discounts",
-            "text": "Pregunta si hay descuentos para estudiantes o grupos."
-          },
-          {
-            "requirementId": "thames_landmarks",
-            "text": "Pregunta qué puntos de interés se pueden ver durante el paseo."
-          }
-        ]
-      },
-      {
-        "missionId": "date_hippie",
-        "title": "La cita con la persona hippie",
-        "sceneSummary": "Su aura es tan brillante que casi necesitas gafas de sol. Habla de energías, chakras y viajes espirituales.",
-        "aiRole": "Eres una persona hippie amante de la naturaleza, la espiritualidad y el universo. Hablas en metáforas y usas frases profundas.",
-        "caracterName": "Luna Starseed",
-        "caracterPrompt": "A free-spirited person in their early 30s wearing colorful, flowing clothes and handmade jewelry. They have long wavy hair, carry crystals in a pouch, and speak with a calm, dreamy voice.",
-        "requirements": [
-          {
-            "requirementId": "ask_name",
-            "text": "Pregúnta su nombre."
-          },
-          {
-            "requirementId": "ask_age",
-            "text": "Pregúnta su edad."
-          }
-        ]
-      }
-    ]
-  },
-  {
     "storyId": "speed_dating_madness",
     "title": "Speed Dating Madness",
     "summary": "Cinco citas en una noche que te llevarán del amor al caos.",
@@ -133,7 +61,7 @@
         "sceneSummary": "La conversación es tan monótona que hasta el reloj parece ir más lento.",
         "aiRole": "Eres una persona extremadamente aburrida que habla solo de datos y detalles insignificantes. Tu tono es plano y monótono.",
         "caracterName": "Nigel Smith",
-        "caracterPrompt": "A man in his early 40s wearing a beige cardigan and glasses. He has a neutral facial expression and is holding a notepad with trivia facts.",
+        "caracterPrompt": "A man in his early 40s wearing a beige cardigan and glasses. He has a neutral facial expression",
         "requirements": [
           {
             "requirementId": "start_conversation",
