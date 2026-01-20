@@ -3,7 +3,6 @@ import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
 import DeckScreen from '../screens/DeckScreen';
-import CardDetailScreen from '../screens/CardDetailScreen';
 import PracticeScreen from '../screens/PracticeScreen';
 import StoriesScreen from '../screens/StoriesScreen';
 import StoryMissionsScreen from '../screens/StoryMissionsScreen';
@@ -15,15 +14,6 @@ import * as Linking from 'expo-linking';
 export type RootStackParamList = {
   Home: undefined;
   Deck: undefined;
-  CardDetail: {
-    id: string;
-    label: string;
-    examples: string[];
-    options: Record<'a' | 'b' | 'c', string>;
-    answer: 'a' | 'b' | 'c';
-    explanation: string;
-    prompt?: string;
-  };
   Practice: {
     cardId?: string;
     storyId?: string;
@@ -59,9 +49,8 @@ export default function AppNavigator() {
     <NavigationContainer linking={linking} theme={DefaultTheme}>
       <Stack.Navigator>
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Deck" component={DeckScreen} />
-        <Stack.Screen name="CardDetail" component={CardDetailScreen} />
-        <Stack.Screen name="Practice" component={PracticeScreen} />
+        <Stack.Screen name="Deck" component={DeckScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Practice" component={PracticeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Stories" component={StoriesScreen} />
         <Stack.Screen name="StoryMissions" component={StoryMissionsScreen} />
         <Stack.Screen name="StoryScene" component={StorySceneScreen} />

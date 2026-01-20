@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, TextInput, Pressable, Keyboard } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export type StoryFlowState = 'idle' | 'recording' | 'uploading' | 'transcribing' | 'evaluating';
 
@@ -122,9 +123,11 @@ export default function StoryMessageComposer({
               : '#10b981',
           })}
         >
-          <Text style={{ color: 'white', fontWeight: '800', fontSize: 16 }}>
-            {flowState === 'recording' ? 'REC' : '🎤'}
-          </Text>
+          <MaterialIcons
+            name={flowState === 'recording' ? 'mic' : 'mic'}
+            size={24}
+            color="white"
+          />
         </Pressable>
       </View>
     </View>
