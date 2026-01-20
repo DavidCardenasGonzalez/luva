@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,10 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Image,
+  Modal,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import useAudioRecorder from '../shared/useAudioRecorder';
 import useUploadToS3 from '../shared/useUploadToS3';
@@ -18,6 +21,7 @@ import {
 } from '../hooks/useStories';
 import { useStoryProgress } from '../progress/StoryProgressProvider';
 import StoryMessageComposer from '../components/StoryMessageComposer';
+import { getChatAvatar } from '../chatimages/chatAvatarMap';
 
 type StoryMessage = {
   id: string;
@@ -67,12 +71,29 @@ export default function StorySceneScreen() {
   const { story, loading, error } = useStoryDetail(storyId);
   const { markMissionCompleted, isMissionCompleted, storyCompleted: isStoryCompleted } = useStoryProgress();
   const [sceneIndex, setSceneIndex] = useState<number>(initialSceneIndex);
+  const insets = useSafeAreaInsets();
+  const [showCharacterModal, setShowCharacterModal] = useState(false);
 
   useEffect(() => {
     setSceneIndex(initialSceneIndex);
   }, [initialSceneIndex, storyId]);
 
   const mission = story?.missions?.[sceneIndex];
+  const missionAvatar = useMemo(() => {
+    if (!mission) return undefined;
+    return getChatAvatar(mission.missionId);
+  }, [mission?.missionId]);
+  const characterDisplayName = mission?.caracterName || mission?.title || 'Personaje';
+  const avatarInitial = useMemo(
+    () => (characterDisplayName?.trim()?.charAt(0) || '?').toUpperCase(),
+    [characterDisplayName]
+  );
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, [navigation]);
 
   const storyDefinitionPayload = useMemo(() => {
     if (!story) return undefined;
@@ -148,7 +169,9 @@ export default function StorySceneScreen() {
   }, [isMissionCompleted, isStoryCompleted, mission?.missionId, storyId]);
 
   useEffect(() => {
-    scrollRef.current?.scrollToEnd({ animated: true });
+    if (messages.length > 0) {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    }
   }, [messages.length]);
 
   const retryBlocked = retryState === 'required';
@@ -450,23 +473,68 @@ export default function StorySceneScreen() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: '#f8fafc' }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
+      behavior="height"
+      // keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
     >
-      <ScrollView
-        ref={scrollRef}
-        contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
-        keyboardShouldPersistTaps="handled"
-      >
+      <View style={{ flex: 1 }}>
+        <View style={{ backgroundColor: '#2563eb', paddingTop: insets.top + 8, paddingBottom: 12, paddingHorizontal: 16 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, minWidth: 0 }}>
+              <Pressable
+                onPress={() => navigation.goBack()}
+                hitSlop={12}
+                style={({ pressed }) => ({
+                  paddingHorizontal: 4,
+                  paddingVertical: 6,
+                  marginRight: 12,
+                  opacity: pressed ? 0.6 : 1,
+                })}
+              >
+                <Text style={{ fontSize: 24, color: 'white', fontWeight: '700', lineHeight: 26 }}>{'‹'}</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setShowCharacterModal(true)}
+                hitSlop={6}
+                style={({ pressed }) => ({
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  flex: 1,
+                  minWidth: 0,
+                  opacity: pressed ? 0.7 : 1,
+                })}
+              >
+                <View style={{ width: 40, height: 40, borderRadius: 999, overflow: 'hidden', backgroundColor: '#1d4ed8', borderWidth: 1, borderColor: '#1d4ed8', marginRight: 12 }}>
+                  {missionAvatar ? (
+                    <Image source={missionAvatar} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                  ) : (
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ fontSize: 16, fontWeight: '700', color: 'white' }}>{avatarInitial}</Text>
+                    </View>
+                  )}
+                </View>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={{ fontSize: 16, fontWeight: '700', color: 'white' }} numberOfLines={1}>
+                    {characterDisplayName}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: '#e2e8f0' }} numberOfLines={1}>
+                    {mission?.title || story?.title || ''}
+                  </Text>
+                </View>
+              </Pressable>
+            </View>
+            <Pressable hitSlop={12} onPress={() => {}} style={({ pressed }) => ({ paddingHorizontal: 8, paddingVertical: 6, opacity: pressed ? 0.5 : 1 })}>
+              <Text style={{ fontSize: 24, color: 'white', fontWeight: '700', lineHeight: 26 }}>⋯</Text>
+            </Pressable>
+          </View>
+        </View>
+        <ScrollView
+          ref={scrollRef}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+          keyboardShouldPersistTaps="handled"
+        >
         <Text style={{ fontSize: 18, fontWeight: '700', color: '#0f172a' }}>{story?.title}</Text>
         <Text style={{ marginTop: 4, color: '#475569' }}>Misión {sceneIndex + 1} de {story?.missions.length}</Text>
-
-        <View style={{ marginTop: 16, padding: 16, backgroundColor: 'white', borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0' }}>
-          <Text style={{ fontSize: 16, fontWeight: '700', color: '#1e293b' }}>{mission.title}</Text>
-          {mission.sceneSummary ? (
-            <Text style={{ marginTop: 6, color: '#475569' }}>{mission.sceneSummary}</Text>
-          ) : null}
-        </View>
 
         <View style={{ marginTop: 16, padding: 16, backgroundColor: 'white', borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0' }}>
           <Text style={{ fontWeight: '700', color: '#1e293b', marginBottom: 8 }}>Requisitos</Text>
@@ -647,20 +715,80 @@ export default function StorySceneScreen() {
             ) : null}
           </View>
         ) : null}
-
-        <StoryMessageComposer
-          flowState={flowState}
-          retryBlocked={retryBlocked}
-          statusLabel={statusLabel}
-          onSendText={handleSendText}
-          onRecordPressIn={handleRecordPressIn}
-          onRecordRelease={handleRecordRelease}
-        />
-
-        {errorMessage ? (
-          <Text style={{ marginTop: 12, color: '#dc2626' }}>{errorMessage}</Text>
-        ) : null}
       </ScrollView>
+      {errorMessage ? (
+        <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
+          <Text style={{ color: '#dc2626' }}>{errorMessage}</Text>
+        </View>
+      ) : null}
+
+      <StoryMessageComposer
+        flowState={flowState}
+        retryBlocked={retryBlocked}
+        statusLabel={statusLabel}
+        onSendText={handleSendText}
+        onRecordPressIn={handleRecordPressIn}
+        onRecordRelease={handleRecordRelease}
+      />
+      </View>
+      <Modal
+        animationType="fade"
+        transparent
+        visible={showCharacterModal}
+        onRequestClose={() => setShowCharacterModal(false)}
+      >
+        <Pressable
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', padding: 24, justifyContent: 'center' }}
+          onPress={() => setShowCharacterModal(false)}
+        >
+          <Pressable
+            style={{
+              backgroundColor: 'white',
+              borderRadius: 16,
+              padding: 20,
+              overflow: 'hidden',
+            }}
+            onPress={() => {}}
+          >
+            <View style={{ alignItems: 'flex-end' }}>
+              <Pressable
+                onPress={() => setShowCharacterModal(false)}
+                hitSlop={12}
+                style={({ pressed }) => ({ padding: 4, opacity: pressed ? 0.6 : 1 })}
+              >
+                <Text style={{ fontSize: 20, color: '#0f172a' }}>✕</Text>
+              </Pressable>
+            </View>
+            <View style={{ alignItems: 'center', marginTop: 4 }}>
+              <View style={{ width: 220, height: 220, borderRadius: 16, overflow: 'hidden', backgroundColor: '#e2e8f0', borderWidth: 1, borderColor: '#cbd5e1' }}>
+                {missionAvatar ? (
+                  <Image source={missionAvatar} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                ) : (
+                  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 42, fontWeight: '700', color: '#334155' }}>{avatarInitial}</Text>
+                  </View>
+                )}
+              </View>
+              <Text style={{ marginTop: 16, fontSize: 20, fontWeight: '700', color: '#0f172a', textAlign: 'center' }}>
+                {characterDisplayName}
+              </Text>
+              <Text style={{ marginTop: 6, fontSize: 14, color: '#475569', textAlign: 'center' }}>
+                {mission.title}
+              </Text>
+              {mission.sceneSummary ? (
+                <Text style={{ marginTop: 12, fontSize: 14, color: '#1f2937', textAlign: 'center' }}>
+                  {mission.sceneSummary}
+                </Text>
+              ) : null}
+              {mission.caracterPrompt ? (
+                <Text style={{ marginTop: 12, fontSize: 13, color: '#475569', textAlign: 'center' }}>
+                  {mission.caracterPrompt}
+                </Text>
+              ) : null}
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }

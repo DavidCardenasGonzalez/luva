@@ -58,7 +58,7 @@ export default function AppNavigator() {
   return (
     <NavigationContainer linking={linking} theme={DefaultTheme}>
       <Stack.Navigator>
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Deck" component={DeckScreen} />
         <Stack.Screen name="CardDetail" component={CardDetailScreen} />
         <Stack.Screen name="Practice" component={PracticeScreen} />

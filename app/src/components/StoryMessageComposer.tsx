@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, TextInput, Pressable } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, Text, TextInput, Pressable, Keyboard } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export type StoryFlowState = 'idle' | 'recording' | 'uploading' | 'transcribing' | 'evaluating';
 
@@ -21,6 +22,17 @@ export default function StoryMessageComposer({
   onRecordRelease,
 }: Props) {
   const [text, setText] = useState('');
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const insets = useSafeAreaInsets();
+  
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const handleSendPress = useCallback(async () => {
     const trimmed = text.trim();
@@ -35,82 +47,85 @@ export default function StoryMessageComposer({
   const recordDisabled = retryBlocked || (flowState !== 'idle' && flowState !== 'recording');
 
   return (
-    <View style={{ marginTop: 24 }}>
-      <View
-        style={{
-          padding: 16,
-          backgroundColor: 'white',
-          borderRadius: 12,
-          borderWidth: 1,
-          borderColor: '#e2e8f0',
-        }}
-      >
-        <Text style={{ fontWeight: '600', color: '#1e293b', marginBottom: 8 }}>Escribe tu mensaje (opcional)</Text>
-        <TextInput
-          value={text}
-          onChangeText={setText}
-          placeholder="Escribe aquí tu intervención..."
-          multiline
+    <View
+      style={{
+        paddingHorizontal: 12,
+        paddingBottom: Math.max(insets.bottom, 8),
+        paddingTop: statusLabel ? 8 : 12,
+        backgroundColor: '#f8fafc',
+        borderTopWidth: 1,
+        borderTopColor: '#e2e8f0',
+      }}
+    >
+      {statusLabel ? <Text style={{ color: '#475569', marginBottom: 8 }}>{statusLabel}</Text> : null}
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View
           style={{
-            borderWidth: 1,
-            borderColor: '#cbd5f5',
-            borderRadius: 10,
-            padding: 12,
-            minHeight: 60,
-            backgroundColor: '#f8fafc',
-            textAlignVertical: 'top',
-          }}
-        />
-        <Pressable
-          disabled={sendDisabled}
-          onPress={handleSendPress}
-          style={({ pressed }) => ({
-            marginTop: 12,
-            paddingVertical: 12,
-            borderRadius: 10,
+            flex: 1,
+            flexDirection: 'row',
             alignItems: 'center',
-            backgroundColor: sendDisabled ? '#cbd5f5' : pressed ? '#2563eb' : '#3b82f6',
-          })}
+            backgroundColor: 'white',
+            borderRadius: 999,
+            borderWidth: 1,
+            borderColor: '#dbeafe',
+            paddingHorizontal: 14,
+            paddingVertical: 8,
+          }}
         >
-          <Text style={{ color: 'white', fontWeight: '700' }}>Enviar texto</Text>
-        </Pressable>
-      </View>
-
-      <View
-        style={{
-          marginTop: 16,
-          padding: 16,
-          backgroundColor: 'white',
-          borderRadius: 12,
-          borderWidth: 1,
-          borderColor: '#e2e8f0',
-        }}
-      >
-        <Text style={{ fontWeight: '600', color: '#1e293b', marginBottom: 8 }}>Grabar mensaje</Text>
+          <TextInput
+            value={text}
+            onChangeText={setText}
+            placeholder="Escribe tu mensaje..."
+            placeholderTextColor="#94a3b8"
+            multiline
+            style={{
+              flex: 1,
+              paddingVertical: 0,
+              paddingRight: 8,
+              color: '#0f172a',
+              maxHeight: 120,
+            }}
+            onSubmitEditing={handleSendPress}
+            blurOnSubmit={false}
+            returnKeyType="send"
+          />
+          <Pressable
+            disabled={sendDisabled}
+            onPress={handleSendPress}
+            style={({ pressed }) => ({
+              paddingHorizontal: 12,
+              paddingVertical: 8,
+              borderRadius: 999,
+              backgroundColor: sendDisabled ? '#e2e8f0' : pressed ? '#2563eb' : '#3b82f6',
+            })}
+          >
+            <Text style={{ color: sendDisabled ? '#94a3b8' : 'white', fontWeight: '700' }}>➤</Text>
+          </Pressable>
+        </View>
         <Pressable
-          onPressIn={flowState === 'idle' && !retryBlocked ? onRecordPressIn : undefined}
-          onPressOut={onRecordRelease}
+          onPressIn={!recordDisabled ? onRecordPressIn : undefined}
+          onPressOut={!recordDisabled ? onRecordRelease : undefined}
           disabled={recordDisabled}
           style={({ pressed }) => ({
-            paddingVertical: 14,
+            marginLeft: 10,
+            width: 52,
+            height: 52,
             borderRadius: 999,
             alignItems: 'center',
+            justifyContent: 'center',
             backgroundColor: retryBlocked
               ? '#cbd5f5'
               : flowState === 'recording'
               ? '#dc2626'
               : pressed
-              ? '#7c3aed'
-              : flowState === 'idle'
-              ? '#8b5cf6'
-              : '#cbd5f5',
+              ? '#059669'
+              : '#10b981',
           })}
         >
-          <Text style={{ color: 'white', fontWeight: '700' }}>
-            {flowState === 'recording' ? 'Suelta para finalizar' : 'Mantén presionado para grabar'}
+          <Text style={{ color: 'white', fontWeight: '800', fontSize: 16 }}>
+            {flowState === 'recording' ? 'REC' : '🎤'}
           </Text>
         </Pressable>
-        {statusLabel ? <Text style={{ marginTop: 8, color: '#475569' }}>{statusLabel}</Text> : null}
       </View>
     </View>
   );

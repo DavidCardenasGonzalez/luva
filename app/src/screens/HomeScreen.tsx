@@ -4,18 +4,20 @@ import {
   Text,
   ScrollView,
   Pressable,
-  ActivityIndicator,
+  Image,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { useProgress } from '../hooks/useProgress';
 import { useAuth } from '../auth/AuthProvider';
 import { useLearningItems } from '../hooks/useLearningItems';
+import { useStories } from '../hooks/useStories';
 import {
   CARD_STATUS_LABELS,
   CardProgressStatus,
   useCardProgress,
 } from '../progress/CardProgressProvider';
+import { useStoryProgress } from '../progress/StoryProgressProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -27,12 +29,13 @@ const STATUS_COLORS: Record<CardProgressStatus, string> = {
 };
 
 export default function HomeScreen({ navigation }: Props) {
-  const { data, loading, error, reload } = useProgress();
   const { isSignedIn, signIn, signOut } = useAuth();
   const { items } = useLearningItems();
-  const { statusFor, statuses } = useCardProgress();
+  const { items: stories } = useStories();
+  const { loading: cardLoading, statusFor, statuses } = useCardProgress();
+  const { loading: storyLoading, completedCountFor } = useStoryProgress();
 
-  const { totalCards, counts, percentages } = useMemo(() => {
+  const { totalCards, learnedCards, counts, percentages } = useMemo(() => {
     const totals: Record<CardProgressStatus, number> = { todo: 0, learning: 0, learned: 0 };
     for (const item of items) {
       totals[statusFor(item.id)] += 1;
@@ -43,44 +46,84 @@ export default function HomeScreen({ navigation }: Props) {
       learning: Math.round((totals.learning / total) * 100),
       learned: Math.round((totals.learned / total) * 100),
     };
-    return { totalCards: items.length, counts: totals, percentages: pct };
+    return { totalCards: items.length, learnedCards: totals.learned, counts: totals, percentages: pct };
   }, [items, statuses, statusFor]);
 
-  const points = data?.points ?? 0;
-  const streak = data?.streak ?? 0;
-  const nextPointsGoal = Math.max(120, Math.ceil((points + 1) / 250) * 250);
-  const pointsProgress = Math.min(points / nextPointsGoal, 1);
-  const streakGoal = Math.max(5, Math.ceil(Math.max(streak, 1) / 5) * 5);
-  const streakProgress = Math.min(streak / streakGoal, 1);
-  const streakDots = Array.from({ length: Math.min(streakGoal, 8) }, (_, idx) => idx + 1 <= streak);
+  const { totalMissions, completedMissions } = useMemo(() => {
+    const totals = stories.reduce(
+      (acc, story) => {
+        const missions = story.missionsCount || 0;
+        const completed = Math.min(completedCountFor(story.storyId), missions);
+        acc.total += missions;
+        acc.completed += completed;
+        return acc;
+      },
+      { total: 0, completed: 0 }
+    );
+    return { totalMissions: totals.total, completedMissions: totals.completed };
+  }, [stories, completedCountFor]);
+
+  const totalWeighted = totalCards + totalMissions * 2;
+  const completedWeighted = learnedCards + completedMissions * 2;
+  const overallProgress = totalWeighted > 0 ? Math.round((completedWeighted / totalWeighted) * 100) : 0;
+  const isLoading = cardLoading || storyLoading;
+  const missionsProgress = totalMissions > 0 ? Math.round((completedMissions / totalMissions) * 100) : 0;
+  const remainingCards = Math.max(totalCards - learnedCards, 0);
+  const remainingMissions = Math.max(totalMissions - completedMissions, 0);
 
   return (
-    <ScrollView
+    <SafeAreaView
+      edges={['top', 'left', 'right']}
       style={{ flex: 1, backgroundColor: '#0b1224' }}
-      contentContainerStyle={{ padding: 20, paddingBottom: 32 }}
     >
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: 32 }}
+      >
       <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 260, backgroundColor: '#0b1224' }} />
+
+      <View style={{ alignItems: 'center', marginBottom: 12 }}>
+        <Image
+          source={require('../image/logo.png')}
+          style={{ width: 260, height: 60, resizeMode: 'contain' }}
+        />
+      </View>
 
       <View style={{ borderRadius: 24, overflow: 'hidden', padding: 20, backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1f2937', shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 14 }}>
         <View style={{ position: 'absolute', width: 200, height: 200, backgroundColor: '#0ea5e933', borderRadius: 200, top: -60, right: -60 }} />
         <View style={{ position: 'absolute', width: 160, height: 160, backgroundColor: '#22c55e22', borderRadius: 200, bottom: -50, left: -40 }} />
         <Text style={{ color: '#a5f3fc', fontSize: 12, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' }}>Panel de avance</Text>
-        <Text style={{ color: '#e2e8f0', fontSize: 26, fontWeight: '800', marginTop: 6 }}>Sigue impulsando tu racha</Text>
+        <Text style={{ color: '#e2e8f0', fontSize: 26, fontWeight: '800', marginTop: 6 }}>Sigue impulsando tu avance</Text>
         <Text style={{ color: '#94a3b8', marginTop: 8, lineHeight: 20 }}>
-          Visualiza tu progreso y vuelve al contenido que más te suma puntos.
+          Visualiza tu progreso combinado de tarjetas aprendidas y misiones completadas.
         </Text>
 
-        <View style={{ flexDirection: 'row', marginTop: 16 }}>
-          <View style={{ flex: 1, backgroundColor: '#0b172b', borderColor: '#1f2937', borderWidth: 1, padding: 14, borderRadius: 16, marginRight: 10 }}>
-            <Text style={{ color: '#cbd5e1', fontSize: 12, fontWeight: '600' }}>Puntos</Text>
-            <Text style={{ color: '#22d3ee', fontSize: 28, fontWeight: '800', marginTop: 4 }}>{points}</Text>
-            <Text style={{ color: '#94a3b8', fontSize: 12 }}>Objetivo próximo: {nextPointsGoal}</Text>
+        <View style={{ marginTop: 16, backgroundColor: '#0b172b', borderColor: '#1f2937', borderWidth: 1, padding: 16, borderRadius: 16 }}>
+          <Text style={{ color: '#cbd5e1', fontSize: 12, fontWeight: '700' }}>Avance total</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end', marginTop: 6 }}>
+            <Text style={{ color: '#e2e8f0', fontSize: 36, fontWeight: '900' }}>
+              {isLoading ? '--' : `${overallProgress}%`}
+            </Text>
+            <Text style={{ color: '#94a3b8', marginLeft: 8, marginBottom: 6, fontWeight: '600' }}>completado</Text>
           </View>
-          <View style={{ flex: 1, backgroundColor: '#0b172b', borderColor: '#1f2937', borderWidth: 1, padding: 14, borderRadius: 16 }}>
-            <Text style={{ color: '#cbd5e1', fontSize: 12, fontWeight: '600' }}>Racha</Text>
-            <Text style={{ color: '#fbbf24', fontSize: 28, fontWeight: '800', marginTop: 4 }}>{streak}d</Text>
-            <Text style={{ color: '#94a3b8', fontSize: 12 }}>Hito: {streakGoal} días</Text>
+          <View style={{ marginTop: 10, height: 12, borderRadius: 999, backgroundColor: '#1f2937', overflow: 'hidden' }}>
+            <View style={{ width: isLoading ? '0%' : `${overallProgress}%`, backgroundColor: '#22d3ee', height: '100%' }} />
           </View>
+          <View style={{ marginTop: 12, flexDirection: 'row', justifyContent: 'space-between' }}>
+            <View style={{ padding: 12, borderRadius: 12, backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1e293b', flex: 1, marginRight: 8 }}>
+              <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '700' }}>Tarjetas</Text>
+              <Text style={{ color: '#e2e8f0', marginTop: 4, fontWeight: '800' }}>{learnedCards}/{totalCards}</Text>
+              <Text style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>Aprendidas</Text>
+            </View>
+            <View style={{ padding: 12, borderRadius: 12, backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1e293b', flex: 1, marginLeft: 8 }}>
+              <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '700' }}>Misiones (x2)</Text>
+              <Text style={{ color: '#e2e8f0', marginTop: 4, fontWeight: '800' }}>{completedMissions}/{totalMissions}</Text>
+              <Text style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>Completadas</Text>
+            </View>
+          </View>
+          <Text style={{ color: '#94a3b8', marginTop: 10, fontSize: 12, lineHeight: 18 }}>
+            Fórmula: (tarjetas aprendidas + misiones completadas × 2) / (tarjetas totales + misiones totales × 2)
+          </Text>
         </View>
 
         <View style={{ flexDirection: 'row', marginTop: 18 }}>
@@ -160,83 +203,35 @@ export default function HomeScreen({ navigation }: Props) {
 
       <View style={{ marginTop: 14, flexDirection: 'row' }}>
         <View style={{ flex: 1, backgroundColor: '#fff', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#e5e7eb', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, marginRight: 10 }}>
-          <Text style={{ color: '#0f172a', fontWeight: '800', fontSize: 15 }}>Racha</Text>
-          <Text style={{ color: '#475569', marginTop: 6 }}>Mantente activo hasta el siguiente hito.</Text>
+          <Text style={{ color: '#0f172a', fontWeight: '800', fontSize: 15 }}>Misiones narrativas</Text>
+          <Text style={{ color: '#475569', marginTop: 6 }}>Completa escenas para empujar el avance combinado.</Text>
           <View style={{ marginTop: 12, height: 10, borderRadius: 999, backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
-            <View style={{ width: `${streakProgress * 100}%`, backgroundColor: '#fbbf24', height: '100%' }} />
+            <View style={{ width: `${missionsProgress}%`, backgroundColor: '#0ea5e9', height: '100%' }} />
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
-            {streakDots.map((filled, idx) => (
-              <View
-                key={idx}
-                style={{
-                  width: 18,
-                  height: 18,
-                  borderRadius: 999,
-                  backgroundColor: filled ? '#f59e0b' : '#e2e8f0',
-                  opacity: filled ? 1 : 0.6,
-                  marginRight: 6,
-                }}
-              />
-            ))}
-            <Text style={{ color: '#475569', fontSize: 12, marginLeft: 4 }}>
-              Próximo hito: {streakGoal} días
-            </Text>
-          </View>
+          <Text style={{ color: '#475569', marginTop: 8, fontSize: 12 }}>
+            {completedMissions} de {totalMissions || 0} misiones completas
+          </Text>
+          <Text style={{ color: '#0f172a', fontSize: 12, marginTop: 4, fontWeight: '700' }}>
+            {remainingMissions > 0
+              ? `Faltan ${remainingMissions} misión${remainingMissions === 1 ? '' : 'es'}.`
+              : 'Sin misiones pendientes.'}
+          </Text>
         </View>
 
         <View style={{ flex: 1, backgroundColor: '#0f172a', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#1f2937', shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 10 }}>
-          <Text style={{ color: '#e2e8f0', fontWeight: '800', fontSize: 15 }}>Puntos</Text>
-          <Text style={{ color: '#94a3b8', marginTop: 6 }}>Cada práctica te acerca a la siguiente recompensa.</Text>
-          <View style={{ marginTop: 12, height: 10, borderRadius: 999, backgroundColor: '#1f2937', overflow: 'hidden' }}>
-            <View style={{ width: `${pointsProgress * 100}%`, backgroundColor: '#22d3ee', height: '100%' }} />
-          </View>
-          <Text style={{ color: '#a5f3fc', marginTop: 10, fontSize: 12 }}>
-            Te faltan {Math.max(nextPointsGoal - points, 0)} puntos para el siguiente hito ({nextPointsGoal})
+          <Text style={{ color: '#e2e8f0', fontWeight: '800', fontSize: 15 }}>Detalle rápido</Text>
+          <Text style={{ color: '#94a3b8', marginTop: 6, lineHeight: 18 }}>
+            Prioriza misiones (x2) o termina {remainingCards > 0 ? `${remainingCards} tarjeta${remainingCards === 1 ? '' : 's'} pendientes` : 'las tarjetas de repaso'} para subir el porcentaje.
           </Text>
+          <View style={{ marginTop: 12, padding: 12, borderRadius: 12, backgroundColor: '#111827', borderWidth: 1, borderColor: '#1f2937' }}>
+            <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '700' }}>Tarjetas aprendidas</Text>
+            <Text style={{ color: '#e2e8f0', marginTop: 4 }}>{learnedCards}/{totalCards}</Text>
+            <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '700', marginTop: 10 }}>Misiones completadas</Text>
+            <Text style={{ color: '#e2e8f0', marginTop: 4 }}>{completedMissions}/{totalMissions || 0}</Text>
+          </View>
         </View>
       </View>
-
-      {error ? (
-        <Pressable
-          onPress={reload}
-          style={({ pressed }) => ({
-            marginTop: 14,
-            backgroundColor: '#fef2f2',
-            borderRadius: 12,
-            padding: 12,
-            borderWidth: 1,
-            borderColor: pressed ? '#fca5a5' : '#fecdd3',
-          })}
-        >
-          <Text style={{ color: '#b91c1c', fontWeight: '700' }}>No se pudo actualizar el progreso.</Text>
-          <Text style={{ color: '#b91c1c', marginTop: 4 }}>Toca para reintentar.</Text>
-        </Pressable>
-      ) : null}
-
-      <Pressable
-        onPress={() => { void (isSignedIn ? signOut() : signIn()); }}
-        style={({ pressed }) => ({
-          marginTop: 18,
-          paddingVertical: 12,
-          borderRadius: 12,
-          alignItems: 'center',
-          backgroundColor: pressed ? '#e2e8f0' : '#f1f5f9',
-          borderWidth: 1,
-          borderColor: '#e2e8f0',
-        })}
-      >
-        <Text style={{ color: '#0f172a', fontWeight: '700' }}>
-          {isSignedIn ? 'Cerrar sesión' : 'Iniciar sesión para sincronizar'}
-        </Text>
-      </Pressable>
-
-      {loading ? (
-        <View style={{ marginTop: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-          <ActivityIndicator color="#22d3ee" />
-          <Text style={{ color: '#94a3b8', marginLeft: 8 }}>Actualizando progreso...</Text>
-        </View>
-      ) : null}
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

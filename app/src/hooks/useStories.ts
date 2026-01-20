@@ -11,6 +11,8 @@ export type StoryMissionDefinition = {
   title: string;
   sceneSummary?: string;
   aiRole: string;
+  caracterName?: string;
+  caracterPrompt?: string;
   requirements: StoryRequirement[];
 };
 
@@ -47,6 +49,8 @@ export type StoryMission = {
   title: string;
   sceneSummary?: string;
   aiRole: string;
+  caracterName?: string;
+  caracterPrompt?: string;
   requirements: StoryRequirementState[];
 };
 
@@ -91,6 +95,8 @@ export function useStoryDetail(storyId?: string) {
         title: mission.title,
         sceneSummary: mission.sceneSummary,
         aiRole: mission.aiRole,
+        caracterName: mission.caracterName,
+        caracterPrompt: mission.caracterPrompt,
         requirements: (mission.requirements || []).map((req) => ({
           requirementId: req.requirementId,
           text: req.text,
