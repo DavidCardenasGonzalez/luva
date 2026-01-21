@@ -51,8 +51,8 @@ export default function AppNavigator() {
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Deck" component={DeckScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Practice" component={PracticeScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Stories" component={StoriesScreen} />
-        <Stack.Screen name="StoryMissions" component={StoryMissionsScreen} />
+        <Stack.Screen name="Stories" component={StoriesScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="StoryMissions" component={StoryMissionsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="StoryScene" component={StorySceneScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="AuthCallback" component={AuthCallbackScreen} />

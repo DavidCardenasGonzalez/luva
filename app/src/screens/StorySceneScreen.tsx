@@ -477,7 +477,7 @@ export default function StorySceneScreen() {
       // keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
     >
       <View style={{ flex: 1 }}>
-        <View style={{ backgroundColor: '#2563eb', paddingTop: insets.top + 8, paddingBottom: 12, paddingHorizontal: 16 }}>
+        <View style={{ backgroundColor: '#0b1224', paddingTop: insets.top + 8, paddingBottom: 12, paddingHorizontal: 16 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, minWidth: 0 }}>
               <Pressable
@@ -503,7 +503,7 @@ export default function StorySceneScreen() {
                   opacity: pressed ? 0.7 : 1,
                 })}
               >
-                <View style={{ width: 40, height: 40, borderRadius: 999, overflow: 'hidden', backgroundColor: '#1d4ed8', borderWidth: 1, borderColor: '#1d4ed8', marginRight: 12 }}>
+                <View style={{ width: 40, height: 40, borderRadius: 999, overflow: 'hidden', backgroundColor: '#0b1224', borderWidth: 1, borderColor: '#0b1224', marginRight: 12 }}>
                   {missionAvatar ? (
                     <Image source={missionAvatar} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                   ) : (
@@ -631,7 +631,7 @@ export default function StorySceneScreen() {
                     flowState !== 'idle'
                       ? '#cbd5f5'
                       : pressed
-                      ? '#1d4ed8'
+                      ? '#0b1224'
                       : '#2563eb',
                 })}
               >
