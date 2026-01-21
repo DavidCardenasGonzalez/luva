@@ -7,6 +7,7 @@ Monorepo
 - infra/ — AWS CDK (Cognito, S3, DynamoDB, API Gateway, Lambdas, SSM)
 - backend/ — Lambdas Node/TypeScript (mocks) + tests
 - app/ — React Native (TypeScript) con pantallas y hooks stub
+- web/ — Sitio público en React (Vite) con explicación, TyC y política de privacidad
 - seed/ — generador de 100 cartas y 5 historias
 - scripts/ — utilidades locales (p.ej., evaluate-sandbox)
 - docs/ — colección Postman/Insomnia y [Prompt Development Notes](docs/prompt-development-notes.md)

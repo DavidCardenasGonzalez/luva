@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { MaterialIcons } from '@expo/vector-icons';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useAuth } from '../auth/AuthProvider';
 import { useLearningItems } from '../hooks/useLearningItems';
@@ -82,11 +83,24 @@ export default function HomeScreen({ navigation }: Props) {
       >
       <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 260, backgroundColor: '#0b1224' }} />
 
-      <View style={{ alignItems: 'center', marginBottom: 12 }}>
+      <View style={{ alignItems: 'center', marginBottom: 16, position: 'relative' }}>
         <Image
           source={require('../image/logo.png')}
           style={{ width: 260, height: 60, resizeMode: 'contain' }}
         />
+        <Pressable
+          onPress={() => navigation.navigate('Settings')}
+          hitSlop={12}
+          style={({ pressed }) => ({
+            position: 'absolute',
+            right: 0,
+            top: 6,
+            opacity: pressed ? 0.8 : 1,
+            padding: 6,
+          })}
+        >
+          <MaterialIcons name="settings" size={26} color="#cbd5e1" />
+        </Pressable>
       </View>
 
       <View style={{ borderRadius: 24, overflow: 'hidden', padding: 20, backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1f2937', shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 14 }}>

@@ -9,6 +9,7 @@ import StoryMissionsScreen from '../screens/StoryMissionsScreen';
 import StorySceneScreen from '../screens/StorySceneScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import AuthCallbackScreen from '../screens/AuthCallbackScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 import * as Linking from 'expo-linking';
 
 export type RootStackParamList = {
@@ -30,6 +31,7 @@ export type RootStackParamList = {
   StoryScene: { storyId: string; sceneIndex: number };
   Profile: undefined;
   AuthCallback: undefined;
+  Settings: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -56,6 +58,7 @@ export default function AppNavigator() {
         <Stack.Screen name="StoryScene" component={StorySceneScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="AuthCallback" component={AuthCallbackScreen} />
+        <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
