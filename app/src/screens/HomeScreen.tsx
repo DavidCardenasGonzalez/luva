@@ -116,14 +116,11 @@ export default function HomeScreen({ navigation }: Props) {
               <Text style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>Aprendidas</Text>
             </View>
             <View style={{ padding: 12, borderRadius: 12, backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1e293b', flex: 1, marginLeft: 8 }}>
-              <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '700' }}>Misiones (x2)</Text>
+              <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '700' }}>Misiones</Text>
               <Text style={{ color: '#e2e8f0', marginTop: 4, fontWeight: '800' }}>{completedMissions}/{totalMissions}</Text>
               <Text style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>Completadas</Text>
             </View>
           </View>
-          <Text style={{ color: '#94a3b8', marginTop: 10, fontSize: 12, lineHeight: 18 }}>
-            Fórmula: (tarjetas aprendidas + misiones completadas × 2) / (tarjetas totales + misiones totales × 2)
-          </Text>
         </View>
 
         <View style={{ flexDirection: 'row', marginTop: 18 }}>
@@ -221,7 +218,7 @@ export default function HomeScreen({ navigation }: Props) {
         <View style={{ flex: 1, backgroundColor: '#0f172a', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#1f2937', shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 10 }}>
           <Text style={{ color: '#e2e8f0', fontWeight: '800', fontSize: 15 }}>Detalle rápido</Text>
           <Text style={{ color: '#94a3b8', marginTop: 6, lineHeight: 18 }}>
-            Prioriza misiones (x2) o termina {remainingCards > 0 ? `${remainingCards} tarjeta${remainingCards === 1 ? '' : 's'} pendientes` : 'las tarjetas de repaso'} para subir el porcentaje.
+            Prioriza misiones o termina {remainingCards > 0 ? `${remainingCards} tarjeta${remainingCards === 1 ? '' : 's'} pendientes` : 'las tarjetas de repaso'} para subir el porcentaje.
           </Text>
           <View style={{ marginTop: 12, padding: 12, borderRadius: 12, backgroundColor: '#111827', borderWidth: 1, borderColor: '#1f2937' }}>
             <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '700' }}>Tarjetas aprendidas</Text>

@@ -23,7 +23,7 @@ export default function CardStatusSelector({ cardId, title = 'Estado', style, al
 
   return (
     <View style={[{ marginTop: 16 }, style]}>
-      <Text style={{ fontWeight: '600', marginBottom: 8 }}>{title}</Text>
+      <Text style={{ fontWeight: '600', marginBottom: 8, color: '#22d3ee' }}>{title}</Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
         {statuses.map((status) => {
           const active = status === current;
