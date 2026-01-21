@@ -9,6 +9,7 @@ import {
   Platform,
   Image,
   Modal,
+  TextInput,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -22,6 +23,7 @@ import {
 import { useStoryProgress } from '../progress/StoryProgressProvider';
 import StoryMessageComposer from '../components/StoryMessageComposer';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
+import luviImage from '../image/luvi.png';
 
 type StoryMessage = {
   id: string;
@@ -61,6 +63,10 @@ type StoryAttemptSnapshot = {
     summary: string;
     improvements: string[];
   } | null;
+};
+
+type StoryAssistanceResponse = {
+  answer: string;
 };
 
 export default function StorySceneScreen() {
@@ -142,6 +148,11 @@ export default function StorySceneScreen() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [retryState, setRetryState] = useState<'none' | 'optional' | 'required'>('none');
   const [lastAttemptSnapshot, setLastAttemptSnapshot] = useState<StoryAttemptSnapshot | null>(null);
+  const [showAssistanceModal, setShowAssistanceModal] = useState(false);
+  const [assistanceQuestion, setAssistanceQuestion] = useState('');
+  const [assistanceAnswer, setAssistanceAnswer] = useState('');
+  const [assistanceLoading, setAssistanceLoading] = useState(false);
+  const [assistanceError, setAssistanceError] = useState<string | null>(null);
 
   const recorder = useAudioRecorder();
   const uploader = useUploadToS3();
@@ -158,6 +169,11 @@ export default function StorySceneScreen() {
     setRetryState('none');
     setLastAttemptSnapshot(null);
     setFlowState('idle');
+    setAssistanceQuestion('');
+    setAssistanceAnswer('');
+    setAssistanceError(null);
+    setAssistanceLoading(false);
+    setShowAssistanceModal(false);
   }, [mission?.missionId, storyId]);
 
   useEffect(() => {
@@ -427,6 +443,62 @@ export default function StorySceneScreen() {
     [handleAdvance, retryState, sceneIndex, storyId]
   );
 
+  const handleOpenAssistance = useCallback(() => {
+    setAssistanceQuestion('');
+    setAssistanceAnswer('');
+    setAssistanceError(null);
+    setShowAssistanceModal(true);
+  }, []);
+
+  const handleRequestAssistance = useCallback(async () => {
+    const trimmed = assistanceQuestion.trim();
+    if (!trimmed) {
+      setAssistanceError('Escribe tu pregunta.');
+      return;
+    }
+    if (!storyId || !mission) {
+      setAssistanceError('No encontramos la misión actual.');
+      return;
+    }
+    setAssistanceLoading(true);
+    setAssistanceError(null);
+    setAssistanceAnswer('');
+    try {
+      const historyPayload = messages.map(({ role, text }) => ({ role, content: text }));
+      const requirementPayload = requirements.map((req) => ({
+        requirementId: req.requirementId,
+        text: req.text,
+        met: !!req.met,
+        feedback: req.feedback,
+      }));
+      const payload = await api.post<StoryAssistanceResponse>(`/stories/${storyId}/assist`, {
+        sceneIndex,
+        question: trimmed,
+        history: historyPayload,
+        requirements: requirementPayload,
+        storyDefinition: storyDefinitionPayload,
+        missionDefinition: missionDefinitionPayload,
+        conversationFeedback,
+      });
+      setAssistanceAnswer(payload?.answer || '');
+    } catch (err: any) {
+      console.error('Story assistance error', err);
+      setAssistanceError(err?.message || 'No pudimos obtener la asistencia.');
+    } finally {
+      setAssistanceLoading(false);
+    }
+  }, [
+    assistanceQuestion,
+    conversationFeedback,
+    messages,
+    mission,
+    missionDefinitionPayload,
+    requirements,
+    sceneIndex,
+    storyDefinitionPayload,
+    storyId,
+  ]);
+
   if (!storyId) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16 }}>
@@ -516,13 +588,13 @@ export default function StorySceneScreen() {
                   <Text style={{ fontSize: 16, fontWeight: '700', color: 'white' }} numberOfLines={1}>
                     {characterDisplayName}
                   </Text>
-                  <Text style={{ fontSize: 12, color: '#e2e8f0' }} numberOfLines={1}>
-                    {mission?.title || story?.title || ''}
-                  </Text>
-                </View>
-              </Pressable>
-            </View>
-            <Pressable hitSlop={12} onPress={() => {}} style={({ pressed }) => ({ paddingHorizontal: 8, paddingVertical: 6, opacity: pressed ? 0.5 : 1 })}>
+                <Text style={{ fontSize: 12, color: '#e2e8f0' }} numberOfLines={1}>
+                  {mission?.title || story?.title || ''}
+                </Text>
+              </View>
+            </Pressable>
+          </View>
+            <Pressable hitSlop={12} onPress={handleOpenAssistance} style={({ pressed }) => ({ paddingHorizontal: 8, paddingVertical: 6, opacity: pressed ? 0.5 : 1 })}>
               <Text style={{ fontSize: 24, color: 'white', fontWeight: '700', lineHeight: 26 }}>⋯</Text>
             </Pressable>
           </View>
@@ -731,6 +803,120 @@ export default function StorySceneScreen() {
         onRecordRelease={handleRecordRelease}
       />
       </View>
+      <Modal
+        animationType="fade"
+        transparent
+        visible={showAssistanceModal}
+        onRequestClose={() => setShowAssistanceModal(false)}
+      >
+        <Pressable
+          style={{ flex: 1, backgroundColor: 'rgba(4,7,17,0.7)', padding: 20, justifyContent: 'center' }}
+          onPress={() => setShowAssistanceModal(false)}
+        >
+          <Pressable
+            onPress={() => {}}
+            style={{
+              backgroundColor: 'white',
+              borderRadius: 18,
+              padding: 20,
+              shadowColor: '#0f172a',
+              shadowOpacity: 0.12,
+              shadowRadius: 16,
+              elevation: 6,
+            }}
+          >
+            <View style={{ alignItems: 'flex-end' }}>
+              <Pressable
+                onPress={() => setShowAssistanceModal(false)}
+                hitSlop={12}
+                style={({ pressed }) => ({ padding: 4, opacity: pressed ? 0.6 : 1 })}
+              >
+                <Text style={{ fontSize: 20, color: '#0f172a' }}>✕</Text>
+              </Pressable>
+            </View>
+            <View style={{ alignItems: 'center', marginBottom: 12 }}>
+              <View
+                style={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: 20,
+                  backgroundColor: '#0b1224',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
+                }}
+              >
+                <Image source={luviImage} style={{ width: '90%', height: '90%' }} resizeMode="contain" />
+              </View>
+              <Text style={{ marginTop: 12, fontSize: 18, fontWeight: '800', color: '#0f172a' }}>
+                ¿Cómo puedo ayudarte?
+              </Text>
+              <Text style={{ marginTop: 6, fontSize: 13, color: '#475569', textAlign: 'center' }}>
+                Luvi puede darte ideas rápidas usando la misión, objetivos y el chat actual.
+              </Text>
+              <Text style={{ marginTop: 4, fontSize: 12, color: '#64748b', textAlign: 'center' }}>
+                Misión: {mission.title}
+              </Text>
+            </View>
+            <TextInput
+              value={assistanceQuestion}
+              onChangeText={(text) => {
+                setAssistanceQuestion(text);
+                if (assistanceError) setAssistanceError(null);
+              }}
+              placeholder="Cuéntame qué necesitas desbloquear o cómo seguir la conversación..."
+              placeholderTextColor="#94a3b8"
+              multiline
+              style={{
+                minHeight: 90,
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: '#e2e8f0',
+                backgroundColor: '#f8fafc',
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                fontSize: 14,
+                color: '#0f172a',
+              }}
+            />
+            {assistanceError ? (
+              <Text style={{ marginTop: 6, color: '#dc2626' }}>{assistanceError}</Text>
+            ) : null}
+            <Pressable
+              onPress={handleRequestAssistance}
+              disabled={assistanceLoading}
+              style={({ pressed }) => ({
+                marginTop: 12,
+                paddingVertical: 12,
+                borderRadius: 999,
+                alignItems: 'center',
+                backgroundColor: assistanceLoading ? '#cbd5f5' : pressed ? '#0b1224' : '#2563eb',
+              })}
+            >
+              {assistanceLoading ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text style={{ color: 'white', fontWeight: '700' }}>Pedir asistencia</Text>
+              )}
+            </Pressable>
+            {assistanceAnswer ? (
+              <View
+                style={{
+                  marginTop: 14,
+                  padding: 12,
+                  borderRadius: 12,
+                  backgroundColor: '#f8fafc',
+                  borderWidth: 1,
+                  borderColor: '#e2e8f0',
+                }}
+              >
+                <Text style={{ fontWeight: '700', color: '#0f172a', marginBottom: 6 }}>Sugerencia</Text>
+                <Text style={{ color: '#0f172a', lineHeight: 20 }}>{assistanceAnswer}</Text>
+              </View>
+            ) : null}
+          </Pressable>
+        </Pressable>
+      </Modal>
       <Modal
         animationType="fade"
         transparent

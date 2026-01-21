@@ -106,3 +106,21 @@ export interface StoryAdvancePayload {
     improvements: string[];
   } | null;
 }
+
+export interface StoryAssistanceRequest {
+  question: string;
+  sceneIndex?: number;
+  sessionId?: string;
+  history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+  storyDefinition?: StoryDefinition;
+  missionDefinition?: StoryMission;
+  requirements?: StoryAdvanceRequirementState[];
+  conversationFeedback?: {
+    summary?: string;
+    improvements?: string[];
+  } | null;
+}
+
+export interface StoryAssistanceResponse {
+  answer: string;
+}

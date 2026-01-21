@@ -24,7 +24,9 @@ import {
   StoryMission,
   StoryRequirement,
   StoryAdvanceRequirementState,
-  EvalResult
+  EvalResult,
+  StoryAssistanceRequest,
+  StoryAssistanceResponse
 } from "../types";
 import { STORIES_SEED } from "../data/stories-seed";
 
@@ -406,6 +408,73 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
           requirements: initialRequirementStates(mission),
         })) || [],
       });
+    }
+
+    const storyAssist = path.match(/^\/v1\/stories\/([^/]+)\/assist$/);
+    if (method === "POST" && storyAssist) {
+      const storyId = storyAssist[1];
+      const body = parseBody(event.body) as StoryAssistanceRequest;
+      const question = typeof body?.question === 'string' ? body.question.trim() : '';
+      if (!question) {
+        return badRequest('Missing question');
+      }
+      const sessionId = typeof body?.sessionId === 'string' ? body.sessionId : undefined;
+      let sessionState = sessionId ? STORY_SESSIONS.get(sessionId) : undefined;
+      let story = getStory(storyId) || sessionState?.story || sanitizeStoryDefinition(body?.storyDefinition, storyId);
+      if (!story) {
+        return notFound();
+      }
+      const missions = story.missions || [];
+      const rawIndex =
+        typeof body?.sceneIndex === 'number'
+          ? body.sceneIndex
+          : Number(body?.sceneIndex);
+      const targetIndex = Number.isFinite(rawIndex)
+        ? Math.max(0, Math.min(missions.length - 1, Math.floor(rawIndex as number)))
+        : sessionState?.missionIndex ?? 0;
+      let mission = missions[targetIndex];
+      if (!mission && body?.missionDefinition) {
+        mission = sanitizeStoryMission(body.missionDefinition) || mission;
+      }
+      if (!mission) {
+        return badRequest('Mission not found');
+      }
+
+      let history = sanitizeHistory(body?.history).slice(-STORY_HISTORY_LIMIT);
+      if (sessionState?.history?.length) {
+        history = mergeHistory(sessionState.history, history);
+      }
+      history = history.slice(-STORY_HISTORY_LIMIT);
+
+      const requirementStates = Array.isArray(body?.requirements)
+        ? alignRequirementStates(mission, body.requirements)
+        : alignRequirementStates(mission, sessionState?.requirements || []);
+
+      try {
+        const answer = await generateAssistanceAnswer({
+          story,
+          mission,
+          history,
+          requirements: requirementStates,
+          question,
+          conversationFeedback: body?.conversationFeedback || null,
+        });
+        if (sessionState) {
+          sessionState.history = history;
+          sessionState.missionIndex = targetIndex;
+          sessionState.story = story;
+          sessionState.lastUpdated = Date.now();
+        }
+        return json(200, { answer } as StoryAssistanceResponse);
+      } catch (err: any) {
+        console.error(
+          JSON.stringify({
+            scope: 'stories.assist.error',
+            message: err?.message || 'unknown',
+          })
+        );
+        return json(500, { message: 'No pudimos generar la asistencia', code: 'ASSISTANCE_FAILED' });
+      }
     }
 
     const storyAdvance = path.match(/^\/v1\/stories\/([^/]+)\/advance$/);
@@ -1012,6 +1081,158 @@ async function advanceStoryMission(
   };
 }
 
+async function generateAssistanceAnswer(args: {
+  story: StoryDefinition;
+  mission: StoryMission;
+  history: StoryMessage[];
+  requirements: StoryAdvanceRequirementState[];
+  question: string;
+  conversationFeedback?: { summary?: string; improvements?: string[] } | null;
+}): Promise<string> {
+  const { story, mission, history, requirements, question, conversationFeedback } = args;
+  const apiKey = await getOpenAIKey();
+  const model =
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || 'gpt-5-nano';
+  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
+  const isGpt5 = /gpt-5/i.test(model);
+  const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
+  const reasoningConfig = isGpt5
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'low' }
+    : undefined;
+  const conversation = history.slice(-STORY_HISTORY_LIMIT);
+  const conversationText = conversation
+    .map((msg) => `${msg.role === 'user' ? 'Estudiante' : 'Guía'}: ${msg.content}`)
+    .join('\n')
+    .trim();
+  const requirementText = requirements
+    .map(
+      (req, idx) =>
+        `${idx + 1}. ${req.text} — ${req.met ? 'cumplido' : 'pendiente'}${req.feedback ? ` (${req.feedback})` : ''}`
+    )
+    .join('\n');
+  const feedbackLines: string[] = [];
+  if (conversationFeedback?.summary) {
+    feedbackLines.push(`Feedback previo: ${conversationFeedback.summary}`);
+  }
+  if (conversationFeedback?.improvements?.length) {
+    feedbackLines.push(`Mejoras sugeridas: ${conversationFeedback.improvements.join(' | ')}`);
+  }
+  const systemPrompt = `Eres un tutor de inglés que responde en español de forma breve y accionable.
+Con el contexto de la misión, la conversación y los objetivos, ofrece orientación clara para que el alumno avance.
+Devuelve 2-4 viñetas en español (máx 3 líneas en total) y, si es útil, agrega un solo ejemplo en inglés de hasta 15 palabras con el prefijo "Ejemplo:".
+No incluyas formato extra, JSON ni emojis.`;
+  const userPrompt = `Historia: ${story.title}
+Misión: ${mission.title}
+Rol de la IA: ${mission.aiRole}
+Resumen: ${mission.sceneSummary || 'N/D'}
+Objetivos:
+${requirementText || 'Sin objetivos definidos.'}
+${feedbackLines.length ? `Notas previas:\n${feedbackLines.join('\n')}` : ''}
+Conversación reciente:
+${conversationText || 'Sin conversación previa.'}
+
+Pregunta del alumno: ${question}
+
+Entrega ayuda concreta para cumplir la misión.`;
+
+  console.log(
+    JSON.stringify({
+      scope: 'stories.assist.openai.begin',
+      storyId: story.storyId,
+      missionId: mission.missionId,
+      questionLength: question.length,
+      historyCount: conversation.length,
+      requirements: requirements.length,
+    })
+  );
+
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), timeoutMs);
+  let raw = '';
+  try {
+    if (useResponses) {
+      const body: Record<string, any> = {
+        model,
+        instructions: systemPrompt,
+        input: [
+          {
+            role: 'user',
+            content: [{ type: 'input_text', text: userPrompt }],
+          },
+        ],
+        max_output_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 400),
+      };
+      if (reasoningConfig) body.reasoning = reasoningConfig;
+      const res = await fetch('https://api.openai.com/v1/responses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(body),
+        signal: ac.signal,
+      });
+      const payload: any = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const reason = payload?.error?.message || res.statusText;
+        throw new Error(`STORY_ASSIST_HTTP_${res.status}_${reason}`);
+      }
+      if (Array.isArray(payload?.output)) {
+        for (const item of payload.output) {
+          if (item?.type === 'message' && Array.isArray(item.content)) {
+            const texts = item.content
+              .filter((c: any) => c?.type === 'output_text' && typeof c.text === 'string')
+              .map((c: any) => c.text);
+            if (texts.length) {
+              raw = texts.join('\n');
+              break;
+            }
+          }
+        }
+      }
+      if (!raw && typeof payload?.output_text === 'string') {
+        raw = payload.output_text;
+      }
+    } else {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          max_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 400),
+        }),
+        signal: ac.signal,
+      });
+      if (!res.ok) {
+        const bodyTxt = await res.text();
+        throw new Error(`STORY_ASSIST_HTTP_${res.status}_${bodyTxt.slice(0, 120)}`);
+      }
+      const data: any = await res.json();
+      raw = data.choices?.[0]?.message?.content || '';
+    }
+  } catch (err) {
+    if ((err as any)?.name === 'AbortError') {
+      throw new Error('STORY_ASSIST_TIMEOUT');
+    }
+    throw err;
+  } finally {
+    clearTimeout(to);
+  }
+
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    throw new Error('STORY_ASSIST_EMPTY_RESPONSE');
+  }
+  return trimmed;
+}
+
 
 async function evaluateStoryMissionProgress(
   story: StoryDefinition,
@@ -1604,10 +1825,6 @@ function mockCards(): CardItem[] {
     },
   ];
 }
-
-
-
-
 
 
 
