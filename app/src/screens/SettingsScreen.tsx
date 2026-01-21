@@ -1,22 +1,19 @@
 import React from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import { View, Text, ScrollView, Pressable, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { useAuth } from '../auth/AuthProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
 export default function SettingsScreen({ navigation }: Props) {
-  const { isSignedIn, signIn, signOut } = useAuth();
-
-  const handleAuthAction = async () => {
-    if (isSignedIn) {
-      await signOut();
-      return;
+  const openExternal = async (url: string) => {
+    try {
+      await Linking.openURL(url);
+    } catch (err) {
+      console.warn('No se pudo abrir el enlace', err);
     }
-    await signIn();
   };
 
   return (
@@ -56,136 +53,6 @@ export default function SettingsScreen({ navigation }: Props) {
           style={{
             borderRadius: 20,
             padding: 18,
-            backgroundColor: '#0f172a',
-            borderWidth: 1,
-            borderColor: '#1f2937',
-            shadowColor: '#000',
-            shadowOpacity: 0.14,
-            shadowRadius: 12,
-            marginBottom: 14,
-          }}
-        >
-          <Text style={{ color: '#a5f3fc', fontSize: 12, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' }}>
-            Cuenta
-          </Text>
-          <Text style={{ color: '#e2e8f0', fontSize: 18, fontWeight: '800', marginTop: 6 }}>
-            Sesión y credenciales
-          </Text>
-          <Text style={{ color: '#94a3b8', marginTop: 6, lineHeight: 20 }}>
-            Administra tu acceso y mantiene tu sesión segura desde aquí.
-          </Text>
-
-          <View
-            style={{
-              marginTop: 14,
-              padding: 14,
-              borderRadius: 14,
-              backgroundColor: '#0b172b',
-              borderWidth: 1,
-              borderColor: '#1e293b',
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}
-          >
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: '#cbd5e1', fontWeight: '700', fontSize: 12 }}>Estado</Text>
-              <Text style={{ color: '#e2e8f0', fontWeight: '800', marginTop: 4 }}>
-                {isSignedIn ? 'Sesión activa' : 'Sin iniciar sesión'}
-              </Text>
-              <Text style={{ color: '#94a3b8', fontSize: 12, marginTop: 4 }}>
-                {isSignedIn ? 'Puedes cerrar sesión cuando lo necesites.' : 'Inicia sesión para guardar tu progreso.'}
-              </Text>
-            </View>
-            <Pressable
-              onPress={handleAuthAction}
-              style={({ pressed }) => ({
-                paddingHorizontal: 14,
-                paddingVertical: 10,
-                borderRadius: 12,
-                backgroundColor: pressed ? '#2563eb' : '#3b82f6',
-                shadowColor: '#3b82f6',
-                shadowOpacity: 0.35,
-                shadowRadius: 10,
-              })}
-            >
-              <Text style={{ color: 'white', fontWeight: '800' }}>
-                {isSignedIn ? 'Cerrar sesión' : 'Iniciar sesión'}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-
-        <View
-          style={{
-            borderRadius: 20,
-            padding: 18,
-            backgroundColor: '#0f172a',
-            borderWidth: 1,
-            borderColor: '#1f2937',
-            shadowColor: '#000',
-            shadowOpacity: 0.12,
-            shadowRadius: 10,
-            marginBottom: 14,
-          }}
-        >
-          <Text style={{ color: '#a5f3fc', fontSize: 12, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' }}>
-            Preferencias
-          </Text>
-          <Text style={{ color: '#e2e8f0', fontSize: 18, fontWeight: '800', marginTop: 6 }}>
-            Experiencia personalizada
-          </Text>
-          <Text style={{ color: '#94a3b8', marginTop: 6, lineHeight: 20 }}>
-            Ajustes sugeridos para que la app se sienta tuya. Más opciones llegarán pronto.
-          </Text>
-
-          <View style={{ marginTop: 14, gap: 10 }}>
-            <View
-              style={{
-                padding: 12,
-                borderRadius: 14,
-                backgroundColor: '#0b172b',
-                borderWidth: 1,
-                borderColor: '#1e293b',
-              }}
-            >
-              <Text style={{ color: '#e2e8f0', fontWeight: '700' }}>Idioma</Text>
-              <Text style={{ color: '#94a3b8', marginTop: 4, fontSize: 12 }}>Español (más idiomas pronto)</Text>
-            </View>
-            <View
-              style={{
-                padding: 12,
-                borderRadius: 14,
-                backgroundColor: '#0b172b',
-                borderWidth: 1,
-                borderColor: '#1e293b',
-              }}
-            >
-              <Text style={{ color: '#e2e8f0', fontWeight: '700' }}>Modo enfoque</Text>
-              <Text style={{ color: '#94a3b8', marginTop: 4, fontSize: 12 }}>Silencia notificaciones durante la práctica.</Text>
-              <Text style={{ color: '#475569', marginTop: 6, fontSize: 12 }}>Próximamente</Text>
-            </View>
-            <View
-              style={{
-                padding: 12,
-                borderRadius: 14,
-                backgroundColor: '#0b172b',
-                borderWidth: 1,
-                borderColor: '#1e293b',
-              }}
-            >
-              <Text style={{ color: '#e2e8f0', fontWeight: '700' }}>Recordatorios</Text>
-              <Text style={{ color: '#94a3b8', marginTop: 4, fontSize: 12 }}>
-                Programa alertas para retomar historias o tarjetas.
-              </Text>
-              <Text style={{ color: '#475569', marginTop: 6, fontSize: 12 }}>Próximamente</Text>
-            </View>
-          </View>
-        </View>
-
-        <View
-          style={{
-            borderRadius: 20,
-            padding: 18,
             backgroundColor: '#0b172a',
             borderWidth: 1,
             borderColor: '#1f2937',
@@ -215,7 +82,7 @@ export default function SettingsScreen({ navigation }: Props) {
               }}
             >
               <Text style={{ color: '#cbd5e1', fontWeight: '700', fontSize: 12 }}>Soporte</Text>
-              <Text style={{ color: '#e2e8f0', marginTop: 4 }}>support@luva.app</Text>
+              <Text style={{ color: '#e2e8f0', marginTop: 4 }}>dcardenasgz@gmail.com</Text>
             </View>
             <View
               style={{
@@ -230,6 +97,50 @@ export default function SettingsScreen({ navigation }: Props) {
               <Text style={{ color: '#cbd5e1', fontWeight: '700', fontSize: 12 }}>Versión</Text>
               <Text style={{ color: '#e2e8f0', marginTop: 4 }}>0.1.0</Text>
             </View>
+          </View>
+
+          <View style={{ marginTop: 14 }}>
+            <Pressable
+              onPress={() => openExternal('https://d219zijgtsj7lu.cloudfront.net/#privacidad')}
+              style={({ pressed }) => ({
+                padding: 14,
+                borderRadius: 14,
+                backgroundColor: '#0b172b',
+                borderWidth: 1,
+                borderColor: '#1e293b',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 10,
+                opacity: pressed ? 0.92 : 1,
+              })}
+            >
+              <View>
+                <Text style={{ color: '#e2e8f0', fontWeight: '700' }}>Política de privacidad</Text>
+                <Text style={{ color: '#94a3b8', marginTop: 4, fontSize: 12 }}>Se abre en el navegador</Text>
+              </View>
+              <MaterialIcons name="open-in-new" size={18} color="#cbd5e1" />
+            </Pressable>
+            <Pressable
+              onPress={() => openExternal('https://d219zijgtsj7lu.cloudfront.net/#terminos')}
+              style={({ pressed }) => ({
+                padding: 14,
+                borderRadius: 14,
+                backgroundColor: '#0b172b',
+                borderWidth: 1,
+                borderColor: '#1e293b',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                opacity: pressed ? 0.92 : 1,
+              })}
+            >
+              <View>
+                <Text style={{ color: '#e2e8f0', fontWeight: '700' }}>Términos y condiciones</Text>
+                <Text style={{ color: '#94a3b8', marginTop: 4, fontSize: 12 }}>Se abre en el navegador</Text>
+              </View>
+              <MaterialIcons name="open-in-new" size={18} color="#cbd5e1" />
+            </Pressable>
           </View>
         </View>
       </ScrollView>

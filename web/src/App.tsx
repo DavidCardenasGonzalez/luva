@@ -76,7 +76,7 @@ const privacyPoints = [
   'El audio se procesa para generar transcripciones y feedback; después se descarta. Guardamos las transcripciones y métricas para darte seguimiento.',
   'Alojamos la infraestructura en AWS. Protegemos la información con cifrado en tránsito y en reposo y aplicamos controles de acceso mínimos.',
   'No vendemos tus datos. Solo los compartimos con proveedores que nos ayudan a operar (autenticación, almacenamiento, analítica) bajo acuerdos de confidencialidad.',
-  'Puedes solicitar acceso, corrección o eliminación de tus datos escribiendo al equipo de soporte publicado en la app o en soporte@luva.app.',
+  'Puedes solicitar acceso, corrección o eliminación de tus datos escribiendo al equipo de soporte publicado en la app o en dcardenasgz@gmail.com.',
 ]
 
 function App() {
@@ -185,7 +185,7 @@ function App() {
           <div className="policy-note">
             <strong>Soporte:</strong> si tienes dudas, escríbenos al correo indicado en la app o a
             {' '}
-            <a href="mailto:soporte@luva.app">soporte@luva.app</a>.
+            <a href="mailto:dcardenasgz@gmail.com">dcardenasgz@gmail.com</a>.
           </div>
         </div>
 
@@ -202,7 +202,7 @@ function App() {
           </ul>
           <div className="policy-note">
             <strong>Derechos ARCO:</strong> puedes ejercer acceso, rectificación, cancelación u oposición
-            contactándonos en <a href="mailto:privacidad@luva.app">privacidad@luva.app</a>.
+            contactándonos en <a href="mailto:dcardenasgz@gmail.com">dcardenasgz@gmail.com</a>.
           </div>
         </div>
       </section>
