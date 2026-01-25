@@ -6,6 +6,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import UnlockModal from '../components/UnlockModal';
 import { useStoryProgress } from '../progress/StoryProgressProvider';
+import CoinCountChip from '../components/CoinCountChip';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Stories'>;
 
@@ -100,11 +101,12 @@ export default function StoriesScreen({ navigation }: Props) {
                     }}
                   />
                 </Pressable>
-                <Image
-                  source={require('../image/logo.png')}
-                  style={{ width: 180, height: 42, resizeMode: 'contain' }}
-                />
-              </View>
+                  <Image
+                    source={require('../image/logo.png')}
+                    style={{ width: 180, height: 42, resizeMode: 'contain' }}
+                  />
+                  <CoinCountChip style={{ position: 'absolute', right: 0 }} />
+                </View>
 
               <View
                 style={{

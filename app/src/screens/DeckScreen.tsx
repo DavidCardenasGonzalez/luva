@@ -10,7 +10,7 @@ import {
   useCardProgress,
 } from '../progress/CardProgressProvider';
 import { useCoins, CARD_OPEN_COST } from '../purchases/CoinBalanceProvider';
-import CoinBalanceBadge from '../components/CoinBalanceBadge';
+import CoinCountChip from '../components/CoinCountChip';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Deck'>;
 
@@ -138,6 +138,7 @@ export default function DeckScreen({ navigation }: Props) {
                 source={require('../image/logo.png')}
                 style={{ width: 180, height: 42, resizeMode: 'contain' }}
               />
+              <CoinCountChip style={{ position: 'absolute', right: 0 }} />
             </View>
 
             <View
@@ -176,11 +177,7 @@ export default function DeckScreen({ navigation }: Props) {
                   <View style={{ width: totalCount ? `${percentages.learned}%` : '0%', backgroundColor: '#22d3ee', height: '100%' }} />
                 </View>
               </View>
-            </View>
-            <CoinBalanceBadge variant="dark" style={{ marginTop: 12, marginBottom: 6 }} />
-            <Text style={{ color: '#94a3b8', fontSize: 12, marginBottom: 4 }}>
-              Abrir una tarjeta consume {CARD_OPEN_COST} moneda (Pro = ilimitado).
-            </Text>
+              </View>
             <View style={{ marginTop: 14, backgroundColor: '#0f172a', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#1f2937' }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Text style={{ color: '#e2e8f0', fontWeight: '800', fontSize: 15 }}>Filtrar por estado</Text>

@@ -26,6 +26,7 @@ import StoryMessageComposer from '../components/StoryMessageComposer';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
 import luviImage from '../image/luvi.png';
 import { useCoins, CHAT_MISSION_COST } from '../purchases/CoinBalanceProvider';
+import CoinCountChip from '../components/CoinCountChip';
 
 type StoryMessage = {
   id: string;
@@ -636,12 +637,15 @@ export default function StorySceneScreen() {
                 <Text style={{ fontSize: 12, color: '#e2e8f0' }} numberOfLines={1}>
                   {mission?.title || story?.title || ''}
                 </Text>
-              </View>
-            </Pressable>
-          </View>
-            <Pressable hitSlop={12} onPress={handleOpenAssistance} style={({ pressed }) => ({ paddingHorizontal: 8, paddingVertical: 6, opacity: pressed ? 0.5 : 1 })}>
-              <Text style={{ fontSize: 24, color: 'white', fontWeight: '700', lineHeight: 26 }}>⋯</Text>
-            </Pressable>
+                </View>
+              </Pressable>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <CoinCountChip />
+              <Pressable hitSlop={12} onPress={handleOpenAssistance} style={({ pressed }) => ({ paddingHorizontal: 8, paddingVertical: 6, opacity: pressed ? 0.5 : 1 })}>
+                <Text style={{ fontSize: 24, color: 'white', fontWeight: '700', lineHeight: 26 }}>⋯</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
         <ScrollView

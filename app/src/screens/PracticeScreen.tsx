@@ -24,6 +24,7 @@ import StoryMessageComposer, {
   StoryFlowState,
 } from "../components/StoryMessageComposer";
 import { useCoins, CARD_OPEN_COST } from "../purchases/CoinBalanceProvider";
+import CoinCountChip from "../components/CoinCountChip";
 
 type EvalRes = {
   score: number;
@@ -399,6 +400,7 @@ export default function PracticeScreen() {
               flexDirection: "row",
               alignItems: "center",
               marginBottom: 16,
+              justifyContent: "space-between",
             }}
           >
             <Pressable
@@ -436,6 +438,7 @@ export default function PracticeScreen() {
                 Repite, graba y recibe feedback inmediato.
               </Text>
             </View>
+            <CoinCountChip style={{ marginLeft: 10 }} />
           </View>
 
           <View

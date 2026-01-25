@@ -19,8 +19,7 @@ import {
   useCardProgress,
 } from '../progress/CardProgressProvider';
 import { useStoryProgress } from '../progress/StoryProgressProvider';
-import CoinBalanceBadge from '../components/CoinBalanceBadge';
-import { CARD_OPEN_COST, CHAT_MISSION_COST } from '../purchases/CoinBalanceProvider';
+import CoinCountChip from '../components/CoinCountChip';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -90,6 +89,7 @@ export default function HomeScreen({ navigation }: Props) {
           source={require('../image/logo.png')}
           style={{ width: 260, height: 60, resizeMode: 'contain' }}
         />
+        <CoinCountChip style={{ position: 'absolute', left: 0, top: 6 }} />
         <Pressable
           onPress={() => navigation.navigate('Settings')}
           hitSlop={12}
@@ -112,10 +112,6 @@ export default function HomeScreen({ navigation }: Props) {
         <Text style={{ color: '#e2e8f0', fontSize: 26, fontWeight: '800', marginTop: 6 }}>Sigue impulsando tu avance</Text>
         <Text style={{ color: '#94a3b8', marginTop: 8, lineHeight: 20 }}>
           Visualiza tu progreso combinado de tarjetas aprendidas y misiones completadas.
-        </Text>
-        <CoinBalanceBadge variant="dark" style={{ marginTop: 12 }} />
-        <Text style={{ color: '#94a3b8', marginTop: 6, fontSize: 12 }}>
-          Misiones de chat cuestan {CHAT_MISSION_COST} monedas y cada tarjeta {CARD_OPEN_COST}. Se regenera 1 moneda por hora (Pro = ilimitado).
         </Text>
 
         <View style={{ marginTop: 16, backgroundColor: '#0b172b', borderColor: '#1f2937', borderWidth: 1, padding: 16, borderRadius: 16 }}>

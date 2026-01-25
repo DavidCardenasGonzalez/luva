@@ -16,7 +16,7 @@ import { useStoryProgress } from "../progress/StoryProgressProvider";
 import { RouteProp } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCoins, CHAT_MISSION_COST } from "../purchases/CoinBalanceProvider";
-import CoinBalanceBadge from "../components/CoinBalanceBadge";
+import CoinCountChip from "../components/CoinCountChip";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type RouteProps = RouteProp<RootStackParamList, "StoryMissions">;
@@ -163,6 +163,7 @@ export default function StoryMissionsScreen() {
             source={require("../image/logo.png")}
             style={{ width: 180, height: 42, resizeMode: "contain" }}
           />
+          <CoinCountChip style={{ position: "absolute", right: 0 }} />
         </View>
 
         <View
@@ -364,16 +365,6 @@ export default function StoryMissionsScreen() {
               </Pressable>
             ) : null}
           </View>
-          <CoinBalanceBadge variant="dark" style={{ marginTop: 12 }} />
-          <Text
-            style={{
-              color: "#94a3b8",
-              marginTop: 6,
-              fontSize: 12,
-            }}
-          >
-            Costo por misión: {CHAT_MISSION_COST} monedas (Pro = ilimitado).
-          </Text>
         </View>
 
         <Text
