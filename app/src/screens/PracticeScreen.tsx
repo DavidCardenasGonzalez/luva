@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
 import useAudioRecorder from "../shared/useAudioRecorder";
 import useUploadToS3 from "../shared/useUploadToS3";
@@ -22,6 +23,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import StoryMessageComposer, {
   StoryFlowState,
 } from "../components/StoryMessageComposer";
+import { useCoins, CARD_OPEN_COST } from "../purchases/CoinBalanceProvider";
 
 type EvalRes = {
   score: number;
@@ -117,12 +119,45 @@ export default function PracticeScreen() {
   const recorder = useAudioRecorder();
   const uploader = useUploadToS3();
   const { statusFor } = useCardProgress();
+  const { spendCoins, loading: coinsLoading, isUnlimited } = useCoins();
   const [transcript, setTranscript] = useState("");
   const [state, setState] = useState<PracticeState>("idle");
   const [feedback, setFeedback] = useState<EvalRes | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<"a" | "b" | "c" | null>(null);
   const [canRecord, setCanRecord] = useState<boolean>(false);
+  const chargeRegistered = useRef(false);
+
+  useEffect(() => {
+    if (!cardId) return;
+    if (chargeRegistered.current) return;
+    if (isUnlimited) {
+      chargeRegistered.current = true;
+      return;
+    }
+    if (coinsLoading) return;
+    let cancelled = false;
+    (async () => {
+      const ok = await spendCoins(CARD_OPEN_COST, `card:${cardId}`);
+      if (!ok && !cancelled) {
+        Alert.alert(
+          "Monedas insuficientes",
+          `Necesitas ${CARD_OPEN_COST} moneda${CARD_OPEN_COST === 1 ? "" : "s"} para practicar esta tarjeta. Se regenera 1 por hora.`,
+          [
+            {
+              text: "Volver",
+              onPress: () => navigation.goBack(),
+            },
+          ],
+        );
+      } else if (!cancelled) {
+        chargeRegistered.current = true;
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [cardId, coinsLoading, isUnlimited, navigation, spendCoins]);
 
   const speakSegments = useCallback(
     async (
@@ -304,17 +339,22 @@ export default function PracticeScreen() {
     void speakSegments(improvementsList, "feedback.reformulaciones");
   }, [improvementsList, speakSegments]);
 
-  const recordReady = (selected && canRecord) || state === "recording";
+  const coinReady = isUnlimited || chargeRegistered.current;
+  const recordReady = coinReady && ((selected && canRecord) || state === "recording");
   const cardStatusLabel = cardId ? CARD_STATUS_LABELS[statusFor(cardId)] : null;
-  const practiceSubtitle = !selected
-    ? "Selecciona una opción"
-    : recordReady
-      ? "Listo para grabar"
-      : canRecord
-        ? "Prepara tu respuesta"
-        : feedback?.result === "correct"
-          ? "Práctica completada"
-          : "Prepara tu respuesta";
+  const practiceSubtitle = !coinReady
+    ? coinsLoading
+      ? "Cargando tus monedas..."
+      : "Esperando saldo para practicar"
+    : !selected
+      ? "Selecciona una opción"
+      : recordReady
+        ? "Listo para grabar"
+        : canRecord
+          ? "Prepara tu respuesta"
+          : feedback?.result === "correct"
+            ? "Práctica completada"
+            : "Prepara tu respuesta";
 
   const flowState: StoryFlowState =
     state === "recording"

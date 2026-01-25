@@ -5,6 +5,7 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Image,
@@ -24,6 +25,7 @@ import { useStoryProgress } from '../progress/StoryProgressProvider';
 import StoryMessageComposer from '../components/StoryMessageComposer';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
 import luviImage from '../image/luvi.png';
+import { useCoins, CHAT_MISSION_COST } from '../purchases/CoinBalanceProvider';
 
 type StoryMessage = {
   id: string;
@@ -76,9 +78,11 @@ export default function StorySceneScreen() {
   const initialSceneIndex: number = route.params?.sceneIndex ?? 0;
   const { story, loading, error } = useStoryDetail(storyId);
   const { markMissionCompleted, isMissionCompleted, storyCompleted: isStoryCompleted } = useStoryProgress();
+  const { spendCoins, loading: coinsLoading, isUnlimited } = useCoins();
   const [sceneIndex, setSceneIndex] = useState<number>(initialSceneIndex);
   const insets = useSafeAreaInsets();
   const [showCharacterModal, setShowCharacterModal] = useState(false);
+  const chargedMissions = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     setSceneIndex(initialSceneIndex);
@@ -100,6 +104,41 @@ export default function StorySceneScreen() {
       headerShown: false,
     });
   }, [navigation]);
+
+  useEffect(() => {
+    chargedMissions.current = new Set();
+  }, [storyId]);
+
+  useEffect(() => {
+    if (!mission?.missionId) return;
+    if (coinsLoading) return;
+    if (isUnlimited) {
+      chargedMissions.current.add(mission.missionId);
+      return;
+    }
+    if (chargedMissions.current.has(mission.missionId)) return;
+    let cancelled = false;
+    (async () => {
+      const ok = await spendCoins(CHAT_MISSION_COST, `mission:${mission.missionId}`);
+      if (!ok && !cancelled) {
+        Alert.alert(
+          'Monedas insuficientes',
+          `Necesitas ${CHAT_MISSION_COST} monedas para iniciar esta misión. Se regenera 1 moneda por hora.`,
+          [
+            {
+              text: 'Volver',
+              onPress: () => navigation.goBack(),
+            },
+          ]
+        );
+      } else if (!cancelled) {
+        chargedMissions.current.add(mission.missionId);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [mission?.missionId, coinsLoading, isUnlimited, spendCoins, navigation]);
 
   const storyDefinitionPayload = useMemo(() => {
     if (!story) return undefined;
@@ -190,9 +229,15 @@ export default function StorySceneScreen() {
     }
   }, [messages.length]);
 
-  const retryBlocked = retryState === 'required';
+  const missionCostPaid =
+    isUnlimited || (mission?.missionId ? chargedMissions.current.has(mission.missionId) : false);
+  const coinLocked = coinsLoading || !missionCostPaid;
+  const retryBlocked = retryState === 'required' || coinLocked;
 
   const statusLabel = useMemo(() => {
+    if (coinLocked) {
+      return coinsLoading ? 'Cargando tus monedas...' : `Costo de misión: ${CHAT_MISSION_COST} monedas`;
+    }
     switch (flowState) {
       case 'recording':
         return 'Grabando...';
@@ -205,7 +250,7 @@ export default function StorySceneScreen() {
       default:
         return '';
     }
-  }, [flowState]);
+  }, [coinLocked, coinsLoading, flowState]);
 
   const appendMessage = useCallback((msg: StoryMessage) => {
     setMessages((prev) => [...prev, msg]);

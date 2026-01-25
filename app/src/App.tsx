@@ -4,17 +4,20 @@ import { CardProgressProvider } from './progress/CardProgressProvider';
 import { StoryProgressProvider } from './progress/StoryProgressProvider';
 import AppNavigator from './navigation/AppNavigator';
 import { RevenueCatProvider } from './purchases/RevenueCatProvider';
+import { CoinBalanceProvider } from './purchases/CoinBalanceProvider';
 
 export default function App() {
   return (
     <RevenueCatProvider>
-      <AuthProvider>
-        <CardProgressProvider>
-          <StoryProgressProvider>
-            <AppNavigator />
-          </StoryProgressProvider>
-        </CardProgressProvider>
-      </AuthProvider>
+      <CoinBalanceProvider>
+        <AuthProvider>
+          <CardProgressProvider>
+            <StoryProgressProvider>
+              <AppNavigator />
+            </StoryProgressProvider>
+          </CardProgressProvider>
+        </AuthProvider>
+      </CoinBalanceProvider>
     </RevenueCatProvider>
   );
 }

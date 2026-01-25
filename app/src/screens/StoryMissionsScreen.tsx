@@ -6,6 +6,7 @@ import {
   Pressable,
   ActivityIndicator,
   Image,
+  Alert,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -14,6 +15,8 @@ import { useStoryDetail } from "../hooks/useStories";
 import { useStoryProgress } from "../progress/StoryProgressProvider";
 import { RouteProp } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useCoins, CHAT_MISSION_COST } from "../purchases/CoinBalanceProvider";
+import CoinBalanceBadge from "../components/CoinBalanceBadge";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type RouteProps = RouteProp<RootStackParamList, "StoryMissions">;
@@ -24,6 +27,7 @@ export default function StoryMissionsScreen() {
   const storyId = route.params?.storyId;
   const { story, loading, error } = useStoryDetail(storyId);
   const { isMissionCompleted, storyCompleted } = useStoryProgress();
+  const { canSpend, loading: coinsLoading, isUnlimited } = useCoins();
 
   const { completedCount, totalMissions, progressPct } = useMemo(() => {
     if (!story) {
@@ -78,7 +82,22 @@ export default function StoryMissionsScreen() {
     );
   }
 
-  const handleMissionPress = (index: number) => {
+  const handleMissionPress = async (index: number) => {
+    if (!story) return;
+    if (!isUnlimited) {
+      if (coinsLoading) {
+        Alert.alert("Sincronizando monedas", "Espera un momento, cargando tu saldo.");
+        return;
+      }
+      const enough = await canSpend(CHAT_MISSION_COST);
+      if (!enough) {
+        Alert.alert(
+          "Monedas insuficientes",
+          `Necesitas ${CHAT_MISSION_COST} monedas para abrir esta misión. Se regenera 1 moneda por hora.`
+        );
+        return;
+      }
+    }
     navigation.navigate("StoryScene", {
       storyId: story.storyId,
       sceneIndex: index,
@@ -324,7 +343,7 @@ export default function StoryMissionsScreen() {
               </Text>
             ) : nextIncompleteIndex >= 0 ? (
               <Pressable
-                onPress={() => handleMissionPress(nextIncompleteIndex)}
+                onPress={() => void handleMissionPress(nextIncompleteIndex)}
                 style={({ pressed }) => ({
                   marginTop: 12,
                   paddingVertical: 12,
@@ -345,6 +364,16 @@ export default function StoryMissionsScreen() {
               </Pressable>
             ) : null}
           </View>
+          <CoinBalanceBadge variant="dark" style={{ marginTop: 12 }} />
+          <Text
+            style={{
+              color: "#94a3b8",
+              marginTop: 6,
+              fontSize: 12,
+            }}
+          >
+            Costo por misión: {CHAT_MISSION_COST} monedas (Pro = ilimitado).
+          </Text>
         </View>
 
         <Text
@@ -366,7 +395,7 @@ export default function StoryMissionsScreen() {
           return (
             <Pressable
               key={mission.missionId}
-              onPress={() => handleMissionPress(index)}
+              onPress={() => void handleMissionPress(index)}
               style={({ pressed }) => ({
                 marginBottom: 12,
                 borderRadius: 16,

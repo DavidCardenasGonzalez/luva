@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, FlatList, Pressable, Image } from 'react-native';
+import { View, Text, FlatList, Pressable, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLearningItems } from '../hooks/useLearningItems';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -9,6 +9,8 @@ import {
   CardProgressStatus,
   useCardProgress,
 } from '../progress/CardProgressProvider';
+import { useCoins, CARD_OPEN_COST } from '../purchases/CoinBalanceProvider';
+import CoinBalanceBadge from '../components/CoinBalanceBadge';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Deck'>;
 
@@ -27,6 +29,7 @@ const STATUS_BADGE_BG: Record<CardProgressStatus, string> = {
 export default function DeckScreen({ navigation }: Props) {
   const { items } = useLearningItems();
   const { statusFor, statuses } = useCardProgress();
+  const { canSpend, loading: coinsLoading, isUnlimited } = useCoins();
   const [activeStatuses, setActiveStatuses] = useState<CardProgressStatus[]>(['todo']);
 
   const { totals, percentages, filteredItems, totalCount } = useMemo(() => {
@@ -51,6 +54,32 @@ export default function DeckScreen({ navigation }: Props) {
         return prev.filter((s) => s !== status);
       }
       return [...prev, status];
+    });
+  };
+
+  const handleOpenCard = async (item: any) => {
+    if (!isUnlimited) {
+      if (coinsLoading) {
+        Alert.alert('Sincronizando monedas', 'Espera un momento, cargando tu saldo.');
+        return;
+      }
+      const enough = await canSpend(CARD_OPEN_COST);
+      if (!enough) {
+        Alert.alert(
+          'Monedas insuficientes',
+          `Necesitas ${CARD_OPEN_COST} moneda${CARD_OPEN_COST === 1 ? '' : 's'} para abrir una tarjeta. Se regenera 1 por hora.`
+        );
+        return;
+      }
+    }
+    navigation.navigate('Practice', {
+      cardId: String(item.id),
+      label: item.label,
+      examples: item.examples,
+      options: item.options,
+      answer: item.answer,
+      explanation: item.explanation,
+      prompt: item.prompt,
     });
   };
 
@@ -148,6 +177,10 @@ export default function DeckScreen({ navigation }: Props) {
                 </View>
               </View>
             </View>
+            <CoinBalanceBadge variant="dark" style={{ marginTop: 12, marginBottom: 6 }} />
+            <Text style={{ color: '#94a3b8', fontSize: 12, marginBottom: 4 }}>
+              Abrir una tarjeta consume {CARD_OPEN_COST} moneda (Pro = ilimitado).
+            </Text>
             <View style={{ marginTop: 14, backgroundColor: '#0f172a', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#1f2937' }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Text style={{ color: '#e2e8f0', fontWeight: '800', fontSize: 15 }}>Filtrar por estado</Text>
@@ -190,17 +223,7 @@ export default function DeckScreen({ navigation }: Props) {
         }
         renderItem={({ item }) => (
           <Pressable
-            onPress={() =>
-              navigation.navigate('Practice', {
-                cardId: String(item.id),
-                label: item.label,
-                examples: item.examples,
-                options: item.options,
-                answer: item.answer,
-                explanation: item.explanation,
-                prompt: item.prompt,
-              })
-            }
+            onPress={() => void handleOpenCard(item)}
             style={({ pressed }) => ({
               padding: 16,
               borderRadius: 16,
