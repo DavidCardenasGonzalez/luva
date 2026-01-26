@@ -141,16 +141,8 @@ export default function PracticeScreen() {
     (async () => {
       const ok = await spendCoins(CARD_OPEN_COST, `card:${cardId}`);
       if (!ok && !cancelled) {
-        Alert.alert(
-          "Monedas insuficientes",
-          `Necesitas ${CARD_OPEN_COST} moneda${CARD_OPEN_COST === 1 ? "" : "s"} para practicar esta tarjeta. Se regenera 1 por hora.`,
-          [
-            {
-              text: "Volver",
-              onPress: () => navigation.goBack(),
-            },
-          ],
-        );
+        navigation.goBack();
+        navigation.navigate("Paywall");
       } else if (!cancelled) {
         chargeRegistered.current = true;
       }

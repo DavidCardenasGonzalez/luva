@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, FlatList, Pressable, Image, Alert } from 'react-native';
+import { View, Text, FlatList, Pressable, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLearningItems } from '../hooks/useLearningItems';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -11,6 +11,7 @@ import {
 } from '../progress/CardProgressProvider';
 import { useCoins, CARD_OPEN_COST } from '../purchases/CoinBalanceProvider';
 import CoinCountChip from '../components/CoinCountChip';
+import { useNavigation } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Deck'>;
 
@@ -59,16 +60,10 @@ export default function DeckScreen({ navigation }: Props) {
 
   const handleOpenCard = async (item: any) => {
     if (!isUnlimited) {
-      if (coinsLoading) {
-        Alert.alert('Sincronizando monedas', 'Espera un momento, cargando tu saldo.');
-        return;
-      }
+      if (coinsLoading) return;
       const enough = await canSpend(CARD_OPEN_COST);
       if (!enough) {
-        Alert.alert(
-          'Monedas insuficientes',
-          `Necesitas ${CARD_OPEN_COST} moneda${CARD_OPEN_COST === 1 ? '' : 's'} para abrir una tarjeta. Se regenera 1 por hora.`
-        );
+        navigation.navigate('Paywall');
         return;
       }
     }

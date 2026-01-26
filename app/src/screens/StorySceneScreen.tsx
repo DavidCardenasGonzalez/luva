@@ -122,16 +122,7 @@ export default function StorySceneScreen() {
     (async () => {
       const ok = await spendCoins(CHAT_MISSION_COST, `mission:${mission.missionId}`);
       if (!ok && !cancelled) {
-        Alert.alert(
-          'Monedas insuficientes',
-          `Necesitas ${CHAT_MISSION_COST} monedas para iniciar esta misión. Se regenera 1 moneda por hora.`,
-          [
-            {
-              text: 'Volver',
-              onPress: () => navigation.goBack(),
-            },
-          ]
-        );
+        navigation.navigate('Paywall');
       } else if (!cancelled) {
         chargedMissions.current.add(mission.missionId);
       }

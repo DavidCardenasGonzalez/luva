@@ -10,6 +10,7 @@ import StorySceneScreen from '../screens/StorySceneScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import AuthCallbackScreen from '../screens/AuthCallbackScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import PaywallScreen from '../screens/PaywallScreen';
 import * as Linking from 'expo-linking';
 
 export type RootStackParamList = {
@@ -32,6 +33,7 @@ export type RootStackParamList = {
   Profile: undefined;
   AuthCallback: undefined;
   Settings: undefined;
+  Paywall: { asModal?: boolean } | undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -59,6 +61,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="AuthCallback" component={AuthCallbackScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Paywall" component={PaywallScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -20,6 +20,7 @@ import {
 } from '../progress/CardProgressProvider';
 import { useStoryProgress } from '../progress/StoryProgressProvider';
 import CoinCountChip from '../components/CoinCountChip';
+import { useRevenueCat } from '../purchases/RevenueCatProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -36,6 +37,7 @@ export default function HomeScreen({ navigation }: Props) {
   const { items: stories } = useStories();
   const { loading: cardLoading, statusFor, statuses } = useCardProgress();
   const { loading: storyLoading, completedCountFor } = useStoryProgress();
+  const { isPro, loading: rcLoading } = useRevenueCat();
 
   const { totalCards, learnedCards, counts, percentages } = useMemo(() => {
     const totals: Record<CardProgressStatus, number> = { todo: 0, learning: 0, learned: 0 };
@@ -113,6 +115,29 @@ export default function HomeScreen({ navigation }: Props) {
         <Text style={{ color: '#94a3b8', marginTop: 8, lineHeight: 20 }}>
           Visualiza tu progreso combinado de tarjetas aprendidas y misiones completadas.
         </Text>
+        {!isPro ? (
+          <Pressable
+            disabled={rcLoading}
+            onPress={() => navigation.navigate('Paywall')}
+            style={({ pressed }) => ({
+              alignSelf: 'flex-start',
+              marginTop: 12,
+              paddingHorizontal: 14,
+              paddingVertical: 10,
+              borderRadius: 12,
+              backgroundColor: rcLoading ? '#1f2937' : pressed ? '#0f766e' : '#0d9488',
+              shadowColor: '#0d9488',
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+            })}
+          >
+            <Text style={{ color: 'white', fontWeight: '800' }}>
+              {rcLoading ? 'Cargando...' : 'Hazte Pro · monedas ilimitadas'}
+            </Text>
+          </Pressable>
+        ) : (
+          <Text style={{ color: '#22c55e', marginTop: 10, fontWeight: '700' }}>Modo Pro activo</Text>
+        )}
 
         <View style={{ marginTop: 16, backgroundColor: '#0b172b', borderColor: '#1f2937', borderWidth: 1, padding: 16, borderRadius: 16 }}>
           <Text style={{ color: '#cbd5e1', fontSize: 12, fontWeight: '700' }}>Avance total</Text>

@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, ViewStyle } from 'react-native';
+import { View, Text, ViewStyle, Pressable } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useCoins } from '../purchases/CoinBalanceProvider';
+import { useNavigation } from '@react-navigation/native';
 
 type Props = {
   style?: ViewStyle;
@@ -10,6 +11,7 @@ type Props = {
 
 export default function CoinCountChip({ style, variant = 'dark' }: Props) {
   const { balance, isUnlimited, loading } = useCoins();
+  const navigation = useNavigation<any>();
   const palette =
     variant === 'light'
       ? {
@@ -28,8 +30,14 @@ export default function CoinCountChip({ style, variant = 'dark' }: Props) {
   const label = isUnlimited ? '∞' : loading ? '...' : String(balance);
 
   return (
-    <View
-      style={[
+    <Pressable
+      onPress={() => {
+        if (!isUnlimited && !loading) {
+          navigation.navigate('Paywall');
+        }
+      }}
+      disabled={loading}
+      style={({ pressed }) => [
         {
           flexDirection: 'row',
           alignItems: 'center',
@@ -39,12 +47,13 @@ export default function CoinCountChip({ style, variant = 'dark' }: Props) {
           backgroundColor: palette.bg,
           borderWidth: 1,
           borderColor: palette.border,
+          opacity: pressed ? 0.85 : 1,
         },
         style,
       ]}
     >
       <MaterialIcons name="monetization-on" size={18} color={palette.icon} style={{ marginRight: 6 }} />
       <Text style={{ color: palette.text, fontWeight: '800' }}>{label}</Text>
-    </View>
+    </Pressable>
   );
 }

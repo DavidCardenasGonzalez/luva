@@ -85,16 +85,10 @@ export default function StoryMissionsScreen() {
   const handleMissionPress = async (index: number) => {
     if (!story) return;
     if (!isUnlimited) {
-      if (coinsLoading) {
-        Alert.alert("Sincronizando monedas", "Espera un momento, cargando tu saldo.");
-        return;
-      }
+      if (coinsLoading) return;
       const enough = await canSpend(CHAT_MISSION_COST);
       if (!enough) {
-        Alert.alert(
-          "Monedas insuficientes",
-          `Necesitas ${CHAT_MISSION_COST} monedas para abrir esta misión. Se regenera 1 moneda por hora.`
-        );
+        navigation.navigate("Paywall");
         return;
       }
     }
