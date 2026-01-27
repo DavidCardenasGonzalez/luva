@@ -891,113 +891,125 @@ export default function StorySceneScreen() {
         visible={showAssistanceModal}
         onRequestClose={() => setShowAssistanceModal(false)}
       >
-        <Pressable
-          style={{ flex: 1, backgroundColor: 'rgba(4,7,17,0.7)', padding: 20, justifyContent: 'center' }}
-          onPress={() => setShowAssistanceModal(false)}
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top + 12 : 0}
         >
           <Pressable
-            onPress={() => {}}
-            style={{
-              backgroundColor: 'white',
-              borderRadius: 18,
-              padding: 20,
-              shadowColor: '#0f172a',
-              shadowOpacity: 0.12,
-              shadowRadius: 16,
-              elevation: 6,
-            }}
+            style={{ flex: 1, backgroundColor: 'rgba(4,7,17,0.7)', padding: 20 }}
+            onPress={() => setShowAssistanceModal(false)}
           >
-            <View style={{ alignItems: 'flex-end' }}>
-              <Pressable
-                onPress={() => setShowAssistanceModal(false)}
-                hitSlop={12}
-                style={({ pressed }) => ({ padding: 4, opacity: pressed ? 0.6 : 1 })}
-              >
-                <Text style={{ fontSize: 20, color: '#0f172a' }}>✕</Text>
-              </Pressable>
-            </View>
-            <View style={{ alignItems: 'center', marginBottom: 12 }}>
-              <View
-                style={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: 20,
-                  backgroundColor: '#0b1224',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden',
-                }}
-              >
-                <Image source={luviImage} style={{ width: '90%', height: '90%' }} resizeMode="contain" />
-              </View>
-              <Text style={{ marginTop: 12, fontSize: 18, fontWeight: '800', color: '#0f172a' }}>
-                ¿Cómo puedo ayudarte?
-              </Text>
-              <Text style={{ marginTop: 6, fontSize: 13, color: '#475569', textAlign: 'center' }}>
-                Luvi puede darte ideas rápidas usando la misión, objetivos y el chat actual.
-              </Text>
-              <Text style={{ marginTop: 4, fontSize: 12, color: '#64748b', textAlign: 'center' }}>
-                Misión: {mission.title}
-              </Text>
-            </View>
-            <TextInput
-              value={assistanceQuestion}
-              onChangeText={(text) => {
-                setAssistanceQuestion(text);
-                if (assistanceError) setAssistanceError(null);
-              }}
-              placeholder="Cuéntame qué necesitas desbloquear o cómo seguir la conversación..."
-              placeholderTextColor="#94a3b8"
-              multiline
-              style={{
-                minHeight: 90,
-                borderRadius: 12,
-                borderWidth: 1,
-                borderColor: '#e2e8f0',
-                backgroundColor: '#f8fafc',
-                paddingHorizontal: 12,
-                paddingVertical: 10,
-                fontSize: 14,
-                color: '#0f172a',
-              }}
-            />
-            {assistanceError ? (
-              <Text style={{ marginTop: 6, color: '#dc2626' }}>{assistanceError}</Text>
-            ) : null}
-            <Pressable
-              onPress={handleRequestAssistance}
-              disabled={assistanceLoading}
-              style={({ pressed }) => ({
-                marginTop: 12,
-                paddingVertical: 12,
-                borderRadius: 999,
-                alignItems: 'center',
-                backgroundColor: assistanceLoading ? '#cbd5f5' : pressed ? '#0b1224' : '#2563eb',
-              })}
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
             >
-              {assistanceLoading ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <Text style={{ color: 'white', fontWeight: '700' }}>Pedir asistencia</Text>
-              )}
-            </Pressable>
-            {assistanceAnswer ? (
-              <View
+              <Pressable
+                onPress={() => {}}
                 style={{
-                  marginTop: 14,
-                  padding: 12,
-                  borderRadius: 12,
-                  backgroundColor: '#f8fafc',
-                  borderWidth: 1,
-                  borderColor: '#e2e8f0',
+                  backgroundColor: 'white',
+                  borderRadius: 18,
+                  padding: 20,
+                  shadowColor: '#0f172a',
+                  shadowOpacity: 0.12,
+                  shadowRadius: 16,
+                  elevation: 6,
                 }}
               >
-                <Text style={{ fontWeight: '700', color: '#0f172a', marginBottom: 6 }}>Sugerencia</Text>
-                <Text style={{ color: '#0f172a', lineHeight: 20 }}>{assistanceAnswer}</Text>
-              </View>
-            ) : null}
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Pressable
+                    onPress={() => setShowAssistanceModal(false)}
+                    hitSlop={12}
+                    style={({ pressed }) => ({ padding: 4, opacity: pressed ? 0.6 : 1 })}
+                  >
+                    <Text style={{ fontSize: 20, color: '#0f172a' }}>✕</Text>
+                  </Pressable>
+                </View>
+                <View style={{ alignItems: 'center', marginBottom: 12 }}>
+                  <View
+                    style={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: 20,
+                      backgroundColor: '#0b1224',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <Image source={luviImage} style={{ width: '90%', height: '90%' }} resizeMode="contain" />
+                  </View>
+                  <Text style={{ marginTop: 12, fontSize: 18, fontWeight: '800', color: '#0f172a' }}>
+                    ¿Cómo puedo ayudarte?
+                  </Text>
+                  <Text style={{ marginTop: 6, fontSize: 13, color: '#475569', textAlign: 'center' }}>
+                    Luvi puede darte ideas rápidas usando la misión, objetivos y el chat actual.
+                  </Text>
+                  <Text style={{ marginTop: 4, fontSize: 12, color: '#64748b', textAlign: 'center' }}>
+                    Misión: {mission.title}
+                  </Text>
+                </View>
+                <TextInput
+                  value={assistanceQuestion}
+                  onChangeText={(text) => {
+                    setAssistanceQuestion(text);
+                    if (assistanceError) setAssistanceError(null);
+                  }}
+                  placeholder="Cuéntame qué necesitas desbloquear o cómo seguir la conversación..."
+                  placeholderTextColor="#94a3b8"
+                  multiline
+                  style={{
+                    minHeight: 90,
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: '#e2e8f0',
+                    backgroundColor: '#f8fafc',
+                    paddingHorizontal: 12,
+                    paddingVertical: 10,
+                    fontSize: 14,
+                    color: '#0f172a',
+                  }}
+                />
+                {assistanceError ? (
+                  <Text style={{ marginTop: 6, color: '#dc2626' }}>{assistanceError}</Text>
+                ) : null}
+                <Pressable
+                  onPress={handleRequestAssistance}
+                  disabled={assistanceLoading}
+                  style={({ pressed }) => ({
+                    marginTop: 12,
+                    paddingVertical: 12,
+                    borderRadius: 999,
+                    alignItems: 'center',
+                    backgroundColor: assistanceLoading ? '#cbd5f5' : pressed ? '#0b1224' : '#2563eb',
+                  })}
+                >
+                  {assistanceLoading ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    <Text style={{ color: 'white', fontWeight: '700' }}>Pedir asistencia</Text>
+                  )}
+                </Pressable>
+                {assistanceAnswer ? (
+                  <View
+                    style={{
+                      marginTop: 14,
+                      padding: 12,
+                      borderRadius: 12,
+                      backgroundColor: '#f8fafc',
+                      borderWidth: 1,
+                      borderColor: '#e2e8f0',
+                    }}
+                  >
+                    <Text style={{ fontWeight: '700', color: '#0f172a', marginBottom: 6 }}>Sugerencia</Text>
+                    <Text style={{ color: '#0f172a', lineHeight: 20 }}>{assistanceAnswer}</Text>
+                  </View>
+                ) : null}
+              </Pressable>
+            </ScrollView>
           </Pressable>
-        </Pressable>
+        </KeyboardAvoidingView>
       </Modal>
       <Modal
         animationType="fade"
