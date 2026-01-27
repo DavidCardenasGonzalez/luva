@@ -210,6 +210,10 @@ export default function StorySceneScreen() {
   const recorder = useAudioRecorder();
   const uploader = useUploadToS3();
   const scrollRef = useRef<ScrollView>(null);
+  // Permite saber si todavía estamos en el flujo de `start()` (permiso + prepare).
+  const isStartingRecording = useRef(false);
+  // Si el usuario suelta el botón mientras seguimos pidiendo permiso, guardamos la intención de parar.
+  const stopRequestedWhileStarting = useRef(false);
 
   useEffect(() => {
     if (!mission) return;
@@ -441,16 +445,33 @@ export default function StorySceneScreen() {
       }
       setErrorMessage(null);
       setFlowState('recording');
+      stopRequestedWhileStarting.current = false;
+      isStartingRecording.current = true;
       await recorder.start();
+      // El start terminó, marcamos que ya no estamos en fase de inicio.
+      isStartingRecording.current = false;
+      // Si el usuario soltó el botón mientras se pedía el permiso, ejecutamos el release ahora.
+      if (stopRequestedWhileStarting.current) {
+        stopRequestedWhileStarting.current = false;
+        await handleRecordRelease(true);
+      }
     } catch (err: any) {
       console.error('Record start error', err);
       setErrorMessage(err?.message || 'No pudimos iniciar la grabación.');
       setFlowState('idle');
+      stopRequestedWhileStarting.current = false;
+      isStartingRecording.current = false;
     }
   }, [recorder, retryState]);
 
-  const handleRecordRelease = useCallback(async () => {
+  const handleRecordRelease = useCallback(async (skipStartGuard = false) => {
     try {
+      if (isStartingRecording.current && !skipStartGuard) {
+        // El usuario soltó mientras el permiso estaba en curso; paramos al terminar el start.
+        stopRequestedWhileStarting.current = true;
+        setFlowState('idle');
+        return;
+      }
       if (!recorder.isRecording()) {
         setFlowState('idle');
         return;
