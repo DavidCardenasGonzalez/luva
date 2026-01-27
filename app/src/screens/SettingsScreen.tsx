@@ -1,16 +1,25 @@
-import React, { useMemo } from 'react';
-import { View, Text, ScrollView, Pressable, Linking } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { View, Text, ScrollView, Pressable, Linking, Modal, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
 import Purchases from 'react-native-purchases';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useRevenueCat } from '../purchases/RevenueCatProvider';
+import { useCoins } from '../purchases/CoinBalanceProvider';
+import { useCardProgress } from '../progress/CardProgressProvider';
+import { useStoryProgress } from '../progress/StoryProgressProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
 export default function SettingsScreen({ navigation }: Props) {
   const { isPro, customerInfo, loading: rcLoading } = useRevenueCat();
+  const { resetCoins } = useCoins();
+  const { resetAll: resetCardProgress } = useCardProgress();
+  const { resetAll: resetStoryProgress } = useStoryProgress();
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [resetting, setResetting] = useState(false);
 
   const proInfo = useMemo(() => {
     const entitlement = customerInfo?.entitlements?.active
@@ -36,6 +45,24 @@ export default function SettingsScreen({ navigation }: Props) {
     const d = new Date(iso);
     return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
   };
+
+  const canConfirmReset = confirmText.trim().toLowerCase() === 'borrar';
+
+  const handleConfirmReset = useCallback(async () => {
+    if (!canConfirmReset || resetting) return;
+    try {
+      setResetting(true);
+      await Promise.all([resetCoins(), resetCardProgress(), resetStoryProgress()]);
+      setConfirmText('');
+      setShowResetModal(false);
+      Alert.alert('Restaurado', 'Se borró tu progreso y se reiniciaron tus monedas.');
+    } catch (err) {
+      console.warn('[Settings] Error al restaurar', err);
+      Alert.alert('Error', 'No se pudo restaurar la app. Inténtalo de nuevo.');
+    } finally {
+      setResetting(false);
+    }
+  }, [canConfirmReset, resetCoins, resetCardProgress, resetStoryProgress, resetting]);
 
   return (
     <SafeAreaView
@@ -222,8 +249,135 @@ export default function SettingsScreen({ navigation }: Props) {
               <MaterialIcons name="open-in-new" size={18} color="#cbd5e1" />
             </Pressable>
           </View>
+
+          <View
+            style={{
+              marginTop: 18,
+              padding: 14,
+              borderRadius: 14,
+              borderWidth: 1,
+              borderColor: '#7f1d1d',
+              backgroundColor: '#1f0b10',
+            }}
+          >
+            <Text style={{ color: '#f87171', fontSize: 12, letterSpacing: 1, fontWeight: '800', textTransform: 'uppercase' }}>
+              Peligro
+            </Text>
+            <Text style={{ color: '#fecdd3', fontWeight: '800', fontSize: 18, marginTop: 6 }}>
+              Restaurar app
+            </Text>
+            <Text style={{ color: '#fca5a5', marginTop: 6, lineHeight: 20 }}>
+              Esto borrará todo tu progreso y monedas. No hay vuelta atrás.
+            </Text>
+            <Pressable
+              onPress={() => setShowResetModal(true)}
+              style={({ pressed }) => ({
+                marginTop: 12,
+                padding: 14,
+                borderRadius: 12,
+                backgroundColor: pressed ? '#b91c1c' : '#dc2626',
+                borderWidth: 1,
+                borderColor: '#991b1b',
+                opacity: pressed ? 0.92 : 1,
+              })}
+            >
+              <Text style={{ color: 'white', fontWeight: '800', textAlign: 'center' }}>Restaurar app</Text>
+            </Pressable>
+          </View>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={showResetModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          if (!resetting) {
+            setShowResetModal(false);
+            setConfirmText('');
+          }
+        }}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <View
+            style={{
+              width: '100%',
+              borderRadius: 16,
+              backgroundColor: '#0f172a',
+              padding: 18,
+              borderWidth: 1,
+              borderColor: '#1e293b',
+              shadowColor: '#000',
+              shadowOpacity: 0.35,
+              shadowRadius: 16,
+            }}
+          >
+            <Text style={{ color: '#f87171', fontWeight: '800', fontSize: 18 }}>¿Estás seguro?</Text>
+            <Text style={{ color: '#cbd5e1', marginTop: 8, lineHeight: 20 }}>
+              Esta acción borrará tu progreso y reiniciará tus monedas. No hay vuelta atrás.
+            </Text>
+            <Text style={{ color: '#cbd5e1', marginTop: 12, fontSize: 12 }}>
+              Escribe <Text style={{ fontWeight: '800', color: '#f87171' }}>borrar</Text> para confirmar.
+            </Text>
+            <TextInput
+              value={confirmText}
+              onChangeText={setConfirmText}
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder="borrar"
+              placeholderTextColor="#64748b"
+              style={{
+                marginTop: 10,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: '#1e293b',
+                backgroundColor: '#0b1224',
+                color: '#e2e8f0',
+              }}
+            />
+            <View style={{ flexDirection: 'row', marginTop: 14, gap: 10 }}>
+              <Pressable
+                onPress={() => {
+                  if (resetting) return;
+                  setShowResetModal(false);
+                  setConfirmText('');
+                }}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  paddingVertical: 12,
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: '#1e293b',
+                  backgroundColor: pressed ? '#0b1224' : '#0f172a',
+                  opacity: resetting ? 0.6 : 1,
+                })}
+                disabled={resetting}
+              >
+                <Text style={{ color: '#e2e8f0', textAlign: 'center', fontWeight: '700' }}>Cancelar</Text>
+              </Pressable>
+              <Pressable
+                onPress={handleConfirmReset}
+                disabled={!canConfirmReset || resetting}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  paddingVertical: 12,
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: '#991b1b',
+                  backgroundColor: !canConfirmReset || resetting ? '#7f1d1d' : pressed ? '#b91c1c' : '#dc2626',
+                  opacity: resetting ? 0.7 : 1,
+                })}
+              >
+                <Text style={{ color: 'white', textAlign: 'center', fontWeight: '800' }}>
+                  {resetting ? 'Borrando...' : 'Sí, borrar todo'}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

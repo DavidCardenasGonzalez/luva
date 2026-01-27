@@ -19,6 +19,7 @@ type StoryProgressContextValue = {
   storyCompleted: (storyId?: string) => boolean;
   markMissionCompleted: (storyId: string, missionId: string, storyCompleted?: boolean) => Promise<void>;
   resetStory: (storyId: string) => Promise<void>;
+  resetAll: () => Promise<void>;
 };
 
 const STORAGE_KEY = '@luva/story-progress';
@@ -105,6 +106,11 @@ export function StoryProgressProvider({ children }: { children: React.ReactNode 
     [persist]
   );
 
+  const resetAll = useCallback(async () => {
+    setProgress({});
+    await persist({});
+  }, [persist]);
+
   const value = useMemo<StoryProgressContextValue>(() => {
     const isMissionCompleted = (storyId?: string, missionId?: string) => {
       if (!storyId || !missionId) return false;
@@ -132,8 +138,9 @@ export function StoryProgressProvider({ children }: { children: React.ReactNode 
       storyCompleted,
       markMissionCompleted,
       resetStory,
+      resetAll,
     };
-  }, [loading, markMissionCompleted, progress, resetStory]);
+  }, [loading, markMissionCompleted, progress, resetAll, resetStory]);
 
   return <StoryProgressContext.Provider value={value}>{children}</StoryProgressContext.Provider>;
 }

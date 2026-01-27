@@ -11,7 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRevenueCat } from './RevenueCatProvider';
 
 const STORAGE_KEY = '@luva/coins/state';
-const MAX_FREE_COINS = 5;
+const MAX_FREE_COINS = 50;
 const REGEN_INTERVAL_MS = 60 * 60 * 1000;
 
 export const CHAT_MISSION_COST = 5;
@@ -31,6 +31,7 @@ type CoinsContextValue = {
   refreshBalance: () => Promise<void>;
   canSpend: (amount: number) => Promise<boolean>;
   spendCoins: (amount: number, reason?: string) => Promise<boolean>;
+  resetCoins: () => Promise<void>;
 };
 
 const CoinsContext = createContext<CoinsContextValue | undefined>(undefined);
@@ -148,6 +149,14 @@ export function CoinBalanceProvider({ children }: { children: React.ReactNode })
     [isPro, persist]
   );
 
+  const resetCoins = useCallback(async () => {
+    const now = Date.now();
+    const fresh: CoinsState = { balance: MAX_FREE_COINS, lastUpdated: now };
+    setState(fresh);
+    stateRef.current = fresh;
+    await persist(fresh);
+  }, [persist]);
+
   const canSpend = useCallback(
     async (amount: number) => {
       if (amount <= 0) return true;
@@ -179,8 +188,9 @@ export function CoinBalanceProvider({ children }: { children: React.ReactNode })
       refreshBalance,
       canSpend,
       spendCoins,
+      resetCoins,
     }),
-    [canSpend, isPro, loading, nextRegenAt, refreshBalance, revenueLoading, spendCoins, state.balance]
+    [canSpend, isPro, loading, nextRegenAt, refreshBalance, resetCoins, revenueLoading, spendCoins, state.balance]
   );
 
   return <CoinsContext.Provider value={value}>{children}</CoinsContext.Provider>;

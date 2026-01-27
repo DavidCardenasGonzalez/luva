@@ -79,11 +79,13 @@ export default function StorySceneScreen() {
   const initialSceneIndex: number = route.params?.sceneIndex ?? 0;
   const { story, loading, error } = useStoryDetail(storyId);
   const { markMissionCompleted, isMissionCompleted, storyCompleted: isStoryCompleted } = useStoryProgress();
-  const { spendCoins, loading: coinsLoading, isUnlimited } = useCoins();
+  const { spendCoins, loading: coinsLoading, isUnlimited, balance } = useCoins();
   const [sceneIndex, setSceneIndex] = useState<number>(initialSceneIndex);
   const insets = useSafeAreaInsets();
   const [showCharacterModal, setShowCharacterModal] = useState(false);
   const chargedMissions = useRef<Set<string>>(new Set());
+  const chargingMissionId = useRef<string | null>(null);
+  const [missionUnlocked, setMissionUnlocked] = useState<boolean>(false);
 
   useEffect(() => {
     setSceneIndex(initialSceneIndex);
@@ -108,29 +110,49 @@ export default function StorySceneScreen() {
 
   useEffect(() => {
     chargedMissions.current = new Set();
+    setMissionUnlocked(false);
   }, [storyId]);
 
   useEffect(() => {
-    if (!mission?.missionId) return;
-    if (coinsLoading) return;
-    if (isUnlimited) {
-      chargedMissions.current.add(mission.missionId);
+    if (!mission?.missionId) {
+      setMissionUnlocked(false);
       return;
     }
-    if (chargedMissions.current.has(mission.missionId)) return;
+    // If unlimited or already charged in this session, unlock and exit.
+    if (isUnlimited || chargedMissions.current.has(mission.missionId)) {
+      setMissionUnlocked(true);
+      return;
+    }
+    if (coinsLoading) return;
+    if (chargingMissionId.current === mission.missionId) return;
+
+    chargingMissionId.current = mission.missionId;
+    chargedMissions.current.add(mission.missionId); // mark early to avoid double charge (StrictMode / rerenders)
+
     let cancelled = false;
     (async () => {
       const ok = await spendCoins(CHAT_MISSION_COST, `mission:${mission.missionId}`);
-      if (!ok && !cancelled) {
-        navigation.navigate('Paywall');
-      } else if (!cancelled) {
-        chargedMissions.current.add(mission.missionId);
+      if (!ok) {
+        if (!cancelled) {
+          chargedMissions.current.delete(mission.missionId);
+          setMissionUnlocked(false);
+          navigation.navigate('Paywall');
+        }
+        chargingMissionId.current = null;
+        return;
       }
+      if (cancelled) return;
+      setMissionUnlocked(true);
+      chargingMissionId.current = null;
     })();
+
     return () => {
       cancelled = true;
+      chargingMissionId.current = null;
+      chargedMissions.current.delete(mission.missionId);
+      setMissionUnlocked(false);
     };
-  }, [mission?.missionId, coinsLoading, isUnlimited, spendCoins, navigation]);
+  }, [mission?.missionId, isUnlimited, coinsLoading, spendCoins, navigation]);
 
   const storyDefinitionPayload = useMemo(() => {
     if (!story) return undefined;
@@ -221,8 +243,7 @@ export default function StorySceneScreen() {
     }
   }, [messages.length]);
 
-  const missionCostPaid =
-    isUnlimited || (mission?.missionId ? chargedMissions.current.has(mission.missionId) : false);
+  const missionCostPaid = missionUnlocked;
   const coinLocked = coinsLoading || !missionCostPaid;
   const retryBlocked = retryState === 'required' || coinLocked;
 

@@ -9,6 +9,7 @@ type CardProgressContextValue = {
   statuses: CardProgressState;
   statusFor: (cardId?: string | number | null) => CardProgressStatus;
   setStatus: (cardId: string, status: CardProgressStatus) => Promise<void>;
+  resetAll: () => Promise<void>;
 };
 
 const STORAGE_KEY = '@luva/card-progress';
@@ -77,8 +78,12 @@ export function CardProgressProvider({ children }: { children: React.ReactNode }
         return statuses[key] ?? 'todo';
       },
       setStatus,
+      resetAll: async () => {
+        setStatuses({});
+        await persist({});
+      },
     }),
-    [loading, statuses, setStatus]
+    [loading, persist, statuses, setStatus]
   );
 
   return (
@@ -101,4 +106,3 @@ export const CARD_STATUS_LABELS: Record<CardProgressStatus, string> = {
   learning: 'En aprendizaje',
   learned: 'Aprendida',
 };
-
