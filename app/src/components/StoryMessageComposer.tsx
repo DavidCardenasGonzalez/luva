@@ -38,9 +38,11 @@ export default function StoryMessageComposer({
   const handleSendPress = useCallback(async () => {
     const trimmed = text.trim();
     if (!trimmed) return;
+    // Limpia el input tan pronto como intentamos enviar; si falla, restauramos el texto.
+    setText('');
     const success = await onSendText(trimmed);
-    if (success) {
-      setText('');
+    if (!success) {
+      setText(trimmed);
     }
   }, [onSendText, text]);
 

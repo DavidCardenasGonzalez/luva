@@ -34,6 +34,7 @@ module.exports = {
         backgroundColor: "#0b1224",
       },
       package: "com.cardi7.luva",
+      versionCode: 1
     },
     plugins: ["expo-dev-client", "expo-secure-store", "expo-web-browser"],
     extra: {
