@@ -29,6 +29,16 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "dcardenasgz@gmail.com",
+        "ascAppId": "6758112881",
+        "appleTeamId": "RHZ94C9F36"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./rafix-440822-7c095cc82b0e.json",
+        "track": "internal"
+      }
+    }
   }
 }

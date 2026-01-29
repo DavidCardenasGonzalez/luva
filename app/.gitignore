@@ -7,8 +7,7 @@ android/app/build/
 ios/build/
 ios/Pods/
 *.tsbuildinfo
-.env
-.env.*
+# .env
+# .env.*
 !.env.example
 npm-debug.log*
-
