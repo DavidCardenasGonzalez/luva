@@ -143,7 +143,7 @@ export default function SettingsScreen({ navigation }: Props) {
               }}
             >
               <Text style={{ color: '#cbd5e1', fontWeight: '700', fontSize: 12 }}>Versión</Text>
-              <Text style={{ color: '#e2e8f0', marginTop: 4 }}>0.1.0</Text>
+              <Text style={{ color: '#e2e8f0', marginTop: 4 }}>1.1.0</Text>
             </View>
           </View>
 

@@ -19,7 +19,7 @@ module.exports = {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.cardi7.luva",
-      buildNumber: "1.0.0",
+      buildNumber: "1.1.0",
       infoPlist: {
         NSUserTrackingUsageDescription:
           "Usamos tu identificador publicitario para medir suscripciones y mejorar nuestras campañas. No vendemos tu información.",
