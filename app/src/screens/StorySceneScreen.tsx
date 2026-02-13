@@ -11,6 +11,7 @@ import {
   Image,
   Modal,
   TextInput,
+  AppState,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -206,6 +207,16 @@ export default function StorySceneScreen() {
   const [assistanceAnswer, setAssistanceAnswer] = useState('');
   const [assistanceLoading, setAssistanceLoading] = useState(false);
   const [assistanceError, setAssistanceError] = useState<string | null>(null);
+  const hasShownCharacterModal = useRef(false);
+  // Force-remount the KeyboardAvoidingView when returning from background so it recalculates sizes.
+  const [keyboardAvoiderKey, setKeyboardAvoiderKey] = useState(0);
+  const exitWarningMessage = useMemo(
+    () =>
+      isUnlimited
+        ? 'No has terminado la misión. Si sales ahora, perderás tu avance.'
+        : 'No has terminado la misión. Si sales ahora, perderás tu avance y las monedas/créditos utilizados para entrar.',
+    [isUnlimited]
+  );
 
   const recorder = useAudioRecorder();
   const uploader = useUploadToS3();
@@ -231,6 +242,7 @@ export default function StorySceneScreen() {
     setAssistanceError(null);
     setAssistanceLoading(false);
     setShowAssistanceModal(false);
+    hasShownCharacterModal.current = false;
   }, [mission?.missionId, storyId]);
 
   useEffect(() => {
@@ -529,6 +541,13 @@ export default function StorySceneScreen() {
     setShowAssistanceModal(true);
   }, []);
 
+  const handleAssistantMessagePress = useCallback((text: string) => {
+    setAssistanceQuestion(`Puedes explicarme esta frase: "${text}"`);
+    setAssistanceAnswer('');
+    setAssistanceError(null);
+    setShowAssistanceModal(true);
+  }, []);
+
   const handleRequestAssistance = useCallback(async () => {
     const trimmed = assistanceQuestion.trim();
     if (!trimmed) {
@@ -578,6 +597,37 @@ export default function StorySceneScreen() {
     storyId,
   ]);
 
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        setKeyboardAvoiderKey((prev) => prev + 1);
+      }
+    });
+    return () => sub.remove();
+  }, []);
+
+  useEffect(() => {
+    if (!mission || hasShownCharacterModal.current) return;
+    hasShownCharacterModal.current = true;
+    setShowCharacterModal(true);
+  }, [mission]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (event) => {
+      if (missionCompleted) return;
+      event.preventDefault();
+      Alert.alert('Salir de la misión', exitWarningMessage, [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Salir',
+          style: 'destructive',
+          onPress: () => navigation.dispatch(event.data.action),
+        },
+      ]);
+    });
+    return unsubscribe;
+  }, [exitWarningMessage, missionCompleted, navigation]);
+
   if (!storyId) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16 }}>
@@ -623,9 +673,10 @@ export default function StorySceneScreen() {
 
   return (
     <KeyboardAvoidingView
+      key={keyboardAvoiderKey}
       style={{ flex: 1, backgroundColor: '#f8fafc' }}
-      behavior="height"
-      // keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
     >
       <View style={{ flex: 1 }}>
         <View style={{ backgroundColor: '#0b1224', paddingTop: insets.top + 8, paddingBottom: 12, paddingHorizontal: 16 }}>
@@ -720,29 +771,56 @@ export default function StorySceneScreen() {
             </View>
           ) : (
             <View style={{ gap: 12 }}>
-              {messages.map((msg) => (
-                <View
-                  key={msg.id}
-                  style={{
-                    alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                    backgroundColor: msg.role === 'user' ? '#4f46e5' : 'white',
-                    borderRadius: 16,
-                    paddingVertical: 10,
-                    paddingHorizontal: 14,
-                    maxWidth: '80%',
-                    borderWidth: msg.role === 'user' ? 0 : 1,
-                    borderColor: '#e2e8f0',
-                  }}
-                >
-                  <Text style={{ color: msg.role === 'user' ? 'white' : '#0f172a' }}>{msg.text}</Text>
-                </View>
-              ))}
+              {messages.map((msg) => {
+                const alignStyle = { alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start' };
+                const bubble = (
+                  <View
+                    style={{
+                      backgroundColor: msg.role === 'user' ? '#4f46e5' : 'white',
+                      borderRadius: 16,
+                      paddingVertical: 10,
+                      paddingHorizontal: 14,
+                      maxWidth: '80%',
+                      borderWidth: msg.role === 'user' ? 0 : 1,
+                      borderColor: '#e2e8f0',
+                    }}
+                  >
+                    <Text style={{ color: msg.role === 'user' ? 'white' : '#0f172a' }}>{msg.text}</Text>
+                  </View>
+                );
+                if (msg.role === 'assistant') {
+                  return (
+                    <Pressable
+                      key={msg.id}
+                      onPress={() => handleAssistantMessagePress(msg.text)}
+                      style={({ pressed }) => ({ ...alignStyle, opacity: pressed ? 0.85 : 1 })}
+                      hitSlop={6}
+                    >
+                      {bubble}
+                    </Pressable>
+                  );
+                }
+                return (
+                  <View key={msg.id} style={alignStyle}>
+                    {bubble}
+                  </View>
+                );
+              })}
             </View>
           )}
         </View>
 
         {analysis ? (
-          <View style={{ marginTop: 16, padding: 16, backgroundColor: 'white', borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0' }}>
+          <View
+            style={{
+              marginTop: 16,
+              padding: 16,
+              backgroundColor: retryState === 'required' ? '#fef2f2' : 'white',
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: retryState === 'required' ? '#fecdd3' : '#e2e8f0',
+            }}
+          >
             <Text style={{ fontWeight: '700', color: '#1e293b' }}>
               Correctness: {analysis.correctness}% ({analysis.result === 'correct' ? 'Correcto' : analysis.result === 'partial' ? 'Parcial' : 'Reintenta'})
             </Text>
@@ -1058,11 +1136,6 @@ export default function StorySceneScreen() {
               {mission.sceneSummary ? (
                 <Text style={{ marginTop: 12, fontSize: 14, color: '#1f2937', textAlign: 'center' }}>
                   {mission.sceneSummary}
-                </Text>
-              ) : null}
-              {mission.caracterPrompt ? (
-                <Text style={{ marginTop: 12, fontSize: 13, color: '#475569', textAlign: 'center' }}>
-                  {mission.caracterPrompt}
                 </Text>
               ) : null}
             </View>

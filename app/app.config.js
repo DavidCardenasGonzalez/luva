@@ -6,7 +6,7 @@ module.exports = {
     name: "Luva",
     slug: "luva",
     scheme: "myapp",
-    version: "1.0.0",
+    version: "1.1.3",
     orientation: "portrait",
     updates: { fallbackToCacheTimeout: 0 },
     assetBundlePatterns: ["**/*"],
@@ -19,11 +19,13 @@ module.exports = {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.cardi7.luva",
-      buildNumber: "1.1.0",
+      buildNumber: "1.1.3",
       infoPlist: {
-        NSUserTrackingUsageDescription:
-          "Usamos tu identificador publicitario para medir suscripciones y mejorar nuestras campañas. No vendemos tu información.",
+        // NSUserTrackingUsageDescription:
+        // "Usamos tu identificador publicitario para medir suscripciones y mejorar nuestras campañas. No vendemos tu información.",
         ITSAppUsesNonExemptEncryption: false,
+        NSMicrophoneUsageDescription:
+          "Luva usa el micrófono para que puedas grabar tu voz mientras practicas ejercicios de habla inglesa y recibir comentarios sobre tu pronunciación.",
       },
     },
     // Icons temporarily disabled until assets are added
@@ -34,7 +36,7 @@ module.exports = {
         backgroundColor: "#0b1224",
       },
       package: "com.cardi7.luva",
-      versionCode: 2
+      versionCode: 4,
     },
     plugins: ["expo-dev-client", "expo-secure-store", "expo-web-browser"],
     extra: {

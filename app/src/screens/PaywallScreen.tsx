@@ -6,6 +6,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Linking,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -32,6 +33,8 @@ type PackageInfo = {
   price: string;
   title: string;
   periodLabel?: string;
+  cadenceLabel?: string;
+  isRecommended: boolean;
 };
 
 export default function PaywallScreen() {
@@ -45,6 +48,14 @@ export default function PaywallScreen() {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [restoring, setRestoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const openExternal = async (url: string) => {
+    try {
+      await Linking.openURL(url);
+    } catch (err) {
+      console.warn("[Paywall] No se pudo abrir el enlace", err);
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -80,22 +91,30 @@ export default function PaywallScreen() {
     return all.map((pkg) => {
       const { product } = pkg;
       const title =
-        product.subscriptionPeriod?.unit === "MONTH"
+        product.subscriptionPeriod === "P1M"
           ? "Plan mensual"
-          : product.subscriptionPeriod?.unit === "YEAR"
+          : product.subscriptionPeriod === "P1Y"
             ? "Plan anual"
             : product.title || pkg.identifier;
       let periodLabel: string | undefined;
-      if (product.subscriptionPeriod?.unit === "MONTH") {
+      let cadenceLabel: string | undefined;
+      let isRecommended = false;
+      console.log(product.subscriptionPeriod);
+      if (product.subscriptionPeriod === "P1M") {
         periodLabel = "Facturado cada mes";
-      } else if (product.subscriptionPeriod?.unit === "YEAR") {
+        cadenceLabel = "mes";
+      } else if (product.subscriptionPeriod === "P1Y") {
         periodLabel = "Facturado cada año";
+        cadenceLabel = "año";
+        isRecommended = true;
       }
       return {
         pkg,
         price: product.priceString,
         title,
         periodLabel,
+        cadenceLabel,
+        isRecommended,
       };
     });
   }, [offerings]);
@@ -139,7 +158,7 @@ export default function PaywallScreen() {
   };
 
   const renderPackageCard = (info: PackageInfo, idx: number) => {
-    const isRecommended = info.pkg.identifier.toLowerCase().includes("annual") || idx === 0;
+    const isRecommended = info.isRecommended;
     const processing = processingId === info.pkg.identifier;
     return (
       <Pressable
@@ -183,6 +202,11 @@ export default function PaywallScreen() {
         </View>
         <View style={{ flexDirection: "row", alignItems: "flex-end", marginTop: 10 }}>
           <Text style={{ color: COLORS.text, fontSize: 26, fontWeight: "900" }}>{info.price}</Text>
+          {info.cadenceLabel ? (
+            <Text style={{ color: COLORS.muted, fontSize: 16, fontWeight: "800", marginLeft: 4 }}>
+              /{info.cadenceLabel}
+            </Text>
+          ) : null}
         </View>
         <Text style={{ color: "#cbd5e1", marginTop: 12, fontWeight: "700" }}>
           • Monedas ilimitadas y sin esperas
@@ -264,7 +288,6 @@ export default function PaywallScreen() {
               "Sin esperar regeneraciones",
               "Misiones y cartas sin costo",
               "Soporte prioritario",
-              "Nuevas funciones Pro incluidas",
             ].map((item) => (
               <View
                 key={item}
@@ -302,6 +325,29 @@ export default function PaywallScreen() {
               </Text>
             </View>
           )}
+        </View>
+
+        <View
+          style={{
+            marginTop: 10,
+            padding: 12,
+            borderRadius: 14,
+            backgroundColor: COLORS.card,
+            borderWidth: 1,
+            borderColor: COLORS.border,
+          }}
+        >
+          <Text style={{ color: COLORS.muted, fontSize: 12, lineHeight: 18 }}>
+            Auto-renewable subscription. Cancel anytime.
+          </Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 8, gap: 12 }}>
+            <Pressable onPress={() => openExternal("https://d219zijgtsj7lu.cloudfront.net/#privacidad")}>
+              <Text style={{ color: COLORS.accent2, fontWeight: "700" }}>Política de privacidad</Text>
+            </Pressable>
+            <Pressable onPress={() => openExternal("https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")}>
+              <Text style={{ color: COLORS.accent2, fontWeight: "700" }}>Términos y condiciones</Text>
+            </Pressable>
+          </View>
         </View>
 
         <View style={{ marginTop: 18, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>

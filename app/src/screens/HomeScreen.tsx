@@ -82,7 +82,7 @@ export default function HomeScreen({ navigation }: Props) {
     >
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 20, paddingBottom: 32 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: 60 }}
       >
       <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 260, backgroundColor: '#0b1224' }} />
 

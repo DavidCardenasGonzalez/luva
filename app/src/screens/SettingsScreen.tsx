@@ -143,7 +143,7 @@ export default function SettingsScreen({ navigation }: Props) {
               }}
             >
               <Text style={{ color: '#cbd5e1', fontWeight: '700', fontSize: 12 }}>Versión</Text>
-              <Text style={{ color: '#e2e8f0', marginTop: 4 }}>1.1.0</Text>
+              <Text style={{ color: '#e2e8f0', marginTop: 4 }}>1.1.1</Text>
             </View>
           </View>
 
@@ -229,7 +229,7 @@ export default function SettingsScreen({ navigation }: Props) {
               <MaterialIcons name="open-in-new" size={18} color="#cbd5e1" />
             </Pressable>
             <Pressable
-              onPress={() => openExternal('https://d219zijgtsj7lu.cloudfront.net/#terminos')}
+              onPress={() => openExternal('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/')}
               style={({ pressed }) => ({
                 padding: 14,
                 borderRadius: 14,
