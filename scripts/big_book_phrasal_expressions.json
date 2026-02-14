@@ -1,0 +1,1286 @@
+[
+  {
+    "label": "ask for",
+    "definition": "Solicitar algo a alguien, pedir ayuda o información."
+  },
+  {
+    "label": "ask out",
+    "definition": "Invitar a alguien a salir, generalmente en contexto romántico."
+  },
+  {
+    "label": "ask over",
+    "definition": "Invitar a alguien a visitar tu casa."
+  },
+  {
+    "label": "back down",
+    "definition": "Rendirse o retirar una posición en una discusión."
+  },
+  {
+    "label": "back up",
+    "definition": "Retroceder o mover en reversa."
+  },
+  {
+    "label": "beat up",
+    "definition": "Golpear o maltratar a alguien o algo."
+  },
+  {
+    "label": "beef up",
+    "definition": "Fortalecer o aumentar la resistencia de algo."
+  },
+  {
+    "label": "believe in",
+    "definition": "Confiar o tener fe en alguien o algo."
+  },
+  {
+    "label": "blow away",
+    "definition": "Impresionar mucho o ganar con facilidad."
+  },
+  {
+    "label": "blow out",
+    "definition": "Extinguirse por el viento o una llama."
+  },
+  {
+    "label": "blow up",
+    "definition": "Explotar o hacer explotar algo."
+  },
+  {
+    "label": "break down",
+    "definition": "Descomponer o analizar en partes."
+  },
+  {
+    "label": "break out",
+    "definition": "Emerger o comenzar de repente."
+  },
+  {
+    "label": "break through",
+    "definition": "Superar obstáculos o avanzar."
+  },
+  {
+    "label": "bring back",
+    "definition": "Devolver algo a su lugar o estado anterior."
+  },
+  {
+    "label": "bring down",
+    "definition": "Hacer que algo caiga o fracase."
+  },
+  {
+    "label": "bring over",
+    "definition": "Llevar o mover algo a un lugar."
+  },
+  {
+    "label": "bring up",
+    "definition": "Mencionar o criar a un niño."
+  },
+  {
+    "label": "brush up",
+    "definition": "Repasar o mejorar conocimientos o habilidades."
+  },
+  {
+    "label": "build into",
+    "definition": "Construir algo como parte integral de otra cosa."
+  },
+  {
+    "label": "bump into",
+    "definition": "Encontrarse con alguien inesperadamente."
+  },
+  {
+    "label": "burn down",
+    "definition": "Ser destruido por un incendio."
+  },
+  {
+    "label": "burn up",
+    "definition": "Ser destruido por el fuego."
+  },
+  {
+    "label": "burst out",
+    "definition": "Eruptar emocionalmente de repente."
+  },
+  {
+    "label": "butt in",
+    "definition": "Interrumpir sin ser invitado."
+  },
+  {
+    "label": "call back",
+    "definition": "Devolver una llamada telefónica."
+  },
+  {
+    "label": "call in",
+    "definition": "Solicitar que alguien venga a un lugar."
+  },
+  {
+    "label": "call up",
+    "definition": "Hacer una llamada telefónica."
+  },
+  {
+    "label": "calm down",
+    "definition": "Hacer que alguien se tranquilice."
+  },
+  {
+    "label": "care for",
+    "definition": "Proveer atención o cuidado a alguien."
+  },
+  {
+    "label": "carry out",
+    "definition": "Completar o ejecutar una tarea."
+  },
+  {
+    "label": "catch on",
+    "definition": "Entender o captar una idea."
+  },
+  {
+    "label": "catch up",
+    "definition": "Alcanzar a alguien o algo que va adelante."
+  },
+  {
+    "label": "cheat on",
+    "definition": "Ser infiel o actuar deshonestamente."
+  },
+  {
+    "label": "check in",
+    "definition": "Registrarse en un hotel u otro lugar."
+  },
+  {
+    "label": "check out",
+    "definition": "Salir y pagar en un hotel o tienda."
+  },
+  {
+    "label": "chop up",
+    "definition": "Cortar en pedazos pequeños."
+  },
+  {
+    "label": "clear up",
+    "definition": "Aclarar dudas o confusiones."
+  },
+  {
+    "label": "clog up",
+    "definition": "Obstruir o bloquear el paso."
+  },
+  {
+    "label": "come across",
+    "definition": "Encontrar o descubrir por casualidad."
+  },
+  {
+    "label": "come along",
+    "definition": "Acompañar o ir con alguien."
+  },
+  {
+    "label": "come apart",
+    "definition": "Separarse o desmoronarse."
+  },
+  {
+    "label": "come back",
+    "definition": "Regresar a un lugar."
+  },
+  {
+    "label": "come down",
+    "definition": "Moverse de un nivel superior a uno inferior."
+  },
+  {
+    "label": "come down with",
+    "definition": "Enfermarse de algo."
+  },
+  {
+    "label": "come from",
+    "definition": "Proceder de un lugar o origen."
+  },
+  {
+    "label": "come in",
+    "definition": "Entrar o solicitar permiso para entrar."
+  },
+  {
+    "label": "come on",
+    "definition": "Una expresión para animar o pedir que alguien participe."
+  },
+  {
+    "label": "come out",
+    "definition": "Ser publicado o revelado."
+  },
+  {
+    "label": "come through",
+    "definition": "Superar una dificultad o situación."
+  },
+  {
+    "label": "come up",
+    "definition": "Surgir o presentarse."
+  },
+  {
+    "label": "come up with",
+    "definition": "Idear o inventar una idea o solución."
+  },
+  {
+    "label": "con into",
+    "definition": "Engañar a alguien para que haga algo."
+  },
+  {
+    "label": "con out of",
+    "definition": "Engañar a alguien para obtener algo."
+  },
+  {
+    "label": "count in",
+    "definition": "Incluir a alguien en un plan o actividad."
+  },
+  {
+    "label": "count on",
+    "definition": "Confiar en alguien o algo."
+  },
+  {
+    "label": "count up",
+    "definition": "Contar o sumar cantidades."
+  },
+  {
+    "label": "cover up",
+    "definition": "Ocultar o esconder algo."
+  },
+  {
+    "label": "crack down",
+    "definition": "Aplicar medidas estrictas contra algo."
+  },
+  {
+    "label": "cut back",
+    "definition": "Reducir el uso o gasto de algo."
+  },
+  {
+    "label": "cut down",
+    "definition": "Disminuir la cantidad o tamaño."
+  },
+  {
+    "label": "cut out",
+    "definition": "Dejar de hacer algo repentinamente."
+  },
+  {
+    "label": "cut up",
+    "definition": "Cortar en pedazos."
+  },
+  {
+    "label": "deal with",
+    "definition": "Enfrentar o manejar una situación."
+  },
+  {
+    "label": "do away with",
+    "definition": "Eliminar o acabar con algo."
+  },
+  {
+    "label": "do over",
+    "definition": "Repetir o hacer de nuevo."
+  },
+  {
+    "label": "do without",
+    "definition": "Vivir sin algo que se necesita."
+  },
+  {
+    "label": "dress up",
+    "definition": "Vestirse con ropa elegante o especial."
+  },
+  {
+    "label": "drink down",
+    "definition": "Beber todo de una vez."
+  },
+  {
+    "label": "drink up",
+    "definition": "Terminar de beber."
+  },
+  {
+    "label": "drop in",
+    "definition": "Visitar sin aviso previo."
+  },
+  {
+    "label": "drop out",
+    "definition": "Dejar de participar en algo."
+  },
+  {
+    "label": "dry",
+    "definition": "Eliminar agua o humedad."
+  },
+  {
+    "label": "dry up",
+    "definition": "Que la humedad se evapore."
+  },
+  {
+    "label": "eat up",
+    "definition": "Comer todo lo que hay."
+  },
+  {
+    "label": "eat out",
+    "definition": "Comer en un restaurante."
+  },
+  {
+    "label": "empty out",
+    "definition": "Vaciar completamente el contenido."
+  },
+  {
+    "label": "end up",
+    "definition": "Terminar en un resultado o lugar."
+  },
+  {
+    "label": "fall apart",
+    "definition": "Descomponerse o desmoronarse."
+  },
+  {
+    "label": "fall behind",
+    "definition": "Quedarse atrás en progreso o tareas."
+  },
+  {
+    "label": "fall",
+    "definition": "Caer desde una posición más alta hacia abajo."
+  },
+  {
+    "label": "fall for",
+    "definition": "Creer algo que no es cierto, a veces actuando en consecuencia."
+  },
+  {
+    "label": "fall out",
+    "definition": "Dejar una formación militar o grupo por decisión propia."
+  },
+  {
+    "label": "fall over",
+    "definition": "Tumbarse o caer desde un lugar alto a uno más bajo."
+  },
+  {
+    "label": "fall through",
+    "definition": "Un plan o acuerdo que no se realiza o completa."
+  },
+  {
+    "label": "feel up to",
+    "definition": "Tener energía o ánimo para hacer algo."
+  },
+  {
+    "label": "fight back",
+    "definition": "Defenderse en un conflicto o responder a un ataque."
+  },
+  {
+    "label": "figure on",
+    "definition": "Planear o contar con algo en el futuro."
+  },
+  {
+    "label": "figure out",
+    "definition": "Encontrar una solución o entender algo mediante reflexión."
+  },
+  {
+    "label": "fill out",
+    "definition": "Completar un formulario o documento."
+  },
+  {
+    "label": "fill up",
+    "definition": "Llenar un recipiente con líquido u otra sustancia."
+  },
+  {
+    "label": "find out",
+    "definition": "Descubrir o aprender algo nuevo."
+  },
+  {
+    "label": "fix up",
+    "definition": "Reparar o renovar algo para ponerlo en buen estado."
+  },
+  {
+    "label": "flip out",
+    "definition": "Enojarse mucho o ponerse muy ansioso."
+  },
+  {
+    "label": "float around",
+    "definition": "Moverse por el espacio sin un rumbo fijo."
+  },
+  {
+    "label": "follow through",
+    "definition": "Completar una acción o compromiso iniciado."
+  },
+  {
+    "label": "follow up",
+    "definition": "Hacer un esfuerzo adicional para verificar o continuar."
+  },
+  {
+    "label": "fool around",
+    "definition": "No tomarse algo en serio, hacer cosas sin importancia."
+  },
+  {
+    "label": "get ahead",
+    "definition": "Progresar o mejorar en una situación o carrera."
+  },
+  {
+    "label": "get along",
+    "definition": "Coexistir bien con otras personas o animales."
+  },
+  {
+    "label": "get around to",
+    "definition": "Hacer algo cuando se tiene tiempo o ganas."
+  },
+  {
+    "label": "get back at",
+    "definition": "Resentir o vengarse de alguien."
+  },
+  {
+    "label": "get back to",
+    "definition": "Volver a un lugar o tema previamente mencionado."
+  },
+  {
+    "label": "get behind",
+    "definition": "Apoyar o respaldar a alguien o algo."
+  },
+  {
+    "label": "get by",
+    "definition": "Sobrevivir con lo justo, sin mucho margen."
+  },
+  {
+    "label": "get on",
+    "definition": "Subir a un medio de transporte."
+  },
+  {
+    "label": "get out",
+    "definition": "Salir o abandonar un lugar."
+  },
+  {
+    "label": "get out of",
+    "definition": "Evitar o liberarse de una obligación o situación."
+  },
+  {
+    "label": "get over",
+    "definition": "Recuperarse de una enfermedad o situación difícil."
+  },
+  {
+    "label": "get over with",
+    "definition": "Terminar o completar algo desagradable o molesto."
+  },
+  {
+    "label": "get through",
+    "definition": "Superar dificultades o terminar una tarea."
+  },
+  {
+    "label": "get to",
+    "definition": "Llegar a un lugar, idea o situación."
+  },
+  {
+    "label": "get together",
+    "definition": "Reunirse con otras personas para socializar."
+  },
+  {
+    "label": "get up",
+    "definition": "Levantarse de la cama o de una posición sentada."
+  },
+  {
+    "label": "give away",
+    "definition": "Regalar o donar algo a alguien."
+  },
+  {
+    "label": "give back",
+    "definition": "Devolver algo a su dueño original."
+  },
+  {
+    "label": "give in",
+    "definition": "Ceder o rendirse ante una petición o presión."
+  },
+  {
+    "label": "give out",
+    "definition": "Agotarse o dejar de funcionar por completo."
+  },
+  {
+    "label": "give up",
+    "definition": "Rendirse o dejar de intentar algo."
+  },
+  {
+    "label": "go about",
+    "definition": "Realizar una tarea o comenzar una actividad."
+  },
+  {
+    "label": "go after",
+    "definition": "Perseguir o intentar alcanzar algo o a alguien."
+  },
+  {
+    "label": "go ahead",
+    "definition": "Proceder o continuar con una acción."
+  },
+  {
+    "label": "go along with",
+    "definition": "Estar de acuerdo o apoyar una idea o plan."
+  },
+  {
+    "label": "go around",
+    "definition": "Moverse por diferentes lugares o distribuirse."
+  },
+  {
+    "label": "go away",
+    "definition": "Partir o dejar un lugar."
+  },
+  {
+    "label": "go back",
+    "definition": "Regresar a un lugar o situación anterior."
+  },
+  {
+    "label": "go beyond",
+    "definition": "Superar los límites o expectativas."
+  },
+  {
+    "label": "go by",
+    "definition": "Pasar cerca de algo o alguien."
+  },
+  {
+    "label": "go down",
+    "definition": "Disminuir o caer por debajo de un nivel."
+  },
+  {
+    "label": "go for",
+    "definition": "Atacar o intentar conseguir algo."
+  },
+  {
+    "label": "go in or into",
+    "definition": "Entrar en un lugar o espacio cerrado."
+  },
+  {
+    "label": "go on",
+    "definition": "Continuar con una acción o evento."
+  },
+  {
+    "label": "go out",
+    "definition": "Salir de un lugar para socializar o divertirse."
+  },
+  {
+    "label": "go over",
+    "definition": "Revisar o examinar cuidadosamente."
+  },
+  {
+    "label": "go through",
+    "definition": "Pasar por una experiencia difícil o completar un proceso."
+  },
+  {
+    "label": "go up",
+    "definition": "Subir a un lugar más alto o en dirección norte."
+  },
+  {
+    "label": "go with",
+    "definition": "Combinar o acompañar algo con otra cosa."
+  },
+  {
+    "label": "goof around",
+    "definition": "Divertirse sin tomar en serio las responsabilidades."
+  },
+  {
+    "label": "gross out",
+    "definition": "Provocar asco o repulsión."
+  },
+  {
+    "label": "grow out",
+    "definition": "Dejar de usar algo por ser demasiado viejo o maduro."
+  },
+  {
+    "label": "grow up",
+    "definition": "Madurar o comportarse de manera más responsable."
+  },
+  {
+    "label": "hand back",
+    "definition": "Devolver algo a su dueño o a quien lo entregó."
+  },
+  {
+    "label": "hand in",
+    "definition": "Entregar un trabajo o documento a una autoridad."
+  },
+  {
+    "label": "hand out",
+    "definition": "Distribuir cosas a varias personas."
+  },
+  {
+    "label": "hand over",
+    "definition": "Entregar o ceder algo a otra persona."
+  },
+  {
+    "label": "hang around",
+    "definition": "Pasar el tiempo sin hacer nada en particular."
+  },
+  {
+    "label": "hang on",
+    "definition": "Esperar un momento o mantener la conexión."
+  },
+  {
+    "label": "hang out",
+    "definition": "Pasar tiempo con amigos o en un lugar."
+  },
+  {
+    "label": "hang up",
+    "definition": "Terminar una llamada telefónica."
+  },
+  {
+    "label": "have on",
+    "definition": "Llevar puesto algo de ropa."
+  },
+  {
+    "label": "head back",
+    "definition": "Regresar a un lugar desde donde se vino."
+  },
+  {
+    "label": "head for",
+    "definition": "Dirigirse hacia un destino."
+  },
+  {
+    "label": "head towards",
+    "definition": "Ir en dirección a un lugar."
+  },
+  {
+    "label": "hear about",
+    "definition": "Enterarse de información sobre algo."
+  },
+  {
+    "label": "hear of",
+    "definition": "Conocer o tener noticia de algo."
+  },
+  {
+    "label": "heat up",
+    "definition": "Hacer algo más caliente o calentar."
+  },
+  {
+    "label": "help out",
+    "definition": "Prestar ayuda o asistencia."
+  },
+  {
+    "label": "hit on",
+    "definition": "Llegar a una idea o solución."
+  },
+  {
+    "label": "hold against",
+    "definition": "Resistir o contener algo o a alguien."
+  },
+  {
+    "label": "hold on",
+    "definition": "Mantenerse firme o esperar un momento."
+  },
+  {
+    "label": "hold out",
+    "definition": "Mantenerse firme en resistencia o en una posición difícil."
+  },
+  {
+    "label": "hold over",
+    "definition": "Prolongar o mantener algo para más adelante."
+  },
+  {
+    "label": "hold up",
+    "definition": "Retrasar o bloquear el avance de algo o alguien."
+  },
+  {
+    "label": "hook up",
+    "definition": "Conectar dispositivos o equipos entre sí."
+  },
+  {
+    "label": "hurry up",
+    "definition": "Dar una orden para que alguien se apresure."
+  },
+  {
+    "label": "keep at",
+    "definition": "Persistir o continuar con una tarea o esfuerzo."
+  },
+  {
+    "label": "keep away",
+    "definition": "Mantener distancia deliberadamente de alguien o algo."
+  },
+  {
+    "label": "keep down",
+    "definition": "Reducir, suprimir o limitar el crecimiento o la cantidad."
+  },
+  {
+    "label": "keep from",
+    "definition": "Prevenir o impedir que alguien haga algo."
+  },
+  {
+    "label": "keep on",
+    "definition": "Continuar haciendo algo sin detenerse."
+  },
+  {
+    "label": "keep",
+    "definition": "Restringir o limitar según ciertas reglas o pautas."
+  },
+  {
+    "label": "kick",
+    "definition": "Dar algo (a menudo un soborno) de forma informal o poco ética."
+  },
+  {
+    "label": "knock",
+    "definition": "Quitar material de un objeto o superficie."
+  },
+  {
+    "label": "know",
+    "definition": "Tener conocimiento o familiaridad con algo o alguien."
+  },
+  {
+    "label": "lay",
+    "definition": "Colocar en posición horizontal o en una superficie."
+  },
+  {
+    "label": "lead up",
+    "definition": "Preparar o sentar las bases para un evento o acción."
+  },
+  {
+    "label": "leave",
+    "definition": "Irse sin llevarse algo o alguien consigo."
+  },
+  {
+    "label": "let",
+    "definition": "Decepcionar o fallar en una expectativa."
+  },
+  {
+    "label": "let in",
+    "definition": "Permitir que otros compartan información o entrada."
+  },
+  {
+    "label": "lie",
+    "definition": "Descansar o reclinarse sin preocupación particular."
+  },
+  {
+    "label": "lift",
+    "definition": "Elevar algo de una posición baja a una más alta."
+  },
+  {
+    "label": "light",
+    "definition": "Iluminar un espacio o superficie."
+  },
+  {
+    "label": "line",
+    "definition": "Organizar o formar en fila."
+  },
+  {
+    "label": "live",
+    "definition": "Residir o convivir en un mismo lugar con alguien."
+  },
+  {
+    "label": "lock",
+    "definition": "Fijar o asegurar algo para que no cambie, como un precio o tasa."
+  },
+  {
+    "label": "look around",
+    "definition": "Examinar visualmente en diferentes direcciones."
+  },
+  {
+    "label": "look",
+    "definition": "Fijar la vista en algo o alguien."
+  },
+  {
+    "label": "look down",
+    "definition": "Ver con desprecio o condescendencia."
+  },
+  {
+    "label": "look forward",
+    "definition": "Anticipar algo con optimismo en el futuro."
+  },
+  {
+    "label": "look out",
+    "definition": "Tener precaución y estar atento a posibles peligros."
+  },
+  {
+    "label": "look up",
+    "definition": "Admirar o respetar a alguien."
+  },
+  {
+    "label": "luck",
+    "definition": "Tener buena fortuna o suerte."
+  },
+  {
+    "label": "make",
+    "definition": "Crear condiciones o ambiente para una situación."
+  },
+  {
+    "label": "mess",
+    "definition": "Cometer un error o equivocación."
+  },
+  {
+    "label": "mix",
+    "definition": "Confundir o combinar cosas diferentes."
+  },
+  {
+    "label": "move",
+    "definition": "Comenzar a residir en un nuevo lugar."
+  },
+  {
+    "label": "move out",
+    "definition": "Salir de un lugar con pertenencias."
+  },
+  {
+    "label": "narrow",
+    "definition": "Reducir en tamaño o alcance."
+  },
+  {
+    "label": "open",
+    "definition": "Quitar la tapa o abrir una puerta para revelar algo."
+  },
+  {
+    "label": "pass",
+    "definition": "Transmitir o entregar de una persona a otra."
+  },
+  {
+    "label": "pass out",
+    "definition": "Distribuir o repartir algo."
+  },
+  {
+    "label": "pay",
+    "definition": "Reembolsar o saldar una deuda."
+  },
+  {
+    "label": "pick",
+    "definition": "Molestar o burlarse de alguien."
+  },
+  {
+    "label": "pile",
+    "definition": "Acumular o amontonar cosas."
+  },
+  {
+    "label": "plan",
+    "definition": "Organizar o preparar ideas para el futuro."
+  },
+  {
+    "label": "play",
+    "definition": "Ser desleal o traicionar a alguien."
+  },
+  {
+    "label": "plug in",
+    "definition": "Conectar un aparato eléctrico a la corriente."
+  },
+  {
+    "label": "plug up",
+    "definition": "Cerrar o bloquear el paso de algo."
+  },
+  {
+    "label": "point out",
+    "definition": "Indicar o señalar algo a la atención de otros."
+  },
+  {
+    "label": "point to",
+    "definition": "Dirigir la atención hacia un área específica."
+  },
+  {
+    "label": "print out",
+    "definition": "Imprimir un documento o imagen."
+  },
+  {
+    "label": "pull out",
+    "definition": "Retirar o sacar con fuerza."
+  },
+  {
+    "label": "pull over",
+    "definition": "Aparcar un vehículo a un lado de la vía."
+  },
+  {
+    "label": "pull through",
+    "definition": "Recuperarse o sobrevivir a una enfermedad o dificultad."
+  },
+  {
+    "label": "punch in",
+    "definition": "Registrar la hora de entrada en un trabajo."
+  },
+  {
+    "label": "punch out",
+    "definition": "Registrar la salida del trabajo."
+  },
+  {
+    "label": "put away",
+    "definition": "Devolver algo a su lugar habitual."
+  },
+  {
+    "label": "put back",
+    "definition": "Regresar algo a su lugar original."
+  },
+  {
+    "label": "put down",
+    "definition": "Colocar algo en una posición inferior."
+  },
+  {
+    "label": "put in",
+    "definition": "Hacer una oferta formal o presentar algo."
+  },
+  {
+    "label": "put on",
+    "definition": "Vestirse o aplicar algo en el cuerpo."
+  },
+  {
+    "label": "put out",
+    "definition": "Extender o sacar algo de un espacio cerrado."
+  },
+  {
+    "label": "put past",
+    "definition": "Expresión para decir que no sorprendería que alguien hiciera algo malo."
+  },
+  {
+    "label": "put to",
+    "definition": "Colocar una parte del cuerpo en contacto con algo."
+  },
+  {
+    "label": "put together",
+    "definition": "Montar o ensamblar piezas para formar algo."
+  },
+  {
+    "label": "put up",
+    "definition": "Ofrecer alojamiento o un lugar para quedarse."
+  },
+  {
+    "label": "put up with",
+    "definition": "Tolerar o soportar algo o a alguien."
+  },
+  {
+    "label": "rip up",
+    "definition": "Arrancar o desgarrar papel o cartón."
+  },
+  {
+    "label": "rule out",
+    "definition": "Excluir o descartar una opción o posibilidad."
+  },
+  {
+    "label": "run across",
+    "definition": "Encontrar o toparse con alguien inesperadamente."
+  },
+  {
+    "label": "run around",
+    "definition": "Ir de un lado a otro rápidamente."
+  },
+  {
+    "label": "run down",
+    "definition": "Encontrar o localizar algo que se buscaba."
+  },
+  {
+    "label": "run into",
+    "definition": "Encontrarse con alguien inesperadamente."
+  },
+  {
+    "label": "run out",
+    "definition": "Agotar o quedarse sin algo."
+  },
+  {
+    "label": "run over",
+    "definition": "Chocar o pasar por encima de algo o alguien."
+  },
+  {
+    "label": "run up",
+    "definition": "Acumular una deuda o cuenta."
+  },
+  {
+    "label": "screw out of",
+    "definition": "Engañar o estafar a alguien para quitarle algo que le pertenece."
+  },
+  {
+    "label": "screw up",
+    "definition": "Cometer un error o equivocación."
+  },
+  {
+    "label": "see about",
+    "definition": "Organizar o gestionar algo."
+  },
+  {
+    "label": "sell out",
+    "definition": "Vender todas las unidades disponibles."
+  },
+  {
+    "label": "set out",
+    "definition": "Comenzar un viaje o una tarea con un propósito definido."
+  },
+  {
+    "label": "set up",
+    "definition": "Montar, construir o instalar algo en un lugar."
+  },
+  {
+    "label": "settle down",
+    "definition": "Establecerse y vivir de manera más estable y tranquila."
+  },
+  {
+    "label": "settle for",
+    "definition": "Aceptar algo aunque no sea lo ideal o preferido."
+  },
+  {
+    "label": "shake up",
+    "definition": "Mezclar o agitar enérgicamente; también sorprender."
+  },
+  {
+    "label": "show up",
+    "definition": "Llegar a un lugar, a veces de forma inesperada."
+  },
+  {
+    "label": "shut up",
+    "definition": "Dejar de hablar, guardar silencio."
+  },
+  {
+    "label": "sign in",
+    "definition": "Registrarse al llegar a un lugar o sistema."
+  },
+  {
+    "label": "sign out",
+    "definition": "Registrar la salida de un lugar o sistema."
+  },
+  {
+    "label": "sign up",
+    "definition": "Inscribirse o registrarse para participar o recibir algo."
+  },
+  {
+    "label": "sit down",
+    "definition": "Tomar asiento o cambiar de posición para sentarse."
+  },
+  {
+    "label": "slip up",
+    "definition": "Cometer un error o equivocación."
+  },
+  {
+    "label": "slow down",
+    "definition": "Reducir la velocidad o hacer que algo vaya más despacio."
+  },
+  {
+    "label": "sneak out",
+    "definition": "Salir de un lugar de forma secreta o sin ser visto."
+  },
+  {
+    "label": "sort out",
+    "definition": "Resolver un problema o poner en orden algo."
+  },
+  {
+    "label": "space out",
+    "definition": "Separar cosas o personas para que queden iguales o distanciadas."
+  },
+  {
+    "label": "stand around",
+    "definition": "Estar de pie sin hacer nada, sin propósito claro."
+  },
+  {
+    "label": "stand for",
+    "definition": "Tolerar o aceptar algo, representar o significar."
+  },
+  {
+    "label": "stand up",
+    "definition": "Mantenerse firme, válido o resistente ante algo."
+  },
+  {
+    "label": "start out",
+    "definition": "Comenzar una actividad o camino, generalmente al principio."
+  },
+  {
+    "label": "start over",
+    "definition": "Empezar de nuevo, realizar algo otra vez."
+  },
+  {
+    "label": "start up",
+    "definition": "Iniciar un negocio, organización o proyecto."
+  },
+  {
+    "label": "stay out",
+    "definition": "Mantenerse fuera de un lugar o situación."
+  },
+  {
+    "label": "stay up",
+    "definition": "Permanecer despierto más allá de la hora habitual."
+  },
+  {
+    "label": "step on",
+    "definition": "Pisar o caminar sobre algo con los pies."
+  },
+  {
+    "label": "stick around",
+    "definition": "Quedarse en un lugar más tiempo del esperado."
+  },
+  {
+    "label": "stick out",
+    "definition": "Ser evidente o sobresalir visualmente."
+  },
+  {
+    "label": "stick to",
+    "definition": "Continuar con una idea, plan o comportamiento."
+  },
+  {
+    "label": "stick up",
+    "definition": "Poner o exhibir algo en un lugar visible."
+  },
+  {
+    "label": "stick with",
+    "definition": "Mantenerse firme en una decisión o actividad."
+  },
+  {
+    "label": "stop over",
+    "definition": "Hacer una parada en un viaje antes del destino final."
+  },
+  {
+    "label": "straighten out",
+    "definition": "Corregir o aclarar una situación o problema."
+  },
+  {
+    "label": "straighten up",
+    "definition": "Organizar o limpiar un espacio."
+  },
+  {
+    "label": "stress out",
+    "definition": "Sentirse preocupado, ansioso o nervioso por algo."
+  },
+  {
+    "label": "switch on",
+    "definition": "Encender un aparato o dispositivo."
+  },
+  {
+    "label": "take apart",
+    "definition": "Desmontar o separar en piezas."
+  },
+  {
+    "label": "take in",
+    "definition": "Recibir o aceptar a alguien o algo como invitado."
+  },
+  {
+    "label": "take on",
+    "definition": "Aceptar una responsabilidad o comenzar una actividad."
+  },
+  {
+    "label": "take out",
+    "definition": "Sacar o retirar algo de un lugar."
+  },
+  {
+    "label": "take over",
+    "definition": "Asumir control o gestión de algo."
+  },
+  {
+    "label": "take to",
+    "definition": "Empezar a gustar o apegarse a algo o alguien."
+  },
+  {
+    "label": "take up",
+    "definition": "Levantar o elevar algo; comenzar una actividad."
+  },
+  {
+    "label": "talk down to",
+    "definition": "Hablar con condescendencia o de forma insultante."
+  },
+  {
+    "label": "talk into",
+    "definition": "Convencer a alguien de hacer algo."
+  },
+  {
+    "label": "talk out of",
+    "definition": "Convencer a alguien de no hacer algo."
+  },
+  {
+    "label": "tear down",
+    "definition": "Demoler o destruir una estructura."
+  },
+  {
+    "label": "tear up",
+    "definition": "Arrugar o romper en pedazos."
+  },
+  {
+    "label": "tell apart",
+    "definition": "Distinguir entre dos cosas o personas."
+  },
+  {
+    "label": "think about",
+    "definition": "Considerar o reflexionar sobre algo."
+  },
+  {
+    "label": "think ahead",
+    "definition": "Planear o prepararse para el futuro."
+  },
+  {
+    "label": "think over",
+    "definition": "Reflexionar cuidadosamente antes de decidir."
+  },
+  {
+    "label": "throw away",
+    "definition": "Desechar o botar algo que no se necesita."
+  },
+  {
+    "label": "throw out",
+    "definition": "Deshacerse de algo, generalmente de forma definitiva."
+  },
+  {
+    "label": "throw up",
+    "definition": "Vomitar, expulsar el contenido del estómago."
+  },
+  {
+    "label": "track down",
+    "definition": "Encontrar a alguien o algo tras buscar."
+  },
+  {
+    "label": "trade in",
+    "definition": "Cambiar un artículo viejo por uno nuevo."
+  },
+  {
+    "label": "trick into",
+    "definition": "Engañar a alguien para que haga algo."
+  },
+  {
+    "label": "try on",
+    "definition": "Probar ropa para ver si queda bien."
+  },
+  {
+    "label": "try out",
+    "definition": "Probar algo para evaluar su funcionamiento."
+  },
+  {
+    "label": "turn around",
+    "definition": "Cambiar de dirección o posición."
+  },
+  {
+    "label": "turn down",
+    "definition": "Rechazar o disminuir el volumen o intensidad."
+  },
+  {
+    "label": "turn in",
+    "definition": "Devolver o entregar algo."
+  },
+  {
+    "label": "turn into",
+    "definition": "Convertirse en otra cosa."
+  },
+  {
+    "label": "turn on",
+    "definition": "Encender o activar un aparato."
+  },
+  {
+    "label": "turn out",
+    "definition": "Resulta ser o terminar siendo de cierta manera."
+  },
+  {
+    "label": "turn over",
+    "definition": "Dar o transferir algo a otra persona."
+  },
+  {
+    "label": "turn up",
+    "definition": "Aumentar el volumen o la energía."
+  },
+  {
+    "label": "use up",
+    "definition": "Consumir completamente un recurso."
+  },
+  {
+    "label": "wake up",
+    "definition": "Dejar de dormir, despertar."
+  },
+  {
+    "label": "warm up",
+    "definition": "Hacer algo más cálido o prepararse para una actividad."
+  },
+  {
+    "label": "wash out",
+    "definition": "Eliminar suciedad o manchas."
+  },
+  {
+    "label": "wash up",
+    "definition": "Lavar las manos, cara o utensilios."
+  },
+  {
+    "label": "watch out",
+    "definition": "Estar atento o alerta a peligros."
+  },
+  {
+    "label": "wear down",
+    "definition": "Desgastar o agotar por uso o presión."
+  },
+  {
+    "label": "wear out",
+    "definition": "Hacer que algo deje de ser útil por uso."
+  },
+  {
+    "label": "wind up",
+    "definition": "Terminar o concluir una actividad."
+  },
+  {
+    "label": "wipe",
+    "definition": "Limpiar brevemente con un paño."
+  },
+  {
+    "label": "work",
+    "definition": "Introducir o insertar algo en otra cosa."
+  },
+  {
+    "label": "wrap",
+    "definition": "Finalizar o completar algo."
+  },
+  {
+    "label": "write",
+    "definition": "Escribir o anotar en papel."
+  },
+  {
+    "label": "zip",
+    "definition": "Cerrar una abertura, generalmente en ropa o tela."
+  }
+]

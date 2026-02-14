@@ -68,23 +68,6 @@
     "prompt": "Escribe una situación en la que tú acuses a alguien de algo que hizo."
   },
   {
-    "id": 5,
-    "label": "acre",
-    "examples": [
-      "They bought a 2-acre plot of land last year.",
-      "The farm spans over fifty acres of farmland.",
-      "He measured the garden as half an acre."
-    ],
-    "options": {
-      "a": "Una unidad de peso para objetos pesados.",
-      "b": "Unidad de medida de superficie de tierra, aproximadamente 0.405 hectáreas.",
-      "c": "Una medida de volumen para líquidos."
-    },
-    "answer": "b",
-    "explanation": "El término 'acre' se usa principalmente para medir terrenos o propiedades rurales, no para líquidos o peso.",
-    "prompt": "Describe una situación en la que alguien compre o mida un terreno usando 'acre'."
-  },
-  {
     "id": 6,
     "label": "activate",
     "examples": [
@@ -119,23 +102,6 @@
     "prompt": "Describe una situación en la que algo sea suficiente para cumplir con una necesidad."
   },
   {
-    "id": 8,
-    "label": "adjust",
-    "examples": [
-      "I need to adjust the thermostat to make the room warmer.",
-      "She adjusted her schedule to fit the new commitments.",
-      "They are adjusting the plans based on the new information."
-    ],
-    "options": {
-      "a": "Modificar o cambiar ligeramente algo para que funcione mejor.",
-      "b": "Control total sobre un sistema o proceso.",
-      "c": "Aceptar una idea o propuesta sin cambios."
-    },
-    "answer": "a",
-    "explanation": "Se usa 'adjust' para indicar cambios menores o adaptaciones, no para control absoluto o aceptación sin modificaciones.",
-    "prompt": "Describe una situación en la que alguien tenga que ajustar algo para mejorar o adaptarse."
-  },
-  {
     "id": 9,
     "label": "affordable",
     "examples": [
@@ -168,23 +134,6 @@
     "answer": "b",
     "explanation": "‘Afterwards’ se usa para indicar que algo sucede después de otro evento, en diferentes tiempos y contextos. Es importante no confundirlo con expresiones que indican anterioridad.",
     "prompt": "Escribe una breve situación en la que alguien hace algo y luego realiza otra acción después."
-  },
-  {
-    "id": 11,
-    "label": "aggressive",
-    "examples": [
-      "The dog was aggressive towards strangers.",
-      "She became more aggressive in her approach.",
-      "His comments were aggressive and confrontational."
-    ],
-    "options": {
-      "a": "Que es muy amistoso y tranquilo.",
-      "b": "Relacionado con la agricultura y el cultivo de la tierra.",
-      "c": "Que muestra fuerza o tendencia a atacar o confrontar."
-    },
-    "answer": "c",
-    "explanation": "Se usa para describir comportamientos o actitudes que son fuertes, combativos o que tienden a atacar, no solo en contextos físicos sino también en actitud o comunicación.",
-    "prompt": "Escribe una situación en la que alguien actúe de manera agresiva y explica por qué."
   },
   {
     "id": 12,
@@ -238,23 +187,6 @@
     "prompt": "Escribe una situación en la que alguien se sienta como un alien en un lugar nuevo."
   },
   {
-    "id": 15,
-    "label": "alternative",
-    "examples": [
-      "You should consider an alternative solution to the problem.",
-      "She explored alternative ways to reach her goal.",
-      "They are offering an alternative to the traditional method."
-    ],
-    "options": {
-      "a": "una opción diferente o más para elegir",
-      "b": "una restricción o limitación en una situación",
-      "c": "una forma de hacer algo que siempre se ha hecho"
-    },
-    "answer": "a",
-    "explanation": "La palabra 'alternative' se usa para indicar una opción distinta a la habitual, resaltando la variedad o posibilidad de cambio. Es importante no confundirla con ideas de restricción o continuidad tradicional.",
-    "prompt": "Describe una situación en la que alguien tenga que escoger entre varias opciones diferentes."
-  },
-  {
     "id": 16,
     "label": "altogether",
     "examples": [
@@ -304,40 +236,6 @@
     "answer": "b",
     "explanation": "Anger se usa para describir un sentimiento intenso de disgusto o irritación, a menudo en respuesta a una injusticia o provocación. Es importante distinguirlo de otros sentimientos como la tristeza o la frustración.",
     "prompt": "Escribe una situación en la que alguien muestre su anger de manera natural."
-  },
-  {
-    "id": 19,
-    "label": "annual",
-    "examples": [
-      "The company holds an annual meeting every March.",
-      "She received an annual bonus at the end of the year.",
-      "We plan to take an annual vacation to the mountains."
-    ],
-    "options": {
-      "a": "que ocurre solo una vez en la vida",
-      "b": "que sucede varias veces al mes",
-      "c": "que ocurre una vez al año o cada año"
-    },
-    "answer": "c",
-    "explanation": "La palabra 'annual' se usa para eventos o acciones que suceden una vez al año, no con frecuencia menor ni solo una vez en toda la vida.",
-    "prompt": "Escribe una breve situación donde alguien hable de un evento anual que organiza o participa."
-  },
-  {
-    "id": 20,
-    "label": "anticipate",
-    "examples": [
-      "She anticipates the results of the exam with confidence.",
-      "We anticipate a busy weekend ahead.",
-      "He anticipated her needs before she asked."
-    ],
-    "options": {
-      "a": "Prepararse para un evento sin preverlo.",
-      "b": "Reaccionar rápidamente ante una situación inesperada.",
-      "c": "Esperar o prever que algo suceda o sucederá en el futuro."
-    },
-    "answer": "c",
-    "explanation": "Se usa 'anticipate' para expresar la acción de esperar o prever algo con anticipación, a menudo con cierta preparación o expectativa.",
-    "prompt": "Describe una situación en la que anticipes un evento importante y cómo te sientes."
   },
   {
     "id": 21,
@@ -391,23 +289,6 @@
     "prompt": "Describe una situación en la que tengas que abordar un problema usando la palabra 'approach'."
   },
   {
-    "id": 24,
-    "label": "appropriate",
-    "examples": [
-      "She wore an appropriate dress for the interview.",
-      "It's not appropriate to joke during a serious meeting.",
-      "The teacher approved the appropriate materials for the project."
-    ],
-    "options": {
-      "a": "Un tipo de celebración o evento.",
-      "b": "Una forma de expresar sorpresa.",
-      "c": "Adecuado o conveniente para la situación."
-    },
-    "answer": "c",
-    "explanation": "Se usa 'appropriate' para indicar que algo es correcto o conveniente en un contexto específico, pero puede variar en formalidad y matiz según la situación.",
-    "prompt": "Escribe una breve situación en la que alguien elija una acción o cosa apropiada para un evento."
-  },
-  {
     "id": 25,
     "label": "arbitrary",
     "examples": [
@@ -423,23 +304,6 @@
     "answer": "b",
     "explanation": "El término 'arbitrary' se usa para describir decisiones o acciones que parecen ser aleatorias o sin una justificación lógica, a diferencia de decisiones fundamentadas en reglas o criterios claros.",
     "prompt": "Escribe una breve situación en la que alguien tome una decisión arbitraria sin explicación lógica."
-  },
-  {
-    "id": 26,
-    "label": "architectural",
-    "examples": [
-      "The new building has an architectural design that blends modern and traditional styles.",
-      "She studied architectural engineering at university last year.",
-      "The city’s architectural heritage attracts many tourists."
-    ],
-    "options": {
-      "a": "Relacionado a la decoración interior de las casas.",
-      "b": "Relacionado a la planificación urbana en general.",
-      "c": "Relacionado al diseño y construcción de edificios."
-    },
-    "answer": "c",
-    "explanation": "El término 'architectural' se refiere específicamente a aspectos relacionados con el diseño y estructura de edificios, no a la planificación urbana o decoración interior.",
-    "prompt": "Describe una situación en la que alguien comente sobre el estilo arquitectónico de un edificio."
   },
   {
     "id": 27,
@@ -459,40 +323,6 @@
     "prompt": "Escribe una breve situación en la que algo inesperado pueda surgir en tu día a día."
   },
   {
-    "id": 28,
-    "label": "armed",
-    "examples": [
-      "The soldiers were armed with rifles during the patrol.",
-      "She was armed with knowledge to solve the problem.",
-      "They arrived armed and ready for the debate."
-    ],
-    "options": {
-      "a": "que lleva armas o está equipado con ellas",
-      "b": "que está preparado para una presentación",
-      "c": "que tiene habilidades especiales"
-    },
-    "answer": "a",
-    "explanation": "La palabra 'armed' se usa principalmente para indicar que alguien lleva armas o está equipado con ellas. También puede usarse figuradamente para indicar que alguien está preparado con recursos o conocimientos.",
-    "prompt": "Escribe una situación en la que alguien esté armado o equipado con algo importante."
-  },
-  {
-    "id": 29,
-    "label": "arms",
-    "examples": [
-      "The soldiers carried their arms into the battlefield.",
-      "She was arrested for possessing illegal arms.",
-      "He bought new arms for his collection."
-    ],
-    "options": {
-      "a": "armas o armas de fuego",
-      "b": "herramientas o utensilios usados en tareas diarias",
-      "c": "parte superior del cuerpo, desde los hombros hasta las manos"
-    },
-    "answer": "a",
-    "explanation": "La palabra 'arms' generalmente se refiere a armas o armas de fuego, pero también puede significar los brazos del cuerpo en contextos diferentes. Es importante distinguir su uso en contextos militares o legales.",
-    "prompt": "Escribe una situación en la que alguien hable sobre la adquisición o uso de arms."
-  },
-  {
     "id": 30,
     "label": "arrange",
     "examples": [
@@ -508,23 +338,6 @@
     "answer": "a",
     "explanation": "El verbo 'arrange' se usa tanto para organizar objetos como para planear eventos o compromisos, especialmente en contextos formales o planificados.",
     "prompt": "Escribe una situación en la que alguien tenga que organizar un evento o planear algo con anticipación."
-  },
-  {
-    "id": 31,
-    "label": "arrest",
-    "examples": [
-      "The police arrested the suspect last night.",
-      "She was arrested for shoplifting yesterday.",
-      "They might arrest him if he breaks the law again."
-    ],
-    "options": {
-      "a": "Detenerse por motivos personales o físicos.",
-      "b": "Detener a alguien legalmente por una autoridad.",
-      "c": "Aumentar o incrementar algo rápidamente."
-    },
-    "answer": "b",
-    "explanation": "El término 'arrest' se usa específicamente para referirse a la detención legal por parte de la policía, no a detenerse por otras razones o aumentar algo.",
-    "prompt": "Escribe una breve situación en la que alguien sea arrestado por la policía."
   },
   {
     "id": 32,
@@ -661,23 +474,6 @@
     "answer": "c",
     "explanation": "Attitude se refiere a la postura mental o emocional que alguien tiene respecto a algo, y puede influir en su comportamiento. Es importante no confundirlo con comportamientos específicos o acciones físicas.",
     "prompt": "Escribe una situación en la que alguien muestre una actitud positiva o negativa hacia un desafío."
-  },
-  {
-    "id": 40,
-    "label": "audio",
-    "examples": [
-      "I listened to the audio recording yesterday.",
-      "She needs good audio equipment for her podcast.",
-      "The audio was clear during the concert."
-    ],
-    "options": {
-      "a": "una fuente de energía eléctrica",
-      "b": "una forma de comunicación escrita",
-      "c": "relacionado con el sonido o la grabación de sonido"
-    },
-    "answer": "c",
-    "explanation": "El término 'audio' se usa para referirse a todo lo relacionado con el sonido, especialmente en tecnología y grabaciones. Es importante no confundirlo con otros términos relacionados con medios o energía.",
-    "prompt": "Describe una situación en la que necesitas mejorar la calidad del audio en una grabación."
   },
   {
     "id": 41,
