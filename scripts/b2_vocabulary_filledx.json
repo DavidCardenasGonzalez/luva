@@ -1,0 +1,87 @@
+[
+  {
+    "id": 1,
+    "label": "abbreviation",
+    "examples": [
+      "The abbreviation of the company's name is used on the logo.",
+      "She learned the abbreviation for 'Doctor' as 'Dr.' in medical school.",
+      "Using abbreviations can save time in texting messages."
+    ],
+    "options": {
+      "a": "Una forma de escribir más formal.",
+      "b": "Un símbolo que reemplaza palabras completas.",
+      "c": "Forma corta de una palabra o frase."
+    },
+    "answer": "c",
+    "explanation": "Las abreviaturas son formas reducidas de palabras o frases, usadas para simplificar o acortar textos. Es importante conocer su uso correcto para evitar confusiones.",
+    "prompt": "Describe una situación en la que alguien use una abreviatura en un contexto cotidiano."
+  },
+  {
+    "id": 2,
+    "label": "abduct",
+    "examples": [
+      "The kidnappers tried to abduct the child from the park.",
+      "He was abducted during the night and held for ransom.",
+      "The story describes how aliens might abduct humans."
+    ],
+    "options": {
+      "a": "Transportar a alguien en un vehículo.",
+      "b": "Llevar a alguien por la fuerza contra su voluntad.",
+      "c": "Llevar a alguien a un lugar por voluntad propia."
+    },
+    "answer": "b",
+    "explanation": "El verbo 'abduct' se usa para describir la acción de secuestrar o raptar a alguien, generalmente de manera ilegal y contra su voluntad. Es importante no confundirlo con simplemente llevar o transportar a alguien con consentimiento.",
+    "prompt": "Describe una situación en la que alguien sea secuestrado o llevado por la fuerza."
+  },
+  {
+    "id": 3,
+    "label": "abduction",
+    "examples": [
+      "The detective investigated the abduction of the child last night.",
+      "She was accused of abduction after missing her flight.",
+      "The movie depicted the abduction by aliens in a sci-fi story."
+    ],
+    "options": {
+      "a": "Un tipo de entrenamiento físico.",
+      "b": "Secuestro o raptar a alguien por la fuerza.",
+      "c": "Un método de comunicación secreta."
+    },
+    "answer": "b",
+    "explanation": "Abduction se refiere específicamente a llevar a alguien por la fuerza, como en casos de secuestro. Es importante no confundirlo con otros términos relacionados con la captura o el movimiento.",
+    "prompt": "Describe una situación en la que alguien sea víctima de una abducción y cómo reaccionarías."
+  },
+  {
+    "id": 4,
+    "label": "abductor",
+    "examples": [
+      "The abductor kidnapped the child last night.",
+      "He was accused of being an abductor in the kidnapping case.",
+      "The police arrested the abductor after a long chase."
+    ],
+    "options": {
+      "a": "Persona que realiza una abducción, secuestra a alguien.",
+      "b": "Un experto en transporte de mercancías.",
+      "c": "Persona que ayuda a alguien a escapar."
+    },
+    "answer": "a",
+    "explanation": "La palabra 'abductor' se usa para referirse a quien secuestra a alguien, generalmente en contextos de delitos. Es importante no confundirla con términos relacionados con transporte o ayuda.",
+    "prompt": "Escribe una breve situación en la que alguien sea víctima de un abductor y cómo se resuelve el caso."
+  },
+  {
+    "id": 5,
+    "label": "ability",
+    "examples": [
+      "She has the ability to solve complex problems.",
+      "He demonstrated his ability to lead the team.",
+      "With practice, you'll improve your ability to speak fluently."
+    ],
+    "options": {
+      "a": "Capacidad o talento para hacer algo.",
+      "b": "Capacidad física para realizar un esfuerzo.",
+      "c": "Conjunto de habilidades manuales."
+    },
+    "answer": "a",
+    "explanation": "Ability se refiere a la capacidad o talento para realizar una tarea, no solo a habilidades físicas o manuales. Es importante distinguirlo de términos relacionados como 'skill'.",
+    "prompt": "Escribe una situación en la que alguien demuestre su habilidad para aprender algo nuevo."
+  }
+]

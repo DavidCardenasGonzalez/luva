@@ -13,21 +13,24 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const secretsFile = path.join(__dirname, "environment.local.json");
-const raw = fs.readFileSync(secretsFile, "utf8");
-const data = JSON.parse(raw);
-console.log(`Cargando variables de entorno desde ${secretsFile}`);
-if (data && typeof data === "object") {
-  for (const [key, value] of Object.entries(data)) {
-    if (!process.env[key] && typeof value === "string" && value) {
-      console.log(`Usando ${key} definido en environment.local.json`);
-      process.env[key] = value;
+if (fs.existsSync(secretsFile)) {
+  const raw = fs.readFileSync(secretsFile, "utf8");
+  const data = JSON.parse(raw);
+  console.log(`Cargando variables de entorno desde ${secretsFile}`);
+  if (data && typeof data === "object") {
+    for (const [key, value] of Object.entries(data)) {
+      if (!process.env[key] && typeof value === "string" && value) {
+        console.log(`Usando ${key} definido en environment.local.json`);
+        process.env[key] = value;
+      }
     }
   }
+} else {
+  console.log(`No se encontró ${secretsFile}, continuando sin ese archivo.`);
 }
-const inputPath = "./b2_vocabulary.json";
-const outputPath = "./b2_vocabulary_filled.json";
-const MAX_ITEMS = 5000;
-
+const inputPath = "./vocab_relevant_clean.json";
+const outputPath = "./b2_vocabulary_filled_1.json";
+const MAX_ITEMS = 10000;
 
 const API_KEY = process.env.OPENAI_API_KEY;
 if (!API_KEY) {
@@ -91,46 +94,83 @@ function buildOptions(correct_es, distractors) {
   return { options, answer: answerLetter };
 }
 
-/** Llama a la API de Chat Completions con backoff/reintentos. */
+/** Llama a la API Responses con backoff/reintentos. */
 async function chatJSON(messages, { maxTries = 5 } = {}) {
   let attempt = 0;
   let delay = 1000;
   console.log("Llamando a la API de OpenAI...");
-  console.log(messages);
-  // Usa el endpoint de chat completions estándar
+
+  // Responses separa system vs user
+  const systemMsg = messages.find((m) => m.role === "system");
+  const userMsgs = messages.filter((m) => m.role === "user");
+  const mainUser = userMsgs[userMsgs.length - 1];
+
+  if (!mainUser) {
+    throw new Error("No hay mensaje de usuario para enviar a la API.");
+  }
+
   while (attempt < maxTries) {
     attempt++;
     try {
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      const res = await fetch("https://api.openai.com/v1/responses", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${API_KEY}`,
         },
         body: JSON.stringify({
-          model: "gpt-4.1-nano", // usa tu modelo preferido
-          temperature: 0.4,
-          response_format: { type: "json_object" },
-          messages,
+          model: "gpt-5-nano",
+          reasoning: { effort: "low" },
+          text: { format: { type: "json_object" } },
+          instructions: systemMsg ? systemMsg.content : undefined,
+          input: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "input_text",
+                  text: mainUser.content,
+                },
+              ],
+            },
+          ],
         }),
       });
+
+      console.log("Status:", res.status);
 
       if (!res.ok) {
         const text = await res.text().catch(() => "");
         throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
       }
       const data = await res.json();
-      const content = data?.choices?.[0]?.message?.content;
-      if (!content) throw new Error("Respuesta sin 'content'");
-      const parsed = JSON.parse(content);
+
+      const outputItems = data?.output || [];
+      const messageItem = outputItems.find((it) => it.type === "message");
+
+      if (!messageItem || !Array.isArray(messageItem.content)) {
+        throw new Error("No se encontró un mensaje de salida válido en `output`.");
+      }
+
+      const textParts = messageItem.content
+        .filter(
+          (part) => part.type === "output_text" && typeof part.text === "string"
+        )
+        .map((part) => part.text);
+
+      const contentText = textParts.join("").trim();
+      if (!contentText) {
+        throw new Error("La respuesta no contiene texto en output_text.");
+      }
+
+      const parsed = JSON.parse(contentText);
       console.log("Respuesta parseada:", parsed);
       if (data?.usage) {
         console.log("Usage de ChatGPT:", data.usage);
-      } else {
-        console.log("Usage de ChatGPT no disponible en la respuesta.");
       }
       return parsed;
     } catch (err) {
+      console.warn(`Error intento ${attempt}:`, err.message);
       if (attempt >= maxTries) throw err;
       await sleep(delay);
       delay = Math.min(delay * 2, 10_000);
@@ -180,7 +220,7 @@ function buildMessages({ id, label, rawDefinition }) {
         "correct_es es la definición concisa en español para hispanohablantes (no traducción literal, sino significado natural).",
         "distractors es un array de 2 definiciones plausibles pero incorrectas en español, sin solaparse con la correcta.",
         "explanation: mini explicación en español, 1–2 frases, matizando uso, matices o confusiones típicas.",
-        "prompt: instrucción breve en español que pida al alumno escribir una mini-situación original usando la palabra.",
+        "prompt: instrucción breve en español que pida al alumno escribir una mini-situación original y específica usando la palabra.",
         "No repitas la palabra en español. No inventes significados alternativos raros. Evita falsos cognados.",
       ],
       lemma: label,
