@@ -28,8 +28,10 @@ if (fs.existsSync(secretsFile)) {
 } else {
   console.log(`No se encontró ${secretsFile}, continuando sin ese archivo.`);
 }
-const inputPath = "./vocab_relevant_clean.json";
-const outputPath = "./b2_vocabulary_filled_1.json";
+const inputPath = "./american_idioms.json";
+// scripts/big_book_phrasal_expressions.json
+// scripts/american_idioms.json
+const outputPath = "./b2_vocabulary_filled_4.json";
 const MAX_ITEMS = 10000;
 
 const API_KEY = process.env.OPENAI_API_KEY;
@@ -179,7 +181,7 @@ async function chatJSON(messages, { maxTries = 5 } = {}) {
 }
 
 /** Limita concurrencia simple */
-function createQueue(limit = 3) {
+function createQueue(limit = 10) {
   let active = 0;
   const queue = [];
   const runNext = () => {
@@ -277,11 +279,12 @@ function buildMessages({ id, label, rawDefinition }) {
     console.log(`Procesando solo ${itemsToProcess.length} items (MAX_ITEMS=${MAX_ITEMS})`);
   }
 
-  // Cola con concurrencia (ajusta según tu límite)
-  const enqueue = createQueue(3);
+  // Cola con concurrencia (10 en paralelo)
+  const enqueue = createQueue(10);
 
   const results = [];
   let processed = 0;
+  const tasks = [];
 
   for (const item of itemsToProcess) {
     const job = async () => {
@@ -325,7 +328,7 @@ function buildMessages({ id, label, rawDefinition }) {
     };
 
     // Encolar con reintentos
-    await enqueue(async () => {
+    const task = enqueue(async () => {
       let tries = 0;
       let delay = 1000;
       while (true) {
@@ -339,7 +342,12 @@ function buildMessages({ id, label, rawDefinition }) {
         }
       }
     });
+
+    tasks.push(task);
   }
+
+  // Espera a que terminen todas las tareas
+  await Promise.all(tasks);
 
   // Ordena por id original
   results.sort((a, b) => a.id - b.id);

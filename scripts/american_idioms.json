@@ -1,394 +1,492 @@
 [
   {
     "label": "smell a rat",
-    "definition": "Sentir que algo está mal o sospechoso."
+    "definition": "Sentir que algo está mal o sospechoso.",
+    "id": 4980
   },
   {
     "label": "go to the dogs",
-    "definition": "Ponerse en mal estado o deteriorarse."
+    "definition": "Ponerse en mal estado o deteriorarse.",
+    "id": 4981
   },
   {
     "label": "fishy",
-    "definition": "Algo extraño y que genera desconfianza."
+    "definition": "Algo extraño y que genera desconfianza.",
+    "id": 4982
   },
   {
     "label": "take the bull by the horns",
-    "definition": "Tomar decisiones firmes en una situación difícil."
+    "definition": "Tomar decisiones firmes en una situación difícil.",
+    "id": 4983
   },
   {
     "label": "horse of a different color",
-    "definition": "Una cuestión completamente diferente."
+    "definition": "Una cuestión completamente diferente.",
+    "id": 4984
   },
   {
     "label": "let the cat out of the bag",
-    "definition": "Revelar un secreto accidentalmente."
+    "definition": "Revelar un secreto accidentalmente.",
+    "id": 4985
   },
   {
     "label": "for the birds",
-    "definition": "Algo aburrido, sin interés o valor."
+    "definition": "Algo aburrido, sin interés o valor.",
+    "id": 4986
   },
   {
     "label": "straight from the horses mouth",
-    "definition": "Información confiable, directamente de la fuente."
+    "definition": "Información confiable, directamente de la fuente.",
+    "id": 4987
   },
   {
     "label": "horse around",
-    "definition": "Jugar o comportarse de manera infantil."
+    "definition": "Jugar o comportarse de manera infantil.",
+    "id": 4988
   },
   {
     "label": "get in someones hair",
-    "definition": "Molestar o fastidiar a alguien."
+    "definition": "Molestar o fastidiar a alguien.",
+    "id": 4989
   },
   {
     "label": "shoot off ones mouth",
-    "definition": "Hablar sin pensar o decirlo alto y claro."
+    "definition": "Hablar sin pensar o decirlo alto y claro.",
+    "id": 4990
   },
   {
     "label": "jump down someones throat",
-    "definition": "Reaccionar con enojo o ira hacia alguien."
+    "definition": "Reaccionar con enojo o ira hacia alguien.",
+    "id": 4991
   },
   {
     "label": "pay through the nose",
-    "definition": "Pagar un precio excesivo por algo."
+    "definition": "Pagar un precio excesivo por algo.",
+    "id": 4992
   },
   {
     "label": "pull someones leg",
-    "definition": "Engañar o bromear con alguien."
+    "definition": "Engañar o bromear con alguien.",
+    "id": 4993
   },
   {
     "label": "play by ear",
-    "definition": "Improvizar o actuar sin plan previo."
+    "definition": "Improvizar o actuar sin plan previo.",
+    "id": 4994
   },
   {
     "label": "stick out ones neck",
-    "definition": "Arriesgarse o poner en peligro algo propio."
+    "definition": "Arriesgarse o poner en peligro algo propio.",
+    "id": 4995
   },
   {
     "label": "shake a leg",
-    "definition": "Darse prisa o apresurarse."
+    "definition": "Darse prisa o apresurarse.",
+    "id": 4996
   },
   {
     "label": "all thumbs",
-    "definition": "Ser torpe o tener mala coordinación."
+    "definition": "Ser torpe o tener mala coordinación.",
+    "id": 4997
   },
   {
     "label": "not have a leg to stand on",
-    "definition": "No tener defensa o justificación válida."
+    "definition": "No tener defensa o justificación válida.",
+    "id": 4998
   },
   {
     "label": "get off someones back",
-    "definition": "Dejar de molestar o fastidiar a alguien."
+    "definition": "Dejar de molestar o fastidiar a alguien.",
+    "id": 4999
   },
   {
     "label": "drive someone up a wall",
-    "definition": "Molestar o irritar mucho a alguien."
+    "definition": "Molestar o irritar mucho a alguien.",
+    "id": 5000
   },
   {
     "label": "string someone alone",
-    "definition": "Engañar o manipular a alguien."
+    "definition": "Engañar o manipular a alguien.",
+    "id": 5001
   },
   {
     "label": "sell someone down the river",
-    "definition": "Traicionar o hacer daño a alguien."
+    "definition": "Traicionar o hacer daño a alguien.",
+    "id": 5002
   },
   {
     "label": "leave someone high and dry",
-    "definition": "Abandonar a alguien en una situación difícil."
+    "definition": "Abandonar a alguien en una situación difícil.",
+    "id": 5003
   },
   {
     "label": "sell someone short",
-    "definition": "Subestimar o no valorar a alguien."
+    "definition": "Subestimar o no valorar a alguien.",
+    "id": 5004
   },
   {
     "label": "show job",
-    "definition": "Hablar de manera insincera o falsa."
+    "definition": "Hablar de manera insincera o falsa.",
+    "id": 5005
   },
   {
     "label": "spill the beans",
-    "definition": "Revelar un secreto accidentalmente."
+    "definition": "Revelar un secreto accidentalmente.",
+    "id": 5006
   },
   {
     "label": "feed someone a line",
-    "definition": "Engañar o mentir a alguien."
+    "definition": "Engañar o mentir a alguien.",
+    "id": 5007
   },
   {
     "label": "on ice",
-    "definition": "Reservar o guardar para uso futuro."
+    "definition": "Reservar o guardar para uso futuro.",
+    "id": 5008
   },
   {
     "label": "shoot the breeze",
-    "definition": "Conversar informalmente sin un tema serio."
+    "definition": "Conversar informalmente sin un tema serio.",
+    "id": 5009
   },
   {
     "label": "bite the dust",
-    "definition": "Ser derrotado o morir en una situación."
+    "definition": "Ser derrotado o morir en una situación.",
+    "id": 5010
   },
   {
     "label": "bend over backwards",
-    "definition": "Esforzarse mucho para ayudar o complacer."
+    "definition": "Esforzarse mucho para ayudar o complacer.",
+    "id": 5011
   },
   {
     "label": "hit the hay",
-    "definition": "Irse a dormir."
+    "definition": "Irse a dormir.",
+    "id": 5012
   },
   {
     "label": "cough up",
-    "definition": "Dar algo de mala gana o con dificultad."
+    "definition": "Dar algo de mala gana o con dificultad.",
+    "id": 5013
   },
   {
     "label": "jump the gun",
-    "definition": "Actuar demasiado pronto o precipitadamente."
+    "definition": "Actuar demasiado pronto o precipitadamente.",
+    "id": 5014
   },
   {
     "label": "scratch someones back",
-    "definition": "Hacer un favor a alguien esperando uno a cambio."
+    "definition": "Hacer un favor a alguien esperando uno a cambio.",
+    "id": 5015
   },
   {
     "label": "hit the ceiling",
-    "definition": "Enojarse mucho."
+    "definition": "Enojarse mucho.",
+    "id": 5016
   },
   {
     "label": "fork over",
-    "definition": "Entregar o pagar algo, generalmente dinero."
+    "definition": "Entregar o pagar algo, generalmente dinero.",
+    "id": 5017
   },
   {
     "label": "turn someone off",
-    "definition": "Desagradar o causar rechazo en alguien."
+    "definition": "Desagradar o causar rechazo en alguien.",
+    "id": 5018
   },
   {
     "label": "go fly a kite",
-    "definition": "Decirle a alguien que se vaya o que deje de molestar."
+    "definition": "Decirle a alguien que se vaya o que deje de molestar.",
+    "id": 5019
   },
   {
     "label": "kick the bucket",
-    "definition": "Morir."
+    "definition": "Morir.",
+    "id": 5020
   },
   {
     "label": "raise a stink",
-    "definition": "Protestar o quejarse mucho."
+    "definition": "Protestar o quejarse mucho.",
+    "id": 5021
   },
   {
     "label": "wet blanket",
-    "definition": "Persona que arruina la diversión de otros."
+    "definition": "Persona que arruina la diversión de otros.",
+    "id": 5022
   },
   {
     "label": "keep under ones hat",
-    "definition": "Mantener un secreto en confidencialidad."
+    "definition": "Mantener un secreto en confidencialidad.",
+    "id": 5023
   },
   {
     "label": "up ones sleeve",
-    "definition": "Tener un plan o recurso oculto."
+    "definition": "Tener un plan o recurso oculto.",
+    "id": 5024
   },
   {
     "label": "dressed to kill",
-    "definition": "Vestirse con ropa elegante y llamativa."
+    "definition": "Vestirse con ropa elegante y llamativa.",
+    "id": 5025
   },
   {
     "label": "give someone the slip",
-    "definition": "Escaparse o evadir a alguien."
+    "definition": "Escaparse o evadir a alguien.",
+    "id": 5026
   },
   {
     "label": "knock someones socks off",
-    "definition": "Sorprender o emocionar mucho a alguien."
+    "definition": "Sorprender o emocionar mucho a alguien.",
+    "id": 5027
   },
   {
     "label": "talk thorough ones hat",
-    "definition": "Decir cosas tontas o sin sentido."
+    "definition": "Decir cosas tontas o sin sentido.",
+    "id": 5028
   },
   {
     "label": "lose ones shirt",
-    "definition": "Perder mucho dinero."
+    "definition": "Perder mucho dinero.",
+    "id": 5029
   },
   {
     "label": "in stitches",
-    "definition": "Reírse mucho."
+    "definition": "Reírse mucho.",
+    "id": 5030
   },
   {
     "label": "dressed to the teeth",
-    "definition": "Vestido de manera elegante y formal."
+    "definition": "Vestido de manera elegante y formal.",
+    "id": 5031
   },
   {
     "label": "lemon",
-    "definition": "Algo defectuoso o que no funciona bien."
+    "definition": "Algo defectuoso o que no funciona bien.",
+    "id": 5032
   },
   {
     "label": "out of the woods",
-    "definition": "Ya fuera de peligro o dificultad."
+    "definition": "Ya fuera de peligro o dificultad.",
+    "id": 5033
   },
   {
     "label": "get up on the wrong side of the bed",
-    "definition": "Despertar de mal humor."
+    "definition": "Despertar de mal humor.",
+    "id": 5034
   },
   {
     "label": "out on a limb",
-    "definition": "En una posición arriesgada o vulnerable."
+    "definition": "En una posición arriesgada o vulnerable.",
+    "id": 5035
   },
   {
     "label": "eating someone",
-    "definition": "Molestar o preocuparse excesivamente por alguien."
+    "definition": "Molestar o preocuparse excesivamente por alguien.",
+    "id": 5036
   },
   {
     "label": "get the ax",
-    "definition": "Ser despedido o perder el trabajo."
+    "definition": "Ser despedido o perder el trabajo.",
+    "id": 5037
   },
   {
     "label": "in the hole",
-    "definition": "Estar en deuda."
+    "definition": "Estar en deuda.",
+    "id": 5038
   },
   {
     "label": "bite the bullet",
-    "definition": "Afrontar una situación difícil con resignación."
+    "definition": "Afrontar una situación difícil con resignación.",
+    "id": 5039
   },
   {
     "label": "face the music",
-    "definition": "Aceptar las consecuencias de las acciones."
+    "definition": "Aceptar las consecuencias de las acciones.",
+    "id": 5040
   },
   {
     "label": "blow it",
-    "definition": "Fracasar en algo."
+    "definition": "Fracasar en algo.",
+    "id": 5041
   },
   {
     "label": "at the end of ones rope",
-    "definition": "Estar al límite de la paciencia o capacidad."
+    "definition": "Estar al límite de la paciencia o capacidad.",
+    "id": 5042
   },
   {
     "label": "on ones last legs",
-    "definition": "Estar muy cansado o en mal estado."
+    "definition": "Estar muy cansado o en mal estado.",
+    "id": 5043
   },
   {
     "label": "hot under the collar",
-    "definition": "Muy enojado o irritado."
+    "definition": "Muy enojado o irritado.",
+    "id": 5044
   },
   {
     "label": "on the line",
-    "definition": "En peligro de perderse o fracasar."
+    "definition": "En peligro de perderse o fracasar.",
+    "id": 5045
   },
   {
     "label": "for a song",
-    "definition": "Por muy poco dinero."
+    "definition": "Por muy poco dinero.",
+    "id": 5046
   },
   {
     "label": "make a splash",
-    "definition": "Tener éxito y atraer atención."
+    "definition": "Tener éxito y atraer atención.",
+    "id": 5047
   },
   {
     "label": "have the world by the tail",
-    "definition": "Ser muy exitoso y feliz."
+    "definition": "Ser muy exitoso y feliz.",
+    "id": 5048
   },
   {
     "label": "sitting pretty",
-    "definition": "Estar en una posición favorable."
+    "definition": "Estar en una posición favorable.",
+    "id": 5049
   },
   {
     "label": "feel like a million dollars",
-    "definition": "Sentirse muy bien o feliz."
+    "definition": "Sentirse muy bien o feliz.",
+    "id": 5050
   },
   {
     "label": "kick up ones heels",
-    "definition": "Celebrar o divertirse mucho."
+    "definition": "Celebrar o divertirse mucho.",
+    "id": 5051
   },
   {
     "label": "bury the hatchet",
-    "definition": "Hacer las paces y dejar rencores."
+    "definition": "Hacer las paces y dejar rencores.",
+    "id": 5052
   },
   {
     "label": "paint the town red",
-    "definition": "Salir de fiesta y divertirse mucho."
+    "definition": "Salir de fiesta y divertirse mucho.",
+    "id": 5053
   },
   {
     "label": "get away clean",
-    "definition": "Escapar sin ser atrapado o castigado."
+    "definition": "Escapar sin ser atrapado o castigado.",
+    "id": 5054
   },
   {
     "label": "come alive",
-    "definition": "Animarse y volverse más activo."
+    "definition": "Animarse y volverse más activo.",
+    "id": 5055
   },
   {
     "label": "toot ones own horn",
-    "definition": "Alardear o presumir de logros."
+    "definition": "Alardear o presumir de logros.",
+    "id": 5056
   },
   {
     "label": "stick to ones guns",
-    "definition": "Mantener la postura o decisión firme."
+    "definition": "Mantener la postura o decisión firme.",
+    "id": 5057
   },
   {
     "label": "get the ball rolling",
-    "definition": "Iniciar una acción o proyecto."
+    "definition": "Iniciar una acción o proyecto.",
+    "id": 5058
   },
   {
     "label": "mind ones ps and qs",
-    "definition": "Ser cuidadoso con las palabras y acciones."
+    "definition": "Ser cuidadoso con las palabras y acciones.",
+    "id": 5059
   },
   {
     "label": "hang on",
-    "definition": "Perseverar o esperar un momento, mantener la paciencia."
+    "definition": "Perseverar o esperar un momento, mantener la paciencia.",
+    "id": 5060
   },
   {
     "label": "give it ones best shot",
-    "definition": "Intentar con todas las fuerzas, hacer el máximo esfuerzo."
+    "definition": "Intentar con todas las fuerzas, hacer el máximo esfuerzo.",
+    "id": 5061
   },
   {
     "label": "make ends meet",
-    "definition": "Llevar los gastos con los ingresos, sobrevivir económicamente."
+    "definition": "Llevar los gastos con los ingresos, sobrevivir económicamente.",
+    "id": 5062
   },
   {
     "label": "get the jump on someone",
-    "definition": "Tomar ventaja o adelantarse a alguien en una situación."
+    "definition": "Tomar ventaja o adelantarse a alguien en una situación.",
+    "id": 5063
   },
   {
     "label": "pull strings",
-    "definition": "Usar influencias o conexiones para lograr algo."
+    "definition": "Usar influencias o conexiones para lograr algo.",
+    "id": 5064
   },
   {
     "label": "spread oneself too thin",
-    "definition": "Participar en muchas actividades, sobrecargarse."
+    "definition": "Participar en muchas actividades, sobrecargarse.",
+    "id": 5065
   },
   {
     "label": "go to bat for someone",
-    "definition": "Apoyar o defender a alguien en una situación."
+    "definition": "Apoyar o defender a alguien en una situación.",
+    "id": 5066
   },
   {
     "label": "duck soup",
-    "definition": "Algo muy fácil o sin dificultad."
+    "definition": "Algo muy fácil o sin dificultad.",
+    "id": 5067
   },
   {
     "label": "money talks",
-    "definition": "El dinero puede influir en decisiones o personas."
+    "definition": "El dinero puede influir en decisiones o personas.",
+    "id": 5068
   },
   {
     "label": "let sleeping dogs lie",
-    "definition": "No provocar problemas o conflictos innecesarios."
+    "definition": "No provocar problemas o conflictos innecesarios.",
+    "id": 5069
   },
   {
     "label": "shape up or ship out",
-    "definition": "Compórtate bien o abandona la situación."
+    "definition": "Compórtate bien o abandona la situación.",
+    "id": 5070
   },
   {
     "label": "different strokes for different folks",
-    "definition": "Cada quien tiene gustos e intereses diferentes."
+    "definition": "Cada quien tiene gustos e intereses diferentes.",
+    "id": 5071
   },
   {
     "label": "bark worse than ones bite",
-    "definition": "Parecer más agresivo o peligroso de lo que es."
+    "definition": "Parecer más agresivo o peligroso de lo que es.",
+    "id": 5072
   },
   {
     "label": "eyes are bigger than ones stomach",
-    "definition": "Tomar más comida de la que se puede comer."
+    "definition": "Tomar más comida de la que se puede comer.",
+    "id": 5073
   },
   {
     "label": "put ones money where ones mouth is",
-    "definition": "Cumplir lo que se promete o afirma."
+    "definition": "Cumplir lo que se promete o afirma.",
+    "id": 5074
   },
   {
     "label": "the early bird catches the worm",
-    "definition": "Llegar temprano da ventaja o mejores oportunidades."
+    "definition": "Llegar temprano da ventaja o mejores oportunidades.",
+    "id": 5075
   },
   {
     "label": "people who live in glass houses shouldnt throw stones",
-    "definition": "No criticar a otros si uno tiene fallos propios."
+    "definition": "No criticar a otros si uno tiene fallos propios.",
+    "id": 5076
   },
   {
     "label": "alls well that ends well",
-    "definition": "Un final exitoso justifica los esfuerzos realizados."
+    "definition": "Un final exitoso justifica los esfuerzos realizados.",
+    "id": 5077
   }
 ]

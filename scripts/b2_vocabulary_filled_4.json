@@ -1,0 +1,1668 @@
+[
+  {
+    "id": 4980,
+    "label": "smell a rat",
+    "examples": [
+      "I smell a rat about this deal.",
+      "I smelled a rat when the numbers didn't add up.",
+      "I've smelled a rat since they started avoiding my questions."
+    ],
+    "options": {
+      "a": "tener sospechas de que algo no está bien",
+      "b": "percibir un olor desagradable",
+      "c": "oler físicamente algo mal"
+    },
+    "answer": "a",
+    "explanation": "La expresión significa sospechar que hay algo incorrecto o engañoso, no un olor real. Se usa ante situaciones donde la confianza está en duda.",
+    "prompt": "Propón una situación breve donde el alumno use la frase de forma natural."
+  },
+  {
+    "id": 4981,
+    "label": "go to the dogs",
+    "examples": [
+      "If neglect continues, the project will go to the dogs.",
+      "The old factory has done nothing but go to the dogs after the layoffs.",
+      "Her reputation started to go to the dogs when the scandal broke."
+    ],
+    "options": {
+      "a": "empeorarse notablemente o deteriorarse con el tiempo",
+      "b": "Aumentar la eficiencia o la calidad de algo.",
+      "c": "Perder la esperanza o motivación de repente."
+    },
+    "answer": "a",
+    "explanation": "Se usa para describir un deterioro progresivo o una caída en calidad, estado o reputación. Es informal y puede referirse a objetos, lugares o personas, no a acciones puntuales.",
+    "prompt": "Propón una situación breve donde el alumno use la frase de forma natural en un contexto realista."
+  },
+  {
+    "id": 4982,
+    "label": "fishy",
+    "examples": [
+      "I found a fishy note on my desk this morning.",
+      "The accountant explanation sounded fishy, so I double-check the numbers.",
+      "There is something fishy about that deal; it might be a scam."
+    ],
+    "options": {
+      "a": "relacionado con la pesca o productos del mar.",
+      "b": "sospechoso o poco confiable; que genera desconfianza.",
+      "c": "delicioso o sabroso al paladar."
+    },
+    "answer": "b",
+    "explanation": "Se usa para describir algo que parece dudoso o engañoso; no se refiere a peces literalmente, sino a una sensación de desconfianza o posible fraude.",
+    "prompt": "Propón una situación breve en la que alguien use la palabra para expresar desconfianza de forma natural."
+  },
+  {
+    "id": 4983,
+    "label": "take the bull by the horns",
+    "examples": [
+      "When the project failed, she took the bull by the horns and proposed a fix.",
+      "He decided to take the bull by the horns and confront the budget issues.",
+      "They took the bull by the horns and reorganized the team after the reviews."
+    ],
+    "options": {
+      "a": "Dejar que las cosas sigan como están.",
+      "b": "Tomar decisiones sin consultar a nadie.",
+      "c": "Enfrentar una situación difícil con decisión y coraje para resolverla."
+    },
+    "answer": "c",
+    "explanation": "Se usa cuando alguien asume una acción decisiva ante un obstáculo; no implica esperar pasivamente ni evitar el problema.",
+    "prompt": "Propón una situación breve donde el alumno use la expresión en inglés de forma natural."
+  },
+  {
+    "id": 4984,
+    "label": "horse of a different color",
+    "examples": [
+      "When he unveiled his plan, it was a horse of a different color.",
+      "The project now takes a horse of a different color.",
+      "We had treated it as routine, but it turned into a horse of a different color."
+    ],
+    "options": {
+      "a": "Algo muy diferente o inesperadamente distinto de lo habitual.",
+      "b": "Una persona que cambia de opinión con frecuencia.",
+      "c": "Algo que se mantiene igual a lo habitual."
+    },
+    "answer": "a",
+    "explanation": "Se usa para enfatizar un cambio radical entre dos escenarios; indica que la situación ha cambiado de forma notable, no simplemente en pequeños detalles.",
+    "prompt": "Propón una situación breve donde uses la expresión en inglés de forma natural."
+  },
+  {
+    "id": 4985,
+    "label": "let the cat out of the bag",
+    "examples": [
+      "I accidentally let the cat out of the bag about the party.",
+      "She warned us not to tell, but he let the cat out of the bag.",
+      "If you mention it now, you’ll let the cat out of the bag."
+    ],
+    "options": {
+      "a": "revelar un secreto de forma intencionada",
+      "b": "ocultar deliberadamente un secreto",
+      "c": "revelar un secreto por accidente"
+    },
+    "answer": "c",
+    "explanation": "Se usa para señalar un fallo al revelar algo confidencial sin querer; suele referirse a un secreto que debía mantenerse oculto.",
+    "prompt": "Escribe una mini-situación original y específica en la que alguien use la expresión para revelar un secreto sin querer."
+  },
+  {
+    "id": 4986,
+    "label": "for the birds",
+    "examples": [
+      "That old TV show is for the birds.",
+      "This proposal is for the birds.",
+      "I tried the new app, but it felt like a game for the birds."
+    ],
+    "options": {
+      "a": "algo valioso y útil que merece la pena",
+      "b": "una situación emocionante que merece atención",
+      "c": "algo sin interés o valor práctico; inútil"
+    },
+    "answer": "c",
+    "explanation": "Se usa para describir algo que no vale la pena por ser aburrido o poco relevante; suele aplicar a planes, ideas o entretenimiento poco interesantes.",
+    "prompt": "Describe una mini-situación en la que utilices esta expresión de forma natural."
+  },
+  {
+    "id": 4987,
+    "label": "straight from the horses mouth",
+    "examples": [
+      "I got the details straight from the horse's mouth and updated the report.",
+      "She shared the news straight from the horse's mouth, so we believed it.",
+      "Rely on him; he always hears it straight from the horse's mouth."
+    ],
+    "options": {
+      "a": "información directa y confiable proveniente de la fuente original",
+      "b": "información basada en rumores o especulaciones.",
+      "c": "información oficial emitida por la autoridad pública."
+    },
+    "answer": "a",
+    "explanation": "Se utiliza para señalar que la información proviene directamente de la fuente original y, por ello, suele considerarse más fiable. Puede generar confianza, pero evita asumir que toda la información de la fuente sea 100% correcta.",
+    "prompt": "Escribe una mini-situación original donde uses la expresión de forma natural."
+  },
+  {
+    "id": 4988,
+    "label": "horse around",
+    "examples": [
+      "The kids began to horse around behind the gym.",
+      "We would horse around in the dormitory after classes.",
+      "Don't horse around when the coach speaks."
+    ],
+    "options": {
+      "a": "jugar de manera seria y organizada para obtener una ventaja",
+      "b": "comportarse de forma ruidosa y excesiva para llamar la atención",
+      "c": "jugar de forma juguetona y desenfadada, sin tomarse las cosas demasiado en serio"
+    },
+    "answer": "c",
+    "explanation": "Horse around se usa para describir comportarse de modo lúdico o desenfadado. No implica conflicto serio ni seriedad; suele ocurrir en contextos informales y entre amigos.",
+    "prompt": "Escribe una mini-situación original y específica donde alguien use la expresión de forma natural."
+  },
+  {
+    "id": 4989,
+    "label": "get in someones hair",
+    "examples": [
+      "Her little sister kept getting in her hair about her bedtime.",
+      "The coach warned that if I kept getting in his hair, I would sit out.",
+      "Stop getting in my hair about the project; I need some space."
+    ],
+    "options": {
+      "a": "molestar o fastidiar a alguien de forma insistente",
+      "b": "interesarse románticamente por alguien",
+      "c": "robarle a alguien sin que se dé cuenta"
+    },
+    "answer": "a",
+    "explanation": "Es una expresión informal para describir a alguien que incomoda con insistencia. Suele usarse cuando alguien molesta al otro con comentarios o exigencias constantes.",
+    "prompt": "Propón una situación breve en la que alguien use la expresión get in someone's hair de forma natural."
+  },
+  {
+    "id": 4990,
+    "label": "shoot off ones mouth",
+    "examples": [
+      "He tends to shoot off his mouth during meetings, saying whatever comes to mind.",
+      "If you catch yourself, stop before you shoot off your mouth.",
+      "Yesterday she shot off her mouth about the project and regretted it."
+    ],
+    "options": {
+      "a": "Avisar de forma discreta a alguien sobre un tema sensible.",
+      "b": "Mantener la calma y escuchar atentamente antes de hablar.",
+      "c": "Hablar sin pensar y decir lo primero que se te ocurre, a veces causando problemas."
+    },
+    "answer": "c",
+    "explanation": "Se refiere a hablar impulsivamente y sin filtro; el foco está en la impulsividad y potencialmente decir cosas que luego se lamentan.",
+    "prompt": "Propón una situación breve donde uses la expresión de forma natural."
+  },
+  {
+    "id": 4991,
+    "label": "jump down someones throat",
+    "examples": [
+      "When I asked for help, my manager jumped down my throat.",
+      "The supervisor is quick to jump down your throat if you misstep.",
+      "He jumps down his colleague's throat when questions are raised."
+    ],
+    "options": {
+      "a": "Reaccionar con enojo o irascibilidad desproporcionados hacia alguien ante una duda o error.",
+      "b": "Hacer una observación crítica pero respetuosa para corregir un error.",
+      "c": "Responder de manera calmada y razonable ante una queja."
+    },
+    "answer": "a",
+    "explanation": "Se usa para describir una reacción desproporcionada y agresiva ante una pregunta o fallo; puede generar tensión y malentendidos si no se gestiona con empatía.",
+    "prompt": "Propón una situación breve donde alguien reaccione de forma desproporcionada ante una pregunta o comentario, y describe tu respuesta."
+  },
+  {
+    "id": 4992,
+    "label": "pay through the nose",
+    "examples": [
+      "We paid through the nose for concert tickets last night.",
+      "Prices these days are ridiculous; many fans paid through the nose.",
+      "Tourists have paid through the nose after choosing the luxury package."
+    ],
+    "options": {
+      "a": "pagar un precio excesivo",
+      "b": "Obtener algo gratis o con descuento significativo",
+      "c": "Gastar mucho menos de lo esperado"
+    },
+    "answer": "a",
+    "explanation": "Expresa pagar un precio muy alto, a menudo de forma exagerada. Se usa de manera informal para críticos o desaprobadores del precio.",
+    "prompt": "Propón una situación breve donde el alumno use la expresión en un contexto natural."
+  },
+  {
+    "id": 4993,
+    "label": "pull someones leg",
+    "examples": [
+      "John told me he won the lottery, but he was just pulling my leg.",
+      "Don't take Ben seriously; he's always pulling someone's leg.",
+      "Yesterday, she tried to pull my leg about moving to Mars."
+    ],
+    "options": {
+      "a": "informar a alguien de una verdad importante de forma clara",
+      "b": "engañar deliberadamente para obtener una ventaja",
+      "c": "bromear o engañar a alguien diciéndole algo falso"
+    },
+    "answer": "c",
+    "explanation": "Expresa que alguien bromea o engaña de forma ligera, sin mala intención grave. No se refiere a mentiras serias ni a engaños prolongados.",
+    "prompt": "Propón una situación breve donde el alumno use la expresión de forma natural."
+  },
+  {
+    "id": 4994,
+    "label": "play by ear",
+    "examples": [
+      "When the power outage hit, we had to play by ear and continue the show.",
+      "He plays by ear when improvising music, rather than following a written score.",
+      "If plans change, she will play by ear and decide on the fly."
+    ],
+    "options": {
+      "a": "Planificar minuciosamente cada detalle antes de actuar.",
+      "b": "Mantenerse fiel a un guion sin improvisar.",
+      "c": "Actuar sin un plan previo, improvisar según la situación."
+    },
+    "answer": "c",
+    "explanation": "Se usa para describir la capacidad de improvisar ante cambios o incertidumbre, sin un plan fijo. A veces genera confusión si no se distingue de improvisación forzada.",
+    "prompt": "Describe una situación breve y original en la que puedas usar la expresión de forma natural."
+  },
+  {
+    "id": 4995,
+    "label": "stick out ones neck",
+    "examples": [
+      "He stuck out his neck to defend his colleague in the meeting.",
+      "If you want change, you must stick out your neck and speak up.",
+      "She stuck out her neck by warning the town about the flaw."
+    ],
+    "options": {
+      "a": "Sobresalir físicamente o destacarse de forma notable.",
+      "b": "Aparecer repentinamente sin relación con el tema o la situación.",
+      "c": "arriesgarse para defender o expresar algo ante posibles consecuencias"
+    },
+    "answer": "c",
+    "explanation": "Se usa para indicar tomar un riesgo personal al defender una idea o hacer una advertencia; no se refiere a lo físico.",
+    "prompt": "Propón una breve situación donde alguien se arriesga hablando o defendiendo una idea."
+  },
+  {
+    "id": 4996,
+    "label": "shake a leg",
+    "examples": [
+      "The boss said, 'Shake a leg,' or we'll miss the train.",
+      "Please shake a leg; breakfast starts in ten minutes.",
+      "If you shake a leg, we can finish the project tonight."
+    ],
+    "options": {
+      "a": "darse prisa; apresurarse para no perder tiempo",
+      "b": "tomar una siesta para recuperarse de un cansancio",
+      "c": "ejercitarse con movimientos suaves para relajarse"
+    },
+    "answer": "a",
+    "explanation": "Se usa para urgir a alguien a apresurarse; no se refiere a un movimiento literal de agitar la pierna, sino a la acción de apurarse ante una situación.",
+    "prompt": "Escribe una mini-situación original y específica que muestre a alguien dándose prisa."
+  },
+  {
+    "id": 4997,
+    "label": "all thumbs",
+    "examples": [
+      "I tried to text and drop my phone; I'm all thumbs today.",
+      "She was all thumbs at the kitchen, dropping eggs and splashing milk.",
+      "During the move, he was all thumbs, knocking over boxes and tripping."
+    ],
+    "options": {
+      "a": "tener facilidad para improvisar y adaptarse rápidamente",
+      "b": "ser torpe o tener mala coordinación al realizar tareas que requieren habilidad manual",
+      "c": "ser muy organizado y preciso en el trabajo manual"
+    },
+    "answer": "b",
+    "explanation": "Se usa para describir torpeza física al manipular objetos; suele conllevar humor o empatía. No se aplica a la inteligencia o habilidades verbales.",
+    "prompt": "Propón una situación breve en la que alguien muestre falta de destreza al hacer una tarea simple."
+  },
+  {
+    "id": 4998,
+    "label": "not have a leg to stand on",
+    "examples": [
+      "He had no leg to stand on after the evidence contradicted his claims.",
+      "Without receipts, she had a leg to stand on during the refund dispute.",
+      "If the lawyer failed to cite sources, they would have had no leg to stand on."
+    ],
+    "options": {
+      "a": "No tener base sólida para defender un argumento o posición.",
+      "b": "Tener un motivo convincente para actuar.",
+      "c": "Estar seguro de una decisión."
+    },
+    "answer": "a",
+    "explanation": "Se usa cuando alguien carece de evidencia o argumentos válidos para sostener lo dicho; suele haber debilidad en la posición.",
+    "prompt": "Propón una situación breve en la que alguien necesite defender su postura y use la expresión de forma natural."
+  },
+  {
+    "id": 4999,
+    "label": "get off someones back",
+    "examples": [
+      "Please get off my back about the report.",
+      "He finally got off her back after they agreed.",
+      "Could you get off his back and let him decide?"
+    ],
+    "options": {
+      "a": "permitir que alguien se retire de una tarea o posición",
+      "b": "dejar de molestar o exigir atención; dejar en paz a alguien",
+      "c": "empezar a molestar o insistir repetidamente"
+    },
+    "answer": "b",
+    "explanation": "Expresión informal que significa dejar de acosar o presionar a alguien. A menudo se usa cuando alguien quiere más libertad para decidir o trabajar sin interrupciones.",
+    "prompt": "Escribe una mini-situación original en español donde una persona le pida a otra que se quite de su espalda usando la expresión en inglés."
+  },
+  {
+    "id": 5000,
+    "label": "drive someone up a wall",
+    "examples": [
+      "His constant tapping drives me up a wall.",
+      "The noise from the construction is driving me up a wall.",
+      "You’re always late, and it’s driving me up a wall."
+    ],
+    "options": {
+      "a": "molestar o irritar muchísimo a alguien",
+      "b": "alegrar o entusiasmar a alguien",
+      "c": "animar a alguien a hacer algo"
+    },
+    "answer": "a",
+    "explanation": "Se usa para expresar irritación intensa causada por algo repetitivo o molesto; implica emociones fuertes más que una molestia física y suele ser informal.",
+    "prompt": "Propón una situación breve en la que describas una molestia intensa provocada por algo o alguien usando la expresión."
+  },
+  {
+    "id": 5001,
+    "label": "string someone alone",
+    "examples": [
+      "He strung me along for weeks about a promotion that never happened.",
+      "She warned that he might string you along before breaking things off.",
+      "They felt manipulated after being strung along while the deal fell through."
+    ],
+    "options": {
+      "a": "alejarse de alguien de forma definitiva",
+      "b": "invitar a alguien a salir sin intenciones serias",
+      "c": "engañar o manipular a alguien poco a poco para obtener un beneficio"
+    },
+    "answer": "c",
+    "explanation": "String someone along implica engañar o manipular con promesas falsas durante un tiempo; no se trata de un engaño puntual, sino de una trampa sostenida. No debe confundirse con salir con alguien o romper una relación de golpe.",
+    "prompt": "Propón una situación breve donde alguien es manipulado con promesas falsas usando la expresión."
+  },
+  {
+    "id": 5002,
+    "label": "sell someone down the river",
+    "examples": [
+      "When the manager fired his ally, he was willing to sell him down the river.",
+      "In the scandal, the aide was betrayed; someone sold him down the river.",
+      "If you betray your partner now, you might end up selling them down the river."
+    ],
+    "options": {
+      "a": "traicionar a alguien que confía en ti para beneficiar a otra persona o grupo",
+      "b": "Engañar a alguien para obtener una ventaja personal sin traicionar su confianza.",
+      "c": "Exponer a alguien para que reciba justicia sin necesidad de traicionarlo."
+    },
+    "answer": "a",
+    "explanation": "Uso para describir traición explícita a alguien de confianza con el fin de obtener beneficio propio, a menudo en contextos de lealtades rotas. No se aplica a engaños menores sin relación de confianza establecida.",
+    "prompt": "Propón una situación breve en la que alguien traicione a un amigo o colega para beneficiarse, usando la expresión en inglés."
+  },
+  {
+    "id": 5003,
+    "label": "leave someone high and dry",
+    "examples": [
+      "She left him high and dry after the argument.",
+      "They left us high and dry when the project failed.",
+      "The landlord left tenants high and dry during the outage."
+    ],
+    "options": {
+      "a": "Dejar a alguien abandonado en una situación difícil",
+      "b": "Expulsar a alguien de un lugar",
+      "c": "Proporcionar ayuda a alguien que necesita"
+    },
+    "answer": "a",
+    "explanation": "Expresa abandonar a alguien en una situación problemática sin apoyo; no significa simplemente dejar de ayudar, sino apartar o no responder ante una necesidad crítica.",
+    "prompt": "Propón una situación breve donde el alumno use la expresión de forma natural."
+  },
+  {
+    "id": 5004,
+    "label": "sell someone short",
+    "examples": [
+      "The manager sold his star employee short by giving him a trivial project.",
+      "They felt the coach sold the team short after losing.",
+      "Don't sell yourself short by doubting your abilities."
+    ],
+    "options": {
+      "a": "Subestimar o no valorar a alguien, atribuyéndole menos mérito del que merece.",
+      "b": "Dar a alguien más responsabilidad para demostrar su capacidad.",
+      "c": "Subestimar el valor de una tarea para evitar errores menores."
+    },
+    "answer": "a",
+    "explanation": "Se usa para indicar que alguien no recibe el reconocimiento o los recursos que merece; puede generar injusticia o desmotivación si se aplica a personas o equipos.",
+    "prompt": "Propón una situación breve en la que alguien sea subvalorado o no reconocido adecuadamente por su mérito, usando la expresión en inglés."
+  },
+  {
+    "id": 5005,
+    "label": "show job",
+    "examples": [
+      "He tried to show job competence by bluffing about his skills.",
+      "She tends to show job prospects with hollow promises to impress the boss.",
+      "They only show job readiness in interviews, not in real tasks."
+    ],
+    "options": {
+      "a": "expresión que describe fingir habilidad o competencia para aparentar algo que no es real",
+      "b": "mostrar las funciones de un puesto de trabajo de manera práctica y verificada",
+      "c": "presentar el trabajo de alguien de forma oficial y legítima"
+    },
+    "answer": "a",
+    "explanation": "Se refiere a fingir capacidades o experiencia para parecer más competente; puede generar desconfianza si se detecta la falsedad. Evita confundir con demostrar habilidades reales.",
+    "prompt": "Propón una situación breve en la que alguien intente presentarse como más competente de lo que es y describa cómo lo hace de forma convincente."
+  },
+  {
+    "id": 5006,
+    "label": "spill the beans",
+    "examples": [
+      "She almost spilled the beans about the surprise party.",
+      "If I had known, I would have spilled the beans sooner.",
+      "Don't tell anyone; we can't risk spilling the beans."
+    ],
+    "options": {
+      "a": "Contar un secreto solo cuando ya se ha confirmado",
+      "b": "Decir que no sabes nada para evitar problemas",
+      "c": "Revelar un secreto que debía permanecer oculto."
+    },
+    "answer": "c",
+    "explanation": "Se usa para describir revelar un secreto sin intención o sin permiso. A veces implica un error o un descuido; no se aplica a revelaciones deliberadas con permiso.",
+    "prompt": "Propón una situación breve en la que alguien revele un secreto accidentalmente usando una expresión inglesa equivalente a 'spill the beans'."
+  },
+  {
+    "id": 5007,
+    "label": "feed someone a line",
+    "examples": [
+      "He tried to feed me a line about missing the meeting.",
+      "She claimed the car broke down, and I think she was feeding me a line.",
+      "They'll tell you a line to get you to sign the contract."
+    ],
+    "options": {
+      "a": "Contar una broma inocente sin engañar a nadie.",
+      "b": "Proporcionar una explicación razonable y verídica.",
+      "c": "Engañar con una excusa o mentira para obtener algo."
+    },
+    "answer": "c",
+    "explanation": "Se usa para indicar que alguien ofrece una excusa engañosa para lograr un beneficio. Suele implicar cierta deshonestidad o manipulación.",
+    "prompt": "Propón una situación breve y original en la que una persona use la expresión de forma natural."
+  },
+  {
+    "id": 5008,
+    "label": "on ice",
+    "examples": [
+      "I'm keeping these files on ice until the project starts.",
+      "We have some funds on ice, waiting for approval.",
+      "Her plans are on ice for now."
+    ],
+    "options": {
+      "a": "Conservar algo para uso inmediato",
+      "b": "Mantenerse activo y sin pausas",
+      "c": "reservado para uso futuro"
+    },
+    "answer": "c",
+    "explanation": "On ice se usa para decir que algo se guarda o pospone para más adelante. No se refiere a enfriar literalmente y puede crear confusión con gastos o planes que no están listos.",
+    "prompt": "Propón una situación breve donde el hablante indique que algo está reservado para uso futuro."
+  },
+  {
+    "id": 5009,
+    "label": "shoot the breeze",
+    "examples": [
+      "We would just shoot the breeze about the weather during the break.",
+      "They are shooting the breeze after work, laughing about old times.",
+      "We shot the breeze for hours yesterday, not planning anything serious."
+    ],
+    "options": {
+      "a": "Discutir un tema importante de manera seria.",
+      "b": "Charla informal y sin tema serio",
+      "c": "Mantener una conversación formal y estructurada."
+    },
+    "answer": "b",
+    "explanation": "Expresa conversación casual y sin objetivo específico; se usa en contextos informales. Evita usarlo en situaciones formales o profesionales.",
+    "prompt": "Describe una mini-situación en la que puedas usar la expresión de forma natural."
+  },
+  {
+    "id": 5010,
+    "label": "bite the dust",
+    "examples": [
+      "The band finally bit the dust after the tour.",
+      "If the engine had failed, we would have bitten the dust.",
+      "Many players bit the dust in the finals."
+    ],
+    "options": {
+      "a": "Morir lentamente por una enfermedad.",
+      "b": "morir o fracasar estrepitosamente",
+      "c": "Mordisquear algo de forma literal; uso literal de la frase."
+    },
+    "answer": "b",
+    "explanation": "Es una expresión idiomática; se usa para indicar que alguien ha fracasado rotundamente o ha muerto, no se debe usar en sentido literal de comer o morder.",
+    "prompt": "Propón una situación breve donde uses la expresión de forma natural."
+  },
+  {
+    "id": 5011,
+    "label": "bend over backwards",
+    "examples": [
+      "She bent over backwards to help plan the wedding, even with her own busy schedule.",
+      "The company bent over backwards to accommodate the new intern's needs.",
+      "I bent over backwards for weeks, fixing the project after the client complained."
+    ],
+    "options": {
+      "a": "Hacer todo lo posible para ayudar o complacer a alguien",
+      "b": "Someterse físicamente para parecer sumiso.",
+      "c": "Ignorar las preferencias de alguien para mantener la autonomía."
+    },
+    "answer": "a",
+    "explanation": "Se usa para enfatizar un esfuerzo extremo y desborde de disposición para ayudar; puede implicar un sacrificio de tiempo o recursos, no es solamente buen servicio sino un esfuerzo máximo.",
+    "prompt": "Propón una situación breve y específica en la que utilices la expresión para expresar que haces un esfuerzo extremo por ayudar."
+  },
+  {
+    "id": 5012,
+    "label": "hit the hay",
+    "examples": [
+      "After a long day, I hit the hay early.",
+      "She hit the hay after finishing the report.",
+      "We’ll hit the hay soon if this rain continues."
+    ],
+    "options": {
+      "a": "irse a la cama para dormir",
+      "b": "empezar a beber alcohol en exceso",
+      "c": "salir de casa para buscar aventuras"
+    },
+    "answer": "a",
+    "explanation": "Se usa para indicar que alguien va a dormir, generalmente de forma rápida; suele referirse a acostarse al final del día.",
+    "prompt": "Propón una situación breve donde uses la expresión de forma natural."
+  },
+  {
+    "id": 5013,
+    "label": "cough up",
+    "examples": [
+      "He finally coughed up the money after the auction.",
+      "She can’t cough up the courage to speak in public.",
+      "They coughed up a surprising amount when asked."
+    ],
+    "options": {
+      "a": "Explicar una idea de forma clara y rápida.",
+      "b": "Expulsar aire de los pulmones sin dificultad.",
+      "c": "entregar algo con dificultad o a regañadientes (pagar, revelar, etc.)"
+    },
+    "answer": "c",
+    "explanation": "Cough up se usa para indicar entregar algo con esfuerzo o reluctancia, especialmente dinero, información o datos; no se refiere a toser literalmente, sino a la acción de entregar",
+    "prompt": "Propón una situación breve en la que alguien tenga que usar la expresión de forma natural."
+  },
+  {
+    "id": 5014,
+    "label": "jump the gun",
+    "examples": [
+      "He jumped the gun and announced the results before the bell.",
+      "Don't jump the gun; wait for all the data before deciding.",
+      "If you rush now, you might be jumping the gun on the project."
+    ],
+    "options": {
+      "a": "actuar demasiado pronto o precipitadamente",
+      "b": "dejar pasar la oportunidad esperando a obtener más información",
+      "c": "actuar con demasiada prisa sin verificar los hechos"
+    },
+    "answer": "a",
+    "explanation": "Se usa cuando alguien actúa antes de tener suficiente información o sin esperar el momento adecuado; puede generar errores o malentendidos.",
+    "prompt": "Propón una situación breve donde el alumno use la expresión en inglés para describir una acción tomada demasiado pronto."
+  },
+  {
+    "id": 5015,
+    "label": "scratch someones back",
+    "examples": [
+      "I scratched someone's back after they helped me.",
+      "She likes to scratch someone's back when she receives help.",
+      "Would you scratch someone's back if they promised a favor later?"
+    ],
+    "options": {
+      "a": "Hacer un favor sin esperar nada a cambio.",
+      "b": "Dar un masaje a la espalda de alguien.",
+      "c": "Hacer un favor a alguien esperando que te devuelvan otro, o reciprocidad."
+    },
+    "answer": "c",
+    "explanation": "Se usa para expresar reciprocidad en favores; no es literal, y suena más informal, a menudo en relaciones de ayuda mutua.",
+    "prompt": "Propón una situación breve en la que alguien use la expresión para describir un intercambio de favores."
+  },
+  {
+    "id": 5016,
+    "label": "hit the ceiling",
+    "examples": [
+      "When she saw the bills, she hit the ceiling.",
+      "If he forgets the meeting again, he’ll hit the ceiling.",
+      "They hit the ceiling when the factory closed."
+    ],
+    "options": {
+      "a": "ponerse extremadamente celoso",
+      "b": "enfadarse muchísimo de forma repentina o descontrolada",
+      "c": "alcanzar el máximo nivel de algo"
+    },
+    "answer": "b",
+    "explanation": "Expresa una reacción súbita de enojo ante una situación inesperada; suele ser más fuerte que 'annoyed'. No implica daño físico, sino intensidad emocional alta.",
+    "prompt": "Propón una situación breve donde alguien experimente una reacción intensa usando la expresión."
+  },
+  {
+    "id": 5017,
+    "label": "fork over",
+    "examples": [
+      "He refused at first, but he eventually forked over the cash to settle the dispute.",
+      "The government asked for funds, and the company forked over the required amount.",
+      "If you get pulled over, you won't want to fork over fake documents."
+    ],
+    "options": {
+      "a": "Pagar una deuda de forma voluntaria y sin negociación.",
+      "b": "Recibir o aceptar algo sin esfuerzo ni presión.",
+      "c": "entregar dinero o recursos exigidos, normalmente bajo presión"
+    },
+    "answer": "c",
+    "explanation": "Es un phrasal verb informal que significa entregar dinero o recursos cuando hay coerción, presión o una exigencia.",
+    "prompt": "Propón una situación breve donde alguien tenga que usar esta expresión de forma natural."
+  },
+  {
+    "id": 5018,
+    "label": "turn someone off",
+    "examples": [
+      "The loud chatter at the party turned me off.",
+      "Her rude attitude turned him off from dating.",
+      "That cheesy pickup line might turn you off."
+    ],
+    "options": {
+      "a": "Desagradar y provocar que alguien pierda interés.",
+      "b": "Hacer que alguien se sienta atraído y entusiasmado.",
+      "c": "Inducir a alguien a comprometerse de inmediato."
+    },
+    "answer": "a",
+    "explanation": "Se usa para describir algo que provoca rechazo o disminuye el interés de alguien; suele ir seguido de un objeto (a alguien). A veces se confunde con expresiones similares como turn on, que tienen el efecto opuesto.",
+    "prompt": "Escribe una mini-situación en inglés que muestre a alguien perdiendo interés hacia otra persona o situación, usando la expresión adecuada en contexto."
+  },
+  {
+    "id": 5019,
+    "label": "go fly a kite",
+    "examples": [
+      "After losing the game, he told me to go fly a kite and walked away.",
+      "Don't be rude; if you're upset, go fly a kite and calm down.",
+      "She muttered 'go fly a kite' and left the room in anger."
+    ],
+    "options": {
+      "a": "Instrucción para volar una cometa.",
+      "b": "pedirle a alguien que se vaya o que deje de molestar",
+      "c": "Expresión para animar a alguien a intentarlo de nuevo."
+    },
+    "answer": "b",
+    "explanation": "Es una expresión idiomática para indicar que alguien se vaya o se calme, no se toma literalmente; el tono puede ser ofensivo o humorístico según el contexto.",
+    "prompt": "Propón una situación breve donde el hablante use la expresión de forma natural."
+  },
+  {
+    "id": 5020,
+    "label": "kick the bucket",
+    "examples": [
+      "He joked about his old bike until he kicked the bucket.",
+      "When the inventor finally kicks the bucket, his last project inspires successors.",
+      "They worry he will kick the bucket soon."
+    ],
+    "options": {
+      "a": "terminar algo con éxito o a tiempo",
+      "b": "morir; expresión coloquial que significa fallecer",
+      "c": "iniciar una tarea nueva o empezar desde cero"
+    },
+    "answer": "b",
+    "explanation": "Es un modismo informal para hablar de la muerte. Suele usarse en contextos no formales y puede sonar insensible si se utiliza en situaciones sensibles.",
+    "prompt": "Propón una situación breve y original en la que se use esta expresión para referirse a alguien que fallece."
+  },
+  {
+    "id": 5021,
+    "label": "raise a stink",
+    "examples": [
+      "If you raise a stink, you might draw attention to the issue.",
+      "The neighbors raised a stink about the loud party last night.",
+      "She used to raise a stink every time the policy changed."
+    ],
+    "options": {
+      "a": "protestar o quejarse fuertemente; alborotar por una razón",
+      "b": "Resolver un conflicto sin alzar la voz.",
+      "c": "Expresar una queja de forma suave y moderada."
+    },
+    "answer": "a",
+    "explanation": "Se usa para describir quejarse o protestar de forma fuerte y ruidosa ante una situación; a veces implica llamar la atención, no es sinónimo de quejarse de forma razonada o calmada.",
+    "prompt": "Propón una situación breve y específica donde alguien use la expresión de forma natural."
+  },
+  {
+    "id": 5022,
+    "label": "wet blanket",
+    "examples": [
+      "Stop being a wet blanket and join us for karaoke.",
+      "He was acting like a wet blanket during the party.",
+      "Don't worry, I won't be a wet blanket tonight."
+    ],
+    "options": {
+      "a": "persona que siempre llega tarde a las fiestas sin razón",
+      "b": "aguafiestas; persona que arruina la diversión de los demás",
+      "c": "persona que malinterpreta las chistes y se ofende fácilmente"
+    },
+    "answer": "b",
+    "explanation": "Se usa para describir a alguien que arruina la diversión de otros, no para expresar tristeza general. Cuidado con el tono despectivo y con no traducirlo literalmente.",
+    "prompt": "Escribe una mini-situación original y específica en la que se use la palabra de forma natural."
+  },
+  {
+    "id": 5023,
+    "label": "keep under ones hat",
+    "examples": [
+      "I'll keep it under one's hat until we meet the boss.",
+      "She promised to keep it under one's hat.",
+      "We have to keep it under one's hat for now."
+    ],
+    "options": {
+      "a": "decir la verdad sin rodeos",
+      "b": "explicar algo con detalle",
+      "c": "guardar un secreto; no revelarlo"
+    },
+    "answer": "c",
+    "explanation": "Significa mantener algo confidencial y no contarlo a otros; se usa para secretos o información sensible. Ten cuidado con el tono cuando se aplica a rumores.",
+    "prompt": "Escribe una mini-situación en español que describa a alguien decidiendo keep under one's hat para mantener un secreto."
+  },
+  {
+    "id": 5024,
+    "label": "up ones sleeve",
+    "examples": [
+      "She always keeps a few ideas up her sleeve for tough meetings.",
+      "They had a clever plan up their sleeve for the negotiation.",
+      "If needed, she can pull a useful insight from her sleeve."
+    ],
+    "options": {
+      "a": "un plan secreto o recurso guardado para usar en un momento clave",
+      "b": "un truco físico que se usa para impresionar a la gente.",
+      "c": "una prenda de vestir que se usa en la manga como decoración."
+    },
+    "answer": "a",
+    "explanation": "Se usa para indicar que alguien tiene un recurso o plan secreto listo para usar ante una situación decisiva. No se refiere literalmente a la manga, sino a una ventaja inesperada.",
+    "prompt": "propón una situación breve donde el alumno use la expresión de forma natural."
+  },
+  {
+    "id": 5025,
+    "label": "dressed to kill",
+    "examples": [
+      "She showed up to the party dressed to kill, turning heads as she entered.",
+      "He wore a sharp suit, dressed to kill, and sealed the deal.",
+      "They arrived dressed to kill for the gala, attracting curious glances."
+    ],
+    "options": {
+      "a": "Vestirse de forma excesiva para llamar la atención sin importar el entorno.",
+      "b": "Ir siempre de manera informal para pasar desapercibido.",
+      "c": "Vestirse de forma muy elegante para impresionar o destacar ante los demás."
+    },
+    "answer": "c",
+    "explanation": "Es una expresión idiomática; enfatiza la ropa elegante para causar impresión. Puede generar confusión si se toma literalmente o se aplica fuera de contextos sociales.",
+    "prompt": "Propón una situación breve donde el alumno use la expresión de forma natural."
+  },
+  {
+    "id": 5026,
+    "label": "give someone the slip",
+    "examples": [
+      "I gave him the slip yesterday and left by the back door.",
+      "He tries to give the slip, but they catch him.",
+      "We might give the slip and disappear into the crowd."
+    ],
+    "options": {
+      "a": "Escapar de alguien o evitar su alcance.",
+      "b": "Hacerle un favor a alguien.",
+      "c": "Dar información confidencial a alguien."
+    },
+    "answer": "a",
+    "explanation": "Expresa huir o evadir a alguien (especialmente quien te persigue). Es informal y se usa con personas o autoridades; no se debe confundir con resistirse a una verdad u obligación.",
+    "prompt": "Propón una situación breve donde alguien logre 'give someone the slip' de forma natural."
+  },
+  {
+    "id": 5027,
+    "label": "knock someones socks off",
+    "examples": [
+      "The magician's finale really knocked our socks off.",
+      "Her speech will knock everyone's socks off at the awards.",
+      "That movie knocked my socks off when I saw the twist."
+    ],
+    "options": {
+      "a": "sorprender o impresionar muchísimo a alguien",
+      "b": "Provocar que alguien se sorprenda de forma negativa o desagradable.",
+      "c": "Hacer que alguien cambie de opinión rápidamente."
+    },
+    "answer": "a",
+    "explanation": "Se usa para describir una sorpresa o impresión muy intensa, generalmente positiva. Suele usarse en contextos informales y con énfasis emocional.",
+    "prompt": "Propón una situación breve donde el alumno use la expresión de forma natural."
+  },
+  {
+    "id": 5028,
+    "label": "talk thorough ones hat",
+    "examples": [
+      "If you say the project will finish on time with no plan, you’re talking through one's hat.",
+      "He was clearly talking through his hat about the stock market after reading one article.",
+      "People who insist the plan works, even after failures, are talking through their hats."
+    ],
+    "options": {
+      "a": "Expresar opiniones fundamentadas y basadas en evidencia.",
+      "b": "Hablar sin saber, sin fundamento ni evidencia.",
+      "c": "Dar conclusiones sólidas solo por intuición."
+    },
+    "answer": "b",
+    "explanation": "Es un modismo que significa afirmar algo sin conocimiento o pruebas. Suele usarse para señalar when alguien dice tonterías o pretende saber más de lo que sabe.",
+    "prompt": "Propón una mini-situación original en la que se use la expresión de forma natural."
+  },
+  {
+    "id": 5029,
+    "label": "lose ones shirt",
+    "examples": [
+      "I almost lost my shirt in the stock market.",
+      "They could lose their shirts in that risky venture.",
+      "If you gamble, you might lose your shirt."
+    ],
+    "options": {
+      "a": "Romperse la camisa en una situación estresante",
+      "b": "Ganar mucho dinero",
+      "c": "Perder mucho dinero"
+    },
+    "answer": "c",
+    "explanation": "Frase idiomática para describir perder una cantidad considerable de dinero, especialmente en inversiones o apuestas; no se refiere a objetos físicos.",
+    "prompt": "Propón una situación breve y específica donde puedas usar la expresión para describir una pérdida de dinero."
+  },
+  {
+    "id": 5030,
+    "label": "in stitches",
+    "examples": [
+      "The comedian had me in stitches last night.",
+      "Her stories always have me in stitches.",
+      "I was in stitches watching that silly video yesterday."
+    ],
+    "options": {
+      "a": "reírse muchísimo; estar muy divertido",
+      "b": "Indicar enfado o molestia de forma discreta.",
+      "c": "Provocar risa suave y contenida."
+    },
+    "answer": "a",
+    "explanation": "In stitches se usa para indicar risa muy intensa ante algo cómico, no solo una risa suave. Suele aparecer con humor explícito o situaciones cómicas.",
+    "prompt": "Propón una situación breve donde el alumno use la expresión de forma natural."
+  },
+  {
+    "id": 5031,
+    "label": "dressed to the teeth",
+    "examples": [
+      "She was dressed to the teeth for the gala.",
+      "They arrived dressed to the teeth at the ceremony last night.",
+      "He always looks dressed to the teeth whenever he goes out."
+    ],
+    "options": {
+      "a": "Vestirse de forma informal para una actividad cotidiana.",
+      "b": "Ir muy arreglado para una ocasión especial, con mucho esmero en la vestimenta.",
+      "c": "Arreglarse el cabello sin prestar atención a la ropa."
+    },
+    "answer": "b",
+    "explanation": "Se utiliza para describir a alguien que va extremadamente bien vestido para impresionar en un evento; no implica necesariamente etiqueta formal, sino cuidado extremo del atuendo y apariencia.",
+    "prompt": "Propón una situación breve donde uses la frase de forma natural."
+  },
+  {
+    "id": 5032,
+    "label": "lemon",
+    "examples": [
+      "I bought a lemon at the shop, but it was spoiled.",
+      "Her car turned out to be a lemon after the first week.",
+      "That gadget proved a lemon; it stopped working within days."
+    ],
+    "options": {
+      "a": "Producto nuevo y de alta calidad.",
+      "b": "Objeto defectuoso o que funciona mal.",
+      "c": "Fruta cítrica comestible y deliciosa."
+    },
+    "answer": "b",
+    "explanation": "Lemon se usa coloquialmente para referirse a un artículo defectuoso, especialmente en compras; no traslada su sentido a la fruta en ese contexto. Presta atención al contexto (vehículos, gadgets, electrodomésticos).",
+    "prompt": "Propón una situación breve en la que uses la palabra lemon de forma natural."
+  },
+  {
+    "id": 5033,
+    "label": "out of the woods",
+    "examples": [
+      "After surgery, he's finally out of the woods.",
+      "The project survived the review; we're out of the woods.",
+      "Last week they were sick, but now they're out of the woods."
+    ],
+    "options": {
+      "a": "estar completamente perdido",
+      "b": "estar fuera de servicio",
+      "c": "fuera de peligro"
+    },
+    "answer": "c",
+    "explanation": "Se usa para indicar que una situación se ha estabilizado y ya no hay amenaza inminente. Puede referirse a salud, proyectos o dificultades superadas. A veces se confunde con otros estados de riesgo si no hay claridad del contexto.",
+    "prompt": "Propón una situación breve donde el alumno use la expresión en inglés de forma natural."
+  },
+  {
+    "id": 5034,
+    "label": "get up on the wrong side of the bed",
+    "examples": [
+      "I got up on the wrong side of the bed this morning, so I snapped at everyone.",
+      "If you get up on the wrong side of the bed, try a quick walk.",
+      "She tends to get up on the wrong side of the bed when she misses breakfast."
+    ],
+    "options": {
+      "a": "Levantarse con mal humor; empezar el día de mal humor.",
+      "b": "Salir corriendo de la cama para ir a trabajar",
+      "c": "Despertar y sentirse extremadamente feliz al empezar el día"
+    },
+    "answer": "a",
+    "explanation": "Es una expresión idiomática para describir un mal inicio del día, no se refiere literalmente a la posición de la cama. Úsala cuando alguien parece irritado al empezar la jornada.",
+    "prompt": "Propón una situación breve donde alguien use la expresión en inglés para describir un inicio de día con mal humor."
+  },
+  {
+    "id": 5035,
+    "label": "out on a limb",
+    "examples": [
+      "I'm out on a limb with this proposal, but I'll try it.",
+      "She went out on a limb to defend the controversial view.",
+      "They'll be out on a limb if the plan fails."
+    ],
+    "options": {
+      "a": "Estar en una posición arriesgada o vulnerable al defender una idea o tomar una acción.",
+      "b": "Estar en una posición segura y respaldada mientras se evalúa la situación.",
+      "c": "Hacer algo sin ningún tipo de riesgo ni crítica."
+    },
+    "answer": "a",
+    "explanation": "El modismo indica asumir un riesgo o situarse fuera de la zona de confort para respaldar algo; suele implicar incertidumbre o crítica potencial.",
+    "prompt": "Propón una situación breve y específica en la que uses la expresión en inglés de forma natural."
+  },
+  {
+    "id": 5036,
+    "label": "eating someone",
+    "examples": [
+      "She is eating someone with questions about every detail.",
+      "During the review, the editor was eating someone for missing deadlines last quarter.",
+      "He has been eating someone about the project since it started."
+    ],
+    "options": {
+      "a": "Molestar o preocuparse excesivamente por alguien.",
+      "b": "Proteger a alguien de peligros o daños.",
+      "c": "Cuidar de alguien con cariño y constancia."
+    },
+    "answer": "a",
+    "explanation": "Es una expresión idiomática que implica incomodar o cuestionar a alguien de forma insistente. No se refiere a comer literalmente; es negativo y suele usarse en contextos de críticas o exigencias excesivas.",
+    "prompt": "Propón una situación breve donde alguien use la expresión para describir cómo otra persona le pregunta o presiona de forma constante."
+  },
+  {
+    "id": 5037,
+    "label": "get the ax",
+    "examples": [
+      "The company announced layoffs, and I might get the ax.",
+      "He got the ax after missing three deadlines.",
+      "If profits drop, many workers could get the ax."
+    ],
+    "options": {
+      "a": "ser despedido",
+      "b": "ser promovido",
+      "c": "recibir un aumento de sueldo"
+    },
+    "answer": "a",
+    "explanation": "Frase informal para indicar perder el empleo; suena contundente y no adecuada en contextos formales. Puede implicar despido por rendimiento o reestructuración.",
+    "prompt": "Propón una situación breve donde alguien use la expresión de forma natural."
+  },
+  {
+    "id": 5038,
+    "label": "in the hole",
+    "examples": [
+      "If you’re in the hole, you can't borrow more money.",
+      "He was in the hole after the failed investment last year.",
+      "Being in the hole, she finally negotiated a repayment plan."
+    ],
+    "options": {
+      "a": "Estar en una posición de ventaja.",
+      "b": "Tener una obligación legal pendiente.",
+      "c": "Estar en deuda."
+    },
+    "answer": "c",
+    "explanation": "Se usa para indicar una situación financiera negativa, de deuda. No se refiere a un agujero literal; es un uso figurado.",
+    "prompt": "Propón una situación breve donde alguien esté in the hole."
+  },
+  {
+    "id": 5039,
+    "label": "bite the bullet",
+    "examples": [
+      "She decided to bite the bullet and start the surgery.",
+      "The team bit the bullet and admitted the project failed.",
+      "We will bite the bullet and pay the fines."
+    ],
+    "options": {
+      "a": "Rechazar una decisión difícil y posponerla.",
+      "b": "Enfrentar una situación difícil con decisión y valor, a pesar de las dificultades",
+      "c": "Hacer algo sin pensarlo para evitar la responsabilidad."
+    },
+    "answer": "b",
+    "explanation": "Se usa cuando alguien decide afrontar algo incómodo o doloroso, en lugar de evitarlo; implica determinación más que impulsividad.",
+    "prompt": "Escribe una miniescena original en la que alguien tenga que afrontar una situación difícil y tome una decisión con resolve."
+  },
+  {
+    "id": 5040,
+    "label": "face the music",
+    "examples": [
+      "After the delay, she faced the music and apologized.",
+      "He will have to face the music when the truth comes out.",
+      "They knew they’d messed up, so they finally faced the music."
+    ],
+    "options": {
+      "a": "Disimular los errores para evitar consecuencias.",
+      "b": "Aceptar las consecuencias de las acciones propias.",
+      "c": "Escapar de una situación incómoda sin afrontar responsabilidades."
+    },
+    "answer": "b",
+    "explanation": "Se usa cuando alguien admite las consecuencias de un fallo, especialmente tras reconocer la realidad de la situación; no implica huir ni negar la realidad.",
+    "prompt": "Propón una situación breve en la que alguien use la expresión de forma natural."
+  },
+  {
+    "id": 5041,
+    "label": "blow it",
+    "examples": [
+      "I really blew it at the interview and didn't land the job.",
+      "If you study harder, you won't blow it next time.",
+      "He forgot the presentation slides and blew it in front of everyone."
+    ],
+    "options": {
+      "a": "Mantener la calma y lograr el éxito sin esfuerzo.",
+      "b": "Fracasar o cometer un error grave en una situación importante; dejar pasar una oportunidad.",
+      "c": "Hacer explotar algo accidentalmente."
+    },
+    "answer": "b",
+    "explanation": "Se usa para describir fallos significativos en intentos importantes, especialmente ante otros. No se refiere a errores menores ni a éxitos; es un fallo notable o la pérdida de una oportunidad.",
+    "prompt": "Propón una situación breve donde el alumno use la expresión de forma natural."
+  },
+  {
+    "id": 5042,
+    "label": "at the end of ones rope",
+    "examples": [
+      "I'm at the end of my rope after dealing with this crisis.",
+      "She looked at the end of her rope and prayed for a solution.",
+      "If the project keeps failing, you'll be at the end of your rope."
+    ],
+    "options": {
+      "a": "estar físicamente agotado por el esfuerzo sin relación con la paciencia.",
+      "b": "tener miedo de empezar una tarea nueva.",
+      "c": "estar al límite de la paciencia o de la capacidad para soportar una situación"
+    },
+    "answer": "c",
+    "explanation": "Expresa un límite emocional, no físico. Se usa cuando ya no se puede soportar más una situación, de forma figurada.",
+    "prompt": "Escribe una mini-situación original y específica en la que aparezca la expresión y muestre una tensión que lleve a ese límite."
+  },
+  {
+    "id": 5043,
+    "label": "on ones last legs",
+    "examples": [
+      "After running the marathon, he was on his last legs.",
+      "The old printer is on its last legs and needs replacement.",
+      "By the afternoon, the team was on its last legs and barely continued."
+    ],
+    "options": {
+      "a": "estar muy cansado o en mal estado; casi sin fuerzas",
+      "b": "estar muy feliz y lleno de energía",
+      "c": "ser el último en intentar algo"
+    },
+    "answer": "a",
+    "explanation": "Se usa para indicar que alguien o algo está extremadamente cansado o al borde de fallar, y puede aplicarse tanto a personas como a objetos o máquinas; no debe confundirse con expresar entusiasmo o posición en una competencia.",
+    "prompt": "Propón una situación breve donde alguien esté al límite de sus fuerzas usando la expresión en inglés."
+  },
+  {
+    "id": 5044,
+    "label": "hot under the collar",
+    "examples": [
+      "He got hot under the collar when his colleague interrupted him again.",
+      "She was hot under the collar after reading the unfair memo.",
+      "The manager got hot under the collar, then cooled down and listened."
+    ],
+    "options": {
+      "a": "Estar muy contento por un logro.",
+      "b": "enojado o irritado, a punto de perder la paciencia",
+      "c": "Mantener la calma ante la presión."
+    },
+    "answer": "b",
+    "explanation": "Se usa para describir enfado repentino y marcado, especialmente ante interrupciones o injusticias; puede parecer exagerado si el contexto no es intenso.",
+    "prompt": "Propón una situación breve y específica en la que alguien esté hot under the collar."
+  },
+  {
+    "id": 5045,
+    "label": "on the line",
+    "examples": [
+      "If I miss this deadline, my job is on the line.",
+      "The company risks losing its contract; profits are on the line.",
+      "Her reputation is on the line during the negotiations."
+    ],
+    "options": {
+      "a": "En peligro de perderse o fracasar; en juego",
+      "b": "Estar escrito en una línea de código",
+      "c": "Estar en la línea de llegada"
+    },
+    "answer": "a",
+    "explanation": "Se utiliza para indicar riesgo o apuesta alta en una situación; no se refiere a ubicación física ni a código.",
+    "prompt": "Describe una mini-situación original en la que aparezca la expresión inglesa y signifique riesgo o apuesta."
+  },
+  {
+    "id": 5046,
+    "label": "for a song",
+    "examples": [
+      "I bought the jacket for a song and saved a lot.",
+      "The souvenirs were for a song, so I bought several.",
+      "He could rent that car for a song if he negotiates today."
+    ],
+    "options": {
+      "a": "muy barato; pagar poco por algo",
+      "b": "conseguir algo gratis",
+      "c": "pagar mucho por algo"
+    },
+    "answer": "a",
+    "explanation": "La frase significa obtener algo a un precio extremadamente bajo. Cuidado con su uso en contextos formales o literales; suele ser informal y positivo.",
+    "prompt": "Propón una situación breve usando la expresión en inglés de forma natural."
+  },
+  {
+    "id": 5047,
+    "label": "make a splash",
+    "examples": [
+      "The new product made a splash at the launch.",
+      "Her announcement made a splash during the conference.",
+      "The ad campaign hopes to make a splash this summer."
+    ],
+    "options": {
+      "a": "Lograr un impacto pequeño y discreto sin llamar la atención.",
+      "b": "Lograr un gran impacto y atraer atención de forma notable",
+      "c": "Presentar algo de forma ordenada y sin destacar a nadie."
+    },
+    "answer": "b",
+    "explanation": "Se usa para describir algo que causa gran impresión y recibe interés público; no siempre necesita mucho tiempo, pero sí visibilidad.",
+    "prompt": "Propón una situación breve donde el alumno use la expresión para describir que algo causa gran atención."
+  },
+  {
+    "id": 5048,
+    "label": "have the world by the tail",
+    "examples": [
+      "With the new job, she has the world by the tail, enjoying nonstop success.",
+      "He has the world by the tail since starting his startup.",
+      "They have the world by the tail after winning the championship."
+    ],
+    "options": {
+      "a": "Tener mucho dinero y poder sin esfuerzo.",
+      "b": "Ser extremadamente exitoso y feliz, con plena seguridad y control sobre la vida.",
+      "c": "Sentirse inseguro y temeroso ante el futuro."
+    },
+    "answer": "b",
+    "explanation": "Expresa un estado de éxito y satisfacción sostenidos, a menudo acompañado de confianza. No implica perfección, solo una posición favorable percibida.",
+    "prompt": "Describe una mini-situación en la que alguien esté muy exitoso y feliz como resultado de sus esfuerzos."
+  },
+  {
+    "id": 5049,
+    "label": "sitting pretty",
+    "examples": [
+      "After the promotion, the team has been sitting pretty and planning the launch.",
+      "They are sitting pretty now, with a secure contract and favorable terms.",
+      "If the market improves, small firms will be sitting pretty by year-end."
+    ],
+    "options": {
+      "a": "estar en una posición ventajosa para obtener beneficios o logros",
+      "b": "Estar cómodo física o emocionalmente sin necesitar esfuerzos.",
+      "c": "Estar en una situación de derrota y desventaja."
+    },
+    "answer": "a",
+    "explanation": "La expresión describe beneficiarse de circunstancias favorables, no simplemente estar cómodo. Se usa cuando alguien tiene ventaja o condiciones propicias para obtener algo.",
+    "prompt": "Propón una situación breve y original en la que una persona esté en una posición ventajosa gracias a circunstancias específicas."
+  },
+  {
+    "id": 5050,
+    "label": "feel like a million dollars",
+    "examples": [
+      "After the project, I felt like a million dollars.",
+      "He's been feeling like a million dollars since the promotion.",
+      "If I win the prize, I'll feel like a million dollars."
+    ],
+    "options": {
+      "a": "Sentirse ansioso por un resultado incierto.",
+      "b": "Estar extremadamente cansado y sin energía.",
+      "c": "Sentirse extremadamente bien, muy feliz y con confianza."
+    },
+    "answer": "c",
+    "explanation": "Expresa un estado emocional muy positivo y de confianza, no literalmente relacionado con dinero. Es informal y se usa ante logros o buenas noticias; no debe confundirse con pobreza o estrés.",
+    "prompt": "Propón una mini-situación original donde describas cómo te sentirías tras obtener un logro."
+  },
+  {
+    "id": 5051,
+    "label": "kick up ones heels",
+    "examples": [
+      "We kicked up our heels after final exams.",
+      "She is kicking up her heels tonight at the party.",
+      "They had kicked up their heels during the celebration."
+    ],
+    "options": {
+      "a": "Patear algo para moverlo.",
+      "b": "Celebrar y divertirse mucho, sin preocuparse.",
+      "c": "Producir un alboroto intenso con movimientos agresivos."
+    },
+    "answer": "b",
+    "explanation": "Se utiliza para describir una diversión desenfrenada o despreocupada en una ocasión de celebración; no implica daño, sino disfrutar libremente.",
+    "prompt": "Propón una situación breve donde el alumno use la expresión kick up one's heels de forma natural."
+  },
+  {
+    "id": 5052,
+    "label": "bury the hatchet",
+    "examples": [
+      "After years of feuding, they buried the hatchet at last.",
+      "They finally buried the hatchet and agreed to work together on the project.",
+      "It's time to bury the hatchet and move forward, not dwell on the past."
+    ],
+    "options": {
+      "a": "Iniciar una pelea nueva para demostrar fuerza.",
+      "b": "Pedir disculpas para resolver un malentendido sin reconciliarse.",
+      "c": "Hacer las paces tras una disputa; dejar de pelear o resentirse."
+    },
+    "answer": "c",
+    "explanation": "Frase idiomática que indica reconciliación tras un conflicto. Se usa cuando ambas partes dejan de lado rencores y colaboran.",
+    "prompt": "Escribe una mini-situación original donde dos personas deciden dejar de pelear y reconciliarse usando la expresión dada."
+  },
+  {
+    "id": 5053,
+    "label": "paint the town red",
+    "examples": [
+      "We decided to paint the town red last night after the exam.",
+      "If you pass the test, we'll paint the town red this weekend.",
+      "They'll be painting the town red once their project finishes."
+    ],
+    "options": {
+      "a": "Ir de fiesta y gastar mucho dinero sin preocuparse por las responsabilidades.",
+      "b": "Salir de fiesta y divertirse mucho, celebrando en grande.",
+      "c": "Celebrar un logro personal con una fiesta íntima en casa."
+    },
+    "answer": "b",
+    "explanation": "Expresa una salida para divertirse de manera exagerada; es informal y suele implicar celebración nocturna con amigos, no una simple salida social.",
+    "prompt": "Propón una situación breve donde el alumno use la expresión de forma natural."
+  },
+  {
+    "id": 5054,
+    "label": "get away clean",
+    "examples": [
+      "The thief managed to get away clean after the heist.",
+      "They hoped to get away clean, but the alarm woke neighbors.",
+      "If you plan it well, you could get away clean."
+    ],
+    "options": {
+      "a": "evadir la ley sin ser detectado",
+      "b": "escapar sin ser atrapado",
+      "c": "escapar sin dejar rastro"
+    },
+    "answer": "b",
+    "explanation": "Uso informal para indicar escapar sin ser capturado o castigado; ojo con contextos legales y con la idea de evitar consecuencias en general.",
+    "prompt": "Propón una situación breve y original donde alguien logre salir sin ser atrapado."
+  },
+  {
+    "id": 5055,
+    "label": "come alive",
+    "examples": [
+      "The crowd came alive when the singer started.",
+      "The party came alive once the DJ played her favorite song.",
+      "When the lights dimmed, the theater came alive."
+    ],
+    "options": {
+      "a": "Adoptar una actitud más seria y contenida.",
+      "b": "Despertar una nueva enfermedad o malestar.",
+      "c": "Animarse y cobrar vida; volverse más activo o enérgico."
+    },
+    "answer": "c",
+    "explanation": "Se usa para indicar que alguien o algo se vuelve más dinámico y lleno de energía, no para cambios literales de estado físico; suele ocurrir con música, entretenimiento o ambiente social.",
+    "prompt": "Propón una situación breve donde describas algo que cobra vida de forma natural utilizando la expresión."
+  },
+  {
+    "id": 5056,
+    "label": "toot ones own horn",
+    "examples": [
+      "He keeps boasting about his promotion, which annoys the team.",
+      "She tooted her own horn after finishing the project ahead of schedule.",
+      "They don't like to toot their own horn, but their awards speak for them."
+    ],
+    "options": {
+      "a": "Elogiar a los demás para destacar sus propias virtudes.",
+      "b": "alardear de sus logros; presumir de sí mismo",
+      "c": "Expresar gratitud de forma exagerada hacia alguien."
+    },
+    "answer": "b",
+    "explanation": "Se usa para describir a alguien que presume de sus logros propios; suele tener connotación negativa en contextos sociales o profesionales.",
+    "prompt": "Propón una situación breve y original en la que alguien use la expresión para describir a una persona que presume de sus logros."
+  },
+  {
+    "id": 5057,
+    "label": "stick to ones guns",
+    "examples": [
+      "She sticks to her guns and refuses to change her mind about the project.",
+      "Even under pressure, he sticks to his guns, insisting the plan will work.",
+      "They stuck to their guns despite the critics' doubts."
+    ],
+    "options": {
+      "a": "mantenerse firme en una postura o decisión, resistiendo la presión para cambiarla",
+      "b": "cambiar de opinión fácilmente cuando surge una mejor idea",
+      "c": "convencer a los demás de que están equivocados"
+    },
+    "answer": "a",
+    "explanation": "Se usa para resaltar la firmeza ante la presión. No implica rigidez gratuita, sino sostener una decisión razonada frente a la crítica.",
+    "prompt": "Describe una situación breve en la que mantengas tu postura ante la presión de otros y uses la expresión en inglés."
+  },
+  {
+    "id": 5058,
+    "label": "get the ball rolling",
+    "examples": [
+      "We need a meeting to get the ball rolling on the new project.",
+      "Her idea got the ball rolling last week.",
+      "Starting with a small pilot can get the ball rolling."
+    ],
+    "options": {
+      "a": "iniciar una acción o proyecto; dar inicio a algo",
+      "b": "Acelerar un proceso ya en marcha.",
+      "c": "Mantener a alguien ocupado sin cambiar nada."
+    },
+    "answer": "a",
+    "explanation": "Se usa para indicar el inicio de una acción o proyecto. Puede confundirse con acelerar algo ya existente o con ideas que no implican acción concreta.",
+    "prompt": "Propón una situación breve y específica donde alguien inicie un proyecto o actividad usando la expresión."
+  },
+  {
+    "id": 5059,
+    "label": "mind ones ps and qs",
+    "examples": [
+      "You should mind your p's and q's at the dinner table.",
+      "She minded her p's and q's when meeting the king.",
+      "If you mind your p's and q's, people will take you more seriously."
+    ],
+    "options": {
+      "a": "Gastar dinero sin medir en celebraciones.",
+      "b": "Olvidarse de las normas de etiqueta por completo.",
+      "c": "Ser cuidadoso con las palabras y modales; comportarse con tacto y respeto."
+    },
+    "answer": "c",
+    "explanation": "Se usa para indicate that someone should be careful with manners and language in social settings; not solo decir se debe ser educado, sino prestar atención a detalles sociales.",
+    "prompt": "Propón una situación breve donde el alumno use la expresión de forma natural."
+  },
+  {
+    "id": 5060,
+    "label": "hang on",
+    "examples": [
+      "Hang on a second while I grab my coat.",
+      "She hung on to the railing during the storm.",
+      "They'll hang on until they finish the project."
+    ],
+    "options": {
+      "a": "Colgar un objeto en la pared.",
+      "b": "Conectarse para hacer una llamada telefónica.",
+      "c": "Esperar un momento o mantener la paciencia, seguir adelante a pesar de las dificultades."
+    },
+    "answer": "c",
+    "explanation": "Hang on se usa para pedir paciencia o para indicar que alguien debe esperar; también puede significar aferrarse a algo o continuar a pesar de las molestias. Evita confundir con el sentido de colgar físicamente o de establecer una llamada.",
+    "prompt": "Propón una situación breve y original en la que uses la expresión de forma natural."
+  },
+  {
+    "id": 5061,
+    "label": "give it ones best shot",
+    "examples": [
+      "She decided to give it her best shot at the interview.",
+      "I'll give it my best shot and fix it later.",
+      "They gave it their best shot, but the project failed."
+    ],
+    "options": {
+      "a": "dar lo mejor de uno mismo para lograr algo; esforzarse al máximo",
+      "b": "Intentar algo sin pensar y sin planear.",
+      "c": "Renunciar ante la primera dificultad."
+    },
+    "answer": "a",
+    "explanation": "Se usa para expresar que alguien se esfuerza al máximo para lograr un resultado, sin garantizar el éxito. Puede implicar esfuerzo real incluso si el resultado no es favorable.",
+    "prompt": "Escribe una situación breve donde muestres que alguien da su mejor esfuerzo en una tarea concreta usando la expresión."
+  },
+  {
+    "id": 5062,
+    "label": "make ends meet",
+    "examples": [
+      "Many families struggle to make ends meet after the layoffs.",
+      "Last year they barely made ends meet, but they saved a little.",
+      "If prices rise, they will have to work overtime to make ends meet."
+    ],
+    "options": {
+      "a": "Conseguir ingresos extra para invertir en un negocio propio.",
+      "b": "Gastar más de lo necesario para vivir lujosamente.",
+      "c": "Llegar a fin de mes cubriendo los gastos básicos con ingresos limitados"
+    },
+    "answer": "c",
+    "explanation": "Se refiere a equilibrar ingresos y gastos para no quedarse sin dinero. Puede ser confuso con expresiones similares, pero se centra en sobrevivir económicamente con lo que se tiene.",
+    "prompt": "Propón una situación breve en la que describas cómo haces para cubrir tus gastos mensuales usando la expresión."
+  },
+  {
+    "id": 5063,
+    "label": "get the jump on someone",
+    "examples": [
+      "We got the jump on them by arriving early.",
+      "She will get the jump on her rivals by finishing first.",
+      "They had gotten the jump on everyone by revealing the plan first."
+    ],
+    "options": {
+      "a": "Aprovecharse de alguien adelantándose para obtener una ventaja.",
+      "b": "Llegar tarde para evitar responsabilidades.",
+      "c": "Imitar a alguien para confundirse con él."
+    },
+    "answer": "a",
+    "explanation": "Se usa cuando alguien toma la delantera ante otros para obtener una ventaja, a veces sin que se den cuenta. Evita confundir con simple rapidez; implica anticipación deliberada.",
+    "prompt": "Describe una mini-situación original utilizando la expresión dada."
+  },
+  {
+    "id": 5064,
+    "label": "pull strings",
+    "examples": [
+      "She managed to get tickets by pulling strings with the organizer.",
+      "They pulled strings to secure a last-minute meeting.",
+      "If you pull strings, you won't earn respect."
+    ],
+    "options": {
+      "a": "Obtener algo mediante un esfuerzo directo y honesto.",
+      "b": "Usar influencias o conexiones para lograr algo",
+      "c": "Jalar una cuerda para mover objetos."
+    },
+    "answer": "b",
+    "explanation": "La expresión describe usar contactos o influencias para obtener un resultado, no el esfuerzo personal directo; puede sonar manipuladora en ciertos contextos.",
+    "prompt": "Propón una situación breve donde como hablante hagas uso de esa idea de influencias para lograr un objetivo."
+  },
+  {
+    "id": 5065,
+    "label": "spread oneself too thin",
+    "examples": [
+      "If you spread yourself too thin, you burn out.",
+      "She learned not to spread herself too thin when starting a new job.",
+      "Before finals, he refused to spread himself too thin across extra classes."
+    ],
+    "options": {
+      "a": "Concentrarse en una única tarea para mejorar su calidad.",
+      "b": "Sobrecargarse de responsabilidades; asumir demasiadas tareas a la vez.",
+      "c": "Hacerse cargo de menos responsabilidades para evitar estrés."
+    },
+    "answer": "b",
+    "explanation": "La expresión significa comprometerse con demasiadas actividades a la vez, lo que suele generar agotamiento o desempeño pobre. Se usa para enfatizar el límite entre gestionar bien la carga y excederse.",
+    "prompt": "Propón una situación breve en la que uses la expresión spread oneself too thin de forma natural."
+  },
+  {
+    "id": 5066,
+    "label": "go to bat for someone",
+    "examples": [
+      "When her colleague was unfairly blamed, he decided to go to bat for her.",
+      "I promised to go to bat for my friend during the job interview.",
+      "They will go to bat for the team if management questions their motives."
+    ],
+    "options": {
+      "a": "Defenderse a sí mismo ante una acusación.",
+      "b": "Hacer algo sin consultar a nadie.",
+      "c": "Defender o respaldar a alguien ante una crítica o dificultad."
+    },
+    "answer": "c",
+    "explanation": "Se usa para describir apoyar activamente a alguien ante un problema, conflicto o acusación. No es simplemente respaldarlo de forma pasiva; implica acción concreta y defensa explícita.",
+    "prompt": "Propón una situación breve en la que alguien ofrece apoyo activo a otra persona ante un problema o juicio problemático."
+  },
+  {
+    "id": 5067,
+    "label": "duck soup",
+    "examples": [
+      "Getting this job was duck soup.",
+      "The math test became duck soup after practice.",
+      "Cooking dinner tonight felt like duck soup, honestly."
+    ],
+    "options": {
+      "a": "una expresión para describir un reto difícil.",
+      "b": "algo muy fácil de lograr",
+      "c": "una sopa de pato tradicional."
+    },
+    "answer": "b",
+    "explanation": "Es un modismo que significa que algo es extremadamente fácil de hacer. Se usa en contextos informales y no se refiere literalmente a patos o a la sopa.",
+    "prompt": "Propón una situación breve y específica en la que alguien diga que algo es 'duck soup'."
+  },
+  {
+    "id": 5068,
+    "label": "money talks",
+    "examples": [
+      "If you want the project approved, money talks more than promises.",
+      "In some markets, money talks, swaying decisions faster than reports.",
+      "The fundraiser showed that money talks, securing sponsors after a brief meeting."
+    ],
+    "options": {
+      "a": "El dinero tiene influencia y puede influir en decisiones o resultados.",
+      "b": "La riqueza garantiza la felicidad y el éxito personal permanente.",
+      "c": "Con dinero se compra cualquier conocimiento o habilidad."
+    },
+    "answer": "a",
+    "explanation": "money talks es un modismo que señala que el dinero puede ejercer influencia en decisiones. No implica que el dinero ‘hable’ literalmente, y su uso suele sugerir un poder relativo en contextos prácticos.",
+    "prompt": "Propón una situación breve donde uses la expresión money talks de forma natural."
+  },
+  {
+    "id": 5069,
+    "label": "let sleeping dogs lie",
+    "examples": [
+      "If you want to avoid trouble, let sleeping dogs lie and stay quiet.",
+      "He decided to let sleeping dogs lie after the argument last night.",
+      "We should let sleeping dogs lie rather than reopen old disputes."
+    ],
+    "options": {
+      "a": "Provocar problemas intencionadamente para forzar un resultado inmediato.",
+      "b": "Forzar una solución rápida ante cualquier conflicto.",
+      "c": "No provocar problemas ni reabrir conflictos; dejar las cosas como están para evitar complicaciones."
+    },
+    "answer": "c",
+    "explanation": "Se usa para aconsejar no iniciar ni reabrir temas que podrían generar problemas; transmite la idea de evitar conflictos innecesarios manteniendo la situación tal como está.",
+    "prompt": "Escribe una mini-situación original en la que uses la expresión let sleeping dogs lie para evitar complicaciones."
+  },
+  {
+    "id": 5070,
+    "label": "shape up or ship out",
+    "examples": [
+      "If you don't shape up, you'll ship out.",
+      "He warned us: shape up or ship out.",
+      "If he doesn't shape up, he'll ship out soon."
+    ],
+    "options": {
+      "a": "Conjunto de reglas para organizar un equipo.",
+      "b": "Advertencia de comportarse adecuadamente o abandonar la posición o la situación.",
+      "c": "Frase que describe el proceso de formación de un objeto."
+    },
+    "answer": "b",
+    "explanation": "Es un modismo contundente que se usa para indicar que alguien debe mejorar su comportamiento o podría ser expulsado; puede sonar duro en entornos laborales o grupales, por lo que conviene contextualizarlo.",
+    "prompt": "Propón una situación breve donde alguien deba usar la expresión en inglés para dar un ultimátum."
+  },
+  {
+    "id": 5071,
+    "label": "different strokes for different folks",
+    "examples": [
+      "Different strokes for different folks means people like different things.",
+      "When planning a party, remember: different strokes for different folks.",
+      "She shrugged, saying, 'We have different tastes; different strokes for different folks'."
+    ],
+    "options": {
+      "a": "Abandonar tus propias preferencias para complacer a los demás.",
+      "b": "Cada persona tiene gustos, intereses o enfoques distintos.",
+      "c": "Expresar que todas las personas deben hacer lo mismo."
+    },
+    "answer": "b",
+    "explanation": "Se usa para señalar que las personas pueden preferir cosas distintas sin que haya un único modo correcto; evita imponer tus gustos. Ten cuidado de no interpretar como falta de juicio hacia otros, sino como reconocimiento de diversidad.",
+    "prompt": "Escribe una mini-situación original donde utilices la expresión de forma natural."
+  },
+  {
+    "id": 5072,
+    "label": "bark worse than ones bite",
+    "examples": [
+      "Her bark is worse than her bite, so people fear her at first.",
+      "The coach warned that his bark was worse than his bite, yet discipline followed.",
+      "In meetings, he often threatens changes; still, his bark is worse than his bite."
+    ],
+    "options": {
+      "a": "expresión que indica que la amenaza verbal de alguien es mayor que sus acciones.",
+      "b": "frase que indica que las amenazas de alguien siempre se cumplen.",
+      "c": "expresión que sugiere que una persona siempre actúa con valentía y sin temor."
+    },
+    "answer": "a",
+    "explanation": "Se usa para señalar que alguien puede parecer más intimidante de lo que realmente es; contextualízalo en situaciones de negociación o conflicto para evitar malentendidos.",
+    "prompt": "Propón una situación breve donde el alumno use la expresión de forma natural."
+  },
+  {
+    "id": 5073,
+    "label": "eyes are bigger than ones stomach",
+    "examples": [
+      "At the buffet, we realized our eyes were bigger than our stomach.",
+      "She bought snacks, but her eyes were bigger than her stomach.",
+      "Last night, my eyes had been bigger than my stomach after the party."
+    ],
+    "options": {
+      "a": "Se usa para describir a alguien que quiere comer menos de lo necesario.",
+      "b": "Se usa para expresar que alguien toma más comida de la que puede comer.",
+      "c": "Se aplica cuando alguien mira la comida pero no la come."
+    },
+    "answer": "b",
+    "explanation": "Es un refrán que advierte sobre el exceso al comer; cuidado con el matiz de que la acción está motivada por el impulso y no por la necesidad real.",
+    "prompt": "Propón una situación breve donde la persona use la expresión de forma natural."
+  },
+  {
+    "id": 5074,
+    "label": "put ones money where ones mouth is",
+    "examples": [
+      "If he promised to donate, he should put his money where his mouth is and donate today.",
+      "She always talked about saving the gym, but she finally put her money where her mouth is.",
+      "They will put their money where their mouths are by funding the project."
+    ],
+    "options": {
+      "a": "Gastar dinero para demostrar poder personal sin relación con lo dicho.",
+      "b": "Prometer sin intención de cumplir y no actuar para respaldar la promesa.",
+      "c": "Cumplir con lo dicho, respaldar con hechos las palabras declaradas."
+    },
+    "answer": "c",
+    "explanation": "Se usa para señalar la congruencia entre palabras y acciones: la persona debe respaldar lo que afirma con hechos concretos. Puede generar ironía si alguien habla mucho pero actúa poco.",
+    "prompt": "Escribe una mini-situación específica que use la expresión en inglés."
+  },
+  {
+    "id": 5075,
+    "label": "the early bird catches the worm",
+    "examples": [
+      "If you wake up early, the early bird catches the worm.",
+      "She showed up before dawn; the early bird catches the worm.",
+      "We finished our project first because we started early—the early bird catches the worm."
+    ],
+    "options": {
+      "a": "El conocimiento es más valioso que la acción.",
+      "b": "La suerte favorece a quienes esperan.",
+      "c": "Quien madruga obtiene ventajas."
+    },
+    "answer": "c",
+    "explanation": "Se usa para enfatizar la iniciativa y la puntualidad: actuar temprano puede traer beneficios. No es una promesa absoluta; hay contextos donde otros factores importan.",
+    "prompt": "Escribe una mini-situación original en la que uses la expresión de forma natural."
+  },
+  {
+    "id": 5076,
+    "label": "people who live in glass houses shouldnt throw stones",
+    "examples": [
+      "People who live in glass houses shouldn't throw stones.",
+      "She's sharp, but people who live in glass houses shouldn't throw stones.",
+      "If you criticize others, remember people who live in glass houses shouldn't throw stones."
+    ],
+    "options": {
+      "a": "Describe a alguien que evita discutir sus propios errores y se excusa con facilidad.",
+      "b": "Se aplica a personas que esperan que nadie critique sus acciones, por ser perfectas.",
+      "c": "No critiques a otros si tú también tienes defectos."
+    },
+    "answer": "c",
+    "explanation": "Uso para señalar hipocresía: criticar a otros cuando uno mismo tiene fallos. Evita matizar como una verdad absoluta; suele usarse para fomentar autocrítica.",
+    "prompt": "Propón una situación breve donde alguien comenta la expresión para señalar la hipocresía de otra persona."
+  },
+  {
+    "id": 5077,
+    "label": "alls well that ends well",
+    "examples": [
+      "The project was chaotic, but all's well that ends well.",
+      "They argued for weeks, yet all's well that ends well.",
+      "If we fix the bugs tonight, all's well that ends well."
+    ],
+    "options": {
+      "a": "Significa que se debe abandonar una tarea si las cosas se complican.",
+      "b": "Indica que el proceso es irrelevante si el final es favorable.",
+      "c": "Al final todo salió bien; lo importante es que el desenlace sea favorable."
+    },
+    "answer": "c",
+    "explanation": "Se usa para valorar resoluciones exitosas pese a las dificultades; suele referirse al resultado final más que al camino recorrido. Puede inducir a subestimar el proceso.",
+    "prompt": "Propón una situación breve donde utilices la expresión de forma natural."
+  }
+]
