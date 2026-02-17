@@ -18563,7 +18563,7 @@
     "explanation": "Se usa para enfatizar la intensidad o la cantidad en un contexto informal; puede variar en registro y no siempre se aplica en situaciones literales.",
     "prompt": "Propón una situación breve donde uses la expresión de forma natural."
   },
-    {
+  {
     "id": 4595,
     "label": "down into",
     "examples": [
@@ -21795,7 +21795,7 @@
   },
   {
     "id": 4309,
-    "label": "equipment plugs into",
+    "label": "plugs into",
     "examples": [
       "The new equipment plugs into the wall socket.",
       "During setup, the mixer plugs into power before turning on.",
@@ -25396,23 +25396,6 @@
     "answer": "c",
     "explanation": "Fonder es el comparativo de 'fond' aplicado a emociones; se usa para expresar que se siente más cariño hacia algo o alguien. Evita confundirlo con 'fond' como base de otras palabras o falsos cognados.",
     "prompt": "Propón una situación breve donde alguien describa por qué empieza a sentirse más fonder de una cosa o persona."
-  },
-  {
-    "id": 1245,
-    "label": "food",
-    "examples": [
-      "We need more food for the trip.",
-      "The food was prepared by my sister last night.",
-      "If I eat too much junk food, I feel sluggish."
-    ],
-    "options": {
-      "a": "Bebida nutritiva para recuperar energías.",
-      "b": "Conjunto de utensilios usados para cocinar.",
-      "c": "Sustancia consumible para nutrirse; lo que se ingiere para alimentarse."
-    },
-    "answer": "c",
-    "explanation": "Food se refiere a la sustancia que se ingiere para obtener nutrición, no solo a comidas concretas. Puede referirse a cualquier tipo de comida, sustancia o provisión alimentaria.",
-    "prompt": "Propón una situación breve donde utilices la palabra en un contexto natural."
   },
   {
     "id": 4757,
@@ -32403,7 +32386,7 @@
   },
   {
     "id": 4377,
-    "label": "include someone in",
+    "label": "include (alguien) in",
     "examples": [
       "She included him in the meeting via a quick email.",
       "They will include you in the project if you join this week.",
@@ -32961,23 +32944,6 @@
     "answer": "a",
     "explanation": "Se refiere a hechos, datos o conocimientos relevantes. Se usa tanto en contextos generales como técnicos para indicar lo que se sabe sobre un tema.",
     "prompt": "Describe una situación breve en la que utilices la palabra en inglés de forma natural."
-  },
-  {
-    "id": 4378,
-    "label": "information stored on",
-    "examples": [
-      "The information stored on my phone backs up every night.",
-      "She checked the information stored on the USB drive before leaving.",
-      "The information stored on the cloud is encrypted."
-    ],
-    "options": {
-      "a": "información que se obtiene al revisar manuales",
-      "b": "información que se transmite a otro dispositivo",
-      "c": "información guardada en un dispositivo o medio de almacenamiento"
-    },
-    "answer": "c",
-    "explanation": "Se refiere a datos guardados en un soporte tecnológico. Ten cuidado con el matiz de 'store' como 'guardar' vs. otros sinónimos y con la idea de almacenamiento vs transferencia.",
-    "prompt": "Propón una situación breve y original donde uses la frase exactamente."
   },
   {
     "id": 1553,
@@ -33862,23 +33828,6 @@
     "answer": "c",
     "explanation": "La palabra abarca dos usos comunes: curiosidad/atención hacia algo y beneficio económico de una inversión. Evita confundirla con emociones o deberes.",
     "prompt": "Propón una situación breve donde describas algo que te motive o llame la atención, usando esta palabra de forma natural."
-  },
-  {
-    "id": 4380,
-    "label": "interest (alguien) in",
-    "examples": [
-      "He has a keen interest in jazz.",
-      "They took an interest in the project last year.",
-      "I'm developing an interest in learning Spanish."
-    ],
-    "options": {
-      "a": "Interés que alguien siente por un tema, actividad o persona.",
-      "b": "Interés económico generado por una inversión o negocio.",
-      "c": "Obligación o deber moral de alguien hacia otra persona."
-    },
-    "answer": "a",
-    "explanation": "Nombra un interés o curiosidad por algo; usa 'in' para indicar el objeto de ese interés. No confundir con 'interesting' (interesante).",
-    "prompt": "Propón una situación breve en la que alguien muestre su interés por algo usando la palabra."
   },
   {
     "id": 1604,
@@ -43844,11 +43793,11 @@
   },
   {
     "id": 4421,
-    "label": "mr holroyd reeled off",
+    "label": "reel off",
     "examples": [
       "Mr Holroyd reeled off a long list of names.",
-      "During the meeting, Mr Holroyd reeled off statistics.",
-      "As the minutes passed, Mr Holroyd reeled off details."
+      "She can reel off the capitals of all the countries in Europe.",
+      "He can reel off the periodic table with ease."
     ],
     "options": {
       "a": "Se tomó su tiempo para elegir palabras y pausas.",
@@ -45254,23 +45203,6 @@
     "prompt": "Propón una situación breve y específica donde puedas usar la palabra en inglés de forma natural."
   },
   {
-    "id": 2179,
-    "label": "night",
-    "examples": [
-      "Last night I watched a movie with friends.",
-      "We stayed up late last night, talking on the porch.",
-      "It's at night that the stars look brightest."
-    ],
-    "options": {
-      "a": "Período de oscuridad entre la puesta y la salida del sol.",
-      "b": "Momento de oscuridad total durante el día.",
-      "c": "Período de luz solar entre el atardecer y el amanecer."
-    },
-    "answer": "a",
-    "explanation": "Night se refiere al periodo de oscuridad natural. Úsalo para describir lo ocurrido después del atardecer o durante la madrugada; evita confundirlo con 'evening' o 'morning'.",
-    "prompt": "Propón una situación breve y original en la que uses la palabra de forma natural."
-  },
-  {
     "id": 2180,
     "label": "nightclub",
     "examples": [
@@ -46614,40 +46546,6 @@
     "prompt": "Propón una situación breve en la que alguien necesite cerrar la cremallera de una prenda usando una guía natural."
   },
   {
-    "id": 4432,
-    "label": "of clothing longer by",
-    "examples": [
-      "The tailor will let out the hem to fit the pants.",
-      "She let out the side seams and the dress became longer.",
-      "They have let out the bottom edge to accommodate growth."
-    ],
-    "options": {
-      "a": "acortar una prenda quitando tela",
-      "b": "hacer que una prenda sea más larga dejando que la costura permita más tela",
-      "c": "cortar la tela para ajustar la talla"
-    },
-    "answer": "b",
-    "explanation": "Let out se usa para alargar una prenda aumentando la tela disponible; suele confundirse con ‘let’ en otros contextos de costura. No implica recortar, sino ampliar.",
-    "prompt": "Propón una situación breve en la que alguien necesite usar la expresión para que la prenda quede más larga."
-  },
-  {
-    "id": 4433,
-    "label": "of events leads up",
-    "examples": [
-      "The days leading up to the launch were chaotic.",
-      "A series of delays led up to the final setback.",
-      "What led up to the decision remains unclear."
-    ],
-    "options": {
-      "a": "conjunto de resultados que ocurren después de algo",
-      "b": "la forma en que algo sucede actualmente",
-      "c": "conjunto de acontecimientos que preceden a algo y contribuyen a que ocurra"
-    },
-    "answer": "c",
-    "explanation": "Se usa para referirse a los eventos previos que conducen a un desenlace; no implica el resultado inmediato, sino lo que sucede antes.",
-    "prompt": "Propón una situación breve en la que se describan los eventos que llevaron a un desenlace y usa la expresión en inglés."
-  },
-  {
     "id": 2254,
     "label": "offence",
     "examples": [
@@ -46765,23 +46663,6 @@
     "answer": "a",
     "explanation": "Officer se usa para referirse a alguien con autoridad, especialmente en policía o ejército, o a quien ocupa un cargo de responsabilidad. No debe confundirse con official, que es más general y puede no implicar autoridad formal específica.",
     "prompt": "Propón una situación breve donde declares a una persona como officer y muestres por qué posee esa autoridad de forma natural."
-  },
-  {
-    "id": 4434,
-    "label": "offices to join in",
-    "examples": [
-      "She decided to join in the charity run last weekend.",
-      "If you see us practicing, feel free to join in.",
-      "They have joined in the project since Monday."
-    ],
-    "options": {
-      "a": "empezar una conversación de forma aislada.",
-      "b": "organizar un evento sin participación de otros.",
-      "c": "participar, tomar parte en una actividad junto a otras personas"
-    },
-    "answer": "c",
-    "explanation": "join in se usa para participar en algo que ya está ocurriendo o en curso, a menudo de forma espontánea e informal. No es lo mismo que 'join' aislando a otros; implica involucrarse en lo que ya está pasando.",
-    "prompt": "Propón una situación breve en la que alguien decida participar en una actividad de grupo."
   },
   {
     "id": 2261,
@@ -47802,23 +47683,6 @@
     "answer": "a",
     "explanation": "Originally se usa para indicar el estado inicial o el plan antes de cambios. Confunde a veces si se piensa que implica futuro o cambios ya realizados.",
     "prompt": "Propón una situación breve y específica en la que uses la palabra en inglés de forma natural."
-  },
-  {
-    "id": 4447,
-    "label": "other verbs with off",
-    "examples": [
-      "Please switch off the lights before you leave.",
-      "He turned off the engine and walked away.",
-      "They cut off the electricity after the storm."
-    ],
-    "options": {
-      "a": "emite un sonido o luz, como un faro o alarma",
-      "b": "describe la acción de encender de nuevo",
-      "c": "apagar o desconectar algo usando la partícula off (p. ej., interruptor, suministro eléctrico, etc.)"
-    },
-    "answer": "c",
-    "explanation": "off se usa para indicar la acción de apagar o desconectar. Presta atención a esos verbos compuestos y a la necesidad de un objeto directo.",
-    "prompt": "Propón una situación breve donde alguien use una expresión con off de forma natural para apagar o desconectar algo."
   },
   {
     "id": 2312,
@@ -50167,23 +50031,6 @@
     "prompt": "Escribe una mini-situación original y específica que muestre a qué personas te refieres en un lugar."
   },
   {
-    "id": 4457,
-    "label": "people often talk about",
-    "examples": [
-      "In the meeting, people often talk about the project timeline.",
-      "Online forums show that people often talk about travel experiences.",
-      "We noticed that people often talk about cultural differences during exchanges."
-    ],
-    "options": {
-      "a": "Indica que una persona está buscando activamente información.",
-      "b": "Se utiliza para describir que alguien viaja mucho.",
-      "c": "La gente suele mencionar o discutir acerca de un tema."
-    },
-    "answer": "c",
-    "explanation": "Expresa temas que suelen discutirse o mencionarse; no se refiere a una acción de viajar ni a buscar información específica. Cuidado con no confundirlo con verbos similares de conversación aislados.",
-    "prompt": "Propón una mini-situación original y específica en la que uses la expresión de forma natural."
-  },
-  {
     "id": 2437,
     "label": "pep",
     "examples": [
@@ -51389,23 +51236,6 @@
     "answer": "b",
     "explanation": "place se usa principalmente como sustantivo para indicar ubicación o sitio. También es verbo (to place) que significa 'colocar'. Ten cuidado con diferencias de registro entre uso de lugar y acción de colocar.",
     "prompt": "Propón una situación breve donde utilices place de forma natural."
-  },
-  {
-    "id": 4470,
-    "label": "place or places in",
-    "examples": [
-      "Please place the keys on the table.",
-      "This is a great place to study.",
-      "She placed the book in the cabinet."
-    ],
-    "options": {
-      "a": "Lugar o ubicación; verbo: colocar o situar algo en un sitio.",
-      "b": "Destino final de un objeto, sin movimiento.",
-      "c": "Una emoción intensa que impulsa una acción."
-    },
-    "answer": "a",
-    "explanation": "Se usa como sustantivo para referirse a un lugar y como verbo para indicar que algo se coloca en un sitio; el significado cambia según el contexto y la preposición.",
-    "prompt": "Escribe una mini-situación en inglés donde uses el término para referirse a un lugar y para la acción de colocar."
   },
   {
     "id": 2495,
@@ -53073,28 +52903,28 @@
     "explanation": "Se usa para expresar aprobación o reconocimiento. No confundir con recompensa material ni con crítica.",
     "prompt": "Describe una mini-situación original y específica en la que uses la palabra de forma natural."
   },
-{
-  "id": 4476,
-  "label": "prank",
-  "examples": [
-    "They played a prank on their friend by hiding his phone.",
-    "The prank involved putting a fake spider in the drawer.",
-    "She laughed after successfully pulling off the prank."
-  ],
-  "options": {
-    "a": "broma pesada que causa un daño real",
-    "b": "broma inofensiva que no tiene malas intenciones",
-    "c": "engaño breve diseñado para confundir sin dañar a nadie"
+  {
+    "id": 4476,
+    "label": "prank",
+    "examples": [
+      "They played a prank on their friend by hiding his phone.",
+      "The prank involved putting a fake spider in the drawer.",
+      "She laughed after successfully pulling off the prank."
+    ],
+    "options": {
+      "a": "broma pesada que causa un daño real",
+      "b": "broma inofensiva que no tiene malas intenciones",
+      "c": "engaño breve diseñado para confundir sin dañar a nadie"
+    },
+    "answer": "c",
+    "explanation": "Un \"prank\" es una broma o engaño breve cuyo objetivo es sorprender o confundir de forma divertida, sin intención de causar daño.",
+    "prompt": "Propón una situación breve donde uses la expresión en inglés de forma natural."
   },
-  "answer": "c",
-  "explanation": "Un \"prank\" es una broma o engaño breve cuyo objetivo es sorprender o confundir de forma divertida, sin intención de causar daño.",
-  "prompt": "Propón una situación breve donde uses la expresión en inglés de forma natural."
-},
-{
-  "id": 2582,
-  "label": "prawn",
-  "examples": [
-    "I grilled a prawn with lemon and herbs for lunch.",
+  {
+    "id": 2582,
+    "label": "prawn",
+    "examples": [
+      "I grilled a prawn with lemon and herbs for lunch.",
       "He bought a fresh prawn and cooked it quickly.",
       "The chef spoke about the prawn season and regional varieties."
     ],
@@ -53651,7 +53481,7 @@
     "explanation": "Indica que algo ocurrió antes de un punto de referencia en el tiempo. Su uso típico es señalizar una información previa a lo ya mencionado o al momento presente, con énfasis en el orden temporal.",
     "prompt": "Propón una situación breve en la que se indique algo que ocurrió antes de la acción principal, usando la palabra adecuadamente."
   },
-    {
+  {
     "id": 4592,
     "label": "price by",
     "examples": [
@@ -58784,23 +58614,6 @@
     "answer": "b",
     "explanation": "Se usa cuando se realiza la misma acción otra vez o se repite una situación para confirmar. No implica necesariamente cambiar o detallar; es más bien la acción de volver a hacer.",
     "prompt": "Propón una situación breve donde uses la palabra para describir que vas a hacer algo otra vez."
-  },
-  {
-    "id": 4496,
-    "label": "repeat something in",
-    "examples": [
-      "The teacher asked him to repeat something in English to practice pronunciation.",
-      "She had to repeat something in a quieter voice for the recording.",
-      "They will repeat something in writing to verify the math steps."
-    ],
-    "options": {
-      "a": "Expresar de nuevo una idea en un idioma o formato concreto.",
-      "b": "Modificar el contenido de un texto para cambiar su significado.",
-      "c": "Dar una explicación detallada de un tema."
-    },
-    "answer": "a",
-    "explanation": "Se usa para indicar que se dice o escribe algo nuevamente en un idioma o formato específico, útil para practicar claridad o precisión.",
-    "prompt": "Propón una mini-situación en la que utilices la expresión en inglés para indicar que repites algo en otro idioma o formato."
   },
   {
     "id": 2878,
@@ -66760,7 +66573,7 @@
   },
   {
     "id": 4538,
-    "label": "someone broke into",
+    "label": "(alguien) broke into",
     "examples": [
       "Last night, someone broke into my neighbor's garage.",
       "If someone broke into the office, the alarm would go off.",
@@ -66791,23 +66604,6 @@
     "answer": "a",
     "explanation": "Se usa para indicar el resultado final o logro obtenido al concluir un proceso o análisis. Puede sonar formal en informes o presentaciones.",
     "prompt": "Escribe una mini-situación original y específica en la que aparezca la expresión en inglés de forma natural."
-  },
-  {
-    "id": 4540,
-    "label": "someone else into",
-    "examples": [
-      "I managed to talk someone else into going to the concert.",
-      "She talked someone else into trying the new restaurant last night.",
-      "They will try to talk someone else into volunteering."
-    ],
-    "options": {
-      "a": "Hacer que alguien se interese por ti.",
-      "b": "Convencer a otra persona para que haga algo.",
-      "c": "Pagarle a alguien para que haga algo."
-    },
-    "answer": "b",
-    "explanation": "Se usa con verbos de persuasión como 'talk someone into doing something' para indicar convencer a otra persona de realizar una acción. Típicamente implica negociación o presión suave, no coerción.",
-    "prompt": "Escribe una mini-situación original en la que alguien logre convencer a otra persona para hacer algo."
   },
   {
     "id": 4541,
@@ -66896,7 +66692,7 @@
   },
   {
     "id": 4546,
-    "label": "something is caused by",
+    "label": "caused by",
     "examples": [
       "The accident was caused by slippery roads.",
       "Poor sleep is often caused by stress.",
@@ -69716,7 +69512,7 @@
     "explanation": "Stingy describe una actitud negativa hacia gastar o compartir. Es más fuerte que 'cheap' y gira en torno a la disposición a compartir o ayudar.",
     "prompt": "Propón una situación breve y original en la que el hablante muestre una actitud tacaña sin mencionar explícitamente la palabra."
   },
-    {
+  {
     "id": 4594,
     "label": "sting out",
     "examples": [
@@ -69835,7 +69631,7 @@
     "explanation": "Stole es el pasado simple de 'steal' y se usa para hechos completos en el pasado. Evita confundirlo con formas como 'stealing' (robando) o 'steal' (robar en presente).",
     "prompt": "Escribe una mini-situación original y específica que use la palabra 'stole'."
   },
-    {
+  {
     "id": 4590,
     "label": "stole away",
     "examples": [
@@ -70158,7 +69954,7 @@
     "explanation": "Se usa ‘stream’ para referirse a un flujo continuo de agua o al acto de transmitir contenidos; ten en cuenta que en contextos tecnológicos puede significar ‘transmitir en streaming’, distinto del sentido literal de agua.",
     "prompt": "Propón una situación breve donde el alumno use la palabra de forma natural."
   },
-    {
+  {
     "id": 4518,
     "label": "stretched out",
     "examples": [
@@ -72129,23 +71925,6 @@
     "answer": "b",
     "explanation": "Survive se usa para indicar continuar viviendo tras un peligro o dificultad, con énfasis en la vida; a veces se extiende a superar una adversidad, no solo a vencer a otros.",
     "prompt": "Propón una situación breve donde el alumno use la palabra de forma natural."
-  },
-  {
-    "id": 4578,
-    "label": "surviving through",
-    "examples": [
-      "She is surviving through the winter with little money.",
-      "They survived through the drought by collecting rainwater.",
-      "He will be surviving through exams thanks to daily practice."
-    ],
-    "options": {
-      "a": "Explicar el proceso de continuar viviendo en general sin referencia a un periodo concreto.",
-      "b": "lograr mantenerse vivo o seguir funcionando durante un periodo difícil",
-      "c": "Describir el proceso de recuperarse de una enfermedad específica."
-    },
-    "answer": "b",
-    "explanation": "Surviving through se usa para enfatizar la resistencia durante un periodo concreto y suele ir acompañado de un tiempo verbal continuo o de duración. Evita distinciones entre sobrevivir temporal vs. permanente; el foco es la continuidad durante esa situación.",
-    "prompt": "Propón una situación breve donde el alumno use la expresión en inglés de forma natural."
   },
   {
     "id": 3532,
@@ -74527,7 +74306,6 @@
     "explanation": "Theatre describe tanto el edificio donde se realizan obras como el arte teatral; es la forma británica de decir teatro. En algunos países se prefiere 'theater' para el inglés estadounidense.",
     "prompt": "Propón una situación breve y específica en la que se use la palabra en inglés."
   },
-
   {
     "id": 3647,
     "label": "theft",
@@ -74921,7 +74699,7 @@
   },
   {
     "id": 4603,
-    "label": "thomas i moved away",
+    "label": "moved away",
     "examples": [
       "Last year I moved away from my hometown.",
       "If you move away, you start over in a new city.",
@@ -75159,20 +74937,20 @@
   },
   {
     "id": 4604,
-    "label": "through or breaks through",
+    "label": "through",
     "examples": [
       "We walked through the forest and found a clearing.",
       "She read through the entire manual last night.",
-      "The team broke through the barrier and won the game."
+      "I worked through the problem step by step."
     ],
     "options": {
-      "a": "Indica la conclusión de una acción o evento.",
-      "b": "Preposición/adverbio que indica pasar de un lado a otro o mediante; también se usa para describir superar obstáculos o completar un proceso.",
-      "c": "Describe una acción que se realiza sin esfuerzo o dificultad."
+      "a": "Describe una acción que se realiza sin esfuerzo o dificultad.",
+      "b": "Preposición o adverbio que indica pasar de un lado a otro, o completar un proceso.",
+      "c": "Expresión que significa rendirse ante una dificultad."
     },
     "answer": "b",
-    "explanation": "Through se utiliza para movimiento físico a través de un lugar o para indicar el progreso en un proceso. En contextos de progreso, a menudo transmite la idea de superar obstáculos o lograr algo tras un esfuerzo.",
-    "prompt": "Escribe una mini-situación original en inglés que use la palabra de forma natural."
+    "explanation": "Through se usa para indicar movimiento de un punto a otro dentro de algo, o para expresar que un proceso se completa de principio a fin.",
+    "prompt": "Write an original mini-situation in English using the word naturally."
   },
   {
     "id": 3683,
@@ -84982,5 +84760,226 @@
     "answer": "c",
     "explanation": "Zoología se centra en los animales: su diversidad, clasificación y comportamiento. No abarca plantas ni humanos desde una perspectiva general de la biología.",
     "prompt": "Propón una situación breve en la que uses la palabra zoology para describir un interés o plan de estudio."
+  },
+    {
+    "id": 1629,
+    "label": "urban dwellers",
+    "examples": [
+      "Many urban dwellers prefer to use public transportation.",
+      "Urban dwellers often face noise and pollution in their daily lives.",
+      "The city has seen an increase in urban dwellers over the past decade."
+    ],
+    "options": {
+      "a": "Personas que viven en zonas urbanas.",
+      "b": "Individuos que trabajan en zonas rurales.",
+      "c": "Personas que disfrutan de la vida rural."
+    },
+    "answer": "a",
+    "explanation": "Se refiere a quienes residen en áreas urbanas, diferenciándose de los habitantes rurales. Es importante no confundirlo con personas que solo visitan la ciudad temporalmente.",
+    "prompt": "Escribe una breve situación en la que un urban dweller describe su día en la ciudad."
+  },
+    {
+    "id": 1627,
+    "label": "to relocate",
+    "examples": [
+      "They relocated to a new city last year.",
+      "We are planning to relocate our office next month.",
+      "After the earthquake, many residents relocated to safer areas."
+    ],
+    "options": {
+      "a": "Mover objetos de un lugar a otro.",
+      "b": "Cambiar de trabajo sin mudarse de lugar.",
+      "c": "Mudarse a otro lugar para vivir o trabajar."
+    },
+    "answer": "c",
+    "explanation": "El verbo 'to relocate' se usa principalmente para referirse a mudarse de residencia u oficina, no solo mover objetos o cambiar de empleo sin cambio de domicilio.",
+    "prompt": "Describe una situación en la que alguien tenga que mudarse a otra ciudad o país."
+  },
+    {
+    "id": 1626,
+    "label": "to commute",
+    "examples": [
+      "I commute to work by train every day.",
+      "She commuted from the suburbs to the city for her job.",
+      "They have been commuting for over an hour each way."
+    ],
+    "options": {
+      "a": "Desplazarse regularmente entre el hogar y el trabajo.",
+      "b": "Moverse rápidamente en una carrera.",
+      "c": "Viajar largas distancias por placer."
+    },
+    "answer": "a",
+    "explanation": "El verbo 'to commute' se usa para describir desplazamientos diarios o habituales entre casa y trabajo, no para viajes ocasionales o largos por ocio.",
+    "prompt": "Escribe una breve situación en la que alguien describa su rutina diaria de desplazamiento."
+  },
+    {
+    "id": 1624,
+    "label": "amenities",
+    "examples": [
+      "The hotel offers many amenities like a pool and gym.",
+      "During the meeting, they discussed the amenities provided to employees.",
+      "We chose the apartment because of its amenities and convenient location."
+    ],
+    "options": {
+      "a": "Servicios básicos necesarios para vivir.",
+      "b": "Servicios o instalaciones que mejoran la calidad de vida.",
+      "c": "Equipamiento técnico en una máquina o dispositivo."
+    },
+    "answer": "b",
+    "explanation": "Amenities se refiere a servicios o instalaciones que hacen la vida más cómoda o agradable, generalmente en hoteles, viviendas o lugares públicos. Es importante no confundirlo con necesidades básicas o componentes técnicos específicos.",
+    "prompt": "Describe una situación en la que alguien use las amenities de un hotel o lugar público."
+  },
+    {
+    "id": 1623,
+    "label": "overcrowding",
+    "examples": [
+      "The subway was overcrowded during rush hour.",
+      "Many students complain about overcrowding in the classroom.",
+      "The city struggles with overcrowding in popular tourist areas."
+    ],
+    "options": {
+      "a": "Situación en la que hay demasiadas personas en un espacio.",
+      "b": "Proceso de llenar un espacio vacío con objetos.",
+      "c": "Situación en la que un espacio se queda sin personas."
+    },
+    "answer": "a",
+    "explanation": "Overcrowding se refiere a la presencia excesiva de personas en un lugar, lo que puede causar incomodidad o problemas de capacidad. Es importante diferenciarlo de conceptos como llenado o vaciamiento de espacios.",
+    "prompt": "Describe una situación en la que haya demasiadas personas en un lugar y cómo afecta esa situación."
+  },
+    {
+    "id": 1621,
+    "label": "urban sprawl",
+    "examples": [
+      "The city has experienced rapid urban sprawl over the last decade.",
+      "Many environmentalists criticize urban sprawl for destroying natural habitats.",
+      "She moved to a suburb affected by urban sprawl, seeking more space."
+    ],
+    "options": {
+      "a": "Crecimiento planificado de las áreas urbanas dentro de la ciudad.",
+      "b": "Expansión descontrolada de las ciudades hacia áreas periféricas.",
+      "c": "La renovación de zonas antiguas en el centro de la ciudad."
+    },
+    "answer": "b",
+    "explanation": "El término se refiere a la expansión rápida y desorganizada de las ciudades, a menudo con impacto ambiental y social.",
+    "prompt": "Describe una situación en la que alguien observe o experimente los efectos de la urban sprawl."
+  },
+    {
+    "id": 1614,
+    "label": "landlord",
+    "examples": [
+      "The landlord raised the rent last month.",
+      "She contacted her landlord about the broken heater.",
+      "Many landlords prefer long-term tenants."
+    ],
+    "options": {
+      "a": "Empleado que trabaja en una propiedad.",
+      "b": "Propietario que alquila una vivienda a otra persona.",
+      "c": "Persona que busca un lugar para vivir."
+    },
+    "answer": "b",
+    "explanation": "El término 'landlord' se refiere al propietario de una propiedad que la alquila, no al inquilino ni a otros roles relacionados.",
+    "prompt": "Describe una situación en la que un inquilino habla con su landlord sobre un problema en la vivienda."
+  },
+    {
+    "id": 1613,
+    "label": "tenant",
+    "examples": [
+      "The tenant signed the lease yesterday.",
+      "She is a good tenant who pays rent on time.",
+      "They are looking for a new tenant for the apartment."
+    ],
+    "options": {
+      "a": "Persona que alquila una propiedad o espacio.",
+      "b": "Propietario que ofrece una propiedad en venta.",
+      "c": "Inquilino que vive en una casa propia."
+    },
+    "answer": "a",
+    "explanation": "El término 'tenant' se refiere a quien alquila, no a quien posee o vive en su propiedad propia. Es importante distinguirlo del propietario y del inquilino en sentido amplio.",
+    "prompt": "Describe una situación en la que alguien sea un buen o mal inquilino."
+  },
+    {
+    "id": 1612,
+    "label": "mortgage",
+    "examples": [
+      "They took out a mortgage to buy their house.",
+      "She paid off her mortgage last year.",
+      "He applied for a mortgage to finance his new car."
+    ],
+    "options": {
+      "a": "Préstamo bancario para comprar una vivienda, que se paga a largo plazo.",
+      "b": "Un documento legal que transfiere propiedad.",
+      "c": "Un tipo de inversión en bienes raíces sin préstamo."
+    },
+    "answer": "a",
+    "explanation": "El término 'mortgage' se refiere a un préstamo hipotecario, no a otros tipos de financiamiento o documentos. Es importante distinguirlo de otros conceptos relacionados con bienes raíces.",
+    "prompt": "Describe una situación en la que alguien obtiene o paga un mortgage para una propiedad."
+  },
+    {
+    "id": 1608,
+    "label": "burnout",
+    "examples": [
+      "She experienced burnout after working long hours for months.",
+      "Many teachers suffer from burnout at the end of the school year.",
+      "He is feeling burnout due to constant stress at work."
+    ],
+    "options": {
+      "a": "Estado de agotamiento físico y mental causado por estrés prolongado",
+      "b": "Una quemadura en la piel por calor",
+      "c": "Falta de motivación para aprender un idioma"
+    },
+    "answer": "a",
+    "explanation": "Burnout se refiere al agotamiento emocional y físico por estrés laboral o prolongado, no a lesiones físicas o desmotivación general.",
+    "prompt": "Describe una situación en la que alguien pueda sentirse burnout en su trabajo o estudio."
+  },
+    {
+    "id": 1607,
+    "label": "to unwind",
+    "examples": [
+      "After a long day at work, I like to unwind with a good book.",
+      "She unwound the string carefully to avoid breaking it.",
+      "They unwind by playing sports on the weekends."
+    ],
+    "options": {
+      "a": "Organizar un evento formal y estructurado.",
+      "b": "Enrollarse en una tarea complicada sin terminarla.",
+      "c": "Relajarse o liberar tensión después de una actividad intensa o estresante."
+    },
+    "answer": "c",
+    "explanation": "Unwind se usa principalmente para describir el acto de relajarse o aliviar el estrés, no para tareas físicas como desenrollar o actividades formales.",
+    "prompt": "Escribe una breve situación en la que alguien se relaje después de un día ocupado usando 'to unwind'."
+  },
+    {
+    "id": 1605,
+    "label": "self-esteem",
+    "examples": [
+      "She has high self-esteem after winning the award.",
+      "His self-esteem was hurt by the criticism.",
+      "Building self-esteem takes time and effort."
+    ],
+    "options": {
+      "a": "Valoración positiva que una persona tiene de sí misma.",
+      "b": "Sentimiento de superioridad respecto a los demás.",
+      "c": "Confianza excesiva en las habilidades de uno mismo."
+    },
+    "answer": "a",
+    "explanation": "El 'self-esteem' se refiere a cómo valoramos y respetamos nuestra propia persona, no a la confianza en habilidades específicas ni a sentimientos de superioridad.",
+    "prompt": "Describe una situación en la que alguien mejore su autoestima."
+  },
+    {
+    "id": 1601,
+    "label": "self-awareness",
+    "examples": [
+      "She has developed a strong sense of self-awareness over the years.",
+      "During meditation, he gained greater self-awareness about his reactions.",
+      "Self-awareness helps leaders understand how their behavior affects others."
+    ],
+    "options": {
+      "a": "Habilidad para influir en los demás mediante la persuasión.",
+      "b": "Capacidad de reconocer y comprender las propias emociones, pensamientos y comportamientos.",
+      "c": "Capacidad de recordar detalles específicos de experiencias pasadas."
+    },
+    "answer": "b",
+    "explanation": "Self-awareness se refiere a la capacidad de entenderse a uno mismo, incluyendo emociones y pensamientos, y es fundamental para el crecimiento personal y la regulación emocional.",
+    "prompt": "Escribe una situación en la que alguien se dé cuenta de algo importante sobre sí mismo."
   }
 ]
