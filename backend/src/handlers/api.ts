@@ -1117,13 +1117,13 @@ async function generateAssistanceAnswer(args: {
   if (conversationFeedback?.improvements?.length) {
     feedbackLines.push(`Mejoras sugeridas: ${conversationFeedback.improvements.join(' | ')}`);
   }
-  const systemPrompt = `Eres un tutor de inglés que responde en español de forma breve y accionable.
+  const systemPrompt = `Eres un tutor de inglés que responde en español de forma breve y accionable. Usa un lenguaje amigable y tiene un actitud un poco sarcastica.
+  Puede meter alguna pequeña broma cuando la situacion se presta.
 Con el contexto de la misión, la conversación y los objetivos, ofrece orientación clara para que el alumno avance.
 Devuelve 2-4 viñetas en español (máx 3 líneas en total) y, si es útil, agrega un solo ejemplo en inglés de hasta 15 palabras con el prefijo "Ejemplo:".
 No incluyas formato extra, JSON ni emojis.`;
   const userPrompt = `Historia: ${story.title}
 Misión: ${mission.title}
-Rol de la IA: ${mission.aiRole}
 Resumen: ${mission.sceneSummary || 'N/D'}
 Objetivos:
 ${requirementText || 'Sin objetivos definidos.'}
@@ -1133,7 +1133,7 @@ ${conversationText || 'Sin conversación previa.'}
 
 Pregunta del alumno: ${question}
 
-Entrega ayuda concreta para cumplir la misión.`;
+Resuelve su pregunta con ayuda concreta para cumplir la misión. Si consideras necesario, puedes dar alguna explicación sobre el ingles o sugerir un vocabulario.`;
 
   console.log(
     JSON.stringify({
@@ -1455,14 +1455,23 @@ async function generateStoryReply(
     .map((msg) => `${msg.role === 'user' ? 'Student' : 'Guide'}: ${msg.content}`)
     .join('\n')
     .trim();
-  const systemPrompt = `
-  You are ${mission.aiRole}. Continue the role-play in English as the guide.
-  Stay coherent with the character, but do NOT force the role into every response.
-  Keep a natural, human-like conversation.
-  Do not exaggerate or overuse personality traits. The conversation should feel balanced,
-  natural, and focused on what the user is asking. Keep the reply under 10 words.
-  Ask questions when needed. Use B2 English.
-  `;
+const systemPrompt = `
+You are ${mission.aiRole}. Continue the role-play in English as the guide.
+
+Stay coherent with the character, but do NOT force the role into every response.
+Keep a natural, human-like conversation.
+
+You may introduce small actions, observations, or events
+that naturally move the situation forward.
+
+Encourage the user to react, decide, or express opinions.
+
+Do not exaggerate personality traits.
+Keep the reply under 15 words.
+Ask questions when useful but do not overdo it.
+Use B2 English.
+`;
+
   const userPrompt = `Story: ${story.title}\nMission: ${mission.title}\nMission summary: ${mission.sceneSummary || 'No summary provided.'}
   ${conversationText || 'No prior conversation.'}\n\nWrite the next Guide message in English, sounding natural and aligned with ${mission.aiRole} but do NOT force this role or its interests into every answer.`;
   console.log(
@@ -1589,20 +1598,42 @@ async function generateStoryMissionFeedback(
     .map((msg) => `${msg.role === 'user' ? 'Student' : 'Guide'}: ${msg.content}`)
     .join('\n')
     .trim();
-  const systemPrompt = `You are an English coach. 
-  You need to evaluate a conversation for a Spanish speaker student with an AI.
-  the student is trying to complete a mission in a story-based language learning app made 
-  for Spanish speakers to improve their English skills from b1 to b2 level.
+  const systemPrompt = `
+You are a friendly but slightly sarcastic English coach.
+
+You are evaluating a full conversation of a Spanish-speaking student
+who is completing a mission in a story-based English learning app
+(B1 to C1 progression).
+
+IMPORTANT:
+- Write the feedback directly TO the student (use "you").
+- Do NOT talk about the student in third person.
+- Be warm, encouraging, a little playful or sarcastic when appropriate,
+  but never rude or discouraging.
+- Point out clear grammar mistakes.
+- Also comment on naturalness, tone, politeness, and emotional nuance.
+- If something sounds too direct, awkward, too literal, or slightly rude,
+  explain why and suggest a more natural alternative.
+- Avoid generic feedback like "Good job overall."
+- Be specific and practical.
+- Base everything on the entire conversation.
+
 Return ONLY JSON with the exact shape:
+
 {
-  "summary": "short Spanish summary of the student's overall performance in the conversation",
-  "improvements": ["short Spanish bullet with errors and suggestions to sound more natural", "..."]
+  "summary": "Short Spanish summary speaking directly to the student",
+  "improvements": [
+    "Short Spanish suggestion speaking directly to the student",
+    "..."
+  ]
 }
 
 Rules:
-- Base the feedback on the entire conversation.
-- Do not mention the AI role or behavior, focus only on the student's English.
-- Do not add any extra commentary outside the JSON.`;
+- Do not mention the AI role.
+- Do not mention the system.
+- Do not add commentary outside the JSON.
+`;
+
   const userPrompt = `Story: ${story.title}
 Mission: ${mission.title}
 Mission summary: ${mission.sceneSummary || 'No summary provided.'}

@@ -541,6 +541,13 @@ export default function StorySceneScreen() {
     setShowAssistanceModal(true);
   }, []);
 
+  const handleRequirementPress = useCallback((text: string) => {
+    setAssistanceQuestion(`Puedes ayudarme a cumplir esta misión: "${text}"`);
+    setAssistanceAnswer('');
+    setAssistanceError(null);
+    setShowAssistanceModal(true);
+  }, []);
+
   const handleAssistantMessagePress = useCallback((text: string) => {
     setAssistanceQuestion(`Puedes explicarme esta frase: "${text}"`);
     setAssistanceAnswer('');
@@ -744,7 +751,17 @@ export default function StorySceneScreen() {
         <View style={{ marginTop: 16, padding: 16, backgroundColor: 'white', borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0' }}>
           <Text style={{ fontWeight: '700', color: '#1e293b', marginBottom: 8 }}>Requisitos</Text>
           {requirements.map((req) => (
-            <View key={req.requirementId} style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 8 }}>
+            <Pressable
+              key={req.requirementId}
+              onPress={() => handleRequirementPress(req.text)}
+              style={({ pressed }) => ({
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                marginBottom: 8,
+                opacity: pressed ? 0.8 : 1,
+              })}
+              hitSlop={6}
+            >
               <Text style={{ fontSize: 18, marginRight: 8 }}>{req.met ? '✅' : '⬜'}</Text>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontWeight: req.met ? '600' : '500', color: req.met ? '#15803d' : '#1f2937' }}>
@@ -754,7 +771,7 @@ export default function StorySceneScreen() {
                   <Text style={{ marginTop: 4, fontSize: 12, color: '#475569' }}>{req.feedback}</Text>
                 ) : null}
               </View>
-            </View>
+            </Pressable>
           ))}
           {!requirements.length ? (
             <Text style={{ color: '#475569' }}>Esta misión no tiene requisitos explícitos.</Text>
