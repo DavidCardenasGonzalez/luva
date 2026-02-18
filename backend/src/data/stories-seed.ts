@@ -1,9 +1,9 @@
 ﻿import { StoryDefinition } from "../types";
 
 export const STORIES_SEED: StoryDefinition[] = [
-    {
+  {
     "storyId": "speed_dating_madness",
-    "title": "Speed Dating Madness",
+    "title": "Speed Dating de locos",
     "summary": "Sobrevivir a cinco citas rápidas muy diferentes, manteniendo conversaciones naturales, haciendo preguntas relevantes y reaccionando con inteligencia emocional… sin quedar como raro.",
     "level": "B2",
     "tags": [
@@ -27,7 +27,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             "requirementId": "ask_start_over",
-            "text": "Pregunta si alguna vez ha tenido que empezar desde cero"
+            "text": "Pregunta si alguna vez ha tenido que empezar una empresa desde cero."
           },
           {
             "requirementId": "ask_affection",
@@ -106,15 +106,15 @@ export const STORIES_SEED: StoryDefinition[] = [
             "text": "Usa “by the way…” para cambiar de tema suavemente."
           },
           {
-            "requirementId": "kind_of",
-            "text": "Usa “kind of ...” para decir “un poco ...”."
+            "requirementId": "not_really_my_thing",
+            "text": "Usa “not really my thing” para expresar poco interés."
           }
         ]
       },
       {
         "missionId": "date_hippie",
         "title": "La cita con la persona hippie",
-        "sceneSummary": "speed dating con una chica que habla de energías, chakras y viajes espirituales.",
+        "sceneSummary": "Estas teniendo una cita con una chica que habla de energías, chakras y viajes espirituales.",
         "aiRole": "Eres una persona hippie amante de la naturaleza, la espiritualidad y el universo. Hablas en metáforas y usas frases profundas.",
         "caracterName": "Luna Starseed",
         "caracterPrompt": "A free-spirited person in their early 30s wearing colorful, flowing clothes and handmade jewelry. They have long wavy hair, carry crystals in a pouch, and speak with a calm, dreamy voice.",
@@ -130,7 +130,8 @@ export const STORIES_SEED: StoryDefinition[] = [
           {
             "requirementId": "ask_reincarnation",
             "text": "Pregunta si cree en vidas pasadas."
-          },{
+          },
+          {
             "requirementId": "use_beliefs",
             "text": "Usa “I believe in…” para hablar de creencias."
           },
@@ -165,16 +166,16 @@ export const STORIES_SEED: StoryDefinition[] = [
             "text": "Di si crees que son compatibles."
           },
           {
-            "requirementId": "ask_wedding_plans",
+            "requirementId": "use_long_run",
             "text": "Usa “in the long run”(a la larga) para hablar de futuro."
           },
           {
-            "requirementId": "use_future_tense",
-            "text": "Usa “rush into” para hablar de apresurarse en una decisión."
+            "requirementId": "use_rush",
+            "text": "Usa “rush” (apresurarse)."
           },
           {
-            "requirementId": "ask_marriage_motivation",
-            "text": "Usa “on the same page” para compatibilidad."
+            "requirementId": "use_agreement",
+            "text": "Usa “on the same page” para decir que estás de acuerdo con algo."
           }
         ]
       }
@@ -183,7 +184,7 @@ export const STORIES_SEED: StoryDefinition[] = [
   {
     "storyId": "airport_chaos",
     "title": "Caos en el aeropuerto",
-    "summary": "Tu vuelo se retrasa, pierdes tu maleta y terminas haciendo nuevos amigos en el aeropuerto.",
+    "summary": "Todo lo que puede salir mal en un aeropuerto, sale mal.",
     "level": "B2",
     "tags": [
       "travel",
@@ -201,60 +202,96 @@ export const STORIES_SEED: StoryDefinition[] = [
         "caracterPrompt": "A middle-aged woman wearing a bright airport uniform and a slightly crooked name badge. She has round glasses, a friendly but flustered expression, and stands behind a cluttered lost-and-found desk surrounded by suitcases and sticky notes.",
         "requirements": [
           {
-            "requirementId": "ask_luggage_details",
-            "text": "Pregúntale en inglés por la información que necesita sobre tu maleta (color, tamaño, contenido) para abrir un reporte."
+            "requirementId": "explain_missing_luggage",
+            "text": "Explica que tu maleta no llegó con tu vuelo"
           },
           {
-            "requirementId": "clarify_compensation",
-            "text": "Pregunta en inglés qué opciones de compensación o ayuda ofrece la aerolínea mientras se investiga la maleta."
+            "requirementId": "ask_luggage_delivery",
+            "text": "Pregunta si entregan la maleta en hotel"
           },
           {
-            "requirementId": "confirm_next_steps",
-            "text": "Pide en inglés un resumen claro de los siguientes pasos y un número de contacto para seguimiento."
+            "requirementId": "ask_compensation",
+            "text": "Pregunta por compensación o reembolso."
+          },
+          {
+            "requirementId": "ask_for_clarification",
+            "text": "Usa “Just to clarify…” para pedir precisión."
+          },
+          {
+            "requirementId": "ask_for_additional_info",
+            "text": "Usa “As far as I know…” (Hasta donde yo sé) para pedir información adicional."
+          },
+          {
+            "requirementId": "thank_agent",
+            "text": "Agradece la ayuda del agente."
           }
         ]
       },
       {
         "missionId": "airport_chaos_delayed_passenger_band",
         "title": "La banda del retraso",
-        "sceneSummary": "Un grupo de músicos callejeros ocupa una sala de espera y promete animar el retraso... pero quieren que te unas. ¿Improvisas en inglés o huyes?",
+        "sceneSummary": "Un grupo de músicos callejeros ocupa una sala de espera y promete animar el retraso... pero quieren que te unas",
         "aiRole": "Eres el líder de una banda de viajeros excéntricos, carismático y excesivamente entusiasta. Invita al estudiante a participar con energía, humor y algunas frases para practicar.",
         "caracterName": "Rico Storm",
         "caracterPrompt": "A lively, flamboyant man in colorful travel-worn clothes and a wide hat covered in pins. He carries a ukulele and has a big, welcoming grin. He’s standing in a busy gate area surrounded by chairs and small instruments.",
         "requirements": [
           {
-            "requirementId": "accept_or_decline",
-            "text": "Di en inglés si te unes o no a la actuación y explica por qué (una respuesta clara y razonada)."
+            "requirementId": "accept_participation",
+            "text": "Usa la frase “I’m down” para aceptar la invitación."
           },
           {
-            "requirementId": "ask_for_instructions",
-            "text": "Pide en inglés instrucciones sencillas sobre qué cantar o tocar si decides participar."
+            "requirementId": "ask_song_type",
+            "text": "Pregunta qué tipo de canción tocarán"
           },
           {
-            "requirementId": "give_feedback",
-            "text": "Ofrece en inglés un comentario honesto y educado sobre la actuación de la banda al final."
+            "requirementId": "ask_instrument",
+            "text": "Pregunta qué instrumento podrías usar."
+          },
+          {
+            "requirementId": "close_interaction",
+            "text": "Cierra la interacción con buena actitud."
+          },
+          {
+            "requirementId": "ask_for_clarification",
+            "text": "Usa “do I need to…?” para hacer alguna pregunta."
+          },
+          {
+            "requirementId": "use_summary",
+            "text": "Usa “so I just…” para resumir instrucciones."
           }
         ]
       },
       {
         "missionId": "airport_chaos_confused_customs_officer",
         "title": "El aduanero confundido",
-        "sceneSummary": "Un oficial de aduanas parece haber olvidado las normas y te hace preguntas raras sobre tu viaje. Tu misión: responder claramente y mantener la calma.",
+        "sceneSummary": "Estas hablando con un oficial de aduanas que parece haber olvidado las normas y te hace preguntas raras sobre tu viaje.",
         "aiRole": "Eres un oficial de aduanas distraído y curioso, con tendencia a mezclas de formalidad y preguntas absurdas. Debes mantener la conversación coherente, hacer preguntas de control y reaccionar a respuestas inesperadas.",
         "caracterName": "Officer Bex",
         "caracterPrompt": "A uniformed customs officer with a clipboard, slightly rumpled hat, and a polite but puzzled expression. They stand near an inspection desk with posters about prohibited items behind them.",
         "requirements": [
           {
             "requirementId": "state_purpose_of_trip",
-            "text": "Explica en inglés y con detalle el propósito de tu viaje y la duración prevista."
+            "text": "Explica el propósito de tu viaje."
+          },
+          {
+            "requirementId": "state_duration_of_stay",
+            "text": "Di cuánto tiempo te quedarás."
+          },
+          {
+            "requirementId": "ask_accommodation",
+            "text": "Di dónde te hospedarás."
+          },
+          {
+            "requirementId": "explain_question",
+            "text": "Usa “let me explain” para responder alguna pregunta."
+          },
+          {
+            "requirementId": "use_summary",
+            "text": "Usa “so I just…” para resumir instrucciones."
           },
           {
             "requirementId": "declare_items",
-            "text": "Declara en inglés si llevas objetos que deban declararse y describe uno con detalle (cantidad, valor, motivo)."
-          },
-          {
-            "requirementId": "ask_for_clarification",
-            "text": "Pide en inglés clarificación si el oficial te da instrucciones confusas o contradictorias."
+            "text": "Usa “restricted items” al hablar de objetos prohibidos."
           }
         ]
       },
@@ -268,37 +305,61 @@ export const STORIES_SEED: StoryDefinition[] = [
         "requirements": [
           {
             "requirementId": "order_coffee",
-            "text": "Pide en inglés una bebida concreta, especificando tamaño y una preferencia (milk, sugar, temperature)."
+            "text": "Pide un café usando una “Can I get”"
           },
           {
-            "requirementId": "ask_about_ingredients",
-            "text": "Pregunta en inglés qué ingredientes especiales tiene la bebida más extraña que ofrece y menciona si eres alérgico a algo."
+            "requirementId": "ask_recommendation",
+            "text": "Pregunta al barista cuál es su bebida más popular."
           },
           {
-            "requirementId": "small_talk_flight_delay",
-            "text": "Inicia en inglés una pequeña conversación sobre el retraso del vuelo y explica cómo te sientes (mínimo dos frases)."
+            "requirementId": "dairy_free_option",
+            "text": "Pregunta si tienen opciones sin lácteos."
+          },
+          {
+            "requirementId": "complex_sentence_reason",
+            "text": "Da una razón usando although."
+          },
+          {
+            "requirementId": "contrast_sentence",
+            "text": "Contrasta ideas usando “whereas”."
+          },
+          {
+            "requirementId": "opinion_expression",
+            "text": "Usa la palabra “overwhelming”."
           }
         ]
       },
       {
         "missionId": "airport_chaos_stranded_family_negotiator",
         "title": "La familia varada negocia",
-        "sceneSummary": "Una familia necesita ayuda para reorganizar conexiones y te piden que medies con el personal del aeropuerto. Tienes que ser claro, cortés y efectivo.",
-        "aiRole": "Eres un padre/madre pragmático y un poco dramático que intenta coordinar a una familia estresada. Habla con urgencia pero de forma cooperativa, busca soluciones y responde a propuestas con prioridades concretas.",
+        "sceneSummary": "Una familia necesita tu ayuda para reorganizar conexiones y te piden que medies con el personal del aeropuerto.",
+        "aiRole": "Eres una madre pragmática y un poco dramática que intenta coordinar a una familia estresada. Habla con urgencia pero de forma cooperativa, busca soluciones y responde a propuestas con prioridades concretas.",
         "caracterName": "Lena Ortiz",
         "caracterPrompt": "A worried but determined parent in casual travel clothes, holding a toddler and several boarding passes. She has a slightly exhausted smile and stands near an information desk surrounded by suitcases and toys.",
         "requirements": [
           {
-            "requirementId": "propose_solution",
-            "text": "Propón en inglés al menos dos soluciones prácticas para reorganizar los vuelos o el alojamiento para la familia."
+            "requirementId": "ask_final_destination",
+            "text": "Pregunta cuál es su destino final."
           },
           {
-            "requirementId": "negotiate_priority",
-            "text": "Negocia en inglés con el personal (simulado) para conseguir prioridad en el reembarque o asistencia para la familia."
+            "requirementId": "ask_passenger_count",
+            "text": "Pregunta cuántas personas viajan."
           },
           {
-            "requirementId": "confirm_details",
-            "text": "Confirma en inglés los detalles finales (nombres, nuevos horarios, puntos de encuentro) y pide una implicación de seguimiento."
+            "requirementId": "ask_time_constraints",
+            "text": "Pregunta si tienen restricciones de tiempo para llegar a su destino."
+          },
+          {
+            "requirementId": "phrasal_sort_out",
+            "text": "Usa el phrasal verb “sort out”(solucionar)."
+          },
+          {
+            "requirementId": "cause_effect",
+            "text": "Explica causa usando “due to(debido a)”."
+          },
+          {
+            "requirementId": "b2_verb_arrange",
+            "text": "Usa el verbo “arrange”(organizar)."
           }
         ]
       }
@@ -319,44 +380,68 @@ export const STORIES_SEED: StoryDefinition[] = [
       {
         "missionId": "roommate_from_hell_midnight_concert",
         "title": "Concierto a medianoche",
-        "sceneSummary": "Tu compañero practica la guitarra a las tres de la mañana y quiere que le cantes el estribillo. Tienes que sobrevivir la jam session sin perder la calma.",
+        "sceneSummary": "Tu compañero practica la guitarra a las tres de la mañana y quiere que le cantes con él.",
         "aiRole": "Eres un compañero excéntrico y entusiasta que toca la guitarra a cualquier hora. Responde con energía exagerada, frases cortas y humor, pero acepta sugerencias razonables si el alumno las propone.",
         "caracterName": "Marty Strings",
         "caracterPrompt": "A lanky young man with wild curly hair, wearing a faded band T-shirt and ripped jeans. He holds an electric guitar slung low, smiling wildly, in a cluttered living room filled with posters and empty coffee cups. He looks passionate and a little oblivious to social norms.",
         "requirements": [
           {
-            "requirementId": "ask_to_lower_volume",
-            "text": "Pídele en inglés que baje la intensidad o el volumen de la guitarra."
+            "requirementId": "ask_practice_duration",
+            "text": "Pregunta cuánto tiempo planea seguir practicando."
           },
           {
-            "requirementId": "suggest_compromise",
-            "text": "Propón en inglés una solución intermedia (por ejemplo, usar auriculares o cambiar horario)."
+            "requirementId": "mention_sleep_schedule",
+            "text": "Explica que tienes que levantarte temprano."
           },
           {
-            "requirementId": "express_feeling",
-            "text": "Di en inglés cómo te hace sentir la situación (molesto, cansado, comprensivo, etc.)."
+            "requirementId": "offer_schedule",
+            "text": "Propón un horario específico para practicar."
+          },
+          {
+            "requirementId": "indirect_request",
+            "text": "Haz una petición usando “Would you mind…?”"
+          },
+          {
+            "requirementId": "empathy",
+            "text": "Muestra comprensión usando “I get that…”"
+          },
+          {
+            "requirementId": "thank_roommate",
+            "text": "Agradece por comprender."
           }
         ]
       },
       {
         "missionId": "roommate_from_hell_mystery_food",
         "title": "La comida del misterio",
-        "sceneSummary": "Encuentras un recipiente sospechoso en la nevera con una nota críptica. Tu compañero insiste en que es experimental cuisine. Debes investigar sin ofender.",
+        "sceneSummary": "Encuentras un recipiente sospechoso con mal olor y debes preguntar a tu roommate.",
         "aiRole": "Eres un chef aficionado y algo teatral sobre tus creaciones. Hablas con orgullo y misterio, usando metáforas culinarias; acepta preguntas y explica ingredientes si se le presiona.",
         "caracterName": "Chef Cosmo",
         "caracterPrompt": "A quirky person in a flour-dusted apron, wearing mismatched socks and a bandana. They hold a mysterious Tupperware with a proud grin, standing in a small but chaotic kitchen full of herbs and strange jars.",
         "requirements": [
           {
-            "requirementId": "ask_ingredients",
-            "text": "Pregunta en inglés qué ingredientes contiene el plato misterioso."
+            "requirementId": "ask_smell",
+            "text": "Comenta que el plato tiene un olor extraño y pregunta si es normal."
           },
           {
-            "requirementId": "refuse_politely",
-            "text": "Rechaza probarlo en inglés de forma educada pero firme, explicando por qué."
+            "requirementId": "ask_when_made",
+            "text": "Pregunta cuándo lo preparó."
           },
           {
-            "requirementId": "offer_alternative",
-            "text": "Sugiere en inglés una alternativa segura para compartir comida (por ejemplo, cocinar juntos otra cosa)."
+            "requirementId": "ask_storage_time",
+            "text": "Pregunta cuánto tiempo lleva en la nevera."
+          },
+          {
+            "requirementId": "idiom_suspicious",
+            "text": "Usa el idiom “fishy”(Sospechoso)."
+          },
+          {
+            "requirementId": "phrasal_figure_out",
+            "text": "Usa el phrasal verb “figure out”(averiguar)."
+          },
+          {
+            "requirementId": "polite_opinion",
+            "text": "Da tu opinión usando “In my opinion…”"
           }
         ]
       },
@@ -369,16 +454,28 @@ export const STORIES_SEED: StoryDefinition[] = [
         "caracterPrompt": "A confident person with colorful hair wearing a leather jacket covered in pins, cradling a small creature with tiny wings that emits a faint glow. They stand in a hallway with scorch marks and a mischievous smile.",
         "requirements": [
           {
-            "requirementId": "set_rule",
-            "text": "Explica en inglés una regla concreta sobre la mascota (por ejemplo, dónde puede estar, limpieza, ruido)."
+            "requirementId": "ask_pet_origin",
+            "text": "Pregunta de dónde sacó la mascota."
           },
           {
-            "requirementId": "ask_consequences",
-            "text": "Pregunta en inglés qué pasará si la mascota rompe una regla."
+            "requirementId": "ask_pet_size",
+            "text": "Pregunta qué tan grande puede crecer."
           },
           {
-            "requirementId": "negotiate_solution",
-            "text": "Negocia en inglés un compromiso razonable para cuidar la mascota y mantener la casa ordenada."
+            "requirementId": "ask_pet_food",
+            "text": "Pregunta qué come."
+          },
+          {
+            "requirementId": "idiom_compromise",
+            "text": "Usa el idiom “meet me halfway”(Encuéntrame a mitad de camino, busquemos un punto medio)."
+          },
+          {
+            "requirementId": "indirect_request",
+            "text": "Haz una petición usando “Would you be willing to…?(¿Estarías dispuesto a…?)”"
+          },
+          {
+            "requirementId": "phrasal_cut_back",
+            "text": "Usa el phrasal verb “cut back on(reducir)”."
           }
         ]
       },
@@ -391,16 +488,28 @@ export const STORIES_SEED: StoryDefinition[] = [
         "caracterPrompt": "A neat person in a crisp button-down shirt and glasses, carrying a clipboard and a marker. She stands by a whiteboard with post-it notes and a drawn timetable, looking determined and slightly anxious.",
         "requirements": [
           {
-            "requirementId": "propose_time",
-            "text": "Sugiere en inglés un horario alternativo para usar el baño que funcione para ambos."
+            "requirementId": "ask_morning_need",
+            "text": "Pregunta cuánto tiempo necesita en las mañanas."
           },
           {
-            "requirementId": "ask_for_reason",
-            "text": "Pregunta en inglés por qué el compañero necesita ese horario tan estricto."
+            "requirementId": "ask_peak_times",
+            "text": "Pregunta cuáles son las horas más ocupadas para el baño.(peak times)"
           },
           {
-            "requirementId": "agree_on_checks",
-            "text": "Propón en inglés una forma de revisar que el sistema funciona (por ejemplo, una prueba de una semana)."
+            "requirementId": "ask_average_time",
+            "text": "Pregunta cuánto tiempo promedio pasa en el baño."
+          },
+          {
+            "requirementId": "polite_suggestion",
+            "text": "Haz una sugerencia usando “What if we…?”"
+          },
+          {
+            "requirementId": "idiom_fair",
+            "text": "Usa el idiom “fair and square”(justo y equitativo)."
+          },
+          {
+            "requirementId": "phrasal_stick_to",
+            "text": "Usa el phrasal verb “stick to”(Apegarse a)."
           }
         ]
       },
@@ -413,16 +522,28 @@ export const STORIES_SEED: StoryDefinition[] = [
         "caracterPrompt": "A cheerful person in a bright Hawaiian shirt with a homemade banner behind them and a plate of dubious snacks. They grin broadly, arms open as if welcoming everyone, in a messy living room full of balloons.",
         "requirements": [
           {
-            "requirementId": "express_boundaries",
-            "text": "Comunica en inglés límites claros sobre invitados y espacio personal (por ejemplo, número de personas o tiempo de visita)."
+            "requirementId": "ask_guest_count",
+            "text": "Pregunta cuántas personas fueron invitadas."
           },
           {
-            "requirementId": "offer_alternative_plan",
-            "text": "Propón en inglés una alternativa más cómoda para celebrar (por ejemplo, smaller get-together another day)."
+            "requirementId": "ask_who_invited",
+            "text": "Pregunta quiénes son los invitados."
           },
           {
-            "requirementId": "handle_unexpected",
-            "text": "Di en inglés cómo gestionarías a un invitado molesto o incómodo durante la fiesta."
+            "requirementId": "ask_end_time",
+            "text": "Pregunta a qué hora planea que termine la fiesta."
+          },
+          {
+            "requirementId": "phrasal_kick_out",
+            "text": "Usa el phrasal verb “kick out”(expulsar)."
+          },
+          {
+            "requirementId": "phrasal_tone_down",
+            "text": "Usa el phrasal verb “tone down”(disminuir para)."
+          },
+          {
+            "requirementId": "phrasal_wrap_up",
+            "text": "Usa el phrasal verb “wrap up”(estar en silencio)."
           }
         ]
       }
@@ -449,38 +570,62 @@ export const STORIES_SEED: StoryDefinition[] = [
         "caracterPrompt": "A young waiter with a slightly rumpled white shirt and a crooked bow tie. He has an apologetic smile, messy hair, and holds a tray with a wrong dish. The setting is a dimly lit, elegant restaurant with clinking glasses.",
         "requirements": [
           {
-            "requirementId": "ask_for_clarification",
-            "text": "Pregunta en inglés qué plato te trajo y por qué se equivocó."
+            "requirementId": "comment_wrong_dish",
+            "text": "Comenta que no es el plato que pediste."
           },
           {
-            "requirementId": "request_correction",
-            "text": "Pide en inglés que te traiga el plato correcto y especifica cómo quieres que se prepare."
+            "requirementId": "ask_time_estimate",
+            "text": "Pregunta cuánto tiempo estiman que tardará la corrección."
           },
           {
-            "requirementId": "confirm_time_expectation",
-            "text": "Pide en inglés cuánto tiempo tardará la corrección y confirma que estás dispuesto a esperar o no."
+            "requirementId": "thank_effort",
+            "text": "Agradece el esfuerzo por arreglarlo."
+          },
+          {
+            "requirementId": "phrasal_bring_back",
+            "text": "Usa el phrasal verb “bring back”."
+          },
+          {
+            "requirementId": "phrasal_mix_up",
+            "text": "Usa el phrasal verb “mix up”."
+          },
+          {
+            "requirementId": "indirect_complaint",
+            "text": "Haz una queja usando “I was wondering if…”"
           }
         ]
       },
       {
         "missionId": "restaurant_disaster_mysterious_dish",
         "title": "El plato misterioso",
-        "sceneSummary": "Bestias del menú: recibes un plato con un nombre extraño y nadie sabe qué ingredientes contiene — incluida la cocina.",
-        "aiRole": "Eres un cliente curioso y un poco teatral que explora el menú usando lenguaje imaginativo. Responde con preguntas directas y expresa dudas sobre ingredientes y alergias de forma clara.",
+        "sceneSummary": "Recibes un plato con un nombre extraño y nadie sabe qué ingredientes contiene, pides hablar con el chef.",
+        "aiRole": "Eres un chef curioso y un poco teatral que explora el menú usando lenguaje imaginativo.",
         "caracterName": "Luna",
         "caracterPrompt": "A quirky diner in a colorful scarf, leaning over the menu with wide eyes. She has playful makeup, a notebook for notes, and sits at a candlelit table surrounded by cookbook sketches.",
         "requirements": [
           {
-            "requirementId": "ask_ingredient_details",
-            "text": "Pregunta en inglés por los ingredientes exactos del plato y si contiene alérgenos comunes."
+            "requirementId": "ask_main_component",
+            "text": "Pregunta cuál es el componente principal."
           },
           {
-            "requirementId": "ask_for_substitute",
-            "text": "Pide en inglés una alternativa o sustitución si no puedes comer un ingrediente."
+            "requirementId": "ask_hidden_ingredients",
+            "text": "Pregunta si hay ingredientes ocultos."
           },
           {
-            "requirementId": "ask_cooking_method",
-            "text": "Pregunta en inglés cómo está cocinado el plato (frying, roasting, raw, etc.) y por qué es así."
+            "requirementId": "ask_pairing",
+            "text": "Pregunta con qué bebida se recomienda."
+          },
+          {
+            "requirementId": "polite_question",
+            "text": "Haz una pregunta usando “Could you walk me through...?”"
+          },
+          {
+            "requirementId": "phrasal_find_out",
+            "text": "Usa el phrasal verb “find out”(descubrir)."
+          },
+          {
+            "requirementId": "idiom_mystery",
+            "text": "Usa el idiom “a shot in the dark”(un acto cuyo resultado no se puede prever)."
           }
         ]
       },
@@ -493,60 +638,96 @@ export const STORIES_SEED: StoryDefinition[] = [
         "caracterPrompt": "A middle-aged chef in a stained white apron and a tall chef's hat, arms crossed and an intense look. He stands under warm kitchen lights with a skillet in hand and steam rising behind him.",
         "requirements": [
           {
-            "requirementId": "give_constructive_feedback",
-            "text": "Da en inglés una crítica constructiva sobre el sabor o la textura del plato (usa vocabulario culinario básico)."
+            "requirementId": "express_disappointment",
+            "text": "Expresa decepción de forma educada."
           },
           {
-            "requirementId": "ask_about_technique",
-            "text": "Pregunta en inglés qué técnica o ingrediente hizo ese sabor distintivo."
+            "requirementId": "ask_freshness",
+            "text": "Pregunta si los ingredientes son frescos."
           },
           {
-            "requirementId": "negotiate_compensation",
-            "text": "Negocia en inglés una solución (reemplazo, descuento o disculpa) si el plato está mal."
+            "requirementId": "acknowledge_effort",
+            "text": "Reconoce el esfuerzo del chef."
+          },
+          {
+            "requirementId": "b2_verb_improve",
+            "text": "Usa el verbo “improve”(mejorar)."
+          },
+          {
+            "requirementId": "prediction",
+            "text": "Haz una predicción usando “This might…”"
+          },
+          {
+            "requirementId": "idiom_calm",
+            "text": "Usa el idiom “let’s keep it cool(Mantengámoslo tranquilo)”."
           }
         ]
       },
       {
         "missionId": "restaurant_disaster_pretentious_critic",
         "title": "El crítico pretencioso",
-        "sceneSummary": "Un crítico famoso practica su reseña en voz alta y espera que te unas a su seguidilla de adjetivos exquisitos.",
+        "sceneSummary": "Visitas un restaurante con un crítico famoso. Él hace comentarios exagerados sobre cada bocado y te desafía a describir el sabor con la misma floritura.",
         "aiRole": "Eres un crítico de comida pretencioso pero divertido. Usa descripciones floridas, hace preguntas retóricas y provoca discusión sobre sabor y experiencia.",
         "caracterName": "Veronica Slate",
         "caracterPrompt": "A fashionable food critic wearing a stylish coat and reading glasses perched on her nose. She has an elegant posture, a notebook full of notes, and a tiny espresso cup on the table.",
         "requirements": [
           {
             "requirementId": "describe_taste",
-            "text": "Describe en inglés el sabor del plato usando al menos tres adjetivos diferentes y justifica uno de ellos."
+            "text": "Pregunta si el sabor del plato es dulce o salado."
           },
           {
-            "requirementId": "compare_with_other",
-            "text": "Compara en inglés este plato con otro plato o experiencia culinaria que conozcas."
+            "requirementId": "ask_overall_experience",
+            "text": "Pregunta por la experiencia general."
           },
           {
-            "requirementId": "ask_for_recommendation",
-            "text": "Pide en inglés a la crítica que recomiende otro plato del menú y explica por qué te interesa."
+            "requirementId": "ask_rating",
+            "text": "Pregunta cómo lo calificaría."
+          },
+          {
+            "requirementId": "use_descriptive_language",
+            "text": "Habla del sabor de una forma pretenciosa."
+          },
+          {
+            "requirementId": "ask_for_opinion",
+            "text": "Pide la opinión del crítico sobre el plato."
+          },
+          {
+            "requirementId": "agree_with_critic",
+            "text": "Usa la frase “I couldn’t agree more” para mostrar acuerdo con el crítico."
           }
         ]
       },
       {
         "missionId": "restaurant_disaster_tipsy_sommelier",
-        "title": "El sumiller un poco alegre",
-        "sceneSummary": "El sumiller insiste en maridar tu comida con vinos raros y hace bromas extrañas sobre cada cosecha.",
-        "aiRole": "Eres un sumiller entusiasta y un poco bromista. Sugiere maridajes con confianza, explica notas de cata sencillas y responde de forma educada cuando el cliente no bebe alcohol.",
+        "title": "El sommelier un poco alegre",
+        "sceneSummary": "Eres un cliente de un restaurante y el sommelier insiste en maridar tu comida con vinos raros y hace bromas extrañas sobre cada cosecha.",
+        "aiRole": "Eres un sommelier entusiasta y un poco bromista. Sugiere maridajes con confianza, explica notas de cata sencillas y responde de forma educada cuando el cliente no bebe alcohol.",
         "caracterName": "Simon",
         "caracterPrompt": "A cheerful sommelier in a dark vest and bow tie, holding a wine bottle and a tasting glass. He smiles broadly, with a slightly flushed face, standing beside a well-stocked wine cabinet.",
         "requirements": [
           {
-            "requirementId": "ask_pairing_reason",
-            "text": "Pregunta en inglés por qué ese vino marida con tu plato y menciona una característica del vino."
+            "requirementId": "ask_red_or_white",
+            "text": "Pregunta si recomienda vino tinto o blanco."
           },
           {
-            "requirementId": "decline_alcohol_politely",
-            "text": "Si no quieres alcohol, rechaza la sugerencia en inglés de forma educada y pide una alternativa sin alcohol."
+            "requirementId": "ask_body",
+            "text": "Pregunta si el vino es ligero, medio o con cuerpo."
           },
           {
-            "requirementId": "order_specific_vintage",
-            "text": "Pide en inglés una botella específica o una alternativa concreta (mention vintage, region or grape) y confirma el precio aproximado."
+            "requirementId": "ask_price_range",
+            "text": "Pregunta el rango de precios."
+          },
+          {
+            "requirementId": "thank_recommendation",
+            "text": "Agradece la recomendación."
+          },
+          {
+            "requirementId": "ask_popular_choice",
+            "text": "Pregunta cuál es la elección más popular."
+          },
+          {
+            "requirementId": "phrasal_go_with",
+            "text": "Usa el phrasal verb “go with”."
           }
         ]
       }
@@ -566,111 +747,171 @@ export const STORIES_SEED: StoryDefinition[] = [
     "missions": [
       {
         "missionId": "job_interview_blues_greeting_magic_hire",
-        "title": "Saludo con truco",
-        "sceneSummary": "Entras a una sala donde el entrevistador hace un truco de cartas antes de empezar. Debes impresionar sin perder la compostura.",
-        "aiRole": "Eres un entrevistador excéntrico que usa magia para poner a prueba la reacción de candidatos. Mantén un tono juguetón, ligeramente provocador y ofrece retroalimentación breve según las respuestas del alumno.",
+        "title": "Experiencia Laboral",
+        "sceneSummary": "Vas a tener una entrevista de trabajo.",
+        "aiRole": "Eres un entrevistador que quiere le gusta encaminar la entrevista a la experiencia de la persona. tienes una actitud relajada y amable.",
         "caracterName": "Mr. Cardwell",
         "caracterPrompt": "A middle-aged man with a mischievous grin, wearing a vintage waistcoat and a pocket watch. He performs a card trick at a small wooden table in a dimly lit office, with a faint smell of pipe tobacco and a cluttered bookshelf behind him.",
         "requirements": [
           {
-            "requirementId": "introduce_yourself",
-            "text": "Preséntate en inglés mencionando tu nombre y un rasgo profesional relevante (1–2 frases)."
+            "requirementId": "state_experience_years",
+            "text": "Di cuántos años de experiencia profesional tienes."
           },
           {
-            "requirementId": "react_to_trick",
-            "text": "Reacciona en inglés al truco de cartas mostrando sorpresa o curiosidad y haciendo una pregunta relacionada."
+            "requirementId": "mention_current_role",
+            "text": "Menciona tu puesto actual o más reciente."
           },
           {
-            "requirementId": "ask_about_test",
-            "text": "Pregunta en inglés cómo el truco está relacionado con la prueba de selección (motiva la conexión con el trabajo)."
+            "requirementId": "describe_responsibilities",
+            "text": "Describe una responsabilidad clave de tu trabajo anterior."
+          },
+          {
+            "requirementId": "experience_structure",
+            "text": "Describe experiencia usando “I’ve been working in…”"
+          },
+          {
+            "requirementId": "bg_intro",
+            "text": "Preséntate usando “I have a background in…”"
+          },
+          {
+            "requirementId": "ask_experience_fit",
+            "text": "Pregunta cómo tu experiencia encaja con el puesto."
           }
         ]
       },
       {
         "missionId": "job_interview_blues_weird_questionnaire",
         "title": "Cuestionario absurdo",
-        "sceneSummary": "Te dan un cuestionario con preguntas raras, como elegir una fruta que represente a tu jefe. Tienes que responder con argumentos claros.",
-        "aiRole": "Eres un entrevistador surrealista que hace preguntas inusuales para evaluar pensamiento creativo y razonamiento. Habla de forma seria pero con toques de humor absurdo; pide justificaciones coherentes.",
+        "sceneSummary": "Estas teniendo una entrevista de trabajo",
+        "aiRole": "Eres un entrevistador que ama locamente la empresa en la que trabaja, y quiere saber por qué te interesa formar parte de ella.",
         "caracterName": "Dr. Oddly",
         "caracterPrompt": "A quirky professor-like figure wearing round glasses and a colorful bow tie. He holds a clipboard covered in stickers, stands in front of a whiteboard scribbled with strange diagrams, and smiles as if every question is a puzzle.",
         "requirements": [
           {
-            "requirementId": "choose_metaphor",
-            "text": "Elige en inglés una metáfora (por ejemplo, animal, fruta u objeto) que represente a tu jefe ideal y di por qué (2–3 frases)."
+            "requirementId": "why_company",
+            "text": "Explica por qué quieres trabajar aquí."
           },
           {
-            "requirementId": "justify_choice",
-            "text": "Explica en inglés cómo esa metáfora refleja tus valores profesionales usando ejemplos concretos."
+            "requirementId": "why_role",
+            "text": "Explica por qué te interesa el puesto."
           },
           {
-            "requirementId": "ask_followup",
-            "text": "Haz una pregunta de seguimiento en inglés para clarificar una de las preguntas del entrevistador."
+            "requirementId": "career_goal",
+            "text": "Explica tu meta profesional."
+          },
+          {
+            "requirementId": "culture",
+            "text": "Usa “I value a company that…”"
+          },
+          {
+            "requirementId": "relocation",
+            "text": "Comenta disposición a mudarte."
+          },
+          {
+            "requirementId": "travel",
+            "text": "Comenta disponibilidad para viajar."
           }
         ]
       },
       {
         "missionId": "job_interview_blues_humor_test",
         "title": "Prueba de humor",
-        "sceneSummary": "El jefe cuenta un chiste extraño para ver si puedes mantener la calma y responder con ingenio profesional.",
-        "aiRole": "Eres un jefe con humor extraño que evalúa la capacidad del candidato para manejar tensión social. Mantén un tono juguetón, lanza el chiste y espera respuestas ingeniosas y respetuosas.",
+        "sceneSummary": "Estas en una entrevista laboral donde el entrevistador quiere conocer tus fortalezas.",
+        "aiRole": "Eres un entrevistador de recursos que le gusta ver lo mejor de las personas. te gusta evaluar tus capacidades humanas y fortalezas.",
         "caracterName": "Captain Quip",
         "caracterPrompt": "A bearded man in a slightly rumpled blazer and a colorful scarf, sitting behind a desk with novelty knick-knacks. He leans forward with an amused expression as if about to tell a joke, surrounded by posters of vintage comedy acts.",
         "requirements": [
           {
-            "requirementId": "respond_to_joke",
-            "text": "Responde en inglés al chiste mostrando comprensión (puedes reír o comentar) sin ofender; 1–2 frases."
+            "requirementId": "describe_strength",
+            "text": "Describe una fortaleza."
           },
           {
-            "requirementId": "make_light_comment",
-            "text": "Haz un comentario ingenioso y profesional en inglés que conecte el chiste con el trabajo o el equipo."
+            "requirementId": "motivation_source",
+            "text": "Explica qué te motiva en el trabajo."
           },
           {
-            "requirementId": "maintain_professional_tone",
-            "text": "Demuestra en inglés que mantienes un tono profesional mientras eres simpático (usa una frase que combine humor y profesionalidad)."
+            "requirementId": "skill_structure",
+            "text": "Menciona habilidad usando “I’m skilled in…”"
+          },
+          {
+            "requirementId": "b2_adjective_reliable",
+            "text": "Descríbete usando “reliable”(confiable)."
+          },
+          {
+            "requirementId": "b2_adjective_proactive",
+            "text": "Descríbete usando “proactive”(proactivo)."
+          },
+          {
+            "requirementId": "b2_adjective_adaptable",
+            "text": "Descríbete usando “adaptable”(adaptable)."
           }
         ]
       },
       {
         "missionId": "job_interview_blues_confession_policy",
         "title": "Confesión laboral",
-        "sceneSummary": "Te piden confesar tu peor error profesional y proponer cómo lo arreglarías. Aquí la sinceridad y la solución importan más que la perfección.",
-        "aiRole": "Eres un entrevistador serio pero comprensivo que valora la honestidad y la capacidad de aprendizaje. Haz preguntas clarificadoras y pide un plan de mejora concreto.",
+        "sceneSummary": "Estas en una entrevista de trabajo donde quieren hablar de tus errores. Tu intentas que los errores sean una oportunidad de aprendizaje.",
+        "aiRole": "Eres una entrevistadora muy seria. Te gusta manejar la entrevista desde tue errores y debilidades.",
         "caracterName": "Ms. Ledger",
         "caracterPrompt": "A composed woman in her early 40s wearing a smart blazer and subtle jewelry. She sits at a tidy desk with a laptop open, her expression attentive and encouraging as she leans slightly forward to listen.",
         "requirements": [
           {
             "requirementId": "describe_mistake",
-            "text": "Cuenta en inglés un error profesional realista (no demasiado grave) y di qué aprendiste (2–3 frases)."
+            "text": "Describe un error profesional que cometiste."
           },
           {
-            "requirementId": "propose_solution",
-            "text": "Propón en inglés un plan concreto en 3 pasos para evitar ese error en el futuro."
+            "requirementId": "describe_lesson",
+            "text": "Describe qué aprendiste de una situación."
           },
           {
-            "requirementId": "ask_for_feedback",
-            "text": "Pide en inglés retroalimentación sobre tu plan y cómo podrías mejorarlo."
+            "requirementId": "describe_weakness",
+            "text": "Describe una debilidad profesional."
+          },
+          {
+            "requirementId": "describe_weakness_improvement",
+            "text": "Describe como una habilidad puede ser una fortaleza."
+          },
+          {
+            "requirementId": "habit_phrase",
+            "text": "Usa “I used to…, but now…” para describir un cambio positivo en tu comportamiento."
+          },
+          {
+            "requirementId": "growth_phrase",
+            "text": "Usa “This helped me grow because…”"
           }
         ]
       },
       {
         "missionId": "job_interview_blues_negotiation_snacks",
-        "title": "Negociación de snacks",
-        "sceneSummary": "La entrevista llega a la parte de condiciones: te ofrecen snacks extraños como beneficio. Negocia en serio (pero con gracia) tus condiciones laborales.",
-        "aiRole": "Eres un jefe extravagante que valora negociaciones creativas y evalúa la capacidad de argumento del candidato. Mantén un tono diplomático y juguetón, responde con concesiones y contraofertas.",
+        "title": "Negociación de compensación",
+        "sceneSummary": "La entrevista entra en la fase final: se discuten salario, beneficios y condiciones. Debes defender tu valor profesional y llegar a un acuerdo equilibrado.",
+        "aiRole": "Eres un gerente de contratación profesional y estratégico. Presentas una oferta inicial, escuchas los argumentos del candidato y negocias salario, beneficios y condiciones con un tono respetuoso y realista.",
         "caracterName": "Lady Bargain",
         "caracterPrompt": "An elegant, eccentric executive wearing a bright patterned jacket and oversized glasses. She sits at a long table with a bowl of exotic snacks and a stack of benefit brochures, smiling as she listens to offers.",
         "requirements": [
           {
-            "requirementId": "state_expectations",
-            "text": "Declara en inglés tus expectativas principales (salario, horario o beneficios) de forma clara y concreta."
+            "requirementId": "ask_budget_range",
+            "text": "Pregunta cuál es el presupuesto para el puesto."
           },
           {
-            "requirementId": "make_counteroffer",
-            "text": "Haz en inglés una contraoferta razonada si te ofrecen algo insuficiente; explica por qué es justa."
+            "requirementId": "salary_phrase",
+            "text": "Usa “I’m looking for a range of…”"
           },
           {
-            "requirementId": "confirm_agreement",
-            "text": "Cierra en inglés la negociación confirmando los puntos acordados o solicitando un siguiente paso claro."
+            "requirementId": "ask_total_compensation",
+            "text": "Pregunta qué incluye el paquete total de compensación."
+          },
+          {
+            "requirementId": "state_non_negotiable",
+            "text": "Indica qué condición es no negociable para ti."
+          },
+          {
+            "requirementId": "express_interest",
+            "text": "Reafirma tu interés en el puesto."
+          },
+          {
+            "requirementId": "express_appreciation",
+            "text": "Agradece la oferta."
           }
         ]
       }

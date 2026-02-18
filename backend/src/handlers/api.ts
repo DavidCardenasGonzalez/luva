@@ -1287,7 +1287,7 @@ Rules:
 - Link errors to issues in the last message (max 3).
 - Provide up to 2 natural English alternatives for the last message.
 - Keep the requirements array in the original order.
-- objectives_met must be true only if every requirement is met across the conversation.
+- objectives_met must be true only if every requirement is met across the conversation. only 
 - Do not include any extra keys or commentary.
 
 Language evaluation rubric (for the last message only):

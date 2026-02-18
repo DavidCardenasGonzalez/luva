@@ -13,24 +13,37 @@ import { useStoryProgress } from '../progress/StoryProgressProvider';
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
 export default function SettingsScreen({ navigation }: Props) {
-  const { isPro, customerInfo, loading: rcLoading } = useRevenueCat();
+  const { isPro, customerInfo, loading: rcLoading, manualProExpiration, redeemPromoCode } = useRevenueCat();
   const { resetCoins } = useCoins();
   const { resetAll: resetCardProgress } = useCardProgress();
   const { resetAll: resetStoryProgress } = useStoryProgress();
   const [showResetModal, setShowResetModal] = useState(false);
   const [confirmText, setConfirmText] = useState('');
   const [resetting, setResetting] = useState(false);
+  const [codeInput, setCodeInput] = useState('');
+  const [redeemingCode, setRedeemingCode] = useState(false);
+  const [codeFeedback, setCodeFeedback] = useState<{ message: string; tone: 'success' | 'error' } | null>(null);
 
   const proInfo = useMemo(() => {
     const entitlement = customerInfo?.entitlements?.active
       ? Object.values(customerInfo.entitlements.active)[0]
       : undefined;
-    if (!entitlement) return null;
-    return {
-      productId: entitlement.productIdentifier,
-      expirationDate: entitlement.expirationDate || null,
-    };
-  }, [customerInfo]);
+    if (entitlement) {
+      return {
+        source: 'subscription' as const,
+        productId: entitlement.productIdentifier,
+        expirationDate: entitlement.expirationDate || null,
+      };
+    }
+    if (manualProExpiration && manualProExpiration > Date.now()) {
+      return {
+        source: 'code' as const,
+        productId: 'Código promocional',
+        expirationDate: new Date(manualProExpiration).toISOString(),
+      };
+    }
+    return null;
+  }, [customerInfo, manualProExpiration]);
 
   const openExternal = async (url: string) => {
     try {
@@ -63,6 +76,37 @@ export default function SettingsScreen({ navigation }: Props) {
       setResetting(false);
     }
   }, [canConfirmReset, resetCoins, resetCardProgress, resetStoryProgress, resetting]);
+
+  const handleRedeemCode = useCallback(async () => {
+    const trimmed = codeInput.trim();
+    if (!trimmed) {
+      setCodeFeedback({ message: 'Ingresa un código para canjearlo.', tone: 'error' });
+      return;
+    }
+    setRedeemingCode(true);
+    setCodeFeedback(null);
+    try {
+      const result = await redeemPromoCode(trimmed);
+      if (!result.success) {
+        setCodeFeedback({ message: 'Código no encontrado.', tone: 'error' });
+        return;
+      }
+      const expiresLabel = result.expiresAt
+        ? formatDate(new Date(result.expiresAt).toISOString())
+        : '30 días';
+      setCodeFeedback({
+        message: `Código aplicado. Pro activo hasta ${expiresLabel}.`,
+        tone: 'success',
+      });
+      setCodeInput('');
+      Alert.alert('Listo', 'Tu código fue aplicado y tienes Pro por 30 días.');
+    } catch (err) {
+      console.warn('[Settings] Error al canjear código', err);
+      setCodeFeedback({ message: 'No pudimos validar el código. Inténtalo de nuevo.', tone: 'error' });
+    } finally {
+      setRedeemingCode(false);
+    }
+  }, [codeInput, redeemPromoCode]);
 
   return (
     <SafeAreaView
@@ -162,12 +206,15 @@ export default function SettingsScreen({ navigation }: Props) {
                   borderColor: '#1e293b',
                 }}
               >
-                <Text style={{ color: '#22c55e', fontWeight: '800' }}>Pro activo</Text>
+                <Text style={{ color: '#22c55e', fontWeight: '800' }}>
+                  {proInfo?.source === 'code' ? 'Pro con código' : 'Pro activo'}
+                </Text>
                 <Text style={{ color: '#e2e8f0', marginTop: 6 }}>
                   Plan: {proInfo?.productId || '—'}
                 </Text>
                 <Text style={{ color: '#94a3b8', marginTop: 4 }}>
-                  Renovación: {formatDate(proInfo?.expirationDate)}
+                  {proInfo?.source === 'code' ? 'Expira' : 'Renovación'}:{' '}
+                  {formatDate(proInfo?.expirationDate)}
                 </Text>
                 <View style={{ flexDirection: 'row', marginTop: 10 }}>
                   <Pressable
@@ -204,6 +251,77 @@ export default function SettingsScreen({ navigation }: Props) {
                 </Text>
               </Pressable>
             )}
+          </View>
+
+          <View
+            style={{
+              marginTop: 14,
+              padding: 14,
+              borderRadius: 14,
+              backgroundColor: '#0b172b',
+              borderWidth: 1,
+              borderColor: '#1e293b',
+              shadowColor: '#000',
+              shadowOpacity: 0.06,
+              shadowRadius: 8,
+            }}
+          >
+            <Text style={{ color: '#a5f3fc', fontSize: 12, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' }}>
+              Tengo un código
+            </Text>
+            <Text style={{ color: '#e2e8f0', fontSize: 16, fontWeight: '800', marginTop: 6 }}>
+              Desbloquea Pro por 30 días
+            </Text>
+            <Text style={{ color: '#94a3b8', marginTop: 6, lineHeight: 20 }}>
+              Ingresa tu código promocional. Por ahora solo aceptamos códigos privados.
+            </Text>
+            <TextInput
+              value={codeInput}
+              onChangeText={setCodeInput}
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder="Ej. PRO123"
+              placeholderTextColor="#64748b"
+              editable={!redeemingCode}
+              style={{
+                marginTop: 10,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: '#1e293b',
+                backgroundColor: '#0b1224',
+                color: '#e2e8f0',
+              }}
+            />
+            <Pressable
+              onPress={handleRedeemCode}
+              disabled={redeemingCode}
+              style={({ pressed }) => ({
+                marginTop: 10,
+                paddingVertical: 12,
+                borderRadius: 12,
+                backgroundColor: redeemingCode ? '#1f2937' : pressed ? '#2563eb' : '#3b82f6',
+                borderWidth: 1,
+                borderColor: '#1e3a8a',
+                opacity: redeemingCode ? 0.7 : 1,
+              })}
+            >
+              <Text style={{ color: 'white', fontWeight: '800', textAlign: 'center' }}>
+                {redeemingCode ? 'Validando...' : 'Aplicar código'}
+              </Text>
+            </Pressable>
+            {codeFeedback ? (
+              <Text
+                style={{
+                  color: codeFeedback.tone === 'success' ? '#22c55e' : '#fca5a5',
+                  marginTop: 8,
+                  fontWeight: '700',
+                }}
+              >
+                {codeFeedback.message}
+              </Text>
+            ) : null}
           </View>
 
           <View style={{ marginTop: 14 }}>
