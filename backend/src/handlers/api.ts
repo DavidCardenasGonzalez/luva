@@ -2,7 +2,7 @@
   APIGatewayProxyEventV2 as Event,
   APIGatewayProxyResultV2 as Result,
 } from "aws-lambda";
-import { randomUUID } from "crypto";
+import { createHash, randomUUID } from "crypto";
 import fs from "fs";
 import path from "path";
 import {
@@ -34,12 +34,11 @@ const s3 = new S3Client({});
 const ssm = new SSMClient({});
 let OPENAI_API_KEY_CACHE: string | undefined;
 const STORIES_PATH_CANDIDATES: (string | undefined)[] = [
+  // Only allow override via explicit env var; default source is STORIES_SEED.
   process.env.STORIES_PATH,
-  path.resolve(__dirname, '../../data/stories.json'),
-  path.resolve(__dirname, '../data/stories.json'),
-  path.resolve(process.cwd(), 'data/stories.json'),
 ];
 let STORIES_CACHE: StoryDefinition[] | null = null;
+let STORIES_VERSION_CACHE: string | null = null;
 
 function sanitizeStoriesList(input: any[], fallbackPrefix: string): StoryDefinition[] {
   const sanitized: StoryDefinition[] = [];
@@ -96,8 +95,46 @@ function loadStories(): StoryDefinition[] {
   return STORIES_CACHE;
 }
 
-function listStorySummaries(): StorySummaryItem[] {
-  return loadStories().map((story) => ({
+function computeStoriesVersion(stories: StoryDefinition[]): string {
+  if (!stories || !stories.length) return 'empty';
+  const normalized = stories.map((story) => ({
+    storyId: story.storyId,
+    title: story.title,
+    summary: story.summary,
+    level: story.level || '',
+    tags: story.tags || [],
+    unlockCost: story.unlockCost ?? 0,
+    missions: (story.missions || []).map((mission) => ({
+      missionId: mission.missionId,
+      title: mission.title,
+      sceneSummary: mission.sceneSummary || '',
+      aiRole: mission.aiRole,
+      caracterName: mission.caracterName || '',
+      caracterPrompt: mission.caracterPrompt || '',
+      requirements: (mission.requirements || []).map((req) => ({
+        requirementId: req.requirementId,
+        text: req.text,
+      })),
+    })),
+  }));
+  const hash = createHash('sha256').update(JSON.stringify(normalized)).digest('hex');
+  return hash.slice(0, 12);
+}
+
+function getStoriesVersion(stories?: StoryDefinition[]): string {
+  if (STORIES_VERSION_CACHE) return STORIES_VERSION_CACHE;
+  const override = process.env.STORIES_VERSION;
+  if (override) {
+    STORIES_VERSION_CACHE = override;
+    return STORIES_VERSION_CACHE;
+  }
+  const source = stories || loadStories();
+  STORIES_VERSION_CACHE = computeStoriesVersion(source);
+  return STORIES_VERSION_CACHE;
+}
+
+function listStorySummaries(stories: StoryDefinition[] = loadStories()): StorySummaryItem[] {
+  return stories.map((story) => ({
     storyId: story.storyId,
     title: story.title,
     summary: story.summary,
@@ -385,7 +422,15 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
     }
 
     if (method === "GET" && path === `${ROUTE_PREFIX}/stories`) {
-      return json(200, { items: listStorySummaries() });
+      const stories = loadStories();
+      const version = getStoriesVersion(stories);
+      return json(200, { version, items: listStorySummaries(stories) });
+    }
+
+    if (method === "GET" && path === `${ROUTE_PREFIX}/stories/full`) {
+      const stories = loadStories();
+      const version = getStoriesVersion(stories);
+      return json(200, { version, items: stories });
     }
 
     const storyDetail = path.match(/^\/v1\/stories\/([^/]+)$/);
@@ -395,7 +440,9 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       if (!story) {
         return notFound();
       }
+      const version = getStoriesVersion();
       return json(200, {
+        version,
         storyId: story.storyId,
         title: story.title,
         summary: story.summary,
@@ -1856,12 +1903,6 @@ function mockCards(): CardItem[] {
     },
   ];
 }
-
-
-
-
-
-
 
 
 

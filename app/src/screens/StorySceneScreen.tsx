@@ -228,6 +228,7 @@ export default function StorySceneScreen() {
 
   useEffect(() => {
     if (!mission) return;
+    // Reset UI state when mission data changes (even if missionId stays the same but requirements update).
     setRequirements(mission.requirements.map((req) => ({ ...req, met: req.met ?? false })));
     setMessages([]);
     setAnalysis(null);
@@ -243,7 +244,7 @@ export default function StorySceneScreen() {
     setAssistanceLoading(false);
     setShowAssistanceModal(false);
     hasShownCharacterModal.current = false;
-  }, [mission?.missionId, storyId]);
+  }, [mission, storyId]);
 
   useEffect(() => {
     if (!mission || !storyId) return;
