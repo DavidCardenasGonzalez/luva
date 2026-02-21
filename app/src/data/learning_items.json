@@ -1,22 +1,5 @@
 [
   {
-    "id": 1,
-    "label": "(alguien) broke into",
-    "examples": [
-      "Last night, someone broke into my neighbor's garage.",
-      "If someone broke into the office, the alarm would go off.",
-      "Police say someone has broken into several cars this month."
-    ],
-    "options": {
-      "a": "alguien dejó una nota en un lugar para avisar de una nueva apertura",
-      "b": "alguien visitó un lugar sin permiso pero sin intención de robar",
-      "c": "alguien entró por la fuerza en un lugar ajeno para robar o dañar"
-    },
-    "answer": "c",
-    "explanation": "Se usa para describir un robo en el que el intruso entra físicamente a otro lugar. Aparece tanto en pasado simple como en presente perfecto, y se acompaña de 'into' para indicar entrada.",
-    "prompt": "Propón una situación breve y original en la que describas un robo cometido por alguien que entró sin permiso en un lugar."
-  },
-  {
     "id": 2,
     "label": "abbreviation",
     "examples": [
@@ -7070,6 +7053,23 @@
     "answer": "c",
     "explanation": "Broad significa ampliar o expandir algo, especialmente conocimientos, experiencias o visión. No se usa para disminuir o intensificar emocionalmente de forma directa, ni para referencias físicas de tamaño.",
     "prompt": "Propón una situación breve donde el alumno use el término en inglés de forma natural."
+  },
+    {
+    "id": 1,
+    "label": "broke into",
+    "examples": [
+      "Last night, someone broke into my neighbor's garage.",
+      "If someone broke into the office, the alarm would go off.",
+      "Police say someone has broken into several cars this month."
+    ],
+    "options": {
+      "a": "alguien dejó una nota en un lugar para avisar de una nueva apertura",
+      "b": "alguien visitó un lugar sin permiso pero sin intención de robar",
+      "c": "alguien entró por la fuerza en un lugar ajeno para robar o dañar"
+    },
+    "answer": "c",
+    "explanation": "Se usa para describir un robo en el que el intruso entra físicamente a otro lugar. Aparece tanto en pasado simple como en presente perfecto, y se acompaña de 'into' para indicar entrada.",
+    "prompt": "Propón una situación breve y original en la que describas un robo cometido por alguien que entró sin permiso en un lugar."
   },
   {
     "id": 417,

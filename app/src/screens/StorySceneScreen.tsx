@@ -735,7 +735,7 @@ export default function StorySceneScreen() {
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <CoinCountChip />
               <Pressable hitSlop={12} onPress={handleOpenAssistance} style={({ pressed }) => ({ paddingHorizontal: 8, paddingVertical: 6, opacity: pressed ? 0.5 : 1 })}>
-                <Text style={{ fontSize: 24, color: 'white', fontWeight: '700', lineHeight: 26 }}>⋯</Text>
+                <Text style={{ fontSize: 24, color: 'white', fontWeight: '700', lineHeight: 26 }}>?</Text>
               </Pressable>
             </View>
           </View>

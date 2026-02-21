@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -6,7 +6,7 @@ import {
   Pressable,
   ActivityIndicator,
   Image,
-  Alert,
+  Platform,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -21,6 +21,104 @@ import CoinCountChip from "../components/CoinCountChip";
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type RouteProps = RouteProp<RootStackParamList, "StoryMissions">;
 
+// Reemplaza estos IDs por tus ad units reales de interstitial en producción.
+const PROD_INTERSTITIAL_AD_UNIT_ID =
+  Platform.select({
+    ios: "ca-app-pub-3572102651268229/5186680084",
+    android: "ca-app-pub-3572102651268229/3933453951",
+  }) ?? "ca-app-pub-3572102651268229/3933453951";
+
+type MobileAdsModule = {
+  AdEventType: {
+    LOADED: string;
+    CLOSED: string;
+    ERROR: string;
+  };
+  InterstitialAd: {
+    createForAdRequest: (
+      adUnitId: string,
+      options?: { requestNonPersonalizedAdsOnly?: boolean },
+    ) => {
+      addAdEventListener: (eventType: string, listener: () => void) => () => void;
+      load: () => void;
+      show: () => Promise<void>;
+    };
+  };
+  TestIds: {
+    INTERSTITIAL: string;
+  };
+};
+
+const getMobileAdsModule = (): MobileAdsModule | null => {
+  try {
+    // Lazy require: prevents crash when native module is not in current binary (Expo Go / old dev build).
+    const ads = require("react-native-google-mobile-ads") as MobileAdsModule;
+    if (!ads?.InterstitialAd || !ads?.AdEventType || !ads?.TestIds) {
+      return null;
+    }
+    return ads;
+  } catch {
+    return null;
+  }
+};
+
+const showInterstitialBeforeNavigation = () =>
+  new Promise<void>((resolve) => {
+    const ads = getMobileAdsModule();
+    if (!ads) {
+      resolve();
+      return;
+    }
+
+    const INTERSTITIAL_AD_UNIT_ID = __DEV__
+      ? ads.TestIds.INTERSTITIAL
+      : PROD_INTERSTITIAL_AD_UNIT_ID;
+
+    const { AdEventType, InterstitialAd } = ads;
+    const interstitial = InterstitialAd.createForAdRequest(
+      INTERSTITIAL_AD_UNIT_ID,
+      {
+        requestNonPersonalizedAdsOnly: true,
+      },
+    );
+
+    let finished = false;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let unsubscribeLoaded: (() => void) | null = null;
+    let unsubscribeClosed: (() => void) | null = null;
+    let unsubscribeError: (() => void) | null = null;
+
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      unsubscribeLoaded?.();
+      unsubscribeClosed?.();
+      unsubscribeError?.();
+      if (timeoutId) clearTimeout(timeoutId);
+      resolve();
+    };
+
+    unsubscribeLoaded = interstitial.addAdEventListener(
+      AdEventType.LOADED,
+      () => {
+        interstitial.show().catch(() => {
+          finish();
+        });
+      },
+    );
+    unsubscribeClosed = interstitial.addAdEventListener(
+      AdEventType.CLOSED,
+      finish,
+    );
+    unsubscribeError = interstitial.addAdEventListener(
+      AdEventType.ERROR,
+      finish,
+    );
+
+    timeoutId = setTimeout(finish, 5000);
+    interstitial.load();
+  });
+
 export default function StoryMissionsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RouteProps>();
@@ -28,6 +126,8 @@ export default function StoryMissionsScreen() {
   const { story, loading, error } = useStoryDetail(storyId);
   const { isMissionCompleted, storyCompleted } = useStoryProgress();
   const { canSpend, loading: coinsLoading, isUnlimited } = useCoins();
+  const isOpeningMissionRef = useRef(false);
+  const [isInterstitialLoading, setIsInterstitialLoading] = useState(false);
 
   const { completedCount, totalMissions, progressPct } = useMemo(() => {
     if (!story) {
@@ -83,19 +183,28 @@ export default function StoryMissionsScreen() {
   }
 
   const handleMissionPress = async (index: number) => {
-    if (!story) return;
-    if (!isUnlimited) {
-      if (coinsLoading) return;
-      const enough = await canSpend(CHAT_MISSION_COST);
-      if (!enough) {
-        navigation.navigate("Paywall");
-        return;
+    if (!story || isOpeningMissionRef.current) return;
+    isOpeningMissionRef.current = true;
+    try {
+      if (!isUnlimited) {
+        if (coinsLoading) return;
+        const enough = await canSpend(CHAT_MISSION_COST);
+        if (!enough) {
+          navigation.navigate("Paywall");
+          return;
+        }
       }
+      setIsInterstitialLoading(true);
+      await showInterstitialBeforeNavigation();
+      setIsInterstitialLoading(false);
+      navigation.navigate("StoryScene", {
+        storyId: story.storyId,
+        sceneIndex: index,
+      });
+    } finally {
+      setIsInterstitialLoading(false);
+      isOpeningMissionRef.current = false;
     }
-    navigation.navigate("StoryScene", {
-      storyId: story.storyId,
-      sceneIndex: index,
-    });
   };
 
   const storyDone = storyCompleted(story.storyId);
@@ -470,6 +579,46 @@ export default function StoryMissionsScreen() {
           );
         })}
       </ScrollView>
+      {isInterstitialLoading ? (
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(11, 18, 36, 0.72)",
+            alignItems: "center",
+            justifyContent: "center",
+            paddingHorizontal: 24,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#0f172a",
+              borderWidth: 1,
+              borderColor: "#1f2937",
+              borderRadius: 16,
+              paddingVertical: 18,
+              paddingHorizontal: 20,
+              minWidth: 220,
+              alignItems: "center",
+            }}
+          >
+            <ActivityIndicator size="large" color="#22d3ee" />
+            <Text
+              style={{
+                color: "#e2e8f0",
+                fontWeight: "700",
+                marginTop: 12,
+                textAlign: "center",
+              }}
+            >
+              Cargando anuncio...
+            </Text>
+          </View>
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 }

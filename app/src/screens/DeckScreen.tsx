@@ -1,7 +1,16 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, FlatList, Pressable, Image } from 'react-native';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  Image,
+  Animated,
+  PanResponder,
+  PanResponderGestureState,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLearningItems } from '../hooks/useLearningItems';
+import { LearningItem, useLearningItems } from '../hooks/useLearningItems';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import {
@@ -11,7 +20,6 @@ import {
 } from '../progress/CardProgressProvider';
 import { useCoins, CARD_OPEN_COST } from '../purchases/CoinBalanceProvider';
 import CoinCountChip from '../components/CoinCountChip';
-import { useNavigation } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Deck'>;
 
@@ -26,16 +34,214 @@ const STATUS_BADGE_BG: Record<CardProgressStatus, string> = {
   learning: 'rgba(14, 165, 233, 0.16)',
   todo: 'rgba(245, 158, 11, 0.18)',
 };
+const SWIPE_COMPLETE_THRESHOLD = 90;
+const SWIPE_MAX_TRANSLATE = 140;
+
+type DeckItem = LearningItem & { status: CardProgressStatus };
+
+type DeckCardProps = {
+  item: DeckItem;
+  onOpen: () => void;
+  onMarkLearned: () => void;
+  onMarkTodo: () => void;
+};
+
+function DeckCard({ item, onOpen, onMarkLearned, onMarkTodo }: DeckCardProps) {
+  const translateX = useRef(new Animated.Value(0)).current;
+  const canSwipeRight = item.status === 'todo' || item.status === 'learning';
+  const canSwipeLeft = item.status === 'learned';
+
+  const resetPosition = useCallback(() => {
+    Animated.spring(translateX, {
+      toValue: 0,
+      useNativeDriver: true,
+      bounciness: 10,
+      speed: 18,
+    }).start();
+  }, [translateX]);
+
+  const handleRelease = useCallback(
+    (_: any, gesture: PanResponderGestureState) => {
+      if (canSwipeRight && gesture.dx > SWIPE_COMPLETE_THRESHOLD) {
+        Animated.sequence([
+          Animated.timing(translateX, {
+            toValue: SWIPE_MAX_TRANSLATE,
+            duration: 140,
+            useNativeDriver: true,
+          }),
+          Animated.spring(translateX, {
+            toValue: 0,
+            useNativeDriver: true,
+            bounciness: 10,
+            speed: 18,
+          }),
+        ]).start();
+        onMarkLearned();
+      } else if (canSwipeLeft && gesture.dx < -SWIPE_COMPLETE_THRESHOLD) {
+        Animated.sequence([
+          Animated.timing(translateX, {
+            toValue: -SWIPE_MAX_TRANSLATE,
+            duration: 140,
+            useNativeDriver: true,
+          }),
+          Animated.spring(translateX, {
+            toValue: 0,
+            useNativeDriver: true,
+            bounciness: 10,
+            speed: 18,
+          }),
+        ]).start();
+        onMarkTodo();
+      } else {
+        resetPosition();
+      }
+    },
+    [canSwipeLeft, canSwipeRight, onMarkLearned, onMarkTodo, resetPosition, translateX]
+  );
+
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onMoveShouldSetPanResponder: (_evt, gesture) => {
+          const { dx, dy } = gesture;
+          return Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy);
+        },
+        onPanResponderMove: (_evt, gesture) => {
+          const minX = canSwipeLeft ? -SWIPE_MAX_TRANSLATE : -30;
+          const maxX = canSwipeRight ? SWIPE_MAX_TRANSLATE : 30;
+          const nextX = Math.min(Math.max(gesture.dx, minX), maxX);
+          translateX.setValue(nextX);
+        },
+        onPanResponderRelease: handleRelease,
+        onPanResponderTerminate: handleRelease,
+      }),
+    [canSwipeLeft, canSwipeRight, handleRelease, translateX]
+  );
+
+  const successOpacity = translateX.interpolate({
+    inputRange: [0, SWIPE_COMPLETE_THRESHOLD, SWIPE_MAX_TRANSLATE],
+    outputRange: [0, 0.28, 0.45],
+    extrapolate: 'clamp',
+  });
+  const todoOpacity = translateX.interpolate({
+    inputRange: [-SWIPE_MAX_TRANSLATE, -SWIPE_COMPLETE_THRESHOLD, 0],
+    outputRange: [0.45, 0.28, 0],
+    extrapolate: 'clamp',
+  });
+
+  return (
+    <View style={{ position: 'relative' }}>
+      {canSwipeRight ? (
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
+            borderRadius: 16,
+            backgroundColor: '#22c55e',
+            opacity: successOpacity,
+            justifyContent: 'center',
+            paddingLeft: 20,
+          }}
+        >
+          <Text style={{ color: '#0b1224', fontWeight: '800' }}>
+            Aprendida
+          </Text>
+        </Animated.View>
+      ) : null}
+      {canSwipeLeft ? (
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
+            borderRadius: 16,
+            backgroundColor: '#f59e0b',
+            opacity: todoOpacity,
+            justifyContent: 'center',
+            alignItems: 'flex-end',
+            paddingRight: 20,
+          }}
+        >
+          <Text style={{ color: '#0b1224', fontWeight: '800' }}>
+            Por aprender
+          </Text>
+        </Animated.View>
+      ) : null}
+
+      <Animated.View
+        style={{
+          transform: [
+            {
+              translateX,
+            },
+          ],
+        }}
+        {...panResponder.panHandlers}
+      >
+        <Pressable
+          onPress={onOpen}
+          style={({ pressed }) => ({
+            padding: 16,
+            borderRadius: 16,
+            backgroundColor: '#0f172a',
+            borderWidth: 1,
+            borderColor: '#1f2937',
+            shadowColor: '#000',
+            shadowOpacity: 0.12,
+            shadowRadius: 10,
+            opacity: pressed ? 0.95 : 1,
+            transform: [{ translateY: pressed ? 1 : 0 }],
+          })}
+        >
+          <Text style={{ color: '#e2e8f0', fontWeight: '800', fontSize: 15 }}>
+            {item.label}
+          </Text>
+          {!!item.examples?.[0] && (
+            <Text style={{ color: '#94a3b8', marginTop: 6 }} numberOfLines={2}>
+              {item.examples?.[0]}
+            </Text>
+          )}
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
+            <View
+              style={{
+                paddingHorizontal: 10,
+                paddingVertical: 6,
+                borderRadius: 999,
+                backgroundColor: STATUS_BADGE_BG[item.status as CardProgressStatus],
+                borderWidth: 1,
+                borderColor: STATUS_COLORS[item.status as CardProgressStatus],
+              }}
+            >
+              <Text style={{ color: '#ffffffff', fontWeight: '800', fontSize: 12 }}>
+                {CARD_STATUS_LABELS[item.status as CardProgressStatus]}
+              </Text>
+            </View>
+            <Text style={{ color: '#cbd5e1', fontSize: 12, marginLeft: 10 }}>
+              Toca para practicar
+            </Text>
+          </View>
+        </Pressable>
+      </Animated.View>
+    </View>
+  );
+}
 
 export default function DeckScreen({ navigation }: Props) {
   const { items } = useLearningItems();
-  const { statusFor, statuses } = useCardProgress();
+  const { statusFor, statuses, setStatus } = useCardProgress();
   const { canSpend, loading: coinsLoading, isUnlimited } = useCoins();
   const [activeStatuses, setActiveStatuses] = useState<CardProgressStatus[]>(['todo']);
 
   const { totals, percentages, filteredItems, totalCount } = useMemo(() => {
     const counts: Record<CardProgressStatus, number> = { todo: 0, learning: 0, learned: 0 };
-    const list = items.map((item) => ({ ...item, status: statusFor(item.id) }));
+    const list: DeckItem[] = items.map((item) => ({ ...item, status: statusFor(item.id) }));
     for (const card of list) counts[card.status] += 1;
     const totalCount = list.length;
     const pct: Record<CardProgressStatus, number> = {
@@ -44,7 +250,7 @@ export default function DeckScreen({ navigation }: Props) {
       learned: totalCount ? Math.round((counts.learned / totalCount) * 100) : 0,
     };
     const activeSet = new Set(activeStatuses.length ? activeStatuses : STATUS_ORDER);
-    const filtered = list.filter((card) => activeSet.has(card.status));
+    const filtered: DeckItem[] = list.filter((card) => activeSet.has(card.status));
     return { totals: counts, percentages: pct, filteredItems: filtered, totalCount };
   }, [items, statuses, statusFor, activeStatuses]);
 
@@ -58,7 +264,7 @@ export default function DeckScreen({ navigation }: Props) {
     });
   };
 
-  const handleOpenCard = async (item: any) => {
+  const handleOpenCard = async (item: DeckItem) => {
     if (!isUnlimited) {
       if (coinsLoading) return;
       const enough = await canSpend(CARD_OPEN_COST);
@@ -78,12 +284,27 @@ export default function DeckScreen({ navigation }: Props) {
     });
   };
 
+  const handleMarkAsLearned = useCallback(
+    (item: DeckItem) => {
+      if (item.status === 'learned') return;
+      void setStatus(String(item.id), 'learned');
+    },
+    [setStatus]
+  );
+  const handleMarkAsTodo = useCallback(
+    (item: DeckItem) => {
+      if (item.status === 'todo') return;
+      void setStatus(String(item.id), 'todo');
+    },
+    [setStatus]
+  );
+
   return (
     <SafeAreaView
       edges={['top', 'left', 'right']}
       style={{ flex: 1, backgroundColor: '#0b1224' }}
     >
-      <FlatList
+      <FlatList<DeckItem>
         data={filteredItems}
         keyExtractor={(i) => String(i.id)}
         contentContainerStyle={{ padding: 20, paddingBottom: 32 }}
@@ -214,49 +435,12 @@ export default function DeckScreen({ navigation }: Props) {
           </View>
         }
         renderItem={({ item }) => (
-          <Pressable
-            onPress={() => void handleOpenCard(item)}
-            style={({ pressed }) => ({
-              padding: 16,
-              borderRadius: 16,
-              backgroundColor: '#0f172a',
-              borderWidth: 1,
-              borderColor: '#1f2937',
-              shadowColor: '#000',
-              shadowOpacity: 0.12,
-              shadowRadius: 10,
-              opacity: pressed ? 0.95 : 1,
-              transform: [{ translateY: pressed ? 1 : 0 }],
-            })}
-          >
-            <Text style={{ color: '#e2e8f0', fontWeight: '800', fontSize: 15 }}>
-              {item.label}
-            </Text>
-            {!!item.examples?.[0] && (
-              <Text style={{ color: '#94a3b8', marginTop: 6 }} numberOfLines={2}>
-                {item.examples?.[0]}
-              </Text>
-            )}
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
-              <View
-                style={{
-                  paddingHorizontal: 10,
-                  paddingVertical: 6,
-                  borderRadius: 999,
-                  backgroundColor: STATUS_BADGE_BG[item.status as CardProgressStatus],
-                  borderWidth: 1,
-                  borderColor: STATUS_COLORS[item.status as CardProgressStatus],
-                }}
-              >
-                <Text style={{ color: '#ffffffff', fontWeight: '800', fontSize: 12 }}>
-                  {CARD_STATUS_LABELS[item.status as CardProgressStatus]}
-                </Text>
-              </View>
-              <Text style={{ color: '#cbd5e1', fontSize: 12, marginLeft: 10 }}>
-                Toca para practicar
-              </Text>
-            </View>
-          </Pressable>
+          <DeckCard
+            item={item}
+            onOpen={() => void handleOpenCard(item)}
+            onMarkLearned={() => handleMarkAsLearned(item)}
+            onMarkTodo={() => handleMarkAsTodo(item)}
+          />
         )}
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         ListEmptyComponent={

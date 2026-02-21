@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   Pressable,
   Image,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -21,6 +22,7 @@ import {
 import { useStoryProgress } from '../progress/StoryProgressProvider';
 import CoinCountChip from '../components/CoinCountChip';
 import { useRevenueCat } from '../purchases/RevenueCatProvider';
+import TourOverlay, { TourHighlight } from '../components/TourOverlay';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -30,6 +32,7 @@ const STATUS_COLORS: Record<CardProgressStatus, string> = {
   learning: '#0ea5e9',
   todo: '#f59e0b',
 };
+const HOME_TOUR_STORAGE_KEY = 'luva_home_tour_seen_v1';
 
 export default function HomeScreen({ navigation }: Props) {
   const { isSignedIn, signIn, signOut } = useAuth();
@@ -38,6 +41,38 @@ export default function HomeScreen({ navigation }: Props) {
   const { loading: cardLoading, statusFor, statuses } = useCardProgress();
   const { loading: storyLoading, completedCountFor } = useStoryProgress();
   const { isPro, loading: rcLoading } = useRevenueCat();
+  const progressHighlightRef = useRef<View>(null);
+  const deckButtonRef = useRef<View>(null);
+  const storiesButtonRef = useRef<View>(null);
+  const [showHomeTour, setShowHomeTour] = useState(false);
+  const [tourHighlight, setTourHighlight] = useState<TourHighlight | null>(null);
+  const [tourStepIndex, setTourStepIndex] = useState(0);
+
+  const tourSteps = useMemo(
+    () => [
+      {
+        key: 'progress',
+        ref: progressHighlightRef,
+        title: 'Avance total',
+        description: 'Aquí puedes ver tu progreso combinado de tarjetas aprendidas y misiones completadas. Sube el porcentaje para desbloquear recompensas.',
+      },
+      {
+        key: 'deck',
+        ref: deckButtonRef,
+        title: 'Tarjetas y práctica',
+        description: 'Aquí encontrarás todo el vocabulario que debes aprender para llegar a nivel avanzado.',
+      },
+      {
+        key: 'stories',
+        ref: storiesButtonRef,
+        title: 'Historias (Misión narrativa)',
+        description: 'Aquí podrás conversar con nuestros personajes de IA y recibir feedback inmediato mientras completas misiones.',
+      },
+    ],
+    []
+  );
+  const activeTourStep = showHomeTour ? tourSteps[tourStepIndex] : null;
+  const isLastTourStep = tourStepIndex >= tourSteps.length - 1;
 
   const { totalCards, learnedCards, counts, percentages } = useMemo(() => {
     const totals: Record<CardProgressStatus, number> = { todo: 0, learning: 0, learned: 0 };
@@ -74,6 +109,52 @@ export default function HomeScreen({ navigation }: Props) {
   const missionsProgress = totalMissions > 0 ? Math.round((completedMissions / totalMissions) * 100) : 0;
   const remainingCards = Math.max(totalCards - learnedCards, 0);
   const remainingMissions = Math.max(totalMissions - completedMissions, 0);
+
+  useEffect(() => {
+    AsyncStorage.getItem(HOME_TOUR_STORAGE_KEY).then((value) => {
+      if (!value || true) {
+        setShowHomeTour(true);
+      }
+    });
+  }, []);
+
+  const measureTourTarget = useCallback(() => {
+    if (!showHomeTour) return;
+    const step = tourSteps[tourStepIndex];
+    if (!step) return;
+    const node = step.ref.current;
+    if (!node || !node.measureInWindow) return;
+    node.measureInWindow((x, y, width, height) => {
+      setTourHighlight({ x, y, width, height });
+    });
+  }, [showHomeTour, tourStepIndex, tourSteps]);
+
+  useEffect(() => {
+    if (!showHomeTour) return;
+    const timer = setTimeout(measureTourTarget, 200);
+    return () => clearTimeout(timer);
+  }, [measureTourTarget, showHomeTour, overallProgress, isLoading, tourStepIndex]);
+
+  const dismissTour = useCallback(async () => {
+    setShowHomeTour(false);
+    setTourHighlight(null);
+    setTourStepIndex(0);
+    try {
+      await AsyncStorage.setItem(HOME_TOUR_STORAGE_KEY, 'seen');
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const handleAdvanceTour = useCallback(async () => {
+    if (!showHomeTour) return;
+    if (isLastTourStep) {
+      await dismissTour();
+      return;
+    }
+    setTourHighlight(null);
+    setTourStepIndex((prev) => Math.min(prev + 1, tourSteps.length - 1));
+  }, [dismissTour, isLastTourStep, showHomeTour, tourSteps.length]);
 
   return (
     <SafeAreaView
@@ -141,7 +222,12 @@ export default function HomeScreen({ navigation }: Props) {
 
         <View style={{ marginTop: 16, backgroundColor: '#0b172b', borderColor: '#1f2937', borderWidth: 1, padding: 16, borderRadius: 16 }}>
           <Text style={{ color: '#cbd5e1', fontSize: 12, fontWeight: '700' }}>Avance total</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-end', marginTop: 6 }}>
+          <View
+            ref={progressHighlightRef}
+            collapsable={false}
+            onLayout={measureTourTarget}
+            style={{ flexDirection: 'row', alignItems: 'flex-end', marginTop: 6 }}
+          >
             <Text style={{ color: '#e2e8f0', fontSize: 36, fontWeight: '900' }}>
               {isLoading ? '--' : `${overallProgress}%`}
             </Text>
@@ -166,6 +252,9 @@ export default function HomeScreen({ navigation }: Props) {
 
         <View style={{ flexDirection: 'row', marginTop: 18 }}>
           <Pressable
+            ref={deckButtonRef}
+            collapsable={false}
+            onLayout={measureTourTarget}
             onPress={() => navigation.navigate('Deck')}
             style={({ pressed }) => ({
               flex: 1,
@@ -183,6 +272,9 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={{ color: '#e0f2fe', fontSize: 12, marginTop: 2 }}>Reanudar práctica</Text>
           </Pressable>
           <Pressable
+            ref={storiesButtonRef}
+            collapsable={false}
+            onLayout={measureTourTarget}
             onPress={() => navigation.navigate('Stories')}
             style={({ pressed }) => ({
               flex: 1,
@@ -270,6 +362,15 @@ export default function HomeScreen({ navigation }: Props) {
         </View>
       </View>
       </ScrollView>
+
+      <TourOverlay
+        visible={showHomeTour}
+        highlight={tourHighlight}
+        title={activeTourStep?.title ?? ''}
+        description={activeTourStep?.description ?? ''}
+        onNext={handleAdvanceTour}
+        isLast={isLastTourStep}
+      />
     </SafeAreaView>
   );
 }

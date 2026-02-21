@@ -38,7 +38,18 @@ module.exports = {
       package: "com.cardi7.luva",
       versionCode: 4,
     },
-    plugins: ["expo-dev-client", "expo-secure-store", "expo-web-browser"],
+    plugins: [
+      "expo-dev-client",
+      "expo-secure-store",
+      "expo-web-browser",
+      [
+        "react-native-google-mobile-ads",
+        {
+          androidAppId: "ca-app-pub-3572102651268229~7993878658",
+          iosAppId: "ca-app-pub-3572102651268229~4090701782",
+        },
+      ],
+    ],
     extra: {
       API_BASE_URL: process.env.API_BASE_URL,
       COGNITO_DOMAIN: process.env.COGNITO_DOMAIN,

@@ -6,7 +6,10 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
+  Modal,
+  TextInput,
+  Image,
+  ActivityIndicator,
 } from "react-native";
 import useAudioRecorder from "../shared/useAudioRecorder";
 import useUploadToS3 from "../shared/useUploadToS3";
@@ -19,12 +22,11 @@ import {
 } from "../progress/CardProgressProvider";
 import * as Speech from "expo-speech";
 import { Audio } from "expo-av";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import StoryMessageComposer, {
   StoryFlowState,
 } from "../components/StoryMessageComposer";
 import { useCoins, CARD_OPEN_COST } from "../purchases/CoinBalanceProvider";
-import CoinCountChip from "../components/CoinCountChip";
 
 type EvalRes = {
   score: number;
@@ -38,6 +40,10 @@ type EvalRes = {
   errors?: string[];
   improvements?: string[];
   suggestions?: string[];
+};
+
+type StoryAssistanceResponse = {
+  answer: string;
 };
 
 type PracticeState =
@@ -103,9 +109,12 @@ const STATE_STYLES: Record<
   },
 };
 
+const luviImage = require("../image/luvi.png");
+
 export default function PracticeScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const {
     cardId,
     storyId,
@@ -127,6 +136,11 @@ export default function PracticeScreen() {
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<"a" | "b" | "c" | null>(null);
   const [canRecord, setCanRecord] = useState<boolean>(false);
+  const [showAssistanceModal, setShowAssistanceModal] = useState(false);
+  const [assistanceQuestion, setAssistanceQuestion] = useState("");
+  const [assistanceAnswer, setAssistanceAnswer] = useState("");
+  const [assistanceLoading, setAssistanceLoading] = useState(false);
+  const [assistanceError, setAssistanceError] = useState<string | null>(null);
   const chargeRegistered = useRef(false);
 
   useEffect(() => {
@@ -332,6 +346,163 @@ export default function PracticeScreen() {
     void speakSegments(improvementsList, "feedback.reformulaciones");
   }, [improvementsList, speakSegments]);
 
+  const selectedPracticeItem = useMemo(() => {
+    if (typeof label === "string" && label.trim().length > 0) {
+      return label.trim();
+    }
+    const optionText =
+      selected && options && typeof options[selected] === "string"
+        ? options[selected].trim()
+        : "";
+    return optionText || "esta palabra";
+  }, [label, options, selected]);
+
+  const assistanceStoryId = useMemo(() => {
+    if (typeof storyId === "string" && storyId.trim().length > 0) {
+      return storyId.trim();
+    }
+    if (cardId) {
+      return `practice-card-${String(cardId)}`;
+    }
+    return "practice-session";
+  }, [cardId, storyId]);
+
+  const assistanceSceneIndex = useMemo(() => {
+    const rawIndex =
+      typeof sceneIndex === "number" ? sceneIndex : Number(sceneIndex);
+    if (!Number.isFinite(rawIndex)) return 0;
+    return Math.max(0, Math.floor(rawIndex));
+  }, [sceneIndex]);
+
+  const assistanceMissionDefinition = useMemo(() => {
+    return {
+      missionId: cardId ? `practice-mission-${String(cardId)}` : "practice-mission",
+      title:
+        typeof label === "string" && label.trim().length > 0
+          ? `Práctica de la palabra "${label.trim()}"`
+          : "Práctica de vocabulario",
+      sceneSummary: "Sesión de práctica para entender una palabra y usarla en contexto.",
+      aiRole: "Tutor de inglés para práctica de tarjetas.",
+      requirements: [
+        {
+          requirementId: "understand_word",
+          text: `Entender el significado de "${selectedPracticeItem}".`,
+        },
+        {
+          requirementId: "use_word_in_context",
+          text: `Usar "${selectedPracticeItem}" en una oración natural.`,
+        },
+      ],
+    };
+  }, [cardId, label, selectedPracticeItem]);
+
+  const assistanceStoryDefinition = useMemo(() => {
+    return {
+      storyId: assistanceStoryId,
+      title: "Práctica de vocabulario",
+      summary:
+        "Sesión de práctica de cards para reforzar significado, uso y pronunciación.",
+      level: "B1",
+      missions: [assistanceMissionDefinition],
+    };
+  }, [assistanceMissionDefinition, assistanceStoryId]);
+
+  const assistanceRequirements = useMemo(() => {
+    return [
+      {
+        requirementId: "understand_word",
+        text: `Entender el significado de "${selectedPracticeItem}".`,
+        met: !!feedback,
+      },
+      {
+        requirementId: "use_word_in_context",
+        text: `Usar "${selectedPracticeItem}" en una oración natural.`,
+        met: feedback?.result === "correct",
+      },
+    ];
+  }, [feedback, selectedPracticeItem]);
+
+  const assistanceHistory = useMemo(() => {
+    const history: Array<{ role: "user" | "assistant"; content: string }> = [];
+    const trimmedTranscript = transcript.trim();
+    if (trimmedTranscript) {
+      history.push({
+        role: "user",
+        content: `Mi intento usando "${selectedPracticeItem}" fue: ${trimmedTranscript}`,
+      });
+    }
+    if (errorsList.length) {
+      history.push({
+        role: "assistant",
+        content: `Errores detectados: ${errorsList.join(" | ")}`,
+      });
+    }
+    if (improvementsList.length) {
+      history.push({
+        role: "assistant",
+        content: `Reformulaciones sugeridas: ${improvementsList.join(" | ")}`,
+      });
+    }
+    return history;
+  }, [errorsList, improvementsList, selectedPracticeItem, transcript]);
+
+  const assistanceConversationFeedback = useMemo(() => {
+    if (!feedback) return null;
+    return {
+      summary: `Resultado previo: ${feedback.result} (${feedback.score}/100).`,
+      improvements: improvementsList.slice(0, 3),
+    };
+  }, [feedback, improvementsList]);
+
+  const handleOpenAssistance = useCallback(() => {
+    setAssistanceQuestion(
+      `Puedes ayudarme a entender y usar la palabra "${selectedPracticeItem}"`,
+    );
+    setAssistanceAnswer("");
+    setAssistanceError(null);
+    setShowAssistanceModal(true);
+  }, [selectedPracticeItem]);
+
+  const handleRequestAssistance = useCallback(async () => {
+    const trimmed = assistanceQuestion.trim();
+    if (!trimmed) {
+      setAssistanceError("Escribe tu pregunta.");
+      return;
+    }
+    setAssistanceLoading(true);
+    setAssistanceError(null);
+    setAssistanceAnswer("");
+    try {
+      const payload = await api.post<StoryAssistanceResponse>(
+        `/stories/${encodeURIComponent(assistanceStoryId)}/assist`,
+        {
+          sceneIndex: assistanceSceneIndex,
+          question: trimmed,
+          history: assistanceHistory,
+          storyDefinition: assistanceStoryDefinition,
+          missionDefinition: assistanceMissionDefinition,
+          requirements: assistanceRequirements,
+          conversationFeedback: assistanceConversationFeedback,
+        },
+      );
+      setAssistanceAnswer(payload?.answer || "");
+    } catch (err: any) {
+      console.error("Practice assistance error", err);
+      setAssistanceError(err?.message || "No pudimos obtener la asistencia.");
+    } finally {
+      setAssistanceLoading(false);
+    }
+  }, [
+    assistanceConversationFeedback,
+    assistanceHistory,
+    assistanceMissionDefinition,
+    assistanceQuestion,
+    assistanceRequirements,
+    assistanceSceneIndex,
+    assistanceStoryDefinition,
+    assistanceStoryId,
+  ]);
+
   const coinReady = isUnlimited || chargeRegistered.current;
   const recordReady = coinReady && ((selected && canRecord) || state === "recording");
   const cardStatusLabel = cardId ? CARD_STATUS_LABELS[statusFor(cardId)] : null;
@@ -430,7 +601,39 @@ export default function PracticeScreen() {
                 Repite, graba y recibe feedback inmediato.
               </Text>
             </View>
-            <CoinCountChip style={{ marginLeft: 10 }} />
+            <View
+              style={{ marginLeft: 10, flexDirection: "row", alignItems: "center" }}
+            >
+              <Pressable
+                hitSlop={12}
+                onPress={handleOpenAssistance}
+                accessibilityRole="button"
+                accessibilityLabel="Abrir ayuda"
+                style={({ pressed }) => ({
+                  marginLeft: 6,
+                  width: 40,
+                  height: 40,
+                  borderRadius: 12,
+                  backgroundColor: COLORS.surface,
+                  borderWidth: 1,
+                  borderColor: COLORS.border,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: pressed ? 0.92 : 1,
+                })}
+              >
+                <Text
+                  style={{
+                    color: COLORS.text,
+                    fontSize: 20,
+                    lineHeight: 22,
+                    fontWeight: "800",
+                  }}
+                >
+                  ?
+                </Text>
+              </Pressable>
+            </View>
           </View>
 
           <View
@@ -988,6 +1191,169 @@ export default function PracticeScreen() {
           ) : null}
         </View>
       </KeyboardAvoidingView>
+      <Modal
+        animationType="fade"
+        transparent
+        visible={showAssistanceModal}
+        onRequestClose={() => setShowAssistanceModal(false)}
+      >
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? insets.top + 12 : 0}
+        >
+          <Pressable
+            style={{ flex: 1, backgroundColor: "rgba(4,7,17,0.75)", padding: 20 }}
+            onPress={() => setShowAssistanceModal(false)}
+          >
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+            >
+              <Pressable
+                onPress={() => {}}
+                style={{
+                  backgroundColor: "white",
+                  borderRadius: 18,
+                  padding: 20,
+                  shadowColor: "#0f172a",
+                  shadowOpacity: 0.12,
+                  shadowRadius: 16,
+                  elevation: 6,
+                }}
+              >
+                <View style={{ alignItems: "flex-end" }}>
+                  <Pressable
+                    onPress={() => setShowAssistanceModal(false)}
+                    hitSlop={12}
+                    style={({ pressed }) => ({ padding: 4, opacity: pressed ? 0.6 : 1 })}
+                  >
+                    <Text style={{ fontSize: 20, color: "#0f172a" }}>✕</Text>
+                  </Pressable>
+                </View>
+                <View style={{ alignItems: "center", marginBottom: 12 }}>
+                  <View
+                    style={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: 20,
+                      backgroundColor: "#0b1224",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <Image
+                      source={luviImage}
+                      style={{ width: "90%", height: "90%" }}
+                      resizeMode="contain"
+                    />
+                  </View>
+                  <Text
+                    style={{
+                      marginTop: 12,
+                      fontSize: 18,
+                      fontWeight: "800",
+                      color: "#0f172a",
+                    }}
+                  >
+                    ¿Cómo puedo ayudarte?
+                  </Text>
+                  <Text
+                    style={{
+                      marginTop: 6,
+                      fontSize: 13,
+                      color: "#475569",
+                      textAlign: "center",
+                    }}
+                  >
+                    Luvi puede ayudarte a entender y usar mejor esta palabra.
+                  </Text>
+                  <Text
+                    style={{
+                      marginTop: 4,
+                      fontSize: 12,
+                      color: "#64748b",
+                      textAlign: "center",
+                    }}
+                  >
+                    Palabra seleccionada: {selectedPracticeItem}
+                  </Text>
+                </View>
+                <TextInput
+                  value={assistanceQuestion}
+                  onChangeText={(text) => {
+                    setAssistanceQuestion(text);
+                    if (assistanceError) setAssistanceError(null);
+                  }}
+                  placeholder='Ejemplo: "No entiendo en qué contexto usar esta palabra."'
+                  placeholderTextColor="#94a3b8"
+                  multiline
+                  style={{
+                    minHeight: 90,
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: "#e2e8f0",
+                    backgroundColor: "#f8fafc",
+                    paddingHorizontal: 12,
+                    paddingVertical: 10,
+                    fontSize: 14,
+                    color: "#0f172a",
+                  }}
+                />
+                {assistanceError ? (
+                  <Text style={{ marginTop: 6, color: "#dc2626" }}>{assistanceError}</Text>
+                ) : null}
+                <Pressable
+                  onPress={handleRequestAssistance}
+                  disabled={assistanceLoading}
+                  style={({ pressed }) => ({
+                    marginTop: 12,
+                    paddingVertical: 12,
+                    borderRadius: 999,
+                    alignItems: "center",
+                    backgroundColor: assistanceLoading
+                      ? "#cbd5f5"
+                      : pressed
+                        ? "#0b1224"
+                        : "#2563eb",
+                  })}
+                >
+                  {assistanceLoading ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    <Text style={{ color: "white", fontWeight: "700" }}>
+                      Pedir asistencia
+                    </Text>
+                  )}
+                </Pressable>
+                {assistanceAnswer ? (
+                  <View
+                    style={{
+                      marginTop: 14,
+                      padding: 12,
+                      borderRadius: 12,
+                      backgroundColor: "#f8fafc",
+                      borderWidth: 1,
+                      borderColor: "#e2e8f0",
+                    }}
+                  >
+                    <Text
+                      style={{ fontWeight: "700", color: "#0f172a", marginBottom: 6 }}
+                    >
+                      Sugerencia
+                    </Text>
+                    <Text style={{ color: "#0f172a", lineHeight: 20 }}>
+                      {assistanceAnswer}
+                    </Text>
+                  </View>
+                ) : null}
+              </Pressable>
+            </ScrollView>
+          </Pressable>
+        </KeyboardAvoidingView>
+      </Modal>
     </SafeAreaView>
   );
 }

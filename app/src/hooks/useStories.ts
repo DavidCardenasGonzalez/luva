@@ -207,7 +207,6 @@ async function syncStories(): Promise<StoriesCache | null> {
     let cache = memoryCache || (await readCache()) || BUNDLED_CACHE;
     try {
       const versionRes = await api.get<StoriesIndexResponse>('/stories');
-      console.log('Version check:', versionRes);
       const remoteVersion = typeof (versionRes as any)?.version === 'string' ? (versionRes as any).version : undefined;
       const needsRefresh = !cache || (remoteVersion && cache.version !== remoteVersion);
       if (needsRefresh) {
