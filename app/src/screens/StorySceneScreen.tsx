@@ -12,6 +12,7 @@ import {
   Modal,
   TextInput,
   AppState,
+  NativeModules,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -72,6 +73,116 @@ type StoryAttemptSnapshot = {
 type StoryAssistanceResponse = {
   answer: string;
 };
+
+// Reemplaza estos IDs por tus ad units reales de rewarded en producción.
+const PROD_REWARDED_AD_UNIT_ID =
+  Platform.select({
+    ios: 'ca-app-pub-3572102651268229/8175446712',
+    android: 'ca-app-pub-3572102651268229/6032857897',
+  }) ?? 'ca-app-pub-3572102651268229/6032857897';
+
+type MobileAdsRewardedModule = {
+  AdEventType: {
+    CLOSED: string;
+    ERROR: string;
+  };
+  RewardedAdEventType: {
+    LOADED: string;
+    EARNED_REWARD: string;
+  };
+  RewardedAd: {
+    createForAdRequest: (
+      adUnitId: string,
+      options?: { requestNonPersonalizedAdsOnly?: boolean },
+    ) => {
+      addAdEventListener: (eventType: string, listener: () => void) => () => void;
+      load: () => void;
+      show: () => Promise<void>;
+    };
+  };
+  TestIds: {
+    REWARDED: string;
+  };
+};
+
+const getMobileAdsRewardedModule = (): MobileAdsRewardedModule | null => {
+  const nativeAdsModule =
+    (NativeModules as any)?.RNGoogleMobileAdsModule ||
+    (NativeModules as any)?.RNGoogleMobileAdsNativeModule;
+  if (!nativeAdsModule) {
+    return null;
+  }
+
+  try {
+    // Lazy require: prevents crash when native module is missing in current binary.
+    const ads = require('react-native-google-mobile-ads') as MobileAdsRewardedModule;
+    if (!ads?.RewardedAd || !ads?.RewardedAdEventType || !ads?.AdEventType || !ads?.TestIds) {
+      return null;
+    }
+    return ads;
+  } catch {
+    return null;
+  }
+};
+
+const showRewardedAssistanceAd = () =>
+  new Promise<boolean>((resolve) => {
+    const ads = getMobileAdsRewardedModule();
+    if (!ads) {
+      resolve(true);
+      return;
+    }
+
+    const REWARDED_AD_UNIT_ID = __DEV__
+      ? ads.TestIds.REWARDED
+      : PROD_REWARDED_AD_UNIT_ID;
+
+    const { AdEventType, RewardedAdEventType, RewardedAd } = ads;
+    const rewarded = RewardedAd.createForAdRequest(REWARDED_AD_UNIT_ID, {
+      requestNonPersonalizedAdsOnly: true,
+    });
+
+    let done = false;
+    let earnedReward = false;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let unsubscribeLoaded: (() => void) | null = null;
+    let unsubscribeClosed: (() => void) | null = null;
+    let unsubscribeError: (() => void) | null = null;
+    let unsubscribeReward: (() => void) | null = null;
+
+    const finish = (granted: boolean) => {
+      if (done) return;
+      done = true;
+      unsubscribeLoaded?.();
+      unsubscribeClosed?.();
+      unsubscribeError?.();
+      unsubscribeReward?.();
+      if (timeoutId) clearTimeout(timeoutId);
+      resolve(granted);
+    };
+
+    unsubscribeLoaded = rewarded.addAdEventListener(RewardedAdEventType.LOADED, () => {
+      rewarded.show().catch(() => finish(true));
+    });
+
+    unsubscribeReward = rewarded.addAdEventListener(
+      RewardedAdEventType.EARNED_REWARD,
+      () => {
+        earnedReward = true;
+      },
+    );
+
+    unsubscribeClosed = rewarded.addAdEventListener(AdEventType.CLOSED, () => {
+      finish(earnedReward);
+    });
+
+    unsubscribeError = rewarded.addAdEventListener(AdEventType.ERROR, () => {
+      finish(true);
+    });
+
+    timeoutId = setTimeout(() => finish(true), 7000);
+    rewarded.load();
+  });
 
 export default function StorySceneScreen() {
   const route = useRoute<any>();
@@ -570,6 +681,11 @@ export default function StorySceneScreen() {
     setAssistanceError(null);
     setAssistanceAnswer('');
     try {
+      const rewardedOk = await showRewardedAssistanceAd();
+      if (!rewardedOk) {
+        setAssistanceError('Debes completar el anuncio para pedir asistencia.');
+        return;
+      }
       const historyPayload = messages.map(({ role, text }) => ({ role, content: text }));
       const requirementPayload = requirements.map((req) => ({
         requirementId: req.requirementId,

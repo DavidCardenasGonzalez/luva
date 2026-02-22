@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Image,
   Platform,
+  NativeModules,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -50,6 +51,13 @@ type MobileAdsModule = {
 };
 
 const getMobileAdsModule = (): MobileAdsModule | null => {
+  const nativeAdsModule =
+    (NativeModules as any)?.RNGoogleMobileAdsModule ||
+    (NativeModules as any)?.RNGoogleMobileAdsNativeModule;
+  if (!nativeAdsModule) {
+    return null;
+  }
+
   try {
     // Lazy require: prevents crash when native module is not in current binary (Expo Go / old dev build).
     const ads = require("react-native-google-mobile-ads") as MobileAdsModule;
