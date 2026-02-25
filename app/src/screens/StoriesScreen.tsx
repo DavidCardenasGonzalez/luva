@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, FlatList, Pressable, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useStories } from '../hooks/useStories';
@@ -7,6 +7,8 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import UnlockModal from '../components/UnlockModal';
 import { useStoryProgress } from '../progress/StoryProgressProvider';
 import CoinCountChip from '../components/CoinCountChip';
+import TourOverlay, { TourHighlight } from '../components/TourOverlay';
+import { hasSeenTour, markTourAsSeen } from '../tour/tourProgress';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Stories'>;
 
@@ -14,6 +16,9 @@ export default function StoriesScreen({ navigation }: Props) {
   const { items, loading, error } = useStories();
   const [lockedInfo, setLockedInfo] = useState<{ title: string; cost: number } | null>(null);
   const { completedCountFor, storyCompleted: isStoryCompleted } = useStoryProgress();
+  const firstStoryCardRef = useRef<View>(null);
+  const [showStoriesTour, setShowStoriesTour] = useState(false);
+  const [storiesTourHighlight, setStoriesTourHighlight] = useState<TourHighlight | null>(null);
 
   const { totalMissions, completedMissions, progressPct } = useMemo(() => {
     const totals = items.reduce(
@@ -37,6 +42,41 @@ export default function StoriesScreen({ navigation }: Props) {
     }
     navigation.navigate('StoryMissions', { storyId });
   };
+
+  useEffect(() => {
+    if (loading || items.length === 0) return;
+    let mounted = true;
+    hasSeenTour('stories').then((seen) => {
+      if (mounted && !seen) {
+        setShowStoriesTour(true);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [items.length, loading]);
+
+  const measureStoriesTourTarget = useCallback(() => {
+    if (!showStoriesTour) return;
+    const target = firstStoryCardRef.current;
+    if (!target || !target.measureInWindow) return;
+    target.measureInWindow((x, y, width, height) => {
+      if (width <= 0 || height <= 0) return;
+      setStoriesTourHighlight({ x, y, width, height });
+    });
+  }, [showStoriesTour]);
+
+  useEffect(() => {
+    if (!showStoriesTour) return;
+    const timer = setTimeout(measureStoriesTourTarget, 200);
+    return () => clearTimeout(timer);
+  }, [measureStoriesTourTarget, showStoriesTour, items.length]);
+
+  const finishStoriesTour = useCallback(async () => {
+    setShowStoriesTour(false);
+    setStoriesTourHighlight(null);
+    await markTourAsSeen('stories');
+  }, []);
 
   return (
     <SafeAreaView
@@ -166,13 +206,16 @@ export default function StoriesScreen({ navigation }: Props) {
               </Text>
             </View>
           }
-          renderItem={({ item }) => {
+          renderItem={({ item, index }) => {
             const completed = Math.min(completedCountFor(item.storyId), item.missionsCount);
             const total = item.missionsCount;
             const storyDone = isStoryCompleted(item.storyId);
             const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
             return (
               <Pressable
+                ref={index === 0 ? firstStoryCardRef : undefined}
+                collapsable={false}
+                onLayout={index === 0 ? measureStoriesTourTarget : undefined}
                 onPress={() => handlePress(item.storyId, item.locked, item.title, item.unlockCost)}
                 style={({ pressed }) => ({
                   marginBottom: 12,
@@ -248,6 +291,15 @@ export default function StoriesScreen({ navigation }: Props) {
           }
         />
       )}
+
+      <TourOverlay
+        visible={showStoriesTour}
+        highlight={storiesTourHighlight}
+        title="Historias disponibles"
+        description="Aquí aparecerán todas las historias disponibles. Cada historia incluye varias misiones conectadas por la misma temática para practicar en contexto."
+        onNext={finishStoriesTour}
+        isLast
+      />
 
       <UnlockModal
         visible={!!lockedInfo}

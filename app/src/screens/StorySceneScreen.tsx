@@ -29,6 +29,8 @@ import { getChatAvatar } from '../chatimages/chatAvatarMap';
 import luviImage from '../image/luvi.png';
 import { useCoins, CHAT_MISSION_COST } from '../purchases/CoinBalanceProvider';
 import CoinCountChip from '../components/CoinCountChip';
+import TourOverlay, { TourHighlight } from '../components/TourOverlay';
+import { hasSeenTour, markTourAsSeen } from '../tour/tourProgress';
 
 type StoryMessage = {
   id: string;
@@ -195,6 +197,10 @@ export default function StorySceneScreen() {
   const [sceneIndex, setSceneIndex] = useState<number>(initialSceneIndex);
   const insets = useSafeAreaInsets();
   const [showCharacterModal, setShowCharacterModal] = useState(false);
+  const [isStorySceneTourPending, setIsStorySceneTourPending] = useState(false);
+  const [showStorySceneTour, setShowStorySceneTour] = useState(false);
+  const [storySceneTourHighlight, setStorySceneTourHighlight] = useState<TourHighlight | null>(null);
+  const [storySceneTourStepIndex, setStorySceneTourStepIndex] = useState(0);
   const chargedMissions = useRef<Set<string>>(new Set());
   const chargingMissionId = useRef<string | null>(null);
   const [missionUnlocked, setMissionUnlocked] = useState<boolean>(false);
@@ -208,6 +214,7 @@ export default function StorySceneScreen() {
     if (!mission) return undefined;
     return getChatAvatar(mission.missionId);
   }, [mission?.missionId]);
+  console.log(mission?.caracterName);
   const characterDisplayName = mission?.caracterName || mission?.title || 'Personaje';
   const avatarInitial = useMemo(
     () => (characterDisplayName?.trim()?.charAt(0) || '?').toUpperCase(),
@@ -332,6 +339,8 @@ export default function StorySceneScreen() {
   const recorder = useAudioRecorder();
   const uploader = useUploadToS3();
   const scrollRef = useRef<ScrollView>(null);
+  const requirementsCardRef = useRef<View>(null);
+  const assistanceIconRef = useRef<View>(null);
   // Permite saber si todavía estamos en el flujo de `start()` (permiso + prepare).
   const isStartingRecording = useRef(false);
   // Si el usuario suelta el botón mientras seguimos pidiendo permiso, guardamos la intención de parar.
@@ -354,6 +363,9 @@ export default function StorySceneScreen() {
     setAssistanceError(null);
     setAssistanceLoading(false);
     setShowAssistanceModal(false);
+    setShowStorySceneTour(false);
+    setStorySceneTourHighlight(null);
+    setStorySceneTourStepIndex(0);
     hasShownCharacterModal.current = false;
   }, [mission, storyId]);
 
@@ -736,6 +748,83 @@ export default function StorySceneScreen() {
     setShowCharacterModal(true);
   }, [mission]);
 
+  const storySceneTourSteps = useMemo(
+    () => [
+      {
+        key: 'requirements',
+        ref: requirementsCardRef,
+        title: 'Requisitos',
+        description: 'Estos son los requisitos que evaluara la IA para determinar si cumples la mision.',
+      },
+      {
+        key: 'assistance',
+        ref: assistanceIconRef,
+        title: 'Ventana de ayuda',
+        description: 'Desde este icono puedes abrir la ayuda cuando necesites una pista o aclaracion.',
+      },
+    ],
+    []
+  );
+  const activeStorySceneTourStep = showStorySceneTour ? storySceneTourSteps[storySceneTourStepIndex] : null;
+  const isLastStorySceneTourStep = storySceneTourStepIndex >= storySceneTourSteps.length - 1;
+
+  useEffect(() => {
+    let mounted = true;
+    hasSeenTour('storyScene').then((seen) => {
+      if (mounted && !seen) {
+        setIsStorySceneTourPending(true);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const measureStorySceneTourTarget = useCallback(() => {
+    if (!showStorySceneTour) return;
+    const step = storySceneTourSteps[storySceneTourStepIndex];
+    if (!step) return;
+    const target = step.ref.current;
+    if (!target || !target.measureInWindow) return;
+    target.measureInWindow((x, y, width, height) => {
+      if (width <= 0 || height <= 0) return;
+      setStorySceneTourHighlight({ x, y, width, height });
+    });
+  }, [showStorySceneTour, storySceneTourStepIndex, storySceneTourSteps]);
+
+  useEffect(() => {
+    if (!showStorySceneTour) return;
+    const timer = setTimeout(() => {
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+      measureStorySceneTourTarget();
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [showStorySceneTour, storySceneTourStepIndex, measureStorySceneTourTarget]);
+
+  const closeCharacterModal = useCallback(() => {
+    setShowCharacterModal(false);
+    if (isStorySceneTourPending) {
+      setShowStorySceneTour(true);
+      setIsStorySceneTourPending(false);
+    }
+  }, [isStorySceneTourPending]);
+
+  const finishStorySceneTour = useCallback(async () => {
+    setShowStorySceneTour(false);
+    setStorySceneTourHighlight(null);
+    setStorySceneTourStepIndex(0);
+    await markTourAsSeen('storyScene');
+  }, []);
+
+  const handleAdvanceStorySceneTour = useCallback(async () => {
+    if (!showStorySceneTour) return;
+    if (isLastStorySceneTourStep) {
+      await finishStorySceneTour();
+      return;
+    }
+    setStorySceneTourStepIndex((prev) => Math.min(prev + 1, storySceneTourSteps.length - 1));
+  }, [finishStorySceneTour, isLastStorySceneTourStep, showStorySceneTour, storySceneTourSteps.length]);
+
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (event) => {
       if (missionCompleted) return;
@@ -850,9 +939,11 @@ export default function StorySceneScreen() {
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <CoinCountChip />
-              <Pressable hitSlop={12} onPress={handleOpenAssistance} style={({ pressed }) => ({ paddingHorizontal: 8, paddingVertical: 6, opacity: pressed ? 0.5 : 1 })}>
-                <Text style={{ fontSize: 24, color: 'white', fontWeight: '700', lineHeight: 26 }}>?</Text>
-              </Pressable>
+              <View ref={assistanceIconRef} collapsable={false} onLayout={measureStorySceneTourTarget}>
+                <Pressable hitSlop={12} onPress={handleOpenAssistance} style={({ pressed }) => ({ paddingHorizontal: 8, paddingVertical: 6, opacity: pressed ? 0.5 : 1 })}>
+                  <Text style={{ fontSize: 24, color: 'white', fontWeight: '700', lineHeight: 26 }}>?</Text>
+                </Pressable>
+              </View>
             </View>
           </View>
         </View>
@@ -865,7 +956,12 @@ export default function StorySceneScreen() {
         <Text style={{ fontSize: 18, fontWeight: '700', color: '#0f172a' }}>{story?.title}</Text>
         <Text style={{ marginTop: 4, color: '#475569' }}>Misión {sceneIndex + 1} de {story?.missions.length}</Text>
 
-        <View style={{ marginTop: 16, padding: 16, backgroundColor: 'white', borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0' }}>
+        <View
+          ref={requirementsCardRef}
+          collapsable={false}
+          onLayout={measureStorySceneTourTarget}
+          style={{ marginTop: 16, padding: 16, backgroundColor: 'white', borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0' }}
+        >
           <Text style={{ fontWeight: '700', color: '#1e293b', marginBottom: 8 }}>Requisitos</Text>
           {requirements.map((req) => (
             <Pressable
@@ -1097,6 +1193,14 @@ export default function StorySceneScreen() {
         onRecordRelease={handleRecordRelease}
       />
       </View>
+      <TourOverlay
+        visible={showStorySceneTour}
+        highlight={storySceneTourHighlight}
+        title={activeStorySceneTourStep?.title ?? ''}
+        description={activeStorySceneTourStep?.description ?? ''}
+        onNext={handleAdvanceStorySceneTour}
+        isLast={isLastStorySceneTourStep}
+      />
       <Modal
         animationType="fade"
         transparent
@@ -1227,11 +1331,11 @@ export default function StorySceneScreen() {
         animationType="fade"
         transparent
         visible={showCharacterModal}
-        onRequestClose={() => setShowCharacterModal(false)}
+        onRequestClose={closeCharacterModal}
       >
         <Pressable
           style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', padding: 24, justifyContent: 'center' }}
-          onPress={() => setShowCharacterModal(false)}
+          onPress={closeCharacterModal}
         >
           <Pressable
             style={{
@@ -1244,7 +1348,7 @@ export default function StorySceneScreen() {
           >
             <View style={{ alignItems: 'flex-end' }}>
               <Pressable
-                onPress={() => setShowCharacterModal(false)}
+                onPress={closeCharacterModal}
                 hitSlop={12}
                 style={({ pressed }) => ({ padding: 4, opacity: pressed ? 0.6 : 1 })}
               >
@@ -1266,6 +1370,9 @@ export default function StorySceneScreen() {
               </Text>
               <Text style={{ marginTop: 6, fontSize: 14, color: '#475569', textAlign: 'center' }}>
                 {mission.title}
+              </Text>
+              <Text style={{ marginTop: 12, fontSize: 14, color: '#1f2937', textAlign: 'center' }}>
+                Debes usar el chat para hablar con este personaje y completar la mision.
               </Text>
               {mission.sceneSummary ? (
                 <Text style={{ marginTop: 12, fontSize: 14, color: '#1f2937', textAlign: 'center' }}>

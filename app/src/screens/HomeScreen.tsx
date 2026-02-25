@@ -6,7 +6,6 @@ import {
   Pressable,
   Image,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -23,6 +22,7 @@ import { useStoryProgress } from '../progress/StoryProgressProvider';
 import CoinCountChip from '../components/CoinCountChip';
 import { useRevenueCat } from '../purchases/RevenueCatProvider';
 import TourOverlay, { TourHighlight } from '../components/TourOverlay';
+import { hasSeenTour, markTourAsSeen } from '../tour/tourProgress';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -32,7 +32,6 @@ const STATUS_COLORS: Record<CardProgressStatus, string> = {
   learning: '#0ea5e9',
   todo: '#f59e0b',
 };
-const HOME_TOUR_STORAGE_KEY = 'luva_home_tour_seen_v1';
 
 export default function HomeScreen({ navigation }: Props) {
   const { isSignedIn, signIn, signOut } = useAuth();
@@ -111,11 +110,15 @@ export default function HomeScreen({ navigation }: Props) {
   const remainingMissions = Math.max(totalMissions - completedMissions, 0);
 
   useEffect(() => {
-    AsyncStorage.getItem(HOME_TOUR_STORAGE_KEY).then((value) => {
-      if (!value || true) {
+    let mounted = true;
+    hasSeenTour('home').then((seen) => {
+      if (mounted && !seen) {
         setShowHomeTour(true);
       }
     });
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const measureTourTarget = useCallback(() => {
@@ -139,11 +142,7 @@ export default function HomeScreen({ navigation }: Props) {
     setShowHomeTour(false);
     setTourHighlight(null);
     setTourStepIndex(0);
-    try {
-      await AsyncStorage.setItem(HOME_TOUR_STORAGE_KEY, 'seen');
-    } catch {
-      // ignore
-    }
+    await markTourAsSeen('home');
   }, []);
 
   const handleAdvanceTour = useCallback(async () => {
@@ -237,16 +236,40 @@ export default function HomeScreen({ navigation }: Props) {
             <View style={{ width: isLoading ? '0%' : `${overallProgress}%`, backgroundColor: '#22d3ee', height: '100%' }} />
           </View>
           <View style={{ marginTop: 12, flexDirection: 'row', justifyContent: 'space-between' }}>
-            <View style={{ padding: 12, borderRadius: 12, backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1e293b', flex: 1, marginRight: 8 }}>
+            <Pressable
+              onPress={() => navigation.navigate('Deck')}
+              style={({ pressed }) => ({
+                padding: 12,
+                borderRadius: 12,
+                backgroundColor: '#0f172a',
+                borderWidth: 1,
+                borderColor: '#1e293b',
+                flex: 1,
+                marginRight: 8,
+                opacity: pressed ? 0.85 : 1,
+              })}
+            >
               <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '700' }}>Tarjetas</Text>
               <Text style={{ color: '#e2e8f0', marginTop: 4, fontWeight: '800' }}>{learnedCards}/{totalCards}</Text>
               <Text style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>Aprendidas</Text>
-            </View>
-            <View style={{ padding: 12, borderRadius: 12, backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1e293b', flex: 1, marginLeft: 8 }}>
+            </Pressable>
+            <Pressable
+              onPress={() => navigation.navigate('Stories')}
+              style={({ pressed }) => ({
+                padding: 12,
+                borderRadius: 12,
+                backgroundColor: '#0f172a',
+                borderWidth: 1,
+                borderColor: '#1e293b',
+                flex: 1,
+                marginLeft: 8,
+                opacity: pressed ? 0.85 : 1,
+              })}
+            >
               <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '700' }}>Misiones</Text>
               <Text style={{ color: '#e2e8f0', marginTop: 4, fontWeight: '800' }}>{completedMissions}/{totalMissions}</Text>
               <Text style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>Completadas</Text>
-            </View>
+            </Pressable>
           </View>
         </View>
 

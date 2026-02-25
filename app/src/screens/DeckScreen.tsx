@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -20,6 +20,8 @@ import {
 } from '../progress/CardProgressProvider';
 import { useCoins, CARD_OPEN_COST } from '../purchases/CoinBalanceProvider';
 import CoinCountChip from '../components/CoinCountChip';
+import TourOverlay, { TourHighlight } from '../components/TourOverlay';
+import { hasSeenTour, markTourAsSeen } from '../tour/tourProgress';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Deck'>;
 
@@ -44,9 +46,11 @@ type DeckCardProps = {
   onOpen: () => void;
   onMarkLearned: () => void;
   onMarkTodo: () => void;
+  onLayout?: () => void;
+  cardRef?: React.RefObject<View | null>;
 };
 
-function DeckCard({ item, onOpen, onMarkLearned, onMarkTodo }: DeckCardProps) {
+function DeckCard({ item, onOpen, onMarkLearned, onMarkTodo, onLayout, cardRef }: DeckCardProps) {
   const translateX = useRef(new Animated.Value(0)).current;
   const canSwipeRight = item.status === 'todo' || item.status === 'learning';
   const canSwipeLeft = item.status === 'learned';
@@ -130,7 +134,7 @@ function DeckCard({ item, onOpen, onMarkLearned, onMarkTodo }: DeckCardProps) {
   });
 
   return (
-    <View style={{ position: 'relative' }}>
+    <View ref={cardRef} collapsable={false} onLayout={onLayout} style={{ position: 'relative' }}>
       {canSwipeRight ? (
         <Animated.View
           pointerEvents="none"
@@ -238,6 +242,15 @@ export default function DeckScreen({ navigation }: Props) {
   const { statusFor, statuses, setStatus } = useCardProgress();
   const { canSpend, loading: coinsLoading, isUnlimited } = useCoins();
   const [activeStatuses, setActiveStatuses] = useState<CardProgressStatus[]>(['todo']);
+  const deckListRef = useRef<FlatList<DeckItem>>(null);
+  const progressRef = useRef<View>(null);
+  const todoFilterRef = useRef<View>(null);
+  const learningFilterRef = useRef<View>(null);
+  const learnedFilterRef = useRef<View>(null);
+  const firstCardRef = useRef<View>(null);
+  const [showDeckTour, setShowDeckTour] = useState(false);
+  const [deckTourHighlight, setDeckTourHighlight] = useState<TourHighlight | null>(null);
+  const [deckTourStepIndex, setDeckTourStepIndex] = useState(0);
 
   const { totals, percentages, filteredItems, totalCount } = useMemo(() => {
     const counts: Record<CardProgressStatus, number> = { todo: 0, learning: 0, learned: 0 };
@@ -253,6 +266,108 @@ export default function DeckScreen({ navigation }: Props) {
     const filtered: DeckItem[] = list.filter((card) => activeSet.has(card.status));
     return { totals: counts, percentages: pct, filteredItems: filtered, totalCount };
   }, [items, statuses, statusFor, activeStatuses]);
+
+  const deckTourSteps = useMemo(() => {
+    const baseSteps = [
+      {
+        key: 'progress',
+        ref: progressRef,
+        title: 'Avance del vocabulario',
+        description: 'Este es el porcentaje del vocabulario que debes aprender.',
+      },
+      {
+        key: 'todo-filter',
+        ref: todoFilterRef,
+        title: CARD_STATUS_LABELS.todo,
+        description: 'Este filtro muestra las tarjetas que aun estan por aprender.',
+      },
+      {
+        key: 'learning-filter',
+        ref: learningFilterRef,
+        title: CARD_STATUS_LABELS.learning,
+        description: 'Este filtro muestra tarjetas que ya iniciaste y debes reforzar.',
+      },
+      {
+        key: 'learned-filter',
+        ref: learnedFilterRef,
+        title: CARD_STATUS_LABELS.learned,
+        description: 'Este filtro muestra las tarjetas que ya marcaste como aprendidas.',
+      },
+    ];
+
+    if (filteredItems.length === 0) {
+      return baseSteps;
+    }
+
+    return [
+      ...baseSteps,
+      {
+        key: 'first-card-open',
+        ref: firstCardRef,
+        title: 'Empieza tu practica',
+        description: 'Este es un item para aprender. Toca la tarjeta para comenzar tu practica. Si ya conoces un item, deslizalo a la derecha para marcarlo como aprendido.',
+      },
+    ];
+  }, [filteredItems.length]);
+  const activeDeckTourStep = showDeckTour ? deckTourSteps[deckTourStepIndex] : null;
+  const isLastDeckTourStep = deckTourStepIndex >= deckTourSteps.length - 1;
+
+  useEffect(() => {
+    let mounted = true;
+    hasSeenTour('deck').then((seen) => {
+      if (mounted && !seen) {
+        setShowDeckTour(true);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+    
+  }, []);
+
+  const measureDeckTourTarget = useCallback(() => {
+    if (!showDeckTour) return;
+    const step = deckTourSteps[deckTourStepIndex];
+    if (!step) return;
+    const target = step.ref.current;
+    if (!target || !target.measureInWindow) return;
+    target.measureInWindow((x, y, width, height) => {
+      if (width <= 0 || height <= 0) return;
+      setDeckTourHighlight({ x, y, width, height });
+    });
+  }, [deckTourStepIndex, deckTourSteps, showDeckTour]);
+
+  useEffect(() => {
+    if (!showDeckTour) return;
+    const timer = setTimeout(measureDeckTourTarget, 200);
+    return () => clearTimeout(timer);
+  }, [measureDeckTourTarget, showDeckTour, deckTourStepIndex, filteredItems.length, activeStatuses]);
+
+  useEffect(() => {
+    if (!showDeckTour) return;
+    const stepKey = deckTourSteps[deckTourStepIndex]?.key;
+    if (stepKey !== 'first-card-open' && stepKey !== 'first-card-swipe') return;
+    const timer = setTimeout(() => {
+      deckListRef.current?.scrollToIndex({ index: 0, animated: true, viewPosition: 0.25 });
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [deckTourStepIndex, deckTourSteps, showDeckTour]);
+
+  const finishDeckTour = useCallback(async () => {
+    setShowDeckTour(false);
+    setDeckTourHighlight(null);
+    setDeckTourStepIndex(0);
+    await markTourAsSeen('deck');
+  }, []);
+
+  const handleAdvanceDeckTour = useCallback(async () => {
+    if (!showDeckTour) return;
+    if (isLastDeckTourStep) {
+      await finishDeckTour();
+      return;
+    }
+    setDeckTourStepIndex((prev) => Math.min(prev + 1, deckTourSteps.length - 1));
+  }, [deckTourSteps.length, finishDeckTour, isLastDeckTourStep, showDeckTour]);
 
   const toggleStatus = (status: CardProgressStatus) => {
     setActiveStatuses((prev) => {
@@ -305,6 +420,7 @@ export default function DeckScreen({ navigation }: Props) {
       style={{ flex: 1, backgroundColor: '#0b1224' }}
     >
       <FlatList<DeckItem>
+        ref={deckListRef}
         data={filteredItems}
         keyExtractor={(i) => String(i.id)}
         contentContainerStyle={{ padding: 20, paddingBottom: 32 }}
@@ -383,7 +499,12 @@ export default function DeckScreen({ navigation }: Props) {
 
               <View style={{ marginTop: 16, backgroundColor: '#0b172b', borderColor: '#1f2937', borderWidth: 1, padding: 16, borderRadius: 16 }}>
                 <Text style={{ color: '#cbd5e1', fontSize: 12, fontWeight: '700' }}>Avance en tarjetas</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'flex-end', marginTop: 6 }}>
+                <View
+                  ref={progressRef}
+                  collapsable={false}
+                  onLayout={measureDeckTourTarget}
+                  style={{ flexDirection: 'row', alignItems: 'flex-end', marginTop: 6 }}
+                >
                   <Text style={{ color: '#e2e8f0', fontSize: 34, fontWeight: '900' }}>
                     {totalCount ? `${percentages.learned}%` : '--'}
                   </Text>
@@ -404,26 +525,33 @@ export default function DeckScreen({ navigation }: Props) {
               <View style={{ marginTop: 10, flexDirection: 'row', flexWrap: 'wrap' }}>
                 {STATUS_ORDER.map((status) => {
                   const active = activeStatuses.includes(status);
+                  const statusRef = status === 'todo' ? todoFilterRef : status === 'learning' ? learningFilterRef : learnedFilterRef;
                   return (
-                    <Pressable
+                    <View
                       key={status}
-                      onPress={() => toggleStatus(status)}
-                      style={({ pressed }) => ({
-                        marginRight: 8,
-                        marginBottom: 8,
-                        paddingVertical: 8,
-                        paddingHorizontal: 14,
-                        borderRadius: 999,
-                        backgroundColor: active ? STATUS_COLORS[status] : '#111827',
-                        borderWidth: 1,
-                        borderColor: active ? STATUS_COLORS[status] : '#1f2937',
-                        opacity: pressed ? 0.9 : 1,
-                      })}
+                      ref={statusRef}
+                      collapsable={false}
+                      onLayout={measureDeckTourTarget}
                     >
-                      <Text style={{ color: active ? '#0b1224' : '#cbd5e1', fontWeight: '700' }}>
-                        {CARD_STATUS_LABELS[status]} · {totals[status]}
-                      </Text>
-                    </Pressable>
+                      <Pressable
+                        onPress={() => toggleStatus(status)}
+                        style={({ pressed }) => ({
+                          marginRight: 8,
+                          marginBottom: 8,
+                          paddingVertical: 8,
+                          paddingHorizontal: 14,
+                          borderRadius: 999,
+                          backgroundColor: active ? STATUS_COLORS[status] : '#111827',
+                          borderWidth: 1,
+                          borderColor: active ? STATUS_COLORS[status] : '#1f2937',
+                          opacity: pressed ? 0.9 : 1,
+                        })}
+                      >
+                        <Text style={{ color: active ? '#0b1224' : '#cbd5e1', fontWeight: '700' }}>
+                          {CARD_STATUS_LABELS[status]} · {totals[status]}
+                        </Text>
+                      </Pressable>
+                    </View>
                   );
                 })}
               </View>
@@ -434,9 +562,11 @@ export default function DeckScreen({ navigation }: Props) {
             </Text>
           </View>
         }
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <DeckCard
             item={item}
+            cardRef={index === 0 ? firstCardRef : undefined}
+            onLayout={index === 0 ? measureDeckTourTarget : undefined}
             onOpen={() => void handleOpenCard(item)}
             onMarkLearned={() => handleMarkAsLearned(item)}
             onMarkTodo={() => handleMarkAsTodo(item)}
@@ -451,6 +581,14 @@ export default function DeckScreen({ navigation }: Props) {
             </Text>
           </View>
         }
+      />
+      <TourOverlay
+        visible={showDeckTour}
+        highlight={deckTourHighlight}
+        title={activeDeckTourStep?.title ?? ''}
+        description={activeDeckTourStep?.description ?? ''}
+        onNext={handleAdvanceDeckTour}
+        isLast={isLastDeckTourStep}
       />
     </SafeAreaView>
   );

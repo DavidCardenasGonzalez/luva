@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   View,
   Text,
@@ -23,11 +29,16 @@ import {
 } from "../progress/CardProgressProvider";
 import * as Speech from "expo-speech";
 import { Audio } from "expo-av";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import StoryMessageComposer, {
   StoryFlowState,
 } from "../components/StoryMessageComposer";
 import { useCoins, CARD_OPEN_COST } from "../purchases/CoinBalanceProvider";
+import TourOverlay, { TourHighlight } from "../components/TourOverlay";
+import { hasSeenTour, markTourAsSeen } from "../tour/tourProgress";
 
 type EvalRes = {
   score: number;
@@ -54,6 +65,13 @@ type PracticeState =
   | "transcribing"
   | "evaluating"
   | "done";
+
+type PracticeTourStep = {
+  key: string;
+  ref: React.RefObject<View | null>;
+  title: string;
+  description: string;
+};
 
 const COLORS = {
   background: "#0b1224",
@@ -155,7 +173,8 @@ const getMobileAdsRewardedModule = (): MobileAdsRewardedModule | null => {
   }
 
   try {
-    const ads = require("react-native-google-mobile-ads") as MobileAdsRewardedModule;
+    const ads =
+      require("react-native-google-mobile-ads") as MobileAdsRewardedModule;
     if (
       !ads?.RewardedAd ||
       !ads?.RewardedAdEventType ||
@@ -263,6 +282,14 @@ export default function PracticeScreen() {
   const [assistanceLoading, setAssistanceLoading] = useState(false);
   const [assistanceError, setAssistanceError] = useState<string | null>(null);
   const chargeRegistered = useRef(false);
+  const scrollRef = useRef<ScrollView>(null);
+  const trainingCardRef = useRef<View>(null);
+  const definitionCardRef = useRef<View>(null);
+  const helpButtonRef = useRef<View>(null);
+  const [showPracticeTour, setShowPracticeTour] = useState(false);
+  const [practiceTourHighlight, setPracticeTourHighlight] =
+    useState<TourHighlight | null>(null);
+  const [practiceTourStepIndex, setPracticeTourStepIndex] = useState(0);
 
   useEffect(() => {
     if (!cardId) return;
@@ -497,12 +524,15 @@ export default function PracticeScreen() {
 
   const assistanceMissionDefinition = useMemo(() => {
     return {
-      missionId: cardId ? `practice-mission-${String(cardId)}` : "practice-mission",
+      missionId: cardId
+        ? `practice-mission-${String(cardId)}`
+        : "practice-mission",
       title:
         typeof label === "string" && label.trim().length > 0
           ? `Práctica de la palabra "${label.trim()}"`
           : "Práctica de vocabulario",
-      sceneSummary: "Sesión de práctica para entender una palabra y usarla en contexto.",
+      sceneSummary:
+        "Sesión de práctica para entender una palabra y usarla en contexto.",
       aiRole: "Tutor de inglés para práctica de tarjetas.",
       requirements: [
         {
@@ -630,7 +660,8 @@ export default function PracticeScreen() {
   ]);
 
   const coinReady = isUnlimited || chargeRegistered.current;
-  const recordReady = coinReady && ((selected && canRecord) || state === "recording");
+  const recordReady =
+    coinReady && ((selected && canRecord) || state === "recording");
   const cardStatusLabel = cardId ? CARD_STATUS_LABELS[statusFor(cardId)] : null;
   const practiceSubtitle = !coinReady
     ? coinsLoading
@@ -668,6 +699,110 @@ export default function PracticeScreen() {
             ? "Evaluando..."
             : "";
 
+  const practiceTourSteps = useMemo<PracticeTourStep[]>(() => {
+    const steps: PracticeTourStep[] = [
+      {
+        key: "training-mode",
+        ref: trainingCardRef,
+        title: "Modo entrenamiento",
+        description:
+          "Aquí está la tarjeta que vas a practicar. Encontrarás ejemplos y puedes tocar en escuchar para oír su pronunciación.",
+      },
+    ];
+
+    steps.push({
+      key: "help-button",
+      ref: helpButtonRef,
+      title: "Botón de ayuda",
+      description:
+        "En cualquier momento que tengas una duda puedes consultar a Luvi.",
+    });
+
+    if (options) {
+      steps.push({
+        key: "definition-followup",
+        ref: definitionCardRef,
+        title: "Seguimiento de definición",
+        description:
+          "Elige la opción que concuerda con la definición para habilitar la práctica. Cuando selecciones la opción correcta, se te pedirá usar esta palabra en una oración y Luvi la evaluará.",
+      });
+    }
+
+    return steps;
+  }, [options]);
+
+  const activePracticeTourStep = showPracticeTour
+    ? practiceTourSteps[practiceTourStepIndex]
+    : null;
+  const isLastPracticeTourStep =
+    practiceTourStepIndex >= practiceTourSteps.length - 1;
+
+  useEffect(() => {
+    let mounted = true;
+    hasSeenTour("practice").then((seen) => {
+      if (mounted && !seen) {
+      setShowPracticeTour(true);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const measurePracticeTourTarget = useCallback(() => {
+    if (!showPracticeTour) return;
+    const step = practiceTourSteps[practiceTourStepIndex];
+    if (!step) return;
+    const target = step.ref.current;
+    if (!target || !target.measureInWindow) return;
+    target.measureInWindow((x, y, width, height) => {
+      if (width <= 0 || height <= 0) return;
+      setPracticeTourHighlight({ x, y, width, height });
+    });
+  }, [practiceTourStepIndex, practiceTourSteps, showPracticeTour]);
+
+  useEffect(() => {
+    if (!showPracticeTour) return;
+    const stepKey = practiceTourSteps[practiceTourStepIndex]?.key;
+    const timer = setTimeout(() => {
+      if (stepKey === "definition-box" || stepKey === "definition-followup") {
+        scrollRef.current?.scrollTo({ y: 340, animated: true });
+      } else {
+        scrollRef.current?.scrollTo({ y: 0, animated: true });
+      }
+      measurePracticeTourTarget();
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [
+    measurePracticeTourTarget,
+    practiceTourStepIndex,
+    practiceTourSteps,
+    showPracticeTour,
+  ]);
+
+  const finishPracticeTour = useCallback(async () => {
+    setShowPracticeTour(false);
+    setPracticeTourHighlight(null);
+    setPracticeTourStepIndex(0);
+    await markTourAsSeen("practice");
+  }, []);
+
+  const handleAdvancePracticeTour = useCallback(async () => {
+    if (!showPracticeTour) return;
+    if (isLastPracticeTourStep) {
+      await finishPracticeTour();
+      return;
+    }
+    setPracticeTourStepIndex((prev) =>
+      Math.min(prev + 1, practiceTourSteps.length - 1),
+    );
+  }, [
+    finishPracticeTour,
+    isLastPracticeTourStep,
+    practiceTourSteps.length,
+    showPracticeTour,
+  ]);
+
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
@@ -679,6 +814,7 @@ export default function PracticeScreen() {
         keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
       >
         <ScrollView
+          ref={scrollRef}
           style={{ flex: 1 }}
           contentContainerStyle={{ padding: 16, paddingBottom: 200 }}
           keyboardShouldPersistTaps="handled"
@@ -728,7 +864,14 @@ export default function PracticeScreen() {
               </Text>
             </View>
             <View
-              style={{ marginLeft: 10, flexDirection: "row", alignItems: "center" }}
+              ref={helpButtonRef}
+              collapsable={false}
+              onLayout={measurePracticeTourTarget}
+              style={{
+                marginLeft: 10,
+                flexDirection: "row",
+                alignItems: "center",
+              }}
             >
               <Pressable
                 hitSlop={12}
@@ -763,6 +906,9 @@ export default function PracticeScreen() {
           </View>
 
           <View
+            ref={trainingCardRef}
+            collapsable={false}
+            onLayout={measurePracticeTourTarget}
             style={{
               backgroundColor: COLORS.surface,
               borderRadius: 20,
@@ -920,6 +1066,9 @@ export default function PracticeScreen() {
           </View>
           {options && (
             <View
+              ref={definitionCardRef}
+              collapsable={false}
+              onLayout={measurePracticeTourTarget}
               style={{
                 marginTop: 12,
                 padding: 16,
@@ -1317,6 +1466,14 @@ export default function PracticeScreen() {
           ) : null}
         </View>
       </KeyboardAvoidingView>
+      <TourOverlay
+        visible={showPracticeTour}
+        highlight={practiceTourHighlight}
+        title={activePracticeTourStep?.title ?? ""}
+        description={activePracticeTourStep?.description ?? ""}
+        onNext={handleAdvancePracticeTour}
+        isLast={isLastPracticeTourStep}
+      />
       <Modal
         animationType="fade"
         transparent
@@ -1329,7 +1486,11 @@ export default function PracticeScreen() {
           keyboardVerticalOffset={Platform.OS === "ios" ? insets.top + 12 : 0}
         >
           <Pressable
-            style={{ flex: 1, backgroundColor: "rgba(4,7,17,0.75)", padding: 20 }}
+            style={{
+              flex: 1,
+              backgroundColor: "rgba(4,7,17,0.75)",
+              padding: 20,
+            }}
             onPress={() => setShowAssistanceModal(false)}
           >
             <ScrollView
@@ -1353,7 +1514,10 @@ export default function PracticeScreen() {
                   <Pressable
                     onPress={() => setShowAssistanceModal(false)}
                     hitSlop={12}
-                    style={({ pressed }) => ({ padding: 4, opacity: pressed ? 0.6 : 1 })}
+                    style={({ pressed }) => ({
+                      padding: 4,
+                      opacity: pressed ? 0.6 : 1,
+                    })}
                   >
                     <Text style={{ fontSize: 20, color: "#0f172a" }}>✕</Text>
                   </Pressable>
@@ -1429,7 +1593,9 @@ export default function PracticeScreen() {
                   }}
                 />
                 {assistanceError ? (
-                  <Text style={{ marginTop: 6, color: "#dc2626" }}>{assistanceError}</Text>
+                  <Text style={{ marginTop: 6, color: "#dc2626" }}>
+                    {assistanceError}
+                  </Text>
                 ) : null}
                 <Pressable
                   onPress={handleRequestAssistance}
@@ -1466,7 +1632,11 @@ export default function PracticeScreen() {
                     }}
                   >
                     <Text
-                      style={{ fontWeight: "700", color: "#0f172a", marginBottom: 6 }}
+                      style={{
+                        fontWeight: "700",
+                        color: "#0f172a",
+                        marginBottom: 6,
+                      }}
                     >
                       Sugerencia
                     </Text>
