@@ -93,8 +93,18 @@ function sanitizeMission(input: any): StoryMissionDefinition | null {
     title,
     sceneSummary: typeof input.sceneSummary === 'string' ? input.sceneSummary : undefined,
     aiRole,
-    caracterName: typeof input.caracterName === 'string' ? input.caracterName : undefined,
-    caracterPrompt: typeof input.caracterPrompt === 'string' ? input.caracterPrompt : undefined,
+    caracterName:
+      typeof input.caracterName === 'string'
+        ? input.caracterName
+        : typeof input.characterName === 'string'
+        ? input.characterName
+        : undefined,
+    caracterPrompt:
+      typeof input.caracterPrompt === 'string'
+        ? input.caracterPrompt
+        : typeof input.characterPrompt === 'string'
+        ? input.characterPrompt
+        : undefined,
     requirements,
   };
 }

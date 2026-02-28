@@ -214,7 +214,7 @@ export default function StorySceneScreen() {
     if (!mission) return undefined;
     return getChatAvatar(mission.missionId);
   }, [mission?.missionId]);
-  console.log(mission?.caracterName);
+
   const characterDisplayName = mission?.caracterName || mission?.title || 'Personaje';
   const avatarInitial = useMemo(
     () => (characterDisplayName?.trim()?.charAt(0) || '?').toUpperCase(),

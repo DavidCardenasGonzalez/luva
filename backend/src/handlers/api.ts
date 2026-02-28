@@ -276,6 +276,18 @@ function sanitizeStoryMission(input: any): StoryMission | undefined {
       : typeof input.scene_summary === 'string'
       ? input.scene_summary
       : undefined;
+  const caracterName =
+    typeof input.caracterName === 'string'
+      ? input.caracterName
+      : typeof input.characterName === 'string'
+      ? input.characterName
+      : undefined;
+  const caracterPrompt =
+    typeof input.caracterPrompt === 'string'
+      ? input.caracterPrompt
+      : typeof input.characterPrompt === 'string'
+      ? input.characterPrompt
+      : undefined;
   const requirementsRaw = Array.isArray(input.requirements) ? input.requirements : [];
   const requirements = requirementsRaw
     .map((req: any) => sanitizeStoryRequirement(req))
@@ -285,6 +297,8 @@ function sanitizeStoryMission(input: any): StoryMission | undefined {
     title,
     sceneSummary,
     aiRole,
+    caracterName,
+    caracterPrompt,
     requirements,
   };
 }
@@ -452,6 +466,8 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
           title: mission.title,
           sceneSummary: mission.sceneSummary,
           aiRole: mission.aiRole,
+          caracterName: mission.caracterName,
+          caracterPrompt: mission.caracterPrompt,
           requirements: initialRequirementStates(mission),
         })) || [],
       });
@@ -1903,6 +1919,5 @@ function mockCards(): CardItem[] {
     },
   ];
 }
-
 
 
