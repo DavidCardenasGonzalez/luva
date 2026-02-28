@@ -11,7 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRevenueCat } from './RevenueCatProvider';
 
 const STORAGE_KEY = '@luva/coins/state';
-const MAX_FREE_COINS = 50;
+const MAX_FREE_COINS = 10;
 const REGEN_INTERVAL_MS = 60 * 60 * 1000;
 
 export const CHAT_MISSION_COST = 5;

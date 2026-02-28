@@ -193,7 +193,7 @@ export default function StorySceneScreen() {
   const initialSceneIndex: number = route.params?.sceneIndex ?? 0;
   const { story, loading, error } = useStoryDetail(storyId);
   const { markMissionCompleted, isMissionCompleted, storyCompleted: isStoryCompleted } = useStoryProgress();
-  const { spendCoins, loading: coinsLoading, isUnlimited, balance } = useCoins();
+  const { spendCoins, canSpend, loading: coinsLoading, isUnlimited, balance } = useCoins();
   const [sceneIndex, setSceneIndex] = useState<number>(initialSceneIndex);
   const insets = useSafeAreaInsets();
   const [showCharacterModal, setShowCharacterModal] = useState(false);
@@ -237,40 +237,8 @@ export default function StorySceneScreen() {
       setMissionUnlocked(false);
       return;
     }
-    if (isUnlimited || chargedMissions.current.has(mission.missionId)) {
-      setMissionUnlocked(true);
-      return;
-    }
-    if (coinsLoading) return;
-    if (chargingMissionId.current === mission.missionId) return;
-
-    chargingMissionId.current = mission.missionId;
-    chargedMissions.current.add(mission.missionId);
-
-    let cancelled = false;
-    (async () => {
-      const ok = await spendCoins(CHAT_MISSION_COST, `mission:${mission.missionId}`);
-      if (!ok) {
-        if (!cancelled) {
-          chargedMissions.current.delete(mission.missionId);
-          setMissionUnlocked(false);
-          navigation.navigate('Paywall');
-        }
-        chargingMissionId.current = null;
-        return;
-      }
-      if (cancelled) return;
-      setMissionUnlocked(true);
-      chargingMissionId.current = null;
-    })();
-
-    return () => {
-      cancelled = true;
-      chargingMissionId.current = null;
-      chargedMissions.current.delete(mission.missionId);
-      setMissionUnlocked(false);
-    };
-  }, [mission?.missionId, isUnlimited, coinsLoading, spendCoins, navigation]);
+    setMissionUnlocked(isUnlimited || chargedMissions.current.has(mission.missionId));
+  }, [isUnlimited, mission?.missionId, sceneIndex, storyId]);
 
   const storyDefinitionPayload = useMemo(() => {
     if (!story) return undefined;
@@ -331,7 +299,7 @@ export default function StorySceneScreen() {
     () =>
       isUnlimited
         ? 'No has terminado la misión. Si sales ahora, perderás tu avance.'
-        : 'No has terminado la misión. Si sales ahora, perderás tu avance y las monedas/créditos utilizados para entrar y grabar.',
+        : 'No has terminado la misión. Si sales ahora, perderás tu avance y las monedas/créditos utilizados durante la misión y para grabar.',
     [isUnlimited]
   );
 
@@ -382,9 +350,9 @@ export default function StorySceneScreen() {
     }
   }, [messages.length]);
 
-  const missionCoinLocked = coinsLoading || !missionUnlocked;
+  const missionChargePending = !isUnlimited && !missionUnlocked;
   const recordingCoinLocked = !isUnlimited && balance < RECORDING_COST;
-  const retryBlocked = retryState === 'required' || missionCoinLocked;
+  const retryBlocked = retryState === 'required';
   const recordBlocked = retryBlocked || recordingCoinLocked;
 
   const statusLabel = useMemo(() => {
@@ -398,7 +366,7 @@ export default function StorySceneScreen() {
       case 'evaluating':
         return 'Analizando tu respuesta...';
       default:
-        if (missionCoinLocked) {
+        if (missionChargePending) {
           return coinsLoading ? 'Cargando tus monedas...' : `Costo de misión: ${CHAT_MISSION_COST} monedas`;
         }
         if (recordingCoinLocked) {
@@ -406,11 +374,49 @@ export default function StorySceneScreen() {
         }
         return '';
     }
-  }, [coinsLoading, flowState, missionCoinLocked, recordingCoinLocked]);
+  }, [coinsLoading, flowState, missionChargePending, recordingCoinLocked]);
 
   const appendMessage = useCallback((msg: StoryMessage) => {
     setMessages((prev) => [...prev, msg]);
   }, []);
+
+  const ensureMissionCharge = useCallback(async () => {
+    const missionId = mission?.missionId;
+    if (!missionId) return false;
+    if (isUnlimited || chargedMissions.current.has(missionId)) {
+      setMissionUnlocked(true);
+      return true;
+    }
+    if (coinsLoading) {
+      setErrorMessage('Cargando tus monedas...');
+      return false;
+    }
+    if (chargingMissionId.current === missionId) {
+      return false;
+    }
+    chargingMissionId.current = missionId;
+    try {
+      const ok = await spendCoins(CHAT_MISSION_COST, `mission:${missionId}`);
+      if (!ok) {
+        setMissionUnlocked(false);
+        setErrorMessage(`Costo de misión: ${CHAT_MISSION_COST} monedas`);
+        navigation.navigate('Paywall');
+        return false;
+      }
+      chargedMissions.current.add(missionId);
+      setMissionUnlocked(true);
+      return true;
+    } catch (err: any) {
+      console.error('Mission charge error', err);
+      setMissionUnlocked(false);
+      setErrorMessage(err?.message || 'No pudimos cobrar la misión.');
+      return false;
+    } finally {
+      if (chargingMissionId.current === missionId) {
+        chargingMissionId.current = null;
+      }
+    }
+  }, [coinsLoading, isUnlimited, mission?.missionId, navigation, spendCoins]);
 
   const handleAdvance = useCallback(
     async (transcript: string, sessionId: string) => {
@@ -423,6 +429,11 @@ export default function StorySceneScreen() {
       }
       if (retryState === 'required') {
         setErrorMessage('Debes volver a intentar antes de continuar.');
+        setFlowState('idle');
+        return;
+      }
+      const chargeOk = await ensureMissionCharge();
+      if (!chargeOk) {
         setFlowState('idle');
         return;
       }
@@ -540,6 +551,7 @@ export default function StorySceneScreen() {
       storyCompleted,
       storyDefinitionPayload,
       storyId,
+      ensureMissionCharge,
     ]
   );
 
@@ -582,9 +594,17 @@ export default function StorySceneScreen() {
         setErrorMessage('Debes volver a intentar antes de continuar.');
         return;
       }
-      if (missionCoinLocked) {
-        setErrorMessage(coinsLoading ? 'Cargando tus monedas...' : `Costo de misión: ${CHAT_MISSION_COST} monedas`);
-        return;
+      if (!isUnlimited && !missionUnlocked) {
+        if (coinsLoading) {
+          setErrorMessage('Cargando tus monedas...');
+          return;
+        }
+        const missionAffordable = await canSpend(CHAT_MISSION_COST);
+        if (!missionAffordable) {
+          setErrorMessage(`Costo de misión: ${CHAT_MISSION_COST} monedas`);
+          navigation.navigate('Paywall');
+          return;
+        }
       }
       if (!isUnlimited) {
         const chargeReason = mission?.missionId
@@ -616,7 +636,7 @@ export default function StorySceneScreen() {
       stopRequestedWhileStarting.current = false;
       isStartingRecording.current = false;
     }
-  }, [coinsLoading, isUnlimited, mission?.missionId, missionCoinLocked, navigation, recorder, retryState, sceneIndex, spendCoins, storyId]);
+  }, [canSpend, coinsLoading, isUnlimited, mission?.missionId, missionUnlocked, navigation, recorder, retryState, sceneIndex, spendCoins, storyId]);
 
   const handleRecordRelease = useCallback(async (skipStartGuard = false) => {
     try {

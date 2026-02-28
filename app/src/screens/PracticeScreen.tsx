@@ -282,6 +282,7 @@ export default function PracticeScreen() {
   const [assistanceLoading, setAssistanceLoading] = useState(false);
   const [assistanceError, setAssistanceError] = useState<string | null>(null);
   const chargeRegistered = useRef(false);
+  const chargingCard = useRef(false);
   const scrollRef = useRef<ScrollView>(null);
   const trainingCardRef = useRef<View>(null);
   const definitionCardRef = useRef<View>(null);
@@ -293,27 +294,34 @@ export default function PracticeScreen() {
   const isStartingRecording = useRef(false);
   const stopRequestedWhileStarting = useRef(false);
 
-  useEffect(() => {
-    if (!cardId) return;
-    if (chargeRegistered.current) return;
-    if (isUnlimited) {
-      chargeRegistered.current = true;
-      return;
+  const ensureCardCharge = useCallback(async () => {
+    if (!cardId || isUnlimited || chargeRegistered.current) {
+      return true;
     }
-    if (coinsLoading) return;
-    let cancelled = false;
-    (async () => {
+    if (coinsLoading) {
+      setError("Cargando tus monedas...");
+      return false;
+    }
+    if (chargingCard.current) {
+      return false;
+    }
+    chargingCard.current = true;
+    try {
       const ok = await spendCoins(CARD_OPEN_COST, `card:${cardId}`);
-      if (!ok && !cancelled) {
-        navigation.goBack();
+      if (!ok) {
+        setError(`Necesitas ${CARD_OPEN_COST} moneda${CARD_OPEN_COST === 1 ? "" : "s"} para responder.`);
         navigation.navigate("Paywall");
-      } else if (!cancelled) {
-        chargeRegistered.current = true;
+        return false;
       }
-    })();
-    return () => {
-      cancelled = true;
-    };
+      chargeRegistered.current = true;
+      return true;
+    } catch (err: any) {
+      console.error("[Practice] Error cobrando la card", err);
+      setError(err?.message || "No se pudo cobrar la card");
+      return false;
+    } finally {
+      chargingCard.current = false;
+    }
   }, [cardId, coinsLoading, isUnlimited, navigation, spendCoins]);
 
   const speakSegments = useCallback(
@@ -691,7 +699,7 @@ export default function PracticeScreen() {
     assistanceStoryId,
   ]);
 
-  const coinReady = isUnlimited || chargeRegistered.current;
+  const coinReady = isUnlimited || !cardId || chargeRegistered.current;
   const interactionReady =
     coinReady && ((!!selected && canRecord) || state === "recording");
   const recordingCoinLocked = !isUnlimited && balance < RECORDING_COST;
@@ -700,7 +708,7 @@ export default function PracticeScreen() {
   const practiceSubtitle = !coinReady
     ? coinsLoading
       ? "Cargando tus monedas..."
-      : "Esperando saldo para practicar"
+      : `Responder cuesta ${CARD_OPEN_COST} moneda${CARD_OPEN_COST === 1 ? "" : "s"}`
     : !selected
       ? "Selecciona una opción"
       : recordingCoinLocked
@@ -1129,7 +1137,10 @@ export default function PracticeScreen() {
                 return (
                   <Pressable
                     key={k}
-                    onPress={() => {
+                    onPress={async () => {
+                      const charged = await ensureCardCharge();
+                      if (!charged) return;
+                      setError(null);
                       setSelected(k);
                       setCanRecord(true);
                     }}
@@ -1449,6 +1460,10 @@ export default function PracticeScreen() {
               const trimmed = textToSend.trim();
               if (!trimmed || !interactionReady) return false;
               try {
+                const charged = await ensureCardCharge();
+                if (!charged) {
+                  return false;
+                }
                 setError(null);
                 setState("evaluating");
                 const started = await api.post<{
