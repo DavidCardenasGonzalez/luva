@@ -26,7 +26,9 @@ import {
   StoryAdvanceRequirementState,
   EvalResult,
   StoryAssistanceRequest,
-  StoryAssistanceResponse
+  StoryAssistanceResponse,
+  PromoCodeValidationRequest,
+  PromoCodeValidationResponse
 } from "../types";
 import { STORIES_SEED } from "../data/stories-seed";
 
@@ -343,6 +345,8 @@ function badRequest(message: string): ApiResponse {
 }
 
 const ROUTE_PREFIX = "/v1";
+const PROMO_CODE = "PRO123";
+const PROMO_PREMIUM_DAYS = 30;
 
 export const handler = async (event: any, context?: any): Promise<Result> => {
   const method: string =
@@ -579,6 +583,20 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
         streaks: { max: 7, current: 2 },
         recent: [],
       });
+    }
+
+    if (method === "POST" && path === `${ROUTE_PREFIX}/promo-codes/validate`) {
+      const body = parseBody(event.body) as PromoCodeValidationRequest | undefined;
+      const submittedCode = typeof body?.code === "string" ? body.code.trim() : "";
+      if (!submittedCode) {
+        return badRequest("Missing code");
+      }
+      const payload: PromoCodeValidationResponse = {
+        code: PROMO_CODE,
+        isValid: submittedCode.toUpperCase() === PROMO_CODE,
+        premiumDays: PROMO_PREMIUM_DAYS,
+      };
+      return json(200, payload);
     }
 
     return notFound();
@@ -1919,5 +1937,4 @@ function mockCards(): CardItem[] {
     },
   ];
 }
-
 

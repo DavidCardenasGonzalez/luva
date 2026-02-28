@@ -101,13 +101,14 @@ export default function SettingsScreen({ navigation }: Props) {
       }
       const expiresLabel = result.expiresAt
         ? formatDate(new Date(result.expiresAt).toISOString())
-        : '30 días';
+        : `${result.premiumDays ?? 30} días`;
+      const premiumDays = result.premiumDays ?? 30;
       setCodeFeedback({
         message: `Código aplicado. Pro activo hasta ${expiresLabel}.`,
         tone: 'success',
       });
       setCodeInput('');
-      Alert.alert('Listo', 'Tu código fue aplicado y tienes Pro por 30 días.');
+      Alert.alert('Listo', `Tu código fue aplicado y tienes Pro por ${premiumDays} días.`);
     } catch (err) {
       console.warn('[Settings] Error al canjear código', err);
       setCodeFeedback({ message: 'No pudimos validar el código. Inténtalo de nuevo.', tone: 'error' });

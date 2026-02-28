@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import Purchases, { CustomerInfo, LOG_LEVEL } from 'react-native-purchases';
 import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { api } from '../api/api';
 
 type RevenueCatContextValue = {
   customerInfo?: CustomerInfo;
@@ -13,7 +14,7 @@ type RevenueCatContextValue = {
   clearManualProAccess: () => Promise<void>;
   redeemPromoCode: (
     code: string
-  ) => Promise<{ success: boolean; expiresAt?: number; reason?: 'not_found' | 'error' }>;
+  ) => Promise<{ success: boolean; expiresAt?: number; premiumDays?: number; reason?: 'not_found' | 'error' }>;
 };
 
 const RevenueCatContext = createContext<RevenueCatContextValue | undefined>(undefined);
@@ -22,8 +23,6 @@ const IOS_API_KEY: string | undefined = extra.REVENUECAT_IOS_API_KEY;
 const ANDROID_API_KEY: string | undefined = extra.REVENUECAT_ANDROID_API_KEY;
 const ENTITLEMENT_ID: string = extra.REVENUECAT_ENTITLEMENT_ID || 'Luva Pro';
 const MANUAL_PRO_KEY = '@luva/pro_code_expires_at';
-const PROMO_CODE = 'pro123';
-const PROMO_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
 
 export function RevenueCatProvider({ children }: { children: React.ReactNode }) {
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | undefined>();
@@ -117,18 +116,29 @@ export function RevenueCatProvider({ children }: { children: React.ReactNode }) 
 
   const redeemPromoCode = useCallback(
     async (code: string) => {
-      const normalized = code.trim().toLowerCase();
-      if (normalized !== PROMO_CODE) {
+      const trimmed = code.trim();
+      if (!trimmed) {
         return { success: false, reason: 'not_found' as const };
       }
-      const expiresAt = Date.now() + PROMO_DURATION_MS;
+      const validation = await api.post<{ code: string; isValid: boolean; premiumDays: number }>(
+        '/promo-codes/validate',
+        { code: trimmed }
+      );
+      if (!validation?.isValid) {
+        return { success: false, reason: 'not_found' as const };
+      }
+      const premiumDays = Number.isFinite(validation.premiumDays) ? Math.max(0, validation.premiumDays) : 0;
+      if (premiumDays <= 0) {
+        return { success: false, reason: 'error' as const };
+      }
+      const expiresAt = Date.now() + premiumDays * 24 * 60 * 60 * 1000;
       setManualProExpiration(expiresAt);
       try {
         await AsyncStorage.setItem(MANUAL_PRO_KEY, String(expiresAt));
       } catch (err) {
         console.warn('No se pudo guardar la expiración del código promocional', err);
       }
-      return { success: true, expiresAt };
+      return { success: true, expiresAt, premiumDays };
     },
     []
   );

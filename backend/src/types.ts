@@ -124,3 +124,13 @@ export interface StoryAssistanceRequest {
 export interface StoryAssistanceResponse {
   answer: string;
 }
+
+export interface PromoCodeValidationRequest {
+  code: string;
+}
+
+export interface PromoCodeValidationResponse {
+  code: string;
+  isValid: boolean;
+  premiumDays: number;
+}
