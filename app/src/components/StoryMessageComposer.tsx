@@ -8,6 +8,7 @@ export type StoryFlowState = 'idle' | 'recording' | 'uploading' | 'transcribing'
 type Props = {
   flowState: StoryFlowState;
   retryBlocked: boolean;
+  recordBlocked?: boolean;
   statusLabel: string;
   onSendText: (text: string) => Promise<boolean>;
   onRecordPressIn: () => void | Promise<void>;
@@ -17,6 +18,7 @@ type Props = {
 export default function StoryMessageComposer({
   flowState,
   retryBlocked,
+  recordBlocked,
   statusLabel,
   onSendText,
   onRecordPressIn,
@@ -47,7 +49,9 @@ export default function StoryMessageComposer({
   }, [onSendText, text]);
 
   const sendDisabled = flowState !== 'idle' || retryBlocked || !text.trim().length;
-  const recordDisabled = retryBlocked || (flowState !== 'idle' && flowState !== 'recording');
+  const micBlocked = recordBlocked ?? retryBlocked;
+  // While actively recording we must keep release enabled to avoid a stuck recording state.
+  const recordDisabled = flowState === 'recording' ? false : micBlocked || flowState !== 'idle';
 
   return (
     <View
@@ -116,10 +120,10 @@ export default function StoryMessageComposer({
             borderRadius: 999,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: retryBlocked
-              ? '#cbd5f5'
-              : flowState === 'recording'
+            backgroundColor: flowState === 'recording'
               ? '#dc2626'
+              : micBlocked
+              ? '#cbd5f5'
               : pressed
               ? '#059669'
               : '#10b981',

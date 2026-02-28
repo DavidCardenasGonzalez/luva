@@ -27,7 +27,7 @@ import { useStoryProgress } from '../progress/StoryProgressProvider';
 import StoryMessageComposer from '../components/StoryMessageComposer';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
 import luviImage from '../image/luvi.png';
-import { useCoins, CHAT_MISSION_COST } from '../purchases/CoinBalanceProvider';
+import { useCoins, CHAT_MISSION_COST, RECORDING_COST } from '../purchases/CoinBalanceProvider';
 import CoinCountChip from '../components/CoinCountChip';
 import TourOverlay, { TourHighlight } from '../components/TourOverlay';
 import { hasSeenTour, markTourAsSeen } from '../tour/tourProgress';
@@ -237,7 +237,6 @@ export default function StorySceneScreen() {
       setMissionUnlocked(false);
       return;
     }
-    // If unlimited or already charged in this session, unlock and exit.
     if (isUnlimited || chargedMissions.current.has(mission.missionId)) {
       setMissionUnlocked(true);
       return;
@@ -246,7 +245,7 @@ export default function StorySceneScreen() {
     if (chargingMissionId.current === mission.missionId) return;
 
     chargingMissionId.current = mission.missionId;
-    chargedMissions.current.add(mission.missionId); // mark early to avoid double charge (StrictMode / rerenders)
+    chargedMissions.current.add(mission.missionId);
 
     let cancelled = false;
     (async () => {
@@ -332,7 +331,7 @@ export default function StorySceneScreen() {
     () =>
       isUnlimited
         ? 'No has terminado la misión. Si sales ahora, perderás tu avance.'
-        : 'No has terminado la misión. Si sales ahora, perderás tu avance y las monedas/créditos utilizados para entrar.',
+        : 'No has terminado la misión. Si sales ahora, perderás tu avance y las monedas/créditos utilizados para entrar y grabar.',
     [isUnlimited]
   );
 
@@ -383,14 +382,12 @@ export default function StorySceneScreen() {
     }
   }, [messages.length]);
 
-  const missionCostPaid = missionUnlocked;
-  const coinLocked = coinsLoading || !missionCostPaid;
-  const retryBlocked = retryState === 'required' || coinLocked;
+  const missionCoinLocked = coinsLoading || !missionUnlocked;
+  const recordingCoinLocked = !isUnlimited && balance < RECORDING_COST;
+  const retryBlocked = retryState === 'required' || missionCoinLocked;
+  const recordBlocked = retryBlocked || recordingCoinLocked;
 
   const statusLabel = useMemo(() => {
-    if (coinLocked) {
-      return coinsLoading ? 'Cargando tus monedas...' : `Costo de misión: ${CHAT_MISSION_COST} monedas`;
-    }
     switch (flowState) {
       case 'recording':
         return 'Grabando...';
@@ -401,9 +398,15 @@ export default function StorySceneScreen() {
       case 'evaluating':
         return 'Analizando tu respuesta...';
       default:
+        if (missionCoinLocked) {
+          return coinsLoading ? 'Cargando tus monedas...' : `Costo de misión: ${CHAT_MISSION_COST} monedas`;
+        }
+        if (recordingCoinLocked) {
+          return coinsLoading ? 'Cargando tus monedas...' : 'Necesitas 1 moneda para grabar.';
+        }
         return '';
     }
-  }, [coinLocked, coinsLoading, flowState]);
+  }, [coinsLoading, flowState, missionCoinLocked, recordingCoinLocked]);
 
   const appendMessage = useCallback((msg: StoryMessage) => {
     setMessages((prev) => [...prev, msg]);
@@ -579,6 +582,21 @@ export default function StorySceneScreen() {
         setErrorMessage('Debes volver a intentar antes de continuar.');
         return;
       }
+      if (missionCoinLocked) {
+        setErrorMessage(coinsLoading ? 'Cargando tus monedas...' : `Costo de misión: ${CHAT_MISSION_COST} monedas`);
+        return;
+      }
+      if (!isUnlimited) {
+        const chargeReason = mission?.missionId
+          ? `story-recording:${storyId}:${mission.missionId}`
+          : `story-recording:${storyId}:${sceneIndex}`;
+        const ok = await spendCoins(RECORDING_COST, chargeReason);
+        if (!ok) {
+          setErrorMessage('Necesitas 1 moneda para grabar.');
+          navigation.navigate('Paywall');
+          return;
+        }
+      }
       setErrorMessage(null);
       setFlowState('recording');
       stopRequestedWhileStarting.current = false;
@@ -598,7 +616,7 @@ export default function StorySceneScreen() {
       stopRequestedWhileStarting.current = false;
       isStartingRecording.current = false;
     }
-  }, [recorder, retryState]);
+  }, [coinsLoading, isUnlimited, mission?.missionId, missionCoinLocked, navigation, recorder, retryState, sceneIndex, spendCoins, storyId]);
 
   const handleRecordRelease = useCallback(async (skipStartGuard = false) => {
     try {
@@ -1187,6 +1205,7 @@ export default function StorySceneScreen() {
       <StoryMessageComposer
         flowState={flowState}
         retryBlocked={retryBlocked}
+        recordBlocked={recordBlocked}
         statusLabel={statusLabel}
         onSendText={handleSendText}
         onRecordPressIn={handleRecordPressIn}

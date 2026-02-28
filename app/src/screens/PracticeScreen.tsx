@@ -36,7 +36,7 @@ import {
 import StoryMessageComposer, {
   StoryFlowState,
 } from "../components/StoryMessageComposer";
-import { useCoins, CARD_OPEN_COST } from "../purchases/CoinBalanceProvider";
+import { useCoins, CARD_OPEN_COST, RECORDING_COST } from "../purchases/CoinBalanceProvider";
 import TourOverlay, { TourHighlight } from "../components/TourOverlay";
 import { hasSeenTour, markTourAsSeen } from "../tour/tourProgress";
 
@@ -269,7 +269,7 @@ export default function PracticeScreen() {
   const recorder = useAudioRecorder();
   const uploader = useUploadToS3();
   const { statusFor } = useCardProgress();
-  const { spendCoins, loading: coinsLoading, isUnlimited } = useCoins();
+  const { spendCoins, loading: coinsLoading, isUnlimited, balance } = useCoins();
   const [transcript, setTranscript] = useState("");
   const [state, setState] = useState<PracticeState>("idle");
   const [feedback, setFeedback] = useState<EvalRes | null>(null);
@@ -290,6 +290,8 @@ export default function PracticeScreen() {
   const [practiceTourHighlight, setPracticeTourHighlight] =
     useState<TourHighlight | null>(null);
   const [practiceTourStepIndex, setPracticeTourStepIndex] = useState(0);
+  const isStartingRecording = useRef(false);
+  const stopRequestedWhileStarting = useRef(false);
 
   useEffect(() => {
     if (!cardId) return;
@@ -360,11 +362,34 @@ export default function PracticeScreen() {
     if (!recordReady) {
       return;
     }
+    if (coinsLoading) {
+      setError("Cargando tus monedas...");
+      return;
+    }
+    if (!isUnlimited) {
+      const ok = await spendCoins(
+        RECORDING_COST,
+        cardId ? `practice-recording:${cardId}` : "practice-recording",
+      );
+      if (!ok) {
+        setError("Necesitas 1 moneda para grabar.");
+        navigation.navigate("Paywall");
+        return;
+      }
+    }
     // Mantener el feedback y transcript actual visibles para evitar saltos de layout.
+    setError(null);
     setState("recording");
     setCanRecord(false);
+    stopRequestedWhileStarting.current = false;
+    isStartingRecording.current = true;
     try {
       await recorder.start();
+      isStartingRecording.current = false;
+      if (stopRequestedWhileStarting.current) {
+        stopRequestedWhileStarting.current = false;
+        await onRelease(true);
+      }
     } catch (err: any) {
       console.error(
         "[Practice] No se pudo iniciar la grabación",
@@ -372,11 +397,18 @@ export default function PracticeScreen() {
       );
       setError(err?.message || "No se pudo iniciar la grabación");
       setState("idle");
+      stopRequestedWhileStarting.current = false;
+      isStartingRecording.current = false;
     }
   };
 
-  const onRelease = async () => {
+  const onRelease = async (skipStartGuard = false) => {
     try {
+      if (isStartingRecording.current && !skipStartGuard) {
+        stopRequestedWhileStarting.current = true;
+        setState("idle");
+        return;
+      }
       if (!recorder.isRecording()) {
         console.warn("[Practice] onRelease sin grabación activa");
         setState("idle");
@@ -660,8 +692,10 @@ export default function PracticeScreen() {
   ]);
 
   const coinReady = isUnlimited || chargeRegistered.current;
-  const recordReady =
-    coinReady && ((selected && canRecord) || state === "recording");
+  const interactionReady =
+    coinReady && ((!!selected && canRecord) || state === "recording");
+  const recordingCoinLocked = !isUnlimited && balance < RECORDING_COST;
+  const recordReady = interactionReady && !recordingCoinLocked;
   const cardStatusLabel = cardId ? CARD_STATUS_LABELS[statusFor(cardId)] : null;
   const practiceSubtitle = !coinReady
     ? coinsLoading
@@ -669,6 +703,8 @@ export default function PracticeScreen() {
       : "Esperando saldo para practicar"
     : !selected
       ? "Selecciona una opción"
+      : recordingCoinLocked
+        ? "Necesitas 1 moneda para grabar"
       : recordReady
         ? "Listo para grabar"
         : canRecord
@@ -1406,11 +1442,12 @@ export default function PracticeScreen() {
         >
           <StoryMessageComposer
             flowState={flowState}
-            retryBlocked={!recordReady}
+            retryBlocked={!interactionReady}
+            recordBlocked={!recordReady}
             statusLabel={statusLabel}
             onSendText={async (textToSend: string) => {
               const trimmed = textToSend.trim();
-              if (!trimmed || !recordReady) return false;
+              if (!trimmed || !interactionReady) return false;
               try {
                 setError(null);
                 setState("evaluating");
