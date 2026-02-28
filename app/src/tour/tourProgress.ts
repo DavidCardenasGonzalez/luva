@@ -31,3 +31,11 @@ export async function markTourAsSeen(screen: TourScreenId): Promise<void> {
     // ignore persistence failures
   }
 }
+
+export async function resetSeenTours(): Promise<void> {
+  try {
+    await AsyncStorage.removeItem(TOUR_STORAGE_KEY);
+  } catch {
+    // ignore persistence failures
+  }
+}

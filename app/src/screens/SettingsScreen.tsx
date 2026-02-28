@@ -9,11 +9,13 @@ import { useRevenueCat } from '../purchases/RevenueCatProvider';
 import { useCoins } from '../purchases/CoinBalanceProvider';
 import { useCardProgress } from '../progress/CardProgressProvider';
 import { useStoryProgress } from '../progress/StoryProgressProvider';
+import { resetSeenTours } from '../tour/tourProgress';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
 export default function SettingsScreen({ navigation }: Props) {
-  const { isPro, customerInfo, loading: rcLoading, manualProExpiration, redeemPromoCode } = useRevenueCat();
+  const { isPro, customerInfo, loading: rcLoading, manualProExpiration, redeemPromoCode, clearManualProAccess } =
+    useRevenueCat();
   const { resetCoins } = useCoins();
   const { resetAll: resetCardProgress } = useCardProgress();
   const { resetAll: resetStoryProgress } = useStoryProgress();
@@ -65,17 +67,23 @@ export default function SettingsScreen({ navigation }: Props) {
     if (!canConfirmReset || resetting) return;
     try {
       setResetting(true);
-      await Promise.all([resetCoins(), resetCardProgress(), resetStoryProgress()]);
+      await Promise.all([
+        resetCoins(),
+        resetCardProgress(),
+        resetStoryProgress(),
+        clearManualProAccess(),
+        resetSeenTours(),
+      ]);
       setConfirmText('');
       setShowResetModal(false);
-      Alert.alert('Restaurado', 'Se borró tu progreso y se reiniciaron tus monedas.');
+      Alert.alert('Restaurado', 'Se borró tu progreso, tus tours y se reiniciaron tus monedas.');
     } catch (err) {
       console.warn('[Settings] Error al restaurar', err);
       Alert.alert('Error', 'No se pudo restaurar la app. Inténtalo de nuevo.');
     } finally {
       setResetting(false);
     }
-  }, [canConfirmReset, resetCoins, resetCardProgress, resetStoryProgress, resetting]);
+  }, [canConfirmReset, clearManualProAccess, resetCoins, resetCardProgress, resetStoryProgress, resetting]);
 
   const handleRedeemCode = useCallback(async () => {
     const trimmed = codeInput.trim();
@@ -432,7 +440,7 @@ export default function SettingsScreen({ navigation }: Props) {
           >
             <Text style={{ color: '#f87171', fontWeight: '800', fontSize: 18 }}>¿Estás seguro?</Text>
             <Text style={{ color: '#cbd5e1', marginTop: 8, lineHeight: 20 }}>
-              Esta acción borrará tu progreso y reiniciará tus monedas. No hay vuelta atrás.
+              Esta acción borrará tu progreso, tours y reiniciará tus monedas. También quitará Pro por código.
             </Text>
             <Text style={{ color: '#cbd5e1', marginTop: 12, fontSize: 12 }}>
               Escribe <Text style={{ fontWeight: '800', color: '#f87171' }}>borrar</Text> para confirmar.

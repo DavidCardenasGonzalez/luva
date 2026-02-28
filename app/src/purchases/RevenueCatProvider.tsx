@@ -10,6 +10,7 @@ type RevenueCatContextValue = {
   loading: boolean;
   manualProExpiration: number | null;
   refreshCustomerInfo: () => Promise<CustomerInfo | undefined>;
+  clearManualProAccess: () => Promise<void>;
   redeemPromoCode: (
     code: string
   ) => Promise<{ success: boolean; expiresAt?: number; reason?: 'not_found' | 'error' }>;
@@ -105,6 +106,15 @@ export function RevenueCatProvider({ children }: { children: React.ReactNode }) 
     }
   }, []);
 
+  const clearManualProAccess = useCallback(async () => {
+    setManualProExpiration(null);
+    try {
+      await AsyncStorage.removeItem(MANUAL_PRO_KEY);
+    } catch (err) {
+      console.warn('No se pudo limpiar Pro por código', err);
+    }
+  }, []);
+
   const redeemPromoCode = useCallback(
     async (code: string) => {
       const normalized = code.trim().toLowerCase();
@@ -136,10 +146,11 @@ export function RevenueCatProvider({ children }: { children: React.ReactNode }) 
       isPro,
       loading,
       refreshCustomerInfo,
+      clearManualProAccess,
       manualProExpiration: manualProExpiration && manualProExpiration > Date.now() ? manualProExpiration : null,
       redeemPromoCode,
     }),
-    [customerInfo, isPro, loading, manualProExpiration, redeemPromoCode, refreshCustomerInfo]
+    [clearManualProAccess, customerInfo, isPro, loading, manualProExpiration, redeemPromoCode, refreshCustomerInfo]
   );
 
   return <RevenueCatContext.Provider value={value}>{children}</RevenueCatContext.Provider>;
