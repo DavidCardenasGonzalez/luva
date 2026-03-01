@@ -43,3 +43,31 @@ test('POST /v1/promo-codes/validate rejects unknown codes', async () => {
   assert.equal(body.isValid, false);
   assert.equal(body.premiumDays, 30);
 });
+
+test('POST /v1/app/version-check returns optional update for old supported versions', async () => {
+  const res = await handler({
+    httpMethod: 'POST',
+    path: '/v1/app/version-check',
+    body: JSON.stringify({ version: '1.1.2', platform: 'android' }),
+    requestContext: { http: { method: 'POST', path: '/v1/app/version-check' } },
+  });
+  assert.equal(res.statusCode, 200);
+  const body = JSON.parse(res.body);
+  assert.equal(body.status, 'optional_update');
+  assert.equal(body.force, false);
+  assert.equal(body.storeUrl, 'https://play.google.com/store/apps/details?id=com.cardi7.luva');
+});
+
+test('POST /v1/app/version-check returns required update for unsupported versions', async () => {
+  const res = await handler({
+    httpMethod: 'POST',
+    path: '/v1/app/version-check',
+    body: JSON.stringify({ version: '1.0.9', platform: 'ios' }),
+    requestContext: { http: { method: 'POST', path: '/v1/app/version-check' } },
+  });
+  assert.equal(res.statusCode, 200);
+  const body = JSON.parse(res.body);
+  assert.equal(body.status, 'required_update');
+  assert.equal(body.force, true);
+  assert.equal(body.storeUrl, 'https://apps.apple.com/us/search?term=luva');
+});

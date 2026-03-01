@@ -28,7 +28,10 @@ import {
   StoryAssistanceRequest,
   StoryAssistanceResponse,
   PromoCodeValidationRequest,
-  PromoCodeValidationResponse
+  PromoCodeValidationResponse,
+  AppVersionCheckRequest,
+  AppVersionCheckResponse,
+  AppVersionCheckStatus,
 } from "../types";
 import { STORIES_SEED } from "../data/stories-seed";
 
@@ -347,6 +350,93 @@ function badRequest(message: string): ApiResponse {
 const ROUTE_PREFIX = "/v1";
 const PROMO_CODE = "PRO123";
 const PROMO_PREMIUM_DAYS = 30;
+const APP_VERSION_POLICY = {
+  latestVersion: "1.1.3",
+  recommendedMinimumVersion: "1.1.3",
+  minimumSupportedVersion: "1.1.3",
+  iosStoreUrl: "https://apps.apple.com/us/app/luva-ingles/id6758112881",
+  androidStoreUrl: "https://play.google.com/store/apps/details?id=com.cardi7.luva",
+  fallbackStoreUrl: "https://play.google.com/store/apps/details?id=com.cardi7.luva",
+} as const;
+
+type SupportedPlatform = "ios" | "android" | "web" | "unknown";
+
+function parseVersionParts(version: string): number[] {
+  const trimmed = version.trim();
+  if (!trimmed) return [0];
+  return trimmed.split(".").map((segment) => {
+    const match = segment.match(/\d+/);
+    if (!match) return 0;
+    const value = Number(match[0]);
+    return Number.isFinite(value) ? value : 0;
+  });
+}
+
+function compareVersions(left: string, right: string): number {
+  const a = parseVersionParts(left);
+  const b = parseVersionParts(right);
+  const max = Math.max(a.length, b.length);
+  for (let i = 0; i < max; i += 1) {
+    const av = a[i] ?? 0;
+    const bv = b[i] ?? 0;
+    if (av > bv) return 1;
+    if (av < bv) return -1;
+  }
+  return 0;
+}
+
+function normalizePlatform(platform: unknown): SupportedPlatform {
+  if (typeof platform !== "string") return "unknown";
+  const normalized = platform.trim().toLowerCase();
+  if (normalized === "ios") return "ios";
+  if (normalized === "android") return "android";
+  if (normalized === "web") return "web";
+  return "unknown";
+}
+
+function buildVersionCheckResponse(
+  currentVersion: string,
+  platform: SupportedPlatform
+): AppVersionCheckResponse {
+  let status: AppVersionCheckStatus = "ok";
+  if (compareVersions(currentVersion, APP_VERSION_POLICY.minimumSupportedVersion) < 0) {
+    status = "required_update";
+  } else if (compareVersions(currentVersion, APP_VERSION_POLICY.recommendedMinimumVersion) < 0) {
+    status = "optional_update";
+  }
+  const force = status === "required_update";
+  const title =
+    status === "required_update" ? "Actualiza Luva" : "Hay una nueva versión";
+  const message =
+    status === "required_update"
+      ? `Tu versión ${currentVersion} ya no es compatible. Debes actualizar para continuar.`
+      : status === "optional_update"
+      ? `Hay una versión más reciente (${APP_VERSION_POLICY.latestVersion}). Te recomendamos actualizar.`
+      : "Tu app está actualizada.";
+  const storeUrl =
+    platform === "ios"
+      ? APP_VERSION_POLICY.iosStoreUrl
+      : platform === "android"
+      ? APP_VERSION_POLICY.androidStoreUrl
+      : APP_VERSION_POLICY.fallbackStoreUrl;
+
+  return {
+    status,
+    force,
+    title,
+    message,
+    currentVersion,
+    latestVersion: APP_VERSION_POLICY.latestVersion,
+    recommendedMinimumVersion: APP_VERSION_POLICY.recommendedMinimumVersion,
+    minimumSupportedVersion: APP_VERSION_POLICY.minimumSupportedVersion,
+    storeUrl,
+    urls: {
+      ios: APP_VERSION_POLICY.iosStoreUrl,
+      android: APP_VERSION_POLICY.androidStoreUrl,
+      fallback: APP_VERSION_POLICY.fallbackStoreUrl,
+    },
+  };
+}
 
 export const handler = async (event: any, context?: any): Promise<Result> => {
   const method: string =
@@ -596,6 +686,17 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
         isValid: submittedCode.toUpperCase() === PROMO_CODE,
         premiumDays: PROMO_PREMIUM_DAYS,
       };
+      return json(200, payload);
+    }
+
+    if (method === "POST" && path === `${ROUTE_PREFIX}/app/version-check`) {
+      const body = parseBody(event.body) as AppVersionCheckRequest | undefined;
+      const submittedVersion = typeof body?.version === "string" ? body.version.trim() : "";
+      if (!submittedVersion) {
+        return badRequest("Missing version");
+      }
+      const platform = normalizePlatform(body?.platform);
+      const payload = buildVersionCheckResponse(submittedVersion, platform);
       return json(200, payload);
     }
 
@@ -1937,4 +2038,3 @@ function mockCards(): CardItem[] {
     },
   ];
 }
-

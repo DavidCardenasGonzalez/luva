@@ -134,3 +134,27 @@ export interface PromoCodeValidationResponse {
   isValid: boolean;
   premiumDays: number;
 }
+
+export type AppVersionCheckStatus = "ok" | "optional_update" | "required_update";
+
+export interface AppVersionCheckRequest {
+  version: string;
+  platform?: string;
+}
+
+export interface AppVersionCheckResponse {
+  status: AppVersionCheckStatus;
+  force: boolean;
+  title: string;
+  message: string;
+  currentVersion: string;
+  latestVersion: string;
+  recommendedMinimumVersion: string;
+  minimumSupportedVersion: string;
+  storeUrl: string;
+  urls: {
+    ios: string;
+    android: string;
+    fallback: string;
+  };
+}

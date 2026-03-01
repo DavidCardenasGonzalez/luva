@@ -10,10 +10,12 @@ import { useCoins } from '../purchases/CoinBalanceProvider';
 import { useCardProgress } from '../progress/CardProgressProvider';
 import { useStoryProgress } from '../progress/StoryProgressProvider';
 import { resetSeenTours } from '../tour/tourProgress';
+import { getRuntimeAppVersion } from '../version/appVersion';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
 export default function SettingsScreen({ navigation }: Props) {
+  const appVersion = getRuntimeAppVersion();
   const { isPro, customerInfo, loading: rcLoading, manualProExpiration, redeemPromoCode, clearManualProAccess } =
     useRevenueCat();
   const { resetCoins } = useCoins();
@@ -196,7 +198,7 @@ export default function SettingsScreen({ navigation }: Props) {
               }}
             >
               <Text style={{ color: '#cbd5e1', fontWeight: '700', fontSize: 12 }}>Versión</Text>
-              <Text style={{ color: '#e2e8f0', marginTop: 4 }}>1.1.1</Text>
+              <Text style={{ color: '#e2e8f0', marginTop: 4 }}>{appVersion}</Text>
             </View>
           </View>
 

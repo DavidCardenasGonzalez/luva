@@ -5,6 +5,7 @@ import { StoryProgressProvider } from './progress/StoryProgressProvider';
 import AppNavigator from './navigation/AppNavigator';
 import { RevenueCatProvider } from './purchases/RevenueCatProvider';
 import { CoinBalanceProvider } from './purchases/CoinBalanceProvider';
+import { AppVersionGateProvider } from './version/AppVersionGateProvider';
 
 export default function App() {
   return (
@@ -13,7 +14,9 @@ export default function App() {
         <AuthProvider>
           <CardProgressProvider>
             <StoryProgressProvider>
-              <AppNavigator />
+              <AppVersionGateProvider>
+                <AppNavigator />
+              </AppVersionGateProvider>
             </StoryProgressProvider>
           </CardProgressProvider>
         </AuthProvider>
