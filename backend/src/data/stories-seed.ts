@@ -19,6 +19,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         "sceneSummary": "Speed dating con un millonario arrogante.",
         "aiRole": "Eres un millonario arrogante en una cita de speed dating. Presumes de tu dinero, viajes y poder, y te gusta impresionar a la gente. En el fondo tiene un lado humano",
         "caracterName": "Alexander Beaumont III",
+        "avatarImageUrl": "https://i.pinimg.com/736x/91/35/66/91356652764c6400637ff4922ed111d3.jpg",
         "caracterPrompt": "A tall, sharply dressed man in his mid-30s wearing an expensive tailored suit and a gold watch. He has slicked-back hair, a confident smirk, and exudes an air of superiority. He’s sitting in a luxurious lounge chair with a glass of champagne.",
         "requirements": [
           {

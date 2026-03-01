@@ -201,6 +201,7 @@ export default function StorySceneScreen() {
   const [showStorySceneTour, setShowStorySceneTour] = useState(false);
   const [storySceneTourHighlight, setStorySceneTourHighlight] = useState<TourHighlight | null>(null);
   const [storySceneTourStepIndex, setStorySceneTourStepIndex] = useState(0);
+  const [allowMappedAvatarFallback, setAllowMappedAvatarFallback] = useState(false);
   const chargedMissions = useRef<Set<string>>(new Set());
   const chargingMissionId = useRef<string | null>(null);
   const [missionUnlocked, setMissionUnlocked] = useState<boolean>(false);
@@ -210,10 +211,27 @@ export default function StorySceneScreen() {
   }, [initialSceneIndex, storyId]);
 
   const mission = story?.missions?.[sceneIndex];
+  const avatarImageUrl = mission?.avatarImageUrl?.trim();
+
+  useEffect(() => {
+    setAllowMappedAvatarFallback(false);
+    if (!mission || avatarImageUrl) return;
+    const fallbackTimer = setTimeout(() => {
+      setAllowMappedAvatarFallback(true);
+    }, 300);
+    return () => clearTimeout(fallbackTimer);
+  }, [mission?.missionId, avatarImageUrl]);
+
   const missionAvatar = useMemo(() => {
     if (!mission) return undefined;
+    if (avatarImageUrl) {
+      return { uri: avatarImageUrl };
+    }
+    if (!allowMappedAvatarFallback) {
+      return undefined;
+    }
     return getChatAvatar(mission.missionId);
-  }, [mission?.missionId]);
+  }, [allowMappedAvatarFallback, avatarImageUrl, mission?.missionId]);
 
   const characterDisplayName = mission?.caracterName || mission?.title || 'Personaje';
   const avatarInitial = useMemo(
@@ -252,6 +270,7 @@ export default function StorySceneScreen() {
         title: missionDef.title,
         sceneSummary: missionDef.sceneSummary,
         aiRole: missionDef.aiRole,
+        avatarImageUrl: missionDef.avatarImageUrl,
         requirements: missionDef.requirements.map((req) => ({
           requirementId: req.requirementId,
           text: req.text,
@@ -267,6 +286,7 @@ export default function StorySceneScreen() {
       title: mission.title,
       sceneSummary: mission.sceneSummary,
       aiRole: mission.aiRole,
+      avatarImageUrl: mission.avatarImageUrl,
       requirements: mission.requirements.map((req) => ({
         requirementId: req.requirementId,
         text: req.text,

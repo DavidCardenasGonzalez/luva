@@ -49,6 +49,7 @@ export interface StoryMission {
   aiRole: string;
   caracterName?: string;
   caracterPrompt?: string;
+  avatarImageUrl?: string;
   requirements: StoryRequirement[];
 }
 

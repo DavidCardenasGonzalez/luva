@@ -15,6 +15,7 @@ export type StoryMissionDefinition = {
   aiRole: string;
   caracterName?: string;
   caracterPrompt?: string;
+  avatarImageUrl?: string;
   requirements: StoryRequirement[];
 };
 
@@ -53,6 +54,7 @@ export type StoryMission = {
   aiRole: string;
   caracterName?: string;
   caracterPrompt?: string;
+  avatarImageUrl?: string;
   requirements: StoryRequirementState[];
 };
 
@@ -86,7 +88,7 @@ function sanitizeMission(input: any): StoryMissionDefinition | null {
   const requirements = Array.isArray(input.requirements)
     ? input.requirements
         .map((req: any) => sanitizeRequirement(req))
-        .filter((req): req is StoryRequirement => !!req)
+        .filter((req: StoryRequirement | null): req is StoryRequirement => !!req)
     : [];
   return {
     missionId,
@@ -105,6 +107,12 @@ function sanitizeMission(input: any): StoryMissionDefinition | null {
         : typeof input.characterPrompt === 'string'
         ? input.characterPrompt
         : undefined,
+    avatarImageUrl:
+      typeof input.avatarImageUrl === 'string'
+        ? input.avatarImageUrl
+        : typeof input.avatar_image_url === 'string'
+        ? input.avatar_image_url
+        : undefined,
     requirements,
   };
 }
@@ -118,7 +126,7 @@ function sanitizeStory(input: any): StoryDefinition | null {
   const missions = Array.isArray(input.missions)
     ? input.missions
         .map((mission: any) => sanitizeMission(mission))
-        .filter((mission): mission is StoryMissionDefinition => !!mission)
+        .filter((mission: StoryMissionDefinition | null): mission is StoryMissionDefinition => !!mission)
     : [];
   if (!missions.length) return null;
   return {
@@ -261,6 +269,7 @@ function storyDetailFromDefinition(story: StoryDefinition): StoryDetail {
       aiRole: mission.aiRole,
       caracterName: mission.caracterName,
       caracterPrompt: mission.caracterPrompt,
+      avatarImageUrl: mission.avatarImageUrl,
       requirements: (mission.requirements || []).map((req) => ({
         requirementId: req.requirementId,
         text: req.text,
