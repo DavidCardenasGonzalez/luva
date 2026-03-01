@@ -202,9 +202,11 @@ export default function StoryMissionsScreen() {
           return;
         }
       }
-      setIsInterstitialLoading(true);
-      await showInterstitialBeforeNavigation();
-      setIsInterstitialLoading(false);
+      if (!isUnlimited) {
+        setIsInterstitialLoading(true);
+        await showInterstitialBeforeNavigation();
+        setIsInterstitialLoading(false);
+      }
       navigation.navigate("StoryScene", {
         storyId: story.storyId,
         sceneIndex: index,

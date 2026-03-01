@@ -664,7 +664,7 @@ export default function PracticeScreen() {
     setAssistanceError(null);
     setAssistanceAnswer("");
     try {
-      const rewardedOk = await showRewardedAssistanceAd();
+      const rewardedOk = isUnlimited ? true : await showRewardedAssistanceAd();
       if (!rewardedOk) {
         setAssistanceError("Debes completar el anuncio para pedir asistencia.");
         return;
@@ -697,6 +697,7 @@ export default function PracticeScreen() {
     assistanceSceneIndex,
     assistanceStoryDefinition,
     assistanceStoryId,
+    isUnlimited,
   ]);
 
   const coinReady = isUnlimited || !cardId || chargeRegistered.current;

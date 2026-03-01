@@ -751,7 +751,7 @@ export default function StorySceneScreen() {
     setAssistanceError(null);
     setAssistanceAnswer('');
     try {
-      const rewardedOk = await showRewardedAssistanceAd();
+      const rewardedOk = isUnlimited ? true : await showRewardedAssistanceAd();
       if (!rewardedOk) {
         setAssistanceError('Debes completar el anuncio para pedir asistencia.');
         return;
@@ -789,6 +789,7 @@ export default function StorySceneScreen() {
     sceneIndex,
     storyDefinitionPayload,
     storyId,
+    isUnlimited,
   ]);
 
   useEffect(() => {
