@@ -6,7 +6,7 @@ module.exports = {
     name: "Luva",
     slug: "luva",
     scheme: "myapp",
-    version: "1.1.3",
+    version: "1.1.4",
     orientation: "portrait",
     updates: { fallbackToCacheTimeout: 0 },
     assetBundlePatterns: ["**/*"],
@@ -19,7 +19,7 @@ module.exports = {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.cardi7.luva",
-      buildNumber: "1.1.3",
+      buildNumber: "1.1.4",
       infoPlist: {
         // NSUserTrackingUsageDescription:
         // "Usamos tu identificador publicitario para medir suscripciones y mejorar nuestras campañas. No vendemos tu información.",
@@ -36,7 +36,7 @@ module.exports = {
         backgroundColor: "#0b1224",
       },
       package: "com.cardi7.luva",
-      versionCode: 4,
+      versionCode: 5,
     },
     plugins: [
       "expo-dev-client",
