@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable, Linking, Modal, TextInput, Alert } from 'react-native';
+import { View, Text, ScrollView, Pressable, Linking, Modal, TextInput, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -264,76 +264,75 @@ export default function SettingsScreen({ navigation }: Props) {
             )}
           </View>
 
-          <View
-            style={{
-              marginTop: 14,
-              padding: 14,
-              borderRadius: 14,
-              backgroundColor: '#0b172b',
-              borderWidth: 1,
-              borderColor: '#1e293b',
-              shadowColor: '#000',
-              shadowOpacity: 0.06,
-              shadowRadius: 8,
-            }}
-          >
-            <Text style={{ color: '#a5f3fc', fontSize: 12, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' }}>
-              Tengo un código
-            </Text>
-            <Text style={{ color: '#e2e8f0', fontSize: 16, fontWeight: '800', marginTop: 6 }}>
-              Desbloquea Pro por 30 días
-            </Text>
-            <Text style={{ color: '#94a3b8', marginTop: 6, lineHeight: 20 }}>
-              Ingresa tu código promocional. Por ahora solo aceptamos códigos privados.
-            </Text>
-            <TextInput
-              value={codeInput}
-              onChangeText={setCodeInput}
-              autoCapitalize="none"
-              autoCorrect={false}
-              placeholder="Ej. PRO123"
-              placeholderTextColor="#64748b"
-              editable={!redeemingCode}
+          {__DEV__ || Platform.OS === 'android' ? (
+            <View
               style={{
-                marginTop: 10,
-                paddingHorizontal: 12,
-                paddingVertical: 10,
-                borderRadius: 10,
+                marginTop: 14,
+                padding: 14,
+                borderRadius: 14,
+                backgroundColor: '#0b172b',
                 borderWidth: 1,
                 borderColor: '#1e293b',
-                backgroundColor: '#0b1224',
-                color: '#e2e8f0',
+                shadowColor: '#000',
+                shadowOpacity: 0.06,
+                shadowRadius: 8,
               }}
-            />
-            <Pressable
-              onPress={handleRedeemCode}
-              disabled={redeemingCode}
-              style={({ pressed }) => ({
-                marginTop: 10,
-                paddingVertical: 12,
-                borderRadius: 12,
-                backgroundColor: redeemingCode ? '#1f2937' : pressed ? '#2563eb' : '#3b82f6',
-                borderWidth: 1,
-                borderColor: '#1e3a8a',
-                opacity: redeemingCode ? 0.7 : 1,
-              })}
             >
-              <Text style={{ color: 'white', fontWeight: '800', textAlign: 'center' }}>
-                {redeemingCode ? 'Validando...' : 'Aplicar código'}
+              <Text style={{ color: '#a5f3fc', fontSize: 12, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' }}>
+                Tengo un código
               </Text>
-            </Pressable>
-            {codeFeedback ? (
-              <Text
+              {/* <Text style={{ color: '#94a3b8', marginTop: 6, lineHeight: 20 }}>
+                Ingresa tu código promocional. Por ahora solo aceptamos códigos privados.
+              </Text> */}
+              <TextInput
+                value={codeInput}
+                onChangeText={setCodeInput}
+                autoCapitalize="none"
+                autoCorrect={false}
+                // placeholder="Ej. PRO123"
+                placeholderTextColor="#64748b"
+                editable={!redeemingCode}
                 style={{
-                  color: codeFeedback.tone === 'success' ? '#22c55e' : '#fca5a5',
-                  marginTop: 8,
-                  fontWeight: '700',
+                  marginTop: 10,
+                  paddingHorizontal: 12,
+                  paddingVertical: 10,
+                  borderRadius: 10,
+                  borderWidth: 1,
+                  borderColor: '#1e293b',
+                  backgroundColor: '#0b1224',
+                  color: '#e2e8f0',
                 }}
+              />
+              <Pressable
+                onPress={handleRedeemCode}
+                disabled={redeemingCode}
+                style={({ pressed }) => ({
+                  marginTop: 10,
+                  paddingVertical: 12,
+                  borderRadius: 12,
+                  backgroundColor: redeemingCode ? '#1f2937' : pressed ? '#2563eb' : '#3b82f6',
+                  borderWidth: 1,
+                  borderColor: '#1e3a8a',
+                  opacity: redeemingCode ? 0.7 : 1,
+                })}
               >
-                {codeFeedback.message}
-              </Text>
-            ) : null}
-          </View>
+                <Text style={{ color: 'white', fontWeight: '800', textAlign: 'center' }}>
+                  {redeemingCode ? 'Validando...' : 'Aplicar código'}
+                </Text>
+              </Pressable>
+              {codeFeedback ? (
+                <Text
+                  style={{
+                    color: codeFeedback.tone === 'success' ? '#22c55e' : '#fca5a5',
+                    marginTop: 8,
+                    fontWeight: '700',
+                  }}
+                >
+                  {codeFeedback.message}
+                </Text>
+              ) : null}
+            </View>
+          ) : null}
 
           <View style={{ marginTop: 14 }}>
             <Pressable

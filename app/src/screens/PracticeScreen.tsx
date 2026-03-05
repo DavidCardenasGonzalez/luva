@@ -16,6 +16,7 @@ import {
   TextInput,
   Image,
   ActivityIndicator,
+  AppState,
   NativeModules,
 } from "react-native";
 import useAudioRecorder from "../shared/useAudioRecorder";
@@ -370,6 +371,11 @@ export default function PracticeScreen() {
     if (!recordReady) {
       return;
     }
+    const hasMicPermission = await recorder.ensurePermission();
+    if (!hasMicPermission) {
+      setError("Activa el permiso de microfono para grabar.");
+      return;
+    }
     if (coinsLoading) {
       setError("Cargando tus monedas...");
       return;
@@ -403,7 +409,12 @@ export default function PracticeScreen() {
         "[Practice] No se pudo iniciar la grabación",
         err?.message || err,
       );
-      setError(err?.message || "No se pudo iniciar la grabación");
+      const startErrorMessage = err?.message || "No se pudo iniciar la grabación";
+      if (startErrorMessage === "La grabacion se cancelo al salir de la app.") {
+        setError(null);
+      } else {
+        setError(startErrorMessage);
+      }
       setState("idle");
       stopRequestedWhileStarting.current = false;
       isStartingRecording.current = false;
@@ -497,6 +508,27 @@ export default function PracticeScreen() {
       setState("idle");
     }
   };
+
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (nextState) => {
+      if (nextState !== "background") {
+        return;
+      }
+      if (!isStartingRecording.current && !recorder.isRecording()) {
+        return;
+      }
+      stopRequestedWhileStarting.current = false;
+      isStartingRecording.current = false;
+      setState("idle");
+      void recorder.cancel().catch((cancelErr) => {
+        console.warn(
+          "[Practice] Error cancelando grabacion al salir de la app",
+          cancelErr,
+        );
+      });
+    });
+    return () => sub.remove();
+  }, [recorder]);
 
   const errorsList = useMemo(() => {
     if (!feedback) return [] as string[];
@@ -856,7 +888,7 @@ export default function PracticeScreen() {
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
         <ScrollView
           ref={scrollRef}
@@ -1445,10 +1477,11 @@ export default function PracticeScreen() {
             {
               // borderTopWidth: 1,
               // borderTopColor: COLORS.border,
-              // backgroundColor: COLORS.surface,
+              // // backgroundColor: COLORS.surface,
               // paddingHorizontal: 12,
               // paddingTop: 8,
-              // paddingBottom: 8,
+              // // paddingBottom: 8,
+              // backgroundColor: 'red'
             }
           }
         >
@@ -1512,11 +1545,11 @@ export default function PracticeScreen() {
             onRecordPressIn={run}
             onRecordRelease={onRelease}
           />
-          {error ? (
+          {/* {error ? (
             <Text style={{ marginTop: 6, color: COLORS.error }}>
               Error: {error}
             </Text>
-          ) : null}
+          ) : null} */}
         </View>
       </KeyboardAvoidingView>
       <TourOverlay

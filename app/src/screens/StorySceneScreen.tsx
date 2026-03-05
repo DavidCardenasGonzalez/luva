@@ -614,6 +614,11 @@ export default function StorySceneScreen() {
         setErrorMessage('Debes volver a intentar antes de continuar.');
         return;
       }
+      const hasMicPermission = await recorder.ensurePermission();
+      if (!hasMicPermission) {
+        setErrorMessage('Activa el permiso de microfono para grabar.');
+        return;
+      }
       if (!isUnlimited && !missionUnlocked) {
         if (coinsLoading) {
           setErrorMessage('Cargando tus monedas...');
@@ -651,7 +656,12 @@ export default function StorySceneScreen() {
       }
     } catch (err: any) {
       console.error('Record start error', err);
-      setErrorMessage(err?.message || 'No pudimos iniciar la grabación.');
+      const startErrorMessage = err?.message || 'No pudimos iniciar la grabación.';
+      if (startErrorMessage === 'La grabacion se cancelo al salir de la app.') {
+        setErrorMessage(null);
+      } else {
+        setErrorMessage(startErrorMessage);
+      }
       setFlowState('idle');
       stopRequestedWhileStarting.current = false;
       isStartingRecording.current = false;
@@ -796,10 +806,23 @@ export default function StorySceneScreen() {
     const sub = AppState.addEventListener('change', (nextState) => {
       if (nextState === 'active') {
         setKeyboardAvoiderKey((prev) => prev + 1);
+        return;
       }
+      if (nextState !== 'background') {
+        return;
+      }
+      if (!isStartingRecording.current && !recorder.isRecording()) {
+        return;
+      }
+      stopRequestedWhileStarting.current = false;
+      isStartingRecording.current = false;
+      setFlowState('idle');
+      void recorder.cancel().catch((cancelErr) => {
+        console.warn('Story recorder cleanup on app state change failed', cancelErr);
+      });
     });
     return () => sub.remove();
-  }, []);
+  }, [recorder]);
 
   useEffect(() => {
     if (!mission || hasShownCharacterModal.current) return;
@@ -948,7 +971,7 @@ export default function StorySceneScreen() {
       key={keyboardAvoiderKey}
       style={{ flex: 1, backgroundColor: '#f8fafc' }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
+      // keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
     >
       <View style={{ flex: 1 }}>
         <View style={{ backgroundColor: '#0b1224', paddingTop: insets.top + 8, paddingBottom: 12, paddingHorizontal: 16 }}>
@@ -1270,7 +1293,7 @@ export default function StorySceneScreen() {
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top + 12 : 0}
+          // keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top + 12 : 0}
         >
           <Pressable
             style={{ flex: 1, backgroundColor: 'rgba(4,7,17,0.7)', padding: 20 }}
