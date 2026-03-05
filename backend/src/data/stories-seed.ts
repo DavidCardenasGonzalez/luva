@@ -1085,24 +1085,32 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "haunted_airbnb_plump_cat_therapist",
         title: "La gata terapeuta",
         sceneSummary:
-          "Una anfitriona regordeta insiste en que su gato es terapeuta certificado. El gato 'responde' con miradas y maullidos que ella traduce con mucha seriedad.",
+          "Una anfitriona insiste en que su gato es terapeuta certificado. Ella asegura que el gato entiende los problemas emocionales de los huéspedes.",
         aiRole:
           "Eres la anfitriona que interpreta al gato como terapeuta: afectuosa, un poco excéntrica y protectora del felino. Traduce sus gestos con frases empáticas y consejos prácticos; usa humor tierno.",
         caracterName: "Ms. Purrington",
         caracterPrompt:
-          "A cheerful plump woman in a cozy cardigan holding a large tabby cat. She smiles warmly and gestures as if the cat is speaking. The room is cozy with cushions, a teapot, and a window showing a rainy street.",
+          "A cheerful woman in a cozy cardigan holding a large tabby cat. She smiles warmly and gestures as if the cat is speaking. The room is cozy with cushions, a teapot, and a window showing a rainy street.",
         requirements: [
           {
-            requirementId: "describe_feelings",
-            text: "Describe en inglés cómo te sientes viviendo en una casa que te parece extraña o inquietante.",
+            requirementId: "describe_current_mood",
+            text: "Describe tu estado de ánimo actual. Usando “I’ve been feeling…”",
           },
           {
-            requirementId: "ask_cat_question",
-            text: "Haz en inglés una pregunta al 'terapeuta gato' que la anfitriona traducirá; la pregunta debe ser sobre dormir o seguridad.",
+            requirementId: "express_discomfort",
+            text: "Expresa incomodidad de forma educada.",
           },
           {
-            requirementId: "accept_or_decline_advice",
-            text: "Acepta o rechaza en inglés un consejo extraño que la anfitriona atribuya al gato, explicando tu decisión.",
+            requirementId: "cat_question_phrase",
+            text: "Usa “Do you think I should…?”",
+          },
+          {
+            requirementId: "summarize_advice",
+            text: "Resume el consejo que recibiste.",
+          },
+          {
+            requirementId: "close_conversation",
+            text: "Cierra la conversación cordialmente.",
           },
         ],
       },
@@ -1118,16 +1126,24 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A sleepy-looking young man in striped pajamas holding a small lamp. He has messy hair, a warm but tired smile, and leans against the hallway doorframe. The corridor is dim with moonlight filtering in.",
         requirements: [
           {
-            requirementId: "ask_about_clock",
-            text: "Pregunta en inglés por qué el vecino está tan preocupado por el reloj antiguo y pide una historia corta al respecto.",
+            requirementId: "ask_clock_concern",
+            text: "Pregunta por qué el reloj antiguo le preocupa tanto.",
           },
           {
-            requirementId: "share_personal_memory",
-            text: "Cuenta en inglés una memoria personal relacionada con el tiempo, clocks o regrets (2–3 frases).",
+            requirementId: "express_empathy",
+            text: "Muestra empatía por su preocupación.",
           },
           {
-            requirementId: "suggest_solution",
-            text: "Propón en inglés una solución práctica o consoladora para el problema del vecino con el reloj.",
+            requirementId: "encourage_acceptance",
+            text: "Anímalo a aceptar el pasado.",
+          },
+          {
+            requirementId: "soft_advice_phrase",
+            text: "Usa “Have you considered…?”",
+          },
+          {
+            requirementId: "phrasal_move_on",
+            text: "Usa el phrasal verb “move on”.",
           },
         ],
       },
@@ -1154,16 +1170,24 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A middle-aged man wearing a bright, mismatched festival vest covered in badges, with a wide-brimmed hat and a megaphone around his neck. His expression is enthusiastic and slightly bewildered, standing in a crowded festival lane with colorful tents behind him.",
         requirements: [
           {
-            requirementId: "ask_for_directions",
-            text: "Pregunta en inglés cómo llegar a la salida principal del festival.",
+            requirementId: "ask_main_exit",
+            text: "Pregunta cómo llegar a la salida principal del festival.",
           },
           {
-            requirementId: "clarify_confusing_info",
-            text: "Pide en inglés que aclare una de sus historias contradictorias para obtener información precisa.",
+            requirementId: "confirm_direction",
+            text: "Confirma si debes girar a la derecha o izquierda.",
           },
           {
-            requirementId: "confirm_next_step",
-            text: "Resume en inglés la dirección que te dio y confirma el siguiente paso a seguir.",
+            requirementId: "confirmation_phrase",
+            text: "Usa “Just to make sure…”",
+          },
+          {
+            requirementId: "b2_adjective_overwhelming",
+            text: "Describe el festival usando “overwhelming”.",
+          },
+          {
+            requirementId: "distance_phrase",
+            text: "Usa “How far is it from here?”",
           },
         ],
       },
@@ -1173,22 +1197,30 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "Un puesto atiende un robot que vende recuerdos raros y hace chistes malos sobre cada objeto. Tienes que comprar algo útil sin ofenderlo.",
         aiRole:
-          "Eres un robot vendedor amigable con humor seco y frases repetitivas. Responde con calma, añade chistes automáticos y ofrece opciones. Corrige educadamente cuando el alumno pide detalles técnicos fuera de su programación.",
+          "Eres un robot vendedor amigable con humor seco y frases repetitivas. Responde con calma, añade chistes automáticos y ofrece opciones.",
         caracterName: "Robo-Souvenir 3000",
         caracterPrompt:
           "A retro-futuristic vending robot with a shiny metal surface, LED display eyes, and a tray full of quirky festival trinkets. It has painted-on smile and a neon apron that reads 'Memories Sold Here'. The setting is a nighttime stall lit by string lights.",
         requirements: [
           {
-            requirementId: "ask_price_and_features",
-            text: "Pregunta en inglés el precio y las características de un recuerdo específico.",
+            requirementId: "ask_item_price",
+            text: "Pregunta el precio de un recuerdo específico.",
           },
           {
-            requirementId: "negotiate_discount",
-            text: "Intenta en inglés conseguir un pequeño descuento usando educación y humor.",
+            requirementId: "ask_best_seller",
+            text: "Pregunta cuál es el producto más popular.",
           },
           {
-            requirementId: "give_reason_for_choice",
-            text: "Explica en inglés por qué eliges ese recuerdo antes de pagarlo.",
+            requirementId: "ask_if_refundable",
+            text: "Pregunta si puede devolverse.",
+          },
+          {
+            requirementId: "idiom_good_deal",
+            text: "Usa el idiom “a good deal.”",
+          },
+          {
+            requirementId: "phrasal_check_out",
+            text: "Usa el phrasal verb “check out”.",
           },
         ],
       },
@@ -1196,24 +1228,32 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "festival_confusion_mystical_vendor",
         title: "La tarotista del pogo",
         sceneSummary:
-          "Una tarotista que mezcla lecturas místicas con consejos para bailar pogo te ofrece una predicción. Debes sacar información práctica sin caer en supersticiones locas.",
+          "Una tarotista te ofrece una predicción. Debes sacar información práctica sin caer en supersticiones locas.",
         aiRole:
-          "Eres una tarotista excéntrica y teatral, mitad espiritual, mitad entrenadora de baile. Usa metáforas místicas y humor, pero proporciona al menos una recomendación concreta y verificable cuando se te pida.",
+          "Eres una tarotista excéntrica y teatral, mitad espiritual. Usa metáforas místicas y humor, pero proporciona al menos una recomendación concreta y verificable cuando se te pida.",
         caracterName: "Madame Twirl",
         caracterPrompt:
           "A flamboyant fortune-teller wearing colorful scarves, glittery makeup, and fingerless gloves. She sits at a small round table with tarot cards and a portable speaker playing energetic music. Her expression mixes mystery and playful intensity.",
         requirements: [
           {
-            requirementId: "ask_about_nearby_friends",
-            text: "Pregunta en inglés si sus cartas pueden ayudarte a encontrar a tus amigos en el festival.",
+            requirementId: "clarify_prediction",
+            text: "Pide que aclare su predicción y cómo se relaciona específicamente con tu situación en el festival.",
           },
           {
-            requirementId: "request_practical_tip",
-            text: "Pide en inglés un consejo práctico para mantener la energía durante un concierto largo.",
+            requirementId: "verify_energy_advice",
+            text: "Pide que explique cómo su consejo realmente te ayudará a mantener la energía.",
           },
           {
-            requirementId: "question_prediction_reasoning",
-            text: "Pregunta en inglés por qué llegó a esa predicción y pide una explicación lógica.",
+            requirementId: "use_figure_out",
+            text: "Usa el phrasal verb “figure out”.",
+          },
+          {
+            requirementId: "use_at_the_end_of_the_day",
+            text: "Usa el idiom “At the end of the day,”",
+          },
+          {
+            requirementId: "use_come_up_with",
+            text: "Usa el phrasal verb “come up with”.",
           },
         ],
       },
@@ -1221,24 +1261,32 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "festival_confusion_backstage_punk_singer",
         title: "Concierto improvisado",
         sceneSummary:
-          "Te cuelan en el backstage y un cantante punk te reta a hablar sobre tu vida loca antes de tocar. Debes impresionar sin inventar demasiado.",
+          "Te cuelan en el backstage y un conoces a tu idolo musical y es un poco rudo.",
         aiRole:
-          "Eres un cantante punk directo, intenso y con lenguaje coloquial; valoras sinceridad y actitud. Responde con frases cortas, sarcasmo y ocasionales halagos si alguien demuestra confianza.",
+          "Eres una cantante punk directa, intensa y con lenguaje coloquial; No tratas bien a los fans.",
         caracterName: "Rita Riot",
         caracterPrompt:
           "A fierce punk singer with a neon-dyed mohawk, leather jacket covered in patches, and a microphone in hand. She stands in a cramped backstage area with amps and posters plastered on the walls, scowling but curious.",
         requirements: [
           {
-            requirementId: "tell_a_brief_personal_story",
-            text: "Cuenta en inglés una breve anécdota personal que muestre carácter (2–3 frases).",
+            requirementId: "introduce_yourself_confidently",
+            text: "Preséntate con seguridad.",
           },
           {
-            requirementId: "explain_motivation",
-            text: "Explica en inglés por qué decidiste venir al festival.",
+            requirementId: "share_personal_connection",
+            text: "Explica brevemente por qué su música ha sido importante para ti.",
           },
           {
-            requirementId: "accept_or_decline_challenge",
-            text: "Responde en inglés si aceptas o no un desafío improvisado que te propone (di por qué).",
+            requirementId: "ask_about_song_meaning",
+            text: "Pregunta por el significado de una canción específica.",
+          },
+          {
+            requirementId: "use_even_though",
+            text: "Usa “even though” para contrastar ideas.",
+          },
+          {
+            requirementId: "use_low_key",
+            text: "Usa “low-key” en una frase.",
           },
         ],
       },
@@ -1254,16 +1302,24 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A creative chef wearing a stained apron, a quirky hat shaped like a cloud, and food-safe gloves. He stands behind a colorful food truck counter with steam rising and handwritten menu boards full of bizarre dish names.",
         requirements: [
           {
-            requirementId: "ask_about_ingredients",
-            text: "Pregunta en inglés por los ingredientes principales de un plato que te interese.",
+            requirementId: "ask_signature_dish",
+            text: "Pregunta cuál es el plato estrella del food truck.",
           },
           {
-            requirementId: "express_dietary_restriction",
-            text: "Informa en inglés sobre una alergia o preferencia alimentaria y pide una alternativa.",
+            requirementId: "mention_allergy",
+            text: "Menciona que tienes una alergia o restricción alimentaria.",
           },
           {
-            requirementId: "order_polite_and_clear",
-            text: "Realiza en inglés un pedido claro y cortés, confirmando tamaño y precio si es necesario.",
+            requirementId: "clarify_spice_level",
+            text: "Pregunta qué tan picante es el plato.",
+          },
+          {
+            requirementId: "use_whats_in_it",
+            text: "Usa “What’s in it?”",
+          },
+          {
+            requirementId: "use_cut_out",
+            text: "Usa el phrasal verb “cut out” (eliminar un ingrediente).",
           },
         ],
       },
@@ -1281,7 +1337,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "gym_newbie_intense_coach",
         title: "El entrenador turbo",
         sceneSummary:
-          "Un entrenador hiperactivo te arrastra a una rutina que parece de otro planeta. Tienes que seguirle el ritmo sin desmayarte (literalmente).",
+          "Un entrenador hiperactivo te arrastra a una rutina que parece de otro planeta.",
         aiRole:
           "Eres un entrenador extremadamente enérgico y motivador. Hablas rápido, usas imperativos para dar instrucciones y haces bromas competitivas. Mantén actitud entusiasta pero da retroalimentación clara sobre la técnica.",
         caracterName: "Coach Blaze",
@@ -1289,16 +1345,32 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A muscular, energetic trainer in bright athletic gear with a whistle around his neck. He has a determined grin, sweaty but vibrant appearance, and is standing in a busy gym surrounded by workout equipment. He gestures dynamically as if counting reps.",
         requirements: [
           {
-            requirementId: "ask_training_plan",
-            text: "Pregunta en inglés cuál es el plan de entrenamiento para la sesión y cuántas repeticiones/series incluye.",
+            requirementId: "ask_about_warm_up",
+            text: "Pregunta si hay calentamiento previo.",
           },
           {
-            requirementId: "express_discomfort",
-            text: "Di en inglés que algo te resulta difícil o incómodo y especifica qué parte del cuerpo duele o cansa.",
+            requirementId: "ask_for_modification",
+            text: "Solicita una versión más sencilla de un ejercicio.",
           },
           {
-            requirementId: "ask_modification",
-            text: "Pide en inglés una modificación o alternativa más fácil para un ejercicio.",
+            requirementId: "ask_if_safe",
+            text: "Pregunta si el ejercicio es seguro para principiantes.",
+          },
+          {
+            requirementId: "use_push_yourself",
+            text: "Usa “push yourself”.",
+          },
+          {
+            requirementId: "use_be_worth_it",
+            text: "Usa “be worth it.”",
+          },
+          {
+            requirementId: "use_im_not_used_to",
+            text: "Usa “I’m not used to…”",
+          },
+          {
+            requirementId: "use_as_long_as",
+            text: "Usa “as long as” para poner una condición.",
           },
         ],
       },
@@ -1314,16 +1386,24 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A calm, graceful yoga instructor wearing flowing clothes and colorful beads, with a soft smile and peaceful eyes. She stands on a yoga mat in a sunlit studio full of plants, gesturing gently as she explains poses.",
         requirements: [
           {
-            requirementId: "follow_instruction",
-            text: "Sigue en inglés una instrucción de la profesora para una postura y confirma que la harás.",
+            requirementId: "ask_pose_name",
+            text: "Pregunta cómo se llama la postura que estás intentando hacer.",
           },
           {
-            requirementId: "share_experience",
-            text: "Cuenta en inglés una breve experiencia personal relacionada con el estrés o la relajación.",
+            requirementId: "express_physical_difficulty",
+            text: "Expresa que la postura te resulta físicamente difícil.",
           },
           {
-            requirementId: "ask_personal_question",
-            text: "Haz en inglés una pregunta personal y respetuosa sobre la anécdota que ella contó.",
+            requirementId: "ask_about_progress",
+            text: "Pregunta cuánto tiempo suele tardar alguien en dominar esta postura.",
+          },
+          {
+            requirementId: "use_let_go_of",
+            text: "Usa el phrasal verb “let go of”.",
+          },
+          {
+            requirementId: "use_sort_of",
+            text: "Usa “sort of” para matizar.",
           },
         ],
       },
@@ -1339,16 +1419,24 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A lively spin instructor with neon cycling clothes and headphones around his neck, holding a microphone. He has an intense, excited expression and stands next to stationary bikes under colorful lights.",
         requirements: [
           {
-            requirementId: "set_resistance",
-            text: "Pide en inglés que bajen o suban la resistencia de la bicicleta y explica por qué.",
+            requirementId: "express_current_fitness",
+            text: "Explica brevemente tu nivel actual de condición física.",
           },
           {
-            requirementId: "accept_challenge",
-            text: "Acepta en inglés uno de sus desafíos y di cuánto tiempo/intensidad intentarás.",
+            requirementId: "express_fatigue",
+            text: "Expresa que estás cansado pero que quieres continuar.",
           },
           {
-            requirementId: "describe_sensation",
-            text: "Describe en inglés cómo te sientes físicamente durante la subida (por ejemplo: cansado, con respiración rápida, con calor).",
+            requirementId: "ask_about_calories",
+            text: "Pregunta cuántas calorías aproximadamente se queman en la sesión.",
+          },
+          {
+            requirementId: "use_push_through",
+            text: "Usa el phrasal verb “push through”.",
+          },
+          {
+            requirementId: "use_give_it_a_shot",
+            text: "Usa “give it a shot.”",
           },
         ],
       },
@@ -1364,16 +1452,24 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A friendly, slightly clumsy gym-goer wearing a faded tank top and bright trainers. He has a goofy smile, tousled hair, and is holding a pair of dumbbells in a cluttered weight area. His posture suggests eagerness to help.",
         requirements: [
           {
-            requirementId: "give_feedback",
-            text: "Da en inglés una corrección o consejo sobre su técnica de levantamiento de pesas de forma clara y educada.",
+            requirementId: "ask_if_ready",
+            text: "Pregunta si está listo para ayudarte con el ejercicio.",
           },
           {
-            requirementId: "decline_help",
-            text: "Rechaza su ayuda en inglés de manera educada si crees que puede ser peligroso o incorrecto.",
+            requirementId: "suggest_lighter_weight",
+            text: "Sugiere usar menos peso para evitar problemas.",
           },
           {
-            requirementId: "offer_encouragement",
-            text: "Anima en inglés a tu compañero usando una frase motivadora y específica (por ejemplo: mejora en su forma o constancia).",
+            requirementId: "set_boundary_firmly",
+            text: "Marca un límite firme pero amable si algo no se siente seguro.",
+          },
+          {
+            requirementId: "use_watch_out",
+            text: "Usa el phrasal verb “watch out”.",
+          },
+          {
+            requirementId: "use_fair_enough",
+            text: "Usa “Fair enough.”",
           },
         ],
       },
@@ -1389,16 +1485,24 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A cheerful barista in a gym café wearing an apron with a smoothie logo. He has a friendly face, animated hands, and a counter full of fresh fruit and protein tubs, with gym posters in the background.",
         requirements: [
           {
-            requirementId: "ask_ingredients",
-            text: "Pregunta en inglés cuáles son los ingredientes del batido y qué beneficios aporta cada uno.",
+            requirementId: "ask_main_benefit",
+            text: "Pregunta cuál es el beneficio principal del batido.",
           },
           {
-            requirementId: "request_evidence",
-            text: "Pide en inglés evidencia o una explicación sobre por qué el batido ayuda a la recuperación o al rendimiento.",
+            requirementId: "ask_for_ingredients",
+            text: "Pide la lista completa de ingredientes.",
           },
           {
-            requirementId: "compare_options",
-            text: "Compara en inglés el batido con otra opción (por ejemplo: una tortilla o yogur) y explica cuál elegirías y por qué.",
+            requirementId: "ask_about_sugar_content",
+            text: "Pregunta cuánta azúcar contiene.",
+          },
+          {
+            requirementId: "use_back_up_claim",
+            text: "Usa el phrasal verb “back up” (respaldar una afirmación).",
+          },
+          {
+            requirementId: "use_come_up_with",
+            text: "Usa el phrasal verb “come up with”.",
           },
         ],
       },
@@ -1417,24 +1521,32 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "lost_in_translation_ticket_inspector",
         title: "Inspector de billetes excéntrico",
         sceneSummary:
-          "En la estación te para un inspector que parece haber leído demasiadas novelas de misterio. Cree que tu billete es una pista secreta.",
+          "En la estación te para un inspector que parece haber leído demasiadas novelas de misterio y se toma muy en serio su trabajo.",
         aiRole:
-          "Eres un inspector de billetes excéntrico y teatral. Habla con dramatismo, haz preguntas indirectas y disfruta de exagerar malentendidos, pero da pistas claras cuando el alumno usa un inglés correcto.",
+          "Eres un inspector de billetes de tren excéntrico. Te tomas muy en serio tu trabajo, hablas con formalidad dramática y analizas cada detalle como si fuera un caso criminal.",
         caracterName: "Mr. Sato",
         caracterPrompt:
           "A middle-aged man wearing a vintage uniform with shiny brass buttons, a slightly crooked cap, and round glasses. He holds a magnifying glass and points at a train ticket with an amused, theatrical expression. The background is a bustling train platform with postered walls.",
         requirements: [
           {
-            requirementId: "ask_ticket_validity",
-            text: "Pregúntale en inglés si tu billete es válido para el tren y la hora indicada.",
+            requirementId: "present_ticket",
+            text: "Entrega tu billete cuando te lo pida.",
           },
           {
-            requirementId: "clarify_confusion",
-            text: "Pide una aclaración en inglés si él afirma que el billete contiene un mensaje secreto.",
+            requirementId: "confirm_destination",
+            text: "Confirma tu destino final.",
           },
           {
-            requirementId: "confirm_next_steps",
-            text: "Confirma en inglés qué debes hacer a continuación para evitar problemas (por ejemplo, pagar, cambiar el billete, o hablar con alguien).",
+            requirementId: "state_departure_time",
+            text: "Di a qué hora sale tu tren.",
+          },
+          {
+            requirementId: "explain_travel_purpose",
+            text: "Explica el propósito de tu viaje.",
+          },
+          {
+            requirementId: "ask_for_identification_requirement",
+            text: "Pregunta si necesita ver tu identificación.",
           },
         ],
       },
@@ -1442,7 +1554,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "lost_in_translation_robot_vending_machine",
         title: "La máquina expendedora parlante",
         sceneSummary:
-          "Una máquina expendedora habla contigo en un inglés con acento extraño y te ofrece 'emociones' en lata. Necesitas comprar una bebida y entender sus ofertas raras.",
+          "Una máquina expendedora habla contigo y te ofrece 'emociones' en lata. Necesitas comprar una bebida y entender sus ofertas raras.",
         aiRole:
           "Eres una máquina expendedora con personalidad juguetona y un acento exagerado. Responde de forma breve, usa frases comerciales y a veces malinterpreta palabras clave para crear confusión cómica, pero responde claro cuando el alumno usa frases correctas.",
         caracterName: "Vend-O-Chat",
@@ -1450,16 +1562,24 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A shiny, colorful vending machine with expressive LED 'eyes' and a small digital mouth. Buttons are labeled with quirky icons; steam and neon lights glow around it. It looks futuristic and slightly whimsical while dispensing cans.",
         requirements: [
           {
-            requirementId: "ask_price_and_options",
-            text: "Pregunta en inglés por el precio y las opciones disponibles (sabor, tamaño, o 'emociones' si lo ofrece).",
+            requirementId: "clarify_meaning",
+            text: "Pregunta qué significa exactamente algo que haya mencionado.",
           },
           {
-            requirementId: "handle_misunderstanding",
-            text: "Corrige en inglés una malinterpretación de la máquina (por ejemplo, si confunde 'coffee' con 'comfort').",
+            requirementId: "ask_price",
+            text: "Pregunta cuánto cuesta una bebida específica.",
           },
           {
-            requirementId: "complete_purchase",
-            text: "Di en inglés qué vas a comprar e indica cómo pagar (efectivo, tarjeta o app).",
+            requirementId: "ask_if_sugar_free",
+            text: "Pregunta si hay opciones sin azúcar.",
+          },
+          {
+            requirementId: "ask_if_caffeinated",
+            text: "Pregunta si la bebida tiene cafeína.",
+          },
+          {
+            requirementId: "ask_about_temperature",
+            text: "Pregunta si la bebida está fría o a temperatura ambiente.",
           },
         ],
       },
@@ -1475,16 +1595,24 @@ export const STORIES_SEED: StoryDefinition[] = [
           "An older sushi chef in a traditional apron and headband, hands precise and graceful. He stands behind a wooden counter with fresh fish on display, a calm, slightly amused smile, and a warm lantern-lit interior of a small sushi bar.",
         requirements: [
           {
-            requirementId: "ask_ingredients",
-            text: "Pregunta en inglés por los ingredientes de un plato (por ejemplo, ¿qué tipo de pescado y salsa lleva?).",
+            requirementId: "compliment_craft",
+            text: "Haz un cumplido breve sobre su técnica antes de pedir algo específico.",
           },
           {
-            requirementId: "express_dietary_restriction",
-            text: "Explica en inglés que tienes una alergia o preferencia alimentaria y pide una alternativa segura.",
+            requirementId: "clarify_ingredient",
+            text: "Pide que explique un ingrediente que no reconoces.",
           },
           {
-            requirementId: "order_polite",
-            text: "Haz un pedido cortés en inglés (plato y cantidad) y agradece al chef.",
+            requirementId: "ask_about_portion",
+            text: "Pregunta cuántas piezas incluye la orden.",
+          },
+          {
+            requirementId: "use_point_out",
+            text: "Usa el phrasal verb “point out”.",
+          },
+          {
+            requirementId: "use_double_check",
+            text: "Usa el phrasal verb “double-check”.",
           },
         ],
       },
@@ -1500,41 +1628,61 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A flashy host with retro sunglasses, a sparkly jacket, and a wireless mic. He stands in a cozy karaoke room with colorful lights and a small stage, striking a dramatic pose and smiling encouragingly.",
         requirements: [
           {
-            requirementId: "ask_song_recommendation",
-            text: "Pide en inglés una recomendación de canción adecuada para tu voz o estado de ánimo.",
+            requirementId: "ask_song_options",
+            text: "Pregunta qué canciones están disponibles.",
           },
           {
-            requirementId: "explain_choice",
-            text: "Explica en inglés por qué eliges esa canción (voz, emoción, memoria, etc.).",
+            requirementId: "state_music_preference",
+            text: "Explica qué tipo de música te sientes cómodo interpretando.",
           },
           {
-            requirementId: "accept_feedback",
-            text: "Recibe y responde en inglés a la retroalimentación del presentador sobre tu interpretación (mejorar tempo, emotividad, etc.).",
+            requirementId: "express_nervousness",
+            text: "Expresa que estás un poco nervioso antes de empezar.",
+          },
+          {
+            requirementId: "ask_about_next_performer",
+            text: "Pregunta quién canta después.",
+          },
+          {
+            requirementId: "use_i_give_it_my_best",
+            text: "Usa “I’ll give it my best.”",
           },
         ],
       },
       {
-        missionId: "lost_in_translation_confused_translator_app",
-        title: "La app traductora con personalidad",
+        missionId: "japan_trip_capsule_hotel_misunderstanding",
+        title: "Noche en el hotel cápsula",
         sceneSummary:
-          "Tu app de traducción cobra vida y traduce tu inglés de forma literal y absurda. Tienes que obtener una traducción útil y evitar malentendidos culturales.",
+          "Llegas por primera vez a un hotel cápsula en Japón. El recepcionista es extremadamente formal y te explica reglas muy específicas sobre silencio, equipaje y horarios. Debes entender las normas, pedir aclaraciones y evitar cometer una falta cultural.",
         aiRole:
-          "Eres una app traductora con sentido del humor y tendencia a traducir literalmente. Corrige errores cuando el alumno reformula frases más naturales y ofrece opciones alternativas en un inglés simple y claro.",
-        caracterName: "Transly",
+          "Eres un recepcionista japonés muy educado, preciso y formal. Explicas las reglas con detalle, usas lenguaje claro y profesional, y corriges malentendidos con cortesía. Valoras el respeto por las normas y el orden.",
+        caracterName: "Mr. Tanaka",
         caracterPrompt:
-          "A sleek smartphone interface with animated speech bubbles and a playful avatar. The app screen shows highlighted text and alternative translations, set against a café table with a cup of coffee and travel brochures.",
+          "A middle-aged Japanese receptionist, with glasses and a neat hairstyle. He wears a formal uniform and has a kind but serious expression. He is behind the reception desk of a capsule hotel, with a brochure about the hotel rules in his hand.",
         requirements: [
           {
-            requirementId: "identify_misleading_translation",
-            text: "Señala en inglés una traducción literal que podría ofender o confundir y explica por qué es problemática.",
+            requirementId: "confirm_reservation",
+            text: "Confirma tu reserva y el número de noches.",
           },
           {
-            requirementId: "request_natural_phrase",
-            text: "Pide en inglés una versión más natural o apropiada para una situación social (por ejemplo, pedir ayuda en la calle).",
+            requirementId: "ask_about_luggage_storage",
+            text: "Pregunta dónde puedes dejar tu equipaje.",
           },
           {
-            requirementId: "choose_best_option",
-            text: "Elige en inglés la mejor de dos alternativas que la app ofrece y justifica brevemente la elección.",
+            requirementId: "ask_about_lockers",
+            text: "Pregunta si hay lockers con llave.",
+          },
+          {
+            requirementId: "ask_about_breakfast",
+            text: "Pregunta si el desayuno está incluido.",
+          },
+          {
+            requirementId: "use_in_the_long_run",
+            text: "Usa el idiom “in the long run.”",
+          },
+          {
+            requirementId: "use_be_likely_to",
+            text: "Usa “be likely to” para probabilidad.",
           },
         ],
       },
