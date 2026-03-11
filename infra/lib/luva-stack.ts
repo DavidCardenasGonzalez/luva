@@ -1,9 +1,27 @@
-import { Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput, Duration, RemovalPolicy, SecretValue, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { AttributeType, BillingMode, GlobalSecondaryIndexProps, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Bucket, BlockPublicAccess } from 'aws-cdk-lib/aws-s3';
-import { UserPool, AccountRecovery, OAuthScope, ProviderAttribute, UserPoolClientIdentityProvider, StringAttribute, ClientAttributes, UserPoolIdentityProviderGoogle, UserPoolIdentityProviderApple } from 'aws-cdk-lib/aws-cognito';
-import { RestApi, LambdaIntegration, Deployment, Stage, Cors } from 'aws-cdk-lib/aws-apigateway';
+import {
+  UserPool,
+  AccountRecovery,
+  OAuthScope,
+  ProviderAttribute,
+  UserPoolClientIdentityProvider,
+  StringAttribute,
+  ClientAttributes,
+  UserPoolIdentityProviderGoogle,
+  UserPoolIdentityProviderApple,
+} from 'aws-cdk-lib/aws-cognito';
+import {
+  RestApi,
+  LambdaIntegration,
+  Deployment,
+  Stage,
+  Cors,
+  AuthorizationType,
+  CognitoUserPoolsAuthorizer,
+} from 'aws-cdk-lib/aws-apigateway';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
@@ -14,6 +32,21 @@ import * as path from 'path';
 export class LuvaStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
+
+    const splitCsv = (value: string | undefined, fallback: string[]): string[] => {
+      const items = (value || '')
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean);
+      return items.length ? items : fallback;
+    };
+    const sanitizeDomainPrefix = (value: string) =>
+      value
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, '-')
+        .replace(/--+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 63);
 
     // DynamoDB single-table
     const table = new Table(this, 'LuvaTable', {
@@ -40,6 +73,12 @@ export class LuvaStack extends Stack {
     };
     table.addGlobalSecondaryIndex(gsi2);
 
+    const usersTable = new Table(this, 'LuvaUsersTable', {
+      partitionKey: { name: 'email', type: AttributeType.STRING },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.RETAIN,
+    });
+
     // S3 Buckets
     const audioRawBucket = new Bucket(this, 'AudioRawBucket', {
       bucketName: undefined, // Let AWS name it; set if needed
@@ -59,8 +98,9 @@ export class LuvaStack extends Stack {
 
     // Cognito UserPool (Hosted UI)
     const userPool = new UserPool(this, 'UserPool', {
-      selfSignUpEnabled: false,
+      selfSignUpEnabled: true,
       signInAliases: { email: true },
+      autoVerify: { email: true },
       standardAttributes: {
         email: { required: true, mutable: false },
       },
@@ -70,58 +110,100 @@ export class LuvaStack extends Stack {
       accountRecovery: AccountRecovery.EMAIL_ONLY,
     });
 
-    const clientReadAttrs = new ClientAttributes().withStandardAttributes({ email: true });
-    const clientWriteAttrs = new ClientAttributes().withStandardAttributes({ email: true });
+    const clientReadAttrs = new ClientAttributes().withStandardAttributes({
+      email: true,
+      emailVerified: true,
+      fullname: true,
+      givenName: true,
+      familyName: true,
+      profilePicture: true,
+    });
+    const clientWriteAttrs = new ClientAttributes().withStandardAttributes({
+      email: true,
+      fullname: true,
+      givenName: true,
+      familyName: true,
+      profilePicture: true,
+    });
 
-    const callbackUrls = [
-      'exp://127.0.0.1:19000',
-      'exp://localhost:19000',
-      'myapp://callback',
+    const callbackUrls = splitCsv(process.env.COGNITO_CALLBACK_URLS, ['myapp://callback']);
+    const logoutUrls = splitCsv(process.env.COGNITO_LOGOUT_URLS, callbackUrls);
+    const domainPrefix = sanitizeDomainPrefix(
+      process.env.COGNITO_DOMAIN_PREFIX || `luva-${this.stackName}-${this.account}-${this.region}`
+    );
+    const userPoolDomain = userPool.addDomain('HostedUiDomain', {
+      cognitoDomain: { domainPrefix },
+    });
+
+    const supportedIdentityProviders: UserPoolClientIdentityProvider[] = [
+      UserPoolClientIdentityProvider.COGNITO,
     ];
-    const logoutUrls = [
-      'myapp://signout',
-    ];
+    const identityProviders: Construct[] = [];
+
+    const googleClientId = process.env.GOOGLE_CLIENT_ID;
+    const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    if (googleClientId && googleClientSecret) {
+      const googleProvider = new UserPoolIdentityProviderGoogle(this, 'GoogleProvider', {
+        clientId: googleClientId,
+        clientSecretValue: SecretValue.unsafePlainText(googleClientSecret),
+        scopes: ['openid', 'email', 'profile'],
+        userPool,
+        attributeMapping: {
+          email: ProviderAttribute.GOOGLE_EMAIL,
+          emailVerified: ProviderAttribute.GOOGLE_EMAIL_VERIFIED,
+          fullname: ProviderAttribute.GOOGLE_NAME,
+          givenName: ProviderAttribute.GOOGLE_GIVEN_NAME,
+          familyName: ProviderAttribute.GOOGLE_FAMILY_NAME,
+          profilePicture: ProviderAttribute.GOOGLE_PICTURE,
+        },
+      });
+      supportedIdentityProviders.push(UserPoolClientIdentityProvider.GOOGLE);
+      identityProviders.push(googleProvider);
+    }
+
+    const appleClientId = process.env.APPLE_SERVICE_ID;
+    const appleTeamId = process.env.APPLE_TEAM_ID;
+    const appleKeyId = process.env.APPLE_KEY_ID;
+    const applePrivateKey = process.env.APPLE_PRIVATE_KEY;
+    if (appleClientId && appleTeamId && appleKeyId && applePrivateKey) {
+      const appleProvider = new UserPoolIdentityProviderApple(this, 'AppleProvider', {
+        clientId: appleClientId,
+        teamId: appleTeamId,
+        keyId: appleKeyId,
+        privateKeyValue: SecretValue.unsafePlainText(applePrivateKey),
+        userPool,
+        attributeMapping: {
+          email: ProviderAttribute.APPLE_EMAIL,
+          emailVerified: ProviderAttribute.APPLE_EMAIL_VERIFIED,
+          fullname: ProviderAttribute.APPLE_NAME,
+          givenName: ProviderAttribute.APPLE_FIRST_NAME,
+          familyName: ProviderAttribute.APPLE_LAST_NAME,
+        },
+      });
+      supportedIdentityProviders.push(UserPoolClientIdentityProvider.APPLE);
+      identityProviders.push(appleProvider);
+    }
 
     const userPoolClient = userPool.addClient('AppClient', {
       oAuth: {
+        flows: {
+          authorizationCodeGrant: true,
+          implicitCodeGrant: false,
+        },
         callbackUrls,
         logoutUrls,
         scopes: [OAuthScope.OPENID, OAuthScope.EMAIL, OAuthScope.PROFILE],
       },
       generateSecret: false,
       authFlows: {
-        userSrp: false,
+        userSrp: true,
         userPassword: false,
       },
       readAttributes: clientReadAttrs,
       writeAttributes: clientWriteAttrs,
-      supportedIdentityProviders: [
-        UserPoolClientIdentityProvider.COGNITO,
-      ],
+      supportedIdentityProviders,
     });
-
-    // Identity Providers (placeholders; configure keys in console or SSM then enable)
-    // Google
-    // new UserPoolIdentityProviderGoogle(this, 'Google', {
-    //   clientId: 'GOOGLE_CLIENT_ID',
-    //   clientSecretValue: SecretValue.unsafePlainText('GOOGLE_CLIENT_SECRET'),
-    //   userPool,
-    //   attributeMapping: {
-    //     email: ProviderAttribute.GOOGLE_EMAIL,
-    //   },
-    // });
-
-    // Apple (requires team config)
-    // new UserPoolIdentityProviderApple(this, 'Apple', {
-    //   clientId: 'APPLE_SERVICE_ID',
-    //   keyId: 'APPLE_KEY_ID',
-    //   teamId: 'APPLE_TEAM_ID',
-    //   privateKey: SecretValue.unsafePlainText('APPLE_PRIVATE_KEY'),
-    //   userPool,
-    //   attributeMapping: {
-    //     email: ProviderAttribute.APPLE_EMAIL,
-    //   },
-    // });
+    identityProviders.forEach((provider) => userPoolClient.node.addDependency(provider));
 
     // SSM Parameters (names only; values set outside CDK)
     const openAiKeyParam = new StringParameter(this, 'OpenAIKeyParam', {
@@ -158,6 +240,21 @@ export class LuvaStack extends Stack {
       resources: [openAiKeyParam.parameterArn],
     }));
 
+    const usersFnLogGroup = new LogGroup(this, 'UsersFnLogs', { retention: RetentionDays.ONE_WEEK });
+    const usersFn = new NodejsFunction(this, 'UsersFunction', {
+      entry: path.join(__dirname, '../../backend/src/handlers/users.ts'),
+      handler: 'handler',
+      runtime: Runtime.NODEJS_18_X,
+      memorySize: 256,
+      timeout: Duration.seconds(15),
+      logGroup: usersFnLogGroup,
+      environment: {
+        USERS_TABLE_NAME: usersTable.tableName,
+        STAGE: 'prod',
+      },
+    });
+    usersTable.grantReadWriteData(usersFn);
+
     // API Gateway REST
     const api = new RestApi(this, 'LuvaApi', {
       deploy: false,
@@ -169,14 +266,42 @@ export class LuvaStack extends Stack {
     });
 
     const v1 = api.root.addResource('v1');
+    const usersAuthorizer = new CognitoUserPoolsAuthorizer(this, 'UsersAuthorizer', {
+      cognitoUserPools: [userPool],
+    });
+    const users = v1.addResource('users');
+    const usersMe = users.addResource('me');
     const proxy = v1.addResource('{proxy+}');
     const lambdaIntegration = new LambdaIntegration(apiFn);
+    const usersLambdaIntegration = new LambdaIntegration(usersFn);
+    usersMe.addMethod('GET', usersLambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    usersMe.addMethod('POST', usersLambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
     proxy.addMethod('ANY', lambdaIntegration);
     v1.addMethod('ANY', lambdaIntegration); // for /v1 root
 
     const deployment = new Deployment(this, 'Deployment', { api });
-    new Stage(this, 'ProdStage', { deployment, stageName: 'prod' });
+    const prodStage = new Stage(this, 'ProdStage', { deployment, stageName: 'prod' });
 
-    // Outputs: add as needed
+    new CfnOutput(this, 'ApiBaseUrl', {
+      value: prodStage.urlForPath('/v1'),
+    });
+    new CfnOutput(this, 'UsersTableName', {
+      value: usersTable.tableName,
+    });
+    new CfnOutput(this, 'UserPoolId', {
+      value: userPool.userPoolId,
+    });
+    new CfnOutput(this, 'UserPoolClientId', {
+      value: userPoolClient.userPoolClientId,
+    });
+    new CfnOutput(this, 'HostedUiDomain', {
+      value: userPoolDomain.baseUrl(),
+    });
   }
 }

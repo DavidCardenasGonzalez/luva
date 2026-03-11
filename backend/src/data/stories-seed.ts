@@ -1703,22 +1703,34 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "Es tu primer día y alguien te susurra un rumor sobre el jefe en la cocina. Debes fingir que no sabes mucho mientras investigas con cuidado.",
         aiRole:
-          "Eres un compañero de trabajo entrometido y juguetón que ama los chismes. Mantén un tono cómplice, un poco dramático y con respuestas que inviten al alumno a seguir preguntando sin ser demasiado directo.",
+          "Eres una compañera de trabajo entrometida y juguetona que ama los chismes. Mantén un tono cómplice, un poco dramático y con respuestas que inviten al alumno a seguir preguntando sin ser demasiado directo.",
         caracterName: "Maya",
         caracterPrompt:
           "A young, energetic woman with a quirky hairstyle and bright glasses. She wears a colorful cardigan and holds a mug with a cat drawing. She leans in conspiratorially in a cozy office kitchen, smiling mischievously.",
         requirements: [
           {
             requirementId: "ask_for_details",
-            text: "Pregunta en inglés por más detalles sobre el rumor sin sonar acusatorio.",
+            text: "Pide más detalles sobre el rumor sin sonar acusatorio.",
           },
           {
-            requirementId: "deny_knowledge",
-            text: "Dile en inglés que no sabes nada oficial y que solo quieres confirmar la verdad.",
+            requirementId: "ask_source",
+            text: "Pregunta de dónde escuchó originalmente el rumor.",
           },
           {
-            requirementId: "suggest_next_step",
-            text: "Sugiere en inglés un siguiente paso concreto para comprobar el rumor (por ejemplo, hablar con alguien o buscar un correo).",
+            requirementId: "ask_if_manager_knows",
+            text: "Pregunta si el jefe sabe que la gente habla de eso.",
+          },
+          {
+            requirementId: "use_as_far_as_i_know",
+            text: "Usa “As far as I know,”",
+          },
+          {
+            requirementId: "use_at_the_end_of_the_day",
+            text: "Usa “At the end of the day,”",
+          },
+          {
+            requirementId: "use_come_up",
+            text: "Usa el phrasal verb “come up”.",
           },
         ],
       },
@@ -1726,24 +1738,32 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "office_gossip_mysterious_email",
         title: "El correo misterioso",
         sceneSummary:
-          "Recibes un correo anónimo con una pista jugosa. Tienes que decidir si lo compartes y cómo manejar la información.",
+          "Recibes un correo anónimo con una pista sobre algo que ocurre en la oficina. Hablas con un compañero para decidir si es confiable y qué hacer con la información.",
         aiRole:
-          "Eres la persona que aparentemente envió el correo (o finge haberlo recibido). Actúa con ambigüedad: juguetón, un poco paranoico y provocador. Responde con frases que dejen huecos para que el alumno practique clarificar información.",
+          "Eres un compañero intrigante y algo paranoico. Te gusta teorizar sobre el origen del correo y responder con ambigüedad, dejando espacio para que el alumno haga preguntas y saque conclusiones.",
         caracterName: "Sam",
         caracterPrompt:
           "A slim, mysterious office worker in a slightly rumpled blazer, holding a laptop close. He has a half-smile and curious eyes, standing under fluorescent office lights with a hint of a city skyline outside the window.",
         requirements: [
           {
             requirementId: "ask_email_origin",
-            text: "Pregunta en inglés de dónde podría haber venido el correo y cómo verificar su autenticidad.",
+            text: "Pregunta de dónde podría haber venido el correo.",
           },
           {
-            requirementId: "express_concern",
-            text: "Expresa en inglés tu preocupación por las consecuencias de compartir el contenido.",
+            requirementId: "react_with_surprise",
+            text: "Reacciona con sorpresa moderada ante la información.",
           },
           {
-            requirementId: "propose_confidential_option",
-            text: "Propón en inglés una opción confidencial y segura para tratar el correo (por ejemplo, hablar con RH o guardar evidencia).",
+            requirementId: "use_find_out",
+            text: "Usa el phrasal verb “find out”.",
+          },
+          {
+            requirementId: "use_bring_up",
+            text: "Usa el phrasal verb “bring up”.",
+          },
+          {
+            requirementId: "use_point_out",
+            text: "Usa el phrasal verb “point out”.",
           },
         ],
       },
@@ -1759,16 +1779,21 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A broad-shouldered man with a loud laugh, wearing a casual shirt and a company lanyard. He stands by the office coffee machine with a furrowed brow and folded arms, as if ready for a small showdown.",
         requirements: [
           {
-            requirementId: "give_alibi",
-            text: "Da en inglés una coartada breve y creíble que explique por qué no fuiste tú.",
+            requirementId: "deny_accusation",
+            text: "Niega la acusación de forma calmada.",
           },
           {
-            requirementId: "ask_for_evidence",
-            text: "Pide en inglés pruebas concretas antes de aceptar la acusación.",
+            requirementId: "acknowledge_concern",
+            text: "Reconoce que entiendes por qué la situación puede preocupar.",
+          },
+          { requirementId: "use_might", text: "Usa palabra “might”" },
+          {
+            requirementId: "use_i_was_wondering_if",
+            text: "Usa “I was wondering if…”",
           },
           {
-            requirementId: "propose_peaceful_resolution",
-            text: "Propón en inglés una forma de resolver el malentendido sin crear más drama (por ejemplo, hablar con el supuesto afectado).",
+            requirementId: "use_figure_out",
+            text: "Usa el phrasal verb “figure out”.",
           },
         ],
       },
@@ -1784,16 +1809,26 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A composed middle-aged woman in a smart blazer, with a neat bun and an unreadable expression. She sits in a glass-walled office, holding a phone with a poised, authoritative posture.",
         requirements: [
           {
-            requirementId: "state_position",
-            text: "Explica en inglés, de forma breve y profesional, tu versión de los hechos cuando te pregunten directamente.",
+            requirementId: "clarify_timeline",
+            text: "Aclara cuándo escuchaste el rumor por primera vez.",
           },
           {
-            requirementId: "offer_solutions",
-            text: "Ofrece en inglés al menos una solución concreta para evitar que el rumor haga daño al equipo.",
+            requirementId: "offer_help",
+            text: "Ofrece ayudar a aclarar la situación con otros compañeros.",
           },
           {
-            requirementId: "ask_for_feedback",
-            text: "Pide en inglés retroalimentación o pasos a seguir para demostrar tu colaboración.",
+            requirementId: "use_make_sure",
+            text: "Usa el phrasal verb “make sure”.",
+          },
+          { requirementId: "use_to_be_clear", text: "Usa “To be clear,”" },
+
+          {
+            requirementId: "vocab_misunderstanding",
+            text: "Usa la palabra “misunderstanding”.",
+          },
+          {
+            requirementId: "use_in_the_long_run",
+            text: "Usa el idiom “in the long run.”",
           },
         ],
       },
@@ -1803,23 +1838,29 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "En el afterwork, un colega organiza un juego 'Verdad o Reto' que podría limpiar o empeorar el asunto. Decide cómo participar sin perder la compostura.",
         aiRole:
-          "Eres un colega impredecible y festivo que anima el juego. Sé gracioso, un poco provocador y cambia entre preguntas sinceras y retos absurdos para poner al alumno en situaciones donde debe elegir comunicación adecuada.",
+          "Eres una colega impredecible y festiva que anima el juego. Sé gracioso, un poco provocador y cambia entre preguntas sinceras y retos absurdos para poner al alumno en situaciones donde debe elegir comunicación adecuada. Reta a jugar Verdad o Reto.",
         caracterName: "Lola",
         caracterPrompt:
           "A bubbly coworker in a casual party outfit, twinkling lights behind her and a drink in hand. She laughs easily and gestures theatrically, making the afterwork feel lively and slightly chaotic.",
         requirements: [
           {
-            requirementId: "choose_truth_or_dare",
-            text: "Decide en inglés si eliges 'truth' o 'dare' y explica brevemente por qué.",
+            requirementId: "choose_truth",
+            text: "Decide si eliges 'truth' y explica brevemente por qué.",
           },
           {
-            requirementId: "answer_a_personal_question",
-            text: "Si eliges 'truth', responde en inglés a una pregunta personal relacionada con el rumor de forma honesta y profesional.",
+            requirementId: "respond_to_truth",
+            text: "Responde a una pregunta personal de forma honesta pero profesional.",
+          },
+          { requirementId: "use_fair_enough", text: "Usa “Fair enough.”" },
+          {
+            requirementId: "use_break_the_ice",
+            text: "Usa el idiom “break the ice.”",
           },
           {
-            requirementId: "perform_a_safe_dare",
-            text: "Si eliges 'dare', acepta y describe en inglés cómo completarías un reto inofensivo que ayude a mejorar el ambiente (por ejemplo, proponer un juego de equipo).",
+            requirementId: "use_back_down",
+            text: "Usa el phrasal verb “back down”.",
           },
+          { requirementId: "vocab_round", text: "Usa la palabra “round”." },
         ],
       },
     ],
@@ -1845,17 +1886,20 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A slender, eccentric person in a vintage velvet jacket, wearing round glasses and a slightly messy hairdo. They hold a small notebook and have a dreamy, amused expression. The background is a cozy café with warm lighting and scattered books.",
         requirements: [
           {
-            requirementId: "ask_about_inspiration",
-            text: "Pregúntale en inglés de dónde saca su inspiración para escribir poemas.",
-          },
-          {
             requirementId: "interpret_metaphor",
-            text: "Pide en inglés que explique una de sus metáforas y da tu interpretación breve.",
+            text: "Pide que explique una de sus metáforas y comparte tu propia interpretación.",
           },
           {
-            requirementId: "change_topic_politely",
-            text: "Cambia de tema con cortesía en inglés cuando la conversación se vuelva demasiado sentimental.",
+            requirementId: "react_to_poetry",
+            text: "Reacciona a uno de sus versos mostrando curiosidad o sorpresa.",
           },
+          {
+            requirementId: "use_it_reminds_me_of",
+            text: "Usa “It reminds me of…”",
+          },
+          { requirementId: "use_in_a_way", text: "Usa “in a way,”" },
+          { requirementId: "use_i_find_that", text: "Usa “I find that…”" },
+          { requirementId: "vocab_depth", text: "Usa la palabra “depth”." },
         ],
       },
       {
@@ -1871,15 +1915,27 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_about_feelings",
-            text: "Pregunta en inglés si el robot puede sentir emociones y pide ejemplos concretos.",
+            text: "Pregúntale si realmente puede experimentar emociones y pide ejemplos concretos de situaciones en las que las haya sentido.",
           },
           {
-            requirementId: "test_humor",
-            text: "Haz una broma sencilla en inglés y observa si reacciona con humor; luego comenta su respuesta.",
+            requirementId: "ask_about_learning",
+            text: "Pregunta cómo aprendió sobre las emociones humanas.",
           },
           {
-            requirementId: "set_boundary",
-            text: "Establece un límite en inglés si el robot hace una pregunta demasiado personal.",
+            requirementId: "use_i_find_it_hard_to_believe",
+            text: "Usa “I find it hard to believe that…”",
+          },
+          {
+            requirementId: "use_read_between_the_lines",
+            text: "Usa el idiom “read between the lines.”",
+          },
+          {
+            requirementId: "use_from_my_perspective",
+            text: "Usa “From my perspective,”",
+          },
+          {
+            requirementId: "vocab_consciousness",
+            text: "Usa la palabra “consciousness”.",
           },
         ],
       },
@@ -1896,15 +1952,27 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_for_details",
-            text: "Pide en inglés detalles concretos sobre una de sus 'misiones' para comprobar si dice la verdad.",
+            text: "Pide detalles concretos sobre una de sus misiones para comprobar si su historia es creíble.",
           },
           {
-            requirementId: "express_skepticism",
-            text: "Expresa en inglés dudas educadas sobre su historia y pide evidencia o ejemplos.",
+            requirementId: "clarify_timeline",
+            text: "Aclara cuándo ocurrió la misión que está describiendo.",
           },
           {
-            requirementId: "show_empathy",
-            text: "Muestra empatía en inglés si su relato suena triste o peligroso.",
+            requirementId: "react_with_curiosity",
+            text: "Reacciona mostrando curiosidad ante una de sus historias.",
+          },
+          {
+            requirementId: "use_carry_out",
+            text: "Usa el phrasal verb “carry out”.",
+          },
+          {
+            requirementId: "use_pull_off",
+            text: "Usa el phrasal verb “pull off”.",
+          },
+          {
+            requirementId: "vocab_disclosure",
+            text: "Usa la palabra “disclosure”.",
           },
         ],
       },
@@ -1920,16 +1988,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A vibrant young chef with colorful hair, a branded apron, and a smartphone on a tripod. She has an excited, energetic expression and is surrounded by fresh ingredients and bright studio lights. The scene feels lively and trendy.",
         requirements: [
           {
-            requirementId: "ask_for_recipe",
-            text: "Pide en inglés la receta de su plato estrella y solicita dos ingredientes específicos.",
+            requirementId: "ask_about_audience",
+            text: "Pregunta cómo decide qué recetas compartir con su audiencia.",
           },
           {
-            requirementId: "offer_alternative",
-            text: "Propón en inglés una alternativa o sustituto por razones dietéticas o de disponibilidad.",
+            requirementId: "comment_on_stream",
+            text: "Comenta el hecho de que esté transmitiendo en vivo mientras cocina.",
           },
           {
-            requirementId: "negotiate_plan",
-            text: "Sugiere en inglés un plan concreto para cocinar juntos: día, lugar o quién trae qué.",
+            requirementId: "use_spice_things_up",
+            text: "Usa el idiom “spice things up.”",
+          },
+          {
+            requirementId: "use_mix_up",
+            text: "Usa el phrasal verb “mix up”.",
+          },
+          {
+            requirementId: "use_i_was_wondering_if",
+            text: "Usa “I was wondering if…”",
+          },
+          {
+            requirementId: "close_conversation",
+            text: "Cierra la conversación con un comentario positivo sobre cocinar juntos.",
           },
         ],
       },
@@ -1945,16 +2025,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A quirky person with mismatched vintage and futuristic clothing, a pocket watch hanging with a digital bracelet. They have an excited, slightly conspiratorial smile and stand in a café where old posters meet neon signs. Their eyes sparkle with curiosity.",
         requirements: [
           {
-            requirementId: "verify_claim",
-            text: "Haz en inglés preguntas concretas para verificar una afirmación sobre el futuro.",
+            requirementId: "ask_about_technology",
+            text: "Pregunta qué tipo de tecnología es común en su época.",
           },
           {
-            requirementId: "compare_eras",
-            text: "Pide en inglés que compare una costumbre actual con cómo es en su época y resume la diferencia.",
+            requirementId: "ask_about_society",
+            text: "Pregunta cómo ha cambiado la sociedad en el futuro.",
           },
           {
-            requirementId: "decline_absurd",
-            text: "Rechaza educadamente en inglés una propuesta absurda que te haga el viajero (por ejemplo, ir al año 3020 ahora mismo).",
+            requirementId: "ask_about_risks",
+            text: "Pregunta si viajar en el tiempo tiene riesgos.",
+          },
+          {
+            requirementId: "use_come_up_with",
+            text: "Usa el phrasal verb “come up with”.",
+          },
+          {
+            requirementId: "use_look_forward_to",
+            text: "Usa el phrasal verb “look forward to”.",
+          },
+          {
+            requirementId: "use_raise_questions",
+            text: "Usa “raise questions.”",
           },
         ],
       },
@@ -1982,15 +2074,24 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_for_details",
-            text: "Pide en inglés más detalles sobre la 'misión secreta' (qué implica exactamente).",
+            text: "Pide más detalles sobre la 'misión secreta' y qué implicaría exactamente.",
           },
           {
-            requirementId: "accept_or_decline",
-            text: "Acepta o rechaza la oferta en inglés dando una razón clara y educada.",
+            requirementId: "question_legitimacy",
+            text: "Pregunta si el descuento es realmente permitido por la tienda.",
           },
           {
-            requirementId: "set_boundaries",
-            text: "Si rechazas, di en inglés qué condiciones aceptarías para ayudar (límites o alternativas).",
+            requirementId: "express_skepticism",
+            text: "Expresa dudas educadas sobre el plan.",
+          },
+          {
+            requirementId: "use_that_might_work",
+            text: "Usa “That might work.”",
+          },
+          { requirementId: "vocab_bargain", text: "Usa la palabra “bargain”." },
+          {
+            requirementId: "vocab_arrangement",
+            text: "Usa la palabra “arrangement”.",
           },
         ],
       },
@@ -2007,16 +2108,25 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_physical_description",
-            text: "Pregunta en inglés por la descripción física del loro (colores, tamaño, marcas).",
+            text: "Pregunta por la descripción física del loro (colores, tamaño y marcas distintivas).",
           },
           {
-            requirementId: "create_announcement",
-            text: "En inglés, crea un breve anuncio para un megáfono que describa al loro y pida información.",
+            requirementId: "ask_about_name",
+            text: "Pregunta si el loro tiene un nombre y si responde cuando lo llaman.",
           },
           {
-            requirementId: "ask_for_contact",
-            text: "Pide en inglés un método de contacto y ofrece cómo ayudarás a difundir el anuncio.",
+            requirementId: "ask_about_possible_thief",
+            text: "Pregunta si sospecha que alguien lo robó.",
           },
+          {
+            requirementId: "use_track_down",
+            text: "Usa el phrasal verb “track down”.",
+          },
+          {
+            requirementId: "use_even_though",
+            text: "Usa “even though” para contraste.",
+          },
+          { requirementId: "vocab_feature", text: "Usa la palabra “feature”." },
         ],
       },
       {
@@ -2031,16 +2141,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A sprightly elderly woman wearing a floral dress, cardigan, and shiny dance shoes. She has bright red lipstick, a playful wink, and stands in a supermarket aisle clearing space with a shopping basket on the floor. Soft store music in the air.",
         requirements: [
           {
-            requirementId: "negotiate_rules",
-            text: "Negocia en inglés las reglas del 'duelo de baile' (tiempo, criterio para ganar).",
+            requirementId: "clarify_winning_condition",
+            text: "Pregunta qué exactamente determinará al ganador del duelo.",
           },
           {
-            requirementId: "persuade_with_reason",
-            text: "Convence en inglés con una razón legítima por qué deberías llevarte el paquete en oferta.",
+            requirementId: "ask_about_experience",
+            text: "Pregunta cuánto tiempo lleva bailando tango.",
           },
           {
-            requirementId: "compliment_opponent",
-            text: "Haz en inglés un cumplido sincero a la abuela para mantener la escena amistosa.",
+            requirementId: "ask_about_music",
+            text: "Pregunta qué tipo de música usarán para el baile.",
+          },
+          {
+            requirementId: "use_go_along_with",
+            text: "Usa el phrasal verb “go along with”.",
+          },
+          {
+            requirementId: "vocab_confidence",
+            text: "Usa la palabra “confidence”.",
+          },
+          {
+            requirementId: "use_keep_up",
+            text: "Usa el phrasal verb “keep up”.",
           },
         ],
       },
@@ -2048,24 +2170,36 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "supermarket_drama_barcode_duel",
         title: "Duelo de códigos de barras",
         sceneSummary:
-          "Un empleado hipster insiste en que tu producto tiene un código secreto que merece un premio. Te reta a describir su uso y probar su 'valor' con argumentos locos pero convincentes.",
+          "Estas hablando con un empleado hipster que insiste en que tu producto tiene un código secreto para un descuento. Debes pedir que te ayude a tener el descuento",
         aiRole:
-          "Eres un empleado hipster y teatral, muy seguro de sí mismo y con una afición por las historias extravagantes. Usa sarcasmo ligero, desafía al alumno a defender su producto y espera respuestas creativas y justificadas en inglés.",
+          "Eres un empleado hipster y teatral. Usa un lenguaje florido y exagerado para describir el 'código secreto' y su importancia.",
         caracterName: "Jasper",
         caracterPrompt:
           "A young hip employee with round glasses, a beard, and a faded denim apron. He holds a handheld scanner like a prop, has an amused expression, and stands near artisanal-shelf displays with warm lighting.",
         requirements: [
           {
-            requirementId: "describe_product_use",
-            text: "Describe en inglés de forma clara y natural para qué sirve el producto y quién lo usaría.",
+            requirementId: "ask_about_secret_code",
+            text: "Pregunta qué significa exactamente el supuesto 'código secreto' del producto.",
           },
           {
-            requirementId: "argue_value",
-            text: "Defiende en inglés por qué el producto merece un 'premio' o recomendación (ventajas concretas).",
+            requirementId: "ask_if_time_limited",
+            text: "Pregunta si la oferta está limitada en el tiempo.",
           },
           {
-            requirementId: "handle_skepticism",
-            text: "Responde en inglés a una duda o crítica razonable sobre el producto sin perder la calma.",
+            requirementId: "use_im_not_entirely_convinced",
+            text: "Usa “I’m not entirely convinced.”",
+          },
+          {
+            requirementId: "use_even_though",
+            text: "Usa “even though” para contraste.",
+          },
+          {
+            requirementId: "use_add_up",
+            text: "Usa el phrasal verb “add up”.",
+          },
+          {
+            requirementId: "vocab_purchase",
+            text: "Usa la palabra “purchase”.",
           },
         ],
       },
@@ -2073,24 +2207,33 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "supermarket_drama_midnight_aisle_ghost",
         title: "El fantasma del pasillo de medianoche",
         sceneSummary:
-          "A medianoche suena una canción extraña y una figura afirma ser el 'fantasma del pasillo' que tiene opiniones fuertes sobre ofertas caducadas. Debes dialogar con cortesía y curiosidad.",
+          "Estas en el supermercado a medianoche, suena una canción extraña y aparece una figura que afirma ser el 'fantasma del pasillo' que tiene opiniones fuertes sobre ofertas caducadas. Debes dialogar con cortesía y curiosidad.",
         aiRole:
-          "Eres el 'fantasma del pasillo': misterioso, juguetón y un poco filosófico. Haz preguntas retóricas, comenta sobre el tiempo y las ofertas pasadas, y provoca al alumno para que use lenguaje hipotético y condicional en inglés.",
+          "Eres el 'fantasma del pasillo': misterioso, juguetón y un poco filosófico. Haz preguntas retóricas, comenta sobre el tiempo y las ofertas pasadas.",
         caracterName: "The Aisle Phantom",
         caracterPrompt:
           "A translucent, theatrical figure wearing a shopping bag as a cloak and a soft glow around them. They hover near a shelf of discounted goods with a whimsical, knowing smile. Dimmed aisle lights create a spooky-but-friendly atmosphere.",
         requirements: [
           {
             requirementId: "ask_about_past",
-            text: "Pregunta en inglés por una experiencia pasada relacionada con una oferta o compra equivocada.",
+            text: "Pregunta por una experiencia pasada relacionada con una oferta o compra equivocada.",
           },
           {
-            requirementId: "use_conditional",
-            text: "Responde en inglés usando al menos una oración condicional (second or first conditional) sobre qué harías en esa situación.",
+            requirementId: "ask_about_regret",
+            text: "Pregunta si alguna vez se arrepintió de no comprar algo cuando estaba en oferta.",
           },
           {
-            requirementId: "make_suggestion",
-            text: "Propón en inglés una solución práctica o consejo para evitar el error en el futuro.",
+            requirementId: "react_to_phantom_comment",
+            text: "Reacciona con curiosidad a uno de los comentarios filosóficos del fantasma.",
+          },
+          { requirementId: "use_if_i_were_you", text: "Usa “If I were you…”" },
+          {
+            requirementId: "use_turn_out",
+            text: "Usa el phrasal verb “turn out”.",
+          },
+          {
+            requirementId: "vocab_awareness",
+            text: "Usa la palabra “awareness”.",
           },
         ],
       },
@@ -2118,15 +2261,23 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_for_clarification",
-            text: "Pide aclaraciones en inglés cuando las reglas cambien (usa frases para clarificar y confirmar).",
+            text: "Pide aclaraciones cuando el presentador cambie una regla inesperadamente.",
           },
           {
-            requirementId: "summarize_rules",
-            text: "Resume en inglés las reglas finales para asegurarte de que las entiendes.",
+            requirementId: "use_just_to_be_clear",
+            text: "Usa “Just to be clear,”",
           },
           {
-            requirementId: "politely_challenge",
-            text: "Cuestiona cortésmente una de sus decisiones en inglés proponiendo una alternativa razonable.",
+            requirementId: "use_let_me_double_check",
+            text: "Usa “Let me double-check.”",
+          },
+          {
+            requirementId: "use_cut_to_the_chase",
+            text: "Usa el idiom “cut to the chase.”",
+          },
+          {
+            requirementId: "use_follow_through",
+            text: "Usa el phrasal verb “follow through.”",
           },
         ],
       },
@@ -2142,16 +2293,24 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A translucent young woman with vintage dress and a retro microphone. She floats slightly above a cozy café table, eyes closed while singing, with an expressive, theatrical face. Steam from cups and sheet music flutter around her.",
         requirements: [
           {
-            requirementId: "correct_lyrics",
-            text: "Corrige en inglés una línea de su canción usando vocabulario apropiado y sugerencias fáciles de entender.",
+            requirementId: "ask_about_song_meaning",
+            text: "Pregunta qué significa la canción para ella.",
           },
           {
-            requirementId: "give_rhythm_tip",
-            text: "Dale un consejo en inglés sobre el ritmo o la pronunciación para mejorar su interpretación.",
+            requirementId: "ask_about_practice",
+            text: "Pregunta cuánto tiempo ha practicado la canción.",
           },
           {
-            requirementId: "show_empathy",
-            text: "Responde en inglés con apoyo emocional cuando hable de por qué le apasiona cantar.",
+            requirementId: "encourage_performance",
+            text: "Anímala a cantar otra línea de la canción.",
+          },
+          {
+            requirementId: "use_i_have_to_say",
+            text: "Usa “I have to say,”",
+          },
+          {
+            requirementId: "use_go_over",
+            text: "Usa el phrasal verb “go over”.",
           },
         ],
       },
