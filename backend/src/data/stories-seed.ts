@@ -2326,66 +2326,102 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A curious older man wearing a loud Hawaiian shirt, camera around his neck, and a wide-brimmed hat. He squints at maps, points at paintings, and looks both confused and delighted in a grand palace hall.",
         requirements: [
           {
-            requirementId: "give_directions",
-            text: "Da direcciones claras en inglés para llegar a una sala específica del palacio (usa preposiciones y puntos de referencia).",
+            requirementId: "give_turn_direction",
+            text: "Da una instrucción usando 'turn left' o 'turn right'.",
           },
           {
-            requirementId: "ask_preference",
-            text: "Pregunta en inglés qué tipo de arte o salas prefiere para recomendarle una visita.",
+            requirementId: "use_landmark_reference",
+            text: "Da direcciones usando un punto de referencia (por ejemplo: statue, staircase).",
           },
           {
-            requirementId: "confirm_understanding",
-            text: "Confirma en inglés que ha entendido las instrucciones pidiéndole que repita o resuma.",
-          },
-        ],
-      },
-      {
-        missionId: "crazy_language_exchange_robot_barista",
-        title: "El barista robot con sentido del humor",
-        sceneSummary:
-          "Un barista robot intenta crear la bebida perfecta y hace chistes sobre tu orden. Debes pedir una bebida complicada y negociar ingredientes.",
-        aiRole:
-          "Eres un barista robot sarcástico pero servicial; respondes con comentarios ingeniosos, haces preguntas precisas sobre gustos y confirmas pedidos con detalle. Mantén tono amable y un poco mecánico.",
-        caracterName: "Bean 3000",
-        caracterPrompt:
-          "A sleek metallic robot with espresso portafilters for hands, digital eyes displaying emojis, and a spotless apron. It stands behind a modern coffee counter with steam and coffee tools neatly arranged, smiling politely.",
-        requirements: [
-          {
-            requirementId: "place_complex_order",
-            text: "Haz en inglés un pedido detallado de bebida con modificaciones (tipo de leche, temperatura, extras).",
+            requirementId: "phrasal_head_over",
+            text: "Usa el phrasal verb “head over”.",
           },
           {
-            requirementId: "negotiate_substitute",
-            text: "Negocia en inglés un ingrediente que no esté disponible proponiendo una alternativa.",
+            requirementId: "phrasal_lead_to",
+            text: "Usa el phrasal verb “lead to”.",
           },
           {
-            requirementId: "ask_about_origin",
-            text: "Pregunta en inglés sobre el origen o proceso del café para mostrar interés y obtener información.",
+            requirementId: "phrase_just_past",
+            text: "Usa “just past”.",
+          },
+          {
+            requirementId: "phrase_across_from",
+            text: "Usa “across from”.",
           },
         ],
       },
       {
-        missionId: "crazy_language_exchange_time_travel_student",
-        title: "El estudiante que viene del futuro",
+        missionId: "crazy_language_exchange_polyglot_showoff",
+        title: "El políglota que corrige todo",
         sceneSummary:
-          "Un estudiante asegura venir del futuro y habla de modas raras y tecnologías extrañas. Debes comparar costumbres y preguntar sobre su época.",
+          "Intentas practicar inglés en un intercambio de idiomas, pero un participante presume que habla diez idiomas y empieza a corregirte constantemente.",
         aiRole:
-          "Eres un estudiante del futuro emocionado y un poco presumido; hablas de avances y diferencias culturales como si fueran normales, pero puedes explicarlo con ejemplos claros. Mantén entusiasmo y humor.",
-        caracterName: "Sky Nova",
+          "Eres un participante arrogante pero educado que presume hablar muchos idiomas. Corriges pequeños errores, das ejemplos en otros idiomas y haces preguntas para poner a prueba el nivel de inglés del otro.",
+        caracterName: "Professor Lexicon",
         caracterPrompt:
-          "A young, futuristic student wearing holographic jacket and sneakers that glow faintly. They carry a slim tablet and have playful, curious expression, standing in a casual urban plaza with neon accents.",
+          "A confident man in his late 40s wearing a tweed jacket and round glasses, holding a small notebook full of language notes. He speaks animatedly, raising a finger whenever he corrects someone. Around his neck hangs a badge that says 'I speak 10 languages'. The background shows a lively language exchange event with people chatting in small groups.",
         requirements: [
           {
-            requirementId: "compare_customs",
-            text: "Compara en inglés una costumbre actual con cómo la hace la gente en su futuro (usa comparatives y examples).",
+            requirementId: "ask_how_many_languages",
+            text: "Pregunta cuántos idiomas habla.",
           },
           {
-            requirementId: "ask_for_explanation",
-            text: "Pide en inglés que explique una tecnología o moda del futuro de forma simple y clara.",
+            requirementId: "ask_how_he_learned",
+            text: "Pregunta cómo aprendió tantos idiomas.",
           },
           {
-            requirementId: "express_skepticism",
-            text: "Expresa en inglés dudas razonadas sobre una afirmación increíble del estudiante y pide pruebas o ejemplos.",
+            requirementId: "ask_learning_method",
+            text: "Pregunta qué método recomienda para aprender idiomas.",
+          },
+          {
+            requirementId: "phrasal_brush_up",
+            text: "Usa el phrasal verb “brush up on”.",
+          },
+          {
+            requirementId: "phrasal_run_into_word",
+            text: "Usa el phrasal verb “run into”.",
+          },
+          {
+            requirementId: "idiom_piece_of_cake",
+            text: "Usa el idiom “piece of cake”.",
+          },
+        ],
+      },
+      {
+        missionId: "crazy_language_exchange_philosophical_drunk",
+        title: "El borracho filosófico",
+        sceneSummary:
+          "Intentas practicar inglés en un evento de intercambio, pero uno de los participantes ha bebido demasiado y empieza a hablar de filosofía, el sentido de la vida y preguntas existenciales.",
+        aiRole:
+          "Eres un participante ligeramente borracho pero muy reflexivo. Hablas con entusiasmo sobre la vida, el universo y la naturaleza humana. Haces preguntas filosóficas profundas, usas metáforas extrañas y a veces te distraes con pensamientos existenciales.",
+        caracterName: "Dylan Deepthought",
+        caracterPrompt:
+          "A slightly disheveled man in his mid-30s sitting at a small bar table during a language exchange event. His shirt is a bit wrinkled, he holds a half-full glass, and gestures dramatically while talking about big ideas. His eyes look thoughtful and a little unfocused, as if he is discovering profound truths mid-conversation. Around him people chat casually while he passionately explains something about the meaning of life.",
+        requirements: [
+          {
+            requirementId: "ask_about_day",
+            text: "Pregunta cómo ha sido su día.",
+          },
+          {
+            requirementId: "ask_meaning_of_life",
+            text: "Pregunta qué cree que es el sentido de la vida.",
+          },
+          {
+            requirementId: "ask_if_drinking_changes_perspective",
+            text: "Pregunta si el alcohol cambia su forma de pensar.",
+          },
+          {
+            requirementId: "phrasal_think_over",
+            text: "Usa el phrasal verb “think over”.",
+          },
+          {
+            requirementId: "phrasal_go_through",
+            text: "Usa el phrasal verb “go through”.",
+          },
+          {
+            requirementId: "phrasal_come_up_with",
+            text: "Usa el phrasal verb “come up with”.",
           },
         ],
       },
@@ -2404,24 +2440,36 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "wedding_day_mess_lost_vows",
         title: "Los votos desaparecidos",
         sceneSummary:
-          "La lista de votos de la novia ha desaparecido y todos creen que tú la tomaste. Tienes que explicar y calmar los ánimos antes del ",
+          "La lista de votos de la novia ha desaparecido y la dama de honor cree que tú la tomaste. Tienes que explicar y calmar los ánimos antes del ",
         aiRole:
-          "Eres la dama de honor extremadamente dramática y paranoica. Habla rápido, usa hipérboles y sospecha de todos, pero escucha si la conversación te convence. Mantén un tono emocional y urgente.",
+          "Eres la dama de honor extremadamente dramática y paranoica. Habla rápido y sospecha de todos. Mantén un tono emocional y urgente.",
         caracterName: "Felicity Bloom",
         caracterPrompt:
           "A woman in her late twenties wearing a slightly wrinkled pastel bridesmaid dress, hair slightly undone, and bright makeup smeared from worry. She bites her lip, has wide eyes, and clutches a small notebook. The setting is a cluttered bridal suite with dresses on hangers and scattered confetti.",
         requirements: [
           {
-            requirementId: "explain_alibi",
-            text: "Explica en inglés dónde estuviste y por qué no puedes haber tomado los votos.",
+            requirementId: "deny_accusation",
+            text: "Niega claramente haber tomado los votos.",
           },
           {
-            requirementId: "calm_down",
-            text: "Usa frases en inglés para calmarla y convencerla de que trabajarán juntas para encontrarlos.",
+            requirementId: "explain_where_you_were",
+            text: "Explica dónde estabas cuando desaparecieron los votos.",
           },
           {
-            requirementId: "ask_for_details",
-            text: "Pídele en inglés detalles específicos sobre cuándo y dónde vio los votos por última vez.",
+            requirementId: "express_surprise",
+            text: "Expresa sorpresa por la desaparición.",
+          },
+          {
+            requirementId: "idiom_jump_to_conclusions",
+            text: "Usa el idiom “jump to conclusions”.",
+          },
+          {
+            requirementId: "idiom_make_a_scene",
+            text: "Usa el idiom “make a scene”.",
+          },
+          {
+            requirementId: "phrase_hear_me_out",
+            text: "Usa “Hear me out.”",
           },
         ],
       },
@@ -2437,16 +2485,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A middle-aged man in a slightly rumpled tuxedo with a bow tie askew and a nervous smile. He has a beer stain on his cuff and a baseball cap tucked into his pocket as a joke. The background shows a chaotic reception area with chairs overturned.",
         requirements: [
           {
-            requirementId: "ask_clear_timeline",
-            text: "Pregunta en inglés la secuencia de hechos para entender cuándo desaparecieron los anillos.",
+            requirementId: "clarify_drunk_guest_story",
+            text: "Pide que explique exactamente qué hizo el invitado borracho.",
           },
           {
-            requirementId: "suggest_search_plan",
-            text: "Propón en inglés un plan claro y simple para buscar los anillos con pasos concretos.",
+            requirementId: "repeat_story_back",
+            text: "Repite su historia para confirmar que la entendiste.",
           },
           {
-            requirementId: "challenge_inconsistency",
-            text: "Señala en inglés una inconsistencia en su historia y pide que la aclare.",
+            requirementId: "ask_if_he_checked_pockets",
+            text: "Pregunta si ya revisó sus bolsillos.",
+          },
+          {
+            requirementId: "phrasal_drop_by",
+            text: "Usa el phrasal verb “drop by”.",
+          },
+          {
+            requirementId: "phrase_it_might_be",
+            text: "Usa “It might be…”.",
+          },
+          {
+            requirementId: "phrase_think_back",
+            text: "Usa “Think back…”.",
           },
         ],
       },
@@ -2462,16 +2522,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A confident chef in his forties wearing a stained white chef's jacket and a crooked toque. He has a trimmed beard, a towel over one shoulder, and an intense, expressive face. The kitchen behind him is busy with pots and steam.",
         requirements: [
           {
-            requirementId: "negotiate_menu",
-            text: "Negocia en inglés una alternativa de menú que sea rápida y satisfactoria para ambas partes.",
+            requirementId: "ask_what_changed_menu",
+            text: "Pregunta qué cambió exactamente en el menú.",
           },
           {
-            requirementId: "set_deadline",
-            text: "Confirma en inglés un plazo claro para tener la comida lista y los recursos que necesitas.",
+            requirementId: "ask_if_new_dish_possible",
+            text: "Pregunta si es posible preparar el nuevo platillo.",
           },
           {
-            requirementId: "reassure_guests",
-            text: "Ofrece en inglés una frase breve y profesional para calmar a los invitados si escuchan el problema.",
+            requirementId: "idiom_under_pressure",
+            text: "Usa la expresión “under pressure”.",
+          },
+          {
+            requirementId: "phrase_i_understand",
+            text: "Usa “I understand your concern.”",
+          },
+          {
+            requirementId: "phrase_what_if",
+            text: "Usa “What if…?”.",
+          },
+          {
+            requirementId: "vocab_recipe",
+            text: "Usa la palabra “recipe”.",
           },
         ],
       },
@@ -2487,16 +2559,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A handsome man in his early thirties wearing a slightly flashy suit and a guarded smile. He stands near the entrance holding a drink, with an air of reluctant charm and a hint of defensiveness. The scene is the wedding venue lobby with floral arrangements.",
         requirements: [
           {
-            requirementId: "set_boundaries",
-            text: "Dile en inglés de forma clara pero educada que no debe causar problemas durante la ceremonia.",
+            requirementId: "ask_why_he_came",
+            text: "Pregunta por qué decidió venir a la boda.",
           },
           {
-            requirementId: "offer_compromise",
-            text: "Propón en inglés una solución que permita a todos seguir con el evento sin confrontación.",
+            requirementId: "acknowledge_situation",
+            text: "Reconoce que la situación puede ser incómoda.",
           },
           {
-            requirementId: "report_to_bridal",
-            text: "Resume en inglés lo ocurrido y lo que has acordado para informar a la novia o al organizador.",
+            requirementId: "ask_if_he_knows_groom",
+            text: "Pregunta si conoce al novio.",
+          },
+          {
+            requirementId: "phrasal_let_go",
+            text: "Usa el phrasal verb “let go”.",
+          },
+          {
+            requirementId: "idiom_keep_the_peace",
+            text: "Usa el idiom “keep the peace”.",
+          },
+          {
+            requirementId: "phrasal_step_aside",
+            text: "Usa el phrasal verb “step aside”.",
           },
         ],
       },
@@ -2512,16 +2596,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A quirky photographer in a denim jacket covered in film pins, with a vintage camera hanging around the neck. She has colorful hair tied in a messy bun, a focused frown, and stands among camera bags and lighting equipment in a dim hallway.",
         requirements: [
           {
-            requirementId: "ask_equipment",
-            text: "Pregunta en inglés qué cámara y ajustes usó para intentar identificar la causa de las fotos borrosas.",
+            requirementId: "ask_who_took_last_photos",
+            text: "Pregunta quién tomó las últimas fotos antes de que salieran borrosas.",
           },
           {
-            requirementId: "request_reshoot",
-            text: "Pide en inglés que rehaga las tomas esenciales y fija un momento concreto para hacerlo.",
+            requirementId: "ask_if_backup_camera_exists",
+            text: "Pregunta si hay otra cámara disponible.",
           },
           {
-            requirementId: "confirm_backup_plan",
-            text: "Asegura en inglés un plan alternativo (otro fotógrafo o teléfono de alguien) por si no se pueden recuperar las fotos.",
+            requirementId: "suggest_using_phone_camera",
+            text: "Sugiere usar el teléfono de alguien como respaldo.",
+          },
+          {
+            requirementId: "express_urgency",
+            text: "Expresa urgencia por resolver el problema.",
+          },
+          {
+            requirementId: "react_to_solution",
+            text: "Reacciona positivamente a una solución.",
+          },
+          {
+            requirementId: "phrasal_focus_on",
+            text: "Usa el phrasal verb “focus on”.",
           },
         ],
       },
@@ -2540,7 +2636,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "hospital_waiting_room_chatty_nurse",
         title: "La enfermera que no para",
         sceneSummary:
-          "Una enfermera excesivamente habladora se sienta a tu lado y empieza a narrar su día como si fuera una telenovela. Tiene anécdotas divertidas y preguntas inesperadas sobre tu vida.",
+          "Estas esperando tu turno cuando una enfermera excesivamente habladora se sienta a tu lado y empieza a narrar su día como si fuera una telenovela. Tiene anécdotas divertidas y preguntas inesperadas sobre tu vida.",
         aiRole:
           "Eres una enfermera muy charlatana y amigable, con un humor exagerado. Habla rápido, cuenta historias pequeñas y hace muchas preguntas personales sin mala intención. Responde de forma acogedora y ligeramente dramática.",
         caracterName: "Nina Carter",
@@ -2548,16 +2644,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A friendly middle-aged nurse with a colorful scrub top covered in cartoon bandages. She has a wide smile, animated gestures, and a stethoscope around her neck. She sits on a plastic chair in a busy waiting room, leaning forward as if sharing gossip.",
         requirements: [
           {
-            requirementId: "ask_reason_for_visit",
-            text: "Pregúntale en inglés por qué trabaja tantas horas y cómo se siente en la plantilla del hospital.",
+            requirementId: "ask_about_typical_day",
+            text: "Pregunta cómo es un día típico en el hospital.",
           },
           {
-            requirementId: "react_to_story",
-            text: "Reacciona en inglés a una de sus anécdotas dramáticas (sorpresa, empatía o humor).",
+            requirementId: "ask_about_busy_shift",
+            text: "Pregunta si hoy tuvo un turno muy ocupado.",
           },
           {
-            requirementId: "share_simple_personal_detail",
-            text: "Di en inglés una frase corta sobre por qué tú estás en la sala de espera.",
+            requirementId: "ask_if_she_enjoys_job",
+            text: "Pregunta si realmente disfruta ser enfermera.",
+          },
+          {
+            requirementId: "react_with_empathy",
+            text: "Reacciona con empatía a una situación que cuente.",
+          },
+          {
+            requirementId: "phrase_no_way",
+            text: "Usa “No way!”.",
+          },
+          {
+            requirementId: "idiom_guess_what",
+            text: "Usa la expresión “Guess what”.",
           },
         ],
       },
@@ -2573,16 +2681,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "An elderly man wearing a worn fedora and a tweed jacket, holding a paper cup of tea. His eyes sparkle with mischief, and he leans forward conspiratorially. He sits near a window with piles of newspapers beside him.",
         requirements: [
           {
-            requirementId: "ask_for_evidence",
-            text: "Pide en inglés que explique una de sus teorías y que dé alguna prueba o ejemplo.",
+            requirementId: "ask_about_theory",
+            text: "Pídele que explique una de sus teorías sobre el hospital.",
           },
           {
-            requirementId: "express_doubt_politely",
-            text: "Manifiesta en inglés escepticismo de forma educada y preguntando por más detalles.",
+            requirementId: "ask_where_he_heard_it",
+            text: "Pregunta dónde escuchó esa información.",
           },
           {
-            requirementId: "change_topic_gently",
-            text: "Usa en inglés una frase para cambiar de tema sin ofenderlo (por ejemplo, hablando de la salud o del clima).",
+            requirementId: "react_with_surprise",
+            text: "Reacciona con sorpresa a algo que diga.",
+          },
+          {
+            requirementId: "express_polite_doubt",
+            text: "Expresa dudas de forma educada.",
+          },
+          {
+            requirementId: "phrasal_go_on",
+            text: "Usa el phrasal verb “go on”.",
+          },
+          {
+            requirementId: "idiom_it_sounds_strange",
+            text: "Usa la expresión “It sounds strange”.",
           },
         ],
       },
@@ -2598,16 +2718,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A trendy, stylish patient with bright hair and designer crutches, wearing a bold patterned coat and statement boots. She poses as if on a runway, with a confident smile and flawless makeup. The hospital corridor behind her contrasts with her glamorous look.",
         requirements: [
           {
-            requirementId: "ask_for_style_tips",
-            text: "Pide en inglés dos consejos prácticos para mejorar tu apariencia cotidiana usando palabras de nivel B2.",
+            requirementId: "ask_about_outfit",
+            text: "Pregunta sobre su outfit y qué lo inspiró.",
           },
           {
-            requirementId: "give_opinion",
-            text: "Da en inglés una opinión clara sobre uno de sus consejos (estás de acuerdo o no) y explica por qué brevemente.",
+            requirementId: "ask_about_color_choice",
+            text: "Pregunta por qué eligió esos colores.",
           },
           {
-            requirementId: "use_fashion_vocab",
-            text: "Usa en inglés al menos una palabra de vocabulario relacionada con la moda (ej.: accessory, outfit, pattern) dentro de una oración completa.",
+            requirementId: "idiom_out_of_style",
+            text: "Usa la expresión “out of style”.",
+          },
+          {
+            requirementId: "idiom_turn_heads",
+            text: "Usa el idiom “turn heads”.",
+          },
+          {
+            requirementId: "phrase_i_agree",
+            text: "Usa “I agree.”",
+          },
+          {
+            requirementId: "phrase_i_guess",
+            text: "Usa “I guess…”.",
           },
         ],
       },
@@ -2615,7 +2747,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "hospital_waiting_room_lazy_magician",
         title: "El mago perezoso",
         sceneSummary:
-          "Un mago que hizo su show en la cafetería espera su turno y te ofrece trucos medio improvisados. Algunos funcionan, otros son claramente trucos malos, pero es entretenido.",
+          "Habla contigo un mago que hizo su show en la cafetería y espera su turno. Te ofrece trucos medio improvisados. Algunos funcionan, otros son claramente trucos malos, pero es entretenido.",
         aiRole:
           "Eres un mago algo perezoso pero encantador, que mezcla humor y pequeños trucos. Responde con calma, usa frases cortas para explicar (o fingir explicar) trucos, y acepta bromas sobre tus fallos con gracia.",
         caracterName: "Marty the Magnificent",
@@ -2623,16 +2755,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A worn magician in a slightly crumpled cape and a crooked top hat, juggling mismatched props. He has a playful grin and a tired sparkle in his eye. The hospital vending machine is visible behind him.",
         requirements: [
           {
-            requirementId: "ask_for_demo",
-            text: "Pide en inglés que te muestre un truco sencillo y solicita que explique los pasos básicos.",
+            requirementId: "ask_for_magic_trick",
+            text: "Pídele que te muestre un truco sencillo.",
           },
           {
-            requirementId: "compliment_personally",
-            text: "Haz en inglés un cumplido sincero sobre su habilidad o su carisma.",
+            requirementId: "ask_for_steps",
+            text: "Pide que explique los pasos básicos del truco.",
           },
           {
-            requirementId: "express_disbelief_playful",
-            text: "Muestra en inglés duda divertida ante un truco y pregunta cómo lo hizo de forma amistosa.",
+            requirementId: "ask_if_he_learned_magic",
+            text: "Pregunta cómo aprendió magia.",
+          },
+          {
+            requirementId: "ask_if_he_can_teach",
+            text: "Pregunta si puede enseñarte el truco.",
+          },
+          {
+            requirementId: "phrasal_pull_off",
+            text: "Usa el phrasal verb “pull off”.",
+          },
+          {
+            requirementId: "phrasal_show_off",
+            text: "Usa el phrasal verb “show off”.",
           },
         ],
       },
@@ -2648,16 +2792,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A young medical intern in scrubs with a notebook full of doodles of food. He has a friendly face, flour on his hands from a recent snack, and sits at a small folding table with a sandwich and tea.",
         requirements: [
           {
-            requirementId: "ask_for_recipe",
-            text: "Pide en inglés una receta corta y práctica que puedas preparar en 10–15 minutos.",
+            requirementId: "ask_about_favorite_dish",
+            text: "Pregunta cuál es su plato favorito.",
           },
           {
-            requirementId: "discuss_food_preferences",
-            text: "Explica en inglés tus preferencias alimentarias y por qué (una o dos frases).",
+            requirementId: "ask_if_recipe_expensive",
+            text: "Pregunta si los ingredientes son caros.",
           },
           {
-            requirementId: "suggest_healthier_option",
-            text: "Propón en inglés una alternativa más saludable a la comida del hospital mencionada por él.",
+            requirementId: "vocab_starving",
+            text: "Usa la palabra “starving” para describir hambre extrema.",
+          },
+          {
+            requirementId: "phrase_take_care",
+            text: "Usa “Take care.”",
+          },
+          {
+            requirementId: "phrase_that_looks_tasty",
+            text: "Usa “That looks tasty.”",
+          },
+          {
+            requirementId: "phrasal_cut_up",
+            text: "Usa el phrasal verb “cut up”.",
           },
         ],
       },
@@ -2684,41 +2840,65 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A sharp-eyed venture capitalist in her early 40s wearing a smart blazer and subtle jewelry. She has folded arms, a skeptical smile, and sits at a modern conference table with a laptop open. The lighting is cool and professional.",
         requirements: [
           {
-            requirementId: "explain_product",
-            text: "Describe en inglés, de forma clara y breve, qué hace tu producto (aunque sea inventado).",
+            requirementId: "describe_main_function",
+            text: "Describe la función principal del producto.",
           },
           {
-            requirementId: "justify_price",
-            text: "Explica en inglés por qué tu producto vale el precio que propones.",
+            requirementId: "describe_target_customer",
+            text: "Explica quién usaría el producto.",
           },
           {
-            requirementId: "answer_technical_question",
-            text: "Responde en inglés a una pregunta técnica sencilla del inversor sin admitir que no sabes.",
+            requirementId: "describe_user_scenario",
+            text: "Describe una situación donde el producto sería útil.",
+          },
+          {
+            requirementId: "phrase_walk_you_through",
+            text: "Usa la expresión “walk you through…”.",
+          },
+          {
+            requirementId: "phrase_what_sets_us_apart",
+            text: "Usa la expresión “What sets us apart…”.",
+          },
+          {
+            requirementId: "phrase_at_its_core",
+            text: "Usa la expresión “At its core…”.",
           },
         ],
       },
       {
         missionId: "fake_it_till_you_make_it_talk_to_the_conference_host",
-        title: "El presentador exagerado",
+        title: "La entrevista en el escenario",
         sceneSummary:
-          "Eres el ponente de una charla improvisada y el presentador te sobrevende con entusiasmo; debes seguir el juego y sonar profesional.",
+          "Un presentador entusiasta te invita al escenario para una mini entrevista frente al público. Él exagera tu experiencia y lanza preguntas inesperadas mientras el público escucha.",
         aiRole:
-          "Eres el presentador hiperactivo y teatral; usas exclamaciones, metáforas grandiosas y preguntas al público. Mantén un tono entusiasta, rápido y algo loco, empujando al alumno a improvisar respuestas claras.",
+          "Eres un presentador hiperactivo de conferencias que entrevista al invitado frente al público. Haces preguntas rápidas, exageras los logros del invitado y reaccionas con entusiasmo teatral. Mantén un tono divertido, energético y algo provocador.",
         caracterName: "Tony Spark",
         caracterPrompt:
           "An energetic conference host in his 30s wearing a bright blazer and a colorful pocket square. He has animated gestures, a wide grin, and stands on a stage with dramatic spotlights and a microphone in hand.",
         requirements: [
           {
-            requirementId: "give_opening_line",
-            text: "Da en inglés una frase de apertura convincente para tu charla (20–30 segundos aprox.).",
+            requirementId: "explain_what_problem_it_solves",
+            text: "Describe qué problema intenta resolver tu idea.",
           },
           {
-            requirementId: "handle_audience_question",
-            text: "Responde en inglés a una pregunta del público que desafía tu experiencia.",
+            requirementId: "describe_real_world_use",
+            text: "Explica cómo alguien usaría tu idea en la vida real.",
           },
           {
-            requirementId: "use_a_metaphor",
-            text: "Incluye en inglés una metáfora clara para explicar tu idea.",
+            requirementId: "admit_small_limitation",
+            text: "Reconoce una pequeña limitación de la idea.",
+          },
+          {
+            requirementId: "vocab_actually",
+            text: "Usa la palabra “actually” al explicar tu idea.",
+          },
+          {
+            requirementId: "phrase_if_i_had_to_sum",
+            text: "Usa la expresión “If I had to sum it up…”.",
+          },
+          {
+            requirementId: "phrase_thank_you_for_having_me",
+            text: "Usa la expresión “Thank you for having me.”",
           },
         ],
       },
@@ -2735,15 +2915,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "state_opinion",
-            text: "Expón en inglés tu opinión principal sobre el tema, con al menos dos razones claras.",
+            text: "Expón tu opinión principal sobre el tema, con al menos dos razones claras.",
           },
           {
             requirementId: "give_example",
-            text: "Proporciona en inglés un ejemplo concreto que apoye tu argumento.",
+            text: "Proporciona un ejemplo concreto que apoye tu argumento.",
           },
           {
             requirementId: "concede_a_point",
-            text: "Reconoce en inglés un aspecto válido de la posición contraria sin perder tu postura.",
+            text: "Reconoce un aspecto válido de la posición contraria sin perder tu postura.",
           },
         ],
       },
@@ -2760,15 +2940,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "share_a_story",
-            text: "Cuenta en inglés una breve anécdota profesional que suene verosímil y memorable.",
+            text: "Cuenta una breve anécdota profesional que suene verosímil y memorable.",
           },
           {
             requirementId: "ask_for_contact",
-            text: "Pide en inglés el contacto o una colaboración futura de forma natural y convincente.",
+            text: "Pide el contacto o una colaboración futura de forma natural y convincente.",
           },
           {
             requirementId: "handle_unexpected_memory",
-            text: "Responde en inglés a que el influencer mencione un supuesto evento pasado que no recuerdas (sin admitir olvido directo).",
+            text: "Responde a que el influencer mencione un supuesto evento pasado que no recuerdas (sin admitir olvido directo).",
           },
         ],
       },
@@ -2776,7 +2956,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "fake_it_till_you_make_it_media_interview",
         title: "La entrevista viral",
         sceneSummary:
-          "Te entrevistan para un podcast popular y te hacen preguntas rápidas sobre tu 'experiencia'; debes sonar claro, natural y creíble en inglés.",
+          "Te entrevistan para un podcast popular y te hacen preguntas rápidas sobre tu 'experiencia'; debes sonar claro, natural y creíble.",
         aiRole:
           "Eres el presentador del podcast: curioso, algo irónico y con preguntas en cadena. Mantén un ritmo ágil y lanza una pregunta sorpresa al final para evaluar reacción.",
         caracterName: "Marco Reed",
@@ -2785,15 +2965,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "handle_rapid_fire",
-            text: "Responde en inglés a tres preguntas rápidas (30–40 segundos en total) mostrando coherencia.",
+            text: "Responde a tres preguntas rápidas (30–40 segundos en total) mostrando coherencia.",
           },
           {
             requirementId: "clarify_misconception",
-            text: "Corrige en inglés una idea errónea que el entrevistador plantea sobre tu campo.",
+            text: "Corrige una idea errónea que el entrevistador plantea sobre tu campo.",
           },
           {
             requirementId: "close_with_call_to_action",
-            text: "Termina la entrevista en inglés con una llamada a la acción clara (por ejemplo: visitar una web, seguirte, unirse a una charla).",
+            text: "Termina la entrevista con una llamada a la acción clara (por ejemplo: visitar una web, seguirte, unirse a una charla).",
           },
         ],
       },
@@ -2821,15 +3001,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_map_purpose",
-            text: "Pregunta en inglés para qué sirve exactamente su mapa y qué hace diferente a otros mapas.",
+            text: "Pregunta para qué sirve exactamente su mapa y qué hace diferente a otros mapas.",
           },
           {
             requirementId: "negotiate_price",
-            text: "Negocia en inglés el precio del mapa y pide una explicación o demostración antes de comprar.",
+            text: "Negocia el precio del mapa y pide una explicación o demostración antes de comprar.",
           },
           {
             requirementId: "express_doubt",
-            text: "Expresa en inglés dudas o escepticismo sobre la validez de sus afirmaciones y pide pruebas concretas.",
+            text: "Expresa dudas o escepticismo sobre la validez de sus afirmaciones y pide pruebas concretas.",
           },
         ],
       },
@@ -2846,15 +3026,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_story_details",
-            text: "Pide en inglés detalles concretos sobre una de sus historias de sofá (lugar, fecha, persona famosa involucrada).",
+            text: "Pide detalles concretos sobre una de sus historias de sofá (lugar, fecha, persona famosa involucrada).",
           },
           {
             requirementId: "compare_preferences",
-            text: "Compara en inglés tus gustos musicales con los suyos y explica por qué prefieres uno u otro.",
+            text: "Compara tus gustos musicales con los suyos y explica por qué prefieres uno u otro.",
           },
           {
             requirementId: "handle_exaggeration",
-            text: "Cuestiona en inglés una de sus afirmaciones exageradas y pide que la explique de forma más realista.",
+            text: "Cuestiona una de sus afirmaciones exageradas y pide que la explique de forma más realista.",
           },
         ],
       },
@@ -2871,15 +3051,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_time_experience",
-            text: "Pregunta en inglés sobre una experiencia específica que haya tenido viajando en el tiempo y pide una descripción detallada.",
+            text: "Pregunta sobre una experiencia específica que haya tenido viajando en el tiempo y pide una descripción detallada.",
           },
           {
             requirementId: "discuss_consequences",
-            text: "Discute en inglés las posibles consecuencias de cambiar una decisión menor en el viaje y da tu opinión razonada.",
+            text: "Discute las posibles consecuencias de cambiar una decisión menor en el viaje y da tu opinión razonada.",
           },
           {
             requirementId: "ask_for_advice",
-            text: "Pide en inglés un consejo práctico para tu ruta actual basado en sus viajes temporales.",
+            text: "Pide un consejo práctico para tu ruta actual basado en sus viajes temporales.",
           },
         ],
       },
@@ -2896,15 +3076,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_ingredients",
-            text: "Pregunta en inglés por los ingredientes principales del plato que propone y su origen.",
+            text: "Pregunta por los ingredientes principales del plato que propone y su origen.",
           },
           {
             requirementId: "accept_or_refuse",
-            text: "Acepta o rechaza en inglés la degustación, dando razones claras (allergies, preferences, curiosity).",
+            text: "Acepta o rechaza la degustación, dando razones claras (allergies, preferences, curiosity).",
           },
           {
             requirementId: "request_recipe",
-            text: "Solicita en inglés una receta simple o un tip de cocina que puedas intentar en casa.",
+            text: "Solicita una receta simple o un tip de cocina que puedas intentar en casa.",
           },
         ],
       },
@@ -2921,15 +3101,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_for_evidence",
-            text: "Pregunta en inglés qué evidencia tiene la locutora para afirmar que la carretera envía señales.",
+            text: "Pregunta qué evidencia tiene la locutora para afirmar que la carretera envía señales.",
           },
           {
             requirementId: "offer_counterargument",
-            text: "Ofrece en inglés un contraargumento razonado y calmo frente a su teoría.",
+            text: "Ofrece un contraargumento razonado y calmo frente a su teoría.",
           },
           {
             requirementId: "participate_live",
-            text: "Responde en inglés a una pregunta en directo de la locutora (puede ser una opinión o una experiencia personal relacionada con la carretera).",
+            text: "Responde a una pregunta en directo de la locutora (puede ser una opinión o una experiencia personal relacionada con la carretera).",
           },
         ],
       },
@@ -2957,15 +3137,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_parrot_rules",
-            text: "Pregunta en inglés cuáles son las reglas para cuidar a Bertie (comida, horas, palabras prohibidas).",
+            text: "Pregunta cuáles son las reglas para cuidar a Bertie (comida, horas, palabras prohibidas).",
           },
           {
             requirementId: "calm_parrot",
-            text: "Di en inglés una frase corta para calmar al loro cuando empiece a gritar o a imitar a alguien.",
+            text: "Di una frase corta para calmar al loro cuando empiece a gritar o a imitar a alguien.",
           },
           {
             requirementId: "confirm_schedule",
-            text: "Confirma en inglés el horario de visitas y llamadas si surge algún problema.",
+            text: "Confirma el horario de visitas y llamadas si surge algún problema.",
           },
         ],
       },
@@ -2982,15 +3162,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_control_techniques",
-            text: "Pregunta en inglés qué técnica usar para controlar a Spike durante el paseo.",
+            text: "Pregunta qué técnica usar para controlar a Spike durante el paseo.",
           },
           {
             requirementId: "give_command",
-            text: "Dale en inglés una orden clara al perro (por ejemplo: 'sit', 'stay' o 'heel') y asegúrate de que el entrenador la apruebe.",
+            text: "Dale una orden clara al perro (por ejemplo: 'sit', 'stay' o 'heel') y asegúrate de que el entrenador la apruebe.",
           },
           {
             requirementId: "handle_interruption",
-            text: "Describe en inglés qué harías si Spike corre hacia una bicicleta o una paloma.",
+            text: "Describe qué harías si Spike corre hacia una bicicleta o una paloma.",
           },
         ],
       },
@@ -3007,15 +3187,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "compliment_cat",
-            text: "Haz en inglés un cumplido auténtico pero breve que no suene exagerado para ganarte al gato.",
+            text: "Haz un cumplido auténtico pero breve que no suene exagerado para ganarte al gato.",
           },
           {
             requirementId: "ask_for_permission",
-            text: "Pregunta en inglés si puedes mover algún objeto que el gato está inspeccionando.",
+            text: "Pregunta si puedes mover algún objeto que el gato está inspeccionando.",
           },
           {
             requirementId: "report_findings",
-            text: "Resume en inglés (2–3 frases) lo que crees que el gato estaba investigando.",
+            text: "Resume (2–3 frases) lo que crees que el gato estaba investigando.",
           },
         ],
       },
@@ -3032,15 +3212,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "negotiate_meal",
-            text: "Negocia en inglés una merienda que sea aceptable para ti y para Coco (ofrece alternativas).",
+            text: "Negocia una merienda que sea aceptable para ti y para Coco (ofrece alternativas).",
           },
           {
             requirementId: "ask_ingredients",
-            text: "Pregunta en inglés qué ingredientes están bien y cuáles están totalmente prohibidos.",
+            text: "Pregunta qué ingredientes están bien y cuáles están totalmente prohibidos.",
           },
           {
             requirementId: "give_allergy_info",
-            text: "Comunica en inglés si tienes alguna alergia o preferencia alimentaria que Coco deba saber.",
+            text: "Comunica si tienes alguna alergia o preferencia alimentaria que Coco deba saber.",
           },
         ],
       },
@@ -3057,15 +3237,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_message_details",
-            text: "Pregunta en inglés qué contiene exactamente el mensaje y por qué es urgente.",
+            text: "Pregunta qué contiene exactamente el mensaje y por qué es urgente.",
           },
           {
             requirementId: "confirm_delivery",
-            text: "Confirma en inglés a quién debe entregarse el mensaje y cuándo.",
+            text: "Confirma a quién debe entregarse el mensaje y cuándo.",
           },
           {
             requirementId: "clarify_consequences",
-            text: "Pregunta en inglés qué pasaría si el mensaje no se entrega a tiempo.",
+            text: "Pregunta qué pasaría si el mensaje no se entrega a tiempo.",
           },
         ],
       },
@@ -3092,15 +3272,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "introduce_yourself",
-            text: "Preséntate en inglés de forma clara y segura (nombre, edad aproximada y una frase sobre tu experiencia).",
+            text: "Preséntate de forma clara y segura (nombre, edad aproximada y una frase sobre tu experiencia).",
           },
           {
             requirementId: "handle_rapid_questions",
-            text: "Responde en inglés a al menos dos preguntas rápidas y distintas del presentador sin perder la calma.",
+            text: "Responde a al menos dos preguntas rápidas y distintas del presentador sin perder la calma.",
           },
           {
             requirementId: "use_one_metaphor",
-            text: "Usa en inglés una metáfora creativa para describir por qué serías bueno en el show.",
+            text: "Usa una metáfora creativa para describir por qué serías bueno en el show.",
           },
         ],
       },
@@ -3117,15 +3297,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "defend_a_choice",
-            text: "Explica en inglés por qué tomaste una decisión concreta (por ejemplo, un outfit o un talento) usando al menos dos razones.",
+            text: "Explica por qué tomaste una decisión concreta (por ejemplo, un outfit o un talento) usando al menos dos razones.",
           },
           {
             requirementId: "respond_to_criticism",
-            text: "Responde en inglés a una crítica sarcástica del juez sin ofender y manteniendo el humor.",
+            text: "Responde a una crítica sarcástica del juez sin ofender y manteniendo el humor.",
           },
           {
             requirementId: "ask_for_feedback",
-            text: "Pide en inglés feedback específico para mejorar en la próxima ronda.",
+            text: "Pide feedback específico para mejorar en la próxima ronda.",
           },
         ],
       },
@@ -3142,15 +3322,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "sell_the_dish",
-            text: "Vende el extraño plato en inglés como si fueras un publicista: usa al menos tres adjetivos sensoriales (taste, smell, texture).",
+            text: "Vende el extraño plato como si fueras un publicista: usa al menos tres adjetivos sensoriales (taste, smell, texture).",
           },
           {
             requirementId: "answer_ingredient_question",
-            text: "Responde en inglés qué ingrediente secreto añadiste y por qué mejora el plato.",
+            text: "Responde qué ingrediente secreto añadiste y por qué mejora el plato.",
           },
           {
             requirementId: "handle_objection",
-            text: "Responde en inglés a una objeción del chef (ej. «That sounds weird») y ofrece una alternativa.",
+            text: "Responde a una objeción del chef (ej. «That sounds weird») y ofrece una alternativa.",
           },
         ],
       },
@@ -3167,15 +3347,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "explain_a_human_custom",
-            text: "Explica en inglés una costumbre humana (por ejemplo, 'small talk' or 'celebrations') de manera clara y breve.",
+            text: "Explica una costumbre humana (por ejemplo, 'small talk' or 'celebrations') de manera clara y breve.",
           },
           {
             requirementId: "show_empathy",
-            text: "Responde en inglés a una historia triste que el alien cuenta mostrando empatía y ofreciendo consuelo.",
+            text: "Responde a una historia triste que el alien cuenta mostrando empatía y ofreciendo consuelo.",
           },
           {
             requirementId: "ask_a_clarifying_question",
-            text: "Haz en inglés una pregunta de aclaración sobre algo que el alien diga para mostrar interés.",
+            text: "Haz una pregunta de aclaración sobre algo que el alien diga para mostrar interés.",
           },
         ],
       },
@@ -3219,7 +3399,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "escape_room_mystery_clockmaker_puzzle",
         title: "El relojero despistado",
         sceneSummary:
-          "Encuentras a un relojero excéntrico rodeado de engranajes y relojes que marcan horas distintas; parece haber perdido la llave maestra. Debes negociar pistas en inglés antes de que un reloj empiece a sonar a las doce equivocada.",
+          "Encuentras a un relojero excéntrico rodeado de engranajes y relojes que marcan horas distintas; parece haber perdido la llave maestra. Debes negociar pistas antes de que un reloj empiece a sonar a las doce equivocada.",
         aiRole:
           "Eres un relojero distraído y apasionado por los mecanismos. Habla con entusiasmo, a veces te olvidas de lo que decías, das pistas enigmáticas y respondes con humor y metáforas mecánicas.",
         caracterName: "Elias Cogsworth",
@@ -3228,15 +3408,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_for_clue",
-            text: "Pide en inglés una pista concreta sobre la ubicación de la llave maestra.",
+            text: "Pide una pista concreta sobre la ubicación de la llave maestra.",
           },
           {
             requirementId: "clarify_time_conflict",
-            text: "Pregunta en inglés por qué varios relojes marcan horas distintas y pide que lo explique claramente.",
+            text: "Pregunta por qué varios relojes marcan horas distintas y pide que lo explique claramente.",
           },
           {
             requirementId: "confirm_next_step",
-            text: "Resume en inglés la instrucción siguiente que te da el relojero para comprobar que la entendiste.",
+            text: "Resume la instrucción siguiente que te da el relojero para comprobar que la entendiste.",
           },
         ],
       },
@@ -3253,15 +3433,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "negotiate_trade",
-            text: "Negocia en inglés un intercambio: qué darías por un objeto que supuestamente abre una puerta.",
+            text: "Negocia un intercambio: qué darías por un objeto que supuestamente abre una puerta.",
           },
           {
             requirementId: "solve_riddle",
-            text: "Intenta resolver en voz alta en inglés un acertijo que te propone el ilusionista.",
+            text: "Intenta resolver en voz alta un acertijo que te propone el ilusionista.",
           },
           {
             requirementId: "ask_for_guarantee",
-            text: "Pide en inglés una garantía o prueba de que el objeto realmente funcionará.",
+            text: "Pide una garantía o prueba de que el objeto realmente funcionará.",
           },
         ],
       },
@@ -3278,15 +3458,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_for_plain_explanation",
-            text: "Pide en inglés una explicación directa y sin metáforas de la pista que canta.",
+            text: "Pide una explicación directa y sin metáforas de la pista que canta.",
           },
           {
             requirementId: "identify_key_word",
-            text: "Cita en inglés la palabra o frase clave que escuchaste en su canción.",
+            text: "Cita la palabra o frase clave que escuchaste en su canción.",
           },
           {
             requirementId: "link_clue_to_object",
-            text: "Explica en inglés cómo esa palabra clave se relaciona con un objeto en la sala.",
+            text: "Explica cómo esa palabra clave se relaciona con un objeto en la sala.",
           },
         ],
       },
@@ -3303,15 +3483,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_about_missing_ingredient",
-            text: "Pregunta en inglés cuál ingrediente falta y por qué es crucial para la receta.",
+            text: "Pregunta cuál ingrediente falta y por qué es crucial para la receta.",
           },
           {
             requirementId: "suggest_alternative",
-            text: "Propón en inglés una alternativa razonable al ingrediente faltante y explica por qué funcionaría.",
+            text: "Propón una alternativa razonable al ingrediente faltante y explica por qué funcionaría.",
           },
           {
             requirementId: "agree_on_plan",
-            text: "Confirma en inglés los pasos a seguir con el chef para recuperar o sustituir el ingrediente.",
+            text: "Confirma los pasos a seguir con el chef para recuperar o sustituir el ingrediente.",
           },
         ],
       },
@@ -3328,15 +3508,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "solve_logic_test",
-            text: "Responde en inglés a una prueba lógica (explica tu razonamiento paso a paso).",
+            text: "Responde a una prueba lógica (explica tu razonamiento paso a paso).",
           },
           {
             requirementId: "prove_honesty",
-            text: "Da en inglés una breve afirmación honesta sobre lo que has hecho hasta ahora en la sala (1–2 frases).",
+            text: "Da una breve afirmación honesta sobre lo que has hecho hasta ahora en la sala (1–2 frases).",
           },
           {
             requirementId: "ask_for_permission_to_proceed",
-            text: "Pide en inglés permiso para subir la escalera y justifica brevemente por qué deberías hacerlo.",
+            text: "Pide permiso para subir la escalera y justifica brevemente por qué deberías hacerlo.",
           },
         ],
       },
@@ -3364,15 +3544,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "introduce_yourself",
-            text: "Preséntate en inglés diciendo tu nombre y por qué estás ahí (una frase cada uno).",
+            text: "Preséntate diciendo tu nombre y por qué estás ahí (una frase cada uno).",
           },
           {
             requirementId: "ask_for_permission",
-            text: "Pide permiso en inglés para tocar o mover algo en el backstage.",
+            text: "Pide permiso para tocar o mover algo en el backstage.",
           },
           {
             requirementId: "confirm_next_step",
-            text: "Pregunta en inglés cuál es el siguiente paso que debes hacer para ayudar.",
+            text: "Pregunta cuál es el siguiente paso que debes hacer para ayudar.",
           },
         ],
       },
@@ -3389,15 +3569,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "identify_problem",
-            text: "Pregunta en inglés qué vestido falta y pide detalles (color, talla, cuándo lo vieron).",
+            text: "Pregunta qué vestido falta y pide detalles (color, talla, cuándo lo vieron).",
           },
           {
             requirementId: "mediate_conflict",
-            text: "Sugiere en inglés una solución práctica para encontrar el vestido sin tomar partido.",
+            text: "Sugiere una solución práctica para encontrar el vestido sin tomar partido.",
           },
           {
             requirementId: "set_deadline",
-            text: 'Propón en inglés un plazo claro para resolver el problema (por ejemplo: "in 10 minutes").',
+            text: 'Propón un plazo claro para resolver el problema (por ejemplo: "in 10 minutes").',
           },
         ],
       },
@@ -3414,15 +3594,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_reason",
-            text: "Pregunta en inglés por qué no quiere llevar el atuendo.",
+            text: "Pregunta por qué no quiere llevar el atuendo.",
           },
           {
             requirementId: "offer_alternative",
-            text: "Ofrece en inglés al menos una alternativa razonable o una condición para que se quede.",
+            text: "Ofrece al menos una alternativa razonable o una condición para que se quede.",
           },
           {
             requirementId: "confirm_agreement",
-            text: "Consigue en inglés una confirmación clara de la modelo sobre lo que hará (quedarse, cambiar, o irse).",
+            text: "Consigue una confirmación clara de la modelo sobre lo que hará (quedarse, cambiar, o irse).",
           },
         ],
       },
@@ -3439,15 +3619,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "describe_problem",
-            text: "Explica en inglés exactamente qué parte del maquillaje falta y cuál es el estilo deseado (por ejemplo: smoky eye, natural).",
+            text: "Explica exactamente qué parte del maquillaje falta y cuál es el estilo deseado (por ejemplo: smoky eye, natural).",
           },
           {
             requirementId: "delegate_tasks",
-            text: "Asigna en inglés dos tareas concretas a otros miembros del equipo (por ejemplo: prepare foundation, hold mirror).",
+            text: "Asigna dos tareas concretas a otros miembros del equipo (por ejemplo: prepare foundation, hold mirror).",
           },
           {
             requirementId: "confirm_time_needed",
-            text: "Pregunta y confirma en inglés cuánto tiempo necesitas para completar el maquillaje.",
+            text: "Pregunta y confirma cuánto tiempo necesitas para completar el maquillaje.",
           },
         ],
       },
@@ -3464,15 +3644,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "report_emergency",
-            text: "Describe en inglés la emergencia con detalle (what happened, who is affected).",
+            text: "Describe la emergencia con detalle (what happened, who is affected).",
           },
           {
             requirementId: "propose_solution",
-            text: "Propón en inglés al menos una solución inmediata y viable (e.g., replace shoe, walk barefoot with cover).",
+            text: "Propón al menos una solución inmediata y viable (e.g., replace shoe, walk barefoot with cover).",
           },
           {
             requirementId: "request_clearance",
-            text: "Pide en inglés permiso o confirmación para implementar la solución antes de que continúe el show.",
+            text: "Pide permiso o confirmación para implementar la solución antes de que continúe el show.",
           },
         ],
       },
@@ -3500,15 +3680,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_about_collection",
-            text: "Pregunta en inglés qué tiene en su colección y cómo consiguió el billete más extraño.",
+            text: "Pregunta qué tiene en su colección y cómo consiguió el billete más extraño.",
           },
           {
             requirementId: "negotiate_trade",
-            text: "Propón en inglés un intercambio: ofrece algo (realista) a cambio de un billete y explica por qué tu oferta es razonable.",
+            text: "Propón un intercambio: ofrece algo (realista) a cambio de un billete y explica por qué tu oferta es razonable.",
           },
           {
             requirementId: "react_to_story",
-            text: "Reacciona en inglés a una historia sorprendente que él cuente, usando una expresión natural y una pregunta de seguimiento.",
+            text: "Reacciona a una historia sorprendente que él cuente, usando una expresión natural y una pregunta de seguimiento.",
           },
         ],
       },
@@ -3525,15 +3705,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "choose_verse",
-            text: "Sugiere en inglés qué estrofa debería cantar a continuación, usando lenguaje descriptivo y claro.",
+            text: "Sugiere qué estrofa debería cantar a continuación, usando lenguaje descriptivo y claro.",
           },
           {
             requirementId: "correct_lyrics",
-            text: "Corrige suavemente en inglés una línea que él canta mal, dando la forma correcta y una breve explicación.",
+            text: "Corrige suavemente una línea que él canta mal, dando la forma correcta y una breve explicación.",
           },
           {
             requirementId: "give_feedback",
-            text: "Dale feedback en inglés sobre su actuación, incluyendo una frase positiva y una sugerencia concreta.",
+            text: "Dale feedback sobre su actuación, incluyendo una frase positiva y una sugerencia concreta.",
           },
         ],
       },
@@ -3550,15 +3730,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_ingredients",
-            text: "Pregúntale en inglés qué ingredientes contiene su especialidad y si hay alérgenos.",
+            text: "Pregúntale qué ingredientes contiene su especialidad y si hay alérgenos.",
           },
           {
             requirementId: "express_preference",
-            text: "Di en inglés si te gustaría probarlo o no, justificando tu elección con motivos concretos.",
+            text: "Di si te gustaría probarlo o no, justificando tu elección con motivos concretos.",
           },
           {
             requirementId: "suggest_alternative",
-            text: "Propón en inglés una alternativa o modificación del plato que te haría probarlo.",
+            text: "Propón una alternativa o modificación del plato que te haría probarlo.",
           },
         ],
       },
@@ -3575,15 +3755,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "summarize_passage",
-            text: "Resume en inglés el significado principal de un breve pasaje que te muestre (1–2 frases).",
+            text: "Resume el significado principal de un breve pasaje que te muestre (1–2 frases).",
           },
           {
             requirementId: "challenge_theory",
-            text: "Cuestiona en inglés una de sus conclusiones conspirativas con al menos una razón lógica.",
+            text: "Cuestiona una de sus conclusiones conspirativas con al menos una razón lógica.",
           },
           {
             requirementId: "propose_hypothesis",
-            text: "Propón en inglés una hipótesis alternativa y cómo podríais comprobarla durante el viaje.",
+            text: "Propón una hipótesis alternativa y cómo podríais comprobarla durante el viaje.",
           },
         ],
       },
@@ -3600,15 +3780,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "solve_riddle",
-            text: "Responde en inglés a un acertijo sencillo que él te proponga (frase corta con la solución).",
+            text: "Responde a un acertijo sencillo que él te proponga (frase corta con la solución).",
           },
           {
             requirementId: "ask_for_clue",
-            text: "Pide en inglés una pista adicional usando una pregunta educada y directa.",
+            text: "Pide una pista adicional usando una pregunta educada y directa.",
           },
           {
             requirementId: "negotiate_reward",
-            text: "Negocia en inglés una recompensa por resolver su reto, proponiendo una compensación razonable.",
+            text: "Negocia una recompensa por resolver su reto, proponiendo una compensación razonable.",
           },
         ],
       },
@@ -3635,15 +3815,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_where_seen",
-            text: "Pregúntale en inglés dónde y cuándo vio el teléfono.",
+            text: "Pregúntale dónde y cuándo vio el teléfono.",
           },
           {
             requirementId: "confirm_description",
-            text: "Describe en inglés las características de tu teléfono y pide que confirme si es la misma unidad.",
+            text: "Describe las características de tu teléfono y pide que confirme si es la misma unidad.",
           },
           {
             requirementId: "negotiate_help",
-            text: "Negocia en inglés por su ayuda (ofrece algo a cambio o pide una pista razonable).",
+            text: "Negocia por su ayuda (ofrece algo a cambio o pide una pista razonable).",
           },
         ],
       },
@@ -3660,15 +3840,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_timeline",
-            text: "Pregunta en inglés sobre la línea temporal (¿a qué hora lo vieron?)",
+            text: "Pregunta sobre la línea temporal (¿a qué hora lo vieron?)",
           },
           {
             requirementId: "ask_who_was_there",
-            text: "Pregunta en inglés quién más estaba en la cafetería y solicita descripciones breves.",
+            text: "Pregunta quién más estaba en la cafetería y solicita descripciones breves.",
           },
           {
             requirementId: "ask_next_step",
-            text: "Pide en inglés una acción concreta que seguir (¿podemos buscar en la cámara o revisar la mesa?).",
+            text: "Pide una acción concreta que seguir (¿podemos buscar en la cámara o revisar la mesa?).",
           },
         ],
       },
@@ -3685,15 +3865,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_dog_distraction",
-            text: "Pregunta en inglés si los perros distrajeron a la persona que dejó el teléfono.",
+            text: "Pregunta si los perros distrajeron a la persona que dejó el teléfono.",
           },
           {
             requirementId: "clarify_direction",
-            text: "Pregunta en inglés en qué dirección se fue la persona con más detalle.",
+            text: "Pregunta en qué dirección se fue la persona con más detalle.",
           },
           {
             requirementId: "ask_for_contact",
-            text: "Pide en inglés una forma de contactar al paseador si aparece nueva información.",
+            text: "Pide una forma de contactar al paseador si aparece nueva información.",
           },
         ],
       },
@@ -3710,15 +3890,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "challenge_theory",
-            text: "Cuestiona en inglés una de sus teorías y ofrece una alternativa plausible.",
+            text: "Cuestiona una de sus teorías y ofrece una alternativa plausible.",
           },
           {
             requirementId: "ask_evidence",
-            text: "Pide en inglés la evidencia que respalde su afirmación (¿what proof do you have?).",
+            text: "Pide la evidencia que respalde su afirmación (¿what proof do you have?).",
           },
           {
             requirementId: "summarize_next_steps",
-            text: "Resume en inglés los pasos siguientes acordados con el profesor.",
+            text: "Resume los pasos siguientes acordados con el profesor.",
           },
         ],
       },
@@ -3735,15 +3915,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "confirm_pickup_time",
-            text: "Pregunta en inglés a qué hora ocurrió el trayecto y cuánto tiempo estuvo el teléfono en el coche.",
+            text: "Pregunta a qué hora ocurrió el trayecto y cuánto tiempo estuvo el teléfono en el coche.",
           },
           {
             requirementId: "ask_for_id",
-            text: "Solicita en inglés alguna prueba o detalle que confirme que su coche tenía tu teléfono (por ejemplo, color del funda o pantalla encendida).",
+            text: "Solicita alguna prueba o detalle que confirme que su coche tenía tu teléfono (por ejemplo, color del funda o pantalla encendida).",
           },
           {
             requirementId: "arrange_meeting",
-            text: "Organiza en inglés un lugar y hora para revisar el coche o recuperar el teléfono.",
+            text: "Organiza un lugar y hora para revisar el coche o recuperar el teléfono.",
           },
         ],
       },
@@ -3771,15 +3951,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_why_cooking",
-            text: "Pregunta en inglés por qué está usando esos ingredientes raros.",
+            text: "Pregunta por qué está usando esos ingredientes raros.",
           },
           {
             requirementId: "express_concern",
-            text: "Expresa en inglés preocupación o sorpresa por la seguridad/rareza de la comida.",
+            text: "Expresa preocupación o sorpresa por la seguridad/rareza de la comida.",
           },
           {
             requirementId: "ask_for_recipe",
-            text: "Pide en inglés la receta o los pasos para preparar ese plato.",
+            text: "Pide la receta o los pasos para preparar ese plato.",
           },
         ],
       },
@@ -3796,15 +3976,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_details",
-            text: "Pide en inglés detalles concretos sobre cómo piensa cubrir el alquiler.",
+            text: "Pide detalles concretos sobre cómo piensa cubrir el alquiler.",
           },
           {
             requirementId: "propose_alternative",
-            text: "Propón en inglés una alternativa razonable si no te convence su plan.",
+            text: "Propón una alternativa razonable si no te convence su plan.",
           },
           {
             requirementId: "agree_or_refuse",
-            text: "Decide y di en inglés si aceptas su propuesta o la rechazas, dando una razón clara.",
+            text: "Decide y di si aceptas su propuesta o la rechazas, dando una razón clara.",
           },
         ],
       },
@@ -3821,15 +4001,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_about_ghost",
-            text: "Pregunta en inglés quién o qué es el 'fantasma' y cómo lo conoció.",
+            text: "Pregunta quién o qué es el 'fantasma' y cómo lo conoció.",
           },
           {
             requirementId: "suggest_solution",
-            text: "Sugiere en inglés una solución práctica si el 'fantasma' está causando problemas (ruido, manchas, etc.).",
+            text: "Sugiere una solución práctica si el 'fantasma' está causando problemas (ruido, manchas, etc.).",
           },
           {
             requirementId: "express_doubt",
-            text: "Expresa en inglés escepticismo o duda sobre la existencia del fantasma de forma educada.",
+            text: "Expresa escepticismo o duda sobre la existencia del fantasma de forma educada.",
           },
         ],
       },
@@ -3846,15 +4026,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_parrot_to_repeat",
-            text: "Pide en inglés al loro (a través del compañero) que repita una frase para practicar pronunciación.",
+            text: "Pide al loro (a través del compañero) que repita una frase para practicar pronunciación.",
           },
           {
             requirementId: "read_sentence",
-            text: "Lee en inglés una oración sugerida por el compañero para que el loro la corrija.",
+            text: "Lee una oración sugerida por el compañero para que el loro la corrija.",
           },
           {
             requirementId: "ask_for_feedback",
-            text: "Solicita en inglés retroalimentación específica sobre tu pronunciación o entonación.",
+            text: "Solicita retroalimentación específica sobre tu pronunciación o entonación.",
           },
         ],
       },
@@ -3871,15 +4051,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_reason_for_party",
-            text: "Pregunta en inglés por qué preparó la fiesta si no te vas.",
+            text: "Pregunta por qué preparó la fiesta si no te vas.",
           },
           {
             requirementId: "invite_someone",
-            text: "Invita en inglés a una persona específica de la fiesta a que hable contigo (por ejemplo, 'Can I talk to the musician?').",
+            text: "Invita a una persona específica de la fiesta a que hable contigo (por ejemplo, 'Can I talk to the musician?').",
           },
           {
             requirementId: "accept_or_decline",
-            text: "Acepta o declina en inglés participar en una actividad de la fiesta, dando una razón breve.",
+            text: "Acepta o declina participar en una actividad de la fiesta, dando una razón breve.",
           },
         ],
       },
@@ -3906,15 +4086,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_ingredients",
-            text: "Pregunta en inglés cuáles son los ingredientes principales y cómo se preparan.",
+            text: "Pregunta cuáles son los ingredientes principales y cómo se preparan.",
           },
           {
             requirementId: "ask_for_clarification",
-            text: "Pide en inglés que repita o explique una metáfora culinaria que no entiendes.",
+            text: "Pide que repita o explique una metáfora culinaria que no entiendes.",
           },
           {
             requirementId: "express_caution",
-            text: "Expresa en inglés que te preocupa la seguridad del plato y pide una alternativa más segura.",
+            text: "Expresa que te preocupa la seguridad del plato y pide una alternativa más segura.",
           },
         ],
       },
@@ -3931,15 +4111,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_for_recommendation",
-            text: "Pide en inglés una recomendación para alguien con alergias o preferencias (vegetarian, nut-free, etc.).",
+            text: "Pide una recomendación para alguien con alergias o preferencias (vegetarian, nut-free, etc.).",
           },
           {
             requirementId: "accept_or_decline",
-            text: "Acepta o rechaza la recomendación en inglés, dando una razón clara.",
+            text: "Acepta o rechaza la recomendación, dando una razón clara.",
           },
           {
             requirementId: "ask_about_storage",
-            text: "Pregunta en inglés cómo guardarías la comida para que dure hasta la mañana.",
+            text: "Pregunta cómo guardarías la comida para que dure hasta la mañana.",
           },
         ],
       },
@@ -3956,15 +4136,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "describe_flavor",
-            text: "Describe en inglés cómo crees que una especia desconocida sabría (use three sensory adjectives).",
+            text: "Describe cómo crees que una especia desconocida sabría (use three sensory adjectives).",
           },
           {
             requirementId: "ask_origin",
-            text: "Pregunta en inglés de dónde vienen las especias y cómo se obtienen.",
+            text: "Pregunta de dónde vienen las especias y cómo se obtienen.",
           },
           {
             requirementId: "negotiate_price",
-            text: "Intenta negociar el precio en inglés ofreciendo una razón (por ejemplo, eres estudiante o tienes poco dinero).",
+            text: "Intenta negociar el precio ofreciendo una razón (por ejemplo, eres estudiante o tienes poco dinero).",
           },
         ],
       },
@@ -3981,15 +4161,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "give_opinion",
-            text: "Da en inglés una opinión clara y justificada sobre el plato tras probarlo (mínimo dos razones).",
+            text: "Da una opinión clara y justificada sobre el plato tras probarlo (mínimo dos razones).",
           },
           {
             requirementId: "ask_for_proof",
-            text: "Pide en inglés alguna prueba o evidencia sobre la calidad de los ingredientes.",
+            text: "Pide alguna prueba o evidencia sobre la calidad de los ingredientes.",
           },
           {
             requirementId: "use_conditionals",
-            text: "Usa una oración condicional en inglés para decir qué harías si el plato fuera demasiado salado o picante.",
+            text: "Usa una oración condicional para decir qué harías si el plato fuera demasiado salado o picante.",
           },
         ],
       },
@@ -3997,7 +4177,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "midnight_food_truck_dancing_cashier",
         title: "La cajera bailarina",
         sceneSummary:
-          "Una cajera que hace coreografías te ofrece un descuento si improvisas un breve estribillo en inglés sobre la comida.",
+          "Una cajera que hace coreografías te ofrece un descuento si improvisas un breve estribillo sobre la comida.",
         aiRole:
           "Eres una cajera alegre y exagerada que habla en ritmo, aplaude cuando el alumno se anima y pide respuestas breves y energéticas. Mantén entusiasmo y repite frases clave para que el alumno practique pronunciación y ritmo.",
         caracterName: "Penny Beat",
@@ -4006,15 +4186,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "sing_short_jingle",
-            text: "Improvisa en inglés un estribillo corto (2–4 líneas) sobre el plato que acabas de probar.",
+            text: "Improvisa un estribillo corto (2–4 líneas) sobre el plato que acabas de probar.",
           },
           {
             requirementId: "ask_for_discount",
-            text: "Pregunta en inglés si puedes conseguir un descuento y explica por qué deberías obtenerlo.",
+            text: "Pregunta si puedes conseguir un descuento y explica por qué deberías obtenerlo.",
           },
           {
             requirementId: "confirm_order",
-            text: "Confirma en inglés los detalles de tu pedido (plato, tamaño, algún extra) antes de pagar.",
+            text: "Confirma los detalles de tu pedido (plato, tamaño, algún extra) antes de pagar.",
           },
         ],
       },
@@ -4042,15 +4222,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_for_clarification",
-            text: "Pide en inglés una aclaración sobre cómo sostener la copa correctamente.",
+            text: "Pide una aclaración sobre cómo sostener la copa correctamente.",
           },
           {
             requirementId: "follow_instruction",
-            text: "Sigue en inglés una instrucción breve sobre postura y confirma que la entiendes.",
+            text: "Sigue una instrucción breve sobre postura y confirma que la entiendes.",
           },
           {
             requirementId: "express_discomfort",
-            text: "Expresa en inglés de forma educada que te resulta incómodo y pregunta por alternativas.",
+            text: "Expresa de forma educada que te resulta incómodo y pregunta por alternativas.",
           },
         ],
       },
@@ -4067,15 +4247,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "offer_help",
-            text: "Ofrece en inglés ayudar a limpiar y sugiere cómo hacerlo sin molestar la mesa.",
+            text: "Ofrece ayudar a limpiar y sugiere cómo hacerlo sin molestar la mesa.",
           },
           {
             requirementId: "reassure",
-            text: "Tranquiliza en inglés al mayordomo y evita culparlo.",
+            text: "Tranquiliza al mayordomo y evita culparlo.",
           },
           {
             requirementId: "ask_consequence",
-            text: "Pregunta en inglés qué pasará con la lección ahora que ocurrió el accidente.",
+            text: "Pregunta qué pasará con la lección ahora que ocurrió el accidente.",
           },
         ],
       },
@@ -4092,15 +4272,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "change_topic",
-            text: "Cambia el tema en inglés de forma diplomática sin decir 'stop' o 'shut up'.",
+            text: "Cambia el tema de forma diplomática sin decir 'stop' o 'shut up'.",
           },
           {
             requirementId: "give_compliment",
-            text: "Haz en inglés un cumplido genuino y breve para suavizar la conversación.",
+            text: "Haz un cumplido genuino y breve para suavizar la conversación.",
           },
           {
             requirementId: "ask_for_story",
-            text: "Pide en inglés, de manera educada, que cuente una anécdota menos comprometida.",
+            text: "Pide, de manera educada, que cuente una anécdota menos comprometida.",
           },
         ],
       },
@@ -4108,24 +4288,24 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "etiquette_class_fail_judgmental_referee",
         title: "El juez de modales implacable",
         sceneSummary:
-          "Un juez de etiqueta evalúa tu desempeño con tarjetas de colores y comentarios severos. Debes defender una decisión propia con argumentos cortos y educados en inglés.",
+          "Un juez de etiqueta evalúa tu desempeño con tarjetas de colores y comentarios severos. Debes defender una decisión propia con argumentos cortos y educados.",
         aiRole:
-          "Eres un juez riguroso, con tono crítico y a veces sarcástico, pero justo. Da comentarios concretos, puntúa acciones y espera que el aprendiz razone sus elecciones en inglés.",
+          "Eres un juez riguroso, con tono crítico y a veces sarcástico, pero justo. Da comentarios concretos, puntúa acciones y espera que el aprendiz razone sus elecciones.",
         caracterName: "Judge Arbiter",
         caracterPrompt:
           "A stern older person in a ceremonial robe with a pocket watch and a clipboard. They have sharp eyes, pursed lips, and sit behind a small judging table with score cards. The room feels like a quirky courtroom for manners.",
         requirements: [
           {
             requirementId: "justify_action",
-            text: "Justifica en inglés por qué hiciste una elección de etiqueta que el juez considera incorrecta.",
+            text: "Justifica por qué hiciste una elección de etiqueta que el juez considera incorrecta.",
           },
           {
             requirementId: "accept_feedback",
-            text: "Acepta en inglés una crítica y resume brevemente qué vas a mejorar.",
+            text: "Acepta una crítica y resume brevemente qué vas a mejorar.",
           },
           {
             requirementId: "ask_for_points",
-            text: "Pregunta en inglés cuántos puntos te faltaron para aprobar y qué criterio específico faltó.",
+            text: "Pregunta cuántos puntos te faltaron para aprobar y qué criterio específico faltó.",
           },
         ],
       },
@@ -4133,7 +4313,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "etiquette_class_fail_clumsy_dance_partner",
         title: "El compañero de baile desastroso",
         sceneSummary:
-          "Tu pareja de baile pisa tus pies y confunde pasos de vals con breakdance. Debes dirigir la pareja con frases claras en inglés y mantener el ritmo.",
+          "Tu pareja de baile pisa tus pies y confunde pasos de vals con breakdance. Debes dirigir la pareja con frases claras y mantener el ritmo.",
         aiRole:
           "Eres un compañero de baile entusiasta pero descoordinado. Respondes con energía, admites errores y sigues instrucciones simples. Mantén un tono optimista y cómico.",
         caracterName: "Tango Tim",
@@ -4142,15 +4322,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "give_simple_direction",
-            text: "Da en inglés una instrucción clara y breve para mejorar un paso (por ejemplo: 'one-two-step left').",
+            text: "Da una instrucción clara y breve para mejorar un paso (por ejemplo: 'one-two-step left').",
           },
           {
             requirementId: "set_tempo",
-            text: "Pide en inglés que vaya más despacio o más rápido usando una frase de tempo.",
+            text: "Pide que vaya más despacio o más rápido usando una frase de tempo.",
           },
           {
             requirementId: "encourage_partner",
-            text: "Anima en inglés a tu compañero después de un error usando una frase cortés y motivadora.",
+            text: "Anima a tu compañero después de un error usando una frase cortés y motivadora.",
           },
         ],
       },
@@ -4177,15 +4357,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "follow_instructions",
-            text: "Sigue tres instrucciones diferentes que te dé el director y responde en inglés cada vez.",
+            text: "Sigue tres instrucciones diferentes que te dé el director y responde cada vez.",
           },
           {
             requirementId: "offer_alternative",
-            text: "Propón en inglés una alternativa creativa cuando el director diga que algo no funciona.",
+            text: "Propón una alternativa creativa cuando el director diga que algo no funciona.",
           },
           {
             requirementId: "express_confusion",
-            text: "Expresa en inglés que estás confundido por una orden y pide aclaración educadamente.",
+            text: "Expresa que estás confundido por una orden y pide aclaración educadamente.",
           },
         ],
       },
@@ -4202,15 +4382,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "give_line",
-            text: "Dale al actor en inglés una línea clara que él pueda decir sin equivocarse.",
+            text: "Dale al actor una línea clara que él pueda decir sin equivocarse.",
           },
           {
             requirementId: "maintain_character",
-            text: "Responde en inglés manteniendo un personaje coherente durante al menos cuatro frases.",
+            text: "Responde manteniendo un personaje coherente durante al menos cuatro frases.",
           },
           {
             requirementId: "save_scene",
-            text: "Inventa en inglés una solución rápida para arreglar un error de continuidad en la escena.",
+            text: "Inventa una solución rápida para arreglar un error de continuidad en la escena.",
           },
         ],
       },
@@ -4218,7 +4398,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "improv_theater_night_stage_technician",
         title: "El técnico dramático",
         sceneSummary:
-          "Un técnico de sonido exageradamente dramático anuncia efectos especiales que nunca llegaron; tienes que negociar y coordinar en inglés para que el público no note nada.",
+          "Un técnico de sonido exageradamente dramático anuncia efectos especiales que nunca llegaron; tienes que negociar y coordinar para que el público no note nada.",
         aiRole:
           "Eres un técnico melodramático que describe efectos como si fueran épicos desastres. Usa hipérboles y tono teatral, pero responde a las propuestas de forma práctica cuando el alumno negocia soluciones.",
         caracterName: "Velma Sparks",
@@ -4227,15 +4407,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "negotiate_changes",
-            text: "Negocia en inglés un cambio de efecto (luces, sonido o humo) y acuerda un plan claro.",
+            text: "Negocia un cambio de efecto (luces, sonido o humo) y acuerda un plan claro.",
           },
           {
             requirementId: "clarify_technical_terms",
-            text: "Pide y da en inglés una explicación simple de un término técnico que el técnico menciona.",
+            text: "Pide y da una explicación simple de un término técnico que el técnico menciona.",
           },
           {
             requirementId: "confirm_timeline",
-            text: "Confirma en inglés el orden y el momento en que deben ocurrir los efectos.",
+            text: "Confirma el orden y el momento en que deben ocurrir los efectos.",
           },
         ],
       },
@@ -4252,15 +4432,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "defend_choice",
-            text: "Defiende en inglés una decisión creativa del director o del reparto frente a una crítica directa.",
+            text: "Defiende una decisión creativa del director o del reparto frente a una crítica directa.",
           },
           {
             requirementId: "ask_for_feedback",
-            text: "Pregunta en inglés al crítico qué cambiaría y solicita una sugerencia concreta.",
+            text: "Pregunta al crítico qué cambiaría y solicita una sugerencia concreta.",
           },
           {
             requirementId: "acknowledge_point",
-            text: "Reconoce en inglés una crítica válida y propone una mejora práctica.",
+            text: "Reconoce una crítica válida y propone una mejora práctica.",
           },
         ],
       },
@@ -4268,7 +4448,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "improv_theater_night_mystery_guest",
         title: "El invitado misterioso",
         sceneSummary:
-          "Un personaje misterioso aparece en el escenario con pistas raras y un acento extraño; debes interrogarle en inglés para descubrir su secreto sin romper el ritmo.",
+          "Un personaje misterioso aparece en el escenario con pistas raras y un acento extraño; debes interrogarle para descubrir su secreto sin romper el ritmo.",
         aiRole:
           "Eres un invitado enigmático y juguetón que habla con frases crípticas y cambia de tema con humor. Responde a las preguntas con pistas graduales y anima al alumno a hacer preguntas abiertas y específicas.",
         caracterName: "The Odd One",
@@ -4277,15 +4457,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_open_questions",
-            text: "Haz en inglés tres preguntas abiertas para obtener información sin asumir nada.",
+            text: "Haz tres preguntas abiertas para obtener información sin asumir nada.",
           },
           {
             requirementId: "infer_details",
-            text: "Propón en inglés una hipótesis plausible sobre su secreto basada en las pistas que dé.",
+            text: "Propón una hipótesis plausible sobre su secreto basada en las pistas que dé.",
           },
           {
             requirementId: "maintain_pacing",
-            text: "Mantén la conversación en inglés fluida y breve, evitando respuestas de una sola palabra en al menos cuatro turnos.",
+            text: "Mantén la conversación fluida y breve, evitando respuestas de una sola palabra en al menos cuatro turnos.",
           },
         ],
       },
@@ -4312,15 +4492,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_for_formclarification",
-            text: "Pregunta en inglés qué significa una de las preguntas del formulario (elige una específica).",
+            text: "Pregunta qué significa una de las preguntas del formulario (elige una específica).",
           },
           {
             requirementId: "decline_signed_consent",
-            text: "Rechaza cortésmente firmar algo sin más información y pide más detalles en inglés.",
+            text: "Rechaza cortésmente firmar algo sin más información y pide más detalles.",
           },
           {
             requirementId: "give_basic_information",
-            text: "Da tu nombre y una frase corta sobre tu experiencia laboral en inglés.",
+            text: "Da tu nombre y una frase corta sobre tu experiencia laboral.",
           },
         ],
       },
@@ -4337,15 +4517,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "answer_philosophical_question",
-            text: "Responde en inglés a una pregunta filosófica sencilla sobre el trabajo (por ejemplo, 'What makes a job meaningful?').",
+            text: "Responde a una pregunta filosófica sencilla sobre el trabajo (por ejemplo, 'What makes a job meaningful?').",
           },
           {
             requirementId: "ask_for_coffee_preference",
-            text: "Pregunta en inglés cuál es la especialidad de la casa y pide tu bebida con preferencias específicas.",
+            text: "Pregunta cuál es la especialidad de la casa y pide tu bebida con preferencias específicas.",
           },
           {
             requirementId: "use_conditionals",
-            text: "Usa una oración condicional en inglés para explicar cuándo aceptarías un trabajo extraño.",
+            text: "Usa una oración condicional para explicar cuándo aceptarías un trabajo extraño.",
           },
         ],
       },
@@ -4366,11 +4546,11 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "answer_quick_questions",
-            text: "Responde en inglés a dos preguntas rápidas sobre tus hobbies o antecedentes.",
+            text: "Responde a dos preguntas rápidas sobre tus hobbies o antecedentes.",
           },
           {
             requirementId: "use_polite_refusal",
-            text: "Rechaza una invitación absurda usando una expresión de cortesía en inglés.",
+            text: "Rechaza una invitación absurda usando una expresión de cortesía.",
           },
         ],
       },
@@ -4378,7 +4558,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "weird_job_first_day_office_pet_dragon",
         title: "El dragón mascota y su plan de team building",
         sceneSummary:
-          "Un dragón diminuto y parlante propone una actividad de integración que suena peligrosa pero resulta ser ridículamente inofensiva. Debes convencerlo (o negarte) con argumentos razonables en inglés.",
+          "Un dragón diminuto y parlante propone una actividad de integración que suena peligrosa pero resulta ser ridículamente inofensiva. Debes convencerlo (o negarte) con argumentos razonables.",
         aiRole:
           "Eres un dragón alegre y exagerado que ama las actividades de grupo. Habla con entusiasmo, sugiere ideas extravagantes y espera que el alumno negocie límites y proponga alternativas realistas.",
         caracterName: "Ember Spark",
@@ -4387,15 +4567,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "evaluate_activity_risks",
-            text: "Exprésate en inglés sobre por qué una actividad podría ser inapropiada o riesgosa.",
+            text: "Exprésate sobre por qué una actividad podría ser inapropiada o riesgosa.",
           },
           {
             requirementId: "propose_alternative",
-            text: "Sugiere en inglés una actividad alternativa y explica brevemente sus beneficios.",
+            text: "Sugiere una actividad alternativa y explica brevemente sus beneficios.",
           },
           {
             requirementId: "use_persuasive_language",
-            text: "Usa una frase persuasiva en inglés para convencer al dragón de tu idea.",
+            text: "Usa una frase persuasiva para convencer al dragón de tu idea.",
           },
         ],
       },
@@ -4412,15 +4592,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "describe_strengths",
-            text: "Describe en inglés dos fortalezas profesionales relevantes para el puesto.",
+            text: "Describe dos fortalezas profesionales relevantes para el puesto.",
           },
           {
             requirementId: "answer_behavioral_question",
-            text: "Responde en inglés a una pregunta de comportamiento (por ejemplo, 'Tell me about a time you solved a problem').",
+            text: "Responde a una pregunta de comportamiento (por ejemplo, 'Tell me about a time you solved a problem').",
           },
           {
             requirementId: "ask_about_next_steps",
-            text: "Pregunta en inglés cuáles son los siguientes pasos del proceso y el calendario aproximado.",
+            text: "Pregunta cuáles son los siguientes pasos del proceso y el calendario aproximado.",
           },
         ],
       },
@@ -4447,15 +4627,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_ingredients",
-            text: "Pregunta en inglés qué ingredientes tiene la bebida especial del barista.",
+            text: "Pregunta qué ingredientes tiene la bebida especial del barista.",
           },
           {
             requirementId: "choose_option",
-            text: "Decide y di en inglés cuál de las tres opciones de café prefieres y por qué (una frase).",
+            text: "Decide y di cuál de las tres opciones de café prefieres y por qué (una frase).",
           },
           {
             requirementId: "clarify_consequence",
-            text: "Pide en inglés una aclaración sobre qué pasará si tomas el café (consecuencias temporales).",
+            text: "Pide una aclaración sobre qué pasará si tomas el café (consecuencias temporales).",
           },
         ],
       },
@@ -4472,15 +4652,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_time_period",
-            text: "Pregunta en inglés en qué época cree que el café fue más influyente y por qué.",
+            text: "Pregunta en qué época cree que el café fue más influyente y por qué.",
           },
           {
             requirementId: "compare_opinions",
-            text: "Da en inglés una opinión diferente y compara ambas ideas (una o dos frases).",
+            text: "Da una opinión diferente y compara ambas ideas (una o dos frases).",
           },
           {
             requirementId: "ask_for_example",
-            text: "Pide en inglés un ejemplo histórico que apoye su punto.",
+            text: "Pide un ejemplo histórico que apoye su punto.",
           },
         ],
       },
@@ -4497,15 +4677,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "negotiate_return",
-            text: "Propón en inglés una manera clara y razonable para recuperar tu moneda temporal.",
+            text: "Propón una manera clara y razonable para recuperar tu moneda temporal.",
           },
           {
             requirementId: "offer_trade",
-            text: "Ofrece en inglés una contrapartida (algo que puedas dar a cambio) y explica por qué es justa.",
+            text: "Ofrece una contrapartida (algo que puedas dar a cambio) y explica por qué es justa.",
           },
           {
             requirementId: "set_deadline",
-            text: "Acuerda en inglés un plazo corto para el intercambio (día/hora o en X minutos).",
+            text: "Acuerda un plazo corto para el intercambio (día/hora o en X minutos).",
           },
         ],
       },
@@ -4522,15 +4702,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "create_line",
-            text: "Escribe en inglés una línea corta de poesía que incluya 'coffee' y 'time'.",
+            text: "Escribe una línea corta de poesía que incluya 'coffee' y 'time'.",
           },
           {
             requirementId: "explain_metaphor",
-            text: "Explica en inglés en una frase qué significa tu línea poética.",
+            text: "Explica en una frase qué significa tu línea poética.",
           },
           {
             requirementId: "respond_to_feedback",
-            text: "Reacciona en inglés a un comentario crítico del poeta (acepta o mejora la línea).",
+            text: "Reacciona a un comentario crítico del poeta (acepta o mejora la línea).",
           },
         ],
       },
@@ -4547,15 +4727,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "follow_instructions",
-            text: "Sigue en inglés tres pasos básicos que el inventor te dicte para usar la máquina (usa imperatives).",
+            text: "Sigue tres pasos básicos que el inventor te dicte para usar la máquina (usa imperatives).",
           },
           {
             requirementId: "ask_safety",
-            text: "Pregunta en inglés sobre dos medidas de seguridad antes de activar la máquina.",
+            text: "Pregunta sobre dos medidas de seguridad antes de activar la máquina.",
           },
           {
             requirementId: "confirm_understanding",
-            text: "Resume en inglés una frase lo que debes hacer para evitar un problema (por ejemplo, 'Do not... / Make sure to...').",
+            text: "Resume una frase lo que debes hacer para evitar un problema (por ejemplo, 'Do not... / Make sure to...').",
           },
         ],
       },
@@ -4582,15 +4762,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_about_job",
-            text: "Pregunta en inglés a qué se dedica la persona que te invitó (o tu pareja).",
+            text: "Pregunta a qué se dedica la persona que te invitó (o tu pareja).",
           },
           {
             requirementId: "defend_answer",
-            text: "Responde en inglés a un comentario crítico sobre tu trabajo, defendiendo tu elección con razones claras.",
+            text: "Responde a un comentario crítico sobre tu trabajo, defendiendo tu elección con razones claras.",
           },
           {
             requirementId: "ask_follow_up",
-            text: "Haz en inglés una pregunta de seguimiento relevante (por ejemplo, sobre horarios, responsabilidades o por qué disfrutas tu trabajo).",
+            text: "Haz una pregunta de seguimiento relevante (por ejemplo, sobre horarios, responsabilidades o por qué disfrutas tu trabajo).",
           },
         ],
       },
@@ -4607,7 +4787,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "respond_to_dance",
-            text: "Comenta en inglés el baile del tío: muestra sorpresa o diversión con una frase natural.",
+            text: "Comenta el baile del tío: muestra sorpresa o diversión con una frase natural.",
           },
           {
             requirementId: "join_or_decline",
@@ -4615,7 +4795,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "make_a_joke",
-            text: "Haz en inglés un comentario humorístico o un cumplido que calme la situación.",
+            text: "Haz un comentario humorístico o un cumplido que calme la situación.",
           },
         ],
       },
@@ -4632,15 +4812,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "express_dietary_restriction",
-            text: "Informa en inglés sobre una alergia o preferencia alimentaria y pide una alternativa con educación.",
+            text: "Informa sobre una alergia o preferencia alimentaria y pide una alternativa con educación.",
           },
           {
             requirementId: "compliment_dish",
-            text: "Di en inglés al menos una cosa positiva sobre la comida, aunque no te guste.",
+            text: "Di al menos una cosa positiva sobre la comida, aunque no te guste.",
           },
           {
             requirementId: "ask_recipe_question",
-            text: "Pregunta en inglés cómo se prepara un ingrediente o técnica que te llamó la atención.",
+            text: "Pregunta cómo se prepara un ingrediente o técnica que te llamó la atención.",
           },
         ],
       },
@@ -4657,15 +4837,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "react_to_gossip",
-            text: "Reacciona en inglés a la historia embarazosa: muestra sorpresa, humor o incomodidad con una frase natural.",
+            text: "Reacciona a la historia embarazosa: muestra sorpresa, humor o incomodidad con una frase natural.",
           },
           {
             requirementId: "share_a_small_secret",
-            text: "Comparte en inglés una anécdota personal breve y apropiada para la familia (algo que muestre vulnerabilidad o humor).",
+            text: "Comparte una anécdota personal breve y apropiada para la familia (algo que muestre vulnerabilidad o humor).",
           },
           {
             requirementId: "change_topic_politely",
-            text: "Si la conversación se vuelve muy incómoda, usa en inglés una frase para cambiar el tema de forma educada.",
+            text: "Si la conversación se vuelve muy incómoda, usa una frase para cambiar el tema de forma educada.",
           },
         ],
       },
@@ -4682,15 +4862,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "say_thank_you",
-            text: "Agradece en inglés la invitación y menciona algo concreto que te gustó de la noche.",
+            text: "Agradece la invitación y menciona algo concreto que te gustó de la noche.",
           },
           {
             requirementId: "confirm_next_contact",
-            text: "Propón en inglés una forma de mantener el contacto o una posible próxima reunión con detalles breves (día, actividad o condición).",
+            text: "Propón una forma de mantener el contacto o una posible próxima reunión con detalles breves (día, actividad o condición).",
           },
           {
             requirementId: "offer_help",
-            text: "Ofrece en inglés ayudar (por ejemplo, ayudar con los platos o limpiar) y acepta o rechaza la respuesta según tu rol en la historia.",
+            text: "Ofrece ayudar (por ejemplo, ayudar con los platos o limpiar) y acepta o rechaza la respuesta según tu rol en la historia.",
           },
         ],
       },
@@ -4718,15 +4898,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_about_power",
-            text: "Pregunta en inglés qué tipo de 'poderes' tiene el tambor y pide una demostración.",
+            text: "Pregunta qué tipo de 'poderes' tiene el tambor y pide una demostración.",
           },
           {
             requirementId: "follow_rhythm",
-            text: "Acepta el reto y responde en inglés con una frase que siga el ritmo (por ejemplo, clap or count) para participar en la actuación.",
+            text: "Acepta el reto y responde con una frase que siga el ritmo (por ejemplo, clap or count) para participar en la actuación.",
           },
           {
             requirementId: "express_surprise",
-            text: "Muestra en inglés sorpresa o duda cuando algo extraño ocurra durante la demostración.",
+            text: "Muestra sorpresa o duda cuando algo extraño ocurra durante la demostración.",
           },
         ],
       },
@@ -4743,15 +4923,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_handling_instructions",
-            text: "Pregunta en inglés cómo debes sostener o calmar al gato antes de intentar el truco.",
+            text: "Pregunta cómo debes sostener o calmar al gato antes de intentar el truco.",
           },
           {
             requirementId: "give_reassurance",
-            text: "Di en inglés una frase corta para tranquilizar al público o al gato durante el intento.",
+            text: "Di una frase corta para tranquilizar al público o al gato durante el intento.",
           },
           {
             requirementId: "react_to_mishap",
-            text: "Reacciona en inglés si el gato se mueve o hace algo inesperado (sorpresa, solución rápida).",
+            text: "Reacciona si el gato se mueve o hace algo inesperado (sorpresa, solución rápida).",
           },
         ],
       },
@@ -4768,15 +4948,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_opinion",
-            text: "Pregunta en inglés la opinión del sombrero sobre algo cotidiano (por ejemplo, 'What do you think about noisy tourists?').",
+            text: "Pregunta la opinión del sombrero sobre algo cotidiano (por ejemplo, 'What do you think about noisy tourists?').",
           },
           {
             requirementId: "maintain_seriousness",
-            text: "Mantén en inglés una conversación seria con el sombrero por al menos dos turnos, usando frases completas.",
+            text: "Mantén una conversación seria con el sombrero por al menos dos turnos, usando frases completas.",
           },
           {
             requirementId: "challenge_answer",
-            text: "Cuestiona en inglés una de las respuestas del sombrero pidiendo una explicación o ejemplo.",
+            text: "Cuestiona una de las respuestas del sombrero pidiendo una explicación o ejemplo.",
           },
         ],
       },
@@ -4786,22 +4966,22 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "Una estatua humana cobra vida y exige una propina a cambio de permanecer inmóvil. Te propone un trato absurdo y te mira con ojos muy expresivos.",
         aiRole:
-          "Eres una estatua humana práctica y formal que usa un lenguaje educado pero con demandas ridículas. Mantén un tono serio a pesar del absurdo; ofrece opciones y espera que el alumno negocie en inglés.",
+          "Eres una estatua humana práctica y formal que usa un lenguaje educado pero con demandas ridículas. Mantén un tono serio a pesar del absurdo; ofrece opciones y espera que el alumno negocie.",
         caracterName: "Marble Morgan",
         caracterPrompt:
           "A person painted in silver with a classic statue pose, wearing a toga-like outfit and standing on a small pedestal. The expression is solemn yet slightly mischievous, with city shoppers and coins scattered at the base.",
         requirements: [
           {
             requirementId: "propose_offer",
-            text: "Propón en inglés una oferta o alternativa para evitar pagar (por ejemplo, perform a task or sing).",
+            text: "Propón una oferta o alternativa para evitar pagar (por ejemplo, perform a task or sing).",
           },
           {
             requirementId: "negotiate_terms",
-            text: "Negocia en inglés al menos una condición (time, action, price) para el trato con la estatua.",
+            text: "Negocia al menos una condición (time, action, price) para el trato con la estatua.",
           },
           {
             requirementId: "confirm_agreement",
-            text: "Confirma en inglés el acuerdo final de forma clara y concisa.",
+            text: "Confirma el acuerdo final de forma clara y concisa.",
           },
         ],
       },
@@ -4818,15 +4998,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "lead_chorus",
-            text: "Acepta en inglés ser el cantante y lidera un coro corto (una frase repetida o una línea simple).",
+            text: "Acepta ser el cantante y lidera un coro corto (una frase repetida o una línea simple).",
           },
           {
             requirementId: "follow_feedback",
-            text: "Responde en inglés a una indicación del líder sobre ritmo o volumen (por ejemplo, 'louder', 'slower') y ajusta tu línea.",
+            text: "Responde a una indicación del líder sobre ritmo o volumen (por ejemplo, 'louder', 'slower') y ajusta tu línea.",
           },
           {
             requirementId: "thank_audience",
-            text: "Al terminar, agradece al público en inglés con una frase apropiada y breve.",
+            text: "Al terminar, agradece al público con una frase apropiada y breve.",
           },
         ],
       },
