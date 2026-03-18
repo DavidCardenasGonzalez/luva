@@ -3001,65 +3001,101 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_map_purpose",
-            text: "Pregunta para qué sirve exactamente su mapa y qué hace diferente a otros mapas.",
+            text: "Pregunta en inglés para qué sirve exactamente el mapa.",
           },
           {
-            requirementId: "negotiate_price",
-            text: "Negocia el precio del mapa y pide una explicación o demostración antes de comprar.",
+            requirementId: "describe_your_destination",
+            text: "Explica a dónde planeas viajar.",
           },
           {
-            requirementId: "express_doubt",
-            text: "Expresa dudas o escepticismo sobre la validez de sus afirmaciones y pide pruebas concretas.",
+            requirementId: "ask_if_he_made_it",
+            text: "Pregunta si él mismo creó el mapa.",
+          },
+          {
+            requirementId: "phrase_can_you_explain",
+            text: "Pregunta si puede explicar eso un poco más.",
+          },
+          {
+            requirementId: "phrase_that_sounds",
+            text: "Usa la expresión “That sounds...”",
+          },
+          {
+            requirementId: "decide_if_you_buy",
+            text: "Explica si comprarías o no el mapa.",
           },
         ],
       },
       {
         missionId: "road_trip_madness_concert_couch_surfer",
-        title: "El fanático del sofá concierto",
+        title: "El cazador de extraterrestres del área de descanso",
         sceneSummary:
-          "En un área de descanso encuentras a alguien que viaja solo para coleccionar sofás de conciertos legendarios. Te cuenta historias exageradas de cada pieza.",
+          "En un área de descanso conoces a alguien que está convencido de que los extraterrestres usan las autopistas para viajar por la Tierra.",
         aiRole:
-          "Eres un fanático apasionado y dramático. Cuenta anécdotas con emoción, usa comparaciones coloridas y espera que el interlocutor muestre interés. Mantén un toque cómico y teatral.",
-        caracterName: "Lola Sofa",
+          "Eres un entusiasta conspiranoico pero amigable. Explicas teorías absurdas con total confianza, señalas 'pruebas' imaginarias y haces preguntas para ver si el interlocutor también ha visto señales extraterrestres.",
+        caracterName: "Gary Galaxy",
         caracterPrompt:
-          "A lively young woman with a vintage leather jacket and bright hair dye, sitting cross-legged on an old portable sofa. She holds ticket stubs and polaroids, has animated facial expressions, and is surrounded by stickers and concert posters.",
+          "A scruffy man wearing a reflective emergency vest covered in alien stickers. He holds a notebook full of strange diagrams of highways and UFOs. Behind him is a rest stop parking lot at night with blinking neon lights.",
         requirements: [
           {
-            requirementId: "ask_story_details",
-            text: "Pide detalles concretos sobre una de sus historias de sofá (lugar, fecha, persona famosa involucrada).",
+            requirementId: "ask_about_theory",
+            text: "Pregunta en inglés cómo funcionan exactamente las autopistas para los extraterrestres.",
           },
           {
-            requirementId: "compare_preferences",
-            text: "Compara tus gustos musicales con los suyos y explica por qué prefieres uno u otro.",
+            requirementId: "ask_how_he_discovered",
+            text: "Pregunta cómo descubrió esa teoría.",
           },
           {
-            requirementId: "handle_exaggeration",
-            text: "Cuestiona una de sus afirmaciones exageradas y pide que la explique de forma más realista.",
+            requirementId: "ask_if_he_tracks_aliens",
+            text: "Pregunta cómo rastrea a los extraterrestres.",
+          },
+          {
+            requirementId: "ask_if_he_saw_ufo",
+            text: "Pregunta si alguna vez vio un OVNI.",
+          },
+          {
+            requirementId: "phrase_go_on",
+            text: "Usa la expresión “Go on.”",
+          },
+          {
+            requirementId: "phrase_thats_a_big_claim",
+            text: "Usa la expresión “That’s a big claim.”",
           },
         ],
       },
       {
-        missionId: "road_trip_madness_tourist_time_traveler",
-        title: "El turista que viaja en el tiempo",
+        missionId: "road_trip_madness_wise_road_tourist",
+        title: "El turista sabio de la carretera",
         sceneSummary:
-          "Un anciano dice ser un turista temporal que ha visto versiones alternas de la carretera. Está convencido de que puedes cambiar pequeñas decisiones para mejorar el viaje.",
+          "Un anciano viajero dice haber recorrido la misma carretera muchas veces y afirma que pequeños cambios en el camino pueden transformar completamente el viaje.",
         aiRole:
-          "Eres un viajero del tiempo juguetón y sabio. Habla con calma, mezcla observaciones prácticas con consejos crípticos, y a veces hace bromas sobre paradojas temporales. Mantén paciencia y tono enigmático.",
+          "Eres un viajero experimentado y reflexivo. Hablas con calma, compartes observaciones sobre la vida en la carretera y das consejos prácticos mezclados con comentarios enigmáticos. A veces haces bromas suaves sobre los errores típicos de los viajeros.",
         caracterName: "Evelyn Chronos",
         caracterPrompt:
-          "An elderly person wearing a mismatched scarf and round spectacles, carrying a faded travel journal full of notes and sketches. They sit on a bench beside the road, with a calm, knowing smile and a background of old postcards pinned around them.",
+          "An elderly traveler wearing a mismatched scarf and round spectacles, carrying a faded travel journal full of notes and sketches. They sit on a bench beside the road with a calm, knowing smile, surrounded by old postcards and travel stickers collected from many journeys.",
         requirements: [
           {
-            requirementId: "ask_time_experience",
-            text: "Pregunta sobre una experiencia específica que haya tenido viajando en el tiempo y pide una descripción detallada.",
+            requirementId: "ask_about_first_trip",
+            text: "Pregunta cuándo fue la primera vez que viajó por esa carretera.",
           },
           {
-            requirementId: "discuss_consequences",
-            text: "Discute las posibles consecuencias de cambiar una decisión menor en el viaje y da tu opinión razonada.",
+            requirementId: "ask_about_changes_over_time",
+            text: "Pregunta cómo ha cambiado la carretera con los años.",
           },
           {
-            requirementId: "ask_for_advice",
-            text: "Pide un consejo práctico para tu ruta actual basado en sus viajes temporales.",
+            requirementId: "ask_about_biggest_mistake",
+            text: "Pregunta cuál fue el error más grande que cometió viajando.",
+          },
+          {
+            requirementId: "ask_about_difficult_moment",
+            text: "Pregunta si alguna vez tuvo un momento difícil durante uno de sus viajes.",
+          },
+          {
+            requirementId: "phrasal_set_off",
+            text: "Usa el phrasal verb “set off” (empezar un viaje).",
+          },
+          {
+            requirementId: "phrasal_come_across",
+            text: "Usa el phrasal verb “come across” (encontrar por casualidad).",
           },
         ],
       },
@@ -3067,7 +3103,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "road_trip_madness_foodie_pirate",
         title: "El pirata gourmet",
         sceneSummary:
-          "En un puesto de comida encuentras a un 'pirata gourmet' que combina recetas antiguas con ingredientes de la carretera. Te ofrece una degustación con reglas curiosas.",
+          "Estas en un puesto de comida encuentras a un 'pirata gourmet' que combina recetas antiguas con ingredientes de la carretera. Te ofrece una degustación con reglas curiosas.",
         aiRole:
           "Eres un chef pirata carismático y teatral. Habla con energía, mezcla lenguaje marinero con términos culinarios y propone desafíos sabrosos pero extraños. Sé persuasivo y juguetón.",
         caracterName: "Captain Sizzle",
@@ -3075,16 +3111,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A robust, bearded person wearing a worn tricorn hat adorned with cooking utensils and a stained apron. They stand behind a roadside grill with smoke and trays of colorful, unusual-looking dishes, grinning broadly.",
         requirements: [
           {
-            requirementId: "ask_ingredients",
-            text: "Pregunta por los ingredientes principales del plato que propone y su origen.",
+            requirementId: "ask_about_cooking_time",
+            text: "Pregunta cuánto tiempo tarda en preparar el plato.",
           },
           {
-            requirementId: "accept_or_refuse",
-            text: "Acepta o rechaza la degustación, dando razones claras (allergies, preferences, curiosity).",
+            requirementId: "ask_about_kitchen_tools",
+            text: "Pregunta qué utensilios son indispensables para su cocina.",
           },
           {
-            requirementId: "request_recipe",
-            text: "Solicita una receta simple o un tip de cocina que puedas intentar en casa.",
+            requirementId: "ask_about_future_recipe",
+            text: "Pregunta si está trabajando en una nueva receta.",
+          },
+          {
+            requirementId: "phrasal_whip_up",
+            text: "Usa el phrasal verb “whip up” (preparar rápidamente).",
+          },
+          {
+            requirementId: "phrasal_cut_back_on",
+            text: "Usa el phrasal verb “cut back on”.",
+          },
+          {
+            requirementId: "idiom_spill_the_beans",
+            text: "Usa el idiom “spill the beans”.",
           },
         ],
       },
@@ -3100,16 +3148,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A flamboyant radio host with dramatic makeup, oversized headphones, and a glittery microphone. She sits in a retro car-turned-studio filled with blinking lights and quirky gadgets, smiling energetically.",
         requirements: [
           {
-            requirementId: "ask_for_evidence",
-            text: "Pregunta qué evidencia tiene la locutora para afirmar que la carretera envía señales.",
+            requirementId: "ask_signal_origin",
+            text: "Pregunta de dónde cree la locutora que provienen las supuestas señales de la carretera.",
           },
           {
-            requirementId: "offer_counterargument",
-            text: "Ofrece un contraargumento razonado y calmo frente a su teoría.",
+            requirementId: "ask_how_signals_work",
+            text: "Pregunta cómo exactamente la carretera enviaría esas señales.",
           },
           {
-            requirementId: "participate_live",
-            text: "Responde a una pregunta en directo de la locutora (puede ser una opinión o una experiencia personal relacionada con la carretera).",
+            requirementId: "ask_about_frequency",
+            text: "Pregunta con qué frecuencia ocurren esos eventos.",
+          },
+          {
+            requirementId: "phrasal_rule_out",
+            text: "Usa el phrasal verb “rule out”.",
+          },
+          {
+            requirementId: "vocab_broadcast",
+            text: "Usa la palabra “broadcast”.",
+          },
+          {
+            requirementId: "ask_about_personal_experience",
+            text: "Pregunta si ella misma ha experimentado algo extraño.",
           },
         ],
       },
@@ -3130,22 +3190,34 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "Te presentan a Bertie, un loro que no para de imitar voces y dar consejos absurdos. Debes ganarte su confianza mientras el dueño te observa con una sonrisa preocupada.",
         aiRole:
-          "Eres el dueño preocupado y divertido. Habla con paciencia, da información sobre los hábitos del loro y lanza comentarios sarcásticos de vez en cuando. Mantén un tono amistoso y ligeramente exasperado.",
+          "Eres el dueño preocupado y divertido. Habla con paciencia, da información sobre los hábitos del loro y lanza comentarios sarcásticos de vez en cuando. Le gustan las golosinas, Mantén un tono amistoso y ligeramente exasperado.",
         caracterName: "Sam the Owner",
         caracterPrompt:
           "A friendly middle-aged person wearing a paint-splattered cardigan and glasses perched on their head. They have a warm smile, slightly rumpled hair, and stand in a colorful living room filled with bird toys. They hold a cup of tea and occasionally glance at a noisy parrot cage.",
         requirements: [
           {
-            requirementId: "ask_parrot_rules",
-            text: "Pregunta cuáles son las reglas para cuidar a Bertie (comida, horas, palabras prohibidas).",
+            requirementId: "conversation_identificar_palabras_gatillo",
+            text: "Pregunta cuáles son las palabras o sonidos que hacen que Bertie se altere para poder evitarlos.",
           },
           {
-            requirementId: "calm_parrot",
-            text: "Di una frase corta para calmar al loro cuando empiece a gritar o a imitar a alguien.",
+            requirementId: "conversation_pedir_demostracion_manejo",
+            text: "Solicita que el dueño te muestre cómo acercar la mano al loro.",
           },
           {
-            requirementId: "confirm_schedule",
-            text: "Confirma el horario de visitas y llamadas si surge algún problema.",
+            requirementId: "english_usar_phrasal_calm_down",
+            text: "Emplea el phrasal verb 'calm down'",
+          },
+          {
+            requirementId: "english_usar_phrasal_run_out_of",
+            text: "Emplea 'run out of' para hablar de qué harás si se acaban las golosinas.",
+          },
+          {
+            requirementId: "english_usar_collocation_set_boundaries",
+            text: "Usa la collocation 'set boundaries'.",
+          },
+          {
+            requirementId: "english_usar_vocab_latch",
+            text: "Usa la palabra 'latch'.",
           },
         ],
       },
@@ -3161,16 +3233,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "An energetic dog trainer wearing a bright tracksuit and a whistle around her neck. Her hair is in a messy ponytail, she has a confident grin, and she stands on a city sidewalk with a leash in hand and treats in her pocket. A lively dog pulls at the leash beside her.",
         requirements: [
           {
-            requirementId: "ask_control_techniques",
-            text: "Pregunta qué técnica usar para controlar a Spike durante el paseo.",
+            requirementId: "conversation_confirmar_agarre_correa",
+            text: "Confirma si tu forma de agarrar la correa es segura y eficiente para un perro que tira.",
           },
           {
-            requirementId: "give_command",
-            text: "Dale una orden clara al perro (por ejemplo: 'sit', 'stay' o 'heel') y asegúrate de que el entrenador la apruebe.",
+            requirementId: "conversation_preguntar_refuerzo_positivo",
+            text: "Pregunta con qué frecuencia debes reforzar positivamente a Spike cuando ignora una distracción.",
           },
           {
-            requirementId: "handle_interruption",
-            text: "Describe qué harías si Spike corre hacia una bicicleta o una paloma.",
+            requirementId: "conversation_ensayar_parar_y_seguir",
+            text: "Propón practicar paradas breves y reanudaciones para que Spike controle el impulso y pide evaluación.",
+          },
+          {
+            requirementId: "english_phrasal_rein_in",
+            text: "Usa el phrasal verb 'rein in'.",
+          },
+          {
+            requirementId: "english_phrasal_hold_on",
+            text: "Usa el phrasal verb 'hold on'.",
+          },
+          {
+            requirementId: "english_use_threshold",
+            text: "Usa 'threshold' al hablar del límite de tolerancia de Spike.",
           },
         ],
       },
@@ -3186,16 +3270,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A sleek, long-haired cat with a tiny jeweled collar, lounging on a velvet cushion. She has narrowed, intelligent eyes and a slightly raised eyebrow, as if judging everything. The room is dim and elegant, with books and a faint smell of lavender.",
         requirements: [
           {
-            requirementId: "compliment_cat",
-            text: "Haz un cumplido auténtico pero breve que no suene exagerado para ganarte al gato.",
+            requirementId: "conversation_halago_sutil_collares",
+            text: "Haz un cumplido breve y creíble sobre el collar con joya de Madame Whiskers.",
           },
           {
-            requirementId: "ask_for_permission",
-            text: "Pregunta si puedes mover algún objeto que el gato está inspeccionando.",
+            requirementId: "conversation_hipotesis_breve_sobre_caso",
+            text: "Propón una hipótesis corta sobre lo que ella está investigando.",
           },
           {
-            requirementId: "report_findings",
-            text: "Resume (2–3 frases) lo que crees que el gato estaba investigando.",
+            requirementId: "english_rule_out_phrasal",
+            text: "Emplea 'rule out' para descartar una pista que te parece débil.",
+          },
+          {
+            requirementId: "english_red_herring_vocab",
+            text: "Incluye el término 'red herring'.",
+          },
+          {
+            requirementId: "english_cut_to_the_chase_idiom",
+            text: "Incluye el idiom 'cut to the chase'.",
+          },
+          {
+            requirementId: "english_narrow_down_phrasal",
+            text: "Incluye 'narrow down' para reducir la lista de sospechosos.",
           },
         ],
       },
@@ -3211,16 +3307,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A cute, chubby rabbit wearing a tiny chef's hat and a stained apron. He stands on his hind legs on a kitchen counter surrounded by vegetables and recipe cards, with an eager, determined expression and bright eyes.",
         requirements: [
           {
-            requirementId: "negotiate_meal",
-            text: "Negocia una merienda que sea aceptable para ti y para Coco (ofrece alternativas).",
+            requirementId: "conversation_negotiate_merienda_aceptable",
+            text: "Pide en inglés una merienda intermedia que satisfaga tus gustos y la obsesión saludable de Coco.",
           },
           {
-            requirementId: "ask_ingredients",
-            text: "Pregunta qué ingredientes están bien y cuáles están totalmente prohibidos.",
+            requirementId: "conversation_rebate_asuncion_sobre_carbohidratos",
+            text: "Refuta en inglés la idea de que tu merienda no es saludable.",
           },
           {
-            requirementId: "give_allergy_info",
-            text: "Comunica si tienes alguna alergia o preferencia alimentaria que Coco deba saber.",
+            requirementId: "conversation_rechaza_ingrediente_con_razon",
+            text: "Rechaza en inglés un ingrediente específico y justifica tu decisión con una razón práctica.",
+          },
+          {
+            requirementId: "english_phrasal_swap_out",
+            text: 'Propón en inglés una sustitución usando "swap out".',
+          },
+          {
+            requirementId: "english_phrasal_stick_to",
+            text: 'Insiste en inglés en mantener tu plan usando el phrasal verb "stick to".',
+          },
+          {
+            requirementId: "english_collocation_guilty_pleasure",
+            text: 'Admite en inglés un antojo usando la collocation "guilty pleasure".',
           },
         ],
       },
@@ -3230,22 +3338,34 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "A medianoche suena una alarma y descubres a Hoot, una lechuza que trae mensajes misteriosos. Debes entender el mensaje sin asustar al mensajero emplumado.",
         aiRole:
-          "Eres Hoot la lechuza mensajera: enigmático, formal y un poco teatral. Habla con frases medidas, ofrece pistas crípticas y espera que el alumno haga preguntas directas para aclararlas. Mantén un tono misterioso pero amable.",
+          "Eres Hoot la lechuza mensajera: formal y un poco teatral. Habla con frases medidas y espera que el alumno haga preguntas directas para aclararlas. Mantén un tono misterioso pero amable.",
         caracterName: "Hoot the Owl",
         caracterPrompt:
           "A dignified owl with round spectacles perched on a wooden post in a moonlit garden. He wears a tiny satchel and has an expressive face, with feathers slightly ruffled by a night breeze. The scene has soft silver light and scattered letters.",
         requirements: [
           {
-            requirementId: "ask_message_details",
-            text: "Pregunta qué contiene exactamente el mensaje y por qué es urgente.",
+            requirementId: "conversation_pedir_ver_mensaje_sin_tocar",
+            text: "Pide ver el mensaje de cerca.",
           },
           {
-            requirementId: "confirm_delivery",
-            text: "Confirma a quién debe entregarse el mensaje y cuándo.",
+            requirementId: "conversation_preguntar_origen_alarma",
+            text: "Pregunta si la alarma estaba relacionada con la llegada de Hoot o con el contenido del mensaje.",
           },
           {
-            requirementId: "clarify_consequences",
-            text: "Pregunta qué pasaría si el mensaje no se entrega a tiempo.",
+            requirementId: "english_usar_hand_over",
+            text: "Usa el phrasal verb en inglés 'hand over'.",
+          },
+          {
+            requirementId: "english_usar_go_off",
+            text: "Usa el phrasal verb en inglés 'go off'.",
+          },
+          {
+            requirementId: "english_usar_utter_discretion",
+            text: "Usa la collocation en inglés 'utmost discretion' para prometer discreción total.",
+          },
+          {
+            requirementId: "english_usar_touch_base",
+            text: "Usa el idiom en inglés 'touch base'.",
           },
         ],
       },
@@ -3263,24 +3383,36 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "reality_show_audition_bizarre_host",
         title: "El presentador excéntrico",
         sceneSummary:
-          "Debes convencer a un presentador que cambia de tema cada cinco segundos y adora las metáforas ridículas.",
+          "Debes mantener una entrevista con un presentador que cambia de tema cada cinco segundos y quiere que te adaptes rápidamente.",
         aiRole:
-          "Eres un presentador excéntrico y carismático que habla rápido, usa metáforas extravagantes y pone a prueba la paciencia del concursante con preguntas inesperadas. Mantén un tono juguetón y ligeramente teatral.",
+          "Eres un presentador excéntrico y carismático que habla rápido y pone a prueba la paciencia del concursante con preguntas inesperadas. Cambia de tema sin previo aviso. Mantén un tono juguetón y ligeramente teatral.",
         caracterName: "Gideon Spark",
         caracterPrompt:
           "A flamboyant TV host wearing a colorful blazer with mismatched socks and oversized glasses. He has wild hair, an exaggerated grin, and gestures dramatically on a glittery stage. Bright studio lights and a cheering crowd in the background.",
         requirements: [
           {
-            requirementId: "introduce_yourself",
-            text: "Preséntate de forma clara y segura (nombre, edad aproximada y una frase sobre tu experiencia).",
+            requirementId: "conversation_request_repeat_fast_line",
+            text: "Pide en inglés que el presentador repita algo que dijo.",
           },
           {
-            requirementId: "handle_rapid_questions",
-            text: "Responde a al menos dos preguntas rápidas y distintas del presentador sin perder la calma.",
+            requirementId: "english_use_out_of_the_blue_idiom",
+            text: "Usa el idiom en inglés 'out of the blue'.",
           },
           {
-            requirementId: "use_one_metaphor",
-            text: "Usa una metáfora creativa para describir por qué serías bueno en el show.",
+            requirementId: "english_use_off_limits_collocation",
+            text: "Incluye la collocation en inglés 'off-limits'.",
+          },
+          {
+            requirementId: "english_use_stick_to_phrasal",
+            text: "Usa el phrasal verb en inglés 'stick to'.",
+          },
+          {
+            requirementId: "english_use_lean_into_phrasal",
+            text: "Incluye el phrasal verb en inglés 'lean into'.",
+          },
+          {
+            requirementId: "english_use_brush_off_phrasal",
+            text: "Emplea el phrasal verb en inglés 'brush off'.",
           },
         ],
       },
@@ -3288,7 +3420,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "reality_show_audition_critical_puppet_judge",
         title: "El juez títere crítico",
         sceneSummary:
-          "Un gran títere juez con voz chillona critica cada detalle: desde tu chiste hasta tu peinado. Tú tienes que defenderte con educación y humor.",
+          "Estás hablando con un gran títere juez con voz chillona que critica cada detalle: desde tu chiste hasta tu peinado. Tú tienes que defenderte con educación y humor.",
         aiRole:
           "Eres un juez títere muy crítico pero sorprendentemente justo; interrumpes con comentarios sarcásticos y preguntas puntuales. Mantén un tono satírico y directo, pero ofrece oportunidades para que el concursante brille.",
         caracterName: "Judge Pinch",
@@ -3296,16 +3428,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A large puppet judge with exaggerated features, wearing a tiny judicial robe and a comical wig. His expression alternates between stern and amused, and he sits on a small elevated bench surrounded by colorful stage props.",
         requirements: [
           {
-            requirementId: "defend_a_choice",
-            text: "Explica por qué tomaste una decisión concreta (por ejemplo, un outfit o un talento) usando al menos dos razones.",
+            requirementId: "conversation_establecer_limite_respectuoso",
+            text: "Establece un límite amable cuando el comentario del juez.",
           },
           {
-            requirementId: "respond_to_criticism",
-            text: "Responde a una crítica sarcástica del juez sin ofender y manteniendo el humor.",
+            requirementId: "conversation_responder_pregunta_absurda_con_humor",
+            text: "Responde a una pregunta absurda del juez con ingenio",
           },
           {
-            requirementId: "ask_for_feedback",
-            text: "Pide feedback específico para mejorar en la próxima ronda.",
+            requirementId: "english_use_read_the_room",
+            text: 'Usa la expresión en inglés "read the room".',
+          },
+          {
+            requirementId: "english_use_tone_down_phrasal",
+            text: 'Incluye el phrasal verb "tone down".',
+          },
+          {
+            requirementId: "english_use_laugh_off_phrasal",
+            text: 'Incluye el phrasal verb "laugh off".',
+          },
+          {
+            requirementId: "english_use_on_the_spot_expression",
+            text: 'Usa la expresión "on the spot".',
           },
         ],
       },
@@ -3321,16 +3465,32 @@ export const STORIES_SEED: StoryDefinition[] = [
           "An eccentric chef in a stained white apron and a tall, crooked chef's hat. He has flour on his cheeks, wild eyes, and is surrounded by unusual ingredients on a rustic kitchen counter. Steam and colorful spices fill the air.",
         requirements: [
           {
-            requirementId: "sell_the_dish",
-            text: "Vende el extraño plato como si fueras un publicista: usa al menos tres adjetivos sensoriales (taste, smell, texture).",
+            requirementId: "conversation_target_audience_probe",
+            text: "Pregunta a Chef Marlowe qué tipo de público quiere conquistar y adapta tu discurso a ese segmento.",
           },
           {
-            requirementId: "answer_ingredient_question",
-            text: "Responde qué ingrediente secreto añadiste y por qué mejora el plato.",
+            requirementId: "english_use_win_over",
+            text: 'Usa la expresión inglesa "win over" para prometer que conquistarás a los escépticos del jurado.',
           },
           {
-            requirementId: "handle_objection",
-            text: "Responde a una objeción del chef (ej. «That sounds weird») y ofrece una alternativa.",
+            requirementId: "english_use_spice_up_phrasal",
+            text: 'Usa el phrasal verb "spice up".',
+          },
+          {
+            requirementId: "english_use_take_it_up_a_notch_idiom",
+            text: 'Usa la expresión "take it up a notch".',
+          },
+          {
+            requirementId: "english_use_back_up_phrasal",
+            text: 'Usa el phrasal verb "back up".',
+          },
+          {
+            requirementId: "english_use_double_down_phrasal",
+            text: 'Usa el phrasal verb "double down".',
+          },
+          {
+            requirementId: "english_use_nevertheless_marker",
+            text: 'Usa el conector "nevertheless".',
           },
         ],
       },
@@ -3340,22 +3500,42 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "Un ser de otro planeta evalúa tu 'humanness' con preguntas extrañas sobre costumbres y emociones. Debes demostrar empatía y explicar comportamientos humanos.",
         aiRole:
-          "Eres un alien curioso y literal que hace preguntas inusuales sobre la vida humana, sin malicia pero con mucha ingenuidad. Mantén un tono inquisitivo, directo y humorístico.",
+          "Eres un alien curioso y literal que hace preguntas inusuales sobre la vida humana, sin malicia pero con mucha ingenuidad. Mantén un tono inquisitivo, directo y humorístico. Te cuesta entender el lenguaje figurado.",
         caracterName: "Zylo-7",
         caracterPrompt:
           "A friendly extraterrestrial with iridescent skin, three small eyes, and wearing a quirky metallic suit. It tilts its head in fascination and floats slightly above the ground in a futuristic audition room with holographic panels.",
         requirements: [
           {
-            requirementId: "explain_a_human_custom",
-            text: "Explica una costumbre humana (por ejemplo, 'small talk' or 'celebrations') de manera clara y breve.",
+            requirementId: "conversation_define_humanness_criteria",
+            text: "Pide a Zylo-7 que aclare qué criterios específicos usa para medir la 'humanidad' y confirma en voz alta esos criterios.",
           },
           {
-            requirementId: "show_empathy",
-            text: "Responde a una historia triste que el alien cuenta mostrando empatía y ofreciendo consuelo.",
+            requirementId: "conversation_request_time_to_think",
+            text: "Pide unos segundos para pensar ante una pregunta inesperada y avisa cuando estés listo para responder.",
           },
           {
-            requirementId: "ask_a_clarifying_question",
-            text: "Haz una pregunta de aclaración sobre algo que el alien diga para mostrar interés.",
+            requirementId: "english_use_phrasal_verb_open_up",
+            text: "Usa el phrasal verb inglés 'open up'.",
+          },
+          {
+            requirementId: "english_use_word_misconception",
+            text: "Usa la palabra inglesa 'misconception'.",
+          },
+          {
+            requirementId: "english_use_word_bittersweet",
+            text: "Emplea la palabra inglesa 'bittersweet'.",
+          },
+          {
+            requirementId: "english_use_word_awkward",
+            text: "Incluye la palabra inglesa 'awkward'.",
+          },
+          {
+            requirementId: "english_use_idiom_fish_out_of_water",
+            text: "Usa el modismo inglés 'fish out of water'.",
+          },
+          {
+            requirementId: "english_use_idiom_keep_a_straight_face",
+            text: "Usa la expresión inglesa 'keep a straight face'.",
           },
         ],
       },
@@ -3365,22 +3545,35 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "Un coreógrafo exagerado te pide improvisar un movimiento para la cámara; quiere pasión, pero tu inglés debe convencerlo con instrucciones simples.",
         aiRole:
-          "Eres un coreógrafo sobreexcitado, dramático y detallista que da instrucciones enérgicas y espera descripciones visuales. Mantén un tono entusiasta y demandante, con halagos cuando alguien lo hace bien.",
+          "Eres una coreógrafa sobreexcitada, dramática y detallista que da instrucciones enérgicas y espera descripciones visuales. Mantén un tono entusiasta y demandante, con halagos cuando alguien lo hace bien.",
         caracterName: "Talia Vibe",
         caracterPrompt:
           "An energetic choreographer wearing bright activewear, chunky jewelry, and dramatic makeup. She poses mid-motion with a headset microphone, surrounded by mirrors and stage lights, exuding high energy and confidence.",
         requirements: [
           {
-            requirementId: "describe_a_move",
-            text: "Describe in English a simple dance move clearly so someone can copy it (use action verbs and sequencing).",
+            requirementId: "conversation_request_time_to_learn",
+            text: "Pedir en inglés que te den el tiempo para aprender la coreografía.",
           },
           {
-            requirementId: "accept_feedback",
-            text: "Accept in English a suggestion from the choreographer and restate how you'll change the move.",
+            requirementId: "conversation_confirmar_mirada_camara_o_espejo",
+            text: "Confirmar en inglés si debes mirar a la cámara",
           },
           {
-            requirementId: "express_confidence",
-            text: "Say in English a short confident line to motivate the crew before performing.",
+            requirementId: "conversation_aceptar_correccion_y_ajustar_energia",
+            text: "Aceptar en inglés una corrección de Talia y decir cómo ajustarás el nivel de energía.",
+          },
+          {
+            requirementId:
+              "conversation_mencionar_limite_vestuario_y_reemplazo",
+            text: "Señalar en inglés que tu vestuario limita un salto específico y ofrecer un reemplazo creíble.",
+          },
+          {
+            requirementId: "english_use_idiom_nail_it",
+            text: 'En inglés, usa "nail it".',
+          },
+          {
+            requirementId: "english_use_idiom_over_the_top",
+            text: 'En inglés, usa "over the top".',
           },
         ],
       },
@@ -3399,24 +3592,36 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "escape_room_mystery_clockmaker_puzzle",
         title: "El relojero despistado",
         sceneSummary:
-          "Encuentras a un relojero excéntrico rodeado de engranajes y relojes que marcan horas distintas; parece haber perdido la llave maestra. Debes negociar pistas antes de que un reloj empiece a sonar a las doce equivocada.",
+          "Encuentras a un relojero excéntrico; parece haber perdido su reloj favorito. Te pide ayuda para encontrarlo.",
         aiRole:
-          "Eres un relojero distraído y apasionado por los mecanismos. Habla con entusiasmo, a veces te olvidas de lo que decías, das pistas enigmáticas y respondes con humor y metáforas mecánicas.",
+          "Eres un relojero distraído y apasionado por los mecanismos. Habla con entusiasmo, a veces te olvidas de lo que decías y respondes con humor.",
         caracterName: "Elias Cogsworth",
         caracterPrompt:
           "A middle-aged clockmaker with wild gray hair and magnifying glasses perched on his forehead. He wears a stained apron covered in tiny gears, has ink on his fingers, and stands in a cluttered workshop filled with ticking clocks and hanging pendulums. His expression is frantic but friendly.",
         requirements: [
           {
-            requirementId: "ask_for_clue",
-            text: "Pide una pista concreta sobre la ubicación de la llave maestra.",
+            requirementId: "ask_last_seen_location",
+            text: "Pregunta donde podría haber visto su reloj por última vez.",
           },
           {
-            requirementId: "clarify_time_conflict",
-            text: "Pregunta por qué varios relojes marcan horas distintas y pide que lo explique claramente.",
+            requirementId: "confirm_understanding",
+            text: "Confirma que entendiste la instrucción del relojero.",
           },
           {
-            requirementId: "confirm_next_step",
-            text: "Resume la instrucción siguiente que te da el relojero para comprobar que la entendiste.",
+            requirementId: "english_use_phrasal_figure_out",
+            text: "Usa el phrasal verb 'figure out'.",
+          },
+          {
+            requirementId: "english_use_discourse_marker_nevertheless",
+            text: "Introduce una objeción con 'nevertheless'.",
+          },
+          {
+            requirementId: "english_use_phrasal_break_down",
+            text: "Usa el phrasal verb 'break down'.",
+          },
+          {
+            requirementId: "english_use_idiom_buy_time",
+            text: "Incluye el idiom 'buy time'.",
           },
         ],
       },
@@ -3432,16 +3637,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A charismatic street magician in a flamboyant velvet coat and a top hat, with a mischievous smile and a deck of curious-looking cards in his hands. He stands in a dim market stall filled with glowing trinkets and hanging talismans, exuding showmanship and mystery.",
         requirements: [
           {
-            requirementId: "negotiate_trade",
-            text: "Negocia un intercambio: qué darías por un objeto que supuestamente abre una puerta.",
+            requirementId: "conversation_pedir_demostracion",
+            text: "Pide en inglés una demostración de como se usa algun objeto.",
           },
           {
-            requirementId: "solve_riddle",
-            text: "Intenta resolver en voz alta un acertijo que te propone el ilusionista.",
+            requirementId: "english_use_call_your_bluff",
+            text: 'Di en inglés que vas a "call your bluff" si el vendedor exagera la potencia del objeto.',
           },
           {
-            requirementId: "ask_for_guarantee",
-            text: "Pide una garantía o prueba de que el objeto realmente funcionará.",
+            requirementId: "english_use_no_strings_attached",
+            text: 'Exige en inglés que la oferta sea "no strings attached" al aceptar una pista del vendedor.',
+          },
+          {
+            requirementId: "english_use_money_back_guarantee",
+            text: 'Pregunta en inglés si existe una "money-back guarantee" si el artefacto falla.',
+          },
+          {
+            requirementId: "english_use_up_my_sleeve",
+            text: 'Insinúa en inglés que el vendedor aún tiene algo "up your sleeve" respecto a las pistas.',
+          },
+          {
+            requirementId: "english_use_throw_me_off_pv",
+            text: 'Di en inglés que un detalle del truco te "threw me off" y pide aclaración.',
           },
         ],
       },
@@ -3457,16 +3674,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A slender librarian in vintage glasses, wearing a floral dress and a cardigan, holding an ancient book open as if about to sing. Shelves tower behind her, and sheet music peeks from between pages; she has a warm, whimsical smile.",
         requirements: [
           {
-            requirementId: "ask_for_plain_explanation",
-            text: "Pide una explicación directa y sin metáforas de la pista que canta.",
+            requirementId: "conversation_pedir_repetir_verso_clave",
+            text: "Pide que Beatrice repita el verso donde crees que aparece la pista clave y explica por qué ese verso te llamó la atención.",
           },
           {
-            requirementId: "identify_key_word",
-            text: "Cita la palabra o frase clave que escuchaste en su canción.",
+            requirementId: "conversation_solicitar_ritmo_mas_lento",
+            text: "Pide que cante más despacio el estribillo para poder anotar las palabras exactas.",
           },
           {
-            requirementId: "link_clue_to_object",
-            text: "Explica cómo esa palabra clave se relaciona con un objeto en la sala.",
+            requirementId: "english_usar_read_between_the_lines",
+            text: "Usa el idiom inglés 'read between the lines'.",
+          },
+          {
+            requirementId: "english_usar_pick_up_on",
+            text: "Usa el phrasal verb inglés 'pick up on'.",
+          },
+          {
+            requirementId: "english_usar_in_a_nutshell",
+            text: "Usa la expresión inglesa 'in a nutshell'.",
+          },
+          {
+            requirementId: "english_usar_piece_together",
+            text: "Usa el phrasal verb inglés 'piece together'.",
           },
         ],
       },
@@ -3482,16 +3711,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A short, energetic chef with a stained white jacket and a bandana, hands flour-dusted and holding a wooden spoon like a baton. The kitchen is steamy with pots bubbling and spices scattered everywhere; his face shows both anxiety and comic determination.",
         requirements: [
           {
-            requirementId: "ask_about_missing_ingredient",
-            text: "Pregunta cuál ingrediente falta y por qué es crucial para la receta.",
+            requirementId: "conversation_listar_faltantes_cantidades",
+            text: "Pide al chef que enumere todos los ingredientes faltantes con cantidades exactas para la receta.",
           },
           {
-            requirementId: "suggest_alternative",
-            text: "Propón una alternativa razonable al ingrediente faltante y explica por qué funcionaría.",
+            requirementId: "conversation_repartir_tareas_roles_claros",
+            text: "Propón dividirse las tareas y acuerda con el chef qué hará cada uno de forma específica.",
           },
           {
-            requirementId: "agree_on_plan",
-            text: "Confirma los pasos a seguir con el chef para recuperar o sustituir el ingrediente.",
+            requirementId: "english_usar_sabotage_collocation",
+            text: "Usa en inglés la palabra 'sabotage' o la collocation 'was sabotaged' para describir lo que ocurrió en la cocina.",
+          },
+          {
+            requirementId: "english_usar_phrasal_set_off_alarm",
+            text: "Advierte en inglés sobre activar la alarma usando el phrasal verb 'set off' con 'alarm'.",
+          },
+          {
+            requirementId: "english_usar_phrasal_seal_off_area",
+            text: "Sugiere en inglés acordonar una zona sensible usando el phrasal verb 'seal off'.",
+          },
+          {
+            requirementId: "english_usar_phrasal_speed_up_prep",
+            text: "Propón acelerar la preparación usando en inglés el phrasal verb 'speed up'.",
           },
         ],
       },
@@ -3499,7 +3740,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "escape_room_mystery_clocktower_guardian",
         title: "El guardián de la torre",
         sceneSummary:
-          "Un guardián de torre excéntrico exige tres pruebas de lógica y confianza antes de permitir subir; es severo pero tiene un sentido del humor oscuro.",
+          "En un escape room, un guardián de torre excéntrico exige tres pruebas de lógica y confianza antes de permitir subir; es severo pero tiene un sentido del humor oscuro.",
         aiRole:
           "Eres un guardián severo y enigmático que valora la lógica y la honestidad. Habla con formalidad, plantea preguntas retadoras y evalúa las respuestas; ofrece pistas adicionales solo si se demuestra razonamiento correcto.",
         caracterName: "Sir Reginald Thorn",
@@ -3507,16 +3748,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "An imposing tower guardian in a worn leather coat and a brass helmet, holding a large key and standing at the base of a spiral staircase. His expression is stern but with a glint of ironic amusement, and the tower interior is dim and stone-lined.",
         requirements: [
           {
-            requirementId: "solve_logic_test",
-            text: "Responde a una prueba lógica (explica tu razonamiento paso a paso).",
+            requirementId: "conversation_confirmar_reglas_tres_pruebas",
+            text: "Confirma con Sir Reginald que hay exactamente tres pruebas y explica brevemente qué entiendes por cada una.",
           },
           {
-            requirementId: "prove_honesty",
-            text: "Da una breve afirmación honesta sobre lo que has hecho hasta ahora en la sala (1–2 frases).",
+            requirementId: "conversation_persuadir_guardian_merito",
+            text: "Intenta persuadir al guardián de que tu razonamiento merece una mínima pista adicional.",
           },
           {
-            requirementId: "ask_for_permission_to_proceed",
-            text: "Pide permiso para subir la escalera y justifica brevemente por qué deberías hacerlo.",
+            requirementId: "english_usar_phrasal_rule_out",
+            text: 'Incluye el phrasal verb en inglés "rule out".',
+          },
+          {
+            requirementId: "english_usar_collocation_draw_a_conclusion",
+            text: 'Usa la collocation en inglés "draw a conclusion".',
+          },
+          {
+            requirementId: "english_usar_collocation_weigh_the_options",
+            text: 'Incluye la collocation en inglés "weigh the options" al comparar dos caminos posibles.',
+          },
+          {
+            requirementId: "english_usar_phrasal_lay_out",
+            text: 'Emplea el phrasal verb en inglés "lay out" para presentar tu plan paso a paso.',
           },
         ],
       },
@@ -3543,16 +3796,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A middle-aged woman with messy hair tied up in a colorful scarf, wearing a clipboard, a headset, and a sequined jacket with paint stains. She looks frazzled but sharp, standing among racks of clothes and sewing machines in a dim backstage area.",
         requirements: [
           {
-            requirementId: "introduce_yourself",
-            text: "Preséntate diciendo tu nombre y por qué estás ahí (una frase cada uno).",
+            requirementId: "conversation_presentacion_clara_rapida",
+            text: "Preséntate con tu nombre y di en una frase que te han confundido con parte del equipo pero que quieres ayudar sin estorbar.",
           },
           {
-            requirementId: "ask_for_permission",
-            text: "Pide permiso para tocar o mover algo en el backstage.",
+            requirementId: "conversation_identificar_responsable",
+            text: "Pregunta quién es la persona responsable inmediata de vestuario para recibir instrucciones rápidas.",
           },
           {
-            requirementId: "confirm_next_step",
-            text: "Pregunta cuál es el siguiente paso que debes hacer para ayudar.",
+            requirementId: "conversation_aclarar_no_modelo",
+            text: "Aclara explícitamente que no eres modelo ni diseñador.",
+          },
+          {
+            requirementId: "english_usar_line_up",
+            text: "Usa el término 'line-up' para pedir ver el orden de las salidas.",
+          },
+          {
+            requirementId: "english_usar_wardrobe_malfunction",
+            text: "Describe un problema urgente de vestuario usando la expresión 'wardrobe malfunction'.",
+          },
+          {
+            requirementId: "english_usar_quick_fix",
+            text: "Propón un 'quick fix' para un problema de vestuario.",
           },
         ],
       },
@@ -3568,16 +3833,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A young assistant with an oversized blazer, eyeliner, and a chaotic hairdo. He holds fabric swatches in one hand and a steaming iron in the other, making dramatic gestures in a cramped costume tent under bright lights.",
         requirements: [
           {
-            requirementId: "identify_problem",
-            text: "Pregunta qué vestido falta y pide detalles (color, talla, cuándo lo vieron).",
+            requirementId: "conversation_aclarar_vestido_faltante",
+            text: "Pregunta cuál es el vestido desaparecido.",
           },
           {
-            requirementId: "mediate_conflict",
-            text: "Sugiere una solución práctica para encontrar el vestido sin tomar partido.",
+            requirementId: "conversation_reconstruir_ruta",
+            text: "Pide reconstruir el recorrido del vestido paso a paso desde el perchero hasta la modelo.",
           },
           {
-            requirementId: "set_deadline",
-            text: 'Propón un plazo claro para resolver el problema (por ejemplo: "in 10 minutes").',
+            requirementId: "conversation_validar_sentimientos",
+            text: "Reconoce la frustración de ambos con empatía sin tomar partido.",
+          },
+          {
+            requirementId: "conversation_pedir_prueba_foto",
+            text: "Solicita una foto reciente del vestido.",
+          },
+          {
+            requirementId: "english_swap_out",
+            text: 'Usa el phrasal verb "swap out" al sugerir cambiar temporalmente el look de la modelo.',
+          },
+          {
+            requirementId: "english_given_that",
+            text: 'Empieza una frase con "Given that" para introducir una condición relevante del plan.',
           },
         ],
       },
@@ -3593,16 +3870,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A tall, striking model with platinum hair, bold makeup and a leather jacket thrown over an extravagant gown. She leans against a clothing rack, arms crossed, with an unimpressed smirk and bright stage lights behind her.",
         requirements: [
           {
-            requirementId: "ask_reason",
-            text: "Pregunta por qué no quiere llevar el atuendo.",
+            requirementId: "conversation_indagar_motivo_exacto",
+            text: "Pide que explique que no le gusta del atuendo.",
           },
           {
-            requirementId: "offer_alternative",
-            text: "Ofrece al menos una alternativa razonable o una condición para que se quede.",
+            requirementId: "conversation_condicion_minima_para_quedarse",
+            text: "Pregunta que podemos hacer para que se quede el vestido.",
           },
           {
-            requirementId: "confirm_agreement",
-            text: "Consigue una confirmación clara de la modelo sobre lo que hará (quedarse, cambiar, o irse).",
+            requirementId: "conversation_acordar_prueba_espejo",
+            text: "Propón que se pruebe el atuendo frente al espejo.",
+          },
+          {
+            requirementId: "conversation_talla_medidas",
+            text: "Pregunta su talla.",
+          },
+          {
+            requirementId: "english_slip_into",
+            text: "Incluye el phrasal verb 'slip into' al sugerir ponerse una alternativa en segundos.",
+          },
+          {
+            requirementId: "english_green_light",
+            text: "Utiliza 'green light' para pedir su visto bueno antes de hacer el ajuste.",
           },
         ],
       },
@@ -3618,16 +3907,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A flamboyant makeup artist with colorful brushes tucked into a belt, wearing a paint-splattered apron and oversized glasses. He’s kneeling by a makeup trolley under harsh dressing-room lights, smiling energetically.",
         requirements: [
           {
-            requirementId: "describe_problem",
-            text: "Explica exactamente qué parte del maquillaje falta y cuál es el estilo deseado (por ejemplo: smoky eye, natural).",
+            requirementId: "conversation_verify_designer_reference",
+            text: "Di que enviaras una imagen de referencia de la modelo con el maquillaje terminado.",
           },
           {
-            requirementId: "delegate_tasks",
-            text: "Asigna dos tareas concretas a otros miembros del equipo (por ejemplo: prepare foundation, hold mirror).",
+            requirementId: "english_use_smudge_proof",
+            text: 'Menciona explícitamente el adjetivo en inglés "smudge-proof" al justificar la elección del delineador.',
           },
           {
-            requirementId: "confirm_time_needed",
-            text: "Pregunta y confirma cuánto tiempo necesitas para completar el maquillaje.",
+            requirementId: "english_use_even_out",
+            text: 'Incluye el phrasal verb en inglés "even out" al hablar de igualar entre ambos ojos.',
+          },
+          {
+            requirementId: "english_use_tone_down",
+            text: 'Emplea el phrasal verb en inglés "tone down" al sugerir suavizar un color demasiado intenso.',
+          },
+          {
+            requirementId: "english_use_under_the_gun_idiom",
+            text: 'Menciona el idiom en inglés "under the gun" para señalar la presión de tiempo.',
+          },
+          {
+            requirementId: "english_use_waterline",
+            text: 'Menciona la palabra en inglés "waterline" al indicar dónde aplicarás el lápiz.',
           },
         ],
       },
@@ -3644,15 +3945,27 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "report_emergency",
-            text: "Describe la emergencia con detalle (what happened, who is affected).",
+            text: "Describe la emergencia.",
           },
           {
             requirementId: "propose_solution",
-            text: "Propón al menos una solución inmediata y viable (e.g., replace shoe, walk barefoot with cover).",
+            text: "Propón al menos una solución inmediata.",
           },
           {
-            requirementId: "request_clearance",
-            text: "Pide permiso o confirmación para implementar la solución antes de que continúe el show.",
+            requirementId: "english_use_on_standby",
+            text: "Di que el equipo de vestuario debe estar 'on standby' hasta nueva orden.",
+          },
+          {
+            requirementId: "english_use_patch_up_phrasal",
+            text: "Incluye el phrasal verb 'patch up' al describir un arreglo temporal del calzado.",
+          },
+          {
+            requirementId: "english_use_play_it_safe_idiom",
+            text: "Emplea el idiom 'play it safe'.",
+          },
+          {
+            requirementId: "english_use_keep_it_together_idiom",
+            text: "Anima al equipo con el idiom 'keep it together'.",
           },
         ],
       },
@@ -3679,16 +3992,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A quirky older man wearing a patchwork coat full of pockets. He has round glasses, a messy white beard, and a mischievous smile. He is surrounded by small paper tickets and vintage coins on a train seat, looking delighted to show his collection.",
         requirements: [
           {
-            requirementId: "ask_about_collection",
-            text: "Pregunta qué tiene en su colección y cómo consiguió el billete más extraño.",
+            requirementId: "conversation_preguntar_billete_mas_raro",
+            text: "Pregunta cómo llegó a conseguir el billete más raro.",
           },
           {
-            requirementId: "negotiate_trade",
-            text: "Propón un intercambio: ofrece algo (realista) a cambio de un billete y explica por qué tu oferta es razonable.",
+            requirementId: "conversation_contraoferta_cortes",
+            text: "Rechaza amablemente una oferta.",
           },
           {
-            requirementId: "react_to_story",
-            text: "Reacciona a una historia sorprendente que él cuente, usando una expresión natural y una pregunta de seguimiento.",
+            requirementId: "english_usar_provenance",
+            text: "Usa la palabra 'provenance' al hablar del origen documentado de un billete específico.",
+          },
+          {
+            requirementId: "english_usar_counterfeit",
+            text: "Emplea 'counterfeit' para expresar duda sobre la autenticidad de una pieza.",
+          },
+          {
+            requirementId: "english_idiom_call_it_even",
+            text: "Emplea el idiom 'call it even' para proponer cerrar un intercambio en equilibrio.",
+          },
+          {
+            requirementId: "english_idiom_raise_red_flags",
+            text: "Incluye el idiom 'raise red flags' para señalar detalles que te resultan sospechosos.",
           },
         ],
       },
@@ -3696,49 +4021,73 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "mystery_train_ride_singing_conductor",
         title: "El revisor cantante",
         sceneSummary:
-          "Un revisor que en vez de comprobar billetes canta ópera y corrige las letras según le place. Quiere que le ayudes a elegir la próxima estrofa.",
+          "Un revisor que en vez de comprobar billetes canta ópera y te cuenta que nunca quiso ser revisor y su pasión es la música.",
         aiRole:
-          "Eres un revisor apasionado por la ópera y la dramatización. Habla con grandilocuencia, corrige con humor y espera que el alumno participe creativamente pero con claridad.",
+          "Eres un revisor apasionado por la ópera y la dramatización. Habla con grandilocuencia, corrige con humor.",
         caracterName: "Conductor Aria",
         caracterPrompt:
           "A dramatic middle-aged train conductor wearing a vintage uniform with a bright red sash. He has a booming expression, twirls a ticket puncher like a baton, and stands in a dimly lit carriage as if on stage.",
         requirements: [
           {
-            requirementId: "choose_verse",
-            text: "Sugiere qué estrofa debería cantar a continuación, usando lenguaje descriptivo y claro.",
+            requirementId: "mencionar_tenor",
+            text: "Menciona que él puede llegar a ser un gran tenor.",
           },
           {
-            requirementId: "correct_lyrics",
-            text: "Corrige suavemente una línea que él canta mal, dando la forma correcta y una breve explicación.",
+            requirementId: "mencionar_pasion_musical",
+            text: "Menciona su pasión por la música y cómo siempre soñó con ser cantante.",
           },
           {
-            requirementId: "give_feedback",
-            text: "Dale feedback sobre su actuación, incluyendo una frase positiva y una sugerencia concreta.",
+            requirementId: "english_vocal_range_comentario",
+            text: 'Comenta sobre su "vocal range" y si la estrofa se ajusta bien a él.',
+          },
+          {
+            requirementId: "english_nevertheless_conector_matiz",
+            text: 'Introduce un matiz tras un elogio usando el conector "nevertheless".',
+          },
+          {
+            requirementId: "english_use_connector_however",
+            text: "Usa el conector 'however' para añadir un contraste en inglés.",
+          },
+          {
+            requirementId: "english_use_connector_besides",
+            text: "Usa el conector 'besides' para añadir un argumento adicional.",
           },
         ],
       },
       {
-        missionId: "mystery_train_ride_suspicious_chef",
-        title: "El chef sospechoso",
+        missionId: "mystery_train_ride_train_historian",
+        title: "La historiadora del tren",
         sceneSummary:
-          "En el vagón restaurante hay un chef que ofrece platos extraños con nombres aún más raros. Insiste en que pruebes su especialidad experimental.",
+          "Una pasajera conoce historias extrañas sobre este tren y asegura que cada vagón tiene un pasado inquietante.",
         aiRole:
-          "Eres un chef teatral y un poco misterioso. Describe sabores y técnicas de forma vívida, provoca al estudiante a describir sus gustos y responde con picardía si el alumno duda.",
-        caracterName: "Chef Basil",
+          "Eres una historiadora entusiasta. Cuentas anécdotas fascinantes y te encanta cuando alguien muestra curiosidad por los detalles históricos.",
+        caracterName: "Dr. Marianne Vale",
         caracterPrompt:
-          "A flamboyant chef wearing a tall white hat and a patterned apron splattered with colorful sauces. He has animated gestures, bright eyes, and stands by a small portable stove on the train, offering a steaming dish.",
+          "A middle-aged woman with notebooks and historical maps spread across a train table, wearing a vintage coat and spectacles.",
         requirements: [
           {
-            requirementId: "ask_ingredients",
-            text: "Pregúntale qué ingredientes contiene su especialidad y si hay alérgenos.",
+            requirementId: "conversation_preguntar_origen_tren",
+            text: "Pregunta en inglés cuándo fue construido el tren y quién lo diseñó originalmente.",
           },
           {
-            requirementId: "express_preference",
-            text: "Di si te gustaría probarlo o no, justificando tu elección con motivos concretos.",
+            requirementId: "conversation_pedir_evento_mas_importante",
+            text: "Pregunta cuál fue el evento histórico más importante ocurrido en este tren.",
           },
           {
-            requirementId: "suggest_alternative",
-            text: "Propón una alternativa o modificación del plato que te haría probarlo.",
+            requirementId: "english_usar_archives",
+            text: "Incluye la palabra 'archives' al hablar de documentos históricos.",
+          },
+          {
+            requirementId: "english_phrasal_look_back_on",
+            text: "Usa el phrasal verb 'look back on' al reflexionar sobre el pasado.",
+          },
+          {
+            requirementId: "english_phrasal_pass_down",
+            text: "Usa el phrasal verb 'pass down' al hablar de historias transmitidas por generaciones.",
+          },
+          {
+            requirementId: "english_phrasal_piece_together",
+            text: "Usa el phrasal verb 'piece together' al explicar cómo reconstruir eventos históricos.",
           },
         ],
       },
@@ -3754,16 +4103,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A slim, intense person wearing a tweed jacket and round spectacles, holding an old leather-bound book. They sit under a small lamp in a quiet train carriage, whispering and pointing to scribbled notes.",
         requirements: [
           {
-            requirementId: "summarize_passage",
-            text: "Resume el significado principal de un breve pasaje que te muestre (1–2 frases).",
+            requirementId: "conversation_mostrar_pasaje_completo",
+            text: "Pide que te muestre el pasaje críptico completo antes de sacar conclusiones.",
           },
           {
-            requirementId: "challenge_theory",
-            text: "Cuestiona una de sus conclusiones conspirativas con al menos una razón lógica.",
+            requirementId: "conversation_proponer_voz_baja",
+            text: "Sugiere continuar la investigación en voz baja para no llamar la atención.",
           },
           {
-            requirementId: "propose_hypothesis",
-            text: "Propón una hipótesis alternativa y cómo podríais comprobarla durante el viaje.",
+            requirementId: "english_uso_cipher",
+            text: 'Usa la palabra en inglés "cipher" al proponer el método que vais a probar.',
+          },
+          {
+            requirementId: "english_phrasal_back_up",
+            text: 'Utiliza la frase "back up".',
+          },
+          {
+            requirementId: "english_expression_off_the_record",
+            text: 'Usa "off the record" al sugerir que cierta parte de la charla sea discreta.',
+          },
+          {
+            requirementId: "english_discurso_as_far_as_i_can_tell",
+            text: 'Emplea "as far as I can tell" para expresar cautela basada en la evidencia.',
           },
         ],
       },
@@ -3779,16 +4140,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A mysterious, slim figure in a long dark coat with a small lantern and a deck of worn cards. They have a sly smile, sit in a dim carriage corridor, and their posture suggests secrecy and playfulness.",
         requirements: [
           {
-            requirementId: "solve_riddle",
-            text: "Responde a un acertijo sencillo que él te proponga (frase corta con la solución).",
+            requirementId: "conversation_presentarte_motivo_noche",
+            text: "Preséntate brevemente y explica por qué viajas a medianoche.",
           },
           {
-            requirementId: "ask_for_clue",
-            text: "Pide una pista adicional usando una pregunta educada y directa.",
+            requirementId: "conversation_consultar_reembolso_fallo",
+            text: "Pregunta si hay reembolso si no superas el desafío.",
           },
           {
-            requirementId: "negotiate_reward",
-            text: "Negocia una recompensa por resolver su reto, proponiendo una compensación razonable.",
+            requirementId: "english_usar_vacant_seat",
+            text: "Refiérete a un asiento disponible usando la expresión en inglés 'vacant seat'.",
+          },
+          {
+            requirementId: "english_phrasal_turn_down",
+            text: "Rechaza una parte de la oferta usando el phrasal verb en inglés 'turn down'.",
+          },
+          {
+            requirementId: "english_phrasal_play_along",
+            text: "Di que seguirás su juego por un momento usando el phrasal verb en inglés 'play along'.",
+          },
+          {
+            requirementId: "english_idiom_bend_the_rules",
+            text: "Pide una excepción usando la expresión en inglés 'bend the rules'.",
           },
         ],
       },
@@ -3806,7 +4179,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "lost_phone_adventure_street_magic_vendor",
         title: "El vendedor de trucos callejeros",
         sceneSummary:
-          "En una plaza bulliciosa un vendedor te dice que vio tu teléfono... a cambio de ayudarte a encontrar su sombrero perdido. Todo es un poco sospechoso y muy teatral.",
+          "Haz perdido tu celular. En una plaza bulliciosa un vendedor te dice que vio tu teléfono... a cambio de ayudarte quiero venderte un sombrero. Todo es un poco sospechoso y muy teatral.",
         aiRole:
           "Eres un vendedor callejero excéntrico y teatral que afirma saberlo todo sobre objetos perdidos. Habla con dramatismo, usa metáforas y provoca al alumno para que haga preguntas concretas. Mantén humor y algo de misterio.",
         caracterName: "Milo the Magician",
@@ -3815,15 +4188,27 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_where_seen",
-            text: "Pregúntale dónde y cuándo vio el teléfono.",
+            text: "Pregúntale dónde vio el teléfono.",
           },
           {
-            requirementId: "confirm_description",
-            text: "Describe las características de tu teléfono y pide que confirme si es la misma unidad.",
+            requirementId: "ask_when_seen",
+            text: "Pregúntale cuándo vio el teléfono.",
           },
           {
-            requirementId: "negotiate_help",
-            text: "Negocia por su ayuda (ofrece algo a cambio o pide una pista razonable).",
+            requirementId: "conversation_rechaza_pago_anticipado",
+            text: "Rechaza entregar dinero por adelantado y ofrece una alternativa razonable.",
+          },
+          {
+            requirementId: "english_usa_track_down",
+            text: 'Usa el phrasal verb "track down" para proponer cómo localizar el teléfono.',
+          },
+          {
+            requirementId: "english_usa_too_good_to_be_true",
+            text: 'Usa el idiom "too good to be true" para evaluar una promesa exagerada.',
+          },
+          {
+            requirementId: "english_usa_before_we_go_any_further",
+            text: 'Usa el marcador discursivo "Before we go any further" para introducir una condición.',
           },
         ],
       },
@@ -3839,16 +4224,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A young barista with a vintage apron, round glasses, and a notepad tucked into a pocket. She has an intense but friendly expression, stands behind a rustic coffee counter, and gestures with a steaming cup as she explains her theories.",
         requirements: [
           {
-            requirementId: "ask_timeline",
-            text: "Pregunta sobre la línea temporal (¿a qué hora lo vieron?)",
+            requirementId: "conversation_detallar_hora_y_lugar_exactos",
+            text: "Explica con precisión en inglés a qué hora y en qué mesa crees que dejaste el celular.",
           },
           {
-            requirementId: "ask_who_was_there",
-            text: "Pregunta quién más estaba en la cafetería y solicita descripciones breves.",
+            requirementId: "conversation_pedir_verificacion_ticket_hora",
+            text: "Pide en inglés revisar el ticket o recibo para confirmar la hora exacta en que pagaste y te fuiste.",
           },
           {
-            requirementId: "ask_next_step",
-            text: "Pide una acción concreta que seguir (¿podemos buscar en la cámara o revisar la mesa?).",
+            requirementId: "english_use_last_seen_at",
+            text: "Usa la frase en inglés 'last seen at' para indicar el lugar exacto donde viste tu teléfono por última vez.",
+          },
+          {
+            requirementId: "english_use_look_into_phrasal",
+            text: "Emplea el phrasal verb en inglés 'look into' para sugerir investigar una pista específica.",
+          },
+          {
+            requirementId: "english_use_security_footage",
+            text: "Usa el término en inglés 'security footage'.",
+          },
+          {
+            requirementId: "english_use_pick_up_signal_phrasal",
+            text: "Usa el phrasal verb en inglés 'pick up'.",
           },
         ],
       },
@@ -3864,16 +4261,28 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A cheerful dog-walker wearing a bright windbreaker and multiple leashes wrapped around one arm. He has tousled hair, a wide smile, and is surrounded by three excited dogs in a sunny park. He crouches to point at tracks on the ground.",
         requirements: [
           {
-            requirementId: "ask_dog_distraction",
-            text: "Pregunta si los perros distrajeron a la persona que dejó el teléfono.",
+            requirementId: "conversation_descripcion_de_la_persona",
+            text: "Pide que describa a la persona que lo dejó caer.",
           },
           {
-            requirementId: "clarify_direction",
-            text: "Pregunta en qué dirección se fue la persona con más detalle.",
+            requirementId: "conversation_quien_lo_recogio",
+            text: "Pregunta si alguien más se acercó y lo recogió.",
           },
           {
-            requirementId: "ask_for_contact",
-            text: "Pide una forma de contactar al paseador si aparece nueva información.",
+            requirementId: "conversation_pedir_silencio_para_escuchar",
+            text: "Pide un momento de silencio para escuchar si el teléfono suena cerca.",
+          },
+          {
+            requirementId: "english_keep_me_in_the_loop",
+            text: 'Incluye "keep me in the loop" al pedir actualizaciones si aparece nueva información.',
+          },
+          {
+            requirementId: "english_polite_request_was_wondering",
+            text: 'Usa la estructura "I was wondering if you could..." para solicitar que te acompañe a buscar.',
+          },
+          {
+            requirementId: "english_long_story_short",
+            text: 'Incluye "long story short" para resumir tu situación rápidamente.',
           },
         ],
       },
@@ -3889,41 +4298,65 @@ export const STORIES_SEED: StoryDefinition[] = [
           "An elderly academic with a tweed jacket, elbow patches, and a stack of old books. He has a thoughtful expression, half-smile, and sits at a wooden table in a dim, book-lined library, tapping a fountain pen on paper.",
         requirements: [
           {
-            requirementId: "challenge_theory",
-            text: "Cuestiona una de sus teorías y ofrece una alternativa plausible.",
+            requirementId: "conversation_describir_telefono_identificable",
+            text: "Describe en inglés tu teléfono con rasgos identificables como color, funda y fondo de pantalla para facilitar su reconocimiento.",
           },
           {
-            requirementId: "ask_evidence",
-            text: "Pide la evidencia que respalde su afirmación (¿what proof do you have?).",
+            requirementId: "conversation_preguntar_observacion_sospechosa",
+            text: "Pregunta en inglés si vio a alguien manipulando pertenencias o merodeando cerca de tu mesa.",
           },
           {
-            requirementId: "summarize_next_steps",
-            text: "Resume los pasos siguientes acordados con el profesor.",
+            requirementId: "conversation_agradecer_paciencia",
+            text: "Agradece en inglés su paciencia.",
+          },
+          {
+            requirementId: "english_lost_and_found_desk",
+            text: 'Incluye en inglés "lost and found desk" al pedir dirigirse al mostrador correspondiente.',
+          },
+          {
+            requirementId: "english_surveillance_footage",
+            text: 'Usa en inglés "surveillance footage" al preguntar si hay grabaciones que puedan ayudar.',
+          },
+          {
+            requirementId: "english_phrasal_look_into",
+            text: 'Usa en inglés el phrasal verb "look into" para proponer investigar un detalle concreto.',
           },
         ],
       },
       {
-        missionId: "lost_phone_adventure_midnight_taxi_singer",
-        title: "El taxista cantante de medianoche",
+        missionId: "lost_phone_adventure_midnight_taxi",
+        title: "El taxista de medianoche",
         sceneSummary:
-          "Un taxista que también canta ópera te recoge y jura que recogió un teléfono en su coche. Su dramatismo convierte la conversación en un mini-concierto.",
+          "Un taxista que ha recuperado tu teléfono perdido, debes probar que es el tuyo.",
         aiRole:
-          "Eres un taxista apasionado por la música que dramatiza cada frase. Usa frases poéticas, repite detalles importantes para enfatizar y responde con calidez; permite que el alumno dirija la pregunta hacia la evidencia y la logística.",
+          "Eres un taxista que ha encontrado un teléfono perdido y está dispuesto a devolverlo, pero necesitas asegurarte de que realmente es el del pasajero.",
         caracterName: "Marco the Cabby",
         caracterPrompt:
           "A middle-aged taxi driver wearing a leather jacket and a faded cap, singing into a steering-wheel-mounted microphone. He has a booming voice, animated gestures, and the interior of the car is lit by city lights and a hanging air-freshener.",
         requirements: [
           {
-            requirementId: "confirm_pickup_time",
-            text: "Pregunta a qué hora ocurrió el trayecto y cuánto tiempo estuvo el teléfono en el coche.",
+            requirementId: "conversation_pedir_ver_telefono",
+            text: "Pide ver el teléfono para confirmar que coincide con el tuyo.",
           },
           {
-            requirementId: "ask_for_id",
-            text: "Solicita alguna prueba o detalle que confirme que su coche tenía tu teléfono (por ejemplo, color del funda o pantalla encendida).",
+            requirementId: "conversation_describir_fondo_pantalla",
+            text: "Describe la imagen o foto que debería aparecer en la pantalla de bloqueo.",
           },
           {
-            requirementId: "arrange_meeting",
-            text: "Organiza un lugar y hora para revisar el coche o recuperar el teléfono.",
+            requirementId: "conversation_ofrecer_desbloquear",
+            text: "Ofrece desbloquear el teléfono para demostrar que eres el dueño.",
+          },
+          {
+            requirementId: "english_idiom_ring_a_bell",
+            text: "Usa el idiom 'ring a bell' al preguntar si algo le resulta familiar.",
+          },
+          {
+            requirementId: "english_phrasal_hand_over",
+            text: "Usa el phrasal verb 'hand over' cuando pidas que te entregue el teléfono.",
+          },
+          {
+            requirementId: "english_idiom_prove_my_point",
+            text: "Usa la expresión 'prove my point' al explicar por qué el teléfono es tuyo.",
           },
         ],
       },
@@ -3950,16 +4383,24 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A quirky, energetic young person with messy hair, wearing a colorful apron covered in imaginary food stains. They have bright eyes, a mischievous grin, and stand in a small, cluttered kitchen full of odd jars and steam. The atmosphere is warm and chaotic.",
         requirements: [
           {
-            requirementId: "ask_why_cooking",
-            text: "Pregunta por qué está usando esos ingredientes raros.",
+            requirementId: "conversation_pedir_origen_ingredientes",
+            text: "Pide que explique de dónde salieron esos ingredientes.",
           },
           {
-            requirementId: "express_concern",
-            text: "Expresa preocupación o sorpresa por la seguridad/rareza de la comida.",
+            requirementId: "conversation_solicitar_demostracion_seguridad",
+            text: "Pide una demostración sencilla de que el plato es seguro para comer",
           },
           {
-            requirementId: "ask_for_recipe",
-            text: "Pide la receta o los pasos para preparar ese plato.",
+            requirementId: "english_out_of_bounds_off_limits",
+            text: 'Declara una zona prohibida usando en inglés "off-limits" o "out of bounds" aplicado a tus ingredientes.',
+          },
+          {
+            requirementId: "english_use_hazard",
+            text: 'Declara un riesgo usando "hazard".',
+          },
+          {
+            requirementId: "english_ground_rules_shared_kitchen",
+            text: 'Propón normas usando en inglés la expresión "set some ground rules" para la cocina compartida.',
           },
         ],
       },
@@ -3986,6 +4427,18 @@ export const STORIES_SEED: StoryDefinition[] = [
             requirementId: "agree_or_refuse",
             text: "Decide y di si aceptas su propuesta o la rechazas, dando una razón clara.",
           },
+          {
+            requirementId: "english_use_make_up_for_phrasal",
+            text: "Usan el phrasal verb 'make up for'.",
+          },
+          {
+            requirementId: "english_use_iron_out_phrasal",
+            text: "Usa el phrasal verb 'iron out'.",
+          },
+          {
+            requirementId: "english_use_follow_through_phrasal",
+            text: "Usa el phrasal verb 'follow through'.",
+          },
         ],
       },
       {
@@ -4004,12 +4457,14 @@ export const STORIES_SEED: StoryDefinition[] = [
             text: "Pregunta quién o qué es el 'fantasma' y cómo lo conoció.",
           },
           {
-            requirementId: "suggest_solution",
-            text: "Sugiere una solución práctica si el 'fantasma' está causando problemas (ruido, manchas, etc.).",
+            requirementId:
+              "conversation_identificar_preferencias_decoracion_fantasma",
+            text: "Pregunta qué cambios de decoración exige el 'fantasma' en el salón y por qué.",
           },
           {
-            requirementId: "express_doubt",
-            text: "Expresa escepticismo o duda sobre la existencia del fantasma de forma educada.",
+            requirementId:
+              "conversation_consultar_preferencias_colores_fantasma",
+            text: "Pregunta si el 'fantasma' prefiere ciertos colores.",
           },
         ],
       },
