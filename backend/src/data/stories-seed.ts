@@ -403,7 +403,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "Tu compañero practica la guitarra a las tres de la mañana y quiere que le cantes con él.",
         aiRole:
-          "Eres un compañero excéntrico y entusiasta que toca la guitarra a cualquier hora. Responde con energía exagerada, frases cortas y humor, pero acepta sugerencias razonables si el alumno las propone.",
+          "Eres un compañero excéntrico y entusiasta que toca la guitarra a cualquier hora. Responde con energía exagerada, frases cortas y humor",
         caracterName: "Marty Strings",
         caracterPrompt:
           "A lanky young man with wild curly hair, wearing a faded band T-shirt and ripped jeans. He holds an electric guitar slung low, smiling wildly, in a cluttered living room filled with posters and empty coffee cups. He looks passionate and a little oblivious to social norms.",
@@ -1164,7 +1164,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "Te topas con un autoproclamado guía del festival que sabe poco sobre el lugar pero mucho sobre historias absurdas. Debes encontrar la salida entre sus relatos.",
         aiRole:
-          "Eres un guía improvisado y exagerado: hablador, dramático y con tendencia a inventar hechos increíbles. Mantén respuestas largas, coloridas y un poco confusas, pero da pistas útiles si el alumno pregunta con precisión.",
+          "Eres un guía improvisado y exagerado: hablador, dramático y con tendencia a inventar hechos increíbles.",
         caracterName: "Marty the Guide",
         caracterPrompt:
           "A middle-aged man wearing a bright, mismatched festival vest covered in badges, with a wide-brimmed hat and a megaphone around his neck. His expression is enthusiastic and slightly bewildered, standing in a crowded festival lane with colorful tents behind him.",
@@ -1296,7 +1296,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "Un chef de food truck propone platos extraños con nombres más raros aún. Debes pedir algo que puedas comer y preguntar por alergias o ingredientes.",
         aiRole:
-          "Eres un chef excéntrico, entusiasta y algo teatral sobre tus combinaciones culinarias. Describe sabores con pasión y responde claramente sobre ingredientes y posibles alergias cuando el alumno pregunte.",
+          "Eres un chef excéntrico, entusiasta y algo teatral sobre tus combinaciones culinarias. Describe sabores con pasión y responde claramente sobre ingredientes y posibles alergias cuando te pregunten.",
         caracterName: "Chef Nimbus",
         caracterPrompt:
           "A creative chef wearing a stained apron, a quirky hat shaped like a cloud, and food-safe gloves. He stands behind a colorful food truck counter with steam rising and handwritten menu boards full of bizarre dish names.",
@@ -1556,7 +1556,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "Una máquina expendedora habla contigo y te ofrece 'emociones' en lata. Necesitas comprar una bebida y entender sus ofertas raras.",
         aiRole:
-          "Eres una máquina expendedora con personalidad juguetona y un acento exagerado. Responde de forma breve, usa frases comerciales y a veces malinterpreta palabras clave para crear confusión cómica, pero responde claro cuando el alumno usa frases correctas.",
+          "Eres una máquina expendedora con personalidad juguetona y un acento exagerado. Responde de forma breve, usa frases comerciales y a veces malinterpreta palabras clave para crear confusión cómica.",
         caracterName: "Vend-O-Chat",
         caracterPrompt:
           "A shiny, colorful vending machine with expressive LED 'eyes' and a small digital mouth. Buttons are labeled with quirky icons; steam and neon lights glow around it. It looks futuristic and slightly whimsical while dispensing cans.",
@@ -3001,7 +3001,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_map_purpose",
-            text: "Pregunta en inglés para qué sirve exactamente el mapa.",
+            text: "Pregunta para qué sirve exactamente el mapa.",
           },
           {
             requirementId: "describe_your_destination",
@@ -3038,7 +3038,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "ask_about_theory",
-            text: "Pregunta en inglés cómo funcionan exactamente las autopistas para los extraterrestres.",
+            text: "Pregunta cómo funcionan exactamente las autopistas para los extraterrestres.",
           },
           {
             requirementId: "ask_how_he_discovered",
@@ -3308,27 +3308,27 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "conversation_negotiate_merienda_aceptable",
-            text: "Pide en inglés una merienda intermedia que satisfaga tus gustos y la obsesión saludable de Coco.",
+            text: "Pide una merienda intermedia que satisfaga tus gustos y la obsesión saludable de Coco.",
           },
           {
             requirementId: "conversation_rebate_asuncion_sobre_carbohidratos",
-            text: "Refuta en inglés la idea de que tu merienda no es saludable.",
+            text: "Refuta la idea de que tu merienda no es saludable.",
           },
           {
             requirementId: "conversation_rechaza_ingrediente_con_razon",
-            text: "Rechaza en inglés un ingrediente específico y justifica tu decisión con una razón práctica.",
+            text: "Rechaza un ingrediente específico y justifica tu decisión con una razón práctica.",
           },
           {
             requirementId: "english_phrasal_swap_out",
-            text: 'Propón en inglés una sustitución usando "swap out".',
+            text: 'Propón una sustitución usando "swap out".',
           },
           {
             requirementId: "english_phrasal_stick_to",
-            text: 'Insiste en inglés en mantener tu plan usando el phrasal verb "stick to".',
+            text: 'Insiste en mantener tu plan usando el phrasal verb "stick to".',
           },
           {
             requirementId: "english_collocation_guilty_pleasure",
-            text: 'Admite en inglés un antojo usando la collocation "guilty pleasure".',
+            text: 'Admite un antojo usando la collocation "guilty pleasure".',
           },
         ],
       },
@@ -3353,19 +3353,19 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_usar_hand_over",
-            text: "Usa el phrasal verb en inglés 'hand over'.",
+            text: "Usa el phrasal verb 'hand over'.",
           },
           {
             requirementId: "english_usar_go_off",
-            text: "Usa el phrasal verb en inglés 'go off'.",
+            text: "Usa el phrasal verb 'go off'.",
           },
           {
             requirementId: "english_usar_utter_discretion",
-            text: "Usa la collocation en inglés 'utmost discretion' para prometer discreción total.",
+            text: "Usa la collocation 'utmost discretion' para prometer discreción total.",
           },
           {
             requirementId: "english_usar_touch_base",
-            text: "Usa el idiom en inglés 'touch base'.",
+            text: "Usa el idiom 'touch base'.",
           },
         ],
       },
@@ -3392,27 +3392,27 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "conversation_request_repeat_fast_line",
-            text: "Pide en inglés que el presentador repita algo que dijo.",
+            text: "Pide que el presentador repita algo que dijo.",
           },
           {
             requirementId: "english_use_out_of_the_blue_idiom",
-            text: "Usa el idiom en inglés 'out of the blue'.",
+            text: "Usa el idiom 'out of the blue'.",
           },
           {
             requirementId: "english_use_off_limits_collocation",
-            text: "Incluye la collocation en inglés 'off-limits'.",
+            text: "Incluye la collocation 'off-limits'.",
           },
           {
             requirementId: "english_use_stick_to_phrasal",
-            text: "Usa el phrasal verb en inglés 'stick to'.",
+            text: "Usa el phrasal verb 'stick to'.",
           },
           {
             requirementId: "english_use_lean_into_phrasal",
-            text: "Incluye el phrasal verb en inglés 'lean into'.",
+            text: "Incluye el phrasal verb 'lean into'.",
           },
           {
             requirementId: "english_use_brush_off_phrasal",
-            text: "Emplea el phrasal verb en inglés 'brush off'.",
+            text: "Emplea el phrasal verb 'brush off'.",
           },
         ],
       },
@@ -3437,7 +3437,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_use_read_the_room",
-            text: 'Usa la expresión en inglés "read the room".',
+            text: 'Usa la expresión "read the room".',
           },
           {
             requirementId: "english_use_tone_down_phrasal",
@@ -3552,20 +3552,20 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "conversation_request_time_to_learn",
-            text: "Pedir en inglés que te den el tiempo para aprender la coreografía.",
+            text: "Pedir que te den el tiempo para aprender la coreografía.",
           },
           {
             requirementId: "conversation_confirmar_mirada_camara_o_espejo",
-            text: "Confirmar en inglés si debes mirar a la cámara",
+            text: "Confirmar si debes mirar a la cámara",
           },
           {
             requirementId: "conversation_aceptar_correccion_y_ajustar_energia",
-            text: "Aceptar en inglés una corrección de Talia y decir cómo ajustarás el nivel de energía.",
+            text: "Aceptar una corrección de Talia y decir cómo ajustarás el nivel de energía.",
           },
           {
             requirementId:
               "conversation_mencionar_limite_vestuario_y_reemplazo",
-            text: "Señalar en inglés que tu vestuario limita un salto específico y ofrecer un reemplazo creíble.",
+            text: "Señalar que tu vestuario limita un salto específico y ofrecer un reemplazo creíble.",
           },
           {
             requirementId: "english_use_idiom_nail_it",
@@ -3638,27 +3638,27 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "conversation_pedir_demostracion",
-            text: "Pide en inglés una demostración de como se usa algun objeto.",
+            text: "Pide una demostración de como se usa algun objeto.",
           },
           {
             requirementId: "english_use_call_your_bluff",
-            text: 'Di en inglés que vas a "call your bluff" si el vendedor exagera la potencia del objeto.',
+            text: 'Di que vas a "call your bluff" si el vendedor exagera la potencia del objeto.',
           },
           {
             requirementId: "english_use_no_strings_attached",
-            text: 'Exige en inglés que la oferta sea "no strings attached" al aceptar una pista del vendedor.',
+            text: 'Exige que la oferta sea "no strings attached" al aceptar una pista del vendedor.',
           },
           {
             requirementId: "english_use_money_back_guarantee",
-            text: 'Pregunta en inglés si existe una "money-back guarantee" si el artefacto falla.',
+            text: 'Pregunta si existe una "money-back guarantee" si el artefacto falla.',
           },
           {
             requirementId: "english_use_up_my_sleeve",
-            text: 'Insinúa en inglés que el vendedor aún tiene algo "up your sleeve" respecto a las pistas.',
+            text: 'Insinúa que el vendedor aún tiene algo "up your sleeve" respecto a las pistas.',
           },
           {
             requirementId: "english_use_throw_me_off_pv",
-            text: 'Di en inglés que un detalle del truco te "threw me off" y pide aclaración.',
+            text: 'Di que un detalle del truco te "threw me off" y pide aclaración.',
           },
         ],
       },
@@ -3720,19 +3720,19 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_usar_sabotage_collocation",
-            text: "Usa en inglés la palabra 'sabotage' o la collocation 'was sabotaged' para describir lo que ocurrió en la cocina.",
+            text: "Usa la palabra 'sabotage' o la collocation 'was sabotaged' para describir lo que ocurrió en la cocina.",
           },
           {
             requirementId: "english_usar_phrasal_set_off_alarm",
-            text: "Advierte en inglés sobre activar la alarma usando el phrasal verb 'set off' con 'alarm'.",
+            text: "Advierte sobre activar la alarma usando el phrasal verb 'set off' con 'alarm'.",
           },
           {
             requirementId: "english_usar_phrasal_seal_off_area",
-            text: "Sugiere en inglés acordonar una zona sensible usando el phrasal verb 'seal off'.",
+            text: "Sugiere acordonar una zona sensible usando el phrasal verb 'seal off'.",
           },
           {
             requirementId: "english_usar_phrasal_speed_up_prep",
-            text: "Propón acelerar la preparación usando en inglés el phrasal verb 'speed up'.",
+            text: "Propón acelerar la preparación usando el phrasal verb 'speed up'.",
           },
         ],
       },
@@ -3757,19 +3757,19 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_usar_phrasal_rule_out",
-            text: 'Incluye el phrasal verb en inglés "rule out".',
+            text: 'Incluye el phrasal verb "rule out".',
           },
           {
             requirementId: "english_usar_collocation_draw_a_conclusion",
-            text: 'Usa la collocation en inglés "draw a conclusion".',
+            text: 'Usa la collocation "draw a conclusion".',
           },
           {
             requirementId: "english_usar_collocation_weigh_the_options",
-            text: 'Incluye la collocation en inglés "weigh the options" al comparar dos caminos posibles.',
+            text: 'Incluye la collocation "weigh the options" al comparar dos caminos posibles.',
           },
           {
             requirementId: "english_usar_phrasal_lay_out",
-            text: 'Emplea el phrasal verb en inglés "lay out" para presentar tu plan paso a paso.',
+            text: 'Emplea el phrasal verb "lay out" para presentar tu plan paso a paso.',
           },
         ],
       },
@@ -3912,23 +3912,23 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_use_smudge_proof",
-            text: 'Menciona explícitamente el adjetivo en inglés "smudge-proof" al justificar la elección del delineador.',
+            text: 'Menciona explícitamente el adjetivo "smudge-proof" al justificar la elección del delineador.',
           },
           {
             requirementId: "english_use_even_out",
-            text: 'Incluye el phrasal verb en inglés "even out" al hablar de igualar entre ambos ojos.',
+            text: 'Incluye el phrasal verb "even out" al hablar de igualar entre ambos ojos.',
           },
           {
             requirementId: "english_use_tone_down",
-            text: 'Emplea el phrasal verb en inglés "tone down" al sugerir suavizar un color demasiado intenso.',
+            text: 'Emplea el phrasal verb "tone down" al sugerir suavizar un color demasiado intenso.',
           },
           {
             requirementId: "english_use_under_the_gun_idiom",
-            text: 'Menciona el idiom en inglés "under the gun" para señalar la presión de tiempo.',
+            text: 'Menciona el idiom "under the gun" para señalar la presión de tiempo.',
           },
           {
             requirementId: "english_use_waterline",
-            text: 'Menciona la palabra en inglés "waterline" al indicar dónde aplicarás el lápiz.',
+            text: 'Menciona la palabra "waterline" al indicar dónde aplicarás el lápiz.',
           },
         ],
       },
@@ -4067,7 +4067,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "conversation_preguntar_origen_tren",
-            text: "Pregunta en inglés cuándo fue construido el tren y quién lo diseñó originalmente.",
+            text: "Pregunta cuándo fue construido el tren y quién lo diseñó originalmente.",
           },
           {
             requirementId: "conversation_pedir_evento_mas_importante",
@@ -4112,7 +4112,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_uso_cipher",
-            text: 'Usa la palabra en inglés "cipher" al proponer el método que vais a probar.',
+            text: 'Usa la palabra "cipher" al proponer el método que vais a probar.',
           },
           {
             requirementId: "english_phrasal_back_up",
@@ -4149,19 +4149,19 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_usar_vacant_seat",
-            text: "Refiérete a un asiento disponible usando la expresión en inglés 'vacant seat'.",
+            text: "Refiérete a un asiento disponible usando la expresión 'vacant seat'.",
           },
           {
             requirementId: "english_phrasal_turn_down",
-            text: "Rechaza una parte de la oferta usando el phrasal verb en inglés 'turn down'.",
+            text: "Rechaza una parte de la oferta usando el phrasal verb 'turn down'.",
           },
           {
             requirementId: "english_phrasal_play_along",
-            text: "Di que seguirás su juego por un momento usando el phrasal verb en inglés 'play along'.",
+            text: "Di que seguirás su juego por un momento usando el phrasal verb 'play along'.",
           },
           {
             requirementId: "english_idiom_bend_the_rules",
-            text: "Pide una excepción usando la expresión en inglés 'bend the rules'.",
+            text: "Pide una excepción usando la expresión 'bend the rules'.",
           },
         ],
       },
@@ -4225,27 +4225,27 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "conversation_detallar_hora_y_lugar_exactos",
-            text: "Explica con precisión en inglés a qué hora y en qué mesa crees que dejaste el celular.",
+            text: "Explica con precisión a qué hora y en qué mesa crees que dejaste el celular.",
           },
           {
             requirementId: "conversation_pedir_verificacion_ticket_hora",
-            text: "Pide en inglés revisar el ticket o recibo para confirmar la hora exacta en que pagaste y te fuiste.",
+            text: "Pide revisar el ticket o recibo para confirmar la hora exacta en que pagaste y te fuiste.",
           },
           {
             requirementId: "english_use_last_seen_at",
-            text: "Usa la frase en inglés 'last seen at' para indicar el lugar exacto donde viste tu teléfono por última vez.",
+            text: "Usa la frase 'last seen at' para indicar el lugar exacto donde viste tu teléfono por última vez.",
           },
           {
             requirementId: "english_use_look_into_phrasal",
-            text: "Emplea el phrasal verb en inglés 'look into' para sugerir investigar una pista específica.",
+            text: "Emplea el phrasal verb 'look into' para sugerir investigar una pista específica.",
           },
           {
             requirementId: "english_use_security_footage",
-            text: "Usa el término en inglés 'security footage'.",
+            text: "Usa el término 'security footage'.",
           },
           {
             requirementId: "english_use_pick_up_signal_phrasal",
-            text: "Usa el phrasal verb en inglés 'pick up'.",
+            text: "Usa el phrasal verb 'pick up'.",
           },
         ],
       },
@@ -4299,27 +4299,27 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "conversation_describir_telefono_identificable",
-            text: "Describe en inglés tu teléfono con rasgos identificables como color, funda y fondo de pantalla para facilitar su reconocimiento.",
+            text: "Describe tu teléfono con rasgos identificables como color, funda y fondo de pantalla para facilitar su reconocimiento.",
           },
           {
             requirementId: "conversation_preguntar_observacion_sospechosa",
-            text: "Pregunta en inglés si vio a alguien manipulando pertenencias o merodeando cerca de tu mesa.",
+            text: "Pregunta si vio a alguien manipulando pertenencias o merodeando cerca de tu mesa.",
           },
           {
             requirementId: "conversation_agradecer_paciencia",
-            text: "Agradece en inglés su paciencia.",
+            text: "Agradece su paciencia.",
           },
           {
             requirementId: "english_lost_and_found_desk",
-            text: 'Incluye en inglés "lost and found desk" al pedir dirigirse al mostrador correspondiente.',
+            text: 'Incluye "lost and found desk" al pedir dirigirse al mostrador correspondiente.',
           },
           {
             requirementId: "english_surveillance_footage",
-            text: 'Usa en inglés "surveillance footage" al preguntar si hay grabaciones que puedan ayudar.',
+            text: 'Usa "surveillance footage" al preguntar si hay grabaciones que puedan ayudar.',
           },
           {
             requirementId: "english_phrasal_look_into",
-            text: 'Usa en inglés el phrasal verb "look into" para proponer investigar un detalle concreto.',
+            text: 'Usa el phrasal verb "look into" para proponer investigar un detalle concreto.',
           },
         ],
       },
@@ -4392,7 +4392,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_out_of_bounds_off_limits",
-            text: 'Declara una zona prohibida usando en inglés "off-limits" o "out of bounds" aplicado a tus ingredientes.',
+            text: 'Declara una zona prohibida usando "off-limits" o "out of bounds" aplicado a tus ingredientes.',
           },
           {
             requirementId: "english_use_hazard",
@@ -4400,7 +4400,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_ground_rules_shared_kitchen",
-            text: 'Propón normas usando en inglés la expresión "set some ground rules" para la cocina compartida.',
+            text: 'Propón normas usando la expresión "set some ground rules" para la cocina compartida.',
           },
         ],
       },
@@ -4522,27 +4522,27 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "conversation_check_guest_list_limit",
-            text: "Negocia en inglés un límite concreto de personas en la lista de invitados.",
+            text: "Negocia un límite concreto de personas en la lista de invitados.",
           },
           {
             requirementId: "conversation_propose_alternative_theme",
-            text: "Propón en inglés un tema alternativo de la fiesta que tenga sentido si no te vas.",
+            text: "Propón un tema alternativo de la fiesta que tenga sentido si no te vas.",
           },
           {
             requirementId: "conversation_ask_permission_private_room",
-            text: "Pide en inglés que los invitados no entren a tu habitación.",
+            text: "Pide que los invitados no entren a tu habitación.",
           },
           {
             requirementId: "english_use_on_the_same_page_idiom",
-            text: "Usa la expresión en inglés 'on the same page' para confirmar que comparten el mismo plan.",
+            text: "Usa la expresión 'on the same page' para confirmar que comparten el mismo plan.",
           },
           {
             requirementId: "english_use_show_up_phrasal",
-            text: "Usa el phrasal verb en inglés 'show up' para preguntar a qué hora llegarán los invitados clave.",
+            text: "Usa el phrasal verb 'show up' para preguntar a qué hora llegarán los invitados clave.",
           },
           {
             requirementId: "english_use_noise_complaint_collocation",
-            text: "Usa la collocation en inglés 'noise complaint' para advertir sobre posibles problemas con los vecinos.",
+            text: "Usa la collocation 'noise complaint' para advertir sobre posibles problemas con los vecinos.",
           },
         ],
       },
@@ -4606,11 +4606,11 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "conversation_saludar_suavemente",
-            text: "Saluda en inglés de forma calmada para no sobresaltarlo mientras está somnoliento.",
+            text: "Saluda de forma calmada para no sobresaltarlo mientras está somnoliento.",
           },
           {
             requirementId: "conversation_preguntar_si_esta_cansado",
-            text: "Pregunta en inglés si está cansado o lleva mucho tiempo sin dormir.",
+            text: "Pregunta si está cansado o lleva mucho tiempo sin dormir.",
           },
           {
             requirementId: "conversation_mostrar_empatia",
@@ -4659,11 +4659,11 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_not_my_cup_of_tea_idiom",
-            text: "Rechaza una opción con el idiom en inglés 'not my cup of tea' de forma cortés.",
+            text: "Rechaza una opción con el idiom 'not my cup of tea' de forma cortés.",
           },
           {
             requirementId: "english_get_carried_away_idiom",
-            text: "Advierte sobre excederse usando la expresión en inglés 'get carried away' al dosificar.",
+            text: "Advierte sobre excederse usando la expresión 'get carried away' al dosificar.",
           },
         ],
       },
@@ -4680,19 +4680,19 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "conversation_pedir_detalle_acusacion",
-            text: "Pide en inglés que explique exactamente qué le parece sospechoso en la preparación de la comida.",
+            text: "Pide que explique exactamente qué le parece sospechoso en la preparación de la comida.",
           },
           {
             requirementId: "conversation_proponer_verificacion_calma",
-            text: "Propón en inglés revisar la situación con calma antes de sacar conclusiones definitivas.",
+            text: "Propón revisar la situación con calma antes de sacar conclusiones definitivas.",
           },
           {
             requirementId: "conversation_preguntar_si_ya_ha_comido_ahi",
-            text: "Pregunta en inglés si ya ha probado la comida del food truck.",
+            text: "Pregunta si ya ha probado la comida del food truck.",
           },
           {
             requirementId: "conversation_preguntar_experiencia_previa",
-            text: "Pregunta en inglés si ha tenido malas experiencias anteriores que expliquen su desconfianza.",
+            text: "Pregunta si ha tenido malas experiencias anteriores que expliquen su desconfianza.",
           },
           {
             requirementId: "english_phrasal_rule_out",
@@ -4716,11 +4716,11 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "conversation_preguntar_reglas_juego",
-            text: "Pregunta en inglés cuáles son exactamente las reglas del juego para obtener el descuento.",
+            text: "Pregunta cuáles son exactamente las reglas del juego para obtener el descuento.",
           },
           {
             requirementId: "conversation_pedir_pista_cancion",
-            text: "Pide en inglés una pista sobre la canción que está bailando.",
+            text: "Pide una pista sobre la canción que está bailando.",
           },
           {
             requirementId: "conversation_describir_genero_musical",
@@ -4728,7 +4728,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "conversation_pedir_confirmacion_parcial",
-            text: "Pregunta en inglés si estás cerca de la respuesta correcta.",
+            text: "Pregunta si estás cerca de la respuesta correcta.",
           },
           {
             requirementId: "english_use_catchy_tune",
@@ -4776,7 +4776,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_usar_with_all_due_respect",
-            text: 'Incluye literalmente la expresión en inglés "with all due respect" al discrepar de una corrección.',
+            text: 'Incluye literalmente la expresión "with all due respect" al discrepar de una corrección.',
           },
           {
             requirementId: "english_usar_phrasal_brush_up_on",
@@ -4813,7 +4813,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_mop_up",
-            text: 'Usa el phrasal verb en inglés "mop up".',
+            text: 'Usa el phrasal verb "mop up".',
           },
           {
             requirementId: "english_wipe_down",
@@ -4842,7 +4842,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "conversation_preguntar_origen",
-            text: "Pregunta en inglés de qué familia noble proviene.",
+            text: "Pregunta de qué familia noble proviene.",
           },
           {
             requirementId: "conversation_preguntar_escandalo",
@@ -4932,7 +4932,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_use_mind_your_step",
-            text: "Pide cuidado con los pies incluyendo la expresión en inglés 'mind your step'.",
+            text: "Pide cuidado con los pies incluyendo la expresión 'mind your step'.",
           },
         ],
       },
@@ -4959,7 +4959,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "conversation_pedir_instrucciones_claras",
-            text: "Pide en inglés instrucciones claras antes de comenzar la improvisación.",
+            text: "Pide instrucciones claras antes de comenzar la improvisación.",
           },
           {
             requirementId: "conversation_aceptar_reto",
@@ -5000,23 +5000,23 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_usar_improvise",
-            text: "Incluye la palabra 'improvise' en inglés al sugerir una solución.",
+            text: "Incluye la palabra 'improvise' al sugerir una solución.",
           },
           {
             requirementId: "english_usar_play_it_by_ear",
-            text: "Incluye la expresión en inglés 'play it by ear' para proponer improvisar el siguiente momento.",
+            text: "Incluye la expresión 'play it by ear' para proponer improvisar el siguiente momento.",
           },
           {
             requirementId: "conversation_reconfortar_bloqueo",
-            text: "Responde en inglés con empatía cuando pida perdón por olvidar su línea.",
+            text: "Responde con empatía cuando pida perdón por olvidar su línea.",
           },
           {
             requirementId: "english_usar_the_show_must_go_on",
-            text: "Di la expresión en inglés 'the show must go on' para motivar a continuar pese al error.",
+            text: "Di la expresión 'the show must go on' para motivar a continuar pese al error.",
           },
           {
             requirementId: "english_usar_keep_a_straight_face",
-            text: "Incluye 'keep a straight face' en inglés al pedirle a Milo que no se ría durante el momento cómico.",
+            text: "Incluye 'keep a straight face' al pedirle a Milo que no se ría durante el momento cómico.",
           },
         ],
       },
@@ -5033,15 +5033,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "conversation_saludo_profesional",
-            text: "Saluda en inglés de forma profesional antes de abordar el problema.",
+            text: "Saluda de forma profesional antes de abordar el problema.",
           },
           {
             requirementId: "conversation_pedir_aclaracion",
-            text: "Pide en inglés que explique qué ocurrió con los efectos prometidos.",
+            text: "Pide que explique qué ocurrió con los efectos prometidos.",
           },
           {
             requirementId: "conversation_marcar_limite_pago",
-            text: "Deja claro en inglés que no se realizará el pago debido a la falta de entrega.",
+            text: "Deja claro que no se realizará el pago debido a la falta de entrega.",
           },
           {
             requirementId: "english_use_delivery_deadline",
@@ -5078,15 +5078,15 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_usa_pacing",
-            text: "Incluye la palabra en inglés 'pacing' al defender el ritmo de la escena frente a la crítica.",
+            text: "Incluye la palabra 'pacing' al defender el ritmo de la escena frente a la crítica.",
           },
           {
             requirementId: "english_usa_character_arc",
-            text: "Menciona la expresión en inglés 'character arc' para hablar de la progresión de un personaje.",
+            text: "Menciona la expresión 'character arc' para hablar de la progresión de un personaje.",
           },
           {
             requirementId: "english_usa_raise_the_stakes",
-            text: "Incluye la expresión en inglés 'raise the stakes' para proponer cómo aumentar la tensión dramática.",
+            text: "Incluye la expresión 'raise the stakes' para proponer cómo aumentar la tensión dramática.",
           },
         ],
       },
@@ -5150,15 +5150,15 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "conversation_saludo_amistoso",
-            text: "Saluda en inglés de forma amable al recepcionista.",
+            text: "Saluda de forma amable al recepcionista.",
           },
           {
             requirementId: "conversation_agradecer_galletas",
-            text: "Agradece en inglés la oferta de las galletas antes de rechazarlas.",
+            text: "Agradece la oferta de las galletas antes de rechazarlas.",
           },
           {
             requirementId: "conversation_rechazo_educado",
-            text: "Rechaza en inglés las galletas de forma educada.",
+            text: "Rechaza las galletas de forma educada.",
           },
           {
             requirementId: "conversation_comentar_olor",
@@ -5203,7 +5203,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_on_the_other_hand",
-            text: "Usa el conector en inglés 'on the other hand'.",
+            text: "Usa el conector 'on the other hand'.",
           },
           {
             requirementId: "english_lean_into_phrasal",
@@ -5228,11 +5228,11 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "conversation_negociar_numero_preguntas",
-            text: "Negocia en inglés responder solo tres preguntas antes de que llegue tu piso.",
+            text: "Negocia responder solo tres preguntas antes de que llegue tu piso.",
           },
           {
             requirementId: "conversation_preguntar_quien_los_envia",
-            text: "Pregunta en inglés quién los envió.",
+            text: "Pregunta quién los envió.",
           },
           {
             requirementId: "english_in_a_nutshell",
@@ -5240,11 +5240,11 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_phrasal_back_off",
-            text: 'Pide espacio usando el phrasal verb en inglés "back off" de manera cortés.',
+            text: 'Pide espacio usando el phrasal verb "back off" de manera cortés.',
           },
           {
             requirementId: "english_phrasal_wrap_up",
-            text: 'Usando el phrasal verb en inglés "wrap up".',
+            text: 'Usando el phrasal verb "wrap up".',
           },
         ],
       },
@@ -5345,11 +5345,11 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "conversation_romper_hielo_con_observacion",
-            text: "Rompe el hielo en inglés con una observación amable.",
+            text: "Rompe el hielo con una observación amable.",
           },
           {
             requirementId: "conversation_establecer_limite_pregunta_invasiva",
-            text: "Cuando te hagan una pregunta demasiado personal, establece un límite en inglés de manera respetuosa.",
+            text: "Cuando te hagan una pregunta demasiado personal, establece un límite de manera respetuosa.",
           },
           {
             requirementId: "conversation_expresar_felicidad",
@@ -5357,15 +5357,15 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_suavizar_tension_phrasal",
-            text: "Emplea el phrasal verb en inglés 'smooth things over'.",
+            text: "Emplea el phrasal verb 'smooth things over'.",
           },
           {
             requirementId: "english_llevarse_bien_phrasal",
-            text: "Usa el phrasal verb en inglés 'get along with'",
+            text: "Usa el phrasal verb 'get along with'",
           },
           {
             requirementId: "english_sonar_como_phrasal",
-            text: "Emplea el phrasal verb en inglés 'come across as'.",
+            text: "Emplea el phrasal verb 'come across as'.",
           },
         ],
       },
@@ -5419,7 +5419,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "conversation_agradecer_plato",
-            text: "Agradece en inglés que te haya servido el plato.",
+            text: "Agradece que te haya servido el plato.",
           },
           {
             requirementId: "conversation_pedir_historia",
@@ -5435,7 +5435,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "english_with_all_due_respect_marker",
-            text: "Atenúa una opinión potencialmente sensible usando el marcador en inglés 'With all due respect,'.",
+            text: "Atenúa una opinión potencialmente sensible usando el marcador 'With all due respect,'.",
           },
           {
             requirementId: "english_labor_of_love_collocation",
@@ -5455,7 +5455,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         requirements: [
           {
             requirementId: "conversation_llamar_atencion",
-            text: "Llama en inglés a tu primo para que se detenga.",
+            text: "Llama a tu primo para que se detenga.",
           },
           {
             requirementId: "conversation_mostrar_preocupacion",
@@ -5626,7 +5626,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
                     {
             requirementId: "english_use_tourist_trap",
-            text: "Usa la expresión en inglés 'tourist trap'.",
+            text: "Usa la expresión 'tourist trap'.",
           },
                 {
             requirementId: "english_idiom_on_the_fence",
@@ -5659,7 +5659,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
                {
             requirementId: "english_usar_collocation_fair_and_square",
-            text: 'Usa la collocation en inglés "fair and square" para insistir en que el trato sea justo.',
+            text: 'Usa la collocation "fair and square" para insistir en que el trato sea justo.',
           },
           {
             requirementId: "english_usar_phrasal_turn_down",

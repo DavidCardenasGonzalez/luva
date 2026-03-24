@@ -1,4 +1,4 @@
-Luva — B1 → B2 (MVP)
+Luva — B1 → C1 (MVP)
 
 Visión
 - App móvil para practicar inglés con cartas y conversaciones guiadas por voz. Backend serverless en AWS. Sin claves de OpenAI en cliente.
