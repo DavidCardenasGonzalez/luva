@@ -17,6 +17,7 @@ Uso
    `APPLE_SERVICE_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY`
    Puedes copiar `infra/.env.infra.example` a `infra/.env.infra` y cargarlo con:
    `set -a && source .env.infra && set +a`
+   Si usas `infra/.env`, los scripts `npm run synth` y `npm run deploy` ya lo cargan automáticamente.
 3) `npx cdk bootstrap` (primera vez en la cuenta)
 4) `npx cdk deploy` (usa `cdk.json` → no requiere `--app`)
 

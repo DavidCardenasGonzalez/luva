@@ -97,12 +97,12 @@ export class LuvaStack extends Stack {
     });
 
     // Cognito UserPool (Hosted UI)
-    const userPool = new UserPool(this, 'UserPool', {
+    const userPool = new UserPool(this, 'AuthUserPoolV2', {
       selfSignUpEnabled: true,
       signInAliases: { email: true },
       autoVerify: { email: true },
       standardAttributes: {
-        email: { required: true, mutable: false },
+        email: { required: true, mutable: true },
       },
       customAttributes: {
         levelEstimate: new StringAttribute({ mutable: true }),
@@ -131,7 +131,7 @@ export class LuvaStack extends Stack {
     const domainPrefix = sanitizeDomainPrefix(
       process.env.COGNITO_DOMAIN_PREFIX || `luva-${this.stackName}-${this.account}-${this.region}`
     );
-    const userPoolDomain = userPool.addDomain('HostedUiDomain', {
+    const userPoolDomain = userPool.addDomain('HostedUiDomainV2', {
       cognitoDomain: { domainPrefix },
     });
 
@@ -143,7 +143,7 @@ export class LuvaStack extends Stack {
     const googleClientId = process.env.GOOGLE_CLIENT_ID;
     const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
     if (googleClientId && googleClientSecret) {
-      const googleProvider = new UserPoolIdentityProviderGoogle(this, 'GoogleProvider', {
+      const googleProvider = new UserPoolIdentityProviderGoogle(this, 'GoogleProviderV2', {
         clientId: googleClientId,
         clientSecretValue: SecretValue.unsafePlainText(googleClientSecret),
         scopes: ['openid', 'email', 'profile'],
@@ -166,7 +166,7 @@ export class LuvaStack extends Stack {
     const appleKeyId = process.env.APPLE_KEY_ID;
     const applePrivateKey = process.env.APPLE_PRIVATE_KEY;
     if (appleClientId && appleTeamId && appleKeyId && applePrivateKey) {
-      const appleProvider = new UserPoolIdentityProviderApple(this, 'AppleProvider', {
+      const appleProvider = new UserPoolIdentityProviderApple(this, 'AppleProviderV2', {
         clientId: appleClientId,
         teamId: appleTeamId,
         keyId: appleKeyId,
@@ -184,7 +184,7 @@ export class LuvaStack extends Stack {
       identityProviders.push(appleProvider);
     }
 
-    const userPoolClient = userPool.addClient('AppClient', {
+    const userPoolClient = userPool.addClient('AppClientV2', {
       oAuth: {
         flows: {
           authorizationCodeGrant: true,
@@ -266,7 +266,7 @@ export class LuvaStack extends Stack {
     });
 
     const v1 = api.root.addResource('v1');
-    const usersAuthorizer = new CognitoUserPoolsAuthorizer(this, 'UsersAuthorizer', {
+    const usersAuthorizer = new CognitoUserPoolsAuthorizer(this, 'UsersAuthorizerV2', {
       cognitoUserPools: [userPool],
     });
     const users = v1.addResource('users');

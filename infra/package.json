@@ -9,8 +9,8 @@
     "build": "tsc",
     "watch": "tsc -w",
     "cdk": "cdk",
-    "synth": "cdk synth",
-    "deploy": "cdk deploy --profile david"
+    "synth": "zsh -lc 'export PATH=/Users/cardenas/.nvm/versions/node/v20.19.0/bin:$PATH && set -a && [ -f .env ] && source .env && set +a && cdk synth'",
+    "deploy": "zsh -lc 'export PATH=/Users/cardenas/.nvm/versions/node/v20.19.0/bin:$PATH && set -a && [ -f .env ] && source .env && set +a && cdk deploy --profile david'"
   },
   "devDependencies": {
     "@types/node": "^18",
