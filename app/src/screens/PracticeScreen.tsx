@@ -135,8 +135,8 @@ const luviImage = require("../image/luvi.png");
 const PROD_REWARDED_AD_UNIT_ID =
   Platform.select({
     ios: "ca-app-pub-3572102651268229/8175446712",
-    android: "ca-app-pub-3572102651268229/6032857897",
-  }) ?? "ca-app-pub-3572102651268229/6032857897";
+    android: "ca-app-pub-3572102651268229/4835017171",
+  }) ?? "ca-app-pub-3572102651268229/4835017171";
 
 type MobileAdsRewardedModule = {
   AdEventType: {

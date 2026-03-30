@@ -26,8 +26,8 @@ type RouteProps = RouteProp<RootStackParamList, "StoryMissions">;
 const PROD_INTERSTITIAL_AD_UNIT_ID =
   Platform.select({
     ios: "ca-app-pub-3572102651268229/5186680084",
-    android: "ca-app-pub-3572102651268229/3933453951",
-  }) ?? "ca-app-pub-3572102651268229/3933453951";
+    android: "ca-app-pub-3572102651268229/2484186004",
+  }) ?? "ca-app-pub-3572102651268229/2484186004";
 
 type MobileAdsModule = {
   AdEventType: {
