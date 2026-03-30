@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import * as SecureStore from 'expo-secure-store';
@@ -38,6 +38,7 @@ type TokenExchangeResponse = {
   access_token?: string;
   id_token?: string;
   refresh_token?: string;
+  expires_in?: number;
   error?: string;
   error_description?: string;
 };
@@ -56,7 +57,9 @@ const REDIRECT_URI: string = extra.REDIRECT_URI || 'myapp://callback';
 const ACCESS_TOKEN_KEY = 'luva_access';
 const ID_TOKEN_KEY = 'luva_id';
 const REFRESH_TOKEN_KEY = 'luva_refresh';
+const SESSION_EXPIRES_AT_KEY = 'luva_session_expires_at';
 const USER_KEY = 'luva_user';
+const SESSION_EXPIRY_SKEW_MS = 30_000;
 
 const IDENTITY_PROVIDER_MAP: Record<AuthProviderName, string | undefined> = {
   google: 'Google',
@@ -84,6 +87,17 @@ async function storeValue(key: string, value?: string) {
 
 async function getValue(key: string) {
   return SecureStore.getItemAsync(key);
+}
+
+async function storeNumber(key: string, value?: number) {
+  await storeValue(key, typeof value === 'number' && Number.isFinite(value) ? String(value) : undefined);
+}
+
+async function getStoredNumber(key: string): Promise<number | undefined> {
+  const raw = await getValue(key);
+  if (!raw) return undefined;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 async function deleteValue(key: string) {
@@ -148,6 +162,40 @@ async function exchangeCodeForTokens(code: string): Promise<TokenExchangeRespons
   return payload;
 }
 
+async function refreshTokens(refreshToken: string): Promise<TokenExchangeResponse> {
+  if (!DOMAIN) {
+    throw new Error('COGNITO_DOMAIN no está configurado.');
+  }
+  const tokenUrl = `${DOMAIN}/oauth2/token`;
+  const form = new URLSearchParams();
+  form.append('grant_type', 'refresh_token');
+  form.append('client_id', CLIENT_ID);
+  form.append('refresh_token', refreshToken);
+
+  const res = await fetch(tokenUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: form.toString(),
+  });
+  const payload = await res.json() as TokenExchangeResponse;
+  if (!res.ok || payload.error) {
+    throw new Error(payload.error_description || payload.error || 'Refresh token failed');
+  }
+  return payload;
+}
+
+function getSessionExpiresAt(expiresInSeconds?: number): number | undefined {
+  if (typeof expiresInSeconds !== 'number' || !Number.isFinite(expiresInSeconds) || expiresInSeconds <= 0) {
+    return undefined;
+  }
+  return Date.now() + expiresInSeconds * 1000;
+}
+
+function isSessionExpired(expiresAt?: number): boolean {
+  if (!expiresAt) return false;
+  return expiresAt <= Date.now() + SESSION_EXPIRY_SKEW_MS;
+}
+
 async function syncCurrentUser(authToken: string, authProvider?: AuthProviderName): Promise<AuthUser | undefined> {
   api.setToken(authToken);
   try {
@@ -170,32 +218,209 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isHydrating, setIsHydrating] = useState(true);
   const [isBusy, setIsBusy] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const sessionExpiresAtRef = useRef<number | undefined>(undefined);
+  const accessTokenRef = useRef<string | undefined>(undefined);
+  const idTokenRef = useRef<string | undefined>(undefined);
+  const refreshTokenRef = useRef<string | undefined>(undefined);
+  const userRef = useRef<AuthUser | undefined>(undefined);
+  const refreshPromiseRef = useRef<Promise<string | undefined> | undefined>(undefined);
 
   const isConfigured = Boolean(DOMAIN && CLIENT_ID && REDIRECT_URI);
   const authToken = idToken || accessToken;
+
+  const applySession = useCallback(
+    async (
+      next: {
+        accessToken?: string;
+        idToken?: string;
+        refreshToken?: string;
+        expiresAt?: number;
+        user?: AuthUser;
+      },
+      options?: { persist?: boolean }
+    ) => {
+      const persist = options?.persist ?? true;
+
+      accessTokenRef.current = next.accessToken;
+      idTokenRef.current = next.idToken;
+      refreshTokenRef.current = next.refreshToken;
+      userRef.current = next.user;
+      sessionExpiresAtRef.current = next.expiresAt;
+
+      setAccessToken(next.accessToken);
+      setIdToken(next.idToken);
+      setUser(next.user);
+      api.setToken(next.idToken || next.accessToken);
+
+      if (!persist) {
+        return;
+      }
+
+      await Promise.all([
+        storeValue(ACCESS_TOKEN_KEY, next.accessToken),
+        storeValue(ID_TOKEN_KEY, next.idToken),
+        storeValue(REFRESH_TOKEN_KEY, next.refreshToken),
+        storeNumber(SESSION_EXPIRES_AT_KEY, next.expiresAt),
+        storeUser(next.user),
+      ]);
+    },
+    []
+  );
+
+  const clearSession = useCallback(
+    async (options?: { persist?: boolean }) => {
+      const persist = options?.persist ?? true;
+
+      accessTokenRef.current = undefined;
+      idTokenRef.current = undefined;
+      refreshTokenRef.current = undefined;
+      userRef.current = undefined;
+      sessionExpiresAtRef.current = undefined;
+      refreshPromiseRef.current = undefined;
+
+      setAccessToken(undefined);
+      setIdToken(undefined);
+      setUser(undefined);
+      api.setToken(undefined);
+
+      if (!persist) {
+        return;
+      }
+
+      await Promise.all([
+        deleteValue(ACCESS_TOKEN_KEY),
+        deleteValue(ID_TOKEN_KEY),
+        deleteValue(REFRESH_TOKEN_KEY),
+        deleteValue(SESSION_EXPIRES_AT_KEY),
+        deleteValue(USER_KEY),
+      ]);
+    },
+    []
+  );
+
+  const refreshSession = useCallback(async (): Promise<string | undefined> => {
+    const currentRefreshToken = refreshTokenRef.current;
+    if (!currentRefreshToken) {
+      const currentBearer = idTokenRef.current || accessTokenRef.current;
+      if (currentBearer && isSessionExpired(sessionExpiresAtRef.current)) {
+        await clearSession();
+      }
+      return currentBearer;
+    }
+
+    if (refreshPromiseRef.current) {
+      return refreshPromiseRef.current;
+    }
+
+    refreshPromiseRef.current = (async () => {
+      try {
+        const payload = await refreshTokens(currentRefreshToken);
+        const nextAccessToken = payload.access_token;
+        const nextIdToken = payload.id_token;
+        const nextRefreshToken = payload.refresh_token || currentRefreshToken;
+        const nextBearer = nextIdToken || nextAccessToken;
+
+        if (!nextAccessToken || !nextBearer) {
+          throw new Error('Cognito no devolvió tokens válidos al refrescar la sesión.');
+        }
+
+        await applySession({
+          accessToken: nextAccessToken,
+          idToken: nextIdToken,
+          refreshToken: nextRefreshToken,
+          expiresAt: getSessionExpiresAt(payload.expires_in),
+          user: userRef.current,
+        });
+
+        return nextBearer;
+      } catch (err: any) {
+        console.warn('auth.refresh.failed', err?.message || err);
+        setError('Tu sesión expiró. Inicia sesión de nuevo.');
+        await clearSession();
+        return undefined;
+      } finally {
+        refreshPromiseRef.current = undefined;
+      }
+    })();
+
+    return refreshPromiseRef.current;
+  }, [applySession, clearSession]);
+
+  const ensureValidSession = useCallback(async (): Promise<string | undefined> => {
+    const currentBearer = idTokenRef.current || accessTokenRef.current;
+    const currentExpiresAt = sessionExpiresAtRef.current;
+
+    if (currentBearer && (!currentExpiresAt || !isSessionExpired(currentExpiresAt))) {
+      api.setToken(currentBearer);
+      return currentBearer;
+    }
+
+    if (!currentBearer && refreshTokenRef.current) {
+      return refreshSession();
+    }
+
+    if (refreshTokenRef.current) {
+      return refreshSession();
+    }
+
+    if (currentBearer && currentExpiresAt && isSessionExpired(currentExpiresAt)) {
+      await clearSession();
+      return undefined;
+    }
+
+    api.setToken(currentBearer);
+    return currentBearer;
+  }, [clearSession, refreshSession]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [storedAccessToken, storedIdToken, storedUser] = await Promise.all([
+        const [storedAccessToken, storedIdToken, storedRefreshToken, storedExpiresAt, storedUser] = await Promise.all([
           getValue(ACCESS_TOKEN_KEY),
           getValue(ID_TOKEN_KEY),
+          getValue(REFRESH_TOKEN_KEY),
+          getStoredNumber(SESSION_EXPIRES_AT_KEY),
           getStoredUser(),
         ]);
 
         if (cancelled) return;
 
-        setAccessToken(storedAccessToken || undefined);
-        setIdToken(storedIdToken || undefined);
-        setUser(storedUser);
-        api.setToken(storedIdToken || storedAccessToken || undefined);
+        await applySession(
+          {
+            accessToken: storedAccessToken || undefined,
+            idToken: storedIdToken || undefined,
+            refreshToken: storedRefreshToken || undefined,
+            expiresAt: storedExpiresAt,
+            user: storedUser,
+          },
+          { persist: false }
+        );
 
-        const storedBearer = storedIdToken || storedAccessToken;
+        const shouldRefresh =
+          Boolean(storedRefreshToken) &&
+          (
+            !storedExpiresAt ||
+            !storedAccessToken ||
+            isSessionExpired(storedExpiresAt)
+          );
+
+        const storedBearer = shouldRefresh
+          ? await refreshSession()
+          : storedIdToken || storedAccessToken || undefined;
+
         if (!storedUser && storedBearer) {
           const syncedUser = await syncCurrentUser(storedBearer);
           if (!cancelled && syncedUser) {
-            setUser(syncedUser);
+            await applySession(
+              {
+                accessToken: accessTokenRef.current,
+                idToken: idTokenRef.current,
+                refreshToken: refreshTokenRef.current,
+                expiresAt: sessionExpiresAtRef.current,
+                user: syncedUser,
+              }
+            );
           }
         }
       } finally {
@@ -208,7 +433,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [applySession, refreshSession]);
+
+  useEffect(() => {
+    api.setTokenResolver({
+      getToken: ensureValidSession,
+      refreshToken: refreshSession,
+    });
+
+    return () => {
+      api.setTokenResolver(undefined);
+    };
+  }, [ensureValidSession, refreshSession]);
 
   const signInWithProvider = useCallback(async (provider: AuthProviderName) => {
     if (!isConfigured) {
@@ -264,25 +500,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      await Promise.all([
-        storeValue(ACCESS_TOKEN_KEY, nextAccessToken),
-        storeValue(ID_TOKEN_KEY, nextIdToken),
-        storeValue(REFRESH_TOKEN_KEY, nextRefreshToken),
-      ]);
-
-      setAccessToken(nextAccessToken);
-      setIdToken(nextIdToken);
-      api.setToken(nextBearer);
+      await applySession({
+        accessToken: nextAccessToken,
+        idToken: nextIdToken,
+        refreshToken: nextRefreshToken,
+        expiresAt: getSessionExpiresAt(data.expires_in),
+        user: undefined,
+      });
 
       const syncedUser = await syncCurrentUser(nextBearer, provider);
-      setUser(syncedUser);
+      await applySession({
+        accessToken: accessTokenRef.current,
+        idToken: idTokenRef.current,
+        refreshToken: refreshTokenRef.current,
+        expiresAt: sessionExpiresAtRef.current,
+        user: syncedUser,
+      });
     } catch (err: any) {
       setError(err?.message || 'No pudimos completar el inicio de sesión.');
     } finally {
       setIsBusy(false);
       setIsHydrating(false);
     }
-  }, [isConfigured]);
+  }, [applySession, isConfigured]);
 
   const signIn = useCallback(async () => {
     await signInWithProvider('email');
@@ -314,19 +554,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } finally {
-      await Promise.all([
-        deleteValue(ACCESS_TOKEN_KEY),
-        deleteValue(ID_TOKEN_KEY),
-        deleteValue(REFRESH_TOKEN_KEY),
-        deleteValue(USER_KEY),
-      ]);
-      setAccessToken(undefined);
-      setIdToken(undefined);
-      setUser(undefined);
-      api.setToken(undefined);
+      await clearSession();
       setIsBusy(false);
     }
-  }, []);
+  }, [clearSession]);
 
   const value = useMemo(
     () => ({

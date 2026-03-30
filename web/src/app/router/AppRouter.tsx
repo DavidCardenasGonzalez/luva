@@ -33,16 +33,17 @@ export function AppRouter() {
       <Route path={appPaths.links} element={<LinksPage />} />
       <Route
         path={appPaths.login}
-        element={isSignedIn ? <Navigate to={appPaths.welcome} replace /> : <LoginPage />}
+        element={isSignedIn ? <Navigate to={appPaths.dashboard} replace /> : <LoginPage />}
       />
       <Route
-        path={appPaths.welcome}
+        path={appPaths.dashboard}
         element={
           <ProtectedRoute>
             <WelcomePage />
           </ProtectedRoute>
         }
       />
+      <Route path={appPaths.welcome} element={<Navigate to={appPaths.dashboard} replace />} />
       <Route path="*" element={<Navigate to={appPaths.home} replace />} />
     </Routes>
   )

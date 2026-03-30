@@ -13,6 +13,7 @@ type TokenExchangeResponse = {
   access_token?: string
   id_token?: string
   refresh_token?: string
+  expires_in?: number
   error?: string
   error_description?: string
 }
@@ -30,6 +31,7 @@ const REFRESH_TOKEN_KEY = 'luva_web_refresh'
 const USER_KEY = 'luva_web_user'
 const PENDING_STATE_KEY = 'luva_web_pending_state'
 const PENDING_PROVIDER_KEY = 'luva_web_pending_provider'
+const SESSION_EXPIRY_SKEW_MS = 30_000
 
 const IDENTITY_PROVIDER_MAP = {
   google: 'Google',
@@ -38,6 +40,10 @@ const IDENTITY_PROVIDER_MAP = {
 
 let inFlightAuthCallbackSearch: string | undefined
 let inFlightAuthCallbackPromise: Promise<AuthCallbackResult | undefined> | undefined
+let inFlightRefreshPromise: Promise<StoredSession | undefined> | undefined
+let currentSession: StoredSession = {}
+let hasHydratedSession = false
+const sessionListeners = new Set<(session: StoredSession) => void>()
 
 function getLocalStorage() {
   if (typeof window === 'undefined') {
@@ -244,7 +250,7 @@ function isTokenExpired(token?: string) {
     return false
   }
 
-  return expiresAtSeconds * 1000 <= Date.now() + 30_000
+  return expiresAtSeconds * 1000 <= Date.now() + SESSION_EXPIRY_SKEW_MS
 }
 
 function parseStoredUser(raw?: string | null): AuthUser | undefined {
@@ -256,71 +262,205 @@ function parseStoredUser(raw?: string | null): AuthUser | undefined {
   }
 }
 
-function persistSession(session: StoredSession) {
-  const storage = getLocalStorage()
-  if (!storage) return
-
-  if (session.accessToken) {
-    storage.setItem(ACCESS_TOKEN_KEY, session.accessToken)
-  } else {
-    storage.removeItem(ACCESS_TOKEN_KEY)
-  }
-
-  if (session.idToken) {
-    storage.setItem(ID_TOKEN_KEY, session.idToken)
-  } else {
-    storage.removeItem(ID_TOKEN_KEY)
-  }
-
-  if (session.refreshToken) {
-    storage.setItem(REFRESH_TOKEN_KEY, session.refreshToken)
-  } else {
-    storage.removeItem(REFRESH_TOKEN_KEY)
-  }
-
-  if (session.user) {
-    storage.setItem(USER_KEY, JSON.stringify(session.user))
-  } else {
-    storage.removeItem(USER_KEY)
-  }
-
-  api.setToken(session.idToken || session.accessToken)
+function getBearer(session?: StoredSession) {
+  return session?.idToken || session?.accessToken
 }
 
-export function loadStoredSession(): StoredSession {
+function normalizeSession(
+  session: StoredSession,
+  fallbackProvider?: AuthProviderName,
+): StoredSession {
+  return {
+    accessToken: session.accessToken,
+    idToken: session.idToken,
+    refreshToken: session.refreshToken,
+    user: session.user || buildFallbackUser(session.idToken, fallbackProvider),
+  }
+}
+
+function hydrateStoredSession() {
   const storage = getLocalStorage()
   if (!storage) {
-    return {}
+    hasHydratedSession = true
+    currentSession = {}
+    api.setToken(undefined)
+    return currentSession
   }
 
-  const accessToken = storage.getItem(ACCESS_TOKEN_KEY) || undefined
-  const idToken = storage.getItem(ID_TOKEN_KEY) || undefined
-  const refreshToken = storage.getItem(REFRESH_TOKEN_KEY) || undefined
+  const nextSession = normalizeSession({
+    accessToken: storage.getItem(ACCESS_TOKEN_KEY) || undefined,
+    idToken: storage.getItem(ID_TOKEN_KEY) || undefined,
+    refreshToken: storage.getItem(REFRESH_TOKEN_KEY) || undefined,
+    user: parseStoredUser(storage.getItem(USER_KEY)),
+  })
 
-  const bearer = idToken || accessToken
-  if (bearer && isTokenExpired(bearer)) {
-    clearStoredSession()
-    return {}
+  hasHydratedSession = true
+  currentSession = nextSession
+  api.setToken(getBearer(nextSession))
+  return nextSession
+}
+
+function getCurrentSession() {
+  if (!hasHydratedSession) {
+    return hydrateStoredSession()
+  }
+  return currentSession
+}
+
+function notifySessionListeners(session: StoredSession) {
+  for (const listener of sessionListeners) {
+    listener(session)
+  }
+}
+
+function persistSession(session: StoredSession, fallbackProvider?: AuthProviderName) {
+  const normalizedSession = normalizeSession(session, fallbackProvider)
+  currentSession = normalizedSession
+  hasHydratedSession = true
+
+  const storage = getLocalStorage()
+
+  if (storage) {
+    if (normalizedSession.accessToken) {
+      storage.setItem(ACCESS_TOKEN_KEY, normalizedSession.accessToken)
+    } else {
+      storage.removeItem(ACCESS_TOKEN_KEY)
+    }
+
+    if (normalizedSession.idToken) {
+      storage.setItem(ID_TOKEN_KEY, normalizedSession.idToken)
+    } else {
+      storage.removeItem(ID_TOKEN_KEY)
+    }
+
+    if (normalizedSession.refreshToken) {
+      storage.setItem(REFRESH_TOKEN_KEY, normalizedSession.refreshToken)
+    } else {
+      storage.removeItem(REFRESH_TOKEN_KEY)
+    }
+
+    if (normalizedSession.user) {
+      storage.setItem(USER_KEY, JSON.stringify(normalizedSession.user))
+    } else {
+      storage.removeItem(USER_KEY)
+    }
   }
 
-  const user = parseStoredUser(storage.getItem(USER_KEY)) || buildFallbackUser(idToken)
-  api.setToken(bearer)
-
-  return {
-    accessToken,
-    idToken,
-    refreshToken,
-    user,
-  }
+  api.setToken(getBearer(normalizedSession))
+  notifySessionListeners(normalizedSession)
+  return normalizedSession
 }
 
 export function clearStoredSession() {
+  currentSession = {}
+  hasHydratedSession = true
+  inFlightRefreshPromise = undefined
+
   const storage = getLocalStorage()
   storage?.removeItem(ACCESS_TOKEN_KEY)
   storage?.removeItem(ID_TOKEN_KEY)
   storage?.removeItem(REFRESH_TOKEN_KEY)
   storage?.removeItem(USER_KEY)
   api.setToken(undefined)
+  notifySessionListeners(currentSession)
+}
+
+export function subscribeToSessionChanges(listener: (session: StoredSession) => void) {
+  sessionListeners.add(listener)
+  return () => {
+    sessionListeners.delete(listener)
+  }
+}
+
+async function refreshTokens(refreshToken: string): Promise<TokenExchangeResponse> {
+  const { domain, clientId, isConfigured } = getAuthConfig()
+  if (!isConfigured || !domain || !clientId) {
+    throw new Error('La configuracion de Cognito no esta completa.')
+  }
+
+  const form = new URLSearchParams()
+  form.append('grant_type', 'refresh_token')
+  form.append('client_id', clientId)
+  form.append('refresh_token', refreshToken)
+
+  const response = await fetch(`${domain}/oauth2/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: form.toString(),
+  })
+
+  const payload = (await response.json()) as TokenExchangeResponse
+  if (!response.ok || payload.error) {
+    throw new Error(payload.error_description || payload.error || 'No se pudo refrescar la sesión.')
+  }
+
+  return payload
+}
+
+async function refreshStoredSession(force = false): Promise<StoredSession | undefined> {
+  const session = getCurrentSession()
+  const bearer = getBearer(session)
+
+  if (!force && bearer && !isTokenExpired(bearer)) {
+    api.setToken(bearer)
+    return session
+  }
+
+  if (!session.refreshToken) {
+    if (bearer && isTokenExpired(bearer)) {
+      clearStoredSession()
+      return undefined
+    }
+    return bearer ? session : undefined
+  }
+
+  if (inFlightRefreshPromise) {
+    return inFlightRefreshPromise
+  }
+
+  inFlightRefreshPromise = (async () => {
+    try {
+      const tokenResponse = await refreshTokens(session.refreshToken as string)
+      const accessToken = tokenResponse.access_token
+      const idToken = tokenResponse.id_token
+      const refreshToken = tokenResponse.refresh_token || session.refreshToken
+      const nextBearer = idToken || accessToken
+
+      if (!accessToken || !nextBearer) {
+        throw new Error('Cognito no devolvio tokens validos al refrescar la sesión.')
+      }
+
+      return persistSession({
+        accessToken,
+        idToken,
+        refreshToken,
+        user: session.user,
+      })
+    } catch (error) {
+      console.warn('web.auth.refresh.failed', error)
+      clearStoredSession()
+      return undefined
+    } finally {
+      inFlightRefreshPromise = undefined
+    }
+  })()
+
+  return inFlightRefreshPromise
+}
+
+export async function loadStoredSession(): Promise<StoredSession> {
+  const session = getCurrentSession()
+  const bearer = getBearer(session)
+  if (!bearer) {
+    return session
+  }
+
+  if (!isTokenExpired(bearer)) {
+    api.setToken(bearer)
+    return session
+  }
+
+  return (await refreshStoredSession(true)) || getCurrentSession()
 }
 
 async function exchangeCodeForTokens(code: string): Promise<TokenExchangeResponse> {
@@ -421,15 +561,21 @@ async function resolveAuthCallback(search: string): Promise<AuthCallbackResult |
     }
   }
 
+  const baseSession = persistSession(
+    {
+      accessToken,
+      idToken,
+      refreshToken,
+    },
+    pendingAuth.provider,
+  )
   const user = await syncCurrentUser(bearer, pendingAuth.provider, idToken)
-  const session = {
+  const session = persistSession({
     accessToken,
     idToken,
     refreshToken,
-    user,
-  } satisfies StoredSession
-
-  persistSession(session)
+    user: user || baseSession.user,
+  })
   return { session }
 }
 
@@ -463,3 +609,8 @@ export function redirectToHostedAuth(mode: AuthMode, provider: AuthProviderName)
 export function redirectToHostedLogout() {
   window.location.assign(buildLogoutUrl())
 }
+
+api.setTokenResolver({
+  getToken: async () => getBearer(await loadStoredSession()),
+  refreshToken: async () => getBearer(await refreshStoredSession(true)),
+})

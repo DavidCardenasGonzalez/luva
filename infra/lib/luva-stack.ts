@@ -199,6 +199,11 @@ export class LuvaStack extends Stack {
         userSrp: true,
         userPassword: false,
       },
+      accessTokenValidity: Duration.hours(1),
+      idTokenValidity: Duration.hours(1),
+      refreshTokenValidity: Duration.days(1460),
+      refreshTokenRotationGracePeriod: Duration.seconds(30),
+      enableTokenRevocation: true,
       readAttributes: clientReadAttrs,
       writeAttributes: clientWriteAttrs,
       supportedIdentityProviders,
@@ -271,6 +276,7 @@ export class LuvaStack extends Stack {
     });
     const users = v1.addResource('users');
     const usersMe = users.addResource('me');
+    const usersMeProgress = usersMe.addResource('progress');
     const proxy = v1.addResource('{proxy+}');
     const lambdaIntegration = new LambdaIntegration(apiFn);
     const usersLambdaIntegration = new LambdaIntegration(usersFn);
@@ -279,6 +285,14 @@ export class LuvaStack extends Stack {
       authorizationType: AuthorizationType.COGNITO,
     });
     usersMe.addMethod('POST', usersLambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    usersMeProgress.addMethod('GET', usersLambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    usersMeProgress.addMethod('POST', usersLambdaIntegration, {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
     });

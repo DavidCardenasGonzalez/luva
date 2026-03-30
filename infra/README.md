@@ -6,7 +6,7 @@ Stacks
 - S3 buckets: `audio-raw`, `public`
 - Cognito Hosted UI con email y proveedores sociales opcionales
 - API Gateway REST `/v1` → Lambda `api`
-- API Gateway REST `/v1/users/me` → Lambda `users` protegida con Cognito authorizer
+- API Gateway REST `/v1/users/me` y `/v1/users/me/progress` → Lambda `users` protegida con Cognito authorizer
 - SSM Parameters (OpenAI key, flags)
 
 Uso

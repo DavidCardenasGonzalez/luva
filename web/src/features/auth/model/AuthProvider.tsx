@@ -10,6 +10,7 @@ import {
   loadStoredSession,
   redirectToHostedAuth,
   redirectToHostedLogout,
+  subscribeToSessionChanges,
 } from '@/features/auth/api/auth-client'
 import { AuthContext } from '@/features/auth/model/auth-context'
 import type { AuthMode, AuthProviderName, AuthState } from '@/features/auth/model/types'
@@ -21,10 +22,20 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [auth, setAuth] = useState<AuthState>({ isLoading: true })
 
   useEffect(() => {
+    return subscribeToSessionChanges((session) => {
+      setAuth((current) => ({
+        ...session,
+        error: undefined,
+        isLoading: current.isLoading,
+      }))
+    })
+  }, [])
+
+  useEffect(() => {
     let cancelled = false
 
     const bootstrapAuth = async () => {
-      const storedSession = loadStoredSession()
+      const storedSession = await loadStoredSession()
 
       try {
         if (hasAuthResponse(location.search)) {
@@ -39,12 +50,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
               error: undefined,
               isLoading: false,
             })
-            navigate(appPaths.welcome, { replace: true })
+            navigate(appPaths.dashboard, { replace: true })
             return
           }
 
           if (result?.error) {
-            const nextPath = storedSession.accessToken || storedSession.idToken ? appPaths.welcome : appPaths.login
+            const nextPath =
+              storedSession.accessToken || storedSession.idToken ? appPaths.dashboard : appPaths.login
             setAuth({
               ...storedSession,
               error: result.error,
@@ -68,7 +80,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
         }
 
         const message = error instanceof Error ? error.message : 'No pudimos completar el inicio de sesión.'
-        const nextPath = storedSession.accessToken || storedSession.idToken ? appPaths.welcome : appPaths.login
+        const nextPath =
+          storedSession.accessToken || storedSession.idToken ? appPaths.dashboard : appPaths.login
 
         setAuth({
           ...storedSession,

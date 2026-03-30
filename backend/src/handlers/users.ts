@@ -1,6 +1,16 @@
 import type { APIGatewayProxyResultV2 as Result } from 'aws-lambda';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
+import {
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand,
+  UpdateCommand,
+} from '@aws-sdk/lib-dynamodb';
+import {
+  mergeUserProgressRecords,
+  normalizeUserProgressRecord,
+  type UserProgressRecord,
+} from '../progress';
 
 const dynamo = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
   marshallOptions: {
@@ -24,6 +34,11 @@ type UserRecord = {
   createdAt: string;
   updatedAt: string;
   lastLoginAt: string;
+};
+
+type StoredUserRecord = UserRecord & {
+  appProgress?: UserProgressRecord;
+  appProgressUpdatedAt?: string;
 };
 
 type UpsertUserPayload = {
@@ -54,6 +69,33 @@ export const handler = async (event: any): Promise<Result> => {
       const payload = method === 'POST' ? parseBody(event.body) as UpsertUserPayload | undefined : undefined;
       const record = await upsertCurrentUser(email, claims, payload);
       return json(200, record);
+    }
+
+    if (method === 'GET' && path === `${ROUTE_PREFIX}/users/me/progress`) {
+      const claims = getClaims(event);
+      const email = normalizeEmail(claims.email || claims['cognito:username']);
+      if (!email) {
+        return json(401, { code: 'UNAUTHORIZED', message: 'Missing email claim' });
+      }
+
+      const progress = await getCurrentUserProgress(email);
+      return json(200, { progress });
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/users/me/progress`) {
+      const claims = getClaims(event);
+      const email = normalizeEmail(claims.email || claims['cognito:username']);
+      if (!email) {
+        return json(401, { code: 'UNAUTHORIZED', message: 'Missing email claim' });
+      }
+
+      const payload = parseBody(event.body);
+      const progressInput =
+        payload && typeof payload === 'object' && 'progress' in payload
+          ? (payload as Record<string, unknown>).progress
+          : payload;
+      const progress = await mergeCurrentUserProgress(email, progressInput);
+      return json(200, { progress });
     }
 
     return json(404, { code: 'NOT_FOUND', message: 'Not found' });
@@ -154,18 +196,7 @@ async function upsertCurrentUser(
   claims: CognitoClaims,
   payload?: UpsertUserPayload
 ): Promise<{ user: UserRecord; created: boolean }> {
-  const tableName = process.env.USERS_TABLE_NAME;
-  if (!tableName) {
-    throw new Error('USERS_TABLE_NAME not set');
-  }
-
-  const existing = await dynamo.send(
-    new GetCommand({
-      TableName: tableName,
-      Key: { email },
-    })
-  );
-  const previous = existing.Item as Partial<UserRecord> | undefined;
+  const previous = await getCurrentStoredUser(email);
   const now = new Date().toISOString();
   const user: UserRecord = {
     email,
@@ -192,20 +223,82 @@ async function upsertCurrentUser(
     updatedAt: now,
     lastLoginAt: now,
   };
+  const storedUser: StoredUserRecord = {
+    ...user,
+    appProgress: previous?.appProgress,
+    appProgressUpdatedAt: previous?.appProgressUpdatedAt,
+  };
 
   await dynamo.send(
     new PutCommand({
-      TableName: tableName,
-      Item: user,
+      TableName: getUsersTableName(),
+      Item: storedUser,
     })
   );
 
   return {
     user,
-    created: !previous,
+    created: !previous?.createdAt,
   };
+}
+
+async function getCurrentStoredUser(email: string): Promise<Partial<StoredUserRecord> | undefined> {
+  const existing = await dynamo.send(
+    new GetCommand({
+      TableName: getUsersTableName(),
+      Key: { email },
+    })
+  );
+  return existing.Item as Partial<StoredUserRecord> | undefined;
+}
+
+async function getCurrentUserProgress(email: string): Promise<UserProgressRecord> {
+  const previous = await getCurrentStoredUser(email);
+  return normalizeUserProgressRecord(previous?.appProgress);
+}
+
+async function mergeCurrentUserProgress(
+  email: string,
+  input: unknown
+): Promise<UserProgressRecord> {
+  const previous = await getCurrentStoredUser(email);
+  const progress = mergeUserProgressRecords(previous?.appProgress, input);
+  const progressUpdatedAt = maxTimestamp(progress.cards.updatedAt, progress.stories.updatedAt);
+
+  await dynamo.send(
+    new UpdateCommand({
+      TableName: getUsersTableName(),
+      Key: { email },
+      UpdateExpression: 'SET appProgress = :progress, appProgressUpdatedAt = :progressUpdatedAt',
+      ExpressionAttributeValues: {
+        ':progress': progress,
+        ':progressUpdatedAt': progressUpdatedAt,
+      },
+    })
+  );
+
+  return progress;
+}
+
+function getUsersTableName(): string {
+  const tableName = process.env.USERS_TABLE_NAME;
+  if (!tableName) {
+    throw new Error('USERS_TABLE_NAME not set');
+  }
+  return tableName;
 }
 
 function asString(value: unknown): string | undefined {
   return typeof value === 'string' ? value : undefined;
+}
+
+function maxTimestamp(...values: Array<string | undefined>): string {
+  let next = '1970-01-01T00:00:00.000Z';
+  for (const value of values) {
+    if (!value) continue;
+    if (value.localeCompare(next) > 0) {
+      next = value;
+    }
+  }
+  return next;
 }

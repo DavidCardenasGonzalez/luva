@@ -18,7 +18,7 @@ export function HomePage() {
   const { auth, isSignedIn } = useAuthSession()
 
   const heroPrimaryLabel = isSignedIn ? 'Abrir Luva Web' : 'Login'
-  const heroPrimaryDestination = isSignedIn ? appPaths.welcome : appPaths.login
+  const heroPrimaryDestination = isSignedIn ? appPaths.dashboard : appPaths.login
 
   return (
     <div className="page">

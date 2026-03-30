@@ -336,7 +336,7 @@ export default function SettingsScreen({ navigation }: Props) {
 
           <View style={{ marginTop: 14 }}>
             <Pressable
-              onPress={() => openExternal('https://d219zijgtsj7lu.cloudfront.net/#privacidad')}
+              onPress={() => openExternal('https://www.luvaenglish.com/#privacidad')}
               style={({ pressed }) => ({
                 padding: 14,
                 borderRadius: 14,

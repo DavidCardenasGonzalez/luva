@@ -208,7 +208,7 @@ export default function PaywallScreen() {
             </Text>
           ) : null}
         </View>
-        <Text style={{ color: "#cbd5e1", marginTop: 12, fontWeight: "700" }}>
+        {/* <Text style={{ color: "#cbd5e1", marginTop: 12, fontWeight: "700" }}>
           • Monedas ilimitadas y sin esperas
         </Text>
         <Text style={{ color: "#cbd5e1", marginTop: 6 }}>
@@ -216,7 +216,7 @@ export default function PaywallScreen() {
         </Text>
         <Text style={{ color: "#cbd5e1", marginTop: 6 }}>
           • Soporte prioritario y mejoras futuras
-        </Text>
+        </Text> */}
         {processing ? (
           <View style={{ marginTop: 12, flexDirection: "row", alignItems: "center" }}>
             <ActivityIndicator color={COLORS.accent} />
@@ -281,13 +281,13 @@ export default function PaywallScreen() {
             Monedas ilimitadas y acceso completo
           </Text>
           <Text style={{ color: COLORS.muted, marginTop: 8, lineHeight: 20 }}>
-            Compra directa con RevenueCat. Verás los precios en tu moneda local y podrás restaurar tus compras cuando quieras.
+            Verás los precios en tu moneda local y podrás restaurar tus compras cuando quieras.
           </Text>
           <View style={{ marginTop: 14, flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
             {[
-              "Sin esperar regeneraciones",
-              "Misiones y cartas sin costo",
-              "Soporte prioritario",
+              "Misiones y cartas ilimitadas sin esperar regeneración",
+              "Uso ilimitado de escritura por voz",
+              "Acceso a nuestra plataforma web"
             ].map((item) => (
               <View
                 key={item}
@@ -341,7 +341,7 @@ export default function PaywallScreen() {
             Auto-renewable subscription. Cancel anytime.
           </Text>
           <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 8, gap: 12 }}>
-            <Pressable onPress={() => openExternal("https://d219zijgtsj7lu.cloudfront.net/#privacidad")}>
+            <Pressable onPress={() => openExternal("https://www.luvaenglish.com/#privacidad")}>
               <Text style={{ color: COLORS.accent2, fontWeight: "700" }}>Política de privacidad</Text>
             </Pressable>
             <Pressable onPress={() => openExternal("https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")}>

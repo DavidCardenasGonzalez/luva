@@ -1,15 +1,23 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../auth/AuthProvider';
+import { fetchUserProgress, mergeUserProgress } from './remote';
+import {
+  areStoryProgressDocumentsEqual,
+  buildStoryProgressState,
+  emptyStoryProgressDocument,
+  mergeStoryProgressDocuments,
+  parseStoredStoryProgressDocument,
+} from './sync';
+import type {
+  StoryProgressDocument,
+  StoryProgressEntry,
+  StoryProgressState,
+  StoryProgressItem,
+  UserProgressRecord,
+} from './types';
 
-type StoryMissionProgress = Record<string, string>;
-
-export type StoryProgressEntry = {
-  completedMissions: StoryMissionProgress;
-  storyCompleted: boolean;
-  storyCompletedAt?: string;
-};
-
-export type StoryProgressState = Record<string, StoryProgressEntry>;
+export type { StoryProgressEntry, StoryProgressState } from './types';
 
 type StoryProgressContextValue = {
   loading: boolean;
@@ -27,20 +35,65 @@ const STORAGE_KEY = '@luva/story-progress';
 const StoryProgressContext = createContext<StoryProgressContextValue | undefined>(undefined);
 
 export function StoryProgressProvider({ children }: { children: React.ReactNode }) {
-  const [progress, setProgress] = useState<StoryProgressState>({});
+  const { isLoading: authLoading, isSignedIn, user } = useAuth();
+  const [document, setDocument] = useState<StoryProgressDocument>(() => emptyStoryProgressDocument());
   const [loading, setLoading] = useState(true);
+  const documentRef = useRef<StoryProgressDocument>(emptyStoryProgressDocument());
+  const syncQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const syncedUserRef = useRef<string | undefined>(undefined);
+
+  const applyDocument = useCallback((next: StoryProgressDocument) => {
+    documentRef.current = next;
+    setDocument(next);
+  }, []);
+
+  const persist = useCallback(async (next: StoryProgressDocument) => {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } catch (err: any) {
+      console.warn('[StoryProgress] No se pudo guardar el progreso:', err?.message || err);
+    }
+  }, []);
+
+  const mergeRemoteStoriesIntoLocal = useCallback(
+    async (remoteStories: unknown) => {
+      const merged = mergeStoryProgressDocuments(documentRef.current, remoteStories);
+      if (areStoryProgressDocumentsEqual(merged, documentRef.current)) {
+        return merged;
+      }
+      applyDocument(merged);
+      await persist(merged);
+      return merged;
+    },
+    [applyDocument, persist]
+  );
+
+  const enqueueRemoteMerge = useCallback(
+    (progress: Partial<UserProgressRecord>) => {
+      if (!isSignedIn || !user?.email) return;
+      syncQueueRef.current = syncQueueRef.current
+        .catch(() => undefined)
+        .then(async () => {
+          try {
+            const remote = await mergeUserProgress(progress);
+            await mergeRemoteStoriesIntoLocal(remote.stories);
+          } catch (err: any) {
+            console.warn('[StoryProgress] No se pudo sincronizar el progreso:', err?.message || err);
+          }
+        });
+    },
+    [isSignedIn, mergeRemoteStoriesIntoLocal, user?.email]
+  );
 
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
         const raw = await AsyncStorage.getItem(STORAGE_KEY);
-        if (raw && mounted) {
-          const parsed = JSON.parse(raw);
-          if (parsed && typeof parsed === 'object') {
-            setProgress(parsed as StoryProgressState);
-          }
-        }
+        const parsed = raw ? JSON.parse(raw) : undefined;
+        const next = parseStoredStoryProgressDocument(parsed);
+        if (!mounted) return;
+        applyDocument(next);
       } catch (err: any) {
         console.warn('[StoryProgress] No se pudo cargar el progreso:', err?.message || err);
       } finally {
@@ -50,72 +103,158 @@ export function StoryProgressProvider({ children }: { children: React.ReactNode 
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [applyDocument]);
 
-  const persist = useCallback(async (next: StoryProgressState) => {
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    } catch (err: any) {
-      console.warn('[StoryProgress] No se pudo guardar el progreso:', err?.message || err);
+  useEffect(() => {
+    if (!isSignedIn) {
+      syncedUserRef.current = undefined;
+      return;
     }
-  }, []);
+    if (loading || authLoading || !user?.email || syncedUserRef.current === user.email) {
+      return;
+    }
+
+    syncedUserRef.current = user.email;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const remote = await fetchUserProgress();
+        if (cancelled) return;
+
+        const localStories = documentRef.current;
+        const merged = mergeStoryProgressDocuments(localStories, remote.stories);
+
+        if (!areStoryProgressDocumentsEqual(merged, localStories)) {
+          applyDocument(merged);
+          await persist(merged);
+        }
+
+        if (!areStoryProgressDocumentsEqual(merged, remote.stories)) {
+          enqueueRemoteMerge({ stories: merged });
+        }
+      } catch (err: any) {
+        console.warn('[StoryProgress] No se pudo cargar el progreso remoto:', err?.message || err);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, applyDocument, enqueueRemoteMerge, isSignedIn, loading, persist, user?.email]);
 
   const markMissionCompleted = useCallback(
     async (storyId: string, missionId: string, storyCompleted?: boolean) => {
-      let nextState: StoryProgressState = {};
-      setProgress((prev) => {
-        const entry: StoryProgressEntry = prev[storyId] || {
-          completedMissions: {},
-          storyCompleted: false,
-        };
-        const completedMissions = {
-          ...entry.completedMissions,
-          [missionId]: entry.completedMissions[missionId] || new Date().toISOString(),
-        };
-        const nextEntry: StoryProgressEntry = {
-          completedMissions,
-          storyCompleted: storyCompleted ? true : entry.storyCompleted,
-          storyCompletedAt: storyCompleted
-            ? entry.storyCompletedAt || new Date().toISOString()
-            : entry.storyCompletedAt,
-        };
-        const next = {
-          ...prev,
-          [storyId]: nextEntry,
-        };
-        nextState = next;
-        return next;
-      });
-      await persist(nextState);
+      const storyKey = String(storyId || '').trim();
+      const missionKey = String(missionId || '').trim();
+      if (!storyKey || !missionKey) return;
+
+      const previousItem = documentRef.current.items[storyKey];
+      const alreadyCompleted = Boolean(previousItem?.completedMissions?.[missionKey]);
+      const alreadyStoryCompleted = storyCompleted ? Boolean(previousItem?.storyCompletedAt) : true;
+      if (alreadyCompleted && alreadyStoryCompleted) {
+        return;
+      }
+
+      const now = new Date().toISOString();
+      const nextItem: StoryProgressItem = {
+        updatedAt: now,
+        completedMissions: {
+          ...(previousItem?.completedMissions || {}),
+          [missionKey]: previousItem?.completedMissions?.[missionKey] || now,
+        },
+        ...(storyCompleted
+          ? { storyCompletedAt: previousItem?.storyCompletedAt || now }
+          : previousItem?.storyCompletedAt
+          ? { storyCompletedAt: previousItem.storyCompletedAt }
+          : {}),
+      };
+
+      const next: StoryProgressDocument = {
+        ...documentRef.current,
+        updatedAt: now,
+        items: {
+          ...documentRef.current.items,
+          [storyKey]: nextItem,
+        },
+      };
+
+      applyDocument(next);
+      await persist(next);
+
+      if (isSignedIn && user?.email) {
+        enqueueRemoteMerge({
+          stories: {
+            updatedAt: now,
+            items: {
+              [storyKey]: nextItem,
+            },
+          },
+        });
+      }
     },
-    [persist]
+    [applyDocument, enqueueRemoteMerge, isSignedIn, persist, user?.email]
   );
 
   const resetStory = useCallback(
     async (storyId: string) => {
-      let nextState: StoryProgressState = {};
-      setProgress((prev) => {
-        if (!prev[storyId]) return prev;
-        const next = { ...prev };
-        delete next[storyId];
-        nextState = next;
-        return next;
-      });
-      await persist(nextState);
+      const storyKey = String(storyId || '').trim();
+      if (!storyKey) return;
+
+      const deletedAt = new Date().toISOString();
+      const nextItem: StoryProgressItem = {
+        updatedAt: deletedAt,
+        deletedAt,
+        completedMissions: {},
+      };
+      const next: StoryProgressDocument = {
+        ...documentRef.current,
+        updatedAt: deletedAt,
+        items: {
+          ...documentRef.current.items,
+          [storyKey]: nextItem,
+        },
+      };
+
+      applyDocument(next);
+      await persist(next);
+
+      if (isSignedIn && user?.email) {
+        enqueueRemoteMerge({
+          stories: {
+            updatedAt: deletedAt,
+            items: {
+              [storyKey]: nextItem,
+            },
+          },
+        });
+      }
     },
-    [persist]
+    [applyDocument, enqueueRemoteMerge, isSignedIn, persist, user?.email]
   );
 
   const resetAll = useCallback(async () => {
-    setProgress({});
-    await persist({});
-  }, [persist]);
+    const resetAt = new Date().toISOString();
+    const next: StoryProgressDocument = {
+      updatedAt: resetAt,
+      resetAt,
+      items: {},
+    };
+
+    applyDocument(next);
+    await persist(next);
+
+    if (isSignedIn && user?.email) {
+      enqueueRemoteMerge({ stories: next });
+    }
+  }, [applyDocument, enqueueRemoteMerge, isSignedIn, persist, user?.email]);
+
+  const progress = useMemo(() => buildStoryProgressState(document), [document]);
 
   const value = useMemo<StoryProgressContextValue>(() => {
     const isMissionCompleted = (storyId?: string, missionId?: string) => {
       if (!storyId || !missionId) return false;
-      const entry = progress[storyId];
-      return !!entry?.completedMissions?.[missionId];
+      return !!progress[storyId]?.completedMissions?.[missionId];
     };
 
     const completedCountFor = (storyId?: string) => {
@@ -126,8 +265,7 @@ export function StoryProgressProvider({ children }: { children: React.ReactNode 
 
     const storyCompleted = (storyId?: string) => {
       if (!storyId) return false;
-      const entry = progress[storyId];
-      return !!entry?.storyCompleted;
+      return !!progress[storyId]?.storyCompleted;
     };
 
     return {
