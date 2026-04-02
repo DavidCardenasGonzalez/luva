@@ -384,7 +384,7 @@ export default function DeckScreen({ navigation }: Props) {
       if (coinsLoading) return;
       const enough = await canSpend(CARD_OPEN_COST);
       if (!enough) {
-        navigation.navigate('Paywall');
+        navigation.navigate('Paywall', { source: 'deck_card_unlock' });
         return;
       }
     }

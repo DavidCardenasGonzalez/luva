@@ -198,7 +198,7 @@ export default function StoryMissionsScreen() {
         if (coinsLoading) return;
         const enough = await canSpend(CHAT_MISSION_COST);
         if (!enough) {
-          navigation.navigate("Paywall");
+          navigation.navigate("Paywall", { source: "story_mission_unlock" });
           return;
         }
       }

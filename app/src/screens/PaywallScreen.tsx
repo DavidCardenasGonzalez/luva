@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -11,11 +11,20 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { RouteProp } from "@react-navigation/native";
-import Purchases, { PurchasesPackage, Offerings } from "react-native-purchases";
+import Purchases, {
+  PurchasesOfferings,
+  PurchasesPackage,
+} from "react-native-purchases";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRevenueCat } from "../purchases/RevenueCatProvider";
 import CoinCountChip from "../components/CoinCountChip";
 import { RootStackParamList } from "../navigation/AppNavigator";
+import {
+  requestMetaTrackingPermissionIfNeeded,
+  trackCheckoutInitiated,
+  trackPaywallViewed,
+  trackSubscriptionPurchased,
+} from "../marketing/metaAppEvents";
 
 const COLORS = {
   bg: "#050b1a",
@@ -42,12 +51,14 @@ export default function PaywallScreen() {
   const route = useRoute<RouteProp<RootStackParamList, "Paywall">>();
   const insets = useSafeAreaInsets();
   const isModal = !!route.params?.asModal;
+  const paywallSource = route.params?.source || "unknown";
   const { isPro, refreshCustomerInfo, loading: rcLoading } = useRevenueCat();
-  const [offerings, setOfferings] = useState<Offerings | null>(null);
+  const [offerings, setOfferings] = useState<PurchasesOfferings | null>(null);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [restoring, setRestoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const trackedPaywallRef = useRef(false);
 
   const openExternal = async (url: string) => {
     try {
@@ -85,6 +96,15 @@ export default function PaywallScreen() {
     }
   }, [isPro, rcLoading, navigation]);
 
+  useEffect(() => {
+    if (trackedPaywallRef.current || isPro) {
+      return;
+    }
+    trackedPaywallRef.current = true;
+    void requestMetaTrackingPermissionIfNeeded();
+    void trackPaywallViewed({ source: paywallSource, asModal: isModal });
+  }, [isModal, isPro, paywallSource]);
+
   const availablePackages = useMemo<PackageInfo[]>(() => {
     const current = offerings?.current;
     const all = current?.availablePackages || [];
@@ -99,7 +119,6 @@ export default function PaywallScreen() {
       let periodLabel: string | undefined;
       let cadenceLabel: string | undefined;
       let isRecommended = false;
-      console.log(product.subscriptionPeriod);
       if (product.subscriptionPeriod === "P1M") {
         periodLabel = "Facturado cada mes";
         cadenceLabel = "mes";
@@ -123,8 +142,28 @@ export default function PaywallScreen() {
     setProcessingId(info.pkg.identifier);
     setError(null);
     try {
+      void trackCheckoutInitiated({
+        source: paywallSource,
+        packageId: info.pkg.identifier,
+        productId: info.pkg.product.identifier,
+        price: info.pkg.product.price,
+        priceString: info.pkg.product.priceString,
+        currency: info.pkg.product.currencyCode,
+        subscriptionPeriod: info.pkg.product.subscriptionPeriod,
+        hasIntroOffer: Boolean(info.pkg.product.introPrice),
+      });
       const res = await Purchases.purchasePackage(info.pkg);
       if (res.customerInfo) {
+        void trackSubscriptionPurchased({
+          source: paywallSource,
+          packageId: info.pkg.identifier,
+          productId: info.pkg.product.identifier,
+          price: info.pkg.product.price,
+          priceString: info.pkg.product.priceString,
+          currency: info.pkg.product.currencyCode,
+          subscriptionPeriod: info.pkg.product.subscriptionPeriod,
+          hasIntroOffer: Boolean(info.pkg.product.introPrice),
+        });
         await refreshCustomerInfo();
         Alert.alert("¡Listo!", "Ya eres Pro. Disfruta monedas ilimitadas.");
         navigation.goBack();

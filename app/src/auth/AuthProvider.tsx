@@ -45,7 +45,10 @@ type TokenExchangeResponse = {
 
 type CurrentUserResponse = {
   user?: AuthUser;
-  created?: boolean;
+};
+
+type CurrentUserSyncResult = {
+  user?: AuthUser;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -196,18 +199,23 @@ function isSessionExpired(expiresAt?: number): boolean {
   return expiresAt <= Date.now() + SESSION_EXPIRY_SKEW_MS;
 }
 
-async function syncCurrentUser(authToken: string, authProvider?: AuthProviderName): Promise<AuthUser | undefined> {
+async function syncCurrentUser(
+  authToken: string,
+  authProvider?: AuthProviderName
+): Promise<CurrentUserSyncResult> {
   api.setToken(authToken);
   try {
     const response = await api.post<CurrentUserResponse>('/users/me', authProvider ? { authProvider } : undefined);
     if (!response?.user?.email) {
-      return undefined;
+      return {};
     }
     await storeUser(response.user);
-    return response.user;
+    return {
+      user: response.user,
+    };
   } catch (err: any) {
     console.warn('user.sync.failed', err?.message || err);
-    return undefined;
+    return {};
   }
 }
 
@@ -410,15 +418,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           : storedIdToken || storedAccessToken || undefined;
 
         if (!storedUser && storedBearer) {
-          const syncedUser = await syncCurrentUser(storedBearer);
-          if (!cancelled && syncedUser) {
+          const syncResult = await syncCurrentUser(storedBearer);
+          if (!cancelled && syncResult.user) {
             await applySession(
               {
                 accessToken: accessTokenRef.current,
                 idToken: idTokenRef.current,
                 refreshToken: refreshTokenRef.current,
                 expiresAt: sessionExpiresAtRef.current,
-                user: syncedUser,
+                user: syncResult.user,
               }
             );
           }
@@ -508,13 +516,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user: undefined,
       });
 
-      const syncedUser = await syncCurrentUser(nextBearer, provider);
+      const syncResult = await syncCurrentUser(nextBearer, provider);
       await applySession({
         accessToken: accessTokenRef.current,
         idToken: idTokenRef.current,
         refreshToken: refreshTokenRef.current,
         expiresAt: sessionExpiresAtRef.current,
-        user: syncedUser,
+        user: syncResult.user,
       });
     } catch (err: any) {
       setError(err?.message || 'No pudimos completar el inicio de sesión.');

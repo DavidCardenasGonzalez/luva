@@ -208,7 +208,7 @@ export default function HomeScreen({ navigation }: Props) {
         {!isPro ? (
           <Pressable
             disabled={rcLoading}
-            onPress={() => navigation.navigate('Paywall')}
+            onPress={() => navigation.navigate('Paywall', { source: 'home_banner' })}
             style={({ pressed }) => ({
               alignSelf: 'flex-start',
               marginTop: 12,

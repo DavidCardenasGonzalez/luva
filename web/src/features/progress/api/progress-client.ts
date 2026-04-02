@@ -48,7 +48,7 @@ type StoriesResponse = {
   items?: StoryCatalogItem[]
 }
 
-const EMPTY_PROGRESS: UserProgressRecord = {
+export const EMPTY_PROGRESS: UserProgressRecord = {
   cards: { updatedAt: '1970-01-01T00:00:00.000Z', items: {} },
   stories: { updatedAt: '1970-01-01T00:00:00.000Z', items: {} },
 }
@@ -64,4 +64,14 @@ export async function fetchDashboardData() {
     totalCards: __LUVA_TOTAL_CARD_COUNT__,
     stories: storiesResponse.items || [],
   }
+}
+
+export async function fetchUserProgress() {
+  const response = await api.get<ProgressResponse>('/users/me/progress')
+  return response.progress || EMPTY_PROGRESS
+}
+
+export async function mergeUserProgress(progress: Partial<UserProgressRecord>) {
+  const response = await api.post<ProgressResponse>('/users/me/progress', { progress })
+  return response.progress || EMPTY_PROGRESS
 }

@@ -40,6 +40,7 @@ import StoryMessageComposer, {
 import { useCoins, CARD_OPEN_COST, RECORDING_COST } from "../purchases/CoinBalanceProvider";
 import TourOverlay, { TourHighlight } from "../components/TourOverlay";
 import { hasSeenTour, markTourAsSeen } from "../tour/tourProgress";
+import { trackPracticeStarted } from "../marketing/metaAppEvents";
 
 type EvalRes = {
   score: number;
@@ -294,6 +295,36 @@ export default function PracticeScreen() {
   const [practiceTourStepIndex, setPracticeTourStepIndex] = useState(0);
   const isStartingRecording = useRef(false);
   const stopRequestedWhileStarting = useRef(false);
+  const trackedPracticeStartRef = useRef<string | null>(null);
+
+  const practiceTrackingKey = useMemo(() => {
+    if (cardId) {
+      return `card:${String(cardId)}`;
+    }
+    if (storyId) {
+      return `story:${String(storyId)}:${String(sceneIndex ?? 0)}`;
+    }
+    return `generic:${String(label || "practice")}`;
+  }, [cardId, label, sceneIndex, storyId]);
+
+  useEffect(() => {
+    if (trackedPracticeStartRef.current === practiceTrackingKey) {
+      return;
+    }
+    trackedPracticeStartRef.current = practiceTrackingKey;
+    void trackPracticeStarted({
+      practiceType: cardId ? "card" : storyId ? "story" : "generic",
+      cardId: cardId ? String(cardId) : undefined,
+      storyId: storyId ? String(storyId) : undefined,
+      sceneIndex:
+        typeof sceneIndex === "number"
+          ? sceneIndex
+          : Number.isFinite(Number(sceneIndex))
+            ? Number(sceneIndex)
+            : undefined,
+      label: typeof label === "string" ? label : undefined,
+    });
+  }, [cardId, label, practiceTrackingKey, sceneIndex, storyId]);
 
   const ensureCardCharge = useCallback(async () => {
     if (!cardId || isUnlimited || chargeRegistered.current) {
@@ -311,7 +342,7 @@ export default function PracticeScreen() {
       const ok = await spendCoins(CARD_OPEN_COST, `card:${cardId}`);
       if (!ok) {
         setError(`Necesitas ${CARD_OPEN_COST} moneda${CARD_OPEN_COST === 1 ? "" : "s"} para responder.`);
-        navigation.navigate("Paywall");
+        navigation.navigate("Paywall", { source: "practice_card_unlock" });
         return false;
       }
       chargeRegistered.current = true;
@@ -387,7 +418,7 @@ export default function PracticeScreen() {
       );
       if (!ok) {
         setError("Necesitas 1 moneda para grabar.");
-        navigation.navigate("Paywall");
+        navigation.navigate("Paywall", { source: "practice_recording" });
         return;
       }
     }

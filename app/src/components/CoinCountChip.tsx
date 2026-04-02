@@ -33,7 +33,7 @@ export default function CoinCountChip({ style, variant = 'dark' }: Props) {
     <Pressable
       onPress={() => {
         if (!isUnlimited && !loading) {
-          navigation.navigate('Paywall');
+          navigation.navigate('Paywall', { source: 'coin_chip' });
         }
       }}
       disabled={loading}

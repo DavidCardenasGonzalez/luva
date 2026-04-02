@@ -46,3 +46,9 @@ En producción agrega además tu dominio web real.
 - `/welcome`: primera pantalla protegida.
 
 También se mantiene compatibilidad con URLs legacy como `?screen=login` y `?view=links`.
+
+## App links
+- iOS usa `/.well-known/apple-app-site-association` con `appID` `RHZ94C9F36.com.cardi7.luva`.
+- Android usa `/.well-known/assetlinks.json` con package `com.cardi7.luva`.
+- Antes de publicar, reemplaza `REPLACE_WITH_ANDROID_SIGNING_SHA256` por el SHA-256 real del certificado que firma la app instalada.
+- El script `npm run publish` vuelve a subir ambos archivos con `Content-Type: application/json`, porque `apple-app-site-association` no tiene extensión.

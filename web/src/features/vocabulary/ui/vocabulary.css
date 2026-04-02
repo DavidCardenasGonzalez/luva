@@ -1,0 +1,476 @@
+.vocab-page {
+  display: grid;
+  gap: 14px;
+  width: min(1040px, 100%);
+  margin: 0 auto;
+}
+
+.vocab-hero-card,
+.vocab-card,
+.vocab-empty-state,
+.practice-header-card,
+.practice-panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+  background:
+    radial-gradient(700px circle at top right, rgba(74, 245, 193, 0.12), transparent 42%),
+    radial-gradient(520px circle at bottom left, rgba(243, 202, 116, 0.1), transparent 40%),
+    linear-gradient(180deg, rgba(12, 20, 36, 0.98), rgba(6, 10, 19, 0.99));
+}
+
+.vocab-hero-card,
+.practice-header-card {
+  padding: 22px;
+  display: grid;
+  gap: 16px;
+}
+
+.vocab-hero-card {
+  grid-template-columns: minmax(0, 1.35fr) minmax(240px, 0.65fr);
+  align-items: end;
+}
+
+.vocab-hero-copy {
+  display: grid;
+  gap: 14px;
+}
+
+.vocab-hero-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vocab-hero-meter {
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(74, 245, 193, 0.16);
+  background:
+    linear-gradient(160deg, rgba(74, 245, 193, 0.14), rgba(74, 245, 193, 0.04)),
+    rgba(255, 255, 255, 0.03);
+}
+
+.vocab-hero-meter span {
+  color: var(--muted);
+}
+
+.vocab-hero-meter strong {
+  display: block;
+  margin-top: 8px;
+  font-size: clamp(34px, 4vw, 52px);
+  line-height: 0.95;
+}
+
+.vocab-hero-meter p {
+  margin-top: 10px;
+  color: var(--muted);
+}
+
+.vocab-hero-total {
+  margin-top: 12px;
+  width: fit-content;
+}
+
+.practice-panel {
+  padding: 20px;
+}
+
+.practice-panel-head,
+.practice-header-row,
+.practice-heading,
+.vocab-card-head,
+.vocab-card-footer,
+.practice-form-actions,
+.practice-header-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.practice-panel-head,
+.practice-header-row,
+.vocab-card-head {
+  align-items: center;
+}
+
+.vocab-search-field,
+.practice-textarea-field {
+  display: grid;
+  gap: 10px;
+}
+
+.vocab-search-field span {
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.vocab-search-field input,
+.practice-textarea-field textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  padding: 13px 15px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.vocab-search-field input:focus,
+.practice-textarea-field textarea:focus {
+  border-color: rgba(74, 245, 193, 0.28);
+  box-shadow: 0 0 0 4px rgba(74, 245, 193, 0.08);
+}
+
+.practice-textarea-field textarea {
+  resize: vertical;
+  min-height: 136px;
+}
+
+.vocab-filter-chip {
+  appearance: none;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 700;
+  padding: 10px 12px;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.vocab-filter-chip:hover {
+  transform: translateY(-1px);
+}
+
+.vocab-filter-chip.is-active {
+  color: #041018;
+}
+
+.vocab-filter-chip-todo.is-active {
+  background: #f3ca74;
+  border-color: #f3ca74;
+}
+
+.vocab-filter-chip-learning.is-active {
+  background: #86b9ff;
+  border-color: #86b9ff;
+}
+
+.vocab-filter-chip-learned.is-active {
+  background: #4af5c1;
+  border-color: #4af5c1;
+}
+
+.vocab-card-grid,
+.practice-grid,
+.practice-feedback-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.vocab-card-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.practice-grid,
+.practice-feedback-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.vocab-card {
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.vocab-card-head h3,
+.practice-heading h1 {
+  margin-top: 8px;
+  font-size: clamp(23px, 3vw, 32px);
+}
+
+.vocab-card-example,
+.vocab-card-definition,
+.practice-example-item,
+.practice-explanation-box p,
+.practice-selection-feedback p,
+.practice-prompt-card p,
+.practice-submitted-answer p,
+.practice-feedback-box p,
+.practice-progress-panel p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.vocab-card-example {
+  font-size: 14px;
+}
+
+.vocab-card-definition {
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.vocab-status-pill,
+.practice-state-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.vocab-status-pill-todo,
+.card-status-switch-button-todo.is-active {
+  background: rgba(243, 202, 116, 0.16);
+  border-color: rgba(243, 202, 116, 0.3);
+  color: #fbe8b0;
+}
+
+.vocab-status-pill-learning,
+.card-status-switch-button-learning.is-active {
+  background: rgba(134, 185, 255, 0.16);
+  border-color: rgba(134, 185, 255, 0.3);
+  color: #cfe0ff;
+}
+
+.vocab-status-pill-learned,
+.card-status-switch-button-learned.is-active {
+  background: rgba(74, 245, 193, 0.14);
+  border-color: rgba(74, 245, 193, 0.28);
+  color: #b8ffe7;
+}
+
+.practice-state-pill-idle {
+  color: var(--muted);
+}
+
+.practice-state-pill-evaluating {
+  background: rgba(243, 202, 116, 0.16);
+  border-color: rgba(243, 202, 116, 0.3);
+  color: #fbe8b0;
+}
+
+.practice-state-pill-done {
+  background: rgba(74, 245, 193, 0.14);
+  border-color: rgba(74, 245, 193, 0.28);
+  color: #b8ffe7;
+}
+
+.card-status-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.card-status-switch-button {
+  appearance: none;
+  cursor: pointer;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font-weight: 700;
+  padding: 8px 12px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.card-status-switch-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.card-status-switch-button:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+
+.practice-header-meta {
+  align-items: center;
+}
+
+.practice-heading {
+  align-items: end;
+}
+
+.practice-prompt-card {
+  max-width: 360px;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  display: grid;
+  gap: 10px;
+}
+
+.practice-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.practice-example-list,
+.practice-options {
+  display: grid;
+  gap: 12px;
+}
+
+.practice-example-item {
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.practice-explanation-box,
+.practice-selection-feedback,
+.practice-submitted-answer,
+.practice-feedback-box {
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.practice-selection-feedback.is-correct {
+  border-color: rgba(74, 245, 193, 0.26);
+  background: rgba(74, 245, 193, 0.08);
+}
+
+.practice-selection-feedback.is-wrong {
+  border-color: rgba(248, 113, 113, 0.24);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.practice-option {
+  appearance: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  padding: 16px 18px;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 14px;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.practice-option:hover {
+  transform: translateY(-1px);
+}
+
+.practice-option span {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.practice-option.is-selected {
+  border-color: rgba(134, 185, 255, 0.26);
+}
+
+.practice-option.is-correct {
+  border-color: rgba(74, 245, 193, 0.26);
+  background: rgba(74, 245, 193, 0.08);
+}
+
+.practice-option.is-wrong {
+  border-color: rgba(248, 113, 113, 0.24);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.practice-form {
+  display: grid;
+  gap: 16px;
+}
+
+.practice-form-actions {
+  justify-content: flex-end;
+}
+
+.practice-submitted-answer,
+.practice-feedback-box {
+  display: grid;
+  gap: 10px;
+}
+
+.practice-feedback-box strong {
+  font-size: 17px;
+}
+
+.practice-feedback-box ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+}
+
+.practice-progress-panel {
+  gap: 14px;
+}
+
+.vocab-empty-state {
+  padding: 22px;
+  display: grid;
+  gap: 8px;
+}
+
+.vocab-empty-state strong {
+  font-size: 22px;
+}
+
+.vocab-empty-state p {
+  color: var(--muted);
+}
+
+@media (max-width: 1100px) {
+  .vocab-card-grid,
+  .practice-grid,
+  .practice-feedback-grid,
+  .vocab-hero-card,
+  .practice-heading {
+    grid-template-columns: 1fr;
+  }
+
+  .practice-heading,
+  .practice-form-actions,
+  .practice-header-row,
+  .vocab-card-head,
+  .practice-panel-head {
+    flex-direction: column;
+    align-items: start;
+  }
+}
+
+@media (max-width: 700px) {
+  .vocab-hero-card,
+  .vocab-card,
+  .vocab-empty-state,
+  .practice-header-card,
+  .practice-panel {
+    padding: 18px;
+    border-radius: 24px;
+  }
+
+  .card-status-switch {
+    width: 100%;
+  }
+
+  .card-status-switch-button,
+  .vocab-open-button,
+  .practice-speak-button {
+    width: 100%;
+  }
+}

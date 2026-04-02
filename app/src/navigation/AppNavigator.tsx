@@ -13,6 +13,17 @@ import SettingsScreen from '../screens/SettingsScreen';
 import PaywallScreen from '../screens/PaywallScreen';
 import * as Linking from 'expo-linking';
 
+export type PaywallSource =
+  | 'coin_chip'
+  | 'deck_card_unlock'
+  | 'home_banner'
+  | 'practice_card_unlock'
+  | 'practice_recording'
+  | 'settings_subscription'
+  | 'story_mission_unlock'
+  | 'story_scene_mission_unlock'
+  | 'story_scene_recording';
+
 export type RootStackParamList = {
   Home: undefined;
   Deck: undefined;
@@ -33,7 +44,7 @@ export type RootStackParamList = {
   Profile: undefined;
   AuthCallback: undefined;
   Settings: undefined;
-  Paywall: { asModal?: boolean } | undefined;
+  Paywall: { asModal?: boolean; source?: PaywallSource } | undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

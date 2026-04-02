@@ -11,7 +11,9 @@ Ejecutar (Expo)
 2) Configura `.env`
 3) `npx expo start`
 
+Meta Ads
+- Ver `README_META_ADS.md` para estrategia, setup del SDK, permisos y verificacion.
+
 Seguridad
 - Sin claves de OpenAI en cliente.
 - Auth por Cognito Hosted UI (WebView / deep link redirect).
-

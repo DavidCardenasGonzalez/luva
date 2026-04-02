@@ -6,7 +6,10 @@ import { AppProviders } from '@/app/providers/AppProviders'
 import '@/app/styles/global.css'
 import '@/app/styles/layout.css'
 import '@/features/auth/ui/auth.css'
+import '@/features/app-shell/ui/app-shell.css'
 import '@/features/marketing/ui/marketing.css'
+import '@/features/stories/ui/stories.css'
+import '@/features/vocabulary/ui/vocabulary.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

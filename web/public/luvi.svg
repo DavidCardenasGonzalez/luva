@@ -1,0 +1,106 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bodyGrad" x1="120" y1="120" x2="392" y2="392" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E8EDF7"/>
+      <stop offset="0.5" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#D9DEE8"/>
+    </linearGradient>
+
+    <linearGradient id="sideGrad" x1="86" y1="180" x2="170" y2="320" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C7D2E4"/>
+      <stop offset="1" stop-color="#9EACC3"/>
+    </linearGradient>
+
+    <linearGradient id="visorGrad" x1="160" y1="160" x2="352" y2="280" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#07102D"/>
+      <stop offset="0.55" stop-color="#0A143B"/>
+      <stop offset="1" stop-color="#050B20"/>
+    </linearGradient>
+
+    <radialGradient id="eyeGrad" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+      gradientTransform="translate(0 0) rotate(90) scale(36)">
+      <stop stop-color="#BFFBFF"/>
+      <stop offset="1" stop-color="#8FECEF"/>
+    </radialGradient>
+
+    <radialGradient id="glowGrad" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+      gradientTransform="translate(0 0) rotate(90) scale(48)">
+      <stop stop-color="#7EF7FF" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="#7EF7FF" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="shadow" x="70" y="86" width="372" height="360" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#0A1735" flood-opacity="0.22"/>
+    </filter>
+
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <!-- ears -->
+    <path d="M140 132C121 82 104 62 98 52C130 60 167 78 196 116C183 127 163 134 140 132Z" fill="url(#sideGrad)" stroke="#98A6BF" stroke-width="4"/>
+    <path d="M372 132C391 82 408 62 414 52C382 60 345 78 316 116C329 127 349 134 372 132Z" fill="url(#bodyGrad)" stroke="#98A6BF" stroke-width="4"/>
+    <path d="M146 122C132 90 121 75 117 67C144 75 169 87 189 112C177 119 162 123 146 122Z" fill="#FFFFFF" fill-opacity="0.96"/>
+    <path d="M366 122C380 90 391 75 395 67C368 75 343 87 323 112C335 119 350 123 366 122Z" fill="#FFFFFF" fill-opacity="0.96"/>
+
+    <!-- side pods -->
+    <rect x="74" y="172" width="46" height="86" rx="20" fill="url(#sideGrad)" stroke="#A9B5C8" stroke-width="4"/>
+    <rect x="392" y="172" width="46" height="86" rx="20" fill="url(#bodyGrad)" stroke="#C8CED9" stroke-width="4"/>
+
+    <!-- head -->
+    <path d="M118 118C141 102 175 96 256 96C337 96 371 102 394 118C423 139 432 171 432 219C432 265 420 302 389 326C361 348 323 356 256 356C189 356 151 348 123 326C92 302 80 265 80 219C80 171 89 139 118 118Z"
+      fill="url(#bodyGrad)" stroke="#B9C2D2" stroke-width="5"/>
+
+    <!-- center split -->
+    <path d="M256 96C337 96 371 102 394 118C423 139 432 171 432 219C432 265 420 302 389 326C361 348 323 356 256 356V96Z"
+      fill="#000" fill-opacity="0.04"/>
+
+    <!-- visor frame -->
+    <rect x="122" y="156" width="268" height="132" rx="48" fill="#F8FAFD" stroke="#B6BFD0" stroke-width="5"/>
+
+    <!-- visor -->
+    <rect x="138" y="170" width="236" height="104" rx="38" fill="url(#visorGrad)"/>
+
+    <!-- speech notch -->
+    <path d="M194 272H224V290C224 297 216 301 210 296L194 284V272Z" fill="url(#visorGrad)"/>
+
+    <!-- eyes glow -->
+    <circle cx="196" cy="222" r="30" fill="url(#glowGrad)" filter="url(#softGlow)"/>
+    <circle cx="316" cy="222" r="30" fill="url(#glowGrad)" filter="url(#softGlow)"/>
+
+    <!-- eyes -->
+    <circle cx="196" cy="222" r="28" fill="url(#eyeGrad)" stroke="#8CEEF3" stroke-width="2"/>
+    <circle cx="316" cy="222" r="28" fill="url(#eyeGrad)" stroke="#8CEEF3" stroke-width="2"/>
+    <circle cx="208" cy="210" r="10" fill="#FFFFFF" fill-opacity="0.92"/>
+    <circle cx="328" cy="210" r="10" fill="#FFFFFF" fill-opacity="0.92"/>
+
+    <!-- smile -->
+    <path d="M232 246C240 255 249 260 256 260C263 260 272 255 280 246" stroke="#FFFFFF" stroke-width="11" stroke-linecap="round"/>
+
+    <!-- neck -->
+    <rect x="160" y="352" width="192" height="22" rx="11" fill="#AAB5C7"/>
+    <rect x="156" y="348" width="200" height="18" rx="9" fill="#D6DCE7" stroke="#9AA7BC" stroke-width="3"/>
+
+    <!-- torso -->
+    <path d="M168 374C191 365 222 360 256 360C290 360 321 365 344 374C366 383 378 399 378 423C378 461 350 484 256 484C162 484 134 461 134 423C134 399 146 383 168 374Z"
+      fill="url(#bodyGrad)" stroke="#B9C2D2" stroke-width="5"/>
+
+    <!-- torso panel -->
+    <path d="M188 388C206 382 229 379 256 379C283 379 306 382 324 388C334 404 338 420 338 441C338 458 307 470 256 470C205 470 174 458 174 441C174 420 178 404 188 388Z"
+      fill="#FFFFFF" fill-opacity="0.62" stroke="#C5CDDA" stroke-width="3"/>
+
+    <!-- chest icon -->
+    <circle cx="224" cy="416" r="12" fill="#C3CFDF" stroke="#9EABC0" stroke-width="2"/>
+
+    <!-- arms -->
+    <path d="M150 378C125 382 103 404 96 434C92 451 99 462 114 460C134 457 154 432 159 405C162 392 160 381 150 378Z"
+      fill="url(#sideGrad)" stroke="#9EABC0" stroke-width="4"/>
+    <path d="M362 378C387 382 409 404 416 434C420 451 413 462 398 460C378 457 358 432 353 405C350 392 352 381 362 378Z"
+      fill="url(#bodyGrad)" stroke="#B7C0D0" stroke-width="4"/>
+
+    <!-- base shadow -->
+    <ellipse cx="256" cy="492" rx="106" ry="16" fill="#0A1735" fill-opacity="0.18"/>
+  </g>
+</svg>

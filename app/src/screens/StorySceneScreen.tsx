@@ -31,6 +31,10 @@ import { useCoins, CHAT_MISSION_COST, RECORDING_COST } from '../purchases/CoinBa
 import CoinCountChip from '../components/CoinCountChip';
 import TourOverlay, { TourHighlight } from '../components/TourOverlay';
 import { hasSeenTour, markTourAsSeen } from '../tour/tourProgress';
+import {
+  trackMissionCompleted,
+  trackMissionStarted,
+} from '../marketing/metaAppEvents';
 
 type StoryMessage = {
   id: string;
@@ -328,6 +332,8 @@ export default function StorySceneScreen() {
   const scrollRef = useRef<ScrollView>(null);
   const requirementsCardRef = useRef<View>(null);
   const assistanceIconRef = useRef<View>(null);
+  const trackedMissionStartRef = useRef<string | null>(null);
+  const trackedMissionCompletionRef = useRef<Set<string>>(new Set());
   // Permite saber si todavía estamos en el flujo de `start()` (permiso + prepare).
   const isStartingRecording = useRef(false);
   // Si el usuario suelta el botón mientras seguimos pidiendo permiso, guardamos la intención de parar.
@@ -363,6 +369,32 @@ export default function StorySceneScreen() {
     setMissionCompleted(missionDone);
     setStoryCompleted(storyDone);
   }, [isMissionCompleted, isStoryCompleted, mission?.missionId, storyId]);
+
+  useEffect(() => {
+    if (!storyId || !story || !mission?.missionId) {
+      return;
+    }
+    const trackingKey = `${storyId}:${mission.missionId}:${sceneIndex}`;
+    if (trackedMissionStartRef.current === trackingKey) {
+      return;
+    }
+    trackedMissionStartRef.current = trackingKey;
+    void trackMissionStarted({
+      storyId,
+      storyTitle: story.title,
+      missionId: mission.missionId,
+      missionTitle: mission.title,
+      sceneIndex,
+      alreadyCompleted: isMissionCompleted(storyId, mission.missionId),
+    });
+  }, [
+    isMissionCompleted,
+    mission?.missionId,
+    mission?.title,
+    sceneIndex,
+    story,
+    storyId,
+  ]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -420,7 +452,7 @@ export default function StorySceneScreen() {
       if (!ok) {
         setMissionUnlocked(false);
         setErrorMessage(`Costo de misión: ${CHAT_MISSION_COST} monedas`);
-        navigation.navigate('Paywall');
+        navigation.navigate('Paywall', { source: 'story_scene_mission_unlock' });
         return false;
       }
       chargedMissions.current.add(missionId);
@@ -531,6 +563,17 @@ export default function StorySceneScreen() {
         setStoryCompleted((prev) => prev || payload.storyCompleted);
         setConversationFeedback(payload.conversationFeedback ?? null);
         if (payload.missionCompleted && storyId && mission?.missionId) {
+          if (!trackedMissionCompletionRef.current.has(mission.missionId)) {
+            trackedMissionCompletionRef.current.add(mission.missionId);
+            void trackMissionCompleted({
+              storyId,
+              storyTitle: story?.title,
+              missionId: mission.missionId,
+              missionTitle: mission.title,
+              sceneIndex,
+              storyCompleted: payload.storyCompleted,
+            });
+          }
           await markMissionCompleted(storyId, mission.missionId, payload.storyCompleted);
         }
         if (payload.missionCompleted && payload.sceneIndex !== sceneIndex) {
@@ -568,6 +611,7 @@ export default function StorySceneScreen() {
       requirements,
       retryState,
       sceneIndex,
+      story,
       storyCompleted,
       storyDefinitionPayload,
       storyId,
@@ -627,7 +671,7 @@ export default function StorySceneScreen() {
         const missionAffordable = await canSpend(CHAT_MISSION_COST);
         if (!missionAffordable) {
           setErrorMessage(`Costo de misión: ${CHAT_MISSION_COST} monedas`);
-          navigation.navigate('Paywall');
+          navigation.navigate('Paywall', { source: 'story_scene_mission_unlock' });
           return;
         }
       }
@@ -638,7 +682,7 @@ export default function StorySceneScreen() {
         const ok = await spendCoins(RECORDING_COST, chargeReason);
         if (!ok) {
           setErrorMessage('Necesitas 1 moneda para grabar.');
-          navigation.navigate('Paywall');
+          navigation.navigate('Paywall', { source: 'story_scene_recording' });
           return;
         }
       }

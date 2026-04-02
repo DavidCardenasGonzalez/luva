@@ -1,0 +1,498 @@
+.stories-page {
+  display: grid;
+  gap: 18px;
+}
+
+.stories-hero-card,
+.story-card,
+.story-detail-hero,
+.mission-card,
+.stories-stat-card,
+.stories-empty-state,
+.chat-topbar,
+.story-chat-panel,
+.story-chat-main,
+.story-assistance-modal {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+  background:
+    radial-gradient(700px circle at top right, rgba(74, 245, 193, 0.12), transparent 42%),
+    radial-gradient(520px circle at bottom left, rgba(243, 202, 116, 0.1), transparent 40%),
+    linear-gradient(180deg, rgba(12, 20, 36, 0.98), rgba(6, 10, 19, 0.99));
+}
+
+.stories-hero-card,
+.story-detail-hero {
+  padding: 28px;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  align-items: end;
+}
+
+.story-detail-header,
+.story-detail-grid {
+  grid-column: 1 / -1;
+}
+
+.stories-hero-meter,
+.story-progress-card {
+  padding: 22px;
+  border-radius: 22px;
+  border: 1px solid rgba(74, 245, 193, 0.16);
+  background:
+    linear-gradient(160deg, rgba(74, 245, 193, 0.14), rgba(74, 245, 193, 0.04)),
+    rgba(255, 255, 255, 0.03);
+}
+
+.stories-hero-meter span,
+.story-progress-card span {
+  color: var(--muted);
+}
+
+.stories-hero-meter strong,
+.story-progress-card strong {
+  display: block;
+  margin-top: 10px;
+  font-size: clamp(40px, 5vw, 64px);
+  line-height: 0.95;
+}
+
+.stories-hero-meter p,
+.story-progress-card p {
+  margin-top: 12px;
+  color: var(--muted);
+}
+
+.stories-stats-grid,
+.stories-list,
+.story-detail-grid,
+.story-chat-layout {
+  display: grid;
+  gap: 16px;
+}
+
+.stories-stats-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.stories-stat-card,
+.story-card,
+.mission-card,
+.stories-empty-state,
+.chat-topbar,
+.story-chat-panel,
+.story-chat-main {
+  padding: 24px;
+}
+
+.stories-stat-card {
+  display: grid;
+  gap: 10px;
+}
+
+.stories-stat-card strong {
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1;
+}
+
+.stories-stat-card p,
+.story-card p,
+.mission-card p,
+.stories-empty-state p,
+.story-requirement-item p,
+.story-complete-box p,
+.story-assistance-answer p {
+  color: var(--muted);
+}
+
+.stories-list,
+.mission-list {
+  display: grid;
+  gap: 14px;
+}
+
+.story-card-head,
+.mission-card-head,
+.story-card-footer,
+.mission-card-footer,
+.story-detail-header,
+.chat-topbar,
+.chat-topbar-left,
+.story-chat-actions,
+.story-assistance-close-row,
+.story-assistance-actions,
+.story-assistance-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.story-card-head,
+.mission-card-head,
+.story-detail-header,
+.chat-topbar,
+.chat-topbar-left,
+.story-chat-actions,
+.story-assistance-head {
+  align-items: center;
+}
+
+.story-card-head h2,
+.story-detail-hero h1,
+.mission-card-head h2 {
+  margin-top: 10px;
+}
+
+.story-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.story-card-status {
+  display: grid;
+  gap: 12px;
+  justify-items: end;
+}
+
+.story-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(134, 185, 255, 0.3);
+  background: rgba(134, 185, 255, 0.16);
+  color: #cfe0ff;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.story-status-pill-complete {
+  border-color: rgba(74, 245, 193, 0.28);
+  background: rgba(74, 245, 193, 0.14);
+  color: #b8ffe7;
+}
+
+.story-card-footer,
+.mission-card-footer {
+  margin-top: 14px;
+  color: var(--muted);
+}
+
+.story-detail-grid {
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+}
+
+.story-link-current {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.chat-topbar {
+  padding: 18px 22px;
+}
+
+.chat-character-button {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+}
+
+.chat-character-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.05);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  font-weight: 800;
+  font-size: 22px;
+}
+
+.chat-character-avatar img,
+.story-assistance-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.chat-character-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.chat-character-copy span:last-child {
+  color: var(--muted);
+}
+
+.story-chat-layout {
+  grid-template-columns: minmax(280px, 0.86fr) minmax(0, 1.14fr);
+}
+
+.story-chat-sidebar,
+.story-chat-thread {
+  display: grid;
+  gap: 16px;
+}
+
+.story-chat-panel h2 {
+  margin-top: 8px;
+}
+
+.story-requirement-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.story-requirement-item {
+  appearance: none;
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.story-requirement-item strong {
+  display: block;
+}
+
+.story-requirement-item p {
+  margin-top: 6px;
+  font-size: 14px;
+}
+
+.story-requirement-item.is-complete {
+  border-color: rgba(74, 245, 193, 0.28);
+  background: rgba(74, 245, 193, 0.08);
+}
+
+.story-analysis-block {
+  margin-top: 14px;
+}
+
+.story-analysis-block ul,
+.story-complete-box ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+}
+
+.story-complete-box {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(74, 245, 193, 0.28);
+  background: rgba(74, 245, 193, 0.08);
+}
+
+.story-chat-main {
+  display: grid;
+  gap: 16px;
+  min-height: 720px;
+}
+
+.story-chat-thread {
+  align-content: start;
+  min-height: 0;
+}
+
+.story-chat-empty {
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.story-chat-bubble {
+  display: flex;
+}
+
+.story-chat-bubble-user {
+  justify-content: flex-end;
+}
+
+.story-chat-bubble-assistant {
+  justify-content: flex-start;
+}
+
+.story-chat-bubble p,
+.story-chat-bubble-action {
+  margin: 0;
+  max-width: min(720px, 86%);
+  padding: 14px 16px;
+  border-radius: 20px;
+  line-height: 1.6;
+  border: 1px solid var(--border);
+}
+
+.story-chat-bubble-user p {
+  color: #041018;
+  background: linear-gradient(140deg, #4af5c1, #86b9ff);
+  border-color: transparent;
+}
+
+.story-chat-bubble-action {
+  appearance: none;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.story-chat-composer {
+  margin-top: auto;
+  display: grid;
+  gap: 14px;
+}
+
+.story-chat-input {
+  display: grid;
+  gap: 10px;
+}
+
+.story-chat-input span,
+.story-chat-status {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.story-chat-input textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  padding: 16px 18px;
+  outline: none;
+  resize: vertical;
+  min-height: 120px;
+}
+
+.story-chat-input textarea:focus {
+  border-color: rgba(74, 245, 193, 0.28);
+  box-shadow: 0 0 0 4px rgba(74, 245, 193, 0.08);
+}
+
+.story-assistance-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 7, 17, 0.72);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.story-assistance-modal {
+  width: min(760px, 100%);
+  padding: 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.story-assistance-head {
+  justify-content: start;
+}
+
+.story-assistance-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #0b1224;
+  flex: 0 0 auto;
+}
+
+.story-assistance-answer {
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+@media (max-width: 1100px) {
+  .stories-hero-card,
+  .story-detail-hero,
+  .story-detail-grid,
+  .stories-stats-grid,
+  .story-chat-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 780px) {
+  .story-card-head,
+  .mission-card-head,
+  .story-card-footer,
+  .mission-card-footer,
+  .story-detail-header,
+  .chat-topbar,
+  .chat-topbar-left,
+  .story-chat-actions,
+  .story-assistance-head {
+    flex-direction: column;
+    align-items: start;
+  }
+
+  .story-card-status {
+    justify-items: start;
+  }
+
+  .story-chat-bubble p,
+  .story-chat-bubble-action {
+    max-width: 100%;
+  }
+
+  .story-chat-main {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .stories-hero-card,
+  .story-card,
+  .story-detail-hero,
+  .mission-card,
+  .stories-stat-card,
+  .stories-empty-state,
+  .chat-topbar,
+  .story-chat-panel,
+  .story-chat-main,
+  .story-assistance-modal {
+    padding: 20px;
+    border-radius: 24px;
+  }
+
+  .story-assistance-backdrop {
+    padding: 16px;
+  }
+}

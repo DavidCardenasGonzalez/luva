@@ -6,19 +6,22 @@ import AppNavigator from './navigation/AppNavigator';
 import { RevenueCatProvider } from './purchases/RevenueCatProvider';
 import { CoinBalanceProvider } from './purchases/CoinBalanceProvider';
 import { AppVersionGateProvider } from './version/AppVersionGateProvider';
+import { MetaAdsProvider } from './marketing/MetaAdsProvider';
 
 export default function App() {
   return (
     <RevenueCatProvider>
       <CoinBalanceProvider>
         <AuthProvider>
-          <CardProgressProvider>
-            <StoryProgressProvider>
-              <AppVersionGateProvider>
-                <AppNavigator />
-              </AppVersionGateProvider>
-            </StoryProgressProvider>
-          </CardProgressProvider>
+          <MetaAdsProvider>
+            <CardProgressProvider>
+              <StoryProgressProvider>
+                <AppVersionGateProvider>
+                  <AppNavigator />
+                </AppVersionGateProvider>
+              </StoryProgressProvider>
+            </CardProgressProvider>
+          </MetaAdsProvider>
         </AuthProvider>
       </CoinBalanceProvider>
     </RevenueCatProvider>

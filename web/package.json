@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "publish": "npm run build && aws s3 sync dist/ s3://luva-webpage --delete --profile david && aws cloudfront create-invalidation --distribution-id E3JVM6XDE0FZWG --paths '/*' --profile david",
+    "publish": "npm run build && aws s3 sync dist/ s3://luva-webpage --delete --profile david && aws s3 cp dist/.well-known/apple-app-site-association s3://luva-webpage/.well-known/apple-app-site-association --content-type application/json --cache-control no-cache --profile david && aws s3 cp dist/.well-known/assetlinks.json s3://luva-webpage/.well-known/assetlinks.json --content-type application/json --cache-control no-cache --profile david && aws cloudfront create-invalidation --distribution-id E3JVM6XDE0FZWG --paths '/*' --profile david",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "lucide-react": "^0.554.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.13.2"

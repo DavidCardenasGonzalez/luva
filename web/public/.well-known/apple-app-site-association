@@ -1,0 +1,10 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["RHZ94C9F36.com.cardi7.luva"],
+        "components": [{ "/": "/" }, { "/": "/*" }]
+      }
+    ]
+  }
+}

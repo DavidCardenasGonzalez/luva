@@ -246,7 +246,7 @@ export default function SettingsScreen({ navigation }: Props) {
             ) : (
               <Pressable
                 disabled={rcLoading}
-                onPress={() => navigation.navigate('Paywall')}
+                onPress={() => navigation.navigate('Paywall', { source: 'settings_subscription' })}
                 style={({ pressed }) => ({
                   marginTop: 10,
                   padding: 14,
