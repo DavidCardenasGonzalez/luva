@@ -8,6 +8,7 @@ Monorepo
 - backend/ — Lambdas Node/TypeScript (mocks) + tests
 - app/ — React Native (TypeScript) con pantallas y hooks stub
 - web/ — Sitio público en React (Vite) con explicación, TyC y política de privacidad
+- admin/ — Portal administrativo en React (Vite) con login por Cognito y acceso por rol
 - seed/ — generador de 100 cartas y 5 historias
 - scripts/ — utilidades locales (p.ej., evaluate-sandbox)
 - docs/ — colección Postman/Insomnia y [Prompt Development Notes](docs/prompt-development-notes.md)
