@@ -32,6 +32,7 @@ coverage/
 
 # Local sandbox secrets
 scripts/environment.local.json
+confyLove/scripts/manifests/
 
 # CDK
 infra/cdk.out/

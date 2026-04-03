@@ -1,0 +1,177 @@
+[
+  {
+    "id": "first_date_lie_dinner",
+    "title": "¿Ya empezó mintiendo? 🍷",
+    "promptImage": "A cinematic romantic comedy scene inside an elegant restaurant at night, both characters visible from the start. Emma sits on the left in a fitted red dress, posture confident but slightly tense, fingers resting near her wine glass. Daniel sits on the right in a navy blazer and white shirt, leaning in with a charming smile that feels a little forced. Warm golden lighting, soft candle glow, shallow depth of field, polished table reflections, upscale atmosphere, playful tension, refined mood, no dialogue.",
+    "width": 1664,
+    "height": 928,
+    "duration": 30,
+    "characters": [
+      {
+        "name": "Emma",
+        "description": "red dress, elegant and sharp, expressive but observant"
+      },
+      {
+        "name": "Daniel",
+        "description": "navy blazer and white shirt, charming and nervous, trying too hard to impress"
+      }
+    ],
+    "chapters": [
+      {
+        "id": 1,
+        "level": "B1",
+        "prompt": "Emma (tilts her head, curious) and say: \"Wait... you said this restaurant is yours?\" Daniel (touches his glass, smiling nervously) and respond: \"Yes... well, not exactly mine. I work here sometimes.\" Emma (raises her eyebrows, looking at him carefully) and say: \"But before, you said you owned it.\" Daniel (shrugs, embarrassed) and respond: \"I wanted to look interesting on the first date.\" Emma (leans back, half amused) and say: \"That is a very strange way to impress someone.\" Daniel (gives a small guilty smile) and respond: \"I know... but at least now I am telling the truth.\""
+      },
+      {
+        "id": 2,
+        "level": "B2",
+        "prompt": "Emma (tilts her head, amused but suspicious) and say: \"So... this amazing restaurant is not actually yours?\" Daniel (adjusts his blazer, smiling awkwardly) and respond: \"Not exactly. I mean... I do work here, but I made it sound bigger than it is.\" Emma (folds her arms lightly, studying him) and say: \"That is funny, because five minutes ago you sounded like the owner.\" Daniel (looks down, then back at her) and respond: \"I know. I just thought it would make me seem more impressive on a first date.\" Emma (leans back, hiding a smile) and say: \"Actually, the lie is terrible... but the honesty is slightly better.\" Daniel (laughs softly, relieved) and respond: \"I will take slightly better.\""
+      },
+      {
+        "id": 3,
+        "level": "Native",
+        "prompt": "Emma (tilts her head, a playful smile forming) and say: \"Hold on... are you telling me this whole suave-owner act was fake?\" Daniel (loosens his shoulders, caught but still charming) and respond: \"Okay... technically, yes. I work here, but I absolutely oversold the situation.\" Emma (glances around the restaurant, then back at him) and say: \"Wow. So I am not on a date with a mysterious restaurateur... I am having dinner with a very confident liar.\" Daniel (lets out a nervous laugh, rubbing the edge of his glass) and respond: \"That sounds worse than I meant it. I just panicked and wanted to seem interesting.\" Emma (leans back, amused despite herself) and say: \"It is a terrible first impression... but weirdly, a memorable one.\" Daniel (smiles, relieved) and respond: \"I am going to treat memorable like a win.\""
+      }
+    ]
+  },
+  {
+    "id": "dangerous_secret_parking_lot",
+    "title": "Él sabe demasiado 😶",
+    "promptImage": "A cinematic psychological thriller scene in an empty parking lot at night, both characters visible from the start. Maya stands on the left wearing a dark green trench coat, posture rigid, arms close to her body, watching carefully. Victor stands on the right in a black leather jacket, shoulders tense, one step closer, eyes fixed on her. Wet pavement reflects cold overhead lights, deep shadows, subtle fog, shallow depth of field, tense silence, ominous mood, no dialogue.",
+    "width": 1664,
+    "height": 928,
+    "duration": 30,
+    "characters": [
+      {
+        "name": "Maya",
+        "description": "dark green trench coat, controlled and intelligent, hiding fear"
+      },
+      {
+        "name": "Victor",
+        "description": "black leather jacket, intense and calculating, quietly threatening"
+      }
+    ],
+    "chapters": [
+      {
+        "id": 1,
+        "level": "B1",
+        "prompt": "Maya (steps back, lowering her voice) and say: \"Why did you ask me to come here... at this time?\" Victor (keeps his hands in his pockets, staring at her) and respond: \"Because no one can hear us here.\" Maya (frowns, uneasy) and say: \"You are scaring me.\" Victor (leans forward slightly, calm) and respond: \"Good. You should be scared.\" Maya (looks around the empty parking lot) and say: \"What do you want from me?\" Victor (tilts his head, cold expression) and respond: \"I know what happened that night... and I know you were there.\" Maya (freezes, breathing shallowly) and say: \"You do not know anything.\" Victor (takes one slow step closer) and respond: \"Then why do you look so afraid?\""
+      },
+      {
+        "id": 2,
+        "level": "B2",
+        "prompt": "Maya (steps back, voice tight) and say: \"Why bring me to an empty parking lot in the middle of the night?\" Victor (keeps his hands in his pockets, watching her carefully) and respond: \"Because this conversation is not for other people.\" Maya (glances around, unsettled) and say: \"You are making this feel dangerous on purpose.\" Victor (leans in slightly, almost calm) and respond: \"Maybe because it is.\" Maya (crosses her arms, trying to stay steady) and say: \"Then stop playing games and tell me what you want.\" Victor (tilts his head, eyes locked on hers) and respond: \"I know what happened that night... and I know you were part of it.\" Maya (goes still, swallowing hard) and say: \"You think you know more than you do.\" Victor (takes one slow step forward) and respond: \"No... I know exactly enough.\""
+      },
+      {
+        "id": 3,
+        "level": "Native",
+        "prompt": "Maya (steps back, keeping her voice low) and say: \"You dragged me out here at midnight... so whatever this is, just say it.\" Victor (stands still, hands in his pockets, unblinking) and respond: \"I thought privacy would make this easier... for you.\" Maya (lets out a sharp breath, scanning the empty lot) and say: \"Nothing about this feels easy. It feels like a threat.\" Victor (leans forward slightly, almost casual) and respond: \"Maybe that is because you know what I am about to say.\" Maya (folds her arms, trying to hold eye contact) and say: \"Then stop circling and say it.\" Victor (takes one deliberate step closer, voice flat) and respond: \"I know what happened that night... and I know you were there when it all went wrong.\" Maya (freezes for a beat, jaw tightening) and say: \"You have no idea what you are talking about.\" Victor (tilts his head, cold smile) and respond: \"That is not what your face says.\""
+      }
+    ]
+  },
+  {
+    "id": "not_human_ship_inspection",
+    "title": "¿Quién no es humano? 🚀",
+    "promptImage": "A cinematic sci-fi inspection scene inside a sleek spaceship corridor, both characters visible from the start. Captain Elena stands on the left in a white and silver command uniform, posture alert, holding a scanner near her chest. Orion stands on the right in a dark gray fitted utility suit, perfectly still, hands at his sides, expression calm but unreadable. Blue ambient lights, metallic walls, holographic panels, cool reflections, shallow depth of field, sterile futuristic atmosphere, subtle tension, no dialogue.",
+    "width": 1664,
+    "height": 928,
+    "duration": 30,
+    "characters": [
+      {
+        "name": "Captain Elena",
+        "description": "white and silver command uniform, disciplined and perceptive, suspicious"
+      },
+      {
+        "name": "Orion",
+        "description": "dark gray utility suit, calm and precise, emotionally distant"
+      }
+    ],
+    "chapters": [
+      {
+        "id": 1,
+        "level": "B1",
+        "prompt": "Captain Elena (raises the scanner, focused) and say: \"Wait... your body temperature is wrong.\" Orion (stands still, calm) and respond: \"My body is working normally.\" Captain Elena (looks at the screen, confused) and say: \"No. It says you have no change in heartbeat.\" Orion (tilts his head slowly) and respond: \"That is not a problem.\" Captain Elena (takes a careful step back) and say: \"For a human, it is a problem.\" Orion (looks at her without blinking) and respond: \"I never said I was human.\" Captain Elena (tightens her grip on the scanner) and say: \"Then what are you?\" Orion (keeps his voice even) and respond: \"A passenger... like you.\""
+      },
+      {
+        "id": 2,
+        "level": "B2",
+        "prompt": "Captain Elena (raises the scanner, studying the result) and say: \"Hold on... your temperature is stable, but your heartbeat is completely flat.\" Orion (stands still, calm and unreadable) and respond: \"My system is functioning exactly as expected.\" Captain Elena (looks up from the scanner, unsettled) and say: \"You said system... not body.\" Orion (tilts his head with mechanical precision) and respond: \"That is correct.\" Captain Elena (takes a measured step back, gripping the device tighter) and say: \"Then you are not human, are you?\" Orion (meets her eyes without blinking) and respond: \"I did not lie. You simply assumed.\" Captain Elena (keeps the scanner raised, voice lower) and say: \"That is a very dangerous difference.\" Orion (stays perfectly still) and respond: \"Only if you decide it is.\""
+      },
+      {
+        "id": 3,
+        "level": "Native",
+        "prompt": "Captain Elena (raises the scanner, narrowing her eyes at the reading) and say: \"Interesting... your temperature is steady, your pulse is flat, and somehow you still expected me not to notice.\" Orion (stands perfectly still, voice calm) and respond: \"I expected you to notice eventually. You are observant.\" Captain Elena (looks up slowly, tension in her shoulders) and say: \"You keep saying things like that, but you are not answering the real question.\" Orion (tilts his head with eerie precision) and respond: \"That depends which question you mean.\" Captain Elena (takes one careful step back, holding the scanner between them) and say: \"The one where I ask whether there is a non-human entity walking freely on my ship.\" Orion (meets her stare, unblinking) and respond: \"Entity feels rude... but technically, yes.\" Captain Elena (tightens her jaw) and say: \"That is not the kind of surprise I like during inspections.\" Orion (remains calm) and respond: \"I gathered that.\""
+      }
+    ]
+  },
+  {
+    "id": "missing_student_hallway",
+    "title": "¿Dónde está Daniel? 🎓",
+    "promptImage": "A cinematic mystery scene in a quiet university hallway after classes, both characters visible from the start. Sofia stands on the left wearing a mustard yellow jacket over a black shirt, posture tense, clutching her backpack strap. Leo stands on the right in a dark denim jacket, leaning slightly toward her, worried but trying to stay calm. Empty lockers, late afternoon light through tall windows, long shadows, shallow depth of field, quiet academic atmosphere, growing tension, no dialogue.",
+    "width": 1664,
+    "height": 928,
+    "duration": 30,
+    "characters": [
+      {
+        "name": "Sofia",
+        "description": "mustard yellow jacket, alert and anxious, observant under pressure"
+      },
+      {
+        "name": "Leo",
+        "description": "dark denim jacket, thoughtful and concerned, trying to stay rational"
+      }
+    ],
+    "chapters": [
+      {
+        "id": 1,
+        "level": "B1",
+        "prompt": "Sofia (looks down the empty hallway, worried) and say: \"Daniel never came to class today... that is not normal.\" Leo (adjusts his backpack, trying to sound calm) and respond: \"Maybe he is sick... or maybe he forgot.\" Sofia (shakes her head quickly) and say: \"No. He always comes. He even texted me last night.\" Leo (frowns, paying closer attention) and respond: \"What did he say?\" Sofia (holds her phone tighter) and say: \"Only this... 'If I do not come tomorrow, something is wrong.'\" Leo (goes still, staring at her) and respond: \"That is not a normal message.\" Sofia (swallows hard) and say: \"I know... that is why I am scared.\""
+      },
+      {
+        "id": 2,
+        "level": "B2",
+        "prompt": "Sofia (looks down the empty hallway, voice tight) and say: \"Daniel missed class today... and that never happens.\" Leo (adjusts his backpack, cautious) and respond: \"Maybe he is just sick, or maybe something came up.\" Sofia (shakes her head, gripping her phone) and say: \"No, this feels wrong. He texted me last night, and it was strange.\" Leo (leans in slightly, more serious now) and respond: \"What exactly did he say?\" Sofia (glances at the screen, uneasy) and say: \"He wrote... 'If I do not show up tomorrow, something is wrong.'\" Leo (stops moving, eyes fixed on her) and respond: \"That does not sound dramatic... it sounds planned.\" Sofia (looks back down the hallway) and say: \"That is exactly what scares me.\""
+      },
+      {
+        "id": 3,
+        "level": "Native",
+        "prompt": "Sofia (stares down the silent hallway, unease in her voice) and say: \"Daniel did not show up today... and I cannot shake the feeling that this is bad.\" Leo (adjusts his backpack strap, trying to stay practical) and respond: \"People miss class all the time. That does not automatically mean something happened.\" Sofia (shakes her head, holding up her phone) and say: \"I would agree... except he sent me a message last night that felt completely off.\" Leo (leans in, expression sharpening) and respond: \"What kind of message?\" Sofia (reads from the screen, almost whispering) and say: \"'If I am not there tomorrow, something is wrong.'\" Leo (goes still for a beat, then looks down the hallway) and respond: \"That is not someone being flaky... that is someone expecting trouble.\" Sofia (tightens her grip on the phone) and say: \"Yeah... and now he is gone.\""
+      }
+    ]
+  },
+  {
+    "id": "basement_noise_old_house",
+    "title": "No bajen ahí... 😨",
+    "promptImage": "A cinematic horror scene inside an old house staircase leading to a basement, both characters visible from the start. Nina stands on the left in an oversized cream sweater, gripping a flashlight with both hands, posture tense and hesitant. Alex stands slightly lower on the right in a faded blue hoodie, leaning forward carefully, jaw tight, listening into the darkness. Dust in the air, weak flashlight beam, cracked wooden walls, deep shadows, shallow depth of field, cold desaturated tones, oppressive mood, no dialogue.",
+    "width": 1664,
+    "height": 928,
+    "duration": 30,
+    "characters": [
+      {
+        "name": "Nina",
+        "description": "cream sweater, nervous and sensitive, easily frightened but brave enough to follow"
+      },
+      {
+        "name": "Alex",
+        "description": "faded blue hoodie, cautious and protective, trying to stay composed"
+      }
+    ],
+    "chapters": [
+      {
+        "id": 1,
+        "level": "B1",
+        "prompt": "Nina (holds the flashlight tighter, whispering) and say: \"Did you hear that... from the basement?\" Alex (leans forward, listening into the dark) and respond: \"Yes... it sounded like someone moved a chair.\" Nina (takes a small step down, breathing fast) and say: \"No one lives here. That is impossible.\" Alex (keeps his eyes on the darkness) and respond: \"Then maybe it is an animal.\" Nina (shakes her head, afraid) and say: \"Animals do not whisper.\" Alex (freezes, lowering his voice) and respond: \"I did not hear a whisper.\" Nina (slowly turns the flashlight toward him) and say: \"That is because... it said my name.\" Alex (goes completely still) and respond: \"Nina... do not move.\""
+      },
+      {
+        "id": 2,
+        "level": "B2",
+        "prompt": "Nina (holds the flashlight tighter, voice shaking) and say: \"Did you hear that from the basement... or am I imagining it?\" Alex (leans forward, focusing on the darkness) and respond: \"No, I heard it too. It sounded like furniture moving.\" Nina (takes one careful step down, uneasy) and say: \"That makes no sense. This house has been empty for years.\" Alex (keeps staring into the dark, trying to stay calm) and respond: \"Then maybe it is just an animal stuck down there.\" Nina (shakes her head quickly, eyes wide) and say: \"Animals do not whisper.\" Alex (turns slightly toward her, confused) and respond: \"Whisper? I did not hear any whisper.\" Nina (raises the flashlight a little, barely breathing) and say: \"It did not whisper to you... it whispered my name.\" Alex (stops cold, voice lower) and respond: \"Nina... stay exactly where you are.\""
+      },
+      {
+        "id": 3,
+        "level": "Native",
+        "prompt": "Nina (grips the flashlight with both hands, barely above a whisper) and say: \"Tell me you heard that too... because I really do not want to be the only one hearing things right now.\" Alex (leans forward into the darkness, jaw tight) and respond: \"I heard something. It sounded like a chair scraping across the floor.\" Nina (takes one slow step downward, panic building) and say: \"That is impossible. No one has lived here in forever.\" Alex (keeps his eyes on the basement, forcing calm) and respond: \"Then it is a raccoon, or pipes, or literally anything normal.\" Nina (shakes her head, eyes wide) and say: \"Normal things do not whisper.\" Alex (turns toward her, unsettled) and respond: \"Nina... I did not hear a whisper.\" Nina (lifts the flashlight slightly, frozen in place) and say: \"That is because it was not talking to you... it said my name.\" Alex (goes rigid, voice dropping) and respond: \"Do not take another step.\""
+      }
+    ]
+  }
+]

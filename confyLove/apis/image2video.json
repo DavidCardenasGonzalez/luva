@@ -1,0 +1,759 @@
+{
+  "98": {
+    "inputs": {
+      "image": "hf_20260317_075856_b3d00ec2-ce26-49cb-bd38-0230c4138d39_min.webp"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Cargar Imagen"
+    }
+  },
+  "168": {
+    "inputs": {
+      "sampler_name": "euler_ancestral_cfg_pp"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "169": {
+    "inputs": {
+      "steps": 8,
+      "max_shift": 2.05,
+      "base_shift": 0.95,
+      "stretch": true,
+      "terminal": 0.1,
+      "latent": [
+        "182",
+        0
+      ]
+    },
+    "class_type": "LTXVScheduler",
+    "_meta": {
+      "title": "LTXVProgramador"
+    }
+  },
+  "170": {
+    "inputs": {
+      "sampler_name": "gradient_estimation"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "171": {
+    "inputs": {
+      "sigmas": "0.909375, 0.725, 0.421875, 0.0"
+    },
+    "class_type": "ManualSigmas",
+    "_meta": {
+      "title": "ManualSigmas"
+    }
+  },
+  "172": {
+    "inputs": {
+      "positive": [
+        "201",
+        0
+      ],
+      "negative": [
+        "201",
+        1
+      ],
+      "latent": [
+        "177",
+        0
+      ]
+    },
+    "class_type": "LTXVCropGuides",
+    "_meta": {
+      "title": "LTXVCropGuides"
+    }
+  },
+  "173": {
+    "inputs": {
+      "cfg": 1,
+      "model": [
+        "238",
+        0
+      ],
+      "positive": [
+        "172",
+        0
+      ],
+      "negative": [
+        "172",
+        1
+      ]
+    },
+    "class_type": "CFGGuider",
+    "_meta": {
+      "title": "GuíaCFG"
+    }
+  },
+  "174": {
+    "inputs": {
+      "frames_number": [
+        "185",
+        0
+      ],
+      "frame_rate": 24,
+      "batch_size": 1,
+      "audio_vae": [
+        "231",
+        0
+      ]
+    },
+    "class_type": "LTXVEmptyLatentAudio",
+    "_meta": {
+      "title": "LTXV Audio Latente Vacío"
+    }
+  },
+  "175": {
+    "inputs": {
+      "noise": [
+        "199",
+        0
+      ],
+      "guider": [
+        "193",
+        0
+      ],
+      "sampler": [
+        "168",
+        0
+      ],
+      "sigmas": [
+        "169",
+        0
+      ],
+      "latent_image": [
+        "182",
+        0
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "176": {
+    "inputs": {
+      "noise_seed": 0
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "Ruido aleatorio"
+    }
+  },
+  "177": {
+    "inputs": {
+      "av_latent": [
+        "175",
+        0
+      ]
+    },
+    "class_type": "LTXVSeparateAVLatent",
+    "_meta": {
+      "title": "LTXVSeparateAVLatent"
+    }
+  },
+  "182": {
+    "inputs": {
+      "video_latent": [
+        "190",
+        0
+      ],
+      "audio_latent": [
+        "174",
+        0
+      ]
+    },
+    "class_type": "LTXVConcatAVLatent",
+    "_meta": {
+      "title": "LTXVConcatAVLatent"
+    }
+  },
+  "183": {
+    "inputs": {
+      "samples": [
+        "172",
+        2
+      ],
+      "upscale_model": [
+        "195",
+        0
+      ],
+      "vae": [
+        "230",
+        0
+      ]
+    },
+    "class_type": "LTXVLatentUpsampler",
+    "_meta": {
+      "title": "spatial"
+    }
+  },
+  "184": {
+    "inputs": {
+      "upscale_method": "lanczos",
+      "scale_by": 0.5,
+      "image": [
+        "196",
+        0
+      ]
+    },
+    "class_type": "ImageScaleBy",
+    "_meta": {
+      "title": "Ampliar Imagen Por"
+    }
+  },
+  "185": {
+    "inputs": {
+      "value": 720
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "Length"
+    }
+  },
+  "186": {
+    "inputs": {
+      "image": [
+        "184",
+        0
+      ]
+    },
+    "class_type": "GetImageSize",
+    "_meta": {
+      "title": "Obtener Tamaño de Imagen"
+    }
+  },
+  "187": {
+    "inputs": {
+      "image": [
+        "200",
+        0
+      ]
+    },
+    "class_type": "GetImageSize",
+    "_meta": {
+      "title": "Obtener Tamaño de Imagen"
+    }
+  },
+  "188": {
+    "inputs": {
+      "img_compression": 33,
+      "image": [
+        "197",
+        0
+      ]
+    },
+    "class_type": "LTXVPreprocess",
+    "_meta": {
+      "title": "LTXVPreprocesar"
+    }
+  },
+  "189": {
+    "inputs": {
+      "width": [
+        "186",
+        0
+      ],
+      "height": [
+        "186",
+        1
+      ],
+      "length": [
+        "185",
+        0
+      ],
+      "batch_size": 1
+    },
+    "class_type": "EmptyLTXVLatentVideo",
+    "_meta": {
+      "title": "EmptyLTXVLatentVideo"
+    }
+  },
+  "190": {
+    "inputs": {
+      "strength": 1,
+      "bypass": false,
+      "vae": [
+        "230",
+        0
+      ],
+      "image": [
+        "188",
+        0
+      ],
+      "latent": [
+        "189",
+        0
+      ]
+    },
+    "class_type": "LTXVImgToVideoInplace",
+    "_meta": {
+      "title": "LTXVImgToVideoInplace"
+    }
+  },
+  "191": {
+    "inputs": {
+      "video_latent": [
+        "192",
+        0
+      ],
+      "audio_latent": [
+        "177",
+        1
+      ]
+    },
+    "class_type": "LTXVConcatAVLatent",
+    "_meta": {
+      "title": "LTXVConcatAVLatent"
+    }
+  },
+  "192": {
+    "inputs": {
+      "strength": 1,
+      "bypass": false,
+      "vae": [
+        "230",
+        0
+      ],
+      "image": [
+        "188",
+        0
+      ],
+      "latent": [
+        "183",
+        0
+      ]
+    },
+    "class_type": "LTXVImgToVideoInplace",
+    "_meta": {
+      "title": "LTXVImgToVideoInplace"
+    }
+  },
+  "193": {
+    "inputs": {
+      "cfg": 1,
+      "model": [
+        "238",
+        0
+      ],
+      "positive": [
+        "201",
+        0
+      ],
+      "negative": [
+        "201",
+        1
+      ]
+    },
+    "class_type": "CFGGuider",
+    "_meta": {
+      "title": "GuíaCFG"
+    }
+  },
+  "195": {
+    "inputs": {
+      "model_name": "ltx-2.3-spatial-upscaler-x2-1.0.safetensors"
+    },
+    "class_type": "LatentUpscaleModelLoader",
+    "_meta": {
+      "title": "Cargar modelo de escalado Latent"
+    }
+  },
+  "196": {
+    "inputs": {
+      "width": [
+        "187",
+        0
+      ],
+      "height": [
+        "187",
+        1
+      ],
+      "batch_size": 1,
+      "color": 0
+    },
+    "class_type": "EmptyImage",
+    "_meta": {
+      "title": "EmptyImage"
+    }
+  },
+  "197": {
+    "inputs": {
+      "longer_edge": 1536,
+      "images": [
+        "200",
+        0
+      ]
+    },
+    "class_type": "ResizeImagesByLongerEdge",
+    "_meta": {
+      "title": "Redimensionar imágenes por el borde más largo"
+    }
+  },
+  "199": {
+    "inputs": {
+      "noise_seed": 269036346586519
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "Ruido aleatorio"
+    }
+  },
+  "200": {
+    "inputs": {
+      "resize_type": "scale dimensions",
+      "resize_type.width": 720,
+      "resize_type.height": 1280,
+      "resize_type.crop": "center",
+      "scale_method": "lanczos",
+      "input": [
+        "98",
+        0
+      ]
+    },
+    "class_type": "ResizeImageMaskNode",
+    "_meta": {
+      "title": "Redimensionar Imagen/Máscara"
+    }
+  },
+  "201": {
+    "inputs": {
+      "frame_rate": 24,
+      "positive": [
+        "203",
+        0
+      ],
+      "negative": [
+        "202",
+        0
+      ]
+    },
+    "class_type": "LTXVConditioning",
+    "_meta": {
+      "title": "LTXVConditioning"
+    }
+  },
+  "202": {
+    "inputs": {
+      "text": "blurry, low quality, still frame, frames, watermark, overlay, titles, has blurbox, has subtitles",
+      "clip": [
+        "237",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Codificar Texto CLIP (Prompt)"
+    }
+  },
+  "203": {
+    "inputs": {
+      "text": [
+        "263",
+        0
+      ],
+      "clip": [
+        "237",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Codificar Texto CLIP (Prompt)"
+    }
+  },
+  "213": {
+    "inputs": {
+      "samples": [
+        "217",
+        1
+      ],
+      "audio_vae": [
+        "231",
+        0
+      ]
+    },
+    "class_type": "LTXVAudioVAEDecode",
+    "_meta": {
+      "title": "Decodificar LTXV Audio VAE"
+    }
+  },
+  "214": {
+    "inputs": {
+      "samples": [
+        "217",
+        0
+      ],
+      "vae": [
+        "230",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decodificación VAE"
+    }
+  },
+  "215": {
+    "inputs": {
+      "fps": 24,
+      "images": [
+        "214",
+        0
+      ],
+      "audio": [
+        "213",
+        0
+      ]
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "Crear video"
+    }
+  },
+  "216": {
+    "inputs": {
+      "filename_prefix": "video/LTX_2.3_i2v",
+      "format": "auto",
+      "codec": "auto",
+      "video-preview": "",
+      "video": [
+        "215",
+        0
+      ]
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "Guardar video"
+    }
+  },
+  "217": {
+    "inputs": {
+      "av_latent": [
+        "175",
+        1
+      ]
+    },
+    "class_type": "LTXVSeparateAVLatent",
+    "_meta": {
+      "title": "LTXVSeparateAVLatent"
+    }
+  },
+  "230": {
+    "inputs": {
+      "vae_name": "LTX23_video_vae_bf16.safetensors",
+      "device": "main_device",
+      "weight_dtype": "bf16"
+    },
+    "class_type": "VAELoaderKJ",
+    "_meta": {
+      "title": "VAELoader KJ - Video"
+    }
+  },
+  "231": {
+    "inputs": {
+      "vae_name": "LTX23_audio_vae_bf16.safetensors",
+      "device": "main_device",
+      "weight_dtype": "bf16"
+    },
+    "class_type": "VAELoaderKJ",
+    "_meta": {
+      "title": "VAELoader KJ - Audio"
+    }
+  },
+  "235": {
+    "inputs": {
+      "unet_name": "ltx-2.3-22b-distilled_transformer_only_fp8_scaled.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Cargar Modelo de Difusión"
+    }
+  },
+  "236": {
+    "inputs": {
+      "clip_name1": "gemma_3_12B_it_fp4_mixed.safetensors",
+      "clip_name2": "ltx-2.3_text_projection_bf16.safetensors",
+      "type": "ltxv",
+      "device": "default"
+    },
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "DualCLIPLoader"
+    }
+  },
+  "237": {
+    "inputs": {
+      "clip_name1": "gemma-3-12b-it-qat-Q3_K_M.gguf",
+      "clip_name2": "ltx-2.3_text_projection_bf16.safetensors",
+      "type": "ltxv"
+    },
+    "class_type": "DualCLIPLoaderGGUF",
+    "_meta": {
+      "title": "DualCLIPLoader (GGUF)"
+    }
+  },
+  "238": {
+    "inputs": {
+      "unet_name": "ltx-2.3-22b-distilled-UD-Q3_K_M.gguf"
+    },
+    "class_type": "UnetLoaderGGUF",
+    "_meta": {
+      "title": "Unet Loader (GGUF)"
+    }
+  },
+  "240": {
+    "inputs": {
+      "value": "A fuzzy puppet superhero resembling a female puppet with blonde yarn hair and a bright blue superhero suit stands in a cluttered superhero headquarters filled with gadgets, broken robots, and blinking control panels. She looks panicked and confused, frantically searching around the room while pulling open drawers and tossing gadgets aside. Her puppet mouth opens wide as she waves her arms dramatically and shouts, mouthing the words, “where is my cape?” Her movements are exaggerated and chaotic, head snapping left and right with high-energy puppet gestures. Suddenly her red superhero cape flies into frame from above, thrown by a small puppet sidekick who runs past laughing. The cape lands on her head, covering her face. She freezes in confusion before bursting into laughter while struggling to untangle herself. The scene feels comedic and chaotic with expressive puppet reactions, cinematic lighting, shallow depth of field, smooth camera motion, and high-quality puppet-style animation."
+    },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": {
+      "title": "Puppet Superhero Prompts"
+    }
+  },
+  "241": {
+    "inputs": {
+      "value": "A fuzzy puppet superhero resembling a female puppet with blonde yarn hair and a blue superhero suit stands in the middle of a toy-sized city made of miniature buildings and tiny cars. She looks determined and dramatic, pointing toward a tiny puppet villain standing on top of a small building. She waves her arms dramatically and shouts heroic lines while stomping forward with exaggerated puppet movements. Suddenly the tiny villain presses a button and a swarm of small toy robots rushes toward her feet. She jumps backward in panic, flailing her arms and shouting in surprise. The robots harmlessly bump into her boots as she awkwardly tries to shoo them away. The scene feels comedic and playful with chaotic puppet acting, cinematic lighting, shallow depth of field, and smooth camera motion."
+    },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": {
+      "title": "Puppet Superhero vs Tiny Villain"
+    }
+  },
+  "242": {
+    "inputs": {
+      "value": "A fuzzy puppet superhero resembling a female puppet with blonde yarn hair and a blue superhero suit stands inside a messy superhero training room filled with punching bags, weights, and obstacle equipment. She begins performing an intense training routine with exaggerated puppet energy, wildly punching a punching bag and doing dramatic push-ups. Her head bobs energetically while she grunts with determination. Suddenly the punching bag swings back and knocks her over, causing her to tumble onto a pile of foam mats. She pops back up immediately, looking embarrassed but determined, raising her fist heroically. The scene feels energetic and comedic with expressive puppet acting, cinematic lighting, smooth camera motion, and shallow depth of field."
+    },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": {
+      "title": "Puppet Superhero Training Montage"
+    }
+  },
+  "243": {
+    "inputs": {
+      "value": "A fuzzy puppet superhero resembling a female puppet with blonde yarn hair and a blue superhero suit stands on the edge of a tall rooftop overlooking a colorful puppet city skyline. She spreads her arms dramatically and prepares to fly, looking determined and heroic. She counts down confidently while wobbling slightly. When she jumps, she immediately flails her arms wildly in panic as she slowly drops out of frame. A moment later she pops back up holding onto the rooftop edge, looking embarrassed and breathing heavily. She glances at the camera and shrugs awkwardly. The scene feels comedic and chaotic with exaggerated puppet movement, cinematic lighting, smooth camera motion, shallow depth of field, and high-quality puppet-style animation."
+    },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": {
+      "title": "Puppet Superhero Trying to Fly"
+    }
+  },
+  "244": {
+    "inputs": {
+      "value": "A fuzzy puppet superhero resembling a female puppet with blonde yarn hair and a blue superhero suit stands in a kitchen laboratory filled with bubbling beakers and strange inventions. In front of her sits an absurdly large sandwich stacked with ingredients taller than her. She stares at it dramatically as if it were a dangerous villain. She cautiously pokes the sandwich before it suddenly collapses and spills ingredients everywhere. She throws her hands in the air and shouts in exaggerated puppet frustration before grabbing a piece of bread and taking a triumphant bite. The scene feels playful and comedic with expressive puppet reactions, cinematic lighting, smooth camera motion, shallow depth of field, and high-quality puppet-style animation."
+    },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": {
+      "title": "Puppet Superhero vs Giant Sandwich"
+    }
+  },
+  "246": {
+    "inputs": {
+      "value": "A fuzzy puppet superhero resembling a female puppet with blonde yarn hair and a bright blue superhero suit stands in the middle of a toy-sized city street surrounded by miniature buildings and tiny cars. Several small toy robots with blinking lights roll around her feet. On top of a nearby building, a tiny puppet villain stands beside a big red button.\n\n0–4 seconds:\nThe superhero lowers her pointing hand and suddenly notices the toy robots moving around her boots. She looks down in confusion, stepping back slightly while the robots roll closer with blinking lights.\n\n4–8 seconds:\nThe robots begin circling her feet faster. She startles and hops backward with exaggerated puppet movements, flailing her arms and trying to avoid stepping on them.\n\n8–10 seconds:\nShe awkwardly tries to shoo the robots away with big puppet gestures, hopping side to side while looking frustrated and confused as the tiny villain watches from the rooftop.\n\nStyle:\nComedic puppet-style acting, exaggerated puppet movement, playful chaotic energy, cinematic lighting, miniature toy city environment, shallow depth of field, smooth camera motion, high-quality puppet-style animation."
+    },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": {
+      "title": "Superhero Prompt"
+    }
+  },
+  "247": {
+    "inputs": {
+      "start_index": 0,
+      "duration": 20,
+      "audio": [
+        "251",
+        0
+      ]
+    },
+    "class_type": "TrimAudioDuration",
+    "_meta": {
+      "title": "Recortar Duración de Audio"
+    }
+  },
+  "251": {
+    "inputs": {
+      "audio": "ComfyUI_00001_-[AudioTrimmer.com].mp3",
+      "audioUI": "/api/view?filename=ComfyUI_00001_-%5BAudioTrimmer.com%5D.mp3&type=input&subfolder=&rand=0.11427263650251751"
+    },
+    "class_type": "LoadAudio",
+    "_meta": {
+      "title": "CargarAudio"
+    }
+  },
+  "253": {
+    "inputs": {
+      "model_name": "MelBandRoformer_fp16.safetensors"
+    },
+    "class_type": "MelBandRoFormerModelLoader",
+    "_meta": {
+      "title": "Mel-Band RoFormer Model Loader"
+    }
+  },
+  "256": {
+    "inputs": {
+      "audio": [
+        "247",
+        0
+      ],
+      "audio_vae": [
+        "231",
+        0
+      ]
+    },
+    "class_type": "LTXVAudioVAEEncode",
+    "_meta": {
+      "title": "Codificar LTXV Audio VAE"
+    }
+  },
+  "257": {
+    "inputs": {
+      "value": 0,
+      "width": [
+        "186",
+        0
+      ],
+      "height": [
+        "186",
+        1
+      ]
+    },
+    "class_type": "SolidMask",
+    "_meta": {
+      "title": "Máscara Sólida"
+    }
+  },
+  "260": {
+    "inputs": {
+      "samples": [
+        "256",
+        0
+      ],
+      "mask": [
+        "257",
+        0
+      ]
+    },
+    "class_type": "SetLatentNoiseMask",
+    "_meta": {
+      "title": "Establecer Máscara de Ruido Latente"
+    }
+  },
+  "263": {
+    "inputs": {
+      "value": "A cinematic close-up shot of a young woman sitting in a modern coffee shop, holding a cold iced drink with a green straw. The background is softly blurred with warm lighting and subtle movement from people behind her. She looks directly at the camera with confident, charismatic influencer energy, natural charm, and expressive micro-expressions. Her tone is engaging, slightly playful, and very natural, like a social media creator talking directly to her audience. Minimal head movement, soft blinking, subtle smiles. No camera movement, stable frame, realistic lighting, no distortion.\n\nShe slightly lifts the glass and smiles with confidence, then begins speaking in natural Mexican Spanish, with a casual, relatable tone, saying, \"A ver, te voy a decir algo rápido porque esto le pasa a TODO el mundo…\" She keeps eye contact and slightly raises her eyebrows for emphasis.\n\nShe continues, \"Según tú ya sabes inglés… o sea, entiendes todo…\" and then adds with a small smirk, \"pero cuando te toca hablar, es como… ‘mmm…’ y nada.\" She lightly gestures with the glass, as if recreating the awkward moment.\n\nShe leans a bit closer and says, \"Sabes frases como 'I’ll think about it'…\" pausing briefly, \"...o 'it depends'…\" and nods, \"...pero no te salen cuando las necesitas.\"\n\nShe takes a small sip, then looks back at the camera with a knowing smile and says, \"Y no, no es que te falte vocabulario…\" She slightly shakes her head.\n\nWith more emphasis and energy, she says, \"es que no lo practicas en situaciones reales.\" She gestures subtly, reinforcing the idea.\n\nShe relaxes and finishes with a confident, friendly tone, \"Si quieres hablar fluido… tienes que usarlo así, en contexto, no solo estudiarlo.\" She holds eye contact for a moment and gives a small, confident smile.\n\nNatural pauses, expressive but controlled facial movement, subtle hand gestures, slight movement of the straw and ice, realistic timing, no flicker, no artifacts."
+    },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": {
+      "title": "Tomato saving the world"
+    }
+  }
+}
