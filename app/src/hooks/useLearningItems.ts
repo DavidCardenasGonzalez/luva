@@ -9,6 +9,7 @@ export type LearningItem = {
   answer: LearningItemOptionKey;
   explanation: string;
   prompt?: string;
+  conversationProbability?: number;
 };
 
 export function useLearningItems() {

@@ -8,6 +8,7 @@ export type LearningItem = {
   answer: LearningItemOptionKey
   explanation: string
   prompt?: string
+  conversationProbability?: number
 }
 
 export const learningItems = __LUVA_LEARNING_ITEMS__ as LearningItem[]
