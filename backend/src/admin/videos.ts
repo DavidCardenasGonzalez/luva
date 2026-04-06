@@ -5,7 +5,7 @@ import {
   ScanCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const dynamo = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
@@ -94,6 +94,32 @@ export type AdminVideoPreviewResponse = {
   previewUrl: string;
   expiresAt: string;
   contentType?: string;
+};
+
+export type AdminVideoReplaceUploadInput = {
+  storyId?: unknown;
+  videoId?: unknown;
+  contentType?: unknown;
+};
+
+export type AdminVideoReplaceUploadResponse = {
+  storyId: string;
+  videoId: string;
+  uploadUrl: string;
+  expiresAt: string;
+  contentType: string;
+};
+
+export type CompleteAdminVideoReplaceInput = {
+  storyId?: unknown;
+  videoId?: unknown;
+  contentType?: unknown;
+  sizeBytes?: unknown;
+};
+
+export type CompleteAdminVideoReplaceResponse = {
+  video: AdminVideoSummary;
+  updatedAt: string;
 };
 
 export async function listAdminVideos(): Promise<AdminVideosResponse> {
@@ -245,6 +271,102 @@ export async function getAdminVideoPreview(input: {
     previewUrl,
     expiresAt,
     ...(summary.contentType ? { contentType: summary.contentType } : {}),
+  };
+}
+
+export async function createAdminVideoReplaceUpload(
+  input: AdminVideoReplaceUploadInput,
+): Promise<AdminVideoReplaceUploadResponse> {
+  const storyId = normalizeKey(input.storyId);
+  const videoId = normalizeKey(input.videoId);
+  const contentType = normalizeContentType(input.contentType) || 'video/mp4';
+
+  if (!storyId || !videoId) {
+    throw new Error('INVALID_VIDEO_KEY');
+  }
+
+  const existing = await getCurrentStoredVideo(storyId, videoId);
+  const summary = toAdminVideoSummary(existing);
+
+  if (!summary || !summary.bucketName || !summary.bucketKey) {
+    throw new Error('VIDEO_NOT_FOUND');
+  }
+
+  const expiresInSeconds = 60 * 15;
+  const uploadUrl = await getSignedUrl(
+    s3,
+    new PutObjectCommand({
+      Bucket: summary.bucketName,
+      Key: summary.bucketKey,
+      ContentType: contentType,
+    }),
+    { expiresIn: expiresInSeconds },
+  );
+  const expiresAt = new Date(Date.now() + expiresInSeconds * 1000).toISOString();
+
+  return {
+    storyId,
+    videoId,
+    uploadUrl,
+    expiresAt,
+    contentType,
+  };
+}
+
+export async function completeAdminVideoReplace(
+  input: CompleteAdminVideoReplaceInput,
+): Promise<CompleteAdminVideoReplaceResponse> {
+  const storyId = normalizeKey(input.storyId);
+  const videoId = normalizeKey(input.videoId);
+  const contentType = normalizeContentType(input.contentType);
+  const sizeBytes = asNumber(input.sizeBytes);
+
+  if (!storyId || !videoId) {
+    throw new Error('INVALID_VIDEO_KEY');
+  }
+
+  const existing = await getCurrentStoredVideo(storyId, videoId);
+  const summary = toAdminVideoSummary(existing);
+
+  if (!summary) {
+    throw new Error('VIDEO_NOT_FOUND');
+  }
+
+  const updatedAt = new Date().toISOString();
+  const expressionAttributeValues: Record<string, unknown> = {
+    ':updatedAt': updatedAt,
+  };
+  let updateExpression = 'SET updatedAt = :updatedAt';
+
+  if (contentType) {
+    expressionAttributeValues[':contentType'] = contentType;
+    updateExpression += ', contentType = :contentType';
+  }
+
+  if (sizeBytes !== undefined) {
+    expressionAttributeValues[':sizeBytes'] = sizeBytes;
+    updateExpression += ', sourceVideoFileSizeBytes = :sizeBytes';
+  }
+
+  await dynamo.send(
+    new UpdateCommand({
+      TableName: getGeneratedVideosTableName(),
+      Key: { storyId, videoId },
+      UpdateExpression: updateExpression,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ConditionExpression:
+        'attribute_exists(storyId) AND attribute_exists(videoId)',
+    }),
+  );
+
+  return {
+    video: {
+      ...summary,
+      ...(contentType ? { contentType } : {}),
+      ...(sizeBytes !== undefined ? { sourceVideoFileSizeBytes: sizeBytes } : {}),
+      updatedAt,
+    },
+    updatedAt,
   };
 }
 
@@ -446,6 +568,11 @@ function normalizeRequestedPublishOn(value: unknown): string | undefined {
 
 function getPublishDay(value: string): string {
   return value.slice(0, 10);
+}
+
+function normalizeContentType(value: unknown): string | undefined {
+  const normalized = asString(value)?.trim().toLowerCase();
+  return normalized || undefined;
 }
 
 function normalizeKey(value: unknown): string | undefined {

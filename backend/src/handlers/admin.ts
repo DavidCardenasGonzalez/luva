@@ -7,6 +7,8 @@ import {
 import { verifyRevenueCatPremiumUsers } from '../admin/revenuecat';
 import { listAdminUsers } from '../admin/users';
 import {
+  completeAdminVideoReplace,
+  createAdminVideoReplaceUpload,
   getAdminVideoPreview,
   listAdminVideos,
   updateAdminVideoPublication,
@@ -75,6 +77,54 @@ export const handler = async (event: any): Promise<Result> => {
             return json(404, {
               code: 'VIDEO_NOT_FOUND',
               message: 'No encontramos ese video o no tiene bucket/key válidos para vista previa.',
+            });
+          }
+        }
+
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/videos/replace-upload`) {
+      try {
+        return json(200, await createAdminVideoReplaceUpload(parseBody(event.body) || {}));
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message === 'INVALID_VIDEO_KEY') {
+            return json(400, {
+              code: 'INVALID_VIDEO_KEY',
+              message: 'Indica storyId y videoId válidos para reemplazar el video.',
+            });
+          }
+
+          if (error.message === 'VIDEO_NOT_FOUND') {
+            return json(404, {
+              code: 'VIDEO_NOT_FOUND',
+              message: 'No encontramos ese video o no tiene bucket/key válidos para reemplazo.',
+            });
+          }
+        }
+
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/videos/replace-complete`) {
+      try {
+        return json(200, await completeAdminVideoReplace(parseBody(event.body) || {}));
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message === 'INVALID_VIDEO_KEY') {
+            return json(400, {
+              code: 'INVALID_VIDEO_KEY',
+              message: 'Indica storyId y videoId válidos para confirmar el reemplazo.',
+            });
+          }
+
+          if (error.message === 'VIDEO_NOT_FOUND') {
+            return json(404, {
+              code: 'VIDEO_NOT_FOUND',
+              message: 'No encontramos ese video para confirmar el reemplazo.',
             });
           }
         }

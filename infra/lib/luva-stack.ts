@@ -1,7 +1,7 @@
 import { CfnOutput, Duration, RemovalPolicy, SecretValue, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { AttributeType, BillingMode, GlobalSecondaryIndexProps, Table } from 'aws-cdk-lib/aws-dynamodb';
-import { Bucket, BlockPublicAccess } from 'aws-cdk-lib/aws-s3';
+import { Bucket, BlockPublicAccess, HttpMethods } from 'aws-cdk-lib/aws-s3';
 import {
   UserPool,
   CfnUserPoolGroup,
@@ -48,6 +48,13 @@ export class LuvaStack extends Stack {
         .replace(/--+/g, '-')
         .replace(/^-+|-+$/g, '')
         .slice(0, 63);
+    const browserOrigins = splitCsv(process.env.COGNITO_CALLBACK_URLS, [
+      'http://localhost:5173/',
+      'http://localhost:5174/',
+      'https://www.luvaenglish.com/',
+    ])
+      .filter((origin) => /^https?:\/\//.test(origin))
+      .map((origin) => origin.replace(/\/$/, ''));
 
     // DynamoDB single-table
     const table = new Table(this, 'LuvaTable', {
@@ -108,6 +115,15 @@ export class LuvaStack extends Stack {
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
       enforceSSL: true,
       removalPolicy: RemovalPolicy.RETAIN,
+      cors: [
+        {
+          allowedOrigins: browserOrigins,
+          allowedMethods: [HttpMethods.GET, HttpMethods.PUT, HttpMethods.HEAD],
+          allowedHeaders: ['*'],
+          exposedHeaders: ['ETag'],
+          maxAge: 3000,
+        },
+      ],
     });
 
     // Cognito UserPool (Hosted UI)
@@ -299,7 +315,7 @@ export class LuvaStack extends Stack {
     });
     usersTable.grantReadWriteData(adminFn);
     generatedVideosTable.grantReadWriteData(adminFn);
-    generatedVideosBucket.grantRead(adminFn);
+    generatedVideosBucket.grantReadWrite(adminFn);
 
     // API Gateway REST
     const api = new RestApi(this, 'LuvaApi', {

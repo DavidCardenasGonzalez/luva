@@ -127,6 +127,14 @@ export type AdminVideoPreviewResponse = {
   contentType?: string
 }
 
+export type AdminVideoReplaceUploadResponse = {
+  storyId: string
+  videoId: string
+  uploadUrl: string
+  expiresAt: string
+  contentType: string
+}
+
 export type AdminRevenueCatVerificationItem = {
   email: string
   status: 'verified' | 'skipped' | 'error'

@@ -977,6 +977,19 @@
   color: var(--muted);
 }
 
+.admin-video-edit-grid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 20px;
+}
+
+.admin-video-edit-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
 @media (max-width: 1100px) {
   .admin-frame,
   .admin-hero,
@@ -987,7 +1000,8 @@
   .admin-users-grid,
   .admin-video-summary-grid,
   .admin-videos-dashboard,
-  .admin-videos-detail-grid {
+  .admin-videos-detail-grid,
+  .admin-video-edit-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -1009,7 +1023,8 @@
 
   .admin-grant-form,
   .admin-video-action-grid,
-  .admin-calendar-toolbar {
+  .admin-calendar-toolbar,
+  .admin-video-edit-controls {
     grid-template-columns: 1fr;
   }
 

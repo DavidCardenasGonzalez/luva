@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { appPaths } from '@/app/router/paths'
 import { getAdminVideoPreview, updateAdminVideo } from '@/features/admin/api/admin-client'
 import { useAdminVideos } from '@/features/admin/model/use-admin-videos'
 import type { AdminVideoStatus, AdminVideoSummary } from '@/features/admin/model/types'
@@ -611,6 +613,12 @@ export function AdminVideosPage() {
                 </div>
 
                 <div className="admin-action-row">
+                  <Link
+                    to={selectedVideo ? appPaths.videoEdit(selectedVideo.storyId, selectedVideo.videoId) : appPaths.videos}
+                    className="btn secondary"
+                  >
+                    Editar
+                  </Link>
                   <button
                     type="button"
                     className="btn secondary"

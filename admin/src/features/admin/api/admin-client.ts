@@ -4,6 +4,7 @@ import type {
   AdminManualCodeProRevokeResponse,
   AdminOverview,
   AdminVideoPreviewResponse,
+  AdminVideoReplaceUploadResponse,
   AdminRevenueCatVerificationResponse,
   AdminVideoStatus,
   AdminVideoUpdateResponse,
@@ -36,6 +37,32 @@ export function getAdminVideoPreview(storyId: string, videoId: string) {
   })
 
   return adminApi.get<AdminVideoPreviewResponse>(`/videos/preview?${query.toString()}`)
+}
+
+export function createAdminVideoReplaceUpload(
+  storyId: string,
+  videoId: string,
+  contentType: string,
+) {
+  return adminApi.post<AdminVideoReplaceUploadResponse>('/videos/replace-upload', {
+    storyId,
+    videoId,
+    contentType,
+  })
+}
+
+export function completeAdminVideoReplace(
+  storyId: string,
+  videoId: string,
+  contentType: string,
+  sizeBytes: number,
+) {
+  return adminApi.post<AdminVideoUpdateResponse>('/videos/replace-complete', {
+    storyId,
+    videoId,
+    contentType,
+    sizeBytes,
+  })
 }
 
 export function updateAdminVideo(
