@@ -6,6 +6,11 @@ import {
 } from '../admin/pro-access';
 import { verifyRevenueCatPremiumUsers } from '../admin/revenuecat';
 import { listAdminUsers } from '../admin/users';
+import {
+  getAdminVideoPreview,
+  listAdminVideos,
+  updateAdminVideoPublication,
+} from '../admin/videos';
 import { getAdminIdentity, getClaims, hasAdminAccess } from '../admin/auth';
 
 const ROUTE_PREFIX = '/v1';
@@ -45,6 +50,82 @@ export const handler = async (event: any): Promise<Result> => {
     if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/users`) {
       const search = normalizeSearch(event);
       return json(200, await listAdminUsers({ search }));
+    }
+
+    if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/videos`) {
+      return json(200, await listAdminVideos());
+    }
+
+    if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/videos/preview`) {
+      try {
+        return json(200, await getAdminVideoPreview({
+          storyId: getQueryParam(event, 'storyId'),
+          videoId: getQueryParam(event, 'videoId'),
+        }));
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message === 'INVALID_VIDEO_KEY') {
+            return json(400, {
+              code: 'INVALID_VIDEO_KEY',
+              message: 'Indica storyId y videoId válidos para abrir la vista previa.',
+            });
+          }
+
+          if (error.message === 'VIDEO_NOT_FOUND') {
+            return json(404, {
+              code: 'VIDEO_NOT_FOUND',
+              message: 'No encontramos ese video o no tiene bucket/key válidos para vista previa.',
+            });
+          }
+        }
+
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/videos/update`) {
+      try {
+        return json(200, await updateAdminVideoPublication(parseBody(event.body) || {}));
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message === 'INVALID_VIDEO_KEY') {
+            return json(400, {
+              code: 'INVALID_VIDEO_KEY',
+              message: 'Indica storyId y videoId válidos para actualizar el video.',
+            });
+          }
+
+          if (error.message === 'INVALID_VIDEO_STATUS') {
+            return json(400, {
+              code: 'INVALID_VIDEO_STATUS',
+              message: 'El status del video no es válido.',
+            });
+          }
+
+          if (error.message === 'INVALID_PUBLISH_ON') {
+            return json(400, {
+              code: 'INVALID_PUBLISH_ON',
+              message: 'publishOn debe venir con fecha y hora válidas en formato ISO.',
+            });
+          }
+
+          if (error.message === 'PUBLISH_ON_REQUIRED_FOR_PROGRAMADO') {
+            return json(400, {
+              code: 'PUBLISH_ON_REQUIRED',
+              message: 'Debes indicar publishOn para dejar el video como programado.',
+            });
+          }
+
+          if (error.message === 'VIDEO_NOT_FOUND') {
+            return json(404, {
+              code: 'VIDEO_NOT_FOUND',
+              message: 'No encontramos ese video en la tabla administrativa.',
+            });
+          }
+        }
+
+        throw error;
+      }
     }
 
     if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/users/revenuecat/verify`) {
@@ -159,6 +240,21 @@ function normalizeSearch(event: any): string | undefined {
 
   const raw = typeof params.search === 'string' ? params.search : undefined;
   return raw?.trim() || undefined;
+}
+
+function getQueryParam(event: any, key: string): string | undefined {
+  const params = event?.queryStringParameters || event?.rawQueryString;
+
+  if (typeof params === 'string') {
+    return new URLSearchParams(params).get(key)?.trim() || undefined;
+  }
+
+  if (!params || typeof params !== 'object') {
+    return undefined;
+  }
+
+  const raw = params[key];
+  return typeof raw === 'string' ? raw.trim() || undefined : undefined;
 }
 
 function parseBody(body: unknown): Record<string, unknown> | undefined {

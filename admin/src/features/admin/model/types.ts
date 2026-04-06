@@ -79,6 +79,54 @@ export type AdminUsersResponse = {
   generatedAt: string
 }
 
+export type AdminVideoStatus = 'por_programar' | 'programado' | 'subido' | 'descartado'
+
+export type AdminVideoSummary = {
+  storyId: string
+  videoId: string
+  title: string
+  status: AdminVideoStatus
+  publishOn?: string
+  bucketPath?: string
+  bucketName?: string
+  bucketKey?: string
+  uploadedAt: string
+  updatedAt: string
+  contentType?: string
+  sourceVideoFileName?: string
+  sourceVideoFileSizeBytes?: number
+  generationUpdatedAt?: string
+}
+
+export type AdminVideosResponse = {
+  videos: AdminVideoSummary[]
+  stats: {
+    totalVideos: number
+    pendingToSchedule: number
+    scheduledVideos: number
+    uploadedVideos: number
+    discardedVideos: number
+    scheduledByDay: Array<{
+      date: string
+      count: number
+    }>
+  }
+  generatedAt: string
+}
+
+export type AdminVideoUpdateResponse = {
+  video: AdminVideoSummary
+  updatedAt: string
+}
+
+export type AdminVideoPreviewResponse = {
+  storyId: string
+  videoId: string
+  previewUrl: string
+  expiresAt: string
+  contentType?: string
+}
+
 export type AdminRevenueCatVerificationItem = {
   email: string
   status: 'verified' | 'skipped' | 'error'

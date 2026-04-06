@@ -18,6 +18,12 @@ const FALLBACK_MODULES: AdminModuleSummary[] = [
     status: 'ready',
   },
   {
+    id: 'videos',
+    label: 'Programación de videos',
+    description: 'Módulo para asignar publishOn, revisar carga diaria y mover videos entre estados.',
+    status: 'ready',
+  },
+  {
     id: 'content',
     label: 'Contenido y catálogos',
     description: 'Espacio para editar historias, vocabulario y assets sin tocar la web pública.',

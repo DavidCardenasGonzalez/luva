@@ -291,12 +291,15 @@ export class LuvaStack extends Stack {
       logGroup: adminFnLogGroup,
       environment: {
         USERS_TABLE_NAME: usersTable.tableName,
+        GENERATED_VIDEOS_TABLE_NAME: generatedVideosTable.tableName,
         REVENUECAT_SECRET_KEY: process.env.REVENUECAT_SECRET_KEY || '',
         REVENUECAT_ENTITLEMENT_ID: process.env.REVENUECAT_ENTITLEMENT_ID || 'Luva Pro',
         STAGE: 'prod',
       },
     });
     usersTable.grantReadWriteData(adminFn);
+    generatedVideosTable.grantReadWriteData(adminFn);
+    generatedVideosBucket.grantRead(adminFn);
 
     // API Gateway REST
     const api = new RestApi(this, 'LuvaApi', {

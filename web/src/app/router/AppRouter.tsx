@@ -8,6 +8,7 @@ import { LoadingPage } from '@/features/auth/ui/LoadingPage'
 import { LoginPage } from '@/features/auth/ui/LoginPage'
 import { ProtectedRoute } from '@/features/auth/ui/ProtectedRoute'
 import { DashboardHomePage } from '@/features/dashboard/ui/DashboardHomePage'
+import { DeleteAccountPage } from '@/features/marketing/ui/DeleteAccountPage'
 import { HomePage } from '@/features/marketing/ui/HomePage'
 import { LinksPage } from '@/features/marketing/ui/LinksPage'
 import { StoryChatPage } from '@/features/stories/ui/StoryChatPage'
@@ -38,6 +39,7 @@ export function AppRouter() {
     <Routes>
       <Route path={appPaths.home} element={<HomeRoute />} />
       <Route path={appPaths.links} element={<LinksPage />} />
+      <Route path={appPaths.deleteAccount} element={<DeleteAccountPage />} />
       <Route
         path={appPaths.login}
         element={isSignedIn ? <Navigate to={appPaths.dashboard} replace /> : <LoginPage />}

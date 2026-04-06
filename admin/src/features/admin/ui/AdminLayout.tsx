@@ -13,6 +13,7 @@ type AdminLayoutProps = PropsWithChildren<{
 const navigationItems = [
   { to: appPaths.home, label: 'Resumen' },
   { to: appPaths.users, label: 'Usuarios' },
+  { to: appPaths.videos, label: 'Videos' },
 ]
 
 export function AdminLayout({ title, description, actions, children }: AdminLayoutProps) {
@@ -64,4 +65,3 @@ export function AdminLayout({ title, description, actions, children }: AdminLayo
     </div>
   )
 }
-

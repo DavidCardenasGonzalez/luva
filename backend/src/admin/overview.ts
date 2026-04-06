@@ -45,6 +45,12 @@ const INITIAL_MODULES: AdminModuleSummary[] = [
     status: 'ready',
   },
   {
+    id: 'videos',
+    label: 'Programacion de videos',
+    description: 'Vista para asignar publishOn, revisar carga por dia y mover videos entre estados de publicacion.',
+    status: 'ready',
+  },
+  {
     id: 'content',
     label: 'Gestion de contenido',
     description: 'Separar catalogos internos del flujo publico para historias, vocabulario y assets.',

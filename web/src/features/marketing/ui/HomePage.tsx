@@ -4,6 +4,7 @@ import { getDisplayName } from '@/features/auth/model/get-display-name'
 import { useAuthSession } from '@/features/auth/model/use-auth-session'
 import {
   commitments,
+  deleteAccountRetentionNote,
   highlights,
   lastLegalUpdate,
   privacyPoints,
@@ -165,6 +166,10 @@ export function HomePage() {
             <strong>Derechos ARCO:</strong> puedes ejercer acceso, rectificación, cancelación u oposición contactándonos
             en <a href={`mailto:${supportEmail}`}>{supportEmail}</a>.
           </div>
+          <div className="policy-note">
+            <strong>Eliminación de cuenta:</strong> consulta la página dedicada en{' '}
+            <Link to={appPaths.deleteAccount}>{appPaths.deleteAccount}</Link>. {deleteAccountRetentionNote}
+          </div>
         </div>
       </section>
 
@@ -175,6 +180,7 @@ export function HomePage() {
           <Link to={appPaths.links}>Links</Link>
           <a href={buildHomeSectionHref('terminos')}>Términos</a>
           <a href={buildHomeSectionHref('privacidad')}>Privacidad</a>
+          <Link to={appPaths.deleteAccount}>Eliminar cuenta</Link>
         </div>
         <p className="muted">Luva - práctica guiada de inglés B1→C1.</p>
       </footer>

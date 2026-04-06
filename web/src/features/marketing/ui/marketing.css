@@ -426,6 +426,100 @@
   color: var(--text);
 }
 
+.page-delete-account {
+  max-width: 960px;
+}
+
+.delete-account-shell {
+  width: 100%;
+}
+
+.delete-account-card {
+  position: relative;
+  overflow: hidden;
+  padding: 32px;
+  border-radius: 32px;
+  background:
+    radial-gradient(520px circle at top right, rgba(74, 245, 193, 0.14), transparent 50%),
+    radial-gradient(520px circle at bottom left, rgba(243, 202, 116, 0.12), transparent 48%),
+    linear-gradient(180deg, rgba(12, 20, 36, 0.96), rgba(7, 12, 22, 0.98));
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
+}
+
+.delete-account-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.delete-account-hero {
+  position: relative;
+  z-index: 1;
+  margin-top: 28px;
+  max-width: 70ch;
+}
+
+.delete-account-hero h1 {
+  margin-top: 10px;
+  font-size: clamp(32px, 5vw, 48px);
+  line-height: 1.06;
+}
+
+.delete-account-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 18px;
+  margin-top: 30px;
+}
+
+.delete-account-section {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+}
+
+.delete-account-section h2 {
+  margin-bottom: 14px;
+  font-size: 22px;
+}
+
+.delete-account-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 12px;
+  color: var(--muted);
+}
+
+.delete-account-list.numbered {
+  padding-left: 22px;
+}
+
+.delete-account-list li {
+  line-height: 1.65;
+}
+
+.delete-account-footer {
+  position: relative;
+  z-index: 1;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 @media (max-width: 900px) {
   .hero-grid {
     grid-template-columns: 1fr;
@@ -457,6 +551,11 @@
   }
 
   .links-card {
+    padding: 24px;
+    border-radius: 24px;
+  }
+
+  .delete-account-card {
     padding: 24px;
     border-radius: 24px;
   }

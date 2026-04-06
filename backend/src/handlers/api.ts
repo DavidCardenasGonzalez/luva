@@ -358,7 +358,7 @@ function badRequest(message: string): ApiResponse {
 
 const ROUTE_PREFIX = "/v1";
 const APP_VERSION_POLICY = {
-  latestVersion: "1.1.5",
+  latestVersion: "1.1.6",
   recommendedMinimumVersion: "1.1.3",
   minimumSupportedVersion: "1.1.3",
   iosStoreUrl: "https://apps.apple.com/us/app/luva-ingles/id6758112881",

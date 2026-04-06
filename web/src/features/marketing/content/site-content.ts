@@ -2,6 +2,8 @@ export const appStoreUrl = 'https://apps.apple.com/es/app/luva-ingles/id67581128
 export const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.cardi7.luva'
 export const supportEmail = 'dcardenasgz@gmail.com'
 export const lastLegalUpdate = '29/03/2026'
+export const deleteAccountRetentionNote =
+  'Las transcripciones, el progreso, los datos de perfil y los identificadores de cuenta se eliminan al cerrar el caso. Podemos conservar temporalmente registros mínimos de facturación o cumplimiento legal por hasta 30 días si la ley o la tienda lo exigen.'
 
 export const socialLinks = [
   {

@@ -6,6 +6,7 @@ import {
   Pressable,
   Image,
   TextInput,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -363,21 +364,23 @@ export default function HomeScreen({ navigation }: Props) {
               </Text>
             </Pressable>
 
-            <Pressable
-              disabled={authLoading || !isConfigured}
-              onPress={signInWithApple}
-              style={({ pressed }) => ({
-                marginTop: 10,
-                paddingVertical: 13,
-                borderRadius: 14,
-                alignItems: 'center',
-                backgroundColor: authLoading || !isConfigured ? '#ffedd5' : pressed ? '#334155' : '#1e293b',
-              })}
-            >
-              <Text style={{ color: authLoading || !isConfigured ? '#9a3412' : '#fff', fontWeight: '800' }}>
-                {authLoading ? 'Conectando...' : 'Continuar con Apple'}
-              </Text>
-            </Pressable>
+            {Platform.OS === 'ios' ? (
+              <Pressable
+                disabled={authLoading || !isConfigured}
+                onPress={signInWithApple}
+                style={({ pressed }) => ({
+                  marginTop: 10,
+                  paddingVertical: 13,
+                  borderRadius: 14,
+                  alignItems: 'center',
+                  backgroundColor: authLoading || !isConfigured ? '#ffedd5' : pressed ? '#334155' : '#1e293b',
+                })}
+              >
+                <Text style={{ color: authLoading || !isConfigured ? '#9a3412' : '#fff', fontWeight: '800' }}>
+                  {authLoading ? 'Conectando...' : 'Continuar con Apple'}
+                </Text>
+              </Pressable>
+            ) : null}
 
             <View style={{ marginTop: 14, backgroundColor: '#ffffffcc', borderRadius: 14, padding: 14, borderWidth: 1, borderColor: '#fdba74' }}>
               <Text style={{ color: '#7c2d12', fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.4 }}>

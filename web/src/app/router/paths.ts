@@ -1,6 +1,7 @@
 export const appPaths = {
   home: '/',
   links: '/links',
+  deleteAccount: '/eliminar-cuenta',
   login: '/login',
   dashboard: '/dashboard',
   account: '/dashboard/account',

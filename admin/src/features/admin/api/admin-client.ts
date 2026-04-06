@@ -3,7 +3,11 @@ import type {
   AdminManualCodeProGrantResponse,
   AdminManualCodeProRevokeResponse,
   AdminOverview,
+  AdminVideoPreviewResponse,
   AdminRevenueCatVerificationResponse,
+  AdminVideoStatus,
+  AdminVideoUpdateResponse,
+  AdminVideosResponse,
   AdminUsersResponse,
 } from '@/features/admin/model/types'
 
@@ -19,6 +23,33 @@ export function getAdminUsers(search?: string) {
 
   const suffix = query.size ? `?${query.toString()}` : ''
   return adminApi.get<AdminUsersResponse>(`/users${suffix}`)
+}
+
+export function getAdminVideos() {
+  return adminApi.get<AdminVideosResponse>('/videos')
+}
+
+export function getAdminVideoPreview(storyId: string, videoId: string) {
+  const query = new URLSearchParams({
+    storyId,
+    videoId,
+  })
+
+  return adminApi.get<AdminVideoPreviewResponse>(`/videos/preview?${query.toString()}`)
+}
+
+export function updateAdminVideo(
+  storyId: string,
+  videoId: string,
+  status: AdminVideoStatus,
+  publishOn?: string | null,
+) {
+  return adminApi.post<AdminVideoUpdateResponse>('/videos/update', {
+    storyId,
+    videoId,
+    status,
+    publishOn,
+  })
 }
 
 export function verifyRevenueCatUsers() {
