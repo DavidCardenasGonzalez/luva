@@ -7,8 +7,26 @@ import { api } from '../api/api';
 
 type AuthProviderName = 'google' | 'apple' | 'email';
 
+type AuthProGrant = {
+  isActive: boolean;
+  updatedAt?: string;
+  expiresAt?: string;
+  productId?: string;
+  entitlementId?: string;
+  appUserId?: string;
+};
+
+type AuthProAccess = {
+  isActive: boolean;
+  source?: 'subscription' | 'code' | 'multiple';
+  updatedAt?: string;
+  subscription?: AuthProGrant;
+  code?: AuthProGrant;
+};
+
 type AuthUser = {
   email: string;
+  cognitoSub?: string;
   displayName?: string;
   givenName?: string;
   familyName?: string;
@@ -17,21 +35,55 @@ type AuthUser = {
   createdAt?: string;
   updatedAt?: string;
   lastLoginAt?: string;
+  isPro?: boolean;
+  proAccess?: AuthProAccess;
+};
+
+type PromoCodeRedemptionResult = {
+  code: string;
+  isValid: boolean;
+  premiumDays: number;
+  expiresAt?: string;
+};
+
+type CurrentUserUpdatePayload = {
+  displayName?: string;
+  pictureUrl?: string;
+  authProvider?: AuthProviderName;
+  promoCode?: string;
+  subscriptionAccess?: {
+    isActive?: boolean;
+    expiresAt?: string | null;
+    productId?: string;
+    entitlementId?: string;
+    appUserId?: string;
+  };
+};
+
+type EmailSignUpResult = {
+  destination?: string;
+  deliveryMedium?: string;
+  requiresConfirmation: boolean;
 };
 
 type AuthContextValue = {
   isConfigured: boolean;
+  isEmailAuthConfigured: boolean;
   isSignedIn: boolean;
   isLoading: boolean;
   error?: string;
   accessToken?: string;
   idToken?: string;
   user?: AuthUser;
-  signIn: () => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signInWithApple: () => Promise<void>;
-  signInWithEmail: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string) => Promise<EmailSignUpResult>;
+  confirmEmailSignUp: (email: string, code: string, password: string) => Promise<void>;
+  resendEmailSignUpCode: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
+  updateCurrentUser: (payload?: CurrentUserUpdatePayload) => Promise<CurrentUserSyncResult>;
 };
 
 type TokenExchangeResponse = {
@@ -45,10 +97,43 @@ type TokenExchangeResponse = {
 
 type CurrentUserResponse = {
   user?: AuthUser;
+  promoCode?: PromoCodeRedemptionResult;
 };
 
 type CurrentUserSyncResult = {
   user?: AuthUser;
+  promoCode?: PromoCodeRedemptionResult;
+};
+
+type CognitoAuthenticationResult = {
+  AccessToken?: string;
+  ExpiresIn?: number;
+  IdToken?: string;
+  RefreshToken?: string;
+  TokenType?: string;
+};
+
+type CognitoInitiateAuthResponse = {
+  AuthenticationResult?: CognitoAuthenticationResult;
+  ChallengeName?: string;
+};
+
+type CognitoCodeDeliveryDetails = {
+  AttributeName?: string;
+  DeliveryMedium?: string;
+  Destination?: string;
+};
+
+type CognitoSignUpResponse = {
+  CodeDeliveryDetails?: CognitoCodeDeliveryDetails;
+  UserConfirmed?: boolean;
+};
+
+type CognitoErrorResponse = {
+  __type?: string;
+  code?: string;
+  message?: string;
+  Message?: string;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -56,6 +141,13 @@ const extra = Constants.expoConfig?.extra || {};
 const RAW_DOMAIN: string | undefined = extra.COGNITO_DOMAIN;
 const DOMAIN = normalizeHostedUiDomain(RAW_DOMAIN);
 const CLIENT_ID: string = extra.COGNITO_CLIENT_ID;
+const COGNITO_REGION: string | undefined =
+  typeof extra.COGNITO_REGION === 'string' && extra.COGNITO_REGION.trim()
+    ? extra.COGNITO_REGION.trim()
+    : deriveRegionFromHostedUiDomain(DOMAIN);
+const COGNITO_IDP_ENDPOINT = COGNITO_REGION
+  ? `https://cognito-idp.${COGNITO_REGION}.amazonaws.com/`
+  : undefined;
 const REDIRECT_URI: string = extra.REDIRECT_URI || 'myapp://callback';
 const ACCESS_TOKEN_KEY = 'luva_access';
 const ID_TOKEN_KEY = 'luva_id';
@@ -78,6 +170,81 @@ function normalizeHostedUiDomain(value?: string): string | undefined {
   if (trimmed.includes('cognito-idp.')) return undefined;
   if (/^https?:\/\//i.test(trimmed)) return trimmed.replace(/^http:\/\//i, 'https://');
   return `https://${trimmed}`;
+}
+
+function deriveRegionFromHostedUiDomain(domain?: string): string | undefined {
+  if (!domain) return undefined;
+  try {
+    const hostname = new URL(domain).hostname;
+    const match = hostname.match(/\.auth\.([a-z0-9-]+)\.amazoncognito\.com$/i);
+    return match?.[1];
+  } catch {
+    return undefined;
+  }
+}
+
+function normalizeEmailAddress(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function extractCognitoErrorCode(payload?: CognitoErrorResponse): string | undefined {
+  const raw = payload?.__type || payload?.code;
+  if (!raw) return undefined;
+  return raw.split('#').pop()?.trim();
+}
+
+function getCognitoErrorMessage(payload?: CognitoErrorResponse, fallback?: string): string {
+  const code = extractCognitoErrorCode(payload);
+  switch (code) {
+    case 'CodeMismatchException':
+      return 'El código es incorrecto.';
+    case 'ExpiredCodeException':
+      return 'El código expiró. Solicita uno nuevo.';
+    case 'InvalidParameterException':
+      return 'Revisa los datos e inténtalo de nuevo.';
+    case 'InvalidPasswordException':
+      return 'La contraseña no cumple con los requisitos mínimos de Cognito.';
+    case 'LimitExceededException':
+    case 'TooManyRequestsException':
+    case 'TooManyFailedAttemptsException':
+      return 'Hiciste demasiados intentos. Espera un momento e inténtalo otra vez.';
+    case 'NotAuthorizedException':
+    case 'UserNotFoundException':
+      return 'Correo o contraseña incorrectos.';
+    case 'PasswordResetRequiredException':
+      return 'Tu cuenta requiere restablecer la contraseña antes de continuar.';
+    case 'ResourceNotFoundException':
+      return 'La configuración de Cognito no es válida para este app.';
+    case 'UserLambdaValidationException':
+      return fallback || payload?.message || payload?.Message || 'No pudimos validar tu cuenta.';
+    case 'UserNotConfirmedException':
+      return 'Tu cuenta todavía no está confirmada. Usa el código que llegó a tu correo.';
+    case 'UsernameExistsException':
+      return 'Ya existe una cuenta con ese correo.';
+    default:
+      return fallback || payload?.message || payload?.Message || 'No pudimos completar la operación en Cognito.';
+  }
+}
+
+async function callCognito<T>(action: string, body: Record<string, unknown>): Promise<T> {
+  if (!COGNITO_IDP_ENDPOINT || !CLIENT_ID) {
+    throw new Error('Falta configurar COGNITO_CLIENT_ID y la región de Cognito en el app.');
+  }
+
+  const response = await fetch(COGNITO_IDP_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-amz-json-1.1',
+      'X-Amz-Target': `AWSCognitoIdentityProviderService.${action}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const payload = await response.json().catch(() => ({})) as T & CognitoErrorResponse;
+  if (!response.ok) {
+    throw new Error(getCognitoErrorMessage(payload));
+  }
+  return payload as T;
 }
 
 async function storeValue(key: string, value?: string) {
@@ -201,17 +368,20 @@ function isSessionExpired(expiresAt?: number): boolean {
 
 async function syncCurrentUser(
   authToken: string,
-  authProvider?: AuthProviderName
+  payload?: CurrentUserUpdatePayload
 ): Promise<CurrentUserSyncResult> {
   api.setToken(authToken);
   try {
-    const response = await api.post<CurrentUserResponse>('/users/me', authProvider ? { authProvider } : undefined);
+    const response = await api.post<CurrentUserResponse>('/users/me', payload);
     if (!response?.user?.email) {
-      return {};
+      return {
+        ...(response?.promoCode ? { promoCode: response.promoCode } : {}),
+      };
     }
     await storeUser(response.user);
     return {
       user: response.user,
+      ...(response.promoCode ? { promoCode: response.promoCode } : {}),
     };
   } catch (err: any) {
     console.warn('user.sync.failed', err?.message || err);
@@ -233,7 +403,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const userRef = useRef<AuthUser | undefined>(undefined);
   const refreshPromiseRef = useRef<Promise<string | undefined> | undefined>(undefined);
 
-  const isConfigured = Boolean(DOMAIN && CLIENT_ID && REDIRECT_URI);
+  const isHostedUiConfigured = Boolean(DOMAIN && CLIENT_ID && REDIRECT_URI);
+  const isEmailAuthConfigured = Boolean(DOMAIN && CLIENT_ID && COGNITO_IDP_ENDPOINT);
+  const isConfigured = isHostedUiConfigured;
   const authToken = idToken || accessToken;
 
   const applySession = useCallback(
@@ -380,6 +552,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return currentBearer;
   }, [clearSession, refreshSession]);
 
+  const completeAuthenticatedSession = useCallback(
+    async (result: CognitoAuthenticationResult, provider: AuthProviderName) => {
+      const nextAccessToken = result.AccessToken;
+      const nextIdToken = result.IdToken;
+      const nextRefreshToken = result.RefreshToken;
+      const nextBearer = nextIdToken || nextAccessToken;
+
+      if (!nextAccessToken || !nextBearer) {
+        throw new Error('Cognito no devolvió tokens válidos.');
+      }
+
+      await applySession({
+        accessToken: nextAccessToken,
+        idToken: nextIdToken,
+        refreshToken: nextRefreshToken,
+        expiresAt: getSessionExpiresAt(result.ExpiresIn),
+        user: undefined,
+      });
+
+      const syncResult = await syncCurrentUser(nextBearer, { authProvider: provider });
+      await applySession({
+        accessToken: accessTokenRef.current,
+        idToken: idTokenRef.current,
+        refreshToken: refreshTokenRef.current,
+        expiresAt: sessionExpiresAtRef.current,
+        user: syncResult.user,
+      });
+    },
+    [applySession]
+  );
+
+  const performEmailPasswordSignIn = useCallback(
+    async (email: string, password: string) => {
+      if (!isEmailAuthConfigured) {
+        throw new Error('Falta configurar COGNITO_DOMAIN, COGNITO_CLIENT_ID o COGNITO_REGION en el app.');
+      }
+
+      const normalizedEmail = normalizeEmailAddress(email);
+      const payload = await callCognito<CognitoInitiateAuthResponse>('InitiateAuth', {
+        AuthFlow: 'USER_PASSWORD_AUTH',
+        ClientId: CLIENT_ID,
+        AuthParameters: {
+          USERNAME: normalizedEmail,
+          PASSWORD: password,
+        },
+      });
+
+      if (payload.ChallengeName) {
+        throw new Error('Esta cuenta requiere una verificación adicional que el app todavía no soporta.');
+      }
+
+      if (!payload.AuthenticationResult) {
+        throw new Error('Cognito no devolvió tokens válidos.');
+      }
+
+      await completeAuthenticatedSession(payload.AuthenticationResult, 'email');
+    },
+    [completeAuthenticatedSession, isEmailAuthConfigured]
+  );
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -417,7 +649,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           ? await refreshSession()
           : storedIdToken || storedAccessToken || undefined;
 
-        if (!storedUser && storedBearer) {
+        if (storedBearer) {
           const syncResult = await syncCurrentUser(storedBearer);
           if (!cancelled && syncResult.user) {
             await applySession(
@@ -455,7 +687,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [ensureValidSession, refreshSession]);
 
   const signInWithProvider = useCallback(async (provider: AuthProviderName) => {
-    if (!isConfigured) {
+    if (!isHostedUiConfigured) {
       setError('Falta configurar COGNITO_DOMAIN, COGNITO_CLIENT_ID o REDIRECT_URI en el app.');
       return;
     }
@@ -498,43 +730,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const data = await exchangeCodeForTokens(code);
-      const nextAccessToken = data.access_token;
-      const nextIdToken = data.id_token;
-      const nextRefreshToken = data.refresh_token;
-      const nextBearer = nextIdToken || nextAccessToken;
-
-      if (!nextAccessToken || !nextBearer) {
-        setError('Cognito no devolvió tokens válidos.');
-        return;
-      }
-
-      await applySession({
-        accessToken: nextAccessToken,
-        idToken: nextIdToken,
-        refreshToken: nextRefreshToken,
-        expiresAt: getSessionExpiresAt(data.expires_in),
-        user: undefined,
-      });
-
-      const syncResult = await syncCurrentUser(nextBearer, provider);
-      await applySession({
-        accessToken: accessTokenRef.current,
-        idToken: idTokenRef.current,
-        refreshToken: refreshTokenRef.current,
-        expiresAt: sessionExpiresAtRef.current,
-        user: syncResult.user,
-      });
+      await completeAuthenticatedSession({
+        AccessToken: data.access_token,
+        IdToken: data.id_token,
+        RefreshToken: data.refresh_token,
+        ExpiresIn: data.expires_in,
+      }, provider);
     } catch (err: any) {
       setError(err?.message || 'No pudimos completar el inicio de sesión.');
     } finally {
       setIsBusy(false);
       setIsHydrating(false);
     }
-  }, [applySession, isConfigured]);
+  }, [completeAuthenticatedSession, isHostedUiConfigured]);
 
-  const signIn = useCallback(async () => {
-    await signInWithProvider('email');
-  }, [signInWithProvider]);
+  const signInWithEmail = useCallback(
+    async (email: string, password: string) => {
+      const normalizedEmail = normalizeEmailAddress(email);
+      if (!normalizedEmail) {
+        setError('Ingresa tu correo.');
+        return;
+      }
+      if (!password.trim()) {
+        setError('Ingresa tu contraseña.');
+        return;
+      }
+
+      setIsBusy(true);
+      setError(undefined);
+
+      try {
+        await performEmailPasswordSignIn(normalizedEmail, password);
+      } catch (err: any) {
+        setError(err?.message || 'No pudimos iniciar sesión con correo.');
+      } finally {
+        setIsBusy(false);
+        setIsHydrating(false);
+      }
+    },
+    [performEmailPasswordSignIn]
+  );
+
+  const signIn = useCallback(async (email: string, password: string) => {
+    await signInWithEmail(email, password);
+  }, [signInWithEmail]);
 
   const signInWithGoogle = useCallback(async () => {
     await signInWithProvider('google');
@@ -544,16 +783,166 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signInWithProvider('apple');
   }, [signInWithProvider]);
 
-  const signInWithEmail = useCallback(async () => {
-    await signInWithProvider('email');
-  }, [signInWithProvider]);
+  const signUpWithEmail = useCallback(
+    async (email: string, password: string): Promise<EmailSignUpResult> => {
+      const normalizedEmail = normalizeEmailAddress(email);
+      if (!normalizedEmail) {
+        const message = 'Ingresa un correo válido.';
+        setError(message);
+        throw new Error(message);
+      }
+      if (!password.trim()) {
+        const message = 'Ingresa una contraseña.';
+        setError(message);
+        throw new Error(message);
+      }
+      if (!isEmailAuthConfigured) {
+        const message = 'Falta configurar COGNITO_DOMAIN, COGNITO_CLIENT_ID o COGNITO_REGION en el app.';
+        setError(message);
+        throw new Error(message);
+      }
+
+      setIsBusy(true);
+      setError(undefined);
+
+      try {
+        const payload = await callCognito<CognitoSignUpResponse>('SignUp', {
+          ClientId: CLIENT_ID,
+          Username: normalizedEmail,
+          Password: password,
+          UserAttributes: [
+            { Name: 'email', Value: normalizedEmail },
+          ],
+        });
+
+        if (payload.UserConfirmed) {
+          await performEmailPasswordSignIn(normalizedEmail, password);
+          return { requiresConfirmation: false };
+        }
+
+        return {
+          destination: payload.CodeDeliveryDetails?.Destination,
+          deliveryMedium: payload.CodeDeliveryDetails?.DeliveryMedium,
+          requiresConfirmation: true,
+        };
+      } catch (err: any) {
+        const message = err?.message || 'No pudimos crear tu cuenta.';
+        setError(message);
+        throw new Error(message);
+      } finally {
+        setIsBusy(false);
+        setIsHydrating(false);
+      }
+    },
+    [isEmailAuthConfigured, performEmailPasswordSignIn]
+  );
+
+  const confirmEmailSignUp = useCallback(
+    async (email: string, code: string, password: string) => {
+      const normalizedEmail = normalizeEmailAddress(email);
+      const trimmedCode = code.trim();
+      if (!normalizedEmail) {
+        const message = 'Ingresa un correo válido.';
+        setError(message);
+        throw new Error(message);
+      }
+      if (!trimmedCode) {
+        const message = 'Ingresa el código que llegó a tu correo.';
+        setError(message);
+        throw new Error(message);
+      }
+      if (!password.trim()) {
+        const message = 'Ingresa tu contraseña para terminar el acceso.';
+        setError(message);
+        throw new Error(message);
+      }
+
+      setIsBusy(true);
+      setError(undefined);
+
+      try {
+        await callCognito('ConfirmSignUp', {
+          ClientId: CLIENT_ID,
+          Username: normalizedEmail,
+          ConfirmationCode: trimmedCode,
+        });
+        await performEmailPasswordSignIn(normalizedEmail, password);
+      } catch (err: any) {
+        const message = err?.message || 'No pudimos confirmar tu cuenta.';
+        setError(message);
+        throw new Error(message);
+      } finally {
+        setIsBusy(false);
+        setIsHydrating(false);
+      }
+    },
+    [performEmailPasswordSignIn]
+  );
+
+  const resendEmailSignUpCode = useCallback(
+    async (email: string) => {
+      const normalizedEmail = normalizeEmailAddress(email);
+      if (!normalizedEmail) {
+        const message = 'Ingresa un correo válido.';
+        setError(message);
+        throw new Error(message);
+      }
+
+      setIsBusy(true);
+      setError(undefined);
+
+      try {
+        await callCognito('ResendConfirmationCode', {
+          ClientId: CLIENT_ID,
+          Username: normalizedEmail,
+        });
+      } catch (err: any) {
+        const message = err?.message || 'No pudimos reenviar el código.';
+        setError(message);
+        throw new Error(message);
+      } finally {
+        setIsBusy(false);
+      }
+    },
+    []
+  );
+
+  const updateCurrentUser = useCallback(
+    async (payload?: CurrentUserUpdatePayload): Promise<CurrentUserSyncResult> => {
+      const currentBearer = await ensureValidSession();
+      if (!currentBearer) {
+        return {};
+      }
+
+      const syncResult = await syncCurrentUser(currentBearer, payload);
+      if (syncResult.user) {
+        await applySession({
+          accessToken: accessTokenRef.current,
+          idToken: idTokenRef.current,
+          refreshToken: refreshTokenRef.current,
+          expiresAt: sessionExpiresAtRef.current,
+          user: syncResult.user,
+        });
+      }
+
+      return syncResult;
+    },
+    [applySession, ensureValidSession]
+  );
 
   const signOut = useCallback(async () => {
     setIsBusy(true);
     setError(undefined);
 
     try {
-      if (DOMAIN && CLIENT_ID) {
+      const provider = userRef.current?.lastAuthProvider?.trim().toLowerCase();
+      const shouldOpenHostedLogout = Boolean(
+        DOMAIN &&
+        CLIENT_ID &&
+        provider &&
+        provider !== 'email'
+      );
+      if (shouldOpenHostedLogout) {
         const logoutUrl = `${DOMAIN}/logout?client_id=${encodeURIComponent(CLIENT_ID)}&logout_uri=${encodeURIComponent(REDIRECT_URI)}`;
         try {
           await WebBrowser.openAuthSessionAsync(logoutUrl, REDIRECT_URI);
@@ -570,6 +959,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(
     () => ({
       isConfigured,
+      isEmailAuthConfigured,
       isSignedIn: Boolean(authToken),
       isLoading: isHydrating || isBusy,
       error,
@@ -580,21 +970,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signInWithGoogle,
       signInWithApple,
       signInWithEmail,
+      signUpWithEmail,
+      confirmEmailSignUp,
+      resendEmailSignUpCode,
       signOut,
+      updateCurrentUser,
     }),
     [
       accessToken,
       authToken,
+      confirmEmailSignUp,
       error,
       idToken,
+      isEmailAuthConfigured,
       isBusy,
       isConfigured,
       isHydrating,
+      resendEmailSignUpCode,
       signIn,
       signInWithApple,
       signInWithEmail,
       signInWithGoogle,
+      signUpWithEmail,
       signOut,
+      updateCurrentUser,
       user,
     ]
   );

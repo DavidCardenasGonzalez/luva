@@ -3,6 +3,7 @@ export const appPaths = {
   links: '/links',
   login: '/login',
   dashboard: '/dashboard',
+  account: '/dashboard/account',
   vocabulary: '/dashboard/vocabulary',
   stories: '/dashboard/stories',
   welcome: '/welcome',

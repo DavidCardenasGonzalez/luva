@@ -34,6 +34,7 @@ import {
   AppVersionCheckStatus,
 } from "../types";
 import { STORIES_SEED } from "../data/stories-seed";
+import { validatePromoCode } from "../promo-codes";
 
 const s3 = new S3Client({});
 const ssm = new SSMClient({});
@@ -356,8 +357,6 @@ function badRequest(message: string): ApiResponse {
 }
 
 const ROUTE_PREFIX = "/v1";
-const PROMO_CODE = "PRO123";
-const PROMO_PREMIUM_DAYS = 30;
 const APP_VERSION_POLICY = {
   latestVersion: "1.1.5",
   recommendedMinimumVersion: "1.1.3",
@@ -690,11 +689,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       if (!submittedCode) {
         return badRequest("Missing code");
       }
-      const payload: PromoCodeValidationResponse = {
-        code: PROMO_CODE,
-        isValid: submittedCode.toUpperCase() === PROMO_CODE,
-        premiumDays: PROMO_PREMIUM_DAYS,
-      };
+      const payload: PromoCodeValidationResponse = validatePromoCode(submittedCode);
       return json(200, payload);
     }
 

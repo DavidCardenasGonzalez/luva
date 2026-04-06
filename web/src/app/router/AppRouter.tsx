@@ -3,6 +3,7 @@ import { appPaths } from '@/app/router/paths'
 import { resolveLegacyDestination } from '@/app/router/legacy-routes'
 import { useAuthSession } from '@/features/auth/model/use-auth-session'
 import { AppShell } from '@/features/app-shell/ui/AppShell'
+import { AccountPage } from '@/features/account/ui/AccountPage'
 import { LoadingPage } from '@/features/auth/ui/LoadingPage'
 import { LoginPage } from '@/features/auth/ui/LoginPage'
 import { ProtectedRoute } from '@/features/auth/ui/ProtectedRoute'
@@ -50,6 +51,7 @@ export function AppRouter() {
         }
       >
         <Route index element={<DashboardHomePage />} />
+        <Route path="account" element={<AccountPage />} />
         <Route path="vocabulary" element={<VocabularyDeckPage />} />
         <Route path="vocabulary/:cardId" element={<VocabularyPracticePage />} />
         <Route path="stories" element={<StoriesIndexPage />} />

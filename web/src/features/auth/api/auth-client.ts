@@ -5,6 +5,9 @@ import type {
   AuthConfig,
   AuthMode,
   AuthProviderName,
+  CurrentUserUpdatePayload,
+  CurrentUserUpdateResult,
+  EmailSignUpResult,
   AuthUser,
   StoredSession,
 } from '@/features/auth/model/types'
@@ -21,6 +24,38 @@ type TokenExchangeResponse = {
 type CurrentUserResponse = {
   user?: AuthUser
   created?: boolean
+  promoCode?: CurrentUserUpdateResult['promoCode']
+}
+
+type CognitoAuthenticationResult = {
+  AccessToken?: string
+  ExpiresIn?: number
+  IdToken?: string
+  RefreshToken?: string
+  TokenType?: string
+}
+
+type CognitoInitiateAuthResponse = {
+  AuthenticationResult?: CognitoAuthenticationResult
+  ChallengeName?: string
+}
+
+type CognitoCodeDeliveryDetails = {
+  AttributeName?: string
+  DeliveryMedium?: string
+  Destination?: string
+}
+
+type CognitoSignUpResponse = {
+  CodeDeliveryDetails?: CognitoCodeDeliveryDetails
+  UserConfirmed?: boolean
+}
+
+type CognitoErrorResponse = {
+  __type?: string
+  code?: string
+  message?: string
+  Message?: string
 }
 
 type JwtClaims = Record<string, unknown>
@@ -79,6 +114,62 @@ function normalizeRedirectUri(value?: string) {
   }
 }
 
+function deriveRegionFromHostedUiDomain(domain?: string) {
+  if (!domain) return undefined
+
+  try {
+    const hostname = new URL(domain).hostname
+    const match = hostname.match(/\.auth\.([a-z0-9-]+)\.amazoncognito\.com$/i)
+    return match?.[1]
+  } catch {
+    return undefined
+  }
+}
+
+function normalizeEmailAddress(value: string) {
+  return value.trim().toLowerCase()
+}
+
+function extractCognitoErrorCode(payload?: CognitoErrorResponse) {
+  const raw = payload?.__type || payload?.code
+  if (!raw) return undefined
+  return raw.split('#').pop()?.trim()
+}
+
+function getCognitoErrorMessage(payload?: CognitoErrorResponse, fallback?: string) {
+  const code = extractCognitoErrorCode(payload)
+
+  switch (code) {
+    case 'CodeMismatchException':
+      return 'El código es incorrecto.'
+    case 'ExpiredCodeException':
+      return 'El código expiró. Solicita uno nuevo.'
+    case 'InvalidParameterException':
+      return 'Revisa los datos e inténtalo de nuevo.'
+    case 'InvalidPasswordException':
+      return 'La contraseña no cumple con los requisitos mínimos de Cognito.'
+    case 'LimitExceededException':
+    case 'TooManyRequestsException':
+    case 'TooManyFailedAttemptsException':
+      return 'Hiciste demasiados intentos. Espera un momento e inténtalo otra vez.'
+    case 'NotAuthorizedException':
+    case 'UserNotFoundException':
+      return 'Correo o contraseña incorrectos.'
+    case 'PasswordResetRequiredException':
+      return 'Tu cuenta requiere restablecer la contraseña antes de continuar.'
+    case 'ResourceNotFoundException':
+      return 'La configuración de Cognito no es válida para esta web.'
+    case 'UserLambdaValidationException':
+      return fallback || payload?.message || payload?.Message || 'No pudimos validar tu cuenta.'
+    case 'UserNotConfirmedException':
+      return 'Tu cuenta todavía no está confirmada. Usa el código que llegó a tu correo.'
+    case 'UsernameExistsException':
+      return 'Ya existe una cuenta con ese correo.'
+    default:
+      return fallback || payload?.message || payload?.Message || 'No pudimos completar la operación en Cognito.'
+  }
+}
+
 function getDefaultRedirectUri(): string | undefined {
   if (typeof window === 'undefined') {
     return undefined
@@ -89,14 +180,52 @@ function getDefaultRedirectUri(): string | undefined {
 export function getAuthConfig(): AuthConfig {
   const domain = normalizeHostedUiDomain(env.cognitoDomain)
   const clientId = env.cognitoClientId
+  const cognitoRegion = env.cognitoRegion || deriveRegionFromHostedUiDomain(domain)
   const redirectUri = normalizeRedirectUri(env.redirectUri) || getDefaultRedirectUri()
+  const isHostedUiConfigured = Boolean(domain && clientId && redirectUri)
+  const isEmailAuthConfigured = Boolean(domain && clientId && cognitoRegion)
 
   return {
     domain,
     clientId,
+    cognitoRegion,
     redirectUri,
-    isConfigured: Boolean(domain && clientId && redirectUri),
+    isConfigured: isHostedUiConfigured,
+    isHostedUiConfigured,
+    isEmailAuthConfigured,
   }
+}
+
+function getCognitoIdpEndpoint() {
+  const { clientId, cognitoRegion, isEmailAuthConfigured } = getAuthConfig()
+  if (!isEmailAuthConfigured || !clientId || !cognitoRegion) {
+    throw new Error('Configura VITE_COGNITO_DOMAIN, VITE_COGNITO_CLIENT_ID y, si aplica, VITE_COGNITO_REGION para habilitar el acceso con correo.')
+  }
+
+  return {
+    clientId,
+    endpoint: `https://cognito-idp.${cognitoRegion}.amazonaws.com/`,
+  }
+}
+
+async function callCognito<T>(action: string, body: Record<string, unknown>): Promise<T> {
+  const { endpoint } = getCognitoIdpEndpoint()
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-amz-json-1.1',
+      'X-Amz-Target': `AWSCognitoIdentityProviderService.${action}`,
+    },
+    body: JSON.stringify(body),
+  })
+
+  const payload = (await response.json().catch(() => ({}))) as T & CognitoErrorResponse
+  if (!response.ok) {
+    throw new Error(getCognitoErrorMessage(payload))
+  }
+
+  return payload as T
 }
 
 function createRandomState() {
@@ -142,8 +271,8 @@ function consumePendingAuth() {
 }
 
 function buildHostedUiUrl(mode: AuthMode, provider: AuthProviderName, state: string) {
-  const { domain, clientId, redirectUri, isConfigured } = getAuthConfig()
-  if (!isConfigured || !domain || !clientId || !redirectUri) {
+  const { domain, clientId, redirectUri, isHostedUiConfigured } = getAuthConfig()
+  if (!isHostedUiConfigured || !domain || !clientId || !redirectUri) {
     throw new Error(
       'Configura VITE_COGNITO_DOMAIN y VITE_COGNITO_CLIENT_ID para habilitar el login web.',
     )
@@ -162,8 +291,8 @@ function buildHostedUiUrl(mode: AuthMode, provider: AuthProviderName, state: str
 }
 
 function buildLogoutUrl() {
-  const { domain, clientId, redirectUri, isConfigured } = getAuthConfig()
-  if (!isConfigured || !domain || !clientId || !redirectUri) {
+  const { domain, clientId, redirectUri, isHostedUiConfigured } = getAuthConfig()
+  if (!isHostedUiConfigured || !domain || !clientId || !redirectUri) {
     throw new Error(
       'Configura VITE_COGNITO_DOMAIN y VITE_COGNITO_CLIENT_ID para cerrar la sesion web.',
     )
@@ -373,8 +502,8 @@ export function subscribeToSessionChanges(listener: (session: StoredSession) => 
 }
 
 async function refreshTokens(refreshToken: string): Promise<TokenExchangeResponse> {
-  const { domain, clientId, isConfigured } = getAuthConfig()
-  if (!isConfigured || !domain || !clientId) {
+  const { domain, clientId, isHostedUiConfigured } = getAuthConfig()
+  if (!isHostedUiConfigured || !domain || !clientId) {
     throw new Error('La configuracion de Cognito no esta completa.')
   }
 
@@ -457,15 +586,199 @@ export async function loadStoredSession(): Promise<StoredSession> {
 
   if (!isTokenExpired(bearer)) {
     api.setToken(bearer)
-    return session
+    const syncResult = await syncCurrentUser(bearer, undefined, session.idToken)
+    return syncResult.user
+      ? persistSession({
+          accessToken: session.accessToken,
+          idToken: session.idToken,
+          refreshToken: session.refreshToken,
+          user: syncResult.user,
+        })
+      : session
   }
 
-  return (await refreshStoredSession(true)) || getCurrentSession()
+  const refreshedSession = (await refreshStoredSession(true)) || getCurrentSession()
+  const refreshedBearer = getBearer(refreshedSession)
+  if (!refreshedBearer) {
+    return refreshedSession
+  }
+
+  const syncResult = await syncCurrentUser(refreshedBearer, undefined, refreshedSession.idToken)
+  return syncResult.user
+    ? persistSession({
+        accessToken: refreshedSession.accessToken,
+        idToken: refreshedSession.idToken,
+        refreshToken: refreshedSession.refreshToken,
+        user: syncResult.user,
+      })
+    : refreshedSession
+}
+
+export async function updateCurrentUser(
+  payload?: CurrentUserUpdatePayload,
+): Promise<CurrentUserUpdateResult> {
+  const session = (await refreshStoredSession()) || getCurrentSession()
+  const bearer = getBearer(session)
+  if (!bearer) {
+    return {}
+  }
+
+  const result = await syncCurrentUser(bearer, payload, session.idToken)
+  if (result.user) {
+    persistSession({
+      accessToken: session.accessToken,
+      idToken: session.idToken,
+      refreshToken: session.refreshToken,
+      user: result.user,
+    })
+  }
+
+  return result
+}
+
+async function completeAuthenticatedSession(
+  result: CognitoAuthenticationResult,
+  provider: AuthProviderName,
+): Promise<StoredSession> {
+  const accessToken = result.AccessToken
+  const idToken = result.IdToken
+  const refreshToken = result.RefreshToken
+  const bearer = idToken || accessToken
+
+  if (!accessToken || !bearer) {
+    throw new Error('Cognito no devolvio tokens validos.')
+  }
+
+  const baseSession = persistSession({
+    accessToken,
+    idToken,
+    refreshToken,
+  }, provider)
+
+  const syncResult = await syncCurrentUser(
+    bearer,
+    { authProvider: provider },
+    idToken,
+  )
+
+  return persistSession({
+    accessToken,
+    idToken,
+    refreshToken,
+    user: syncResult.user || baseSession.user,
+  })
+}
+
+export async function signInWithEmail(email: string, password: string): Promise<StoredSession> {
+  const normalizedEmail = normalizeEmailAddress(email)
+  if (!normalizedEmail) {
+    throw new Error('Ingresa tu correo.')
+  }
+
+  if (!password.trim()) {
+    throw new Error('Ingresa tu contraseña.')
+  }
+
+  const { clientId } = getCognitoIdpEndpoint()
+  const payload = await callCognito<CognitoInitiateAuthResponse>('InitiateAuth', {
+    AuthFlow: 'USER_PASSWORD_AUTH',
+    ClientId: clientId,
+    AuthParameters: {
+      USERNAME: normalizedEmail,
+      PASSWORD: password,
+    },
+  })
+
+  if (payload.ChallengeName) {
+    throw new Error('Esta cuenta requiere una verificación adicional que la web todavía no soporta.')
+  }
+
+  if (!payload.AuthenticationResult) {
+    throw new Error('Cognito no devolvio tokens validos.')
+  }
+
+  return completeAuthenticatedSession(payload.AuthenticationResult, 'email')
+}
+
+export async function signUpWithEmail(
+  email: string,
+  password: string,
+): Promise<EmailSignUpResult> {
+  const normalizedEmail = normalizeEmailAddress(email)
+  if (!normalizedEmail) {
+    throw new Error('Ingresa un correo válido.')
+  }
+
+  if (!password.trim()) {
+    throw new Error('Ingresa una contraseña.')
+  }
+
+  const { clientId } = getCognitoIdpEndpoint()
+  const payload = await callCognito<CognitoSignUpResponse>('SignUp', {
+    ClientId: clientId,
+    Username: normalizedEmail,
+    Password: password,
+    UserAttributes: [{ Name: 'email', Value: normalizedEmail }],
+  })
+
+  if (payload.UserConfirmed) {
+    await signInWithEmail(normalizedEmail, password)
+    return { requiresConfirmation: false }
+  }
+
+  return {
+    destination: payload.CodeDeliveryDetails?.Destination,
+    deliveryMedium: payload.CodeDeliveryDetails?.DeliveryMedium,
+    requiresConfirmation: true,
+  }
+}
+
+export async function confirmEmailSignUp(
+  email: string,
+  code: string,
+  password: string,
+): Promise<StoredSession> {
+  const normalizedEmail = normalizeEmailAddress(email)
+  const trimmedCode = code.trim()
+
+  if (!normalizedEmail) {
+    throw new Error('Ingresa un correo válido.')
+  }
+
+  if (!trimmedCode) {
+    throw new Error('Ingresa el código que llegó a tu correo.')
+  }
+
+  if (!password.trim()) {
+    throw new Error('Ingresa tu contraseña para terminar el acceso.')
+  }
+
+  const { clientId } = getCognitoIdpEndpoint()
+  await callCognito('ConfirmSignUp', {
+    ClientId: clientId,
+    Username: normalizedEmail,
+    ConfirmationCode: trimmedCode,
+  })
+
+  return signInWithEmail(normalizedEmail, password)
+}
+
+export async function resendEmailSignUpCode(email: string): Promise<void> {
+  const normalizedEmail = normalizeEmailAddress(email)
+  if (!normalizedEmail) {
+    throw new Error('Ingresa un correo válido.')
+  }
+
+  const { clientId } = getCognitoIdpEndpoint()
+  await callCognito('ResendConfirmationCode', {
+    ClientId: clientId,
+    Username: normalizedEmail,
+  })
 }
 
 async function exchangeCodeForTokens(code: string): Promise<TokenExchangeResponse> {
-  const { domain, clientId, redirectUri, isConfigured } = getAuthConfig()
-  if (!isConfigured || !domain || !clientId || !redirectUri) {
+  const { domain, clientId, redirectUri, isHostedUiConfigured } = getAuthConfig()
+  if (!isHostedUiConfigured || !domain || !clientId || !redirectUri) {
     throw new Error('La configuracion de Cognito no esta completa.')
   }
 
@@ -491,24 +804,42 @@ async function exchangeCodeForTokens(code: string): Promise<TokenExchangeRespons
 
 async function syncCurrentUser(
   authToken: string,
-  authProvider?: AuthProviderName,
+  payload?: CurrentUserUpdatePayload,
   idToken?: string,
-): Promise<AuthUser | undefined> {
-  const fallbackUser = buildFallbackUser(idToken, authProvider)
+): Promise<CurrentUserUpdateResult> {
+  const fallbackUser = buildFallbackUser(idToken, payload?.authProvider)
   if (!isApiConfigured()) {
-    return fallbackUser
+    return fallbackUser ? { user: fallbackUser } : {}
   }
 
-  api.setToken(authToken)
   try {
-    const response = await api.post<CurrentUserResponse>(
-      '/users/me',
-      authProvider ? { authProvider } : undefined,
-    )
-    return response.user || fallbackUser
+    const response = await fetch(`${env.apiBaseUrl}/users/me`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify(payload || {}),
+    })
+
+    let parsed: CurrentUserResponse = {}
+    try {
+      parsed = (await response.json()) as CurrentUserResponse
+    } catch {
+      // Ignore malformed payloads and fall back to the local user derived from the token.
+    }
+
+    if (!response.ok) {
+      throw parsed
+    }
+
+    return {
+      user: parsed.user || fallbackUser,
+      ...(parsed.promoCode ? { promoCode: parsed.promoCode } : {}),
+    }
   } catch (error) {
     console.warn('web.user.sync.failed', error)
-    return fallbackUser
+    return fallbackUser ? { user: fallbackUser } : {}
   }
 }
 
@@ -569,12 +900,16 @@ async function resolveAuthCallback(search: string): Promise<AuthCallbackResult |
     },
     pendingAuth.provider,
   )
-  const user = await syncCurrentUser(bearer, pendingAuth.provider, idToken)
+  const syncResult = await syncCurrentUser(
+    bearer,
+    pendingAuth.provider ? { authProvider: pendingAuth.provider } : undefined,
+    idToken,
+  )
   const session = persistSession({
     accessToken,
     idToken,
     refreshToken,
-    user: user || baseSession.user,
+    user: syncResult.user || baseSession.user,
   })
   return { session }
 }
@@ -611,6 +946,6 @@ export function redirectToHostedLogout() {
 }
 
 api.setTokenResolver({
-  getToken: async () => getBearer(await loadStoredSession()),
+  getToken: async () => getBearer((await refreshStoredSession()) || getCurrentSession()),
   refreshToken: async () => getBearer(await refreshStoredSession(true)),
 })

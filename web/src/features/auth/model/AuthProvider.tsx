@@ -4,13 +4,18 @@ import { appPaths } from '@/app/router/paths'
 import {
   clearPendingAuth,
   clearStoredSession,
+  confirmEmailSignUp,
   completeAuthFromUrl,
   getAuthConfig,
   hasAuthResponse,
   loadStoredSession,
   redirectToHostedAuth,
   redirectToHostedLogout,
+  resendEmailSignUpCode,
+  signInWithEmail,
+  signUpWithEmail,
   subscribeToSessionChanges,
+  updateCurrentUser,
 } from '@/features/auth/api/auth-client'
 import { AuthContext } from '@/features/auth/model/auth-context'
 import type { AuthMode, AuthProviderName, AuthState } from '@/features/auth/model/types'
@@ -118,14 +123,129 @@ export function AuthProvider({ children }: PropsWithChildren) {
     }
   }
 
+  const startEmailSignIn = async (email: string, password: string) => {
+    setAuth((current) => ({
+      ...current,
+      error: undefined,
+      isLoading: true,
+    }))
+
+    try {
+      const session = await signInWithEmail(email, password)
+      setAuth({
+        ...session,
+        error: undefined,
+        isLoading: false,
+      })
+      navigate(appPaths.dashboard, { replace: true })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No pudimos iniciar sesión con correo.'
+      setAuth((current) => ({
+        ...current,
+        error: message,
+        isLoading: false,
+      }))
+      throw error
+    }
+  }
+
+  const startEmailSignUp = async (email: string, password: string) => {
+    setAuth((current) => ({
+      ...current,
+      error: undefined,
+      isLoading: true,
+    }))
+
+    try {
+      const result = await signUpWithEmail(email, password)
+      setAuth((current) => ({
+        ...current,
+        error: undefined,
+        isLoading: false,
+      }))
+
+      if (!result.requiresConfirmation) {
+        navigate(appPaths.dashboard, { replace: true })
+      }
+
+      return result
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No pudimos crear tu cuenta.'
+      setAuth((current) => ({
+        ...current,
+        error: message,
+        isLoading: false,
+      }))
+      throw error
+    }
+  }
+
+  const completeEmailSignUp = async (email: string, code: string, password: string) => {
+    setAuth((current) => ({
+      ...current,
+      error: undefined,
+      isLoading: true,
+    }))
+
+    try {
+      const session = await confirmEmailSignUp(email, code, password)
+      setAuth({
+        ...session,
+        error: undefined,
+        isLoading: false,
+      })
+      navigate(appPaths.dashboard, { replace: true })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No pudimos confirmar tu cuenta.'
+      setAuth((current) => ({
+        ...current,
+        error: message,
+        isLoading: false,
+      }))
+      throw error
+    }
+  }
+
+  const resendEmailCode = async (email: string) => {
+    setAuth((current) => ({
+      ...current,
+      error: undefined,
+      isLoading: true,
+    }))
+
+    try {
+      await resendEmailSignUpCode(email)
+      setAuth((current) => ({
+        ...current,
+        error: undefined,
+        isLoading: false,
+      }))
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No pudimos reenviar el código.'
+      setAuth((current) => ({
+        ...current,
+        error: message,
+        isLoading: false,
+      }))
+      throw error
+    }
+  }
+
   const signOut = () => {
+    const provider = auth.user?.lastAuthProvider?.trim().toLowerCase()
+    const shouldRedirectToHostedLogout = Boolean(
+      authConfig.isHostedUiConfigured && provider && provider !== 'email',
+    )
+
     clearPendingAuth()
     clearStoredSession()
     setAuth({ isLoading: false })
     navigate(appPaths.home, { replace: true })
 
     try {
-      redirectToHostedLogout()
+      if (shouldRedirectToHostedLogout) {
+        redirectToHostedLogout()
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No pudimos cerrar la sesión.'
       setAuth({
@@ -142,7 +262,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
         authConfig,
         isSignedIn: Boolean(auth.idToken || auth.accessToken),
         startAuthFlow,
+        signInWithEmail: startEmailSignIn,
+        signUpWithEmail: startEmailSignUp,
+        confirmEmailSignUp: completeEmailSignUp,
+        resendEmailSignUpCode: resendEmailCode,
         signOut,
+        updateCurrentUser,
       }}
     >
       {children}

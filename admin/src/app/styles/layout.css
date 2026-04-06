@@ -14,30 +14,40 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 16px;
-  border-radius: 12px;
+  padding: 13px 18px;
+  border-radius: 16px;
   border: 1px solid var(--border-strong);
   font-weight: 700;
   color: var(--text);
   text-decoration: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  background: rgba(255, 255, 255, 0.82);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
 }
 
 .btn.primary {
-  background: linear-gradient(120deg, var(--accent), #4af5c1);
-  color: #041018;
+  background: linear-gradient(135deg, #1f6b4f, #2a7f5d);
+  color: #f7f3ea;
   border: none;
-  box-shadow: 0 12px 30px rgba(74, 245, 193, 0.25);
+  box-shadow: 0 18px 35px rgba(31, 107, 79, 0.18);
+}
+
+.btn.secondary {
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text);
 }
 
 .btn.ghost {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(245, 239, 228, 0.92);
 }
 
 .btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
-  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 18px 38px rgba(27, 50, 40, 0.12);
+  border-color: rgba(31, 107, 79, 0.18);
 }
 
 .btn:disabled {

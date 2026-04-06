@@ -6,6 +6,7 @@ import { AppProviders } from '@/app/providers/AppProviders'
 import '@/app/styles/global.css'
 import '@/app/styles/layout.css'
 import '@/features/auth/ui/auth.css'
+import '@/features/admin/ui/admin-portal.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

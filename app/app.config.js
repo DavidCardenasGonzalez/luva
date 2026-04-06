@@ -105,6 +105,7 @@ module.exports = {
       API_BASE_URL: process.env.API_BASE_URL,
       COGNITO_DOMAIN: process.env.COGNITO_DOMAIN,
       COGNITO_CLIENT_ID: process.env.COGNITO_CLIENT_ID,
+      COGNITO_REGION: process.env.COGNITO_REGION,
       REDIRECT_URI: process.env.REDIRECT_URI || "myapp://callback",
       REVENUECAT_IOS_API_KEY:
         process.env.REVENUECAT_IOS_API_KEY ||

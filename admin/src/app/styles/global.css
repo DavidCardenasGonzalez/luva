@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Sora:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root {
-  font-family: 'Sora', 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color: var(--text);
@@ -10,14 +10,15 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --bg: #050810;
-  --surface: #0c1424;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.16);
-  --text: #e7ecff;
-  --muted: #c5d1ef;
-  --accent: #4af5c1;
-  --accent-2: #f3ca74;
+  --bg: #f7f3ea;
+  --surface: rgba(255, 253, 249, 0.96);
+  --surface-muted: #f5efe4;
+  --border: rgba(16, 32, 25, 0.08);
+  --border-strong: rgba(16, 32, 25, 0.14);
+  --text: #13211a;
+  --muted: #5b675d;
+  --accent: #1f6b4f;
+  --accent-2: #b87739;
 }
 
 * {
@@ -32,10 +33,23 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(1600px circle at 10% 10%, rgba(75, 187, 255, 0.08), transparent 35%),
-    radial-gradient(1200px circle at 90% 0%, rgba(74, 245, 193, 0.08), transparent 40%),
-    var(--bg);
+    radial-gradient(1200px circle at 0% 0%, rgba(31, 107, 79, 0.12), transparent 32%),
+    radial-gradient(960px circle at 100% 0%, rgba(184, 119, 57, 0.12), transparent 30%),
+    linear-gradient(180deg, #faf7f1 0%, #f5efe3 100%);
+  background-attachment: fixed;
   color: var(--text);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.35) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.35) 1px, transparent 1px);
+  background-size: 36px 36px;
+  opacity: 0.35;
 }
 
 a {
@@ -50,6 +64,21 @@ select {
   font: inherit;
 }
 
+code {
+  font-family:
+    'SFMono-Regular',
+    ui-monospace,
+    'Cascadia Code',
+    'Source Code Pro',
+    Menlo,
+    Consolas,
+    monospace;
+  font-size: 0.92em;
+  padding: 0.08em 0.34em;
+  border-radius: 8px;
+  background: rgba(19, 33, 26, 0.06);
+}
+
 p {
   margin: 0;
 }
@@ -59,20 +88,21 @@ h2,
 h3,
 h4 {
   margin: 0;
+  font-family: 'Fraunces', 'Manrope', serif;
   font-weight: 700;
   color: var(--text);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
 ::selection {
-  background: rgba(74, 245, 193, 0.25);
+  background: rgba(31, 107, 79, 0.18);
   color: var(--text);
 }
 
 .brand {
   display: inline-flex;
   align-items: center;
-  font-family: 'Space Grotesk', 'Sora', system-ui, sans-serif;
+  font-family: 'Fraunces', 'Manrope', serif;
   font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -106,12 +136,12 @@ h4 {
 }
 
 .chip {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--muted);
+  background: rgba(31, 107, 79, 0.08);
+  color: var(--accent);
   padding: 8px 12px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .tag {
@@ -119,7 +149,7 @@ h4 {
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.78);
   border-radius: 999px;
   border: 1px solid var(--border);
   font-weight: 700;

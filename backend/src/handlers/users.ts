@@ -11,6 +11,11 @@ import {
   normalizeUserProgressRecord,
   type UserProgressRecord,
 } from '../progress';
+import {
+  calculatePromoExpirationIso,
+  type PromoCodeValidationResult,
+  validatePromoCode,
+} from '../promo-codes';
 
 const dynamo = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
   marshallOptions: {
@@ -20,6 +25,39 @@ const dynamo = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
 const ROUTE_PREFIX = '/v1';
 
 type CognitoClaims = Record<string, string | undefined>;
+
+type StoredSubscriptionAccess = {
+  isActive: boolean;
+  updatedAt: string;
+  expiresAt?: string;
+  productId?: string;
+  entitlementId?: string;
+  appUserId?: string;
+};
+
+type StoredCodeAccess = {
+  isActive: boolean;
+  updatedAt: string;
+  expiresAt?: string;
+  redeemedCode?: string;
+};
+
+type StoredProAccess = {
+  subscription?: StoredSubscriptionAccess;
+  code?: StoredCodeAccess;
+};
+
+type UserProAccess = {
+  isActive: boolean;
+  source?: 'subscription' | 'code' | 'multiple';
+  updatedAt?: string;
+  subscription?: StoredSubscriptionAccess;
+  code?: Omit<StoredCodeAccess, 'redeemedCode'>;
+};
+
+type PromoCodeRedemptionResult = PromoCodeValidationResult & {
+  expiresAt?: string;
+};
 
 type UserRecord = {
   email: string;
@@ -34,9 +72,12 @@ type UserRecord = {
   createdAt: string;
   updatedAt: string;
   lastLoginAt: string;
+  isPro: boolean;
+  proAccess?: UserProAccess;
 };
 
-type StoredUserRecord = UserRecord & {
+type StoredUserRecord = Omit<UserRecord, 'proAccess'> & {
+  proAccess?: StoredProAccess;
   appProgress?: UserProgressRecord;
   appProgressUpdatedAt?: string;
 };
@@ -45,6 +86,14 @@ type UpsertUserPayload = {
   displayName?: string;
   pictureUrl?: string;
   authProvider?: string;
+  promoCode?: string;
+  subscriptionAccess?: {
+    isActive?: boolean;
+    expiresAt?: string | null;
+    productId?: string;
+    entitlementId?: string;
+    appUserId?: string;
+  };
 };
 
 export const handler = async (event: any): Promise<Result> => {
@@ -191,13 +240,206 @@ function deriveProviderFromClaims(claims: CognitoClaims): string {
   return 'email';
 }
 
+function normalizeStoredProAccess(input: unknown): StoredProAccess | undefined {
+  const raw = asRecord(input);
+  if (!raw) return undefined;
+
+  const subscription = normalizeStoredSubscriptionAccess(raw.subscription);
+  const code = normalizeStoredCodeAccess(raw.code);
+  if (!subscription && !code) {
+    return undefined;
+  }
+
+  return {
+    ...(subscription ? { subscription } : {}),
+    ...(code ? { code } : {}),
+  };
+}
+
+function normalizeStoredSubscriptionAccess(input: unknown): StoredSubscriptionAccess | undefined {
+  const raw = asRecord(input);
+  if (!raw) return undefined;
+
+  const updatedAt = asTimestamp(raw.updatedAt);
+  if (!updatedAt) return undefined;
+
+  return {
+    isActive: asBoolean(raw.isActive) ?? false,
+    updatedAt,
+    ...(asTimestamp(raw.expiresAt) ? { expiresAt: asTimestamp(raw.expiresAt) } : {}),
+    ...(firstNonEmpty(asString(raw.productId)) ? { productId: firstNonEmpty(asString(raw.productId)) } : {}),
+    ...(firstNonEmpty(asString(raw.entitlementId))
+      ? { entitlementId: firstNonEmpty(asString(raw.entitlementId)) }
+      : {}),
+    ...(firstNonEmpty(asString(raw.appUserId))
+      ? { appUserId: firstNonEmpty(asString(raw.appUserId)) }
+      : {}),
+  };
+}
+
+function normalizeStoredCodeAccess(input: unknown): StoredCodeAccess | undefined {
+  const raw = asRecord(input);
+  if (!raw) return undefined;
+
+  const updatedAt = asTimestamp(raw.updatedAt);
+  if (!updatedAt) return undefined;
+
+  return {
+    isActive: asBoolean(raw.isActive) ?? false,
+    updatedAt,
+    ...(asTimestamp(raw.expiresAt) ? { expiresAt: asTimestamp(raw.expiresAt) } : {}),
+    ...(firstNonEmpty(asString(raw.redeemedCode))
+      ? { redeemedCode: firstNonEmpty(asString(raw.redeemedCode)) }
+      : {}),
+  };
+}
+
+function summarizeProAccess(input: unknown, now: string): UserProAccess | undefined {
+  const stored = normalizeStoredProAccess(input);
+  if (!stored) return undefined;
+
+  const subscription = stored.subscription
+    ? {
+        ...stored.subscription,
+        isActive: isGrantActive(stored.subscription, now),
+      }
+    : undefined;
+  const code = stored.code
+    ? {
+        isActive: isGrantActive(stored.code, now),
+        updatedAt: stored.code.updatedAt,
+        ...(stored.code.expiresAt ? { expiresAt: stored.code.expiresAt } : {}),
+      }
+    : undefined;
+
+  const activeSources = [
+    subscription?.isActive ? 'subscription' : undefined,
+    code?.isActive ? 'code' : undefined,
+  ].filter((value): value is 'subscription' | 'code' => !!value);
+
+  const updatedAt = maxTimestamp(subscription?.updatedAt, code?.updatedAt);
+  return {
+    isActive: activeSources.length > 0,
+    ...(activeSources.length === 1
+      ? { source: activeSources[0] }
+      : activeSources.length > 1
+      ? { source: 'multiple' as const }
+      : {}),
+    ...(updatedAt !== '1970-01-01T00:00:00.000Z' ? { updatedAt } : {}),
+    ...(subscription ? { subscription } : {}),
+    ...(code ? { code } : {}),
+  };
+}
+
+function isGrantActive(
+  grant?: { isActive: boolean; expiresAt?: string },
+  now: string = new Date().toISOString()
+): boolean {
+  if (!grant?.isActive) {
+    return false;
+  }
+  if (!grant.expiresAt) {
+    return true;
+  }
+  return grant.expiresAt.localeCompare(now) > 0;
+}
+
+function applySubscriptionAccess(
+  current: StoredProAccess | undefined,
+  input: unknown,
+  now: string,
+  fallbackAppUserId?: string,
+): StoredProAccess | undefined {
+  const raw = asRecord(input);
+  if (!raw) {
+    return current;
+  }
+
+  const currentSubscription = normalizeStoredSubscriptionAccess(current?.subscription);
+  const nextSubscription: StoredSubscriptionAccess = {
+    isActive: asBoolean(raw.isActive) ?? false,
+    updatedAt: now,
+    ...(asTimestamp(raw.expiresAt) ? { expiresAt: asTimestamp(raw.expiresAt) } : {}),
+    ...(firstNonEmpty(asString(raw.productId)) ? { productId: firstNonEmpty(asString(raw.productId)) } : {}),
+    ...(firstNonEmpty(asString(raw.entitlementId))
+      ? { entitlementId: firstNonEmpty(asString(raw.entitlementId)) }
+      : {}),
+    ...(firstNonEmpty(
+      asString(raw.appUserId),
+      currentSubscription?.appUserId,
+      fallbackAppUserId,
+    )
+      ? {
+          appUserId: firstNonEmpty(
+            asString(raw.appUserId),
+            currentSubscription?.appUserId,
+            fallbackAppUserId,
+          ),
+        }
+      : {}),
+  };
+
+  return {
+    ...(current || {}),
+    subscription: nextSubscription,
+  };
+}
+
+function redeemPromoCode(
+  current: StoredProAccess | undefined,
+  submittedCode: string
+): { proAccess: StoredProAccess; result: PromoCodeRedemptionResult } {
+  const validation = validatePromoCode(submittedCode);
+  if (!validation.isValid) {
+    return {
+      proAccess: current || {},
+      result: validation,
+    };
+  }
+
+  const expiresAt = calculatePromoExpirationIso(validation.premiumDays);
+  return {
+    proAccess: {
+      ...(current || {}),
+      code: {
+        isActive: true,
+        updatedAt: new Date().toISOString(),
+        expiresAt,
+        redeemedCode: validation.code,
+      },
+    },
+    result: {
+      ...validation,
+      expiresAt,
+    },
+  };
+}
+
 async function upsertCurrentUser(
   email: string,
   claims: CognitoClaims,
   payload?: UpsertUserPayload
-): Promise<{ user: UserRecord; created: boolean }> {
+): Promise<{ user: UserRecord; created: boolean; promoCode?: PromoCodeRedemptionResult }> {
   const previous = await getCurrentStoredUser(email);
   const now = new Date().toISOString();
+  const previousProAccess = normalizeStoredProAccess(previous?.proAccess);
+  let nextProAccess = previousProAccess;
+  let promoCodeResult: PromoCodeRedemptionResult | undefined;
+
+  const submittedPromoCode = asString(payload?.promoCode)?.trim();
+  if (submittedPromoCode) {
+    const nextPromo = redeemPromoCode(nextProAccess, submittedPromoCode);
+    promoCodeResult = nextPromo.result;
+    if (nextPromo.result.isValid) {
+      nextProAccess = nextPromo.proAccess;
+    }
+  }
+
+  if (payload && hasOwn(payload, 'subscriptionAccess')) {
+    nextProAccess = applySubscriptionAccess(nextProAccess, payload.subscriptionAccess, now, claims.sub);
+  }
+
+  const summarizedProAccess = summarizeProAccess(nextProAccess, now);
   const user: UserRecord = {
     email,
     cognitoSub: firstNonEmpty(claims.sub, previous?.cognitoSub),
@@ -222,9 +464,12 @@ async function upsertCurrentUser(
     createdAt: previous?.createdAt || now,
     updatedAt: now,
     lastLoginAt: now,
+    isPro: summarizedProAccess?.isActive ?? false,
+    ...(summarizedProAccess ? { proAccess: summarizedProAccess } : {}),
   };
   const storedUser: StoredUserRecord = {
     ...user,
+    proAccess: nextProAccess,
     appProgress: previous?.appProgress,
     appProgressUpdatedAt: previous?.appProgressUpdatedAt,
   };
@@ -239,6 +484,7 @@ async function upsertCurrentUser(
   return {
     user,
     created: !previous?.createdAt,
+    ...(promoCodeResult ? { promoCode: promoCodeResult } : {}),
   };
 }
 
@@ -290,6 +536,33 @@ function getUsersTableName(): string {
 
 function asString(value: unknown): string | undefined {
   return typeof value === 'string' ? value : undefined;
+}
+
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return undefined;
+  }
+  return value as Record<string, unknown>;
+}
+
+function asBoolean(value: unknown): boolean | undefined {
+  if (typeof value === 'boolean') return value;
+  if (typeof value !== 'string') return undefined;
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return undefined;
+}
+
+function asTimestamp(value: unknown): string | undefined {
+  if (value == null) return undefined;
+  if (typeof value !== 'string' || !value.trim()) return undefined;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return undefined;
+  return parsed.toISOString();
+}
+
+function hasOwn(value: object, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(value, key);
 }
 
 function maxTimestamp(...values: Array<string | undefined>): string {

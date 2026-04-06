@@ -1,0 +1,160 @@
+.account-page {
+  gap: 18px;
+}
+
+.account-hero-card {
+  align-items: stretch;
+}
+
+.account-hero-copy {
+  display: grid;
+  gap: 14px;
+}
+
+.account-hero-actions {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.account-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.account-card-list,
+.account-shortcuts {
+  display: grid;
+  gap: 12px;
+}
+
+.account-info-card,
+.account-link-card,
+.account-shortcut-card,
+.account-pro-card,
+.account-meta-item {
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.account-info-card,
+.account-link-card,
+.account-shortcut-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px;
+}
+
+.account-link-card,
+.account-shortcut-card {
+  color: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.account-link-card:hover,
+.account-shortcut-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(74, 245, 193, 0.22);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.account-link-copy {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.account-info-card strong,
+.account-link-card strong,
+.account-shortcut-card strong,
+.account-pro-card strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.account-info-card p,
+.account-link-card p,
+.account-shortcut-card p,
+.account-pro-card p {
+  color: var(--muted);
+}
+
+.account-info-icon {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  background: rgba(74, 245, 193, 0.1);
+  border: 1px solid rgba(74, 245, 193, 0.18);
+}
+
+.account-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.account-meta-item {
+  padding: 14px 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.account-meta-item span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.account-meta-item strong {
+  font-size: 15px;
+  word-break: break-word;
+}
+
+.account-signout-button {
+  width: fit-content;
+  gap: 10px;
+}
+
+.account-pro-card {
+  padding: 16px 18px;
+}
+
+.account-pro-head {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--accent);
+}
+
+@media (max-width: 980px) {
+  .account-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .account-meta-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .account-hero-actions {
+    display: grid;
+  }
+
+  .account-signout-button {
+    width: 100%;
+  }
+}

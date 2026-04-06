@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { appPaths } from '@/app/router/paths'
 import { AdminPortalPage } from '@/features/admin/ui/AdminPortalPage'
+import { AdminUsersPage } from '@/features/admin/ui/AdminUsersPage'
 import { LoadingPage } from '@/features/auth/ui/LoadingPage'
 import { LoginPage } from '@/features/auth/ui/LoginPage'
 import { ADMIN_ROLES } from '@/features/auth/model/roles'
@@ -38,6 +39,18 @@ export function AppRouter() {
             deniedMessage="Asigna el grupo o rol admin en Cognito y vuelve a iniciar sesión."
           >
             <AdminPortalPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={appPaths.users}
+        element={
+          <ProtectedRoute
+            requiredRoles={ADMIN_ROLES}
+            deniedTitle="Tu cuenta no tiene acceso al portal administrativo."
+            deniedMessage="Asigna el grupo o rol admin en Cognito y vuelve a iniciar sesión."
+          >
+            <AdminUsersPage />
           </ProtectedRoute>
         }
       />

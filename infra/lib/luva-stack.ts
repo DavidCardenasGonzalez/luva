@@ -4,6 +4,7 @@ import { AttributeType, BillingMode, GlobalSecondaryIndexProps, Table } from 'aw
 import { Bucket, BlockPublicAccess } from 'aws-cdk-lib/aws-s3';
 import {
   UserPool,
+  CfnUserPoolGroup,
   AccountRecovery,
   OAuthScope,
   ProviderAttribute,
@@ -110,6 +111,13 @@ export class LuvaStack extends Stack {
       accountRecovery: AccountRecovery.EMAIL_ONLY,
     });
 
+    new CfnUserPoolGroup(this, 'AdminUserGroup', {
+      userPoolId: userPool.userPoolId,
+      groupName: 'admin',
+      description: 'Admin access for the Luva admin portal',
+      precedence: 0,
+    });
+
     const clientReadAttrs = new ClientAttributes().withStandardAttributes({
       email: true,
       emailVerified: true,
@@ -197,7 +205,7 @@ export class LuvaStack extends Stack {
       generateSecret: false,
       authFlows: {
         userSrp: true,
-        userPassword: false,
+        userPassword: true,
       },
       accessTokenValidity: Duration.hours(1),
       idTokenValidity: Duration.hours(1),
@@ -260,6 +268,23 @@ export class LuvaStack extends Stack {
     });
     usersTable.grantReadWriteData(usersFn);
 
+    const adminFnLogGroup = new LogGroup(this, 'AdminFnLogs', { retention: RetentionDays.ONE_WEEK });
+    const adminFn = new NodejsFunction(this, 'AdminFunction', {
+      entry: path.join(__dirname, '../../backend/src/handlers/admin.ts'),
+      handler: 'handler',
+      runtime: Runtime.NODEJS_18_X,
+      memorySize: 256,
+      timeout: Duration.seconds(60),
+      logGroup: adminFnLogGroup,
+      environment: {
+        USERS_TABLE_NAME: usersTable.tableName,
+        REVENUECAT_SECRET_KEY: process.env.REVENUECAT_SECRET_KEY || '',
+        REVENUECAT_ENTITLEMENT_ID: process.env.REVENUECAT_ENTITLEMENT_ID || 'Luva Pro',
+        STAGE: 'prod',
+      },
+    });
+    usersTable.grantReadWriteData(adminFn);
+
     // API Gateway REST
     const api = new RestApi(this, 'LuvaApi', {
       deploy: false,
@@ -277,9 +302,12 @@ export class LuvaStack extends Stack {
     const users = v1.addResource('users');
     const usersMe = users.addResource('me');
     const usersMeProgress = usersMe.addResource('progress');
+    const admin = v1.addResource('admin');
+    const adminProxy = admin.addResource('{proxy+}');
     const proxy = v1.addResource('{proxy+}');
     const lambdaIntegration = new LambdaIntegration(apiFn);
     const usersLambdaIntegration = new LambdaIntegration(usersFn);
+    const adminLambdaIntegration = new LambdaIntegration(adminFn);
     usersMe.addMethod('GET', usersLambdaIntegration, {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
@@ -296,14 +324,42 @@ export class LuvaStack extends Stack {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
     });
+    admin.addMethod('ANY', adminLambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    adminProxy.addMethod('ANY', adminLambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
     proxy.addMethod('ANY', lambdaIntegration);
     v1.addMethod('ANY', lambdaIntegration); // for /v1 root
 
     const deployment = new Deployment(this, 'Deployment', { api });
+    deployment.addToLogicalId({
+      routeManifestVersion: '2026-04-05-admin-v1',
+      routes: {
+        apiRoot: ['ANY /v1', 'ANY /v1/{proxy+}'],
+        users: [
+          'GET /v1/users/me',
+          'POST /v1/users/me',
+          'GET /v1/users/me/progress',
+          'POST /v1/users/me/progress',
+        ],
+        admin: [
+          'ANY /v1/admin',
+          'ANY /v1/admin/{proxy+}',
+        ],
+      },
+      authorizer: 'cognito-user-pool-v2',
+    });
     const prodStage = new Stage(this, 'ProdStage', { deployment, stageName: 'prod' });
 
     new CfnOutput(this, 'ApiBaseUrl', {
       value: prodStage.urlForPath('/v1'),
+    });
+    new CfnOutput(this, 'AdminApiBaseUrl', {
+      value: prodStage.urlForPath('/v1/admin'),
     });
     new CfnOutput(this, 'UsersTableName', {
       value: usersTable.tableName,

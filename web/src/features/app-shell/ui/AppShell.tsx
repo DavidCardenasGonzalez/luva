@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { BookOpenText, House, Menu, Sparkles, X } from 'lucide-react'
+import { BookOpenText, House, Menu, Sparkles, UserRound, X } from 'lucide-react'
 import { appPaths } from '@/app/router/paths'
 import { useAuthSession } from '@/features/auth/model/use-auth-session'
 import { getDisplayName } from '@/features/auth/model/get-display-name'
@@ -23,6 +23,12 @@ const navItems = [
     to: appPaths.stories,
     icon: Sparkles,
     label: 'Historias',
+    end: false,
+  },
+  {
+    to: appPaths.account,
+    icon: UserRound,
+    label: 'Mi cuenta',
     end: false,
   },
 ]

@@ -37,10 +37,13 @@ const EMPTY_DASHBOARD: DashboardState = {
 }
 
 export function DashboardHomePage() {
-  const { auth } = useAuthSession()
+  const { auth, updateCurrentUser } = useAuthSession()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | undefined>()
   const [dashboard, setDashboard] = useState<DashboardState>(EMPTY_DASHBOARD)
+  const [promoCode, setPromoCode] = useState('')
+  const [isRedeemingPromo, setIsRedeemingPromo] = useState(false)
+  const [promoFeedback, setPromoFeedback] = useState<{ tone: 'success' | 'error'; message: string } | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -139,6 +142,49 @@ export function DashboardHomePage() {
     }
   }, [dashboard])
 
+  const handleRedeemPromoCode = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const trimmedCode = promoCode.trim()
+    if (!trimmedCode) {
+      setPromoFeedback({ tone: 'error', message: 'Ingresa un código para activarlo.' })
+      return
+    }
+
+    try {
+      setIsRedeemingPromo(true)
+      setPromoFeedback(null)
+      const result = await updateCurrentUser({ promoCode: trimmedCode })
+      const redemption = result.promoCode
+
+      if (!redemption?.isValid) {
+        setPromoFeedback({ tone: 'error', message: 'Código no encontrado.' })
+        return
+      }
+
+      const expiresLabel = redemption.expiresAt
+        ? new Date(redemption.expiresAt).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          })
+        : `${redemption.premiumDays} días`
+
+      setPromoCode('')
+      setPromoFeedback({
+        tone: 'success',
+        message: `Código aplicado. Tu cuenta quedó Pro hasta ${expiresLabel}.`,
+      })
+    } catch (redeemError) {
+      setPromoFeedback({
+        tone: 'error',
+        message: getErrorMessage(redeemError, 'No pudimos validar el código.'),
+      })
+    } finally {
+      setIsRedeemingPromo(false)
+    }
+  }
+
   return (
     <div className="dashboard-shell">
       <section className="dashboard-hero-card">
@@ -189,6 +235,58 @@ export function DashboardHomePage() {
         <section className="dashboard-feedback dashboard-feedback-error">
           <strong>No pudimos cargar tu progreso.</strong>
           <p>{error}</p>
+        </section>
+      ) : null}
+
+      {(!auth.user?.isPro || promoFeedback) ? (
+        <section className="dashboard-panel dashboard-promo-panel">
+          <div className="dashboard-panel-head">
+            <div>
+              <p className="eyebrow">Cuenta</p>
+              <h2>{auth.user?.isPro ? 'Tu cuenta ya es Pro' : 'Activar Pro con código'}</h2>
+            </div>
+          </div>
+
+          {auth.user?.isPro ? (
+            <p className="lede">
+              Tu cuenta ya tiene acceso Pro. Los beneficios quedan disponibles automáticamente en la web y en el app.
+            </p>
+          ) : (
+            <form className="dashboard-promo-form" onSubmit={handleRedeemPromoCode}>
+              <label className="dashboard-promo-field">
+                <span>Ingresa tu código privado</span>
+                <input
+                  value={promoCode}
+                  onChange={(event) => {
+                    setPromoCode(event.target.value)
+                  }}
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  disabled={isRedeemingPromo}
+                  // placeholder="Ej. PRO123"
+                />
+              </label>
+
+              <div className="dashboard-promo-actions">
+                <button type="submit" className="btn primary" disabled={isRedeemingPromo}>
+                  {isRedeemingPromo ? 'Validando…' : 'Aplicar código'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {promoFeedback ? (
+            <div
+              className={`dashboard-feedback ${
+                promoFeedback.tone === 'success'
+                  ? 'dashboard-feedback-success'
+                  : 'dashboard-feedback-error'
+              }`}
+            >
+              <p>{promoFeedback.message}</p>
+            </div>
+          ) : null}
         </section>
       ) : null}
 

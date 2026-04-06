@@ -10,9 +10,9 @@ import { MetaAdsProvider } from './marketing/MetaAdsProvider';
 
 export default function App() {
   return (
-    <RevenueCatProvider>
-      <CoinBalanceProvider>
-        <AuthProvider>
+    <AuthProvider>
+      <RevenueCatProvider>
+        <CoinBalanceProvider>
           <MetaAdsProvider>
             <CardProgressProvider>
               <StoryProgressProvider>
@@ -22,8 +22,8 @@ export default function App() {
               </StoryProgressProvider>
             </CardProgressProvider>
           </MetaAdsProvider>
-        </AuthProvider>
-      </CoinBalanceProvider>
-    </RevenueCatProvider>
+        </CoinBalanceProvider>
+      </RevenueCatProvider>
+    </AuthProvider>
   );
 }

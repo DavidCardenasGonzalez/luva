@@ -11,12 +11,27 @@ import { useCardProgress } from '../progress/CardProgressProvider';
 import { useStoryProgress } from '../progress/StoryProgressProvider';
 import { resetSeenTours } from '../tour/tourProgress';
 import { getRuntimeAppVersion } from '../version/appVersion';
+import { useAuth } from '../auth/AuthProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
 export default function SettingsScreen({ navigation }: Props) {
   const appVersion = getRuntimeAppVersion();
-  const { isPro, customerInfo, loading: rcLoading, manualProExpiration, redeemPromoCode, clearManualProAccess } =
+  const {
+    isSignedIn,
+    isLoading: authLoading,
+    user,
+    signOut,
+  } = useAuth();
+  const {
+    isPro,
+    customerInfo,
+    loading: rcLoading,
+    manualProExpiration,
+    accountProAccess,
+    redeemPromoCode,
+    clearManualProAccess,
+  } =
     useRevenueCat();
   const { resetCoins } = useCoins();
   const { resetAll: resetCardProgress } = useCardProgress();
@@ -46,8 +61,22 @@ export default function SettingsScreen({ navigation }: Props) {
         expirationDate: new Date(manualProExpiration).toISOString(),
       };
     }
+    if (accountProAccess?.subscription?.isActive) {
+      return {
+        source: 'subscription' as const,
+        productId: accountProAccess.subscription.productId || 'Suscripción activa',
+        expirationDate: accountProAccess.subscription.expiresAt || null,
+      };
+    }
+    if (accountProAccess?.code?.isActive) {
+      return {
+        source: 'code' as const,
+        productId: 'Código promocional',
+        expirationDate: accountProAccess.code.expiresAt || null,
+      };
+    }
     return null;
-  }, [customerInfo, manualProExpiration]);
+  }, [accountProAccess, customerInfo, manualProExpiration]);
 
   const openExternal = async (url: string) => {
     try {
@@ -151,6 +180,60 @@ export default function SettingsScreen({ navigation }: Props) {
             <Text style={{ color: '#94a3b8', marginTop: 2 }}>Ajusta tu experiencia en Luva.</Text>
           </View>
         </View>
+
+        {isSignedIn ? (
+          <View
+            style={{
+              marginBottom: 16,
+              backgroundColor: '#fff7ed',
+              borderRadius: 18,
+              padding: 18,
+              borderWidth: 1,
+              borderColor: '#fed7aa',
+              shadowColor: '#000',
+              shadowOpacity: 0.05,
+              shadowRadius: 8,
+            }}
+          >
+            <Text style={{ color: '#9a3412', fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.6 }}>
+              Cuenta
+            </Text>
+            <Text style={{ color: '#7c2d12', fontSize: 20, fontWeight: '900', marginTop: 6 }}>
+              No pierdas tu avance!
+            </Text>
+            <Text style={{ color: '#9a3412', marginTop: 8, lineHeight: 20 }}>
+              Tu progreso queda vinculado a esta cuenta para recuperarlo desde cualquier dispositivo.
+            </Text>
+
+            <View style={{ marginTop: 14 }}>
+              <View style={{ backgroundColor: '#ffffffcc', borderRadius: 14, padding: 14, borderWidth: 1, borderColor: '#fdba74' }}>
+                <Text style={{ color: '#7c2d12', fontSize: 12, fontWeight: '700' }}>Sesión activa</Text>
+                <Text style={{ color: '#431407', marginTop: 4, fontSize: 16, fontWeight: '800' }}>
+                  {user?.displayName || user?.email || 'Cuenta autenticada'}
+                </Text>
+                <Text style={{ color: '#9a3412', marginTop: 4 }}>
+                  {user?.email || 'Tu usuario ya quedó vinculado a Cognito.'}
+                </Text>
+              </View>
+
+              <Pressable
+                disabled={authLoading}
+                onPress={signOut}
+                style={({ pressed }) => ({
+                  marginTop: 12,
+                  paddingVertical: 13,
+                  borderRadius: 14,
+                  alignItems: 'center',
+                  backgroundColor: authLoading ? '#fdba74' : pressed ? '#ea580c' : '#f97316',
+                })}
+              >
+                <Text style={{ color: '#fff', fontWeight: '800' }}>
+                  {authLoading ? 'Cerrando sesión...' : 'Cerrar sesión'}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        ) : null}
 
         <View
           style={{
@@ -442,7 +525,7 @@ export default function SettingsScreen({ navigation }: Props) {
           >
             <Text style={{ color: '#f87171', fontWeight: '800', fontSize: 18 }}>¿Estás seguro?</Text>
             <Text style={{ color: '#cbd5e1', marginTop: 8, lineHeight: 20 }}>
-              Esta acción borrará tu progreso, tours y reiniciará tus monedas. También quitará Pro por código.
+              Esta acción borrará tu progreso, tours y reiniciará tus monedas. También quitará el Pro por código guardado en este dispositivo.
             </Text>
             <Text style={{ color: '#cbd5e1', marginTop: 12, fontSize: 12 }}>
               Escribe <Text style={{ fontWeight: '800', color: '#f87171' }}>borrar</Text> para confirmar.
