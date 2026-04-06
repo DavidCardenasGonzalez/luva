@@ -80,6 +80,13 @@ export class LuvaStack extends Stack {
       removalPolicy: RemovalPolicy.RETAIN,
     });
 
+    const generatedVideosTable = new Table(this, 'GeneratedVideosTable', {
+      partitionKey: { name: 'storyId', type: AttributeType.STRING },
+      sortKey: { name: 'videoId', type: AttributeType.STRING },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.RETAIN,
+    });
+
     // S3 Buckets
     const audioRawBucket = new Bucket(this, 'AudioRawBucket', {
       bucketName: undefined, // Let AWS name it; set if needed
@@ -92,6 +99,12 @@ export class LuvaStack extends Stack {
     });
 
     const publicBucket = new Bucket(this, 'PublicBucket', {
+      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+      enforceSSL: true,
+      removalPolicy: RemovalPolicy.RETAIN,
+    });
+
+    const generatedVideosBucket = new Bucket(this, 'GeneratedVideosBucket', {
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
       enforceSSL: true,
       removalPolicy: RemovalPolicy.RETAIN,
@@ -363,6 +376,12 @@ export class LuvaStack extends Stack {
     });
     new CfnOutput(this, 'UsersTableName', {
       value: usersTable.tableName,
+    });
+    new CfnOutput(this, 'GeneratedVideosTableName', {
+      value: generatedVideosTable.tableName,
+    });
+    new CfnOutput(this, 'GeneratedVideosBucketName', {
+      value: generatedVideosBucket.bucketName,
     });
     new CfnOutput(this, 'UserPoolId', {
       value: userPool.userPoolId,
