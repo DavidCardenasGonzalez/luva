@@ -9,6 +9,7 @@ export type LearningItem = {
   explanation: string
   prompt?: string
   conversationProbability?: number
+  b1UnknownProbability?: number
 }
 
 export const learningItems = __LUVA_LEARNING_ITEMS__ as LearningItem[]
