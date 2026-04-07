@@ -1,6 +1,6 @@
 import { CfnOutput, Duration, RemovalPolicy, SecretValue, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { AttributeType, BillingMode, GlobalSecondaryIndexProps, Table } from 'aws-cdk-lib/aws-dynamodb';
+import { AttributeType, BillingMode, GlobalSecondaryIndexProps, ProjectionType, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Bucket, BlockPublicAccess, HttpMethods } from 'aws-cdk-lib/aws-s3';
 import {
   UserPool,
@@ -15,6 +15,11 @@ import {
   UserPoolIdentityProviderApple,
 } from 'aws-cdk-lib/aws-cognito';
 import {
+  Distribution,
+  ViewerProtocolPolicy,
+} from 'aws-cdk-lib/aws-cloudfront';
+import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
+import {
   RestApi,
   LambdaIntegration,
   Deployment,
@@ -28,6 +33,8 @@ import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
+import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
+import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import * as path from 'path';
 
 export class LuvaStack extends Stack {
@@ -48,13 +55,51 @@ export class LuvaStack extends Stack {
         .replace(/--+/g, '-')
         .replace(/^-+|-+$/g, '')
         .slice(0, 63);
-    const browserOrigins = splitCsv(process.env.COGNITO_CALLBACK_URLS, [
+    const ensureTrailingSlash = (value: string) => (value.endsWith('/') ? value : `${value}/`);
+    const uniqueStrings = (values: string[]) => [...new Set(values.filter(Boolean))];
+    const configuredBrowserOrigins = splitCsv(process.env.COGNITO_CALLBACK_URLS, [
       'http://localhost:5173/',
       'http://localhost:5174/',
       'https://www.luvaenglish.com/',
+      'https://d3i98h9bcz5u45.cloudfront.net/'
     ])
       .filter((origin) => /^https?:\/\//.test(origin))
       .map((origin) => origin.replace(/\/$/, ''));
+
+    const adminPortalBucket = new Bucket(this, 'AdminPortalBucket', {
+      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+      enforceSSL: true,
+      removalPolicy: RemovalPolicy.RETAIN,
+    });
+
+    const adminPortalDistribution = new Distribution(this, 'AdminPortalDistribution', {
+      comment: 'Luva admin portal',
+      defaultRootObject: 'index.html',
+      defaultBehavior: {
+        origin: S3BucketOrigin.withOriginAccessControl(adminPortalBucket),
+        viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      },
+      errorResponses: [
+        {
+          httpStatus: 403,
+          responseHttpStatus: 200,
+          responsePagePath: '/index.html',
+          ttl: Duration.minutes(1),
+        },
+        {
+          httpStatus: 404,
+          responseHttpStatus: 200,
+          responsePagePath: '/index.html',
+          ttl: Duration.minutes(1),
+        },
+      ],
+    });
+    const adminPortalUrl = `https://${adminPortalDistribution.domainName}`;
+    const adminPortalRedirectUrl = ensureTrailingSlash(adminPortalUrl);
+    const browserOrigins = uniqueStrings([
+      ...configuredBrowserOrigins,
+      adminPortalUrl,
+    ]);
 
     // DynamoDB single-table
     const table = new Table(this, 'LuvaTable', {
@@ -92,6 +137,12 @@ export class LuvaStack extends Stack {
       sortKey: { name: 'videoId', type: AttributeType.STRING },
       billingMode: BillingMode.PAY_PER_REQUEST,
       removalPolicy: RemovalPolicy.RETAIN,
+    });
+    generatedVideosTable.addGlobalSecondaryIndex({
+      indexName: 'StatusPublishOnIndex',
+      partitionKey: { name: 'status', type: AttributeType.STRING },
+      sortKey: { name: 'publishOn', type: AttributeType.STRING },
+      projectionType: ProjectionType.ALL,
     });
 
     // S3 Buckets
@@ -163,8 +214,14 @@ export class LuvaStack extends Stack {
       profilePicture: true,
     });
 
-    const callbackUrls = splitCsv(process.env.COGNITO_CALLBACK_URLS, ['myapp://callback']);
-    const logoutUrls = splitCsv(process.env.COGNITO_LOGOUT_URLS, callbackUrls);
+    const callbackUrls = uniqueStrings([
+      ...splitCsv(process.env.COGNITO_CALLBACK_URLS, ['myapp://callback']),
+      adminPortalRedirectUrl,
+    ]);
+    const logoutUrls = uniqueStrings([
+      ...splitCsv(process.env.COGNITO_LOGOUT_URLS, callbackUrls),
+      adminPortalRedirectUrl,
+    ]);
     const domainPrefix = sanitizeDomainPrefix(
       process.env.COGNITO_DOMAIN_PREFIX || `luva-${this.stackName}-${this.account}-${this.region}`
     );
@@ -253,6 +310,26 @@ export class LuvaStack extends Stack {
       stringValue: 'SET_IN_SSM',
       description: 'OpenAI API key (placeholder, override in SSM)',
     });
+    const instagramAccessTokenParam = new StringParameter(this, 'InstagramAccessTokenParam', {
+      parameterName: '/luva/social/instagram/accessToken',
+      stringValue: 'SET_IN_SSM',
+      description: 'Instagram Graph API access token for automated publishing',
+    });
+    const tiktokAccessTokenParam = new StringParameter(this, 'TikTokAccessTokenParam', {
+      parameterName: '/luva/social/tiktok/accessToken',
+      stringValue: 'SET_IN_SSM',
+      description: 'TikTok Content Posting API access token for automated publishing',
+    });
+    const tiktokRefreshTokenParam = new StringParameter(this, 'TikTokRefreshTokenParam', {
+      parameterName: '/luva/social/tiktok/refreshToken',
+      stringValue: 'SET_IN_SSM',
+      description: 'TikTok OAuth refresh token for administrative publishing',
+    });
+    const tiktokTokenMetaParam = new StringParameter(this, 'TikTokTokenMetaParam', {
+      parameterName: '/luva/social/tiktok/tokenMeta',
+      stringValue: 'SET_IN_SSM',
+      description: 'TikTok OAuth token metadata stored by the admin portal',
+    });
 
     // Lambda: API
     const apiFnLogGroup = new LogGroup(this, 'ApiFnLogs', { retention: RetentionDays.ONE_WEEK });
@@ -310,12 +387,70 @@ export class LuvaStack extends Stack {
         GENERATED_VIDEOS_TABLE_NAME: generatedVideosTable.tableName,
         REVENUECAT_SECRET_KEY: process.env.REVENUECAT_SECRET_KEY || '',
         REVENUECAT_ENTITLEMENT_ID: process.env.REVENUECAT_ENTITLEMENT_ID || 'Luva Pro',
+        TIKTOK_CLIENT_KEY: process.env.TIKTOK_CLIENT_KEY || '',
+        TIKTOK_CLIENT_SECRET: process.env.TIKTOK_CLIENT_SECRET || '',
+        TIKTOK_REDIRECT_URI: process.env.TIKTOK_REDIRECT_URI || '',
+        TIKTOK_AUTH_SCOPES: process.env.TIKTOK_AUTH_SCOPES || 'video.publish',
+        TIKTOK_ACCESS_TOKEN_PARAM: tiktokAccessTokenParam.parameterName,
+        TIKTOK_REFRESH_TOKEN_PARAM: tiktokRefreshTokenParam.parameterName,
+        TIKTOK_TOKEN_META_PARAM: tiktokTokenMetaParam.parameterName,
         STAGE: 'prod',
       },
     });
     usersTable.grantReadWriteData(adminFn);
     generatedVideosTable.grantReadWriteData(adminFn);
     generatedVideosBucket.grantReadWrite(adminFn);
+    adminFn.addToRolePolicy(new PolicyStatement({
+      actions: ['ssm:GetParameter', 'ssm:GetParameters', 'ssm:GetParameterHistory', 'ssm:PutParameter'],
+      resources: [
+        tiktokAccessTokenParam.parameterArn,
+        tiktokRefreshTokenParam.parameterArn,
+        tiktokTokenMetaParam.parameterArn,
+      ],
+    }));
+
+    const videoPublisherFnLogGroup = new LogGroup(this, 'VideoPublisherFnLogs', {
+      retention: RetentionDays.ONE_WEEK,
+    });
+    const videoPublisherFn = new NodejsFunction(this, 'VideoPublisherFunction', {
+      entry: path.join(__dirname, '../../backend/src/handlers/video-publisher.ts'),
+      handler: 'handler',
+      runtime: Runtime.NODEJS_18_X,
+      memorySize: 1024,
+      timeout: Duration.minutes(6),
+      logGroup: videoPublisherFnLogGroup,
+      environment: {
+        GENERATED_VIDEOS_TABLE_NAME: generatedVideosTable.tableName,
+        GENERATED_VIDEOS_STATUS_PUBLISH_ON_INDEX_NAME: 'StatusPublishOnIndex',
+        GENERATED_VIDEOS_BUCKET_NAME: generatedVideosBucket.bucketName,
+        INSTAGRAM_AUTOPUBLISH_ENABLED: process.env.INSTAGRAM_AUTOPUBLISH_ENABLED || 'false',
+        INSTAGRAM_ACCESS_TOKEN_PARAM: instagramAccessTokenParam.parameterName,
+        INSTAGRAM_IG_USER_ID: process.env.INSTAGRAM_IG_USER_ID || '',
+        INSTAGRAM_GRAPH_API_VERSION: process.env.INSTAGRAM_GRAPH_API_VERSION || 'v23.0',
+        INSTAGRAM_SHARE_TO_FEED: process.env.INSTAGRAM_SHARE_TO_FEED || 'false',
+        TIKTOK_AUTOPUBLISH_ENABLED: process.env.TIKTOK_AUTOPUBLISH_ENABLED || 'false',
+        TIKTOK_ACCESS_TOKEN_PARAM: tiktokAccessTokenParam.parameterName,
+        TIKTOK_DEFAULT_PRIVACY_LEVEL: process.env.TIKTOK_DEFAULT_PRIVACY_LEVEL || 'SELF_ONLY',
+        TIKTOK_DISABLE_COMMENT: process.env.TIKTOK_DISABLE_COMMENT || 'false',
+        TIKTOK_DISABLE_DUET: process.env.TIKTOK_DISABLE_DUET || 'false',
+        TIKTOK_DISABLE_STITCH: process.env.TIKTOK_DISABLE_STITCH || 'false',
+        SOCIAL_POST_CAPTION_SUFFIX: process.env.SOCIAL_POST_CAPTION_SUFFIX || '',
+        STAGE: 'prod',
+      },
+    });
+    generatedVideosTable.grantReadWriteData(videoPublisherFn);
+    generatedVideosBucket.grantRead(videoPublisherFn);
+    videoPublisherFn.addToRolePolicy(new PolicyStatement({
+      actions: ['ssm:GetParameter', 'ssm:GetParameters', 'ssm:GetParameterHistory'],
+      resources: [
+        instagramAccessTokenParam.parameterArn,
+        tiktokAccessTokenParam.parameterArn,
+      ],
+    }));
+    new Rule(this, 'VideoPublisherScheduleRule', {
+      schedule: Schedule.rate(Duration.minutes(7)),
+      targets: [new LambdaFunction(videoPublisherFn)],
+    });
 
     // API Gateway REST
     const api = new RestApi(this, 'LuvaApi', {
@@ -393,6 +528,15 @@ export class LuvaStack extends Stack {
     new CfnOutput(this, 'AdminApiBaseUrl', {
       value: prodStage.urlForPath('/v1/admin'),
     });
+    new CfnOutput(this, 'AdminPortalBucketName', {
+      value: adminPortalBucket.bucketName,
+    });
+    new CfnOutput(this, 'AdminPortalDistributionId', {
+      value: adminPortalDistribution.distributionId,
+    });
+    new CfnOutput(this, 'AdminPortalUrl', {
+      value: adminPortalUrl,
+    });
     new CfnOutput(this, 'UsersTableName', {
       value: usersTable.tableName,
     });
@@ -401,6 +545,9 @@ export class LuvaStack extends Stack {
     });
     new CfnOutput(this, 'GeneratedVideosBucketName', {
       value: generatedVideosBucket.bucketName,
+    });
+    new CfnOutput(this, 'VideoPublisherFunctionName', {
+      value: videoPublisherFn.functionName,
     });
     new CfnOutput(this, 'UserPoolId', {
       value: userPool.userPoolId,

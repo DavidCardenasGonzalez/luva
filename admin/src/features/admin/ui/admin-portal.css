@@ -68,6 +68,27 @@
   flex-wrap: wrap;
 }
 
+.tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(31, 107, 79, 0.14);
+  background: rgba(31, 107, 79, 0.1);
+  color: #1f6b4f;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.tag-muted {
+  border-color: rgba(116, 122, 115, 0.16);
+  background: rgba(116, 122, 115, 0.08);
+  color: #6f776e;
+}
+
 .admin-nav-link {
   display: inline-flex;
   align-items: center;
@@ -619,7 +640,8 @@
   gap: 8px;
 }
 
-.admin-grant-field input {
+.admin-grant-field input,
+.admin-grant-field textarea {
   width: 100%;
   min-height: 54px;
   padding: 14px 16px;
@@ -628,9 +650,16 @@
   background: rgba(255, 255, 255, 0.86);
   color: var(--text);
   outline: none;
+  font: inherit;
 }
 
-.admin-grant-field input:focus {
+.admin-grant-field textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.admin-grant-field input:focus,
+.admin-grant-field textarea:focus {
   border-color: rgba(31, 107, 79, 0.32);
   box-shadow: 0 0 0 4px rgba(31, 107, 79, 0.08);
 }

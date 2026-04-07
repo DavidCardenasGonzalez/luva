@@ -24,6 +24,12 @@ const FALLBACK_MODULES: AdminModuleSummary[] = [
     status: 'ready',
   },
   {
+    id: 'tiktok',
+    label: 'Integración TikTok',
+    description: 'Pantalla para seguir el OAuth administrativo y guardar access token + refresh token en AWS.',
+    status: 'ready',
+  },
+  {
     id: 'content',
     label: 'Contenido y catálogos',
     description: 'Espacio para editar historias, vocabulario y assets sin tocar la web pública.',

@@ -86,6 +86,8 @@ export type AdminVideoSummary = {
   videoId: string
   title: string
   status: AdminVideoStatus
+  hasCaption: boolean
+  caption?: string
   publishOn?: string
   bucketPath?: string
   bucketName?: string
@@ -133,6 +135,47 @@ export type AdminVideoReplaceUploadResponse = {
   uploadUrl: string
   expiresAt: string
   contentType: string
+}
+
+export type AdminTikTokAuthStatusResponse = {
+  configured: boolean
+  clientKeyConfigured: boolean
+  clientSecretConfigured: boolean
+  redirectUriConfigured: boolean
+  redirectUri?: string
+  scopes: string[]
+  connected: boolean
+  token: {
+    accessTokenStored: boolean
+    refreshTokenStored: boolean
+    openId?: string
+    scope?: string
+    tokenType?: string
+    accessTokenExpiresAt?: string
+    refreshTokenExpiresAt?: string
+    updatedAt?: string
+  }
+}
+
+export type AdminTikTokAuthStartResponse = {
+  authUrl: string
+  state: string
+  redirectUri: string
+  scopes: string[]
+}
+
+export type AdminTikTokAuthCompleteResponse = {
+  connected: boolean
+  redirectUri: string
+  scopes: string[]
+  token: {
+    openId?: string
+    scope?: string
+    tokenType?: string
+    accessTokenExpiresAt?: string
+    refreshTokenExpiresAt?: string
+    updatedAt: string
+  }
 }
 
 export type AdminRevenueCatVerificationItem = {

@@ -16,6 +16,23 @@ const dynamo = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
 const s3 = new S3Client({});
 
 const MIN_TIMESTAMP = '1970-01-01T00:00:00.000Z';
+const ADMIN_VIDEO_RUNTIME_FIELDS = [
+  'instagramPublishStatus',
+  'instagramPublishedAt',
+  'instagramMediaId',
+  'instagramContainerId',
+  'instagramLastError',
+  'tiktokPublishStatus',
+  'tiktokPublishedAt',
+  'tiktokPublishId',
+  'tiktokPostId',
+  'tiktokLastError',
+  'lastPublishAttemptAt',
+  'publishAttemptCount',
+  'lastPublishError',
+  'publishLockToken',
+  'publishLockExpiresAt',
+] as const;
 
 export const ADMIN_VIDEO_STATUSES = [
   'por_programar',
@@ -30,6 +47,7 @@ type StoredAdminVideoRecord = {
   storyId?: unknown;
   videoId?: unknown;
   title?: unknown;
+  caption?: unknown;
   status?: unknown;
   publishOn?: unknown;
   bucketPath?: unknown;
@@ -48,6 +66,8 @@ export type AdminVideoSummary = {
   videoId: string;
   title: string;
   status: AdminVideoStatus;
+  hasCaption: boolean;
+  caption?: string;
   publishOn?: string;
   bucketPath?: string;
   bucketName?: string;
@@ -217,6 +237,13 @@ export async function updateAdminVideoPublication(
     updateExpression += ' REMOVE publishOn';
   }
 
+  if (nextVideo.status !== 'subido') {
+    const removeFields = ADMIN_VIDEO_RUNTIME_FIELDS.join(', ');
+    updateExpression += shouldRemovePublishOn
+      ? `, ${removeFields}`
+      : ` REMOVE ${removeFields}`;
+  }
+
   await dynamo.send(
     new UpdateCommand({
       TableName: getGeneratedVideosTableName(),
@@ -380,7 +407,7 @@ async function scanAllVideos(): Promise<unknown[]> {
         TableName: getGeneratedVideosTableName(),
         ExclusiveStartKey: exclusiveStartKey,
         ProjectionExpression:
-          'storyId, videoId, title, #status, publishOn, bucketPath, bucketName, bucketKey, uploadedAt, updatedAt, contentType, sourceVideoFileName, sourceVideoFileSizeBytes, generationUpdatedAt',
+          'storyId, videoId, title, caption, #status, publishOn, bucketPath, bucketName, bucketKey, uploadedAt, updatedAt, contentType, sourceVideoFileName, sourceVideoFileSizeBytes, generationUpdatedAt',
         ExpressionAttributeNames: {
           '#status': 'status',
         },
@@ -431,6 +458,8 @@ function toAdminVideoSummary(input: unknown): AdminVideoSummary | undefined {
     videoId,
     title: firstNonEmpty(asString(raw?.title), storyId) || storyId,
     status,
+    hasCaption: hasAdminVideoCaption(raw),
+    ...(firstNonEmpty(asString(raw?.caption)) ? { caption: firstNonEmpty(asString(raw?.caption)) } : {}),
     ...(publishOn ? { publishOn } : {}),
     ...(firstNonEmpty(asString(raw?.bucketPath)) ? { bucketPath: firstNonEmpty(asString(raw?.bucketPath)) } : {}),
     ...(firstNonEmpty(asString(raw?.bucketName)) ? { bucketName: firstNonEmpty(asString(raw?.bucketName)) } : {}),
@@ -448,6 +477,10 @@ function toAdminVideoSummary(input: unknown): AdminVideoSummary | undefined {
       ? { generationUpdatedAt: asTimestamp(raw?.generationUpdatedAt) }
       : {}),
   };
+}
+
+function hasAdminVideoCaption(raw?: StoredAdminVideoRecord): boolean {
+  return !!firstNonEmpty(asString(raw?.caption));
 }
 
 function summarizeVideos(videos: AdminVideoSummary[]): AdminVideosResponse['stats'] {

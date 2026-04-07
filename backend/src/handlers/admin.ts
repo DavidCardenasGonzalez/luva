@@ -1,6 +1,11 @@
 import type { APIGatewayProxyResultV2 as Result } from 'aws-lambda';
 import { buildAdminOverview } from '../admin/overview';
 import {
+  completeAdminTikTokAuth,
+  createAdminTikTokAuthStart,
+  getAdminTikTokAuthStatus,
+} from '../admin/tiktok-auth';
+import {
   grantManualCodeProAccess,
   revokeManualCodeProAccess,
 } from '../admin/pro-access';
@@ -56,6 +61,64 @@ export const handler = async (event: any): Promise<Result> => {
 
     if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/videos`) {
       return json(200, await listAdminVideos());
+    }
+
+    if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/social/tiktok`) {
+      try {
+        return json(200, await getAdminTikTokAuthStatus());
+      } catch (error) {
+        if (error instanceof Error && error.message === 'TIKTOK_ACCESS_TOKEN_PARAM not set') {
+          return json(503, {
+            code: 'TIKTOK_NOT_CONFIGURED',
+            message: 'Configura las variables TikTok en la lambda admin antes de usar esta integración.',
+          });
+        }
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/social/tiktok/start`) {
+      try {
+        return json(200, await createAdminTikTokAuthStart());
+      } catch (error) {
+        if (error instanceof Error && error.message === 'TIKTOK_OAUTH_NOT_CONFIGURED') {
+          return json(503, {
+            code: 'TIKTOK_OAUTH_NOT_CONFIGURED',
+            message: 'Configura TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET y TIKTOK_REDIRECT_URI en la lambda admin.',
+          });
+        }
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/social/tiktok/complete`) {
+      try {
+        return json(200, await completeAdminTikTokAuth(parseBody(event.body) || {}));
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message === 'TIKTOK_OAUTH_NOT_CONFIGURED') {
+            return json(503, {
+              code: 'TIKTOK_OAUTH_NOT_CONFIGURED',
+              message: 'Configura TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET y TIKTOK_REDIRECT_URI en la lambda admin.',
+            });
+          }
+
+          if (error.message === 'INVALID_TIKTOK_CODE') {
+            return json(400, {
+              code: 'INVALID_TIKTOK_CODE',
+              message: 'TikTok no devolvió un code válido para completar la autenticación.',
+            });
+          }
+
+          if (error.message === 'INVALID_TIKTOK_TOKEN_RESPONSE') {
+            return json(502, {
+              code: 'INVALID_TIKTOK_TOKEN_RESPONSE',
+              message: 'TikTok respondió sin access_token o refresh_token válidos.',
+            });
+          }
+        }
+        throw error;
+      }
     }
 
     if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/videos/preview`) {

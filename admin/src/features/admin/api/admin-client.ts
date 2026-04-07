@@ -3,6 +3,9 @@ import type {
   AdminManualCodeProGrantResponse,
   AdminManualCodeProRevokeResponse,
   AdminOverview,
+  AdminTikTokAuthCompleteResponse,
+  AdminTikTokAuthStartResponse,
+  AdminTikTokAuthStatusResponse,
   AdminVideoPreviewResponse,
   AdminVideoReplaceUploadResponse,
   AdminRevenueCatVerificationResponse,
@@ -28,6 +31,20 @@ export function getAdminUsers(search?: string) {
 
 export function getAdminVideos() {
   return adminApi.get<AdminVideosResponse>('/videos')
+}
+
+export function getAdminTikTokAuthStatus() {
+  return adminApi.get<AdminTikTokAuthStatusResponse>('/social/tiktok')
+}
+
+export function startAdminTikTokAuth() {
+  return adminApi.post<AdminTikTokAuthStartResponse>('/social/tiktok/start')
+}
+
+export function completeAdminTikTokAuth(code: string) {
+  return adminApi.post<AdminTikTokAuthCompleteResponse>('/social/tiktok/complete', {
+    code,
+  })
 }
 
 export function getAdminVideoPreview(storyId: string, videoId: string) {
