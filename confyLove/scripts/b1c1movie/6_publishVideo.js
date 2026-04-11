@@ -311,7 +311,7 @@ function buildVideoRecord({
     videoId,
     title: story.title || null,
     status: "por_programar",
-    publishOn: null,
+    publishOn: undefined,
     awsRegion: getAwsRegion(),
     stackName: backendResources.stackName,
     bucketName: backendResources.bucketName,

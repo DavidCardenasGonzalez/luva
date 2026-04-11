@@ -214,8 +214,13 @@ export class LuvaStack extends Stack {
       profilePicture: true,
     });
 
+    const defaultCallbackUrls = [
+      'myapp://callback',
+      'http://localhost:5173/',
+      'https://www.luvaenglish.com/',
+    ];
     const callbackUrls = uniqueStrings([
-      ...splitCsv(process.env.COGNITO_CALLBACK_URLS, ['myapp://callback']),
+      ...splitCsv(process.env.COGNITO_CALLBACK_URLS, defaultCallbackUrls),
       adminPortalRedirectUrl,
     ]);
     const logoutUrls = uniqueStrings([

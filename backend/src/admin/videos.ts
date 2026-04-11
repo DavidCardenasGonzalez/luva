@@ -217,8 +217,41 @@ export async function updateAdminVideoPublication(
   const nextVideo = buildAdminVideoPublicationState(existingSummary, input, {
     now: new Date().toISOString(),
   });
+  const {
+    expressionAttributeNames,
+    expressionAttributeValues,
+    updateExpression,
+  } = buildAdminVideoPublicationUpdate(existing, nextVideo);
+
+  await dynamo.send(
+    new UpdateCommand({
+      TableName: getGeneratedVideosTableName(),
+      Key: { storyId, videoId },
+      UpdateExpression: updateExpression,
+      ExpressionAttributeNames: expressionAttributeNames,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ConditionExpression:
+        'attribute_exists(storyId) AND attribute_exists(videoId)',
+    }),
+  );
+
+  return {
+    video: nextVideo,
+    updatedAt: nextVideo.updatedAt,
+  };
+}
+
+export function buildAdminVideoPublicationUpdate(
+  existing: StoredAdminVideoRecord | undefined,
+  nextVideo: AdminVideoSummary,
+): {
+  expressionAttributeNames: Record<string, string>;
+  expressionAttributeValues: Record<string, unknown>;
+  updateExpression: string;
+} {
+  const hasStoredPublishOn = hasOwn(existing, 'publishOn');
   const shouldSetPublishOn = !!nextVideo.publishOn;
-  const shouldRemovePublishOn = !nextVideo.publishOn && !!existingSummary.publishOn;
+  const shouldRemovePublishOn = !nextVideo.publishOn && hasStoredPublishOn;
   const expressionAttributeNames: Record<string, string> = {
     '#status': 'status',
   };
@@ -244,21 +277,10 @@ export async function updateAdminVideoPublication(
       : ` REMOVE ${removeFields}`;
   }
 
-  await dynamo.send(
-    new UpdateCommand({
-      TableName: getGeneratedVideosTableName(),
-      Key: { storyId, videoId },
-      UpdateExpression: updateExpression,
-      ExpressionAttributeNames: expressionAttributeNames,
-      ExpressionAttributeValues: expressionAttributeValues,
-      ConditionExpression:
-        'attribute_exists(storyId) AND attribute_exists(videoId)',
-    }),
-  );
-
   return {
-    video: nextVideo,
-    updatedAt: nextVideo.updatedAt,
+    expressionAttributeNames,
+    expressionAttributeValues,
+    updateExpression,
   };
 }
 

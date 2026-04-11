@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "publish": "npm run build && aws s3 sync dist/ s3://luva-webpage --delete --profile david && aws s3 cp dist/.well-known/apple-app-site-association s3://luva-webpage/.well-known/apple-app-site-association --content-type application/json --cache-control no-cache --profile david && aws s3 cp dist/.well-known/assetlinks.json s3://luva-webpage/.well-known/assetlinks.json --content-type application/json --cache-control no-cache --profile david && aws cloudfront create-invalidation --distribution-id E3JVM6XDE0FZWG --paths '/*' --profile david",
+    "publish": "VITE_REDIRECT_URI=https://www.luvaenglish.com/ npm run build && aws s3 sync dist/ s3://luva-webpage --delete --profile david && aws s3 cp dist/.well-known/apple-app-site-association s3://luva-webpage/.well-known/apple-app-site-association --content-type application/json --cache-control no-cache --profile david && aws s3 cp dist/.well-known/assetlinks.json s3://luva-webpage/.well-known/assetlinks.json --content-type application/json --cache-control no-cache --profile david && aws cloudfront create-invalidation --distribution-id E3JVM6XDE0FZWG --paths '/*' --profile david",
     "lint": "eslint .",
     "preview": "vite preview"
   },
