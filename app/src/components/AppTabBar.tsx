@@ -10,14 +10,13 @@ type TabConfig = {
   key: AppTabKey;
   label: string;
   icon: React.ComponentProps<typeof MaterialIcons>['name'];
-  route: 'Home' | 'Deck' | 'Stories' | 'Feed';
+  route: 'Deck' | 'Stories' | 'Feed';
 };
 
 const TABS: TabConfig[] = [
-  { key: 'home', label: 'Home', icon: 'home', route: 'Home' },
+  { key: 'feed', label: 'Feed', icon: 'rss-feed', route: 'Feed' },
   { key: 'practice', label: 'Prácticas', icon: 'school', route: 'Deck' },
   { key: 'missions', label: 'Misiones', icon: 'flag', route: 'Stories' },
-  { key: 'feed', label: 'Feed', icon: 'rss-feed', route: 'Feed' },
 ];
 
 export default function AppTabBar({ active }: { active: AppTabKey }) {

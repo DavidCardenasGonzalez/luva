@@ -105,7 +105,7 @@ export default function AppNavigator() {
       onReady={handleReady}
       onStateChange={handleStateChange}
     >
-      <Stack.Navigator>
+      <Stack.Navigator initialRouteName="Feed">
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Deck" component={DeckScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Practice" component={PracticeScreen} options={{ headerShown: false }} />

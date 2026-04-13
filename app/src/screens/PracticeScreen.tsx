@@ -41,6 +41,11 @@ import { useCoins, CARD_OPEN_COST, RECORDING_COST } from "../purchases/CoinBalan
 import TourOverlay, { TourHighlight } from "../components/TourOverlay";
 import { hasSeenTour, markTourAsSeen } from "../tour/tourProgress";
 import { trackPracticeStarted } from "../marketing/metaAppEvents";
+import {
+  trackMixpanelPracticeCompleted,
+  trackMixpanelPracticeHelpRequested,
+  trackMixpanelPracticeStarted,
+} from "../marketing/mixpanelEvents";
 
 type EvalRes = {
   score: number;
@@ -295,7 +300,9 @@ export default function PracticeScreen() {
   const [practiceTourStepIndex, setPracticeTourStepIndex] = useState(0);
   const isStartingRecording = useRef(false);
   const stopRequestedWhileStarting = useRef(false);
-  const trackedPracticeStartRef = useRef<string | null>(null);
+  const trackedMetaPracticeStartRef = useRef<string | null>(null);
+  const practiceAttemptIndexRef = useRef(0);
+  const activePracticeAttemptIndexRef = useRef<number | null>(null);
 
   const practiceTrackingKey = useMemo(() => {
     if (cardId) {
@@ -307,24 +314,35 @@ export default function PracticeScreen() {
     return `generic:${String(label || "practice")}`;
   }, [cardId, label, sceneIndex, storyId]);
 
-  useEffect(() => {
-    if (trackedPracticeStartRef.current === practiceTrackingKey) {
-      return;
-    }
-    trackedPracticeStartRef.current = practiceTrackingKey;
-    void trackPracticeStarted({
-      practiceType: cardId ? "card" : storyId ? "story" : "generic",
+  const practiceSceneIndex = useMemo(() => {
+    const rawIndex =
+      typeof sceneIndex === "number" ? sceneIndex : Number(sceneIndex);
+    return Number.isFinite(rawIndex) ? rawIndex : undefined;
+  }, [sceneIndex]);
+
+  const practiceTrackingProperties = useMemo(() => {
+    const practiceType: "card" | "story" | "generic" = cardId
+      ? "card"
+      : storyId
+        ? "story"
+        : "generic";
+
+    return {
+      practiceType,
       cardId: cardId ? String(cardId) : undefined,
       storyId: storyId ? String(storyId) : undefined,
-      sceneIndex:
-        typeof sceneIndex === "number"
-          ? sceneIndex
-          : Number.isFinite(Number(sceneIndex))
-            ? Number(sceneIndex)
-            : undefined,
+      sceneIndex: practiceSceneIndex,
       label: typeof label === "string" ? label : undefined,
-    });
-  }, [cardId, label, practiceTrackingKey, sceneIndex, storyId]);
+    };
+  }, [cardId, label, practiceSceneIndex, storyId]);
+
+  useEffect(() => {
+    if (trackedMetaPracticeStartRef.current === practiceTrackingKey) {
+      return;
+    }
+    trackedMetaPracticeStartRef.current = practiceTrackingKey;
+    void trackPracticeStarted(practiceTrackingProperties);
+  }, [practiceTrackingKey, practiceTrackingProperties]);
 
   const ensureCardCharge = useCallback(async () => {
     if (!cardId || isUnlimited || chargeRegistered.current) {
@@ -430,6 +448,13 @@ export default function PracticeScreen() {
     try {
       await recorder.start();
       isStartingRecording.current = false;
+      practiceAttemptIndexRef.current += 1;
+      activePracticeAttemptIndexRef.current = practiceAttemptIndexRef.current;
+      void trackMixpanelPracticeStarted({
+        ...practiceTrackingProperties,
+        attemptIndex: activePracticeAttemptIndexRef.current,
+        inputMethod: "audio",
+      });
       if (stopRequestedWhileStarting.current) {
         stopRequestedWhileStarting.current = false;
         await onRelease(true);
@@ -448,6 +473,7 @@ export default function PracticeScreen() {
       setState("idle");
       stopRequestedWhileStarting.current = false;
       isStartingRecording.current = false;
+      activePracticeAttemptIndexRef.current = null;
     }
   };
 
@@ -498,8 +524,8 @@ export default function PracticeScreen() {
       const tr = await api.post<{ transcript: string }>(
         `/sessions/${started.sessionId}/transcribe`,
       );
-      const finalTranscript = tr.transcript;
-      setTranscript(tr.transcript);
+      const finalTranscript = tr.transcript || "";
+      setTranscript(finalTranscript);
 
       setState("evaluating");
       const ev = await api.post<EvalRes>(
@@ -518,6 +544,31 @@ export default function PracticeScreen() {
         setCanRecord(false);
       }
 
+      const trimmedTranscript = finalTranscript.trim();
+      const selectedAnswer = selected || undefined;
+      const expectedAnswer =
+        answer === "a" || answer === "b" || answer === "c"
+          ? answer
+          : undefined;
+      void trackMixpanelPracticeCompleted({
+        ...practiceTrackingProperties,
+        attemptIndex: activePracticeAttemptIndexRef.current ?? undefined,
+        inputMethod: "audio",
+        result: ev.result,
+        score: ev.score,
+        selectedAnswer,
+        expectedAnswer,
+        answerMatched:
+          selectedAnswer && expectedAnswer
+            ? selectedAnswer === expectedAnswer
+            : undefined,
+        transcriptLength: trimmedTranscript.length,
+        transcriptWordCount: trimmedTranscript
+          ? trimmedTranscript.split(/\s+/).length
+          : 0,
+      });
+      activePracticeAttemptIndexRef.current = null;
+
       if (cardId) {
         // Complete card and update points/streak server-side
         const combinedResult =
@@ -534,6 +585,7 @@ export default function PracticeScreen() {
       setState("done");
     } catch (e: any) {
       console.error("Error after release:", e);
+      activePracticeAttemptIndexRef.current = null;
       setError(e?.message || "Failed to process recording");
       setState("idle");
     }
@@ -549,6 +601,7 @@ export default function PracticeScreen() {
       }
       stopRequestedWhileStarting.current = false;
       isStartingRecording.current = false;
+      activePracticeAttemptIndexRef.current = null;
       setState("idle");
       void recorder.cancel().catch((cancelErr) => {
         console.warn(
@@ -731,6 +784,17 @@ export default function PracticeScreen() {
         setAssistanceError("Debes completar el anuncio para pedir asistencia.");
         return;
       }
+      void trackMixpanelPracticeHelpRequested({
+        ...practiceTrackingProperties,
+        attemptIndex: practiceAttemptIndexRef.current || undefined,
+        inputMethod: "text",
+        result: feedback?.result,
+        score: feedback?.score,
+        questionLength: trimmed.length,
+        questionWordCount: trimmed.split(/\s+/).length,
+        historyMessageCount: assistanceHistory.length,
+        hasFeedback: Boolean(feedback),
+      });
       const payload = await api.post<StoryAssistanceResponse>(
         `/stories/${encodeURIComponent(assistanceStoryId)}/assist`,
         {
@@ -759,7 +823,9 @@ export default function PracticeScreen() {
     assistanceSceneIndex,
     assistanceStoryDefinition,
     assistanceStoryId,
+    feedback,
     isUnlimited,
+    practiceTrackingProperties,
   ]);
 
   const coinReady = isUnlimited || !cardId || chargeRegistered.current;

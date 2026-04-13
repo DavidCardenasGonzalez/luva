@@ -44,6 +44,42 @@ type MixpanelPremiumActivatedEvent = {
   premiumDays?: number;
 };
 
+type MixpanelFeedLoadMoreEvent = {
+  previousItemsCount: number;
+  nextItemsCount: number;
+  itemsLoadedCount: number;
+  previousMissionsCount: number;
+  nextMissionsCount: number;
+  missionsLoadedCount: number;
+  previousVocabularyCount: number;
+  nextVocabularyCount: number;
+  vocabularyLoadedCount: number;
+  totalMissionsAvailable: number;
+  totalVocabularyAvailable: number;
+  hasMoreAfter: boolean;
+};
+
+type MixpanelPracticeEvent = {
+  practiceType: "card" | "story" | "generic";
+  cardId?: string;
+  storyId?: string;
+  sceneIndex?: number;
+  label?: string;
+  attemptIndex?: number;
+  inputMethod?: "text" | "audio";
+  result?: "correct" | "partial" | "incorrect";
+  score?: number;
+  selectedAnswer?: "a" | "b" | "c";
+  expectedAnswer?: "a" | "b" | "c";
+  answerMatched?: boolean;
+  transcriptLength?: number;
+  transcriptWordCount?: number;
+  questionLength?: number;
+  questionWordCount?: number;
+  historyMessageCount?: number;
+  hasFeedback?: boolean;
+};
+
 type MixpanelMissionEvent = {
   storyId: string;
   storyTitle?: string;
@@ -145,6 +181,32 @@ function getMissionProperties(event: MixpanelMissionEvent) {
     question_word_count: event.questionWordCount,
     history_message_count: event.historyMessageCount,
     requirements_met_count: event.requirementsMetCount,
+  });
+}
+
+function getPracticeProperties(event: MixpanelPracticeEvent) {
+  return normalizeProperties({
+    event_category: "practice",
+    practice_type: event.practiceType,
+    card_id: event.cardId,
+    story_id: event.storyId,
+    scene_index: event.sceneIndex,
+    practice_number:
+      typeof event.sceneIndex === "number" ? event.sceneIndex + 1 : undefined,
+    label: event.label?.trim() || undefined,
+    attempt_index: event.attemptIndex,
+    input_method: event.inputMethod,
+    result: event.result,
+    score: event.score,
+    selected_answer: event.selectedAnswer,
+    expected_answer: event.expectedAnswer,
+    answer_matched: event.answerMatched,
+    transcript_length: event.transcriptLength,
+    transcript_word_count: event.transcriptWordCount,
+    question_length: event.questionLength,
+    question_word_count: event.questionWordCount,
+    history_message_count: event.historyMessageCount,
+    has_feedback: event.hasFeedback,
   });
 }
 
@@ -478,6 +540,58 @@ export async function trackMixpanelPremiumActivated({
   } catch (err) {
     console.warn("[Mixpanel] No se pudo registrar premium_activated", err);
   }
+}
+
+export async function trackMixpanelFeedLoadMore({
+  previousItemsCount,
+  nextItemsCount,
+  itemsLoadedCount,
+  previousMissionsCount,
+  nextMissionsCount,
+  missionsLoadedCount,
+  previousVocabularyCount,
+  nextVocabularyCount,
+  vocabularyLoadedCount,
+  totalMissionsAvailable,
+  totalVocabularyAvailable,
+  hasMoreAfter,
+}: MixpanelFeedLoadMoreEvent) {
+  await trackMixpanelEvent("feed_load_more", {
+    event_category: "feed",
+    previous_items_count: previousItemsCount,
+    next_items_count: nextItemsCount,
+    items_loaded_count: itemsLoadedCount,
+    previous_missions_count: previousMissionsCount,
+    next_missions_count: nextMissionsCount,
+    missions_loaded_count: missionsLoadedCount,
+    previous_vocabulary_count: previousVocabularyCount,
+    next_vocabulary_count: nextVocabularyCount,
+    vocabulary_loaded_count: vocabularyLoadedCount,
+    total_missions_available: totalMissionsAvailable,
+    total_vocabulary_available: totalVocabularyAvailable,
+    has_more_after: hasMoreAfter,
+  });
+}
+
+export async function trackMixpanelPracticeStarted(
+  event: MixpanelPracticeEvent
+) {
+  await trackMixpanelEvent("practice_started", getPracticeProperties(event));
+}
+
+export async function trackMixpanelPracticeCompleted(
+  event: MixpanelPracticeEvent
+) {
+  await trackMixpanelEvent("practice_completed", getPracticeProperties(event));
+}
+
+export async function trackMixpanelPracticeHelpRequested(
+  event: MixpanelPracticeEvent
+) {
+  await trackMixpanelEvent(
+    "practice_help_requested",
+    getPracticeProperties(event)
+  );
 }
 
 export async function trackMixpanelMissionVisited(event: MixpanelMissionEvent) {

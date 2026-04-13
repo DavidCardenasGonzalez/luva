@@ -28,6 +28,7 @@ import { CARD_OPEN_COST, CHAT_MISSION_COST, useCoins } from '../purchases/CoinBa
 import CoinCountChip from '../components/CoinCountChip';
 import AppTabBar from '../components/AppTabBar';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
+import { trackMixpanelFeedLoadMore } from '../marketing/mixpanelEvents';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Feed'>;
 
@@ -60,6 +61,9 @@ const COLORS = {
   success: '#22c55e',
   warning: '#f59e0b',
 };
+
+const MISSION_BATCH_SIZE = 4;
+const VOCABULARY_BATCH_SIZE = 8;
 
 function hashString(input: string) {
   let hash = 2166136261;
@@ -377,10 +381,14 @@ export default function FeedScreen({ navigation }: Props) {
   } = useStoryProgress();
   const { canSpend, loading: coinsLoading, isUnlimited } = useCoins();
   const [feedSeed, setFeedSeed] = useState(() => `${Date.now()}:${Math.random()}`);
+  const [visibleMissionsCount, setVisibleMissionsCount] = useState(MISSION_BATCH_SIZE);
+  const [visibleVocabularyCount, setVisibleVocabularyCount] = useState(VOCABULARY_BATCH_SIZE);
 
   useFocusEffect(
     useCallback(() => {
       setFeedSeed(`${Date.now()}:${Math.random()}`);
+      setVisibleMissionsCount(MISSION_BATCH_SIZE);
+      setVisibleVocabularyCount(VOCABULARY_BATCH_SIZE);
     }, [])
   );
 
@@ -405,22 +413,94 @@ export default function FeedScreen({ navigation }: Props) {
       .filter((item) => item.status !== 'learned');
   }, [learningItems, statusFor, statuses]);
 
-  const selectedMissions = useMemo(
-    () => pickRandom(pendingMissions, 15, `${feedSeed}:missions`, (item) => item.id),
+  const shuffledMissions = useMemo(
+    () => pickRandom(pendingMissions, pendingMissions.length, `${feedSeed}:missions`, (item) => item.id),
     [feedSeed, pendingMissions]
   );
 
-  const selectedVocabulary = useMemo(
-    () => pickRandom(pendingVocabulary, 30, `${feedSeed}:vocab`, (item) => item.feedId),
+  const shuffledVocabulary = useMemo(
+    () => pickRandom(pendingVocabulary, pendingVocabulary.length, `${feedSeed}:vocab`, (item) => item.feedId),
     [feedSeed, pendingVocabulary]
   );
 
+  const visibleMissions = useMemo(
+    () => shuffledMissions.slice(0, visibleMissionsCount),
+    [shuffledMissions, visibleMissionsCount]
+  );
+
+  const visibleVocabulary = useMemo(
+    () => shuffledVocabulary.slice(0, visibleVocabularyCount),
+    [shuffledVocabulary, visibleVocabularyCount]
+  );
+
   const feedItems = useMemo(
-    () => buildFeedItems(selectedMissions, selectedVocabulary),
-    [selectedMissions, selectedVocabulary]
+    () => buildFeedItems(visibleMissions, visibleVocabulary),
+    [visibleMissions, visibleVocabulary]
   );
 
   const loading = storiesLoading || cardProgressLoading || storyProgressLoading;
+  const hasMoreFeedItems =
+    visibleMissionsCount < shuffledMissions.length || visibleVocabularyCount < shuffledVocabulary.length;
+
+  const loadMoreFeedItems = useCallback(() => {
+    if (loading || !hasMoreFeedItems) return;
+
+    const previousMissionsCount = Math.min(
+      visibleMissionsCount,
+      shuffledMissions.length
+    );
+    const previousVocabularyCount = Math.min(
+      visibleVocabularyCount,
+      shuffledVocabulary.length
+    );
+    const nextMissionsCount = Math.min(
+      visibleMissionsCount + MISSION_BATCH_SIZE,
+      shuffledMissions.length
+    );
+    const nextVocabularyCount = Math.min(
+      visibleVocabularyCount + VOCABULARY_BATCH_SIZE,
+      shuffledVocabulary.length
+    );
+    const missionsLoadedCount = Math.max(
+      nextMissionsCount - previousMissionsCount,
+      0
+    );
+    const vocabularyLoadedCount = Math.max(
+      nextVocabularyCount - previousVocabularyCount,
+      0
+    );
+    const itemsLoadedCount = missionsLoadedCount + vocabularyLoadedCount;
+
+    if (itemsLoadedCount <= 0) {
+      return;
+    }
+
+    setVisibleMissionsCount(nextMissionsCount);
+    setVisibleVocabularyCount(nextVocabularyCount);
+    void trackMixpanelFeedLoadMore({
+      previousItemsCount: previousMissionsCount + previousVocabularyCount,
+      nextItemsCount: nextMissionsCount + nextVocabularyCount,
+      itemsLoadedCount,
+      previousMissionsCount,
+      nextMissionsCount,
+      missionsLoadedCount,
+      previousVocabularyCount,
+      nextVocabularyCount,
+      vocabularyLoadedCount,
+      totalMissionsAvailable: shuffledMissions.length,
+      totalVocabularyAvailable: shuffledVocabulary.length,
+      hasMoreAfter:
+        nextMissionsCount < shuffledMissions.length ||
+        nextVocabularyCount < shuffledVocabulary.length,
+    });
+  }, [
+    hasMoreFeedItems,
+    loading,
+    shuffledMissions.length,
+    shuffledVocabulary.length,
+    visibleMissionsCount,
+    visibleVocabularyCount,
+  ]);
 
   const speakVocabulary = useCallback(async (item: PendingVocab) => {
     const segments = [item.label, item.examples?.[0]].filter(
@@ -494,6 +574,8 @@ export default function FeedScreen({ navigation }: Props) {
       <FlatList<FeedItem>
         data={feedItems}
         keyExtractor={(item) => (item.kind === 'mission' ? item.id : item.feedId)}
+        onEndReached={loadMoreFeedItems}
+        onEndReachedThreshold={0.45}
         contentContainerStyle={{
           padding: 20,
           paddingBottom: Math.max(insets.bottom + 108, 128),

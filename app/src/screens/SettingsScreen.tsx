@@ -11,19 +11,13 @@ import { useCardProgress } from '../progress/CardProgressProvider';
 import { useStoryProgress } from '../progress/StoryProgressProvider';
 import { resetSeenTours } from '../tour/tourProgress';
 import { getRuntimeAppVersion } from '../version/appVersion';
-import { useAuth } from '../auth/AuthProvider';
 import { trackMixpanelPremiumActivated } from '../marketing/mixpanelEvents';
+import AccountProgressCard from '../components/AccountProgressCard';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
 export default function SettingsScreen({ navigation }: Props) {
   const appVersion = getRuntimeAppVersion();
-  const {
-    isSignedIn,
-    isLoading: authLoading,
-    user,
-    signOut,
-  } = useAuth();
   const {
     isPro,
     customerInfo,
@@ -86,6 +80,12 @@ export default function SettingsScreen({ navigation }: Props) {
       console.warn('No se pudo abrir el enlace', err);
     }
   };
+
+  const handleOpenEmailSignUp = useCallback((prefillEmail?: string) => {
+    navigation.navigate('EmailSignUp', {
+      prefillEmail,
+    });
+  }, [navigation]);
 
   const formatDate = (iso?: string | null) => {
     if (!iso) return 'Sin fecha de expiración';
@@ -189,59 +189,10 @@ export default function SettingsScreen({ navigation }: Props) {
           </View>
         </View>
 
-        {isSignedIn ? (
-          <View
-            style={{
-              marginBottom: 16,
-              backgroundColor: '#fff7ed',
-              borderRadius: 18,
-              padding: 18,
-              borderWidth: 1,
-              borderColor: '#fed7aa',
-              shadowColor: '#000',
-              shadowOpacity: 0.05,
-              shadowRadius: 8,
-            }}
-          >
-            <Text style={{ color: '#9a3412', fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.6 }}>
-              Cuenta
-            </Text>
-            <Text style={{ color: '#7c2d12', fontSize: 20, fontWeight: '900', marginTop: 6 }}>
-              No pierdas tu avance!
-            </Text>
-            <Text style={{ color: '#9a3412', marginTop: 8, lineHeight: 20 }}>
-              Tu progreso queda vinculado a esta cuenta para recuperarlo desde cualquier dispositivo.
-            </Text>
-
-            <View style={{ marginTop: 14 }}>
-              <View style={{ backgroundColor: '#ffffffcc', borderRadius: 14, padding: 14, borderWidth: 1, borderColor: '#fdba74' }}>
-                <Text style={{ color: '#7c2d12', fontSize: 12, fontWeight: '700' }}>Sesión activa</Text>
-                <Text style={{ color: '#431407', marginTop: 4, fontSize: 16, fontWeight: '800' }}>
-                  {user?.displayName || user?.email || 'Cuenta autenticada'}
-                </Text>
-                <Text style={{ color: '#9a3412', marginTop: 4 }}>
-                  {user?.email || 'Tu usuario ya quedó vinculado a Cognito.'}
-                </Text>
-              </View>
-
-              <Pressable
-                disabled={authLoading}
-                onPress={signOut}
-                style={({ pressed }) => ({
-                  marginTop: 12,
-                  paddingVertical: 13,
-                  borderRadius: 14,
-                  alignItems: 'center',
-                  backgroundColor: authLoading ? '#fdba74' : pressed ? '#ea580c' : '#f97316',
-                })}
-              >
-                <Text style={{ color: '#fff', fontWeight: '800' }}>
-                  {authLoading ? 'Cerrando sesión...' : 'Cerrar sesión'}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        ) : null}
+        <AccountProgressCard
+          onCreateAccount={handleOpenEmailSignUp}
+          style={{ marginBottom: 16 }}
+        />
 
         <View
           style={{

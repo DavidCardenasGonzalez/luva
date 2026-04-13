@@ -1214,7 +1214,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "Te topas con un autoproclamado guía del festival que sabe poco sobre el lugar pero mucho sobre historias absurdas. Debes encontrar la salida entre sus relatos.",
         aiRole:
-          "Eres un guía improvisado y exagerado: hablador, dramático y con tendencia a inventar hechos increíbles.",
+          "Eres un guía improvisado y exagerado: hablador y con tendencia a inventar hechos increíbles.",
         caracterName: "Marty the Guide",
         caracterPrompt:
           "A middle-aged man wearing a bright, mismatched festival vest covered in badges, with a wide-brimmed hat and a megaphone around his neck. His expression is enthusiastic and slightly bewildered, standing in a crowded festival lane with colorful tents behind him.",
