@@ -22,6 +22,7 @@ import {
 } from '../progress/CardProgressProvider';
 import { useStoryProgress } from '../progress/StoryProgressProvider';
 import CoinCountChip from '../components/CoinCountChip';
+import AppTabBar from '../components/AppTabBar';
 import { useRevenueCat } from '../purchases/RevenueCatProvider';
 import TourOverlay, { TourHighlight } from '../components/TourOverlay';
 import { hasSeenTour, markTourAsSeen } from '../tour/tourProgress';
@@ -185,7 +186,7 @@ export default function HomeScreen({ navigation }: Props) {
     >
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 20, paddingBottom: 60 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: 140 }}
       >
       <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 260, backgroundColor: '#0b1224' }} />
 
@@ -558,6 +559,8 @@ export default function HomeScreen({ navigation }: Props) {
         </View>
       </View>
       </ScrollView>
+
+      <AppTabBar active="home" />
 
       <TourOverlay
         visible={showHomeTour}

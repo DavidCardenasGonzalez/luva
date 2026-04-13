@@ -34,7 +34,6 @@ async function setRecordMode() {
     allowsRecordingIOS: true,
     playsInSilentModeIOS: true,
     staysActiveInBackground: false,
-    defaultToSpeaker: true,
     playThroughEarpieceAndroid: false,
     shouldDuckAndroid: true,
   });
@@ -46,7 +45,6 @@ async function setPlaybackMode(ignoreBackgroundErrors = false) {
       allowsRecordingIOS: false,
       playsInSilentModeIOS: true,
       staysActiveInBackground: false,
-      defaultToSpeaker: true,
       playThroughEarpieceAndroid: false,
       shouldDuckAndroid: true,
     });

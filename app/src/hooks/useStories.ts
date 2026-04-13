@@ -408,3 +408,56 @@ export function useStoryDetail(storyId?: string) {
 
   return { story, loading, error };
 }
+
+export function useStoryCatalog() {
+  const [stories, setStories] = useState<StoryDetail[]>(() =>
+    BUNDLED_CACHE ? BUNDLED_CACHE.stories.map(storyDetailFromDefinition) : []
+  );
+  const [version, setVersion] = useState<string | undefined>(BUNDLED_CACHE?.version);
+  const [loading, setLoading] = useState(stories.length === 0);
+  const [error, setError] = useState<string | undefined>();
+
+  useEffect(() => {
+    let cancelled = false;
+    let hasLocalData = stories.length > 0;
+
+    const applyCache = (cache?: StoriesCache | null) => {
+      if (!cache?.stories?.length) return false;
+      hasLocalData = true;
+      setStories(cache.stories.map(storyDetailFromDefinition));
+      setVersion(cache.version);
+      setError(undefined);
+      setLoading(false);
+      return true;
+    };
+
+    (async () => {
+      const cached = await getLocalStories();
+      if (!cancelled) {
+        applyCache(cached);
+      }
+
+      try {
+        const synced = await syncStories();
+        if (!cancelled) {
+          if (!applyCache(synced)) {
+            setError('No encontramos historias disponibles.');
+            setLoading(false);
+          }
+        }
+      } catch (err: any) {
+        if (cancelled) return;
+        if (!hasLocalData) {
+          setError(err?.message || 'No pudimos cargar las historias.');
+          setLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return { stories, loading, error, version };
+}

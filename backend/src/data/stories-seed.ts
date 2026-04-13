@@ -986,14 +986,14 @@ export const STORIES_SEED: StoryDefinition[] = [
           "La entrevista entra en la fase final: se discuten salario, beneficios y condiciones. Debes defender tu valor profesional y llegar a un acuerdo equilibrado.",
         aiRole:
           "Eres un gerente de contratación profesional y estratégico. Presentas una oferta inicial, escuchas los argumentos del candidato y negocias salario, beneficios y condiciones con un tono respetuoso y realista.",
-        caracterName: "Lady Bargain",
+        caracterName: "Rudy Bargain",
         caracterPrompt:
           "An elegant, eccentric executive wearing a bright patterned jacket and oversized glasses. She sits at a long table with a bowl of exotic snacks and a stack of benefit brochures, smiling as she listens to offers.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260413000832-28002c5b-0160-46ca-b187-6a448d6509a8.png",
         requirements: [
           {
-            requirementId: "ask_budget_range",
+            requirementId: "ask_budget",
             text: "Pregunta cuál es el presupuesto para el puesto.",
           },
           {

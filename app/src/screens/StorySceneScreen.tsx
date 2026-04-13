@@ -26,7 +26,6 @@ import {
 import { useStoryProgress } from '../progress/StoryProgressProvider';
 import StoryMessageComposer from '../components/StoryMessageComposer';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
-import luviImage from '../image/luvi.png';
 import { useCoins, CHAT_MISSION_COST, RECORDING_COST } from '../purchases/CoinBalanceProvider';
 import CoinCountChip from '../components/CoinCountChip';
 import TourOverlay, { TourHighlight } from '../components/TourOverlay';
@@ -35,6 +34,8 @@ import {
   trackMissionCompleted,
   trackMissionStarted,
 } from '../marketing/metaAppEvents';
+
+const luviImage = require('../image/luvi.png');
 
 type StoryMessage = {
   id: string;
@@ -952,7 +953,7 @@ export default function StorySceneScreen() {
   }, [finishStorySceneTour, isLastStorySceneTourStep, showStorySceneTour, storySceneTourSteps.length]);
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('beforeRemove', (event) => {
+    const unsubscribe = navigation.addListener('beforeRemove', (event: any) => {
       if (missionCompleted) return;
       event.preventDefault();
       Alert.alert('Salir de la misión', exitWarningMessage, [
@@ -1128,7 +1129,7 @@ export default function StorySceneScreen() {
           ) : (
             <View style={{ gap: 12 }}>
               {messages.map((msg) => {
-                const alignStyle = { alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start' };
+                const alignStyle = { alignSelf: msg.role === 'user' ? 'flex-end' as const : 'flex-start' as const };
                 const bubble = (
                   <View
                     style={{

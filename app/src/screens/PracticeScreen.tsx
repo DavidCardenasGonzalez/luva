@@ -375,7 +375,6 @@ export default function PracticeScreen() {
             playsInSilentModeIOS: true,
             staysActiveInBackground: false,
             playThroughEarpieceAndroid: false,
-            defaultToSpeaker: true,
           });
         } catch (audioErr) {
           console.warn(

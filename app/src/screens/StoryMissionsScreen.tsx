@@ -18,6 +18,7 @@ import { RouteProp } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCoins, CHAT_MISSION_COST } from "../purchases/CoinBalanceProvider";
 import CoinCountChip from "../components/CoinCountChip";
+import AppTabBar from "../components/AppTabBar";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type RouteProps = RouteProp<RootStackParamList, "StoryMissions">;
@@ -229,7 +230,7 @@ export default function StoryMissionsScreen() {
       style={{ flex: 1, backgroundColor: "#0b1224" }}
     >
       <ScrollView
-        contentContainerStyle={{ padding: 20, paddingBottom: 32 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: 128 }}
         style={{ flex: 1 }}
       >
         <View
@@ -589,6 +590,7 @@ export default function StoryMissionsScreen() {
           );
         })}
       </ScrollView>
+      <AppTabBar active="missions" />
       {isInterstitialLoading ? (
         <View
           style={{
