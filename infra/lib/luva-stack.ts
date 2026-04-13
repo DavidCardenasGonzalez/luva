@@ -177,6 +177,32 @@ export class LuvaStack extends Stack {
       ],
     });
 
+    const configuredAssetsBucketName = process.env.ASSETS_BUCKET_NAME?.trim();
+    const assetsBucket = new Bucket(this, 'AssetsBucket', {
+      ...(configuredAssetsBucketName ? { bucketName: configuredAssetsBucketName } : {}),
+      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+      enforceSSL: true,
+      removalPolicy: RemovalPolicy.RETAIN,
+      cors: [
+        {
+          allowedOrigins: browserOrigins,
+          allowedMethods: [HttpMethods.GET, HttpMethods.PUT, HttpMethods.HEAD],
+          allowedHeaders: ['*'],
+          exposedHeaders: ['ETag'],
+          maxAge: 3000,
+        },
+      ],
+    });
+
+    const assetsDistribution = new Distribution(this, 'AssetsDistribution', {
+      comment: 'Luva assets',
+      defaultBehavior: {
+        origin: S3BucketOrigin.withOriginAccessControl(assetsBucket),
+        viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      },
+    });
+    const assetsCloudFrontUrl = `https://${assetsDistribution.domainName}`;
+
     // Cognito UserPool (Hosted UI)
     const userPool = new UserPool(this, 'AuthUserPoolV2', {
       selfSignUpEnabled: true,
@@ -399,12 +425,16 @@ export class LuvaStack extends Stack {
         TIKTOK_ACCESS_TOKEN_PARAM: tiktokAccessTokenParam.parameterName,
         TIKTOK_REFRESH_TOKEN_PARAM: tiktokRefreshTokenParam.parameterName,
         TIKTOK_TOKEN_META_PARAM: tiktokTokenMetaParam.parameterName,
+        ASSETS_BUCKET_NAME: assetsBucket.bucketName,
+        ASSETS_CLOUDFRONT_DOMAIN_NAME: assetsDistribution.domainName,
+        ASSETS_CLOUDFRONT_URL: assetsCloudFrontUrl,
         STAGE: 'prod',
       },
     });
     usersTable.grantReadWriteData(adminFn);
     generatedVideosTable.grantReadWriteData(adminFn);
     generatedVideosBucket.grantReadWrite(adminFn);
+    assetsBucket.grantReadWrite(adminFn);
     adminFn.addToRolePolicy(new PolicyStatement({
       actions: ['ssm:GetParameter', 'ssm:GetParameters', 'ssm:GetParameterHistory', 'ssm:PutParameter'],
       resources: [
@@ -509,7 +539,7 @@ export class LuvaStack extends Stack {
 
     const deployment = new Deployment(this, 'Deployment', { api });
     deployment.addToLogicalId({
-      routeManifestVersion: '2026-04-05-admin-v1',
+      routeManifestVersion: '2026-04-11-admin-assets-v1',
       routes: {
         apiRoot: ['ANY /v1', 'ANY /v1/{proxy+}'],
         users: [
@@ -550,6 +580,15 @@ export class LuvaStack extends Stack {
     });
     new CfnOutput(this, 'GeneratedVideosBucketName', {
       value: generatedVideosBucket.bucketName,
+    });
+    new CfnOutput(this, 'AssetsBucketName', {
+      value: assetsBucket.bucketName,
+    });
+    new CfnOutput(this, 'AssetsDistributionId', {
+      value: assetsDistribution.distributionId,
+    });
+    new CfnOutput(this, 'AssetsUrl', {
+      value: assetsCloudFrontUrl,
     });
     new CfnOutput(this, 'VideoPublisherFunctionName', {
       value: videoPublisherFn.functionName,

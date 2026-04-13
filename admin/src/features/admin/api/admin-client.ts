@@ -1,5 +1,7 @@
 import { adminApi } from '@/shared/api/client'
 import type {
+  AdminAssetFolder,
+  AdminAssetUploadResponse,
   AdminManualCodeProGrantResponse,
   AdminManualCodeProRevokeResponse,
   AdminOverview,
@@ -31,6 +33,18 @@ export function getAdminUsers(search?: string) {
 
 export function getAdminVideos() {
   return adminApi.get<AdminVideosResponse>('/videos')
+}
+
+export function createAdminAssetUpload(
+  folder: AdminAssetFolder,
+  contentType: string,
+  fileName: string,
+) {
+  return adminApi.post<AdminAssetUploadResponse>('/assets/upload', {
+    folder,
+    contentType,
+    fileName,
+  })
 }
 
 export function getAdminTikTokAuthStatus() {

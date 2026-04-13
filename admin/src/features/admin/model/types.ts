@@ -137,6 +137,18 @@ export type AdminVideoReplaceUploadResponse = {
   contentType: string
 }
 
+export type AdminAssetFolder = 'storiesProfile'
+
+export type AdminAssetUploadResponse = {
+  folder: AdminAssetFolder
+  key: string
+  bucketName: string
+  uploadUrl: string
+  url: string
+  expiresAt: string
+  contentType: string
+}
+
 export type AdminTikTokAuthStatusResponse = {
   configured: boolean
   clientKeyConfigured: boolean

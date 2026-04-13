@@ -3,8 +3,9 @@ Infra (AWS CDK)
 Stacks
 - DynamoDB single-table `Luva` (pk, sk) + GSI1/GSI2
 - DynamoDB `LuvaUsersTable` para usuarios autenticados (`email` como llave)
-- S3 buckets: `audio-raw`, `public`
+- S3 buckets: `audio-raw`, `public`, `assets`
 - Hosting estático del portal admin en S3 + CloudFront propio
+- Distribución CloudFront privada para servir assets subidos desde el portal admin
 - Cognito Hosted UI con email y proveedores sociales opcionales
 - Grupo de Cognito `admin` para acceso al portal administrativo
 - API Gateway REST `/v1` → Lambda `api`
@@ -22,6 +23,7 @@ Uso
    `INSTAGRAM_AUTOPUBLISH_ENABLED`, `INSTAGRAM_IG_USER_ID`, `INSTAGRAM_GRAPH_API_VERSION`, `INSTAGRAM_SHARE_TO_FEED`
    `TIKTOK_AUTOPUBLISH_ENABLED`, `TIKTOK_DEFAULT_PRIVACY_LEVEL`, `TIKTOK_DISABLE_COMMENT`, `TIKTOK_DISABLE_DUET`, `TIKTOK_DISABLE_STITCH`
    `SOCIAL_POST_CAPTION_SUFFIX`
+   `ASSETS_BUCKET_NAME` si quieres fijar manualmente el nombre fisico del bucket de assets
    Puedes copiar `infra/.env.infra.example` a `infra/.env.infra` y cargarlo con:
    `set -a && source .env.infra && set +a`
    Si usas `infra/.env`, los scripts `npm run synth` y `npm run deploy` ya lo cargan automáticamente.
@@ -35,7 +37,7 @@ Notas
 - La Lambda programada usa `backend/src/handlers/video-publisher.ts`, consulta el índice `StatusPublishOnIndex` en `GeneratedVideosTable`, toma videos `programado` con `publishOn <= now`, y persiste estado por plataforma para evitar duplicados.
 - Integra con S3 presigned PUT para audio y DynamoDB para progreso.
 - Los tokens de Instagram y TikTok se leen desde SSM (`/luva/social/instagram/accessToken` y `/luva/social/tiktok/accessToken`) salvo que se inyecten directamente por entorno.
-- Los outputs de CDK incluyen `ApiBaseUrl`, `AdminApiBaseUrl`, `AdminPortalBucketName`, `AdminPortalDistributionId`, `AdminPortalUrl`, `UserPoolClientId` y `HostedUiDomain` para cablear web y portal admin.
+- Los outputs de CDK incluyen `ApiBaseUrl`, `AdminApiBaseUrl`, `AdminPortalBucketName`, `AdminPortalDistributionId`, `AdminPortalUrl`, `AssetsBucketName`, `AssetsDistributionId`, `AssetsUrl`, `UserPoolClientId` y `HostedUiDomain` para cablear web y portal admin.
 - El stack crea el grupo `admin` en Cognito. Para dar acceso al portal admin, solo agrega el usuario a ese grupo y haz que vuelva a iniciar sesión.
 - La URL de CloudFront del admin se agrega automáticamente a callbacks/logout de Cognito y a CORS del bucket de videos generados para que el portal funcione publicado sin configuración manual extra.
 

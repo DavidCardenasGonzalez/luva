@@ -1,4 +1,5 @@
 import type { APIGatewayProxyResultV2 as Result } from 'aws-lambda';
+import { createAdminAssetUpload } from '../admin/assets';
 import { buildAdminOverview } from '../admin/overview';
 import {
   completeAdminTikTokAuth,
@@ -61,6 +62,40 @@ export const handler = async (event: any): Promise<Result> => {
 
     if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/videos`) {
       return json(200, await listAdminVideos());
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/assets/upload`) {
+      try {
+        return json(200, await createAdminAssetUpload(parseBody(event.body) || {}));
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message === 'INVALID_ASSET_FOLDER') {
+            return json(400, {
+              code: 'INVALID_ASSET_FOLDER',
+              message: 'Selecciona una carpeta valida para guardar el asset.',
+            });
+          }
+
+          if (error.message === 'INVALID_ASSET_CONTENT_TYPE') {
+            return json(400, {
+              code: 'INVALID_ASSET_CONTENT_TYPE',
+              message: 'Sube una imagen valida: JPG, PNG, WebP, AVIF, GIF, HEIC o HEIF.',
+            });
+          }
+
+          if (
+            error.message === 'ASSETS_BUCKET_NAME not set' ||
+            error.message === 'ASSETS_CLOUDFRONT_DOMAIN_NAME not set'
+          ) {
+            return json(503, {
+              code: 'ASSETS_NOT_CONFIGURED',
+              message: 'Configura el bucket assets y su distribucion CloudFront en la lambda admin.',
+            });
+          }
+        }
+
+        throw error;
+      }
     }
 
     if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/social/tiktok`) {

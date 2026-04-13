@@ -1,6 +1,7 @@
 export const appPaths = {
   home: '/',
   login: '/login',
+  assets: '/assets',
   users: '/users',
   videos: '/videos',
   integrationsTikTok: '/integrations/tiktok',
