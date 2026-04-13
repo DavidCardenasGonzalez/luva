@@ -13,6 +13,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useAuth } from '../auth/AuthProvider';
+import { trackMixpanelEvent } from '../marketing/mixpanelEvents';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EmailSignUp'>;
 type Step = 'credentials' | 'confirmation';
@@ -33,6 +34,13 @@ export default function EmailSignUpScreen({ navigation, route }: Props) {
   const [code, setCode] = useState('');
   const [notice, setNotice] = useState<string | undefined>();
   const [deliveryHint, setDeliveryHint] = useState<string | undefined>();
+
+  useEffect(() => {
+    void trackMixpanelEvent('signup_started', {
+      event_category: 'auth',
+      auth_provider: 'email',
+    });
+  }, []);
 
   useEffect(() => {
     if (!isSignedIn) return;

@@ -34,6 +34,13 @@ import {
   trackMissionCompleted,
   trackMissionStarted,
 } from '../marketing/metaAppEvents';
+import {
+  trackMixpanelMissionCompleted,
+  trackMixpanelMissionHelpRequested,
+  trackMixpanelMissionMessageSent,
+  trackMixpanelMissionStarted,
+  trackMixpanelMissionVisited,
+} from '../marketing/mixpanelEvents';
 
 const luviImage = require('../image/luvi.png');
 
@@ -334,6 +341,8 @@ export default function StorySceneScreen() {
   const requirementsCardRef = useRef<View>(null);
   const assistanceIconRef = useRef<View>(null);
   const trackedMissionStartRef = useRef<string | null>(null);
+  const trackedMixpanelMissionStartedRef = useRef<Set<string>>(new Set());
+  const missionMessageAttemptsRef = useRef<Map<string, number>>(new Map());
   const trackedMissionCompletionRef = useRef<Set<string>>(new Set());
   // Permite saber si todavía estamos en el flujo de `start()` (permiso + prepare).
   const isStartingRecording = useRef(false);
@@ -380,6 +389,14 @@ export default function StorySceneScreen() {
       return;
     }
     trackedMissionStartRef.current = trackingKey;
+    void trackMixpanelMissionVisited({
+      storyId,
+      storyTitle: story.title,
+      missionId: mission.missionId,
+      missionTitle: mission.title,
+      sceneIndex,
+      alreadyCompleted: isMissionCompleted(storyId, mission.missionId),
+    });
     void trackMissionStarted({
       storyId,
       storyTitle: story.title,
@@ -472,7 +489,7 @@ export default function StorySceneScreen() {
   }, [coinsLoading, isUnlimited, mission?.missionId, navigation, spendCoins]);
 
   const handleAdvance = useCallback(
-    async (transcript: string, sessionId: string) => {
+    async (transcript: string, sessionId: string, inputMethod: 'text' | 'audio') => {
       const trimmed = transcript.trim();
       setErrorMessage(null);
       if (!trimmed) {
@@ -523,6 +540,45 @@ export default function StorySceneScreen() {
       const historyPayload = [...messages, { id: `pending-${Date.now()}`, role: 'user', text: trimmed }].map(
         ({ role, text }) => ({ role, content: text })
       );
+      const missionTrackingKey =
+        storyId && mission?.missionId
+          ? `${storyId}:${mission.missionId}:${sceneIndex}`
+          : undefined;
+      const messageIndex =
+        messages.filter((msg) => msg.role === 'user').length + 1;
+      const messageAttemptIndex = missionTrackingKey
+        ? (missionMessageAttemptsRef.current.get(missionTrackingKey) || 0) + 1
+        : messageIndex;
+
+      if (missionTrackingKey) {
+        missionMessageAttemptsRef.current.set(
+          missionTrackingKey,
+          messageAttemptIndex
+        );
+      }
+
+      if (storyId && story && mission?.missionId) {
+        const missionEvent = {
+          storyId,
+          storyTitle: story.title,
+          missionId: mission.missionId,
+          missionTitle: mission.title,
+          sceneIndex,
+          messageIndex,
+          messageAttemptIndex,
+          inputMethod,
+        };
+
+        if (
+          missionTrackingKey &&
+          !trackedMixpanelMissionStartedRef.current.has(missionTrackingKey)
+        ) {
+          trackedMixpanelMissionStartedRef.current.add(missionTrackingKey);
+          void trackMixpanelMissionStarted(missionEvent);
+        }
+
+        void trackMixpanelMissionMessageSent(missionEvent);
+      }
       appendMessage({ id: `user-${Date.now()}`, role: 'user', text: trimmed });
       try {
         const persistedRequirementPayload = requirements.map((req) => ({
@@ -573,6 +629,19 @@ export default function StorySceneScreen() {
               missionTitle: mission.title,
               sceneIndex,
               storyCompleted: payload.storyCompleted,
+            });
+            void trackMixpanelMissionCompleted({
+              storyId,
+              storyTitle: story?.title,
+              missionId: mission.missionId,
+              missionTitle: mission.title,
+              sceneIndex,
+              storyCompleted: payload.storyCompleted,
+              messageIndex,
+              messageAttemptIndex,
+              inputMethod,
+              result: payload.result,
+              correctness: payload.correctness,
             });
           }
           await markMissionCompleted(storyId, mission.missionId, payload.storyCompleted);
@@ -736,7 +805,7 @@ export default function StorySceneScreen() {
       const transcription = await api.post<{ transcript: string }>(
         `/sessions/${session.sessionId}/transcribe`
       );
-      await handleAdvance(transcription.transcript || '', session.sessionId);
+      await handleAdvance(transcription.transcript || '', session.sessionId, 'audio');
     } catch (err: any) {
       console.error('Story recording error', err);
       setErrorMessage(err?.message || 'No pudimos procesar tu audio.');
@@ -759,7 +828,7 @@ export default function StorySceneScreen() {
           storyId,
           sceneIndex,
         });
-        await handleAdvance(trimmed, session.sessionId);
+        await handleAdvance(trimmed, session.sessionId, 'text');
         return true;
       } catch (err: any) {
         console.error('Story text send error', err);
@@ -818,6 +887,17 @@ export default function StorySceneScreen() {
         met: !!req.met,
         feedback: req.feedback,
       }));
+      void trackMixpanelMissionHelpRequested({
+        storyId,
+        storyTitle: story?.title,
+        missionId: mission.missionId,
+        missionTitle: mission.title,
+        sceneIndex,
+        questionLength: trimmed.length,
+        questionWordCount: trimmed.split(/\s+/).filter(Boolean).length,
+        historyMessageCount: messages.length,
+        requirementsMetCount: requirements.filter((req) => !!req.met).length,
+      });
       const payload = await api.post<StoryAssistanceResponse>(`/stories/${storyId}/assist`, {
         sceneIndex,
         question: trimmed,

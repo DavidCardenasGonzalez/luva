@@ -12,6 +12,7 @@ import { useStoryProgress } from '../progress/StoryProgressProvider';
 import { resetSeenTours } from '../tour/tourProgress';
 import { getRuntimeAppVersion } from '../version/appVersion';
 import { useAuth } from '../auth/AuthProvider';
+import { trackMixpanelPremiumActivated } from '../marketing/mixpanelEvents';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
@@ -134,6 +135,13 @@ export default function SettingsScreen({ navigation }: Props) {
         ? formatDate(new Date(result.expiresAt).toISOString())
         : `${result.premiumDays ?? 30} días`;
       const premiumDays = result.premiumDays ?? 30;
+      void trackMixpanelPremiumActivated({
+        premiumSource: 'promo_code',
+        expiresAt: result.expiresAt
+          ? new Date(result.expiresAt).toISOString()
+          : undefined,
+        premiumDays,
+      });
       setCodeFeedback({
         message: `Código aplicado. Pro activo hasta ${expiresLabel}.`,
         tone: 'success',

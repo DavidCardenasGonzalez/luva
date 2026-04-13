@@ -4,8 +4,14 @@ import * as Linking from 'expo-linking';
 import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 import { api } from '../api/api';
+import {
+  resetMixpanelUserIdentity,
+  setMixpanelUserIdentity,
+  trackMixpanelEvent,
+} from '../marketing/mixpanelEvents';
 
 type AuthProviderName = 'google' | 'apple' | 'email';
+type AuthEventName = 'login_completed' | 'signup_completed';
 
 type AuthProGrant = {
   isActive: boolean;
@@ -389,6 +395,20 @@ async function syncCurrentUser(
   }
 }
 
+async function trackCompletedAuthEvent(
+  eventName: AuthEventName,
+  provider: AuthProviderName,
+  user?: AuthUser,
+  properties?: Record<string, string | number | boolean | undefined>
+) {
+  await setMixpanelUserIdentity(user);
+  await trackMixpanelEvent(eventName, {
+    event_category: 'auth',
+    auth_provider: provider,
+    ...properties,
+  });
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | undefined>();
   const [idToken, setIdToken] = useState<string | undefined>();
@@ -736,6 +756,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         RefreshToken: data.refresh_token,
         ExpiresIn: data.expires_in,
       }, provider);
+      await trackCompletedAuthEvent('login_completed', provider, userRef.current);
     } catch (err: any) {
       setError(err?.message || 'No pudimos completar el inicio de sesión.');
     } finally {
@@ -761,6 +782,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       try {
         await performEmailPasswordSignIn(normalizedEmail, password);
+        await trackCompletedAuthEvent('login_completed', 'email', userRef.current);
       } catch (err: any) {
         setError(err?.message || 'No pudimos iniciar sesión con correo.');
       } finally {
@@ -817,6 +839,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (payload.UserConfirmed) {
           await performEmailPasswordSignIn(normalizedEmail, password);
+          await trackCompletedAuthEvent('signup_completed', 'email', userRef.current, {
+            required_confirmation: false,
+          });
           return { requiresConfirmation: false };
         }
 
@@ -867,6 +892,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           ConfirmationCode: trimmedCode,
         });
         await performEmailPasswordSignIn(normalizedEmail, password);
+        await trackCompletedAuthEvent('signup_completed', 'email', userRef.current, {
+          required_confirmation: true,
+        });
       } catch (err: any) {
         const message = err?.message || 'No pudimos confirmar tu cuenta.';
         setError(message);
@@ -952,6 +980,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } finally {
       await clearSession();
+      await resetMixpanelUserIdentity();
       setIsBusy(false);
     }
   }, [clearSession]);

@@ -1118,12 +1118,16 @@ export const STORIES_SEED: StoryDefinition[] = [
             text: "Pregunta cuánto dura el experimento.",
           },
           {
-            requirementId: "step_phrase",
-            text: "Usa una step phrase “First…, then…, finally…”",
-          },
-          {
             requirementId: "phrasal_try_out",
             text: "Usa el phrasal verb “try out”.",
+          },
+          {
+            requirementId: "use_give_it_a_try",
+            text: "Usa el phrasal verb “give it a try”.",
+          },
+          {
+            requirementId: "use_let_me_know",
+            text: "Usa la frase “let me know” para ofrecer ayuda.",
           },
         ],
       },
@@ -1166,7 +1170,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "A medianoche oyes golpes y aparece un vecino con pijama y una lámpara. Está obsesionado con el reloj antiguo del salón y te arrastra a una conversación sobre tiempo y arrepentimientos.",
         aiRole:
-          "Eres el vecino nocturno, melancólico y algo teatral. Habla pausado, usa reflexiones personales y preguntas abiertas para provocar conversación; permite al alumno expresar opiniones y recuerdos.",
+          "Eres el vecino nocturno y melancólico. Habla pausado, usa reflexiones personales y preguntas abiertas para provocar conversación;",
         caracterName: "Noah Night",
         caracterPrompt:
           "A sleepy-looking young man in striped pajamas holding a small lamp. He has messy hair, a warm but tired smile, and leans against the hallway doorframe. The corridor is dim with moonlight filtering in.",
@@ -1184,11 +1188,11 @@ export const STORIES_SEED: StoryDefinition[] = [
             text: "Anímalo a aceptar el pasado.",
           },
           {
-            requirementId: "soft_advice_phrase",
+            requirementId: "use_have_you_considered",
             text: "Usa “Have you considered…?”",
           },
           {
-            requirementId: "phrasal_move_on",
+            requirementId: "use_move_on",
             text: "Usa el phrasal verb “move on”.",
           },
         ],
