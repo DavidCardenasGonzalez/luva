@@ -32,7 +32,10 @@ export type AdminAssetUploadResponse = {
   url: string;
   expiresAt: string;
   contentType: string;
+  cacheControl: string;
 };
+
+export const ADMIN_ASSET_CACHE_CONTROL = 'public, max-age=31536000, immutable';
 
 const IMAGE_CONTENT_TYPES: Record<string, string> = {
   'image/avif': 'avif',
@@ -106,6 +109,7 @@ export async function createAdminAssetUpload(
       Bucket: bucketName,
       Key: key,
       ContentType: request.contentType,
+      CacheControl: ADMIN_ASSET_CACHE_CONTROL,
     }),
     { expiresIn: expiresInSeconds },
   );
@@ -118,6 +122,7 @@ export async function createAdminAssetUpload(
     url: buildAssetPublicUrl(key, getAssetsPublicBaseUrl()),
     expiresAt: new Date(Date.now() + expiresInSeconds * 1000).toISOString(),
     contentType: request.contentType,
+    cacheControl: ADMIN_ASSET_CACHE_CONTROL,
   };
 }
 

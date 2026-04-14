@@ -43,6 +43,7 @@ import {
   trackMixpanelMissionStarted,
   trackMixpanelMissionVisited,
 } from '../marketing/mixpanelEvents';
+import { prefetchImageUrls } from '../shared/imagePrefetch';
 
 const luviImage = require('../image/luvi.png');
 
@@ -218,7 +219,6 @@ export default function StorySceneScreen() {
   const [showStorySceneTour, setShowStorySceneTour] = useState(false);
   const [storySceneTourHighlight, setStorySceneTourHighlight] = useState<TourHighlight | null>(null);
   const [storySceneTourStepIndex, setStorySceneTourStepIndex] = useState(0);
-  const [allowMappedAvatarFallback, setAllowMappedAvatarFallback] = useState(false);
   const chargedMissions = useRef<Set<string>>(new Set());
   const chargingMissionId = useRef<string | null>(null);
   const [missionUnlocked, setMissionUnlocked] = useState<boolean>(false);
@@ -231,25 +231,18 @@ export default function StorySceneScreen() {
   const avatarImageUrl = mission?.avatarImageUrl?.trim();
   const introVideoUri = mission?.videoIntro?.trim();
 
-  useEffect(() => {
-    setAllowMappedAvatarFallback(false);
-    if (!mission || avatarImageUrl) return;
-    const fallbackTimer = setTimeout(() => {
-      setAllowMappedAvatarFallback(true);
-    }, 300);
-    return () => clearTimeout(fallbackTimer);
-  }, [mission?.missionId, avatarImageUrl]);
-
   const missionAvatar = useMemo(() => {
     if (!mission) return undefined;
-    if (avatarImageUrl) {
-      return { uri: avatarImageUrl };
-    }
-    if (!allowMappedAvatarFallback) {
-      return undefined;
-    }
-    return getChatAvatar(mission.missionId);
-  }, [allowMappedAvatarFallback, avatarImageUrl, mission?.missionId]);
+    return avatarImageUrl ? { uri: avatarImageUrl } : getChatAvatar(mission.missionId);
+  }, [avatarImageUrl, mission?.missionId]);
+
+  useEffect(() => {
+    const nextMission = story?.missions?.[sceneIndex + 1];
+    prefetchImageUrls(
+      [mission, nextMission].map((item) => item?.avatarImageUrl),
+      4
+    );
+  }, [mission, sceneIndex, story?.missions]);
 
   const characterDisplayName = mission?.caracterName || mission?.title || 'Personaje';
   const avatarInitial = useMemo(

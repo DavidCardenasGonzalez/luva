@@ -154,6 +154,7 @@ async function uploadFeedPostAsset(file: File, kind: 'image' | 'video') {
     method: 'PUT',
     headers: {
       'Content-Type': upload.contentType,
+      ...(upload.cacheControl ? { 'Cache-Control': upload.cacheControl } : {}),
     },
     body: file,
   })

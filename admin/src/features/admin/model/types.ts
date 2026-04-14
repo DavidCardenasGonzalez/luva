@@ -147,6 +147,7 @@ export type AdminAssetUploadResponse = {
   url: string
   expiresAt: string
   contentType: string
+  cacheControl: string
 }
 
 export type AdminFeedPostType = 'normal' | 'practice_guide' | 'mission_guide' | 'extra'

@@ -31,6 +31,7 @@ import CoinCountChip from '../components/CoinCountChip';
 import AppTabBar from '../components/AppTabBar';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
 import { trackMixpanelFeedLoadMore } from '../marketing/mixpanelEvents';
+import { prefetchImageUrls } from '../shared/imagePrefetch';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Feed'>;
 
@@ -131,26 +132,10 @@ function MissionCard({
   onStart: (item: PendingMission) => void;
 }) {
   const avatarImageUrl = item.mission.avatarImageUrl?.trim();
-  const [allowMappedAvatarFallback, setAllowMappedAvatarFallback] = useState(false);
-
-  useEffect(() => {
-    setAllowMappedAvatarFallback(false);
-    if (avatarImageUrl) return;
-    const fallbackTimer = setTimeout(() => {
-      setAllowMappedAvatarFallback(true);
-    }, 300);
-    return () => clearTimeout(fallbackTimer);
-  }, [avatarImageUrl, item.mission.missionId]);
 
   const missionAvatar = useMemo<ImageSourcePropType | undefined>(() => {
-    if (avatarImageUrl) {
-      return { uri: avatarImageUrl };
-    }
-    if (!allowMappedAvatarFallback) {
-      return undefined;
-    }
-    return getChatAvatar(item.mission.missionId);
-  }, [allowMappedAvatarFallback, avatarImageUrl, item.mission.missionId]);
+    return avatarImageUrl ? { uri: avatarImageUrl } : getChatAvatar(item.mission.missionId);
+  }, [avatarImageUrl, item.mission.missionId]);
 
   const displayName = item.mission.caracterName || item.mission.title || 'Personaje';
   const avatarInitial = (displayName.trim().charAt(0) || '?').toUpperCase();
@@ -618,6 +603,20 @@ export default function FeedScreen({ navigation }: Props) {
     [feedPostItems, visibleMissions, visibleVocabulary]
   );
 
+  const imageUrlsToPrefetch = useMemo(() => {
+    const upcomingMissions = shuffledMissions.slice(
+      0,
+      Math.min(shuffledMissions.length, visibleMissionsCount + MISSION_BATCH_SIZE)
+    );
+    const missionUrls = upcomingMissions.map((item) => item.mission.avatarImageUrl);
+    const postUrls = feedPostItems.map((item) => item.imageUrl);
+    return [...missionUrls, ...postUrls];
+  }, [feedPostItems, shuffledMissions, visibleMissionsCount]);
+
+  useEffect(() => {
+    prefetchImageUrls(imageUrlsToPrefetch, 16);
+  }, [imageUrlsToPrefetch]);
+
   const loading = storiesLoading || cardProgressLoading || storyProgressLoading || feedPostsLoading;
   const hasMoreFeedItems =
     visibleMissionsCount < shuffledMissions.length || visibleVocabularyCount < shuffledVocabulary.length;
@@ -842,6 +841,9 @@ export default function FeedScreen({ navigation }: Props) {
       <FlatList<FeedItem>
         data={feedItems}
         keyExtractor={(item) => (item.kind === 'mission' ? item.id : item.feedId)}
+        initialNumToRender={6}
+        maxToRenderPerBatch={6}
+        windowSize={7}
         onEndReached={loadMoreFeedItems}
         onEndReachedThreshold={0.45}
         contentContainerStyle={{
