@@ -56,6 +56,12 @@ const INITIAL_MODULES: AdminModuleSummary[] = [
     description: 'Carga de imagenes a S3 con URL publica servida por CloudFront.',
     status: 'ready',
   },
+  {
+    id: 'feed-posts',
+    label: 'Posts del feed',
+    description: 'Administra posts ordenados del feed con texto, media y acciones configurables.',
+    status: 'ready',
+  },
 ];
 
 export function buildAdminOverview(

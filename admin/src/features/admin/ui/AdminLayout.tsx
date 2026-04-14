@@ -14,6 +14,7 @@ const navigationItems = [
   { to: appPaths.home, label: 'Resumen' },
   { to: appPaths.users, label: 'Usuarios' },
   { to: appPaths.assets, label: 'Assets' },
+  { to: appPaths.posts, label: 'Posts' },
   { to: appPaths.videos, label: 'Videos' },
   { to: appPaths.integrationsTikTok, label: 'TikTok' },
 ]

@@ -58,6 +58,32 @@ test('normalizeAdminAssetUploadRequest accepts mission intro video folder and vi
   );
 });
 
+test('normalizeAdminAssetUploadRequest accepts feed post image and video folders', () => {
+  assert.deepEqual(
+    normalizeAdminAssetUploadRequest({
+      folder: 'feedPostImages',
+      contentType: 'image/png',
+      fileName: 'feed.png',
+    }),
+    {
+      folder: 'feedPostImages',
+      contentType: 'image/png',
+    },
+  );
+
+  assert.deepEqual(
+    normalizeAdminAssetUploadRequest({
+      folder: 'feedPostVideos',
+      contentType: '',
+      fileName: 'feed.webm',
+    }),
+    {
+      folder: 'feedPostVideos',
+      contentType: 'video/webm',
+    },
+  );
+});
+
 test('normalizeAdminAssetUploadRequest rejects unknown folders and mismatched asset types', () => {
   assert.throws(
     () =>

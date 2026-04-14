@@ -14,9 +14,11 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
-import { Audio } from 'expo-av';
+import { Audio, ResizeMode, Video } from 'expo-av';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { LearningItem, useLearningItems } from '../hooks/useLearningItems';
+import { FeedPost, useFeedPosts } from '../hooks/useFeedPosts';
 import { StoryMission, useStoryCatalog } from '../hooks/useStories';
 import {
   CARD_STATUS_LABELS,
@@ -47,7 +49,13 @@ type PendingVocab = LearningItem & {
   status: CardProgressStatus;
 };
 
-type FeedItem = PendingMission | PendingVocab;
+type FeedPostItem = FeedPost & {
+  kind: 'post';
+  feedId: string;
+  claimed?: boolean;
+};
+
+type FeedItem = PendingMission | PendingVocab | FeedPostItem;
 
 const COLORS = {
   background: '#0b1224',
@@ -64,6 +72,7 @@ const COLORS = {
 
 const MISSION_BATCH_SIZE = 4;
 const VOCABULARY_BATCH_SIZE = 8;
+const CLAIMED_EXTRA_POSTS_STORAGE_KEY = '@luva/feed/claimed-extra-posts';
 
 function hashString(input: string) {
   let hash = 2166136261;
@@ -80,25 +89,36 @@ function pickRandom<T>(list: T[], count: number, seed: string, keyFor: (item: T)
     .slice(0, count);
 }
 
-function buildFeedItems(missions: PendingMission[], vocabulary: PendingVocab[]) {
-  const feed: FeedItem[] = [];
+function buildFeedItems(missions: PendingMission[], vocabulary: PendingVocab[], posts: FeedPostItem[]) {
+  const baseFeed: Array<PendingMission | PendingVocab> = [];
   const blocks = Math.max(missions.length, Math.ceil(vocabulary.length / 2));
 
   for (let index = 0; index < blocks; index += 1) {
     const mission = missions[index];
     if (mission) {
-      feed.push(mission);
+      baseFeed.push(mission);
     }
 
     const firstVocab = vocabulary[index * 2];
     const secondVocab = vocabulary[index * 2 + 1];
     if (firstVocab) {
-      feed.push(firstVocab);
+      baseFeed.push(firstVocab);
     }
     if (secondVocab) {
-      feed.push(secondVocab);
+      baseFeed.push(secondVocab);
     }
   }
+
+  const feed: FeedItem[] = [...baseFeed];
+  const orderOffsets = new Map<number, number>();
+  [...posts]
+    .sort((left, right) => left.order - right.order || left.postId.localeCompare(right.postId))
+    .forEach((post) => {
+      const offset = orderOffsets.get(post.order) || 0;
+      orderOffsets.set(post.order, offset + 1);
+      const targetIndex = Math.max(0, Math.min(feed.length, post.order - 1 + offset));
+      feed.splice(targetIndex, 0, post);
+    });
 
   return feed;
 }
@@ -364,10 +384,136 @@ function VocabularyCard({
   );
 }
 
+function getPostTypeLabel(item: FeedPostItem) {
+  switch (item.postType) {
+    case 'practice_guide':
+      return 'Guia practica';
+    case 'mission_guide':
+      return 'Guia mision';
+    case 'extra':
+      return 'Extra';
+    default:
+      return 'Post';
+  }
+}
+
+function FeedPostCard({
+  item,
+  onPractice,
+  onMission,
+  onClaimExtra,
+  claiming,
+}: {
+  item: FeedPostItem;
+  onPractice: (item: FeedPostItem) => void;
+  onMission: (item: FeedPostItem) => void;
+  onClaimExtra: (item: FeedPostItem) => void;
+  claiming: boolean;
+}) {
+  const imageUrl = item.imageUrl?.trim();
+  const videoUrl = item.videoUrl?.trim();
+  const hasMedia = !!imageUrl || !!videoUrl;
+  const canClaimExtra = item.postType === 'extra' && !!item.coinAmount && !item.claimed;
+
+  const action =
+    item.postType === 'practice_guide'
+      ? {
+          label: 'Abrir practica',
+          onPress: () => onPractice(item),
+          disabled: false,
+        }
+      : item.postType === 'mission_guide'
+      ? {
+          label: 'Empezar mision',
+          onPress: () => onMission(item),
+          disabled: false,
+        }
+      : item.postType === 'extra'
+      ? {
+          label: item.claimed
+            ? 'Reclamado'
+            : claiming
+            ? 'Reclamando...'
+            : `Reclamar ${item.coinAmount || 0} moneda${item.coinAmount === 1 ? '' : 's'}`,
+          onPress: () => onClaimExtra(item),
+          disabled: !canClaimExtra || claiming,
+        }
+      : undefined;
+
+  return (
+    <View
+      style={{
+        borderRadius: 18,
+        overflow: 'hidden',
+        backgroundColor: COLORS.surface,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        shadowColor: '#000',
+        shadowOpacity: 0.12,
+        shadowRadius: 10,
+      }}
+    >
+      {hasMedia ? (
+        <View style={{ aspectRatio: videoUrl ? 9 / 11 : 1, backgroundColor: COLORS.surfaceAlt }}>
+          {videoUrl ? (
+            <Video
+              source={{ uri: videoUrl }}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode={ResizeMode.COVER}
+              useNativeControls
+              shouldPlay={false}
+            />
+          ) : imageUrl ? (
+            <Image source={{ uri: imageUrl }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+          ) : null}
+        </View>
+      ) : null}
+
+      <View style={{ padding: 16 }}>
+        <Text style={{ color: '#a5f3fc', fontSize: 11, fontWeight: '800', textTransform: 'uppercase' }}>
+          {getPostTypeLabel(item)}
+        </Text>
+        <Text style={{ color: COLORS.text, marginTop: 10, fontSize: 18, lineHeight: 26, fontWeight: '800' }}>
+          {item.text}
+        </Text>
+
+        {action ? (
+          <Pressable
+            onPress={action.onPress}
+            disabled={action.disabled}
+            style={({ pressed }) => ({
+              marginTop: 14,
+              paddingVertical: 13,
+              borderRadius: 12,
+              alignItems: 'center',
+              backgroundColor: action.disabled
+                ? '#334155'
+                : pressed
+                ? '#1d4ed8'
+                : item.postType === 'extra'
+                ? '#0f766e'
+                : COLORS.accentStrong,
+              opacity: action.disabled ? 0.72 : 1,
+            })}
+          >
+            <Text style={{ color: 'white', fontWeight: '900' }}>{action.label}</Text>
+          </Pressable>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
 export default function FeedScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { items: learningItems } = useLearningItems();
   const { stories, loading: storiesLoading, error: storiesError } = useStoryCatalog();
+  const {
+    posts: configuredPosts,
+    loading: feedPostsLoading,
+    error: feedPostsError,
+    reload: reloadFeedPosts,
+  } = useFeedPosts();
   const {
     loading: cardProgressLoading,
     statusFor,
@@ -379,18 +525,43 @@ export default function FeedScreen({ navigation }: Props) {
     isMissionCompleted,
     progress: storyProgress,
   } = useStoryProgress();
-  const { canSpend, loading: coinsLoading, isUnlimited } = useCoins();
+  const { addCoins, canSpend, loading: coinsLoading, isUnlimited } = useCoins();
   const [feedSeed, setFeedSeed] = useState(() => `${Date.now()}:${Math.random()}`);
   const [visibleMissionsCount, setVisibleMissionsCount] = useState(MISSION_BATCH_SIZE);
   const [visibleVocabularyCount, setVisibleVocabularyCount] = useState(VOCABULARY_BATCH_SIZE);
+  const [claimedExtraPostIds, setClaimedExtraPostIds] = useState<Set<string>>(() => new Set());
+  const [claimingPostId, setClaimingPostId] = useState<string>();
+  const [postActionMessage, setPostActionMessage] = useState<string>();
 
   useFocusEffect(
     useCallback(() => {
       setFeedSeed(`${Date.now()}:${Math.random()}`);
       setVisibleMissionsCount(MISSION_BATCH_SIZE);
       setVisibleVocabularyCount(VOCABULARY_BATCH_SIZE);
-    }, [])
+      reloadFeedPosts();
+    }, [reloadFeedPosts])
   );
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const raw = await AsyncStorage.getItem(CLAIMED_EXTRA_POSTS_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        const ids = Array.isArray(parsed)
+          ? parsed.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+          : [];
+        if (mounted) {
+          setClaimedExtraPostIds(new Set(ids));
+        }
+      } catch (err) {
+        console.warn('[Feed] No se pudieron cargar los extras reclamados', err);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const pendingMissions = useMemo<PendingMission[]>(() => {
     return stories.flatMap((story) =>
@@ -413,6 +584,15 @@ export default function FeedScreen({ navigation }: Props) {
       .filter((item) => item.status !== 'learned');
   }, [learningItems, statusFor, statuses]);
 
+  const feedPostItems = useMemo<FeedPostItem[]>(() => {
+    return configuredPosts.map((post) => ({
+      ...post,
+      kind: 'post' as const,
+      feedId: `post:${post.postId}`,
+      claimed: post.postType === 'extra' ? claimedExtraPostIds.has(post.postId) : undefined,
+    }));
+  }, [claimedExtraPostIds, configuredPosts]);
+
   const shuffledMissions = useMemo(
     () => pickRandom(pendingMissions, pendingMissions.length, `${feedSeed}:missions`, (item) => item.id),
     [feedSeed, pendingMissions]
@@ -434,11 +614,11 @@ export default function FeedScreen({ navigation }: Props) {
   );
 
   const feedItems = useMemo(
-    () => buildFeedItems(visibleMissions, visibleVocabulary),
-    [visibleMissions, visibleVocabulary]
+    () => buildFeedItems(visibleMissions, visibleVocabulary, feedPostItems),
+    [feedPostItems, visibleMissions, visibleVocabulary]
   );
 
-  const loading = storiesLoading || cardProgressLoading || storyProgressLoading;
+  const loading = storiesLoading || cardProgressLoading || storyProgressLoading || feedPostsLoading;
   const hasMoreFeedItems =
     visibleMissionsCount < shuffledMissions.length || visibleVocabularyCount < shuffledVocabulary.length;
 
@@ -528,8 +708,8 @@ export default function FeedScreen({ navigation }: Props) {
     [setStatus]
   );
 
-  const handlePractice = useCallback(
-    async (item: PendingVocab) => {
+  const openPractice = useCallback(
+    async (item: LearningItem) => {
       if (!isUnlimited) {
         if (coinsLoading) return;
         const enough = await canSpend(CARD_OPEN_COST);
@@ -551,8 +731,15 @@ export default function FeedScreen({ navigation }: Props) {
     [canSpend, coinsLoading, isUnlimited, navigation]
   );
 
-  const handleStartMission = useCallback(
-    async (item: PendingMission) => {
+  const handlePractice = useCallback(
+    async (item: PendingVocab) => {
+      await openPractice(item);
+    },
+    [openPractice]
+  );
+
+  const openMission = useCallback(
+    async (storyId: string, sceneIndex: number) => {
       if (!isUnlimited) {
         if (coinsLoading) return;
         const enough = await canSpend(CHAT_MISSION_COST);
@@ -562,11 +749,92 @@ export default function FeedScreen({ navigation }: Props) {
         }
       }
       navigation.navigate('StoryScene', {
-        storyId: item.storyId,
-        sceneIndex: item.sceneIndex,
+        storyId,
+        sceneIndex,
       });
     },
     [canSpend, coinsLoading, isUnlimited, navigation]
+  );
+
+  const handleStartMission = useCallback(
+    async (item: PendingMission) => {
+      await openMission(item.storyId, item.sceneIndex);
+    },
+    [openMission]
+  );
+
+  const handlePracticePost = useCallback(
+    async (item: FeedPostItem) => {
+      const practice = learningItems.find((learningItem) => String(learningItem.id) === String(item.practiceId));
+      if (!practice) {
+        setPostActionMessage('No encontramos esa practica en la app.');
+        return;
+      }
+      setPostActionMessage(undefined);
+      await openPractice(practice);
+    },
+    [learningItems, openPractice]
+  );
+
+  const handleMissionPost = useCallback(
+    async (item: FeedPostItem) => {
+      let target: { storyId: string; sceneIndex: number } | undefined;
+      for (const story of stories) {
+        const sceneIndex = story.missions.findIndex((mission) => mission.missionId === item.missionId);
+        if (sceneIndex >= 0) {
+          target = { storyId: story.storyId, sceneIndex };
+          break;
+        }
+      }
+
+      if (!target) {
+        setPostActionMessage('No encontramos esa mision en la app.');
+        return;
+      }
+
+      setPostActionMessage(undefined);
+      await openMission(target.storyId, target.sceneIndex);
+    },
+    [openMission, stories]
+  );
+
+  const persistClaimedExtraPostIds = useCallback(async (ids: Set<string>) => {
+    try {
+      await AsyncStorage.setItem(CLAIMED_EXTRA_POSTS_STORAGE_KEY, JSON.stringify([...ids]));
+    } catch (err) {
+      console.warn('[Feed] No se pudieron guardar los extras reclamados', err);
+    }
+  }, []);
+
+  const handleClaimExtraPost = useCallback(
+    async (item: FeedPostItem) => {
+      if (item.postType !== 'extra' || !item.coinAmount || claimedExtraPostIds.has(item.postId)) {
+        return;
+      }
+
+      setClaimingPostId(item.postId);
+      setPostActionMessage(undefined);
+
+      try {
+        const credited = await addCoins(item.coinAmount, `feed-extra:${item.postId}`);
+        if (!credited) {
+          setPostActionMessage('No pudimos acreditar las monedas.');
+          return;
+        }
+
+        const next = new Set(claimedExtraPostIds);
+        next.add(item.postId);
+        setClaimedExtraPostIds(next);
+        await persistClaimedExtraPostIds(next);
+        setPostActionMessage(`Sumamos ${item.coinAmount} moneda${item.coinAmount === 1 ? '' : 's'} a tu saldo.`);
+      } catch (err) {
+        console.warn('[Feed] No se pudo reclamar el extra', err);
+        setPostActionMessage('No pudimos reclamar ese extra.');
+      } finally {
+        setClaimingPostId(undefined);
+      }
+    },
+    [addCoins, claimedExtraPostIds, persistClaimedExtraPostIds]
   );
 
   return (
@@ -625,17 +893,55 @@ export default function FeedScreen({ navigation }: Props) {
                 <Text style={{ color: '#fecdd3', fontWeight: '700' }}>{storiesError}</Text>
               </View>
             ) : null}
+
+            {feedPostsError ? (
+              <View
+                style={{
+                  marginTop: 12,
+                  padding: 12,
+                  borderRadius: 14,
+                  backgroundColor: '#3f1d2e',
+                  borderWidth: 1,
+                  borderColor: '#7f1d1d',
+                }}
+              >
+                <Text style={{ color: '#fecdd3', fontWeight: '700' }}>{feedPostsError}</Text>
+              </View>
+            ) : null}
+
+            {postActionMessage ? (
+              <View
+                style={{
+                  marginTop: 12,
+                  padding: 12,
+                  borderRadius: 14,
+                  backgroundColor: '#0f2f2a',
+                  borderWidth: 1,
+                  borderColor: '#0f766e',
+                }}
+              >
+                <Text style={{ color: '#ccfbf1', fontWeight: '700' }}>{postActionMessage}</Text>
+              </View>
+            ) : null}
           </View>
         }
         renderItem={({ item }) =>
           item.kind === 'mission' ? (
             <MissionCard item={item} onStart={handleStartMission} />
-          ) : (
+          ) : item.kind === 'vocab' ? (
             <VocabularyCard
               item={item}
               onListen={speakVocabulary}
               onMarkLearned={handleMarkLearned}
               onPractice={handlePractice}
+            />
+          ) : (
+            <FeedPostCard
+              item={item}
+              onPractice={handlePracticePost}
+              onMission={handleMissionPost}
+              onClaimExtra={handleClaimExtraPost}
+              claiming={claimingPostId === item.postId}
             />
           )
         }

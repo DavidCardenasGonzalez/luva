@@ -1041,6 +1041,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Mr. Hush",
         caracterPrompt:
           "A slender middle-aged man wearing a vintage cardigan and a pocket watch. He has soft gray hair, intense eyes, and a knowing smile. He stands in a dim hallway with warm, old-fashioned lighting, leaning slightly forward as if sharing secrets.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260414030720-00e5b902-2d31-4457-8507-1740388e7f86.png",
         requirements: [
           {
             requirementId: "confirm_checkin_time",
@@ -1074,6 +1076,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Mopilda",
         caracterPrompt:
           "A middle-aged woman in a floral dress with rubber gloves and an old-fashioned cleaning cart. Her expression is cheerful but distant, as if half-listening to another world. She stands in a sunlit, slightly dusty kitchen.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260414031045-8b40db58-8e75-42de-82de-d79356c3c98b.png",
         requirements: [
           {
             requirementId: "ask_personal_history",
@@ -1106,6 +1110,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Professor Tinker",
         caracterPrompt:
           "A quirky older man with messy hair, round glasses, and a stained lab coat covered in pocket gadgets. He holds a peculiar handheld device with blinking lights. The background shows a cluttered workshop with sketches and tools.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260414031155-edaa5036-0100-45aa-afde-71795c722c96.png",
         requirements: [
           {
             requirementId: "ask_device_purpose",
@@ -1143,6 +1149,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Ms. Purrington",
         caracterPrompt:
           "A cheerful woman in a cozy cardigan holding a large tabby cat. She smiles warmly and gestures as if the cat is speaking. The room is cozy with cushions, a teapot, and a window showing a rainy street.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260414031347-c7e61130-7df7-460e-974b-1d60412ab807.png",
         requirements: [
           {
             requirementId: "describe_current_mood",
@@ -1176,6 +1184,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Noah Night",
         caracterPrompt:
           "A sleepy-looking young man in striped pajamas holding a small lamp. He has messy hair, a warm but tired smile, and leans against the hallway doorframe. The corridor is dim with moonlight filtering in.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260414031447-4406a098-6ea7-4e28-851d-f123f6b249b3.png",
         requirements: [
           {
             requirementId: "ask_clock_concern",
@@ -1278,18 +1288,18 @@ export const STORIES_SEED: StoryDefinition[] = [
       },
       {
         missionId: "festival_confusion_mystical_vendor",
-        title: "La tarotista del pogo",
+        title: "Predicciones desde el mas allá",
         sceneSummary:
           "Una tarotista te ofrece una predicción. Debes sacar información práctica sin caer en supersticiones locas.",
         aiRole:
-          "Eres una tarotista excéntrica y teatral, mitad espiritual. Usa metáforas místicas y humor, pero proporciona al menos una recomendación concreta y verificable cuando se te pida.",
+          "Eres una tarotista excéntrica y teatral, mitad espiritual. Usa bastante humor, te gusta meterte en la vida de los demas.",
         caracterName: "Madame Twirl",
         caracterPrompt:
           "A flamboyant fortune-teller wearing colorful scarves, glittery makeup, and fingerless gloves. She sits at a small round table with tarot cards and a portable speaker playing energetic music. Her expression mixes mystery and playful intensity.",
         requirements: [
           {
             requirementId: "clarify_prediction",
-            text: "Pide que aclare su predicción y cómo se relaciona específicamente con tu situación en el festival.",
+            text: "Pide que aclare su predicción.",
           },
           {
             requirementId: "verify_energy_advice",

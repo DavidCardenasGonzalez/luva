@@ -20,6 +20,12 @@ import {
   updateAdminVideoPublication,
 } from '../admin/videos';
 import { getAdminIdentity, getClaims, hasAdminAccess } from '../admin/auth';
+import {
+  createAdminFeedPost,
+  deleteAdminFeedPost,
+  listFeedPosts,
+  updateAdminFeedPost,
+} from '../feed-posts';
 
 const ROUTE_PREFIX = '/v1';
 
@@ -62,6 +68,46 @@ export const handler = async (event: any): Promise<Result> => {
 
     if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/videos`) {
       return json(200, await listAdminVideos());
+    }
+
+    if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/feed-posts`) {
+      try {
+        return json(200, await listFeedPosts());
+      } catch (error) {
+        const handled = handleFeedPostError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/feed-posts`) {
+      try {
+        return json(200, await createAdminFeedPost(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleFeedPostError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/feed-posts/update`) {
+      try {
+        return json(200, await updateAdminFeedPost(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleFeedPostError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/feed-posts/delete`) {
+      try {
+        return json(200, await deleteAdminFeedPost(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleFeedPostError(error);
+        if (handled) return handled;
+        throw error;
+      }
     }
 
     if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/assets/upload`) {
@@ -389,6 +435,46 @@ function normalizeSearch(event: any): string | undefined {
 
   const raw = typeof params.search === 'string' ? params.search : undefined;
   return raw?.trim() || undefined;
+}
+
+function handleFeedPostError(error: unknown): Result | undefined {
+  if (!(error instanceof Error)) {
+    return undefined;
+  }
+
+  if (error.message === 'FEED_POSTS_TABLE_NAME not set') {
+    return json(503, {
+      code: 'FEED_POSTS_NOT_CONFIGURED',
+      message: 'Configura la tabla de posts del feed en la lambda admin.',
+    });
+  }
+
+  if (error.message === 'FEED_POST_NOT_FOUND') {
+    return json(404, {
+      code: 'FEED_POST_NOT_FOUND',
+      message: 'No encontramos ese post en la tabla del feed.',
+    });
+  }
+
+  const validationMessages: Record<string, string> = {
+    INVALID_FEED_POST_ID: 'Indica un postId valido para actualizar o borrar el post.',
+    INVALID_FEED_POST_TEXT: 'Escribe el texto del post.',
+    INVALID_FEED_POST_ORDER: 'Indica un orden valido. Usa 1 para mostrarlo hasta arriba.',
+    INVALID_FEED_POST_TYPE: 'Selecciona un tipo de post valido.',
+    INVALID_FEED_POST_TARGET: 'Indica el id requerido para el tipo de post seleccionado.',
+    INVALID_FEED_POST_COIN_AMOUNT: 'Indica una cantidad valida de monedas para el post extra.',
+    INVALID_FEED_POST_URL: 'Usa una URL publica valida para imagen o video.',
+  };
+
+  const message = validationMessages[error.message];
+  if (message) {
+    return json(400, {
+      code: error.message,
+      message,
+    });
+  }
+
+  return undefined;
 }
 
 function getQueryParam(event: any, key: string): string | undefined {

@@ -137,7 +137,7 @@ export type AdminVideoReplaceUploadResponse = {
   contentType: string
 }
 
-export type AdminAssetFolder = 'storiesProfile' | 'missionIntroVideos'
+export type AdminAssetFolder = 'storiesProfile' | 'missionIntroVideos' | 'feedPostImages' | 'feedPostVideos'
 
 export type AdminAssetUploadResponse = {
   folder: AdminAssetFolder
@@ -147,6 +147,37 @@ export type AdminAssetUploadResponse = {
   url: string
   expiresAt: string
   contentType: string
+}
+
+export type AdminFeedPostType = 'normal' | 'practice_guide' | 'mission_guide' | 'extra'
+
+export type AdminFeedPost = {
+  postId: string
+  text: string
+  order: number
+  postType: AdminFeedPostType
+  imageUrl?: string
+  videoUrl?: string
+  practiceId?: string
+  missionId?: string
+  coinAmount?: number
+  createdAt: string
+  updatedAt: string
+}
+
+export type AdminFeedPostsResponse = {
+  posts: AdminFeedPost[]
+  generatedAt: string
+}
+
+export type AdminFeedPostMutationResponse = {
+  post: AdminFeedPost
+  updatedAt: string
+}
+
+export type AdminFeedPostDeleteResponse = {
+  postId: string
+  deletedAt: string
 }
 
 export type AdminTikTokAuthStatusResponse = {

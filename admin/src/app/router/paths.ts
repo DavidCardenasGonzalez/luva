@@ -2,6 +2,7 @@ export const appPaths = {
   home: '/',
   login: '/login',
   assets: '/assets',
+  posts: '/posts',
   users: '/users',
   videos: '/videos',
   integrationsTikTok: '/integrations/tiktok',

@@ -34,6 +34,7 @@ import {
   AppVersionCheckStatus,
 } from "../types";
 import { STORIES_SEED } from "../data/stories-seed";
+import { listPublicFeedPosts } from "../feed-posts";
 import { validatePromoCode } from "../promo-codes";
 
 const s3 = new S3Client({});
@@ -554,6 +555,10 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       const stories = loadStories();
       const version = getStoriesVersion(stories);
       return json(200, { version, items: stories });
+    }
+
+    if (method === "GET" && path === `${ROUTE_PREFIX}/feed/posts`) {
+      return json(200, await listPublicFeedPosts());
     }
 
     const storyDetail = path.match(/^\/v1\/stories\/([^/]+)$/);

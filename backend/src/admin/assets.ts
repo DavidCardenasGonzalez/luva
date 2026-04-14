@@ -4,7 +4,12 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const s3 = new S3Client({});
 
-export const ADMIN_ASSET_FOLDERS = ['storiesProfile', 'missionIntroVideos'] as const;
+export const ADMIN_ASSET_FOLDERS = [
+  'storiesProfile',
+  'missionIntroVideos',
+  'feedPostImages',
+  'feedPostVideos',
+] as const;
 
 export type AdminAssetFolder = (typeof ADMIN_ASSET_FOLDERS)[number];
 
@@ -61,7 +66,21 @@ const ASSET_CONTENT_TYPE_CONFIG: Record<
       jpeg: 'image/jpeg',
     }),
   },
+  feedPostImages: {
+    contentTypes: IMAGE_CONTENT_TYPES,
+    contentTypeByExtension: buildContentTypeByExtension(IMAGE_CONTENT_TYPES, {
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+    }),
+  },
   missionIntroVideos: {
+    contentTypes: VIDEO_CONTENT_TYPES,
+    contentTypeByExtension: buildContentTypeByExtension(VIDEO_CONTENT_TYPES, {
+      mov: 'video/quicktime',
+      m4v: 'video/x-m4v',
+    }),
+  },
+  feedPostVideos: {
     contentTypes: VIDEO_CONTENT_TYPES,
     contentTypeByExtension: buildContentTypeByExtension(VIDEO_CONTENT_TYPES, {
       mov: 'video/quicktime',

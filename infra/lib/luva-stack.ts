@@ -145,6 +145,18 @@ export class LuvaStack extends Stack {
       projectionType: ProjectionType.ALL,
     });
 
+    const feedPostsTable = new Table(this, 'FeedPostsTable', {
+      partitionKey: { name: 'postId', type: AttributeType.STRING },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.RETAIN,
+    });
+    feedPostsTable.addGlobalSecondaryIndex({
+      indexName: 'FeedPostsByOrderIndex',
+      partitionKey: { name: 'feedPk', type: AttributeType.STRING },
+      sortKey: { name: 'order', type: AttributeType.NUMBER },
+      projectionType: ProjectionType.ALL,
+    });
+
     // S3 Buckets
     const audioRawBucket = new Bucket(this, 'AudioRawBucket', {
       bucketName: undefined, // Let AWS name it; set if needed
@@ -374,6 +386,8 @@ export class LuvaStack extends Stack {
       logGroup: apiFnLogGroup,
       environment: {
         TABLE_NAME: table.tableName,
+        FEED_POSTS_TABLE_NAME: feedPostsTable.tableName,
+        FEED_POSTS_BY_ORDER_INDEX_NAME: 'FeedPostsByOrderIndex',
         AUDIO_BUCKET: audioRawBucket.bucketName,
         OPENAI_KEY_PARAM: openAiKeyParam.parameterName,
         OPENAI_CHAT_MODEL: 'gpt-4.1-nano',
@@ -383,6 +397,7 @@ export class LuvaStack extends Stack {
     });
 
     table.grantReadWriteData(apiFn);
+    feedPostsTable.grantReadData(apiFn);
     audioRawBucket.grantReadWrite(apiFn);
     publicBucket.grantReadWrite(apiFn);
     apiFn.addToRolePolicy(new PolicyStatement({
@@ -416,6 +431,8 @@ export class LuvaStack extends Stack {
       environment: {
         USERS_TABLE_NAME: usersTable.tableName,
         GENERATED_VIDEOS_TABLE_NAME: generatedVideosTable.tableName,
+        FEED_POSTS_TABLE_NAME: feedPostsTable.tableName,
+        FEED_POSTS_BY_ORDER_INDEX_NAME: 'FeedPostsByOrderIndex',
         REVENUECAT_SECRET_KEY: process.env.REVENUECAT_SECRET_KEY || '',
         REVENUECAT_ENTITLEMENT_ID: process.env.REVENUECAT_ENTITLEMENT_ID || 'Luva Pro',
         TIKTOK_CLIENT_KEY: process.env.TIKTOK_CLIENT_KEY || '',
@@ -433,6 +450,7 @@ export class LuvaStack extends Stack {
     });
     usersTable.grantReadWriteData(adminFn);
     generatedVideosTable.grantReadWriteData(adminFn);
+    feedPostsTable.grantReadWriteData(adminFn);
     generatedVideosBucket.grantReadWrite(adminFn);
     assetsBucket.grantReadWrite(adminFn);
     adminFn.addToRolePolicy(new PolicyStatement({
@@ -539,7 +557,7 @@ export class LuvaStack extends Stack {
 
     const deployment = new Deployment(this, 'Deployment', { api });
     deployment.addToLogicalId({
-      routeManifestVersion: '2026-04-11-admin-assets-v1',
+      routeManifestVersion: '2026-04-13-feed-posts-v1',
       routes: {
         apiRoot: ['ANY /v1', 'ANY /v1/{proxy+}'],
         users: [
@@ -577,6 +595,9 @@ export class LuvaStack extends Stack {
     });
     new CfnOutput(this, 'GeneratedVideosTableName', {
       value: generatedVideosTable.tableName,
+    });
+    new CfnOutput(this, 'FeedPostsTableName', {
+      value: feedPostsTable.tableName,
     });
     new CfnOutput(this, 'GeneratedVideosBucketName', {
       value: generatedVideosBucket.bucketName,

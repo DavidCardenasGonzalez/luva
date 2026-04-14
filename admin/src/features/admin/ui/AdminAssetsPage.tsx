@@ -24,6 +24,18 @@ const ASSET_FOLDER_OPTIONS: Array<{
     accept: 'video/mp4,video/quicktime,video/webm,video/x-m4v,video/mpeg',
     mediaKind: 'video',
   },
+  {
+    value: 'feedPostImages',
+    label: 'feedPostImages',
+    accept: 'image/*',
+    mediaKind: 'image',
+  },
+  {
+    value: 'feedPostVideos',
+    label: 'feedPostVideos',
+    accept: 'video/mp4,video/quicktime,video/webm,video/x-m4v,video/mpeg',
+    mediaKind: 'video',
+  },
 ]
 
 function formatDateTime(value?: string) {
