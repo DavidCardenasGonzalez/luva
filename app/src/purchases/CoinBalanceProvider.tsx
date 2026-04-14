@@ -12,6 +12,8 @@ import { useRevenueCat } from './RevenueCatProvider';
 
 const STORAGE_KEY = '@luva/coins/state';
 const MAX_FREE_COINS = 10;
+const FIRST_LAUNCH_BONUS_COINS = 20;
+const INITIAL_COIN_BALANCE = MAX_FREE_COINS + FIRST_LAUNCH_BONUS_COINS;
 const REGEN_INTERVAL_MS = 60 * 60 * 1000;
 
 export const CHAT_MISSION_COST = 5;
@@ -39,7 +41,7 @@ type CoinsContextValue = {
 const CoinsContext = createContext<CoinsContextValue | undefined>(undefined);
 
 const sanitizeState = (raw: any): CoinsState => {
-  const fallback: CoinsState = { balance: MAX_FREE_COINS, lastUpdated: Date.now() };
+  const fallback: CoinsState = { balance: INITIAL_COIN_BALANCE, lastUpdated: Date.now() };
   if (!raw || typeof raw !== 'object') return fallback;
   const balance = Number.isFinite(raw.balance) ? Math.max(0, Number(raw.balance)) : MAX_FREE_COINS;
   const lastUpdated = Number.isFinite(raw.lastUpdated) ? Number(raw.lastUpdated) : Date.now();
@@ -61,7 +63,7 @@ const applyRegen = (state: CoinsState, now: number): CoinsState => {
 
 export function CoinBalanceProvider({ children }: { children: React.ReactNode }) {
   const { isPro, loading: revenueLoading } = useRevenueCat();
-  const [state, setState] = useState<CoinsState>({ balance: MAX_FREE_COINS, lastUpdated: Date.now() });
+  const [state, setState] = useState<CoinsState>({ balance: INITIAL_COIN_BALANCE, lastUpdated: Date.now() });
   const [loading, setLoading] = useState(true);
   const stateRef = useRef<CoinsState>(state);
 
