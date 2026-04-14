@@ -79,7 +79,8 @@ export const handler = async (event: any): Promise<Result> => {
           if (error.message === 'INVALID_ASSET_CONTENT_TYPE') {
             return json(400, {
               code: 'INVALID_ASSET_CONTENT_TYPE',
-              message: 'Sube una imagen valida: JPG, PNG, WebP, AVIF, GIF, HEIC o HEIF.',
+              message:
+                'Sube un asset valido para la carpeta seleccionada: imagen JPG, PNG, WebP, AVIF, GIF, HEIC o HEIF; video MP4, MOV, WebM, M4V o MPEG.',
             });
           }
 

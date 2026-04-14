@@ -118,6 +118,7 @@ function computeStoriesVersion(stories: StoryDefinition[]): string {
       caracterName: mission.caracterName || '',
       caracterPrompt: mission.caracterPrompt || '',
       avatarImageUrl: mission.avatarImageUrl || '',
+      videoIntro: mission.videoIntro || '',
       requirements: (mission.requirements || []).map((req) => ({
         requirementId: req.requirementId,
         text: req.text,
@@ -301,6 +302,12 @@ function sanitizeStoryMission(input: any): StoryMission | undefined {
       : typeof input.avatar_image_url === 'string'
       ? input.avatar_image_url
       : undefined;
+  const videoIntro =
+    typeof input.videoIntro === 'string'
+      ? input.videoIntro
+      : typeof input.video_intro === 'string'
+      ? input.video_intro
+      : undefined;
   const requirementsRaw = Array.isArray(input.requirements) ? input.requirements : [];
   const requirements = requirementsRaw
     .map((req: any) => sanitizeStoryRequirement(req))
@@ -313,6 +320,7 @@ function sanitizeStoryMission(input: any): StoryMission | undefined {
     caracterName,
     caracterPrompt,
     avatarImageUrl,
+    videoIntro,
     requirements,
   };
 }
@@ -570,6 +578,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
           caracterName: mission.caracterName,
           caracterPrompt: mission.caracterPrompt,
           avatarImageUrl: mission.avatarImageUrl,
+          videoIntro: mission.videoIntro,
           requirements: initialRequirementStates(mission),
         })) || [],
       });

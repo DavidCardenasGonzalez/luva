@@ -16,6 +16,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { Audio, ResizeMode, Video } from 'expo-av';
+import type { AVPlaybackStatus } from 'expo-av';
 import useAudioRecorder from '../shared/useAudioRecorder';
 import useUploadToS3 from '../shared/useUploadToS3';
 import { api } from '../api/api';
@@ -209,6 +211,9 @@ export default function StorySceneScreen() {
   const [sceneIndex, setSceneIndex] = useState<number>(initialSceneIndex);
   const insets = useSafeAreaInsets();
   const [showCharacterModal, setShowCharacterModal] = useState(false);
+  const [showIntroVideoModal, setShowIntroVideoModal] = useState(false);
+  const [introVideoLoading, setIntroVideoLoading] = useState(false);
+  const [introVideoError, setIntroVideoError] = useState<string | null>(null);
   const [isStorySceneTourPending, setIsStorySceneTourPending] = useState(false);
   const [showStorySceneTour, setShowStorySceneTour] = useState(false);
   const [storySceneTourHighlight, setStorySceneTourHighlight] = useState<TourHighlight | null>(null);
@@ -224,6 +229,7 @@ export default function StorySceneScreen() {
 
   const mission = story?.missions?.[sceneIndex];
   const avatarImageUrl = mission?.avatarImageUrl?.trim();
+  const introVideoUri = mission?.videoIntro?.trim();
 
   useEffect(() => {
     setAllowMappedAvatarFallback(false);
@@ -283,6 +289,7 @@ export default function StorySceneScreen() {
         sceneSummary: missionDef.sceneSummary,
         aiRole: missionDef.aiRole,
         avatarImageUrl: missionDef.avatarImageUrl,
+        videoIntro: missionDef.videoIntro,
         requirements: missionDef.requirements.map((req) => ({
           requirementId: req.requirementId,
           text: req.text,
@@ -299,6 +306,7 @@ export default function StorySceneScreen() {
       sceneSummary: mission.sceneSummary,
       aiRole: mission.aiRole,
       avatarImageUrl: mission.avatarImageUrl,
+      videoIntro: mission.videoIntro,
       requirements: mission.requirements.map((req) => ({
         requirementId: req.requirementId,
         text: req.text,
@@ -325,6 +333,11 @@ export default function StorySceneScreen() {
   const [assistanceLoading, setAssistanceLoading] = useState(false);
   const [assistanceError, setAssistanceError] = useState<string | null>(null);
   const hasShownCharacterModal = useRef(false);
+  const hasShownIntroVideo = useRef(false);
+  const hasDismissedIntroVideo = useRef(false);
+  const introVideoRef = useRef<Video | null>(null);
+  const introVideoLoadedRef = useRef(false);
+  const introVideoStartedRef = useRef(false);
   // Force-remount the KeyboardAvoidingView when returning from background so it recalculates sizes.
   const [keyboardAvoiderKey, setKeyboardAvoiderKey] = useState(0);
   const exitWarningMessage = useMemo(
@@ -366,10 +379,17 @@ export default function StorySceneScreen() {
     setAssistanceError(null);
     setAssistanceLoading(false);
     setShowAssistanceModal(false);
+    setShowIntroVideoModal(false);
+    setIntroVideoLoading(false);
+    setIntroVideoError(null);
     setShowStorySceneTour(false);
     setStorySceneTourHighlight(null);
     setStorySceneTourStepIndex(0);
     hasShownCharacterModal.current = false;
+    hasShownIntroVideo.current = false;
+    hasDismissedIntroVideo.current = false;
+    introVideoLoadedRef.current = false;
+    introVideoStartedRef.current = false;
   }, [mission, storyId]);
 
   useEffect(() => {
@@ -950,10 +970,19 @@ export default function StorySceneScreen() {
   }, [recorder]);
 
   useEffect(() => {
-    if (!mission || hasShownCharacterModal.current) return;
+    if (!mission) return;
+    if (introVideoUri && !hasShownIntroVideo.current) {
+      hasShownIntroVideo.current = true;
+      hasDismissedIntroVideo.current = false;
+      setIntroVideoLoading(true);
+      setIntroVideoError(null);
+      setShowIntroVideoModal(true);
+      return;
+    }
+    if (introVideoUri || hasShownCharacterModal.current) return;
     hasShownCharacterModal.current = true;
     setShowCharacterModal(true);
-  }, [mission]);
+  }, [introVideoUri, mission]);
 
   const storySceneTourSteps = useMemo(
     () => [
@@ -1008,13 +1037,112 @@ export default function StorySceneScreen() {
     return () => clearTimeout(timer);
   }, [showStorySceneTour, storySceneTourStepIndex, measureStorySceneTourTarget]);
 
-  const closeCharacterModal = useCallback(() => {
-    setShowCharacterModal(false);
+  const startPendingStorySceneTour = useCallback(() => {
     if (isStorySceneTourPending) {
       setShowStorySceneTour(true);
       setIsStorySceneTourPending(false);
     }
   }, [isStorySceneTourPending]);
+
+  const closeIntroVideoModal = useCallback(() => {
+    if (hasDismissedIntroVideo.current) return;
+    hasDismissedIntroVideo.current = true;
+    void introVideoRef.current?.stopAsync().catch((pauseErr) => {
+      console.warn('Mission intro video stop failed', pauseErr);
+    });
+    setShowIntroVideoModal(false);
+    setIntroVideoLoading(false);
+    setIntroVideoError(null);
+    startPendingStorySceneTour();
+  }, [startPendingStorySceneTour]);
+
+  const closeCharacterModal = useCallback(() => {
+    setShowCharacterModal(false);
+    startPendingStorySceneTour();
+  }, [startPendingStorySceneTour]);
+
+  useEffect(() => {
+    if (!showIntroVideoModal || !introVideoUri) return;
+    introVideoLoadedRef.current = false;
+    introVideoStartedRef.current = false;
+    setIntroVideoLoading(true);
+    setIntroVideoError(null);
+    void Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: true,
+      playThroughEarpieceAndroid: false,
+    }).catch((audioModeErr) => {
+      console.warn('Mission intro video audio mode failed', audioModeErr);
+    });
+
+    const playFallback = setTimeout(() => {
+      void introVideoRef.current?.playAsync().catch((playErr) => {
+        console.warn('Mission intro video play failed', playErr);
+      });
+    }, 350);
+
+    const loadingFallback = setTimeout(() => {
+      setIntroVideoLoading(false);
+    }, 2500);
+    const errorFallback = setTimeout(() => {
+      if (hasDismissedIntroVideo.current) return;
+      if (introVideoLoadedRef.current || introVideoStartedRef.current) return;
+      setIntroVideoLoading(false);
+      setIntroVideoError('No pudimos cargar el video.');
+    }, 12000);
+
+    return () => {
+      clearTimeout(playFallback);
+      clearTimeout(loadingFallback);
+      clearTimeout(errorFallback);
+    };
+  }, [introVideoUri, showIntroVideoModal]);
+
+  const handleIntroVideoStatus = useCallback(
+    (status: AVPlaybackStatus) => {
+      if (!showIntroVideoModal) return;
+      if (!status.isLoaded) {
+        if (status.error) {
+          setIntroVideoLoading(false);
+          setIntroVideoError(status.error);
+        }
+        return;
+      }
+
+      introVideoLoadedRef.current = true;
+      if (status.isPlaying || status.positionMillis > 0) {
+        introVideoStartedRef.current = true;
+      }
+      if (!status.isBuffering || status.isPlaying) {
+        setIntroVideoLoading(false);
+      }
+      if (status.didJustFinish) {
+        closeIntroVideoModal();
+      }
+    },
+    [closeIntroVideoModal, showIntroVideoModal]
+  );
+
+  const handleIntroVideoLoad = useCallback(() => {
+    introVideoLoadedRef.current = true;
+    setIntroVideoLoading(false);
+    setIntroVideoError(null);
+    void introVideoRef.current?.playAsync().catch((playErr) => {
+      console.warn('Mission intro video play failed', playErr);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!isStorySceneTourPending || showCharacterModal || showIntroVideoModal) return;
+    startPendingStorySceneTour();
+  }, [
+    isStorySceneTourPending,
+    showCharacterModal,
+    showIntroVideoModal,
+    startPendingStorySceneTour,
+  ]);
 
   const finishStorySceneTour = useCallback(async () => {
     setShowStorySceneTour(false);
@@ -1409,6 +1537,120 @@ export default function StorySceneScreen() {
         onNext={handleAdvanceStorySceneTour}
         isLast={isLastStorySceneTourStep}
       />
+      <Modal
+        animationType="fade"
+        visible={showIntroVideoModal}
+        presentationStyle="fullScreen"
+        statusBarTranslucent
+        hardwareAccelerated
+        onRequestClose={closeIntroVideoModal}
+      >
+        <View style={{ flex: 1, backgroundColor: 'black' }}>
+          {showIntroVideoModal && introVideoUri ? (
+            <Video
+              ref={introVideoRef}
+              source={{ uri: introVideoUri }}
+              style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+              resizeMode={ResizeMode.COVER}
+              shouldPlay
+              useNativeControls={false}
+              isLooping={false}
+              progressUpdateIntervalMillis={250}
+              onLoadStart={() => {
+                setIntroVideoLoading(true);
+                setIntroVideoError(null);
+              }}
+              onLoad={handleIntroVideoLoad}
+              onReadyForDisplay={() => setIntroVideoLoading(false)}
+              onError={(videoError) => {
+                setIntroVideoLoading(false);
+                setIntroVideoError(videoError || 'No pudimos cargar el video.');
+              }}
+              onPlaybackStatusUpdate={handleIntroVideoStatus}
+            />
+          ) : null}
+          <View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: insets.top + 96,
+              backgroundColor: 'rgba(0,0,0,0.28)',
+            }}
+          />
+          <Pressable
+            onPress={closeIntroVideoModal}
+            hitSlop={12}
+            style={({ pressed }) => ({
+              position: 'absolute',
+              top: insets.top + 12,
+              right: 16,
+              paddingHorizontal: 14,
+              paddingVertical: 9,
+              borderRadius: 8,
+              backgroundColor: 'rgba(0,0,0,0.58)',
+              borderWidth: 1,
+              borderColor: 'rgba(255,255,255,0.22)',
+              opacity: pressed ? 0.72 : 1,
+            })}
+          >
+            <Text style={{ color: 'white', fontWeight: '800' }}>Saltar</Text>
+          </Pressable>
+          {introVideoLoading ? (
+            <View
+              pointerEvents="none"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'rgba(0,0,0,0.16)',
+              }}
+            >
+              <ActivityIndicator size="large" color="white" />
+            </View>
+          ) : null}
+          {introVideoError ? (
+            <View
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.82)',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 24,
+              }}
+            >
+              <Text style={{ color: 'white', fontSize: 16, fontWeight: '800', textAlign: 'center' }}>
+                No pudimos reproducir este intro.
+              </Text>
+              <Text style={{ color: '#cbd5e1', marginTop: 8, textAlign: 'center' }}>
+                Puedes continuar con la misión.
+              </Text>
+              <Pressable
+                onPress={closeIntroVideoModal}
+                style={({ pressed }) => ({
+                  marginTop: 18,
+                  paddingHorizontal: 18,
+                  paddingVertical: 12,
+                  borderRadius: 8,
+                  backgroundColor: pressed ? '#e2e8f0' : 'white',
+                })}
+              >
+                <Text style={{ color: '#0f172a', fontWeight: '900' }}>Continuar</Text>
+              </Pressable>
+            </View>
+          ) : null}
+        </View>
+      </Modal>
       <Modal
         animationType="fade"
         transparent

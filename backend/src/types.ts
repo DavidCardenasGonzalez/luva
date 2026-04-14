@@ -50,6 +50,7 @@ export interface StoryMission {
   caracterName?: string;
   caracterPrompt?: string;
   avatarImageUrl?: string;
+  videoIntro?: string;
   requirements: StoryRequirement[];
 }
 

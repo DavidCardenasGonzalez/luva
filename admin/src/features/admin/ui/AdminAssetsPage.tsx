@@ -6,8 +6,24 @@ import type {
 } from '@/features/admin/model/types'
 import { AdminLayout } from '@/features/admin/ui/AdminLayout'
 
-const ASSET_FOLDER_OPTIONS: Array<{ value: AdminAssetFolder; label: string }> = [
-  { value: 'storiesProfile', label: 'storiesProfile' },
+const ASSET_FOLDER_OPTIONS: Array<{
+  value: AdminAssetFolder
+  label: string
+  accept: string
+  mediaKind: 'image' | 'video'
+}> = [
+  {
+    value: 'storiesProfile',
+    label: 'storiesProfile',
+    accept: 'image/*',
+    mediaKind: 'image',
+  },
+  {
+    value: 'missionIntroVideos',
+    label: 'missionIntroVideos',
+    accept: 'video/mp4,video/quicktime,video/webm,video/x-m4v,video/mpeg',
+    mediaKind: 'video',
+  },
 ]
 
 function formatDateTime(value?: string) {
@@ -52,6 +68,8 @@ export function AdminAssetsPage() {
   const [error, setError] = useState<string>()
   const [isUploading, setIsUploading] = useState(false)
   const [stage, setStage] = useState<string>()
+  const selectedFolderOption =
+    ASSET_FOLDER_OPTIONS.find((option) => option.value === folder) ?? ASSET_FOLDER_OPTIONS[0]
 
   useEffect(() => {
     if (!file) {
@@ -69,7 +87,7 @@ export function AdminAssetsPage() {
 
   const handleUpload = async () => {
     if (!file) {
-      setError('Selecciona una foto antes de subirla.')
+      setError('Selecciona un archivo antes de subirlo.')
       return
     }
 
@@ -81,7 +99,7 @@ export function AdminAssetsPage() {
 
     try {
       const upload = await createAdminAssetUpload(folder, file.type, file.name)
-      setStage('Subiendo foto a S3...')
+      setStage('Subiendo archivo a S3...')
       const uploadResponse = await fetch(upload.uploadUrl, {
         method: 'PUT',
         headers: {
@@ -91,17 +109,17 @@ export function AdminAssetsPage() {
       })
 
       if (!uploadResponse.ok) {
-        throw new Error(`No pudimos subir la foto. HTTP ${uploadResponse.status}`)
+        throw new Error(`No pudimos subir el archivo. HTTP ${uploadResponse.status}`)
       }
 
       setUploadedAsset(upload)
-      setMessage('Foto subida. La URL ya esta lista para usarse.')
+      setMessage('Asset subido. La URL ya esta lista para usarse.')
       setStage(undefined)
     } catch (uploadError) {
       setError(
         uploadError instanceof Error
           ? uploadError.message
-          : 'No pudimos subir la foto seleccionada.',
+          : 'No pudimos subir el archivo seleccionado.',
       )
       setStage(undefined)
     } finally {
@@ -125,7 +143,7 @@ export function AdminAssetsPage() {
   return (
     <AdminLayout
       title="Assets"
-      description="Sube fotos al bucket de assets y usa la URL publica servida por CloudFront."
+      description="Sube archivos al bucket de assets y usa la URL publica servida por CloudFront."
     >
       {error && (
         <section className="admin-inline-alert">
@@ -142,8 +160,8 @@ export function AdminAssetsPage() {
       <section className="admin-assets-grid">
         <article className="admin-panel">
           <div className="admin-panel-head">
-            <p className="eyebrow">Nueva imagen</p>
-            <h3>Subir foto</h3>
+            <p className="eyebrow">Nuevo asset</p>
+            <h3>Subir archivo</h3>
           </div>
 
           <div className="admin-asset-form">
@@ -151,7 +169,14 @@ export function AdminAssetsPage() {
               <span>Carpeta</span>
               <select
                 value={folder}
-                onChange={(event) => setFolder(event.target.value as AdminAssetFolder)}
+                onChange={(event) => {
+                  setFolder(event.target.value as AdminAssetFolder)
+                  setFile(undefined)
+                  setUploadedAsset(undefined)
+                  setMessage(undefined)
+                  setError(undefined)
+                  setStage(undefined)
+                }}
                 disabled={isUploading}
               >
                 {ASSET_FOLDER_OPTIONS.map((option) => (
@@ -163,10 +188,11 @@ export function AdminAssetsPage() {
             </label>
 
             <label className="admin-grant-field">
-              <span>Foto</span>
+              <span>Archivo</span>
               <input
+                key={folder}
                 type="file"
-                accept="image/*"
+                accept={selectedFolderOption.accept}
                 disabled={isUploading}
                 onChange={(event) => {
                   const selectedFile = event.target.files?.[0]
@@ -174,6 +200,7 @@ export function AdminAssetsPage() {
                   setUploadedAsset(undefined)
                   setMessage(undefined)
                   setError(undefined)
+                  setStage(undefined)
                 }}
               />
             </label>
@@ -210,7 +237,7 @@ export function AdminAssetsPage() {
                 }}
                 disabled={isUploading || !file}
               >
-                {isUploading ? 'Subiendo...' : 'Subir foto'}
+                {isUploading ? 'Subiendo...' : 'Subir asset'}
               </button>
             </div>
           </div>
@@ -224,11 +251,15 @@ export function AdminAssetsPage() {
 
           {localPreviewUrl ? (
             <div className="admin-asset-preview">
-              <img src={localPreviewUrl} alt="Vista previa de la foto seleccionada" />
+              {selectedFolderOption.mediaKind === 'video' ? (
+                <video src={localPreviewUrl} controls muted playsInline preload="metadata" />
+              ) : (
+                <img src={localPreviewUrl} alt="Vista previa del archivo seleccionado" />
+              )}
             </div>
           ) : (
             <div className="admin-empty-state admin-empty-state-compact">
-              <strong>Sin foto seleccionada.</strong>
+              <strong>Sin archivo seleccionado.</strong>
               <p>Elige un archivo para ver la vista previa antes de subirlo.</p>
             </div>
           )}

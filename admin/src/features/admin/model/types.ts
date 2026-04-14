@@ -137,7 +137,7 @@ export type AdminVideoReplaceUploadResponse = {
   contentType: string
 }
 
-export type AdminAssetFolder = 'storiesProfile'
+export type AdminAssetFolder = 'storiesProfile' | 'missionIntroVideos'
 
 export type AdminAssetUploadResponse = {
   folder: AdminAssetFolder

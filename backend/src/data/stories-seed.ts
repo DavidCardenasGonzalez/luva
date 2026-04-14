@@ -991,6 +991,8 @@ export const STORIES_SEED: StoryDefinition[] = [
           "An elegant, eccentric executive wearing a bright patterned jacket and oversized glasses. She sits at a long table with a bowl of exotic snacks and a stack of benefit brochures, smiling as she listens to offers.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260413000832-28002c5b-0160-46ca-b187-6a448d6509a8.png",
+        videoIntro:
+          "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260414011420-c5882b68-8b1b-4675-8f17-701fe883ec8c.mp4",
         requirements: [
           {
             requirementId: "ask_budget",

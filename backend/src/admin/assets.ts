@@ -4,7 +4,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const s3 = new S3Client({});
 
-export const ADMIN_ASSET_FOLDERS = ['storiesProfile'] as const;
+export const ADMIN_ASSET_FOLDERS = ['storiesProfile', 'missionIntroVideos'] as const;
 
 export type AdminAssetFolder = (typeof ADMIN_ASSET_FOLDERS)[number];
 
@@ -39,11 +39,36 @@ const IMAGE_CONTENT_TYPES: Record<string, string> = {
   'image/webp': 'webp',
 };
 
-const CONTENT_TYPE_BY_EXTENSION: Record<string, string> = Object.fromEntries(
-  Object.entries(IMAGE_CONTENT_TYPES).map(([contentType, extension]) => [extension, contentType]),
-);
-CONTENT_TYPE_BY_EXTENSION.jpg = 'image/jpeg';
-CONTENT_TYPE_BY_EXTENSION.jpeg = 'image/jpeg';
+const VIDEO_CONTENT_TYPES: Record<string, string> = {
+  'video/mp4': 'mp4',
+  'video/mpeg': 'mpeg',
+  'video/quicktime': 'mov',
+  'video/webm': 'webm',
+  'video/x-m4v': 'm4v',
+};
+
+const ASSET_CONTENT_TYPE_CONFIG: Record<
+  AdminAssetFolder,
+  {
+    contentTypes: Record<string, string>;
+    contentTypeByExtension: Record<string, string>;
+  }
+> = {
+  storiesProfile: {
+    contentTypes: IMAGE_CONTENT_TYPES,
+    contentTypeByExtension: buildContentTypeByExtension(IMAGE_CONTENT_TYPES, {
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+    }),
+  },
+  missionIntroVideos: {
+    contentTypes: VIDEO_CONTENT_TYPES,
+    contentTypeByExtension: buildContentTypeByExtension(VIDEO_CONTENT_TYPES, {
+      mov: 'video/quicktime',
+      m4v: 'video/x-m4v',
+    }),
+  },
+};
 
 export async function createAdminAssetUpload(
   input: AdminAssetUploadInput,
@@ -85,7 +110,7 @@ export function normalizeAdminAssetUploadRequest(
     throw new Error('INVALID_ASSET_FOLDER');
   }
 
-  const contentType = normalizeImageContentType(input.contentType, input.fileName);
+  const contentType = normalizeAssetContentType(folder, input.contentType, input.fileName);
   if (!contentType) {
     throw new Error('INVALID_ASSET_CONTENT_TYPE');
   }
@@ -102,7 +127,7 @@ export function buildAdminAssetObjectKey(input: {
   id: string;
   now?: string;
 }): string {
-  const extension = IMAGE_CONTENT_TYPES[input.contentType];
+  const extension = ASSET_CONTENT_TYPE_CONFIG[input.folder].contentTypes[input.contentType];
   if (!extension) {
     throw new Error('INVALID_ASSET_CONTENT_TYPE');
   }
@@ -142,22 +167,39 @@ function normalizeAssetFolder(value: unknown): AdminAssetFolder | undefined {
     : undefined;
 }
 
-function normalizeImageContentType(contentType: unknown, fileName: unknown): string | undefined {
+function normalizeAssetContentType(
+  folder: AdminAssetFolder,
+  contentType: unknown,
+  fileName: unknown,
+): string | undefined {
+  const config = ASSET_CONTENT_TYPE_CONFIG[folder];
   const normalizedContentType = asString(contentType)
     ?.split(';')[0]
     ?.trim()
     .toLowerCase();
 
-  if (normalizedContentType && IMAGE_CONTENT_TYPES[normalizedContentType]) {
+  if (normalizedContentType && config.contentTypes[normalizedContentType]) {
     return normalizedContentType;
   }
 
   const extension = getFileExtension(asString(fileName));
-  if (extension && CONTENT_TYPE_BY_EXTENSION[extension]) {
-    return CONTENT_TYPE_BY_EXTENSION[extension];
+  if (extension && config.contentTypeByExtension[extension]) {
+    return config.contentTypeByExtension[extension];
   }
 
   return undefined;
+}
+
+function buildContentTypeByExtension(
+  contentTypes: Record<string, string>,
+  aliases: Record<string, string> = {},
+): Record<string, string> {
+  return {
+    ...Object.fromEntries(
+      Object.entries(contentTypes).map(([contentType, extension]) => [extension, contentType]),
+    ),
+    ...aliases,
+  };
 }
 
 function getFileExtension(fileName?: string): string | undefined {

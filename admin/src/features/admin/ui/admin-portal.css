@@ -1046,7 +1046,8 @@
   background: rgba(255, 255, 255, 0.72);
 }
 
-.admin-asset-preview img {
+.admin-asset-preview img,
+.admin-asset-preview video {
   display: block;
   width: 100%;
   max-height: 520px;

@@ -24,4 +24,4 @@ Notas
 - `/v1/sessions/{id}/transcribe` y `/v1/sessions/{id}/evaluate` devuelven mocks compatibles con el contrato.
 - `GET/POST /v1/users/me` vive en la lambda `users` y requiere un token válido de Cognito vía API Gateway authorizer.
 - `GET/POST /v1/users/me/progress` lee y fusiona progreso autenticado del app en DynamoDB.
-- `POST /v1/admin/assets/upload` genera un presigned PUT para imagenes y devuelve la URL publica por CloudFront.
+- `POST /v1/admin/assets/upload` genera un presigned PUT para assets permitidos por carpeta y devuelve la URL publica por CloudFront.
