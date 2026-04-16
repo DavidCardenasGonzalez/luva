@@ -204,6 +204,7 @@ export type AdminTikTokAuthStatusResponse = {
 export type AdminTikTokAuthStartResponse = {
   authUrl: string
   state: string
+  codeVerifier: string
   redirectUri: string
   scopes: string[]
 }

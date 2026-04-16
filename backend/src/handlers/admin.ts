@@ -192,6 +192,13 @@ export const handler = async (event: any): Promise<Result> => {
             });
           }
 
+          if (error.message === 'INVALID_TIKTOK_CODE_VERIFIER') {
+            return json(400, {
+              code: 'INVALID_TIKTOK_CODE_VERIFIER',
+              message: 'No se encontró el code verifier PKCE para completar la autenticación de TikTok.',
+            });
+          }
+
           if (error.message === 'INVALID_TIKTOK_TOKEN_RESPONSE') {
             return json(502, {
               code: 'INVALID_TIKTOK_TOKEN_RESPONSE',

@@ -96,6 +96,8 @@ export class LuvaStack extends Stack {
     });
     const adminPortalUrl = `https://${adminPortalDistribution.domainName}`;
     const adminPortalRedirectUrl = ensureTrailingSlash(adminPortalUrl);
+    const adminTikTokRedirectUri =
+      process.env.TIKTOK_REDIRECT_URI || `${adminPortalRedirectUrl}integrations/tiktok`;
     const browserOrigins = uniqueStrings([
       ...configuredBrowserOrigins,
       adminPortalUrl,
@@ -437,7 +439,7 @@ export class LuvaStack extends Stack {
         REVENUECAT_ENTITLEMENT_ID: process.env.REVENUECAT_ENTITLEMENT_ID || 'Luva Pro',
         TIKTOK_CLIENT_KEY: process.env.TIKTOK_CLIENT_KEY || '',
         TIKTOK_CLIENT_SECRET: process.env.TIKTOK_CLIENT_SECRET || '',
-        TIKTOK_REDIRECT_URI: process.env.TIKTOK_REDIRECT_URI || '',
+        TIKTOK_REDIRECT_URI: adminTikTokRedirectUri,
         TIKTOK_AUTH_SCOPES: process.env.TIKTOK_AUTH_SCOPES || 'video.publish',
         TIKTOK_ACCESS_TOKEN_PARAM: tiktokAccessTokenParam.parameterName,
         TIKTOK_REFRESH_TOKEN_PARAM: tiktokRefreshTokenParam.parameterName,
@@ -589,6 +591,9 @@ export class LuvaStack extends Stack {
     });
     new CfnOutput(this, 'AdminPortalUrl', {
       value: adminPortalUrl,
+    });
+    new CfnOutput(this, 'TikTokRedirectUri', {
+      value: adminTikTokRedirectUri,
     });
     new CfnOutput(this, 'UsersTableName', {
       value: usersTable.tableName,

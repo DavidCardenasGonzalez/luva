@@ -87,9 +87,10 @@ export function startAdminTikTokAuth() {
   return adminApi.post<AdminTikTokAuthStartResponse>('/social/tiktok/start')
 }
 
-export function completeAdminTikTokAuth(code: string) {
+export function completeAdminTikTokAuth(code: string, codeVerifier: string) {
   return adminApi.post<AdminTikTokAuthCompleteResponse>('/social/tiktok/complete', {
     code,
+    codeVerifier,
   })
 }
 

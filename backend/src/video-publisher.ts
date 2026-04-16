@@ -233,10 +233,107 @@ type UpdateExpressionParts = {
   ExpressionAttributeValues: Record<string, unknown>;
 };
 
+function logPublisher(scope: string, details: Record<string, unknown> = {}) {
+  console.log(
+    JSON.stringify({
+      scope: `video-publisher.${scope}`,
+      ...sanitizeLogValue(details) as Record<string, unknown>,
+    }),
+  );
+}
+
+function sanitizeLogValue(value: unknown): unknown {
+  if (value instanceof Error) {
+    return {
+      name: value.name,
+      message: value.message,
+    };
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizeLogValue(item));
+  }
+
+  if (value && typeof value === 'object') {
+    const output: Record<string, unknown> = {};
+    for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
+      output[key] = isSecretLogKey(key) ? '[redacted]' : sanitizeLogValue(raw);
+    }
+    return output;
+  }
+
+  return value;
+}
+
+function isSecretLogKey(key: string): boolean {
+  const normalized = key.toLowerCase();
+  return (
+    normalized === 'authorization' ||
+    normalized === 'password' ||
+    normalized === 'token' ||
+    normalized === 'accesstoken' ||
+    normalized === 'refreshtoken' ||
+    normalized === 'idtoken' ||
+    normalized.includes('access_token') ||
+    normalized.includes('refresh_token') ||
+    normalized.includes('clientsecret') ||
+    normalized.endsWith('secret') ||
+    normalized.includes('signedurl') ||
+    normalized.includes('videourl') ||
+    normalized.includes('uploadurl')
+  );
+}
+
+function logVideoFields(video: ScheduledVideoRecord): Record<string, unknown> {
+  return {
+    storyId: video.storyId,
+    videoId: video.videoId,
+    title: video.title,
+    status: video.status,
+    publishOn: video.publishOn,
+    bucketName: video.bucketName,
+    bucketKey: video.bucketKey,
+    instagramPublishStatus: video.instagramPublishStatus,
+    instagramContainerId: video.instagramContainerId,
+    tiktokPublishStatus: video.tiktokPublishStatus,
+    tiktokPublishId: video.tiktokPublishId,
+    publishAttemptCount: video.publishAttemptCount,
+    lastPublishAttemptAt: video.lastPublishAttemptAt,
+  };
+}
+
+function logAttemptFields(attempt?: PlatformAttemptResult): Record<string, unknown> {
+  if (!attempt) {
+    return { status: 'not_attempted' };
+  }
+
+  return {
+    status: attempt.status,
+    containerId: 'containerId' in attempt ? attempt.containerId : undefined,
+    mediaId: 'mediaId' in attempt ? attempt.mediaId : undefined,
+    publishId: 'publishId' in attempt ? attempt.publishId : undefined,
+    postId: 'postId' in attempt ? attempt.postId : undefined,
+    error: 'error' in attempt ? attempt.error : undefined,
+  };
+}
+
+function safeEndpoint(url: string): string {
+  try {
+    const parsed = new URL(url);
+    return `${parsed.origin}${parsed.pathname}`;
+  } catch {
+    return url.split('?')[0] || url;
+  }
+}
+
 export async function publishScheduledVideos(
   nowInput?: string,
 ): Promise<ScheduledVideoPublisherSummary> {
   const now = asTimestamp(nowInput) || new Date().toISOString();
+  logPublisher('run.start', {
+    now,
+    nowInput,
+  });
   const config = await loadPublisherConfig();
   const dueVideos = await listDueScheduledVideos(now);
   const summary: ScheduledVideoPublisherSummary = {
@@ -250,19 +347,37 @@ export async function publishScheduledVideos(
     skippedVideos: 0,
     results: [],
   };
+  logPublisher('run.loaded', {
+    now,
+    enabledPlatforms: config.enabledPlatforms,
+    dueVideos: dueVideos.length,
+  });
 
   if (!config.enabledPlatforms.instagram && !config.enabledPlatforms.tiktok) {
+    logPublisher('run.skip.no_platforms_enabled', {
+      now,
+      summary,
+    });
     return summary;
   }
 
   for (const video of dueVideos) {
+    logPublisher('video.candidate', logVideoFields(video));
     const claimed = await acquirePublishLock(video, now);
     if (!claimed) {
+      logPublisher('video.lock.skipped', {
+        ...logVideoFields(video),
+        reason: 'not_claimed',
+      });
       summary.skippedVideos += 1;
       continue;
     }
 
     summary.claimedVideos += 1;
+    logPublisher('video.lock.claimed', {
+      ...logVideoFields(claimed.video),
+      lockToken: claimed.lockToken,
+    });
     const processed = await processClaimedVideo(claimed, config, now);
     const result = {
       storyId: processed.storyId,
@@ -273,6 +388,10 @@ export async function publishScheduledVideos(
       ...(processed.lastPublishError ? { message: processed.lastPublishError } : {}),
     };
     summary.results.push(result);
+    logPublisher('video.processed', {
+      ...logVideoFields(processed),
+      result,
+    });
 
     if (processed.status === STATUS_SUBIDO) {
       summary.publishedVideos += 1;
@@ -298,6 +417,9 @@ export async function publishScheduledVideos(
     summary.skippedVideos += 1;
   }
 
+  logPublisher('run.complete', {
+    summary,
+  });
   return summary;
 }
 
@@ -352,12 +474,20 @@ async function processClaimedVideo(
 ): Promise<ScheduledVideoRecord> {
   const { video, lockToken } = claimed;
   const attempts: PlatformAttemptMap = {};
+  logPublisher('video.process.start', {
+    ...logVideoFields(video),
+    enabledPlatforms: config.enabledPlatforms,
+  });
 
   if (!video.bucketName || !video.bucketKey) {
     const errorResult: PlatformAttemptResult = {
       status: 'error',
       error: 'El registro no tiene bucketName/bucketKey válidos para publicar.',
     };
+    logPublisher('video.process.missing_source', {
+      ...logVideoFields(video),
+      error: errorResult.error,
+    });
     if (config.enabledPlatforms.instagram) {
       attempts.instagram = errorResult;
     }
@@ -367,16 +497,26 @@ async function processClaimedVideo(
   } else {
     const instagramConfig = config.instagram;
     if (config.enabledPlatforms.instagram && instagramConfig) {
-      attempts.instagram = await safelyPublishPlatform(() =>
+      logPublisher('platform.instagram.start', logVideoFields(video));
+      attempts.instagram = await safelyPublishPlatform('instagram', video, () =>
         publishToInstagram(video, instagramConfig, now),
       );
+      logPublisher('platform.instagram.result', {
+        ...logVideoFields(video),
+        attempt: logAttemptFields(attempts.instagram),
+      });
     }
 
     const tiktokConfig = config.tiktok;
     if (config.enabledPlatforms.tiktok && tiktokConfig) {
-      attempts.tiktok = await safelyPublishPlatform(() =>
+      logPublisher('platform.tiktok.start', logVideoFields(video));
+      attempts.tiktok = await safelyPublishPlatform('tiktok', video, () =>
         publishToTikTok(video, tiktokConfig, now),
       );
+      logPublisher('platform.tiktok.result', {
+        ...logVideoFields(video),
+        attempt: logAttemptFields(attempts.tiktok),
+      });
     }
   }
 
@@ -386,16 +526,35 @@ async function processClaimedVideo(
     attempts,
     now,
   );
+  logPublisher('video.settlement.built', {
+    ...logVideoFields(video),
+    instagramAttempt: logAttemptFields(attempts.instagram),
+    tiktokAttempt: logAttemptFields(attempts.tiktok),
+    settlement,
+  });
 
   return applyPublicationSettlement(video, settlement, lockToken);
 }
 
 async function safelyPublishPlatform(
+  platform: 'instagram' | 'tiktok',
+  video: ScheduledVideoRecord,
   fn: () => Promise<PlatformAttemptResult>,
 ): Promise<PlatformAttemptResult> {
   try {
-    return await fn();
+    const result = await fn();
+    logPublisher('platform.safe.success', {
+      platform,
+      ...logVideoFields(video),
+      attempt: logAttemptFields(result),
+    });
+    return result;
   } catch (error) {
+    logPublisher('platform.safe.error', {
+      platform,
+      ...logVideoFields(video),
+      error,
+    });
     return {
       status: 'error',
       error: error instanceof Error ? error.message : 'Error desconocido publicando video.',
@@ -408,10 +567,27 @@ async function publishToInstagram(
   config: InstagramPublisherConfig,
   now: string,
 ): Promise<PlatformAttemptResult> {
+  logPublisher('instagram.publish.start', {
+    ...logVideoFields(video),
+    apiVersion: config.apiVersion,
+    igUserId: config.igUserId,
+    shareToFeed: config.shareToFeed,
+  });
+
   if (video.instagramPublishStatus === 'procesando' && video.instagramContainerId) {
+    logPublisher('instagram.publish.continue_existing', {
+      ...logVideoFields(video),
+      containerId: video.instagramContainerId,
+    });
     return continueInstagramPublication(video.instagramContainerId, config, now);
   }
 
+  logPublisher('instagram.s3.signed_url.start', {
+    bucketName: video.bucketName,
+    bucketKey: video.bucketKey,
+    contentType: video.contentType,
+    expiresIn: S3_URL_EXPIRATION_SECONDS,
+  });
   const videoUrl = await getSignedUrl(
     s3,
     new GetObjectCommand({
@@ -421,8 +597,18 @@ async function publishToInstagram(
     }),
     { expiresIn: S3_URL_EXPIRATION_SECONDS },
   );
+  logPublisher('instagram.s3.signed_url.created', {
+    bucketName: video.bucketName,
+    bucketKey: video.bucketKey,
+    expiresIn: S3_URL_EXPIRATION_SECONDS,
+    signedUrl: videoUrl,
+  });
 
   const containerId = await createInstagramContainer(videoUrl, video, config);
+  logPublisher('instagram.container.created', {
+    ...logVideoFields(video),
+    containerId,
+  });
   return continueInstagramPublication(containerId, config, now);
 }
 
@@ -431,11 +617,31 @@ async function continueInstagramPublication(
   config: InstagramPublisherConfig,
   now: string,
 ): Promise<PlatformAttemptResult> {
+  logPublisher('instagram.poll.start', {
+    containerId,
+    maxPolls: INSTAGRAM_MAX_POLLS,
+    pollIntervalMs: INSTAGRAM_POLL_INTERVAL_MS,
+  });
+
   for (let index = 0; index < INSTAGRAM_MAX_POLLS; index += 1) {
     const status = await getInstagramContainerStatus(containerId, config);
+    logPublisher('instagram.poll.status', {
+      containerId,
+      pollIndex: index + 1,
+      maxPolls: INSTAGRAM_MAX_POLLS,
+      statusCode: status.statusCode,
+      statusText: status.statusText,
+    });
 
     if (status.statusCode === 'FINISHED') {
+      logPublisher('instagram.publish_container.start', {
+        containerId,
+      });
       const mediaId = await publishInstagramContainer(containerId, config);
+      logPublisher('instagram.poll.finished', {
+        containerId,
+        mediaId,
+      });
       return {
         status: 'subido',
         publishedAt: now,
@@ -445,6 +651,11 @@ async function continueInstagramPublication(
     }
 
     if (status.statusCode === 'ERROR' || status.statusCode === 'EXPIRED') {
+      logPublisher('instagram.poll.failed', {
+        containerId,
+        statusCode: status.statusCode,
+        statusText: status.statusText,
+      });
       return {
         status: 'error',
         error: firstNonEmpty(status.statusText, `Instagram status ${status.statusCode}`) || 'Instagram no pudo procesar el video.',
@@ -453,10 +664,19 @@ async function continueInstagramPublication(
     }
 
     if (index < INSTAGRAM_MAX_POLLS - 1) {
+      logPublisher('instagram.poll.sleep', {
+        containerId,
+        nextPollIndex: index + 2,
+        pollIntervalMs: INSTAGRAM_POLL_INTERVAL_MS,
+      });
       await sleep(INSTAGRAM_POLL_INTERVAL_MS);
     }
   }
 
+  logPublisher('instagram.poll.timeout', {
+    containerId,
+    maxPolls: INSTAGRAM_MAX_POLLS,
+  });
   return {
     status: 'procesando',
     containerId,
@@ -469,6 +689,14 @@ async function createInstagramContainer(
   config: InstagramPublisherConfig,
 ): Promise<string> {
   const endpoint = `https://graph.facebook.com/${config.apiVersion}/${encodeURIComponent(config.igUserId)}/media`;
+  logPublisher('instagram.container.create.request', {
+    endpoint: safeEndpoint(endpoint),
+    igUserId: config.igUserId,
+    mediaType: 'REELS',
+    shareToFeed: config.shareToFeed,
+    captionLength: buildSocialCaption(video).length,
+    videoUrl,
+  });
   const body = new URLSearchParams({
     media_type: 'REELS',
     video_url: videoUrl,
@@ -486,9 +714,17 @@ async function createInstagramContainer(
   const containerId = normalizeKey(payload?.id);
 
   if (!containerId) {
+    logPublisher('instagram.container.create.invalid_response', {
+      endpoint: safeEndpoint(endpoint),
+      payloadKeys: Object.keys(payload || {}),
+    });
     throw new Error('Instagram no devolvió el container id del Reel.');
   }
 
+  logPublisher('instagram.container.create.response', {
+    endpoint: safeEndpoint(endpoint),
+    containerId,
+  });
   return containerId;
 }
 
@@ -500,8 +736,13 @@ async function getInstagramContainerStatus(
     fields: 'status_code,status',
     access_token: config.accessToken,
   });
+  const endpoint = `https://graph.facebook.com/${config.apiVersion}/${encodeURIComponent(containerId)}?${query.toString()}`;
+  logPublisher('instagram.container.status.request', {
+    endpoint: safeEndpoint(endpoint),
+    containerId,
+  });
   const payload = await fetchJson(
-    `https://graph.facebook.com/${config.apiVersion}/${encodeURIComponent(containerId)}?${query.toString()}`,
+    endpoint,
     {
       method: 'GET',
     },
@@ -519,6 +760,11 @@ async function publishInstagramContainer(
   config: InstagramPublisherConfig,
 ): Promise<string> {
   const endpoint = `https://graph.facebook.com/${config.apiVersion}/${encodeURIComponent(config.igUserId)}/media_publish`;
+  logPublisher('instagram.container.publish.request', {
+    endpoint: safeEndpoint(endpoint),
+    igUserId: config.igUserId,
+    containerId,
+  });
   const body = new URLSearchParams({
     creation_id: containerId,
     access_token: config.accessToken,
@@ -533,9 +779,19 @@ async function publishInstagramContainer(
   const mediaId = normalizeKey(payload?.id);
 
   if (!mediaId) {
+    logPublisher('instagram.container.publish.invalid_response', {
+      endpoint: safeEndpoint(endpoint),
+      containerId,
+      payloadKeys: Object.keys(payload || {}),
+    });
     throw new Error('Instagram no devolvió el media id del Reel publicado.');
   }
 
+  logPublisher('instagram.container.publish.response', {
+    endpoint: safeEndpoint(endpoint),
+    containerId,
+    mediaId,
+  });
   return mediaId;
 }
 
@@ -544,20 +800,51 @@ async function publishToTikTok(
   config: TikTokPublisherConfig,
   now: string,
 ): Promise<PlatformAttemptResult> {
+  logPublisher('tiktok.publish.start', {
+    ...logVideoFields(video),
+    defaultPrivacyLevel: config.defaultPrivacyLevel,
+    disableComment: config.disableComment,
+    disableDuet: config.disableDuet,
+    disableStitch: config.disableStitch,
+  });
+
   if (video.tiktokPublishStatus === 'procesando' && video.tiktokPublishId) {
+    logPublisher('tiktok.publish.continue_existing', {
+      ...logVideoFields(video),
+      publishId: video.tiktokPublishId,
+    });
     return continueTikTokPublication(video.tiktokPublishId, config, now);
   }
 
   if (!video.bucketName || !video.bucketKey) {
+    logPublisher('tiktok.publish.missing_source', logVideoFields(video));
     throw new Error('TikTok requiere bucketName y bucketKey para descargar el video.');
   }
 
   const creatorInfo = await queryTikTokCreatorInfo(config.accessToken);
+  logPublisher('tiktok.creator_info.loaded', {
+    ...logVideoFields(video),
+    privacyLevelOptions: creatorInfo.privacyLevelOptions,
+    commentDisabled: creatorInfo.commentDisabled,
+    duetDisabled: creatorInfo.duetDisabled,
+    stitchDisabled: creatorInfo.stitchDisabled,
+  });
   const objectMeta = await getStoredVideoObjectMeta(video.bucketName, video.bucketKey);
   const chunkSize = chooseTikTokChunkSize(objectMeta.sizeBytes);
+  logPublisher('tiktok.source.meta_loaded', {
+    ...logVideoFields(video),
+    objectMeta,
+    chunkSize,
+    totalChunkCount: Math.ceil(objectMeta.sizeBytes / chunkSize),
+  });
   const init = await initializeTikTokDirectPost(video, config, creatorInfo, {
     sizeBytes: objectMeta.sizeBytes,
     chunkSize,
+  });
+  logPublisher('tiktok.direct_post.initialized', {
+    ...logVideoFields(video),
+    publishId: init.publishId,
+    uploadUrl: init.uploadUrl,
   });
 
   await uploadTikTokVideoChunks(
@@ -570,6 +857,12 @@ async function publishToTikTok(
     init.uploadUrl,
     chunkSize,
   );
+  logPublisher('tiktok.upload.complete', {
+    ...logVideoFields(video),
+    publishId: init.publishId,
+    sizeBytes: objectMeta.sizeBytes,
+    chunkSize,
+  });
 
   return continueTikTokPublication(init.publishId, config, now);
 }
@@ -579,10 +872,28 @@ async function continueTikTokPublication(
   config: TikTokPublisherConfig,
   now: string,
 ): Promise<PlatformAttemptResult> {
+  logPublisher('tiktok.poll.start', {
+    publishId,
+    maxPolls: TIKTOK_MAX_POLLS,
+    pollIntervalMs: TIKTOK_POLL_INTERVAL_MS,
+  });
+
   for (let index = 0; index < TIKTOK_MAX_POLLS; index += 1) {
     const status = await fetchTikTokPublishStatus(publishId, config.accessToken);
+    logPublisher('tiktok.poll.status', {
+      publishId,
+      pollIndex: index + 1,
+      maxPolls: TIKTOK_MAX_POLLS,
+      status: status.status,
+      failReason: status.failReason,
+      publiclyAvailablePostIds: status.publiclyAvailablePostIds,
+    });
 
     if (status.status === 'PUBLISH_COMPLETE') {
+      logPublisher('tiktok.poll.finished', {
+        publishId,
+        postId: status.publiclyAvailablePostIds[0],
+      });
       return {
         status: 'subido',
         publishedAt: now,
@@ -594,6 +905,10 @@ async function continueTikTokPublication(
     }
 
     if (status.status === 'FAILED') {
+      logPublisher('tiktok.poll.failed', {
+        publishId,
+        failReason: status.failReason,
+      });
       return {
         status: 'error',
         error: firstNonEmpty(status.failReason, 'TikTok devolvió FAILED al publicar.') || 'TikTok devolvió FAILED al publicar.',
@@ -602,10 +917,19 @@ async function continueTikTokPublication(
     }
 
     if (index < TIKTOK_MAX_POLLS - 1) {
+      logPublisher('tiktok.poll.sleep', {
+        publishId,
+        nextPollIndex: index + 2,
+        pollIntervalMs: TIKTOK_POLL_INTERVAL_MS,
+      });
       await sleep(TIKTOK_POLL_INTERVAL_MS);
     }
   }
 
+  logPublisher('tiktok.poll.timeout', {
+    publishId,
+    maxPolls: TIKTOK_MAX_POLLS,
+  });
   return {
     status: 'procesando',
     publishId,
@@ -613,7 +937,11 @@ async function continueTikTokPublication(
 }
 
 async function queryTikTokCreatorInfo(accessToken: string): Promise<TikTokCreatorInfo> {
-  const payload = await fetchJson('https://open.tiktokapis.com/v2/post/publish/creator_info/query/', {
+  const endpoint = 'https://open.tiktokapis.com/v2/post/publish/creator_info/query/';
+  logPublisher('tiktok.creator_info.request', {
+    endpoint: safeEndpoint(endpoint),
+  });
+  const payload = await fetchJson(endpoint, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -622,6 +950,14 @@ async function queryTikTokCreatorInfo(accessToken: string): Promise<TikTokCreato
     body: JSON.stringify({}),
   });
   const data = asRecord(payload?.data) || {};
+  logPublisher('tiktok.creator_info.response', {
+    endpoint: safeEndpoint(endpoint),
+    dataKeys: Object.keys(data),
+    privacyLevelOptions: asStringArray(data.privacy_level_options),
+    commentDisabled: asBoolean(data.comment_disabled),
+    duetDisabled: asBoolean(data.duet_disabled),
+    stitchDisabled: asBoolean(data.stitch_disabled),
+  });
 
   return {
     privacyLevelOptions: asStringArray(data.privacy_level_options)
@@ -647,7 +983,25 @@ async function initializeTikTokDirectPost(
     config.defaultPrivacyLevel,
   );
   const totalChunkCount = Math.ceil(sourceInfo.sizeBytes / sourceInfo.chunkSize);
-  const payload = await fetchJson('https://open.tiktokapis.com/v2/post/publish/video/init/', {
+  const endpoint = 'https://open.tiktokapis.com/v2/post/publish/video/init/';
+  logPublisher('tiktok.direct_post.init.request', {
+    endpoint: safeEndpoint(endpoint),
+    ...logVideoFields(video),
+    requestedPrivacyLevel: config.defaultPrivacyLevel,
+    selectedPrivacyLevel: privacyLevel,
+    sourceInfo: {
+      sizeBytes: sourceInfo.sizeBytes,
+      chunkSize: sourceInfo.chunkSize,
+      totalChunkCount,
+    },
+    postInfo: {
+      titleLength: buildSocialCaption(video).length,
+      disableComment: creatorInfo.commentDisabled || config.disableComment,
+      disableDuet: creatorInfo.duetDisabled || config.disableDuet,
+      disableStitch: creatorInfo.stitchDisabled || config.disableStitch,
+    },
+  });
+  const payload = await fetchJson(endpoint, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${config.accessToken}`,
@@ -674,9 +1028,20 @@ async function initializeTikTokDirectPost(
   const uploadUrl = firstNonEmpty(asString(data?.upload_url));
 
   if (!publishId || !uploadUrl) {
+    logPublisher('tiktok.direct_post.init.invalid_response', {
+      endpoint: safeEndpoint(endpoint),
+      dataKeys: data ? Object.keys(data) : [],
+      publishId,
+      hasUploadUrl: !!uploadUrl,
+    });
     throw new Error('TikTok no devolvió publish_id o upload_url válidos.');
   }
 
+  logPublisher('tiktok.direct_post.init.response', {
+    endpoint: safeEndpoint(endpoint),
+    publishId,
+    uploadUrl,
+  });
   return {
     publishId,
     uploadUrl,
@@ -694,10 +1059,39 @@ async function uploadTikTokVideoChunks(
   chunkSize: number,
 ): Promise<void> {
   let start = 0;
+  let chunkIndex = 0;
+  const totalChunkCount = Math.ceil(input.sizeBytes / chunkSize);
+  logPublisher('tiktok.upload.start', {
+    bucketName: input.bucketName,
+    bucketKey: input.bucketKey,
+    contentType: input.contentType,
+    sizeBytes: input.sizeBytes,
+    chunkSize,
+    totalChunkCount,
+    uploadUrl,
+  });
 
   while (start < input.sizeBytes) {
     const end = Math.min(start + chunkSize, input.sizeBytes) - 1;
+    chunkIndex += 1;
+    logPublisher('tiktok.upload.chunk.read_start', {
+      bucketName: input.bucketName,
+      bucketKey: input.bucketKey,
+      chunkIndex,
+      totalChunkCount,
+      start,
+      end,
+    });
     const chunk = await readS3ByteRange(input.bucketName, input.bucketKey, start, end);
+    logPublisher('tiktok.upload.chunk.put_start', {
+      chunkIndex,
+      totalChunkCount,
+      start,
+      end,
+      byteLength: chunk.byteLength,
+      contentRange: `bytes ${start}-${end}/${input.sizeBytes}`,
+      uploadUrl,
+    });
     const response = await fetch(uploadUrl, {
       method: 'PUT',
       headers: {
@@ -707,6 +1101,14 @@ async function uploadTikTokVideoChunks(
       },
       body: chunk,
     });
+    logPublisher('tiktok.upload.chunk.put_response', {
+      chunkIndex,
+      totalChunkCount,
+      start,
+      end,
+      status: response.status,
+      ok: response.ok,
+    });
 
     if (!response.ok) {
       throw new Error(`TikTok rechazó el upload del chunk. HTTP ${response.status}`);
@@ -714,13 +1116,26 @@ async function uploadTikTokVideoChunks(
 
     start = end + 1;
   }
+
+  logPublisher('tiktok.upload.done', {
+    bucketName: input.bucketName,
+    bucketKey: input.bucketKey,
+    sizeBytes: input.sizeBytes,
+    chunkSize,
+    totalChunkCount,
+  });
 }
 
 async function fetchTikTokPublishStatus(
   publishId: string,
   accessToken: string,
 ): Promise<TikTokPublishStatusResponse> {
-  const payload = await fetchJson('https://open.tiktokapis.com/v2/post/publish/status/fetch/', {
+  const endpoint = 'https://open.tiktokapis.com/v2/post/publish/status/fetch/';
+  logPublisher('tiktok.status.request', {
+    endpoint: safeEndpoint(endpoint),
+    publishId,
+  });
+  const payload = await fetchJson(endpoint, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -731,6 +1146,14 @@ async function fetchTikTokPublishStatus(
     }),
   });
   const data = asRecord(payload?.data) || {};
+  logPublisher('tiktok.status.response', {
+    endpoint: safeEndpoint(endpoint),
+    publishId,
+    dataKeys: Object.keys(data),
+    status: firstNonEmpty(asString(data.status), 'UNKNOWN') || 'UNKNOWN',
+    failReason: firstNonEmpty(asString(data.fail_reason)),
+    publiclyAvailablePostIds: asStringArray(data.publicaly_available_post_id),
+  });
 
   return {
     status: firstNonEmpty(asString(data.status), 'UNKNOWN') || 'UNKNOWN',
@@ -744,8 +1167,20 @@ async function fetchTikTokPublishStatus(
 async function listDueScheduledVideos(now: string): Promise<ScheduledVideoRecord[]> {
   const videos: ScheduledVideoRecord[] = [];
   let exclusiveStartKey: Record<string, unknown> | undefined;
+  let page = 0;
+  logPublisher('dynamodb.query_due.start', {
+    now,
+    tableName: getGeneratedVideosTableName(),
+    indexName: getGeneratedVideosStatusIndexName(),
+    status: STATUS_PROGRAMADO,
+  });
 
   do {
+    page += 1;
+    logPublisher('dynamodb.query_due.page.start', {
+      page,
+      hasExclusiveStartKey: !!exclusiveStartKey,
+    });
     const result = await dynamo.send(
       new QueryCommand({
         TableName: getGeneratedVideosTableName(),
@@ -761,17 +1196,35 @@ async function listDueScheduledVideos(now: string): Promise<ScheduledVideoRecord
         ExclusiveStartKey: exclusiveStartKey,
       }),
     );
+    logPublisher('dynamodb.query_due.page.response', {
+      page,
+      itemCount: result.Items?.length || 0,
+      scannedCount: result.ScannedCount,
+      count: result.Count,
+      hasLastEvaluatedKey: !!result.LastEvaluatedKey,
+    });
 
     for (const item of result.Items || []) {
       const video = toScheduledVideoRecord(item);
       if (video) {
         videos.push(video);
+        logPublisher('dynamodb.query_due.item', logVideoFields(video));
+      } else {
+        logPublisher('dynamodb.query_due.item.skipped_invalid', {
+          page,
+          keys: Object.keys(item || {}),
+        });
       }
     }
 
     exclusiveStartKey = result.LastEvaluatedKey as Record<string, unknown> | undefined;
   } while (exclusiveStartKey);
 
+  logPublisher('dynamodb.query_due.complete', {
+    now,
+    totalVideos: videos.length,
+    pages: page,
+  });
   return videos;
 }
 
@@ -781,6 +1234,11 @@ async function acquirePublishLock(
 ): Promise<ClaimedVideo | undefined> {
   const lockToken = randomUUID();
   const lockExpiresAt = new Date(Date.parse(now) + LOCK_WINDOW_MS).toISOString();
+  logPublisher('dynamodb.lock.attempt', {
+    ...logVideoFields(video),
+    lockToken,
+    lockExpiresAt,
+  });
 
   try {
     const result = await dynamo.send(
@@ -811,17 +1269,34 @@ async function acquirePublishLock(
 
     const lockedVideo = toScheduledVideoRecord(result.Attributes);
     if (!lockedVideo) {
+      logPublisher('dynamodb.lock.invalid_response', {
+        ...logVideoFields(video),
+        returnedKeys: Object.keys(result.Attributes || {}),
+      });
       return undefined;
     }
 
+    logPublisher('dynamodb.lock.acquired', {
+      ...logVideoFields(lockedVideo),
+      lockToken,
+      lockExpiresAt,
+    });
     return {
       lockToken,
       video: lockedVideo,
     };
   } catch (error) {
     if (isConditionalCheckFailed(error)) {
+      logPublisher('dynamodb.lock.conditional_failed', {
+        ...logVideoFields(video),
+        lockExpiresAt: video.publishLockExpiresAt,
+      });
       return undefined;
     }
+    logPublisher('dynamodb.lock.error', {
+      ...logVideoFields(video),
+      error,
+    });
     throw error;
   }
 }
@@ -831,6 +1306,11 @@ async function applyPublicationSettlement(
   settlement: VideoPublicationSettlement,
   lockToken: string,
 ): Promise<ScheduledVideoRecord> {
+  logPublisher('dynamodb.settlement.apply.start', {
+    ...logVideoFields(video),
+    lockToken,
+    settlement,
+  });
   const updateParts = buildUpdateExpression({
     status: settlement.status,
     updatedAt: settlement.updatedAt,
@@ -871,9 +1351,18 @@ async function applyPublicationSettlement(
   const updated = toScheduledVideoRecord(result.Attributes);
 
   if (!updated) {
+    logPublisher('dynamodb.settlement.apply.invalid_response', {
+      ...logVideoFields(video),
+      settlement,
+      returnedKeys: Object.keys(result.Attributes || {}),
+    });
     throw new Error('No pudimos reconstruir el video después de actualizar su publicación.');
   }
 
+  logPublisher('dynamodb.settlement.apply.complete', {
+    ...logVideoFields(updated),
+    lockToken,
+  });
   return updated;
 }
 
@@ -967,6 +1456,18 @@ function mergePlatformAttempt(
 }
 
 async function loadPublisherConfig(): Promise<PublisherConfig> {
+  logPublisher('config.load.start', {
+    env: {
+      instagramEnabled: process.env.INSTAGRAM_AUTOPUBLISH_ENABLED,
+      tiktokEnabled: process.env.TIKTOK_AUTOPUBLISH_ENABLED,
+      instagramAccessTokenParam: process.env.INSTAGRAM_ACCESS_TOKEN_PARAM,
+      tiktokAccessTokenParam: process.env.TIKTOK_ACCESS_TOKEN_PARAM,
+      instagramGraphApiVersion: process.env.INSTAGRAM_GRAPH_API_VERSION,
+      tiktokDefaultPrivacyLevel: process.env.TIKTOK_DEFAULT_PRIVACY_LEVEL,
+      generatedVideosTableName: process.env.GENERATED_VIDEOS_TABLE_NAME,
+      generatedVideosStatusIndexName: process.env.GENERATED_VIDEOS_STATUS_PUBLISH_ON_INDEX_NAME,
+    },
+  });
   const enabledPlatforms: EnabledPlatforms = {
     instagram: asBoolean(process.env.INSTAGRAM_AUTOPUBLISH_ENABLED),
     tiktok: asBoolean(process.env.TIKTOK_AUTOPUBLISH_ENABLED),
@@ -978,6 +1479,11 @@ async function loadPublisherConfig(): Promise<PublisherConfig> {
   };
 
   if (enabledPlatforms.instagram) {
+    logPublisher('config.instagram.load.start', {
+      accessTokenSource: firstNonEmpty(process.env.INSTAGRAM_ACCESS_TOKEN) ? 'env' : 'ssm',
+      paramName: process.env.INSTAGRAM_ACCESS_TOKEN_PARAM,
+      igUserIdConfigured: !!normalizeKey(process.env.INSTAGRAM_IG_USER_ID),
+    });
     const accessToken = await getSecretValue({
       directValue: process.env.INSTAGRAM_ACCESS_TOKEN,
       paramName: process.env.INSTAGRAM_ACCESS_TOKEN_PARAM,
@@ -994,9 +1500,20 @@ async function loadPublisherConfig(): Promise<PublisherConfig> {
       apiVersion: firstNonEmpty(process.env.INSTAGRAM_GRAPH_API_VERSION, 'v23.0') || 'v23.0',
       shareToFeed: asBoolean(process.env.INSTAGRAM_SHARE_TO_FEED),
     };
+    logPublisher('config.instagram.load.complete', {
+      accessTokenConfigured: !!accessToken,
+      igUserId,
+      apiVersion: config.instagram.apiVersion,
+      shareToFeed: config.instagram.shareToFeed,
+    });
   }
 
   if (enabledPlatforms.tiktok) {
+    logPublisher('config.tiktok.load.start', {
+      accessTokenSource: firstNonEmpty(process.env.TIKTOK_ACCESS_TOKEN) ? 'env' : 'ssm',
+      paramName: process.env.TIKTOK_ACCESS_TOKEN_PARAM,
+      defaultPrivacyLevel: process.env.TIKTOK_DEFAULT_PRIVACY_LEVEL,
+    });
     const accessToken = await getSecretValue({
       directValue: process.env.TIKTOK_ACCESS_TOKEN,
       paramName: process.env.TIKTOK_ACCESS_TOKEN_PARAM,
@@ -1014,8 +1531,21 @@ async function loadPublisherConfig(): Promise<PublisherConfig> {
       disableDuet: asBoolean(process.env.TIKTOK_DISABLE_DUET),
       disableStitch: asBoolean(process.env.TIKTOK_DISABLE_STITCH),
     };
+    logPublisher('config.tiktok.load.complete', {
+      accessTokenConfigured: !!accessToken,
+      defaultPrivacyLevel: config.tiktok.defaultPrivacyLevel,
+      disableComment: config.tiktok.disableComment,
+      disableDuet: config.tiktok.disableDuet,
+      disableStitch: config.tiktok.disableStitch,
+    });
   }
 
+  logPublisher('config.load.complete', {
+    enabledPlatforms,
+    hasCaptionSuffix: !!config.captionSuffix,
+    instagramConfigured: !!config.instagram,
+    tiktokConfigured: !!config.tiktok,
+  });
   return config;
 }
 
@@ -1025,14 +1555,23 @@ async function getSecretValue(input: {
 }): Promise<string | undefined> {
   const directValue = firstNonEmpty(input.directValue);
   if (directValue && directValue !== 'SET_IN_SSM') {
+    logPublisher('secret.load.direct', {
+      hasDirectValue: true,
+    });
     return directValue;
   }
 
   const paramName = firstNonEmpty(input.paramName);
   if (!paramName) {
+    logPublisher('secret.load.missing_param_name', {
+      hasDirectValue: !!directValue,
+    });
     return undefined;
   }
 
+  logPublisher('secret.load.ssm.start', {
+    paramName,
+  });
   const result = await ssm.send(
     new GetParameterCommand({
       Name: paramName,
@@ -1041,6 +1580,11 @@ async function getSecretValue(input: {
   );
   const value = firstNonEmpty(result.Parameter?.Value);
 
+  logPublisher('secret.load.ssm.complete', {
+    paramName,
+    hasValue: !!value,
+    valueIgnoredAsPlaceholder: value === 'SET_IN_SSM',
+  });
   return value && value !== 'SET_IN_SSM' ? value : undefined;
 }
 
@@ -1048,6 +1592,10 @@ async function getStoredVideoObjectMeta(
   bucketName: string,
   bucketKey: string,
 ): Promise<{ sizeBytes: number; contentType?: string }> {
+  logPublisher('s3.head.start', {
+    bucketName,
+    bucketKey,
+  });
   const head = await s3.send(
     new HeadObjectCommand({
       Bucket: bucketName,
@@ -1057,9 +1605,21 @@ async function getStoredVideoObjectMeta(
   const sizeBytes = head.ContentLength;
 
   if (!sizeBytes || sizeBytes <= 0) {
+    logPublisher('s3.head.invalid_size', {
+      bucketName,
+      bucketKey,
+      contentLength: head.ContentLength,
+      contentType: head.ContentType,
+    });
     throw new Error('No pudimos resolver el tamaño actual del video en S3.');
   }
 
+  logPublisher('s3.head.complete', {
+    bucketName,
+    bucketKey,
+    sizeBytes,
+    contentType: head.ContentType,
+  });
   return {
     sizeBytes,
     ...(firstNonEmpty(head.ContentType) ? { contentType: firstNonEmpty(head.ContentType) } : {}),
@@ -1072,6 +1632,13 @@ async function readS3ByteRange(
   start: number,
   end: number,
 ): Promise<Uint8Array> {
+  logPublisher('s3.range.read.start', {
+    bucketName,
+    bucketKey,
+    start,
+    end,
+    range: `bytes=${start}-${end}`,
+  });
   const response = await s3.send(
     new GetObjectCommand({
       Bucket: bucketName,
@@ -1081,10 +1648,24 @@ async function readS3ByteRange(
   );
 
   if (!response.Body) {
+    logPublisher('s3.range.read.empty_body', {
+      bucketName,
+      bucketKey,
+      start,
+      end,
+    });
     throw new Error('S3 no devolvió contenido para el rango solicitado.');
   }
 
-  return readBodyToUint8Array(response.Body);
+  const bytes = await readBodyToUint8Array(response.Body);
+  logPublisher('s3.range.read.complete', {
+    bucketName,
+    bucketKey,
+    start,
+    end,
+    byteLength: bytes.byteLength,
+  });
+  return bytes;
 }
 
 async function readBodyToUint8Array(body: unknown): Promise<Uint8Array> {
@@ -1167,9 +1748,22 @@ function normalizeTikTokPrivacyLevel(value: unknown): TikTokPrivacyLevel | undef
 }
 
 async function fetchJson(url: string, init: RequestInit): Promise<Record<string, unknown>> {
+  logPublisher('http.fetch.start', {
+    endpoint: safeEndpoint(url),
+    method: init.method || 'GET',
+  });
   const response = await fetch(url, init);
   const payload = await parseJsonResponse(response);
   const topLevelError = asRecord(payload?.error);
+  logPublisher('http.fetch.response', {
+    endpoint: safeEndpoint(url),
+    method: init.method || 'GET',
+    status: response.status,
+    ok: response.ok,
+    payloadKeys: Object.keys(payload || {}),
+    errorCode: firstNonEmpty(asString(topLevelError?.code)),
+    errorMessage: firstNonEmpty(asString(topLevelError?.message)),
+  });
 
   if (!response.ok || (topLevelError && firstNonEmpty(asString(topLevelError.code)) !== 'ok' && firstNonEmpty(asString(topLevelError.message)))) {
     const message =
@@ -1178,6 +1772,12 @@ async function fetchJson(url: string, init: RequestInit): Promise<Record<string,
         asString((asRecord(payload?.error) || {}).error_user_msg),
         asString((asRecord(payload?.error) || {}).error_user_title),
       ) || `HTTP ${response.status}`;
+    logPublisher('http.fetch.error', {
+      endpoint: safeEndpoint(url),
+      method: init.method || 'GET',
+      status: response.status,
+      message,
+    });
     throw new Error(message);
   }
 
@@ -1187,12 +1787,21 @@ async function fetchJson(url: string, init: RequestInit): Promise<Record<string,
 async function parseJsonResponse(response: Response): Promise<Record<string, unknown>> {
   const text = await response.text();
   if (!text.trim()) {
+    logPublisher('http.fetch.empty_body', {
+      endpoint: safeEndpoint(response.url || ''),
+      status: response.status,
+    });
     return {};
   }
 
   try {
     return JSON.parse(text) as Record<string, unknown>;
   } catch (error) {
+    logPublisher('http.fetch.invalid_json', {
+      endpoint: safeEndpoint(response.url || ''),
+      status: response.status,
+      textPreview: text.slice(0, 180),
+    });
     throw new Error(`Respuesta JSON inválida de ${response.url || 'endpoint remoto'}.`);
   }
 }

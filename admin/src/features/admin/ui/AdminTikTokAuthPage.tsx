@@ -9,6 +9,7 @@ import type { AdminTikTokAuthStatusResponse } from '@/features/admin/model/types
 import { AdminLayout } from '@/features/admin/ui/AdminLayout'
 
 const TIKTOK_OAUTH_STATE_KEY = 'luva.admin.tiktok.oauth.state'
+const TIKTOK_OAUTH_CODE_VERIFIER_KEY = 'luva.admin.tiktok.oauth.codeVerifier'
 
 function formatDateTime(value?: string) {
   if (!value) {
@@ -34,9 +35,25 @@ function readStoredOAuthState() {
   }
 }
 
+function readStoredOAuthCodeVerifier() {
+  try {
+    return sessionStorage.getItem(TIKTOK_OAUTH_CODE_VERIFIER_KEY)
+  } catch {
+    return null
+  }
+}
+
 function writeStoredOAuthState(value: string) {
   try {
     sessionStorage.setItem(TIKTOK_OAUTH_STATE_KEY, value)
+  } catch {
+    // Ignore storage failures in browsers with restricted sessionStorage.
+  }
+}
+
+function writeStoredOAuthCodeVerifier(value: string) {
+  try {
+    sessionStorage.setItem(TIKTOK_OAUTH_CODE_VERIFIER_KEY, value)
   } catch {
     // Ignore storage failures in browsers with restricted sessionStorage.
   }
@@ -48,6 +65,19 @@ function clearStoredOAuthState() {
   } catch {
     // Ignore storage failures in browsers with restricted sessionStorage.
   }
+}
+
+function clearStoredOAuthCodeVerifier() {
+  try {
+    sessionStorage.removeItem(TIKTOK_OAUTH_CODE_VERIFIER_KEY)
+  } catch {
+    // Ignore storage failures in browsers with restricted sessionStorage.
+  }
+}
+
+function clearStoredOAuthSession() {
+  clearStoredOAuthState()
+  clearStoredOAuthCodeVerifier()
 }
 
 export function AdminTikTokAuthPage() {
@@ -133,7 +163,7 @@ export function AdminTikTokAuthPage() {
       if (callbackError) {
         setError(`TikTok devolvió un error en el callback: ${callbackError}`)
         setSearchParams({}, { replace: true })
-        clearStoredOAuthState()
+        clearStoredOAuthSession()
         return
       }
 
@@ -142,10 +172,18 @@ export function AdminTikTokAuthPage() {
       }
 
       const expectedState = readStoredOAuthState()
+      const codeVerifier = readStoredOAuthCodeVerifier()
       if (!expectedState || !callbackState || expectedState !== callbackState) {
         setError('El state devuelto por TikTok no coincide con el iniciado desde el portal.')
         setSearchParams({}, { replace: true })
-        clearStoredOAuthState()
+        clearStoredOAuthSession()
+        return
+      }
+
+      if (!codeVerifier) {
+        setError('No se encontró el code verifier PKCE para completar la autenticación de TikTok.')
+        setSearchParams({}, { replace: true })
+        clearStoredOAuthSession()
         return
       }
 
@@ -154,12 +192,12 @@ export function AdminTikTokAuthPage() {
       setMessage(undefined)
 
       try {
-        const result = await completeAdminTikTokAuth(callbackCode)
+        const result = await completeAdminTikTokAuth(callbackCode, codeVerifier)
         if (cancelled) {
           return
         }
 
-        clearStoredOAuthState()
+        clearStoredOAuthSession()
         setMessage(
           `TikTok quedó conectado. Access token vigente hasta ${formatDateTime(result.token.accessTokenExpiresAt)}.`,
         )
@@ -208,6 +246,7 @@ export function AdminTikTokAuthPage() {
     try {
       const result = await startAdminTikTokAuth()
       writeStoredOAuthState(result.state)
+      writeStoredOAuthCodeVerifier(result.codeVerifier)
       window.location.assign(result.authUrl)
     } catch (startError) {
       setError(

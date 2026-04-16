@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { createHash, randomBytes, randomUUID } from 'crypto';
 import { GetParameterCommand, PutParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 
 const ssm = new SSMClient({});
@@ -35,6 +35,7 @@ export type AdminTikTokAuthStatusResponse = {
 export type AdminTikTokAuthStartResponse = {
   authUrl: string;
   state: string;
+  codeVerifier: string;
   redirectUri: string;
   scopes: string[];
 };
@@ -90,17 +91,22 @@ export async function getAdminTikTokAuthStatus(): Promise<AdminTikTokAuthStatusR
 export async function createAdminTikTokAuthStart(): Promise<AdminTikTokAuthStartResponse> {
   const config = getTikTokOAuthConfig(true);
   const state = randomUUID();
+  const codeVerifier = createPkceCodeVerifier();
+  const codeChallenge = createPkceCodeChallenge(codeVerifier);
   const query = new URLSearchParams({
     client_key: config.clientKey,
     scope: config.scopes.join(','),
     response_type: 'code',
     redirect_uri: config.redirectUri,
     state,
+    code_challenge: codeChallenge,
+    code_challenge_method: 'S256',
   });
 
   return {
     authUrl: `https://www.tiktok.com/v2/auth/authorize/?${query.toString()}`,
     state,
+    codeVerifier,
     redirectUri: config.redirectUri,
     scopes: config.scopes,
   };
@@ -108,18 +114,25 @@ export async function createAdminTikTokAuthStart(): Promise<AdminTikTokAuthStart
 
 export async function completeAdminTikTokAuth(input: {
   code?: unknown;
+  codeVerifier?: unknown;
 }): Promise<AdminTikTokAuthCompleteResponse> {
   const code = asString(input.code)?.trim();
+  const codeVerifier = asString(input.codeVerifier)?.trim();
   const config = getTikTokOAuthConfig(true);
 
   if (!code) {
     throw new Error('INVALID_TIKTOK_CODE');
   }
 
+  if (!isValidPkceCodeVerifier(codeVerifier)) {
+    throw new Error('INVALID_TIKTOK_CODE_VERIFIER');
+  }
+
   const body = new URLSearchParams({
     client_key: config.clientKey,
     client_secret: config.clientSecret,
     code,
+    code_verifier: codeVerifier,
     grant_type: 'authorization_code',
     redirect_uri: config.redirectUri,
   });
@@ -292,6 +305,26 @@ function computeExpiry(now: string, seconds?: number): string | undefined {
   }
 
   return new Date(Date.parse(now) + seconds * 1000).toISOString();
+}
+
+function createPkceCodeVerifier(): string {
+  return base64UrlEncode(randomBytes(64));
+}
+
+function createPkceCodeChallenge(codeVerifier: string): string {
+  return base64UrlEncode(createHash('sha256').update(codeVerifier).digest());
+}
+
+function base64UrlEncode(value: Buffer): string {
+  return value
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '');
+}
+
+function isValidPkceCodeVerifier(value?: string): value is string {
+  return !!value && /^[A-Za-z0-9._~-]{43,128}$/.test(value);
 }
 
 function getTikTokAccessTokenParamName(): string {
