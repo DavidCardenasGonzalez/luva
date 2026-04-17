@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { appPaths } from '@/app/router/paths'
 import { getAdminVideoPreview, updateAdminVideo } from '@/features/admin/api/admin-client'
 import { useAdminVideos } from '@/features/admin/model/use-admin-videos'
 import type { AdminVideoStatus, AdminVideoSummary } from '@/features/admin/model/types'
@@ -229,6 +231,7 @@ export function AdminVideosPage() {
   const [calendarMonth, setCalendarMonth] = useState(getMonthStart(new Date()))
   const [isSaving, setIsSaving] = useState(false)
   const [isLoadingPreview, setIsLoadingPreview] = useState(false)
+  const [isDownloadingVideo, setIsDownloadingVideo] = useState(false)
   const [actionError, setActionError] = useState<string>()
   const [actionMessage, setActionMessage] = useState<string>()
   const [previewError, setPreviewError] = useState<string>()
@@ -322,6 +325,61 @@ export function AdminVideosPage() {
       setPreviewExpiresAt(undefined)
     } finally {
       setIsLoadingPreview(false)
+    }
+  }
+
+  const handleDownloadVideo = async () => {
+    if (!selectedVideo) {
+      return
+    }
+
+    setIsDownloadingVideo(true)
+    setActionError(undefined)
+    setActionMessage(undefined)
+
+    try {
+      const result = await getAdminVideoPreview(selectedVideo.storyId, selectedVideo.videoId)
+      const response = await fetch(result.previewUrl)
+
+      if (!response.ok) {
+        throw new Error(`No pudimos descargar el video. HTTP ${response.status}`)
+      }
+
+      const blob = await response.blob()
+      const objectUrl = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = objectUrl
+      anchor.download = selectedVideo.sourceVideoFileName || `${selectedVideo.storyId}.mp4`
+      document.body.append(anchor)
+      anchor.click()
+      anchor.remove()
+      URL.revokeObjectURL(objectUrl)
+      setActionMessage(`Descargamos "${selectedVideo.sourceVideoFileName || selectedVideo.title}".`)
+    } catch (downloadError) {
+      setActionError(
+        downloadError instanceof Error
+          ? downloadError.message
+          : 'No pudimos descargar el video seleccionado.',
+      )
+    } finally {
+      setIsDownloadingVideo(false)
+    }
+  }
+
+  const handleCopyCaption = async () => {
+    if (!selectedVideo?.caption) {
+      setActionError('Ese video no tiene caption para copiar.')
+      return
+    }
+
+    setActionError(undefined)
+    setActionMessage(undefined)
+
+    try {
+      await navigator.clipboard.writeText(selectedVideo.caption)
+      setActionMessage(`Copiamos el caption de "${selectedVideo.title}".`)
+    } catch {
+      setActionError('No pudimos copiar el caption al portapapeles.')
     }
   }
 
@@ -429,8 +487,12 @@ export function AdminVideosPage() {
                   <div className="admin-video-row-main">
                     <strong>{video.title}</strong>
                     <p>{video.storyId}</p>
+                    {video.caption ? <p>{video.caption}</p> : null}
                   </div>
                   <div className="admin-video-row-meta">
+                    <span className={video.hasCaption ? 'tag' : 'tag tag-muted'}>
+                      {video.hasCaption ? 'Con caption' : 'Sin caption'}
+                    </span>
                     <span className="admin-video-status-badge admin-video-status-por_programar">
                       {getVideoStatusLabel(video.status)}
                     </span>
@@ -576,6 +638,46 @@ export function AdminVideosPage() {
 
               <div className="admin-video-action-card">
                 <div className="admin-panel-head">
+                  <p className="eyebrow">Caption</p>
+                  <h3>Texto para publicación</h3>
+                </div>
+
+                <label className="admin-grant-field">
+                  <span>Caption</span>
+                  <textarea
+                    value={selectedVideo.caption || ''}
+                    readOnly
+                    rows={5}
+                    placeholder="Este video no tiene caption guardado."
+                  />
+                </label>
+
+                <div className="admin-action-row">
+                  <button
+                    type="button"
+                    className="btn secondary"
+                    onClick={() => {
+                      void handleCopyCaption()
+                    }}
+                    disabled={!selectedVideo.caption}
+                  >
+                    Copiar caption
+                  </button>
+                  <button
+                    type="button"
+                    className="btn secondary"
+                    onClick={() => {
+                      void handleDownloadVideo()
+                    }}
+                    disabled={isDownloadingVideo}
+                  >
+                    {isDownloadingVideo ? 'Descargando video...' : 'Descargar video'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="admin-video-action-card">
+                <div className="admin-panel-head">
                   <p className="eyebrow">Programación</p>
                   <h3>Asignar fecha y mover estado</h3>
                 </div>
@@ -611,6 +713,12 @@ export function AdminVideosPage() {
                 </div>
 
                 <div className="admin-action-row">
+                  <Link
+                    to={selectedVideo ? appPaths.videoEdit(selectedVideo.storyId, selectedVideo.videoId) : appPaths.videos}
+                    className="btn secondary"
+                  >
+                    Editar
+                  </Link>
                   <button
                     type="button"
                     className="btn secondary"

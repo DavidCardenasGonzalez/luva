@@ -15,8 +15,22 @@ import {
 import { AuthContext } from '@/features/auth/model/auth-context'
 import type { AuthMode, AuthProviderName, AuthState } from '@/features/auth/model/types'
 
+function isCognitoCallbackLocation(pathname: string, redirectUri?: string) {
+  if (!redirectUri || typeof window === 'undefined') {
+    return false
+  }
+
+  try {
+    const configuredUrl = new URL(redirectUri)
+    return configuredUrl.origin === window.location.origin && configuredUrl.pathname === pathname
+  } catch {
+    return false
+  }
+}
+
 export function AuthProvider({ children }: PropsWithChildren) {
   const authConfig = getAuthConfig()
+  const cognitoRedirectUri = authConfig.redirectUri
   const location = useLocation()
   const navigate = useNavigate()
   const [auth, setAuth] = useState<AuthState>({ isLoading: true })
@@ -38,7 +52,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
       const storedSession = await loadStoredSession()
 
       try {
-        if (hasAuthResponse(location.search)) {
+        if (
+          hasAuthResponse(location.search) &&
+          isCognitoCallbackLocation(location.pathname, cognitoRedirectUri)
+        ) {
           const result = await completeAuthFromUrl(location.search)
           if (cancelled) {
             return
@@ -104,7 +121,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     return () => {
       cancelled = true
     }
-  }, [location.search, navigate])
+  }, [cognitoRedirectUri, location.pathname, location.search, navigate])
 
   const startAuthFlow = (mode: AuthMode, provider: AuthProviderName, redirectPath?: string) => {
     setAuth((current) => ({

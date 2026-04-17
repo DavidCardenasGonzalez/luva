@@ -18,7 +18,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           "Eres un millonario arrogante en una cita de speed dating. Presumes de tu dinero, viajes y poder, y te gusta impresionar a la gente. En el fondo tiene un lado humano",
         caracterName: "Alexander Beaumont III",
         avatarImageUrl:
-          "https://i.pinimg.com/736x/91/35/66/91356652764c6400637ff4922ed111d3.jpg",
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260411071152-7ff0e587-6ccc-47e7-b28a-1acf27706088.png",
         caracterPrompt:
           "A tall, sharply dressed man in his mid-30s wearing an expensive tailored suit and a gold watch. He has slicked-back hair, a confident smirk, and exudes an air of superiority. He’s sitting in a luxurious lounge chair with a glass of champagne.",
         requirements: [
@@ -48,6 +48,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "date_ex_obsessed",
         title: "La cita con la chica obsesionada con su ex",
         sceneSummary: "Speed dating con una chica obsesionada con su ex.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260411063822-8d5a58ab-c6da-4eff-a710-9399328aa805.png",
         aiRole:
           "Eres una chica simpática pero completamente obsesionada con tu ex. Intentas seguir adelante aunque todo te recuerda a él.",
         caracterName: "Sophie Carter",
@@ -88,6 +90,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         aiRole:
           "Eres una persona extremadamente aburrida que habla solo de datos y detalles insignificantes. Tu tono es plano y monótono.",
         caracterName: "Nigel Smith",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260411065943-f27f16b8-351f-4c06-b7e0-4920f072a47c.png",
         caracterPrompt:
           "A man in his early 40s wearing a beige cardigan and glasses. He has a neutral facial expression",
         requirements: [
@@ -100,12 +104,12 @@ export const STORIES_SEED: StoryDefinition[] = [
             text: "Pide que explique un poco más sobre un tema.",
           },
           {
-            requirementId: "change_topic",
-            text: "Cambia el tema hacia algo personal.",
+            requirementId: "ask_pet",
+            text: "Pregunta si tiene alguna mascota.",
           },
           {
-            requirementId: "show_emotions",
-            text: "Usa “that sounds…” para reaccionar a lo que dice.",
+            requirementId: "that_sounds",
+            text: "Usa “that sounds…” para comentar sobre lo que dice.",
           },
           {
             requirementId: "by_the_way",
@@ -125,6 +129,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         aiRole:
           "Eres una persona hippie amante de la naturaleza, la espiritualidad y el universo. Hablas en metáforas y usas frases profundas.",
         caracterName: "Luna Starseed",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260411070143-c013cfcb-7262-471f-b2aa-268085d7a659.png",
         caracterPrompt:
           "A free-spirited person in their early 30s wearing colorful, flowing clothes and handmade jewelry. They have long wavy hair, carry crystals in a pouch, and speak with a calm, dreamy voice.",
         requirements: [
@@ -157,6 +163,8 @@ export const STORIES_SEED: StoryDefinition[] = [
       {
         missionId: "date_wants_to_marry",
         title: "La cita con quien quiere casarse mañana",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260411070442-e5995043-8fdd-41b1-ba2a-3371443898a3.png",
         sceneSummary:
           "Speed dating con una persona que quiere casarse lo antes posible.",
         aiRole:
@@ -186,7 +194,7 @@ export const STORIES_SEED: StoryDefinition[] = [
             text: "Usa “rush” (apresurarse).",
           },
           {
-            requirementId: "use_agreement",
+            requirementId: "use_same_page",
             text: "Usa “on the same page” para decir que estás de acuerdo con algo.",
           },
         ],
@@ -209,6 +217,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         aiRole:
           "Eres un agente de objetos perdidos en el aeropuerto, formal pero con un toque distraído y humorístico. Responde con información útil, mezcla profesionalismo con pequeñas distracciones y ofrece opciones prácticas.",
         caracterName: "Margo Finch",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260411072015-c14128d7-0f52-4762-af24-cf2f42010d11.png",
         caracterPrompt:
           "A middle-aged woman wearing a bright airport uniform and a slightly crooked name badge. She has round glasses, a friendly but flustered expression, and stands behind a cluttered lost-and-found desk surrounded by suitcases and sticky notes.",
         requirements: [
@@ -248,6 +258,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Rico Storm",
         caracterPrompt:
           "A lively, flamboyant man in colorful travel-worn clothes and a wide hat covered in pins. He carries a ukulele and has a big, welcoming grin. He’s standing in a busy gate area surrounded by chairs and small instruments.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260411172652-a0ca8a82-03f2-43c6-9e87-3800ec6bb8c7.png",
         requirements: [
           {
             requirementId: "accept_participation",
@@ -262,16 +274,16 @@ export const STORIES_SEED: StoryDefinition[] = [
             text: "Pregunta qué instrumento podrías usar.",
           },
           {
-            requirementId: "close_interaction",
-            text: "Cierra la interacción con buena actitud.",
-          },
-          {
-            requirementId: "ask_for_clarification",
+            requirementId: "use_do_I_need_to",
             text: "Usa “do I need to…?” para hacer alguna pregunta.",
           },
           {
-            requirementId: "use_summary",
-            text: "Usa “so I just…” para resumir instrucciones.",
+            requirementId: "use_so_I_just",
+            text: "Usa “so I just…” para resumir algo que te haya dicho.",
+          },
+          {
+            requirementId: "state_fun",
+            text: "Menciona que te divertiste.",
           },
         ],
       },
@@ -285,6 +297,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Officer Bex",
         caracterPrompt:
           "A uniformed customs officer with a clipboard, slightly rumpled hat, and a polite but puzzled expression. They stand near an inspection desk with posters about prohibited items behind them.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260411172730-725dd959-d5b5-4728-be23-f30fbcb2452f.png",
         requirements: [
           {
             requirementId: "state_purpose_of_trip",
@@ -299,15 +313,15 @@ export const STORIES_SEED: StoryDefinition[] = [
             text: "Di dónde te hospedarás.",
           },
           {
-            requirementId: "explain_question",
+            requirementId: "use_let_me_explain",
             text: "Usa “let me explain” para responder alguna pregunta.",
           },
           {
-            requirementId: "use_summary",
-            text: "Usa “so I just…” para resumir instrucciones.",
+            requirementId: "use_so_I_just",
+            text: "Usa “so I just…” para resumir algo que te haya dicho.",
           },
           {
-            requirementId: "declare_items",
+            requirementId: "use_restricted_items",
             text: "Usa “restricted items” al hablar de objetos prohibidos.",
           },
         ],
@@ -316,12 +330,14 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "airport_chaos_caffeine_crisis_barista",
         title: "La crisis del café",
         sceneSummary:
-          "Tu vuelo se retrasa otra vez y la cafetería está en caos: el barista es un inventor loco que prepara cafés con nombres ridículos. Necesitas conseguir un café y una conversación entretenida.",
+          "Tu vuelo se retrasa otra vez y la cafetería está en caos: el barista es un inventor loco. Necesitas conseguir un café y una conversación entretenida.",
         aiRole:
-          "Eres un barista creativo, hiperactivo y filosófico que inventa nombres extravagantes para bebidas. Mantén respuestas rápidas, juguetonas y ofrécele opciones al estudiante mientras lo animas a practicar frases útiles para pedir.",
+          "Eres un barista creativo, hiperactivo y filosófico. Mantén respuestas rápidas, juguetonas y ofrécele opciones al estudiante mientras lo animas a practicar frases útiles para pedir.",
         caracterName: "Bean Maestro",
         caracterPrompt:
           "A quirky barista wearing an apron splattered with colorful stains and a quirky beanie. He has animated hand gestures, a mischievous smile, and stands behind a counter with strange coffee gadgets and jars labeled with odd names.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260411172951-bb9bd936-63a9-433c-a5a8-03af21306de5.png",
         requirements: [
           {
             requirementId: "order_coffee",
@@ -336,15 +352,15 @@ export const STORIES_SEED: StoryDefinition[] = [
             text: "Pregunta si tienen opciones sin lácteos.",
           },
           {
-            requirementId: "complex_sentence_reason",
+            requirementId: "use_although",
             text: "Da una razón usando although.",
           },
           {
-            requirementId: "contrast_sentence",
+            requirementId: "use_whereas",
             text: "Contrasta ideas usando “whereas”.",
           },
           {
-            requirementId: "opinion_expression",
+            requirementId: "use_overwhelming",
             text: "Usa la palabra “overwhelming”.",
           },
         ],
@@ -353,9 +369,9 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "airport_chaos_stranded_family_negotiator",
         title: "La familia varada negocia",
         sceneSummary:
-          "Una familia necesita tu ayuda para reorganizar conexiones y te piden que medies con el personal del aeropuerto.",
+          "Lena Ortiz, una madre estresada con su familia varada en el aeropuerto, te pide ayuda para gestionar el caos: reorganizar conexiones, entender opciones y comunicarle al personal lo que necesitan.",
         aiRole:
-          "Eres una madre pragmática y un poco dramática que intenta coordinar a una familia estresada. Habla con urgencia pero de forma cooperativa, busca soluciones y responde a propuestas con prioridades concretas.",
+          "Eres Lena Ortiz, una madre pragmática y algo dramática con su familia varada en el aeropuerto. Le explicas tu situación al usuario (que actúa como mediador/ayudante), respondes sus preguntas con detalles concretos, reaccionas emocionalmente pero de forma colaborativa, y le das instrucciones sobre qué decirle al personal del aeropuerto.",
         caracterName: "Lena Ortiz",
         caracterPrompt:
           "A worried but determined parent in casual travel clothes, holding a toddler and several boarding passes. She has a slightly exhausted smile and stands near an information desk surrounded by suitcases and toys.",
@@ -378,11 +394,11 @@ export const STORIES_SEED: StoryDefinition[] = [
           },
           {
             requirementId: "cause_effect",
-            text: "Explica causa usando “due to(debido a)”.",
+            text: 'Explica una causa usando "due to" (debido a).',
           },
           {
             requirementId: "b2_verb_arrange",
-            text: "Usa el verbo “arrange”(organizar).",
+            text: 'Usa el verbo "arrange" (organizar).',
           },
         ],
       },
@@ -403,10 +419,12 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "Tu compañero practica la guitarra a las tres de la mañana y quiere que le cantes con él.",
         aiRole:
-          "Eres un compañero excéntrico y entusiasta que toca la guitarra a cualquier hora. Responde con energía exagerada, frases cortas y humor",
+          "Eres un compañero excéntrico y entusiasta que toca la guitarra a cualquier hora. Responde con energía exagerada, frases cortas y humor, pero acepta sugerencias razonables si el alumno las propone.",
         caracterName: "Marty Strings",
         caracterPrompt:
           "A lanky young man with wild curly hair, wearing a faded band T-shirt and ripped jeans. He holds an electric guitar slung low, smiling wildly, in a cluttered living room filled with posters and empty coffee cups. He looks passionate and a little oblivious to social norms.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412175310-d2384c97-45bd-4d6f-927d-8beb004604b3.png",
         requirements: [
           {
             requirementId: "ask_practice_duration",
@@ -417,8 +435,8 @@ export const STORIES_SEED: StoryDefinition[] = [
             text: "Explica que tienes que levantarte temprano.",
           },
           {
-            requirementId: "offer_schedule",
-            text: "Propón un horario específico para practicar.",
+            requirementId: "ask_practice_end_time",
+            text: "Pide si podría no practicar despues de las 10 p.m.",
           },
           {
             requirementId: "indirect_request",
@@ -440,10 +458,12 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "Encuentras un recipiente sospechoso con mal olor y debes preguntar a tu roommate.",
         aiRole:
-          "Eres un chef aficionado y algo teatral sobre tus creaciones. Hablas con orgullo y misterio, usando metáforas culinarias; acepta preguntas y explica ingredientes si se le presiona.",
+          "Eres un chef aficionado que te gusta hacer experimentos culinarios aunque a veces sean asquerosos. Te gusta usar metáforas culinarias.",
         caracterName: "Chef Cosmo",
         caracterPrompt:
           "A quirky person in a flour-dusted apron, wearing mismatched socks and a bandana. They hold a mysterious Tupperware with a proud grin, standing in a small but chaotic kitchen full of herbs and strange jars.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412175825-0e4c77df-98df-484a-aad9-6ea5e9a8ec12.png",
         requirements: [
           {
             requirementId: "ask_smell",
@@ -462,8 +482,8 @@ export const STORIES_SEED: StoryDefinition[] = [
             text: "Usa el idiom “fishy”(Sospechoso).",
           },
           {
-            requirementId: "phrasal_figure_out",
-            text: "Usa el phrasal verb “figure out”(averiguar).",
+            requirementId: "use_figure_out",
+            text: "Usa el phrasal verb “figure out”",
           },
           {
             requirementId: "polite_opinion",
@@ -481,6 +501,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Lola Flame",
         caracterPrompt:
           "A confident person with colorful hair wearing a leather jacket covered in pins, cradling a small creature with tiny wings that emits a faint glow. They stand in a hallway with scorch marks and a mischievous smile.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412175934-0d0520fb-8483-49ba-bd94-412275dab612.png",
         requirements: [
           {
             requirementId: "ask_pet_origin",
@@ -518,6 +540,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Timetable Tina",
         caracterPrompt:
           "A neat person in a crisp button-down shirt and glasses, carrying a clipboard and a marker. She stands by a whiteboard with post-it notes and a drawn timetable, looking determined and slightly anxious.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412180759-9b32471c-5e58-4e30-a936-4937812e5daf.png",
         requirements: [
           {
             requirementId: "ask_morning_need",
@@ -555,6 +579,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Party Pete",
         caracterPrompt:
           "A cheerful person in a bright Hawaiian shirt with a homemade banner behind them and a plate of dubious snacks. They grin broadly, arms open as if welcoming everyone, in a messy living room full of balloons.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412180930-fc1e606c-a113-4ff9-9dea-0c822d8ca19a.png",
         requirements: [
           {
             requirementId: "ask_guest_count",
@@ -599,10 +625,12 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "El camarero trae un plato que no pediste y parece sinceramente confundido — y ligeramente culpable.",
         aiRole:
-          "Eres un camarero distraído pero amable que intenta arreglar el error. Habla con humor, admite equivocaciones y ofrece soluciones, pero evita sonar sumiso.",
+          "Eres un camarero distraído pero amable que intenta arreglar el error. Habla con humor, admite equivocaciones y ofrece soluciones. Muy autocritico",
         caracterName: "Marty",
         caracterPrompt:
           "A young waiter with a slightly rumpled white shirt and a crooked bow tie. He has an apologetic smile, messy hair, and holds a tray with a wrong dish. The setting is a dimly lit, elegant restaurant with clinking glasses.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412182337-bf538009-9d08-435b-8a07-fe69a52112fe.png",
         requirements: [
           {
             requirementId: "comment_wrong_dish",
@@ -617,16 +645,16 @@ export const STORIES_SEED: StoryDefinition[] = [
             text: "Agradece el esfuerzo por arreglarlo.",
           },
           {
-            requirementId: "phrasal_bring_back",
+            requirementId: "use_bring_back",
             text: "Usa el phrasal verb “bring back”.",
           },
           {
-            requirementId: "phrasal_mix_up",
+            requirementId: "use_mix_up",
             text: "Usa el phrasal verb “mix up”.",
           },
           {
-            requirementId: "indirect_complaint",
-            text: "Haz una queja usando “I was wondering if…”",
+            requirementId: "use_wondering",
+            text: "Usa la frase “I was wondering if…”",
           },
         ],
       },
@@ -636,10 +664,12 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "Recibes un plato con un nombre extraño y nadie sabe qué ingredientes contiene, pides hablar con el chef.",
         aiRole:
-          "Eres un chef curioso y un poco teatral que explora el menú usando lenguaje imaginativo.",
-        caracterName: "Luna",
+          "Eres una chef curiosa y un poco teatral. Que disfruta hacer experimentos con la comida. Tienes una actitud simpática y encantadora.",
+        caracterName: "Lory Splash",
         caracterPrompt:
           "A quirky diner in a colorful scarf, leaning over the menu with wide eyes. She has playful makeup, a notebook for notes, and sits at a candlelit table surrounded by cookbook sketches.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412182410-7ec354ea-8399-459b-86c1-5b32067f04f9.png",
         requirements: [
           {
             requirementId: "ask_main_component",
@@ -677,6 +707,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Chef Marco",
         caracterPrompt:
           "A middle-aged chef in a stained white apron and a tall chef's hat, arms crossed and an intense look. He stands under warm kitchen lights with a skillet in hand and steam rising behind him.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412182504-7d2537c9-b80a-4297-8302-bfd045e3ec79.png",
         requirements: [
           {
             requirementId: "express_disappointment",
@@ -710,10 +742,12 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "Visitas un restaurante con un crítico famoso. Él hace comentarios exagerados sobre cada bocado y te desafía a describir el sabor con la misma floritura.",
         aiRole:
-          "Eres un crítico de comida pretencioso pero divertido. Usa descripciones floridas, hace preguntas retóricas y provoca discusión sobre sabor y experiencia.",
+          "Eres una crítica de fama mundial de comida, pretenciosa pero divertida. Te gusta que el resto del mundo entienda el arte de la gastronomía.",
         caracterName: "Veronica Slate",
         caracterPrompt:
           "A fashionable food critic wearing a stylish coat and reading glasses perched on her nose. She has an elegant posture, a notebook full of notes, and a tiny espresso cup on the table.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412182540-61b3a111-952f-49a9-81c3-05c97243b9c1.png",
         requirements: [
           {
             requirementId: "describe_taste",
@@ -728,8 +762,8 @@ export const STORIES_SEED: StoryDefinition[] = [
             text: "Pregunta cómo lo calificaría.",
           },
           {
-            requirementId: "use_descriptive_language",
-            text: "Habla del sabor de una forma pretenciosa.",
+            requirementId: "express_feelings",
+            text: "Expresa que te hace sentir el plato.",
           },
           {
             requirementId: "ask_for_opinion",
@@ -748,33 +782,35 @@ export const STORIES_SEED: StoryDefinition[] = [
           "Eres un cliente de un restaurante y el sommelier insiste en maridar tu comida con vinos raros y hace bromas extrañas sobre cada cosecha.",
         aiRole:
           "Eres un sommelier entusiasta y un poco bromista. Sugiere maridajes con confianza, explica notas de cata sencillas y responde de forma educada cuando el cliente no bebe alcohol.",
-        caracterName: "Simon",
+        caracterName: "Simon Becker",
         caracterPrompt:
           "A cheerful sommelier in a dark vest and bow tie, holding a wine bottle and a tasting glass. He smiles broadly, with a slightly flushed face, standing beside a well-stocked wine cabinet.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412182606-bddb651c-9215-4a79-b0f1-558dad8d88a0.png",
         requirements: [
           {
             requirementId: "ask_red_or_white",
             text: "Pregunta si recomienda vino tinto o blanco.",
           },
           {
-            requirementId: "ask_body",
-            text: "Pregunta si el vino es ligero, medio o con cuerpo.",
+            requirementId: "ask_full_bottle",
+            text: "Pregunta si no sería mejor pedir la botella completa.",
           },
           {
             requirementId: "ask_price_range",
             text: "Pregunta el rango de precios.",
           },
           {
-            requirementId: "thank_recommendation",
-            text: "Agradece la recomendación.",
-          },
-          {
-            requirementId: "ask_popular_choice",
-            text: "Pregunta cuál es la elección más popular.",
+            requirementId: "express_feelings",
+            text: "Menciona que no quieres acabar ebrio.",
           },
           {
             requirementId: "phrasal_go_with",
             text: "Usa el phrasal verb “go with”.",
+          },
+          {
+            requirementId: "thank_recommendation",
+            text: "Agradece la recomendación.",
           },
         ],
       },
@@ -782,7 +818,7 @@ export const STORIES_SEED: StoryDefinition[] = [
   },
   {
     storyId: "job_interview_blues",
-    title: "La entrevista más rara del mundo",
+    title: "Entrevistas de trabajo",
     summary:
       "Tienes una entrevista de trabajo con un jefe muy excéntrico y preguntas inesperadas.",
     level: "B2",
@@ -798,6 +834,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Mr. Cardwell",
         caracterPrompt:
           "A middle-aged man with a mischievous grin, wearing a vintage waistcoat and a pocket watch. He performs a card trick at a small wooden table in a dimly lit office, with a faint smell of pipe tobacco and a cluttered bookshelf behind him.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260413000505-4af4b36a-f834-4320-8d29-184850e3de16.png",
         requirements: [
           {
             requirementId: "state_experience_years",
@@ -827,13 +865,15 @@ export const STORIES_SEED: StoryDefinition[] = [
       },
       {
         missionId: "job_interview_blues_weird_questionnaire",
-        title: "Cuestionario absurdo",
+        title: "Entrevista Fan de la Compañía",
         sceneSummary: "Estas teniendo una entrevista de trabajo",
         aiRole:
           "Eres un entrevistador que ama locamente la empresa en la que trabaja, y quiere saber por qué te interesa formar parte de ella.",
-        caracterName: "Dr. Oddly",
+        caracterName: "Elena Hale",
         caracterPrompt:
           "A quirky professor-like figure wearing round glasses and a colorful bow tie. He holds a clipboard covered in stickers, stands in front of a whiteboard scribbled with strange diagrams, and smiles as if every question is a puzzle.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260413000624-1083b219-c66d-469b-9475-c111afd36dd7.png",
         requirements: [
           {
             requirementId: "why_company",
@@ -863,7 +903,7 @@ export const STORIES_SEED: StoryDefinition[] = [
       },
       {
         missionId: "job_interview_blues_humor_test",
-        title: "Prueba de humor",
+        title: "Explica tus fortalezas",
         sceneSummary:
           "Estas en una entrevista laboral donde el entrevistador quiere conocer tus fortalezas.",
         aiRole:
@@ -871,6 +911,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Captain Quip",
         caracterPrompt:
           "A bearded man in a slightly rumpled blazer and a colorful scarf, sitting behind a desk with novelty knick-knacks. He leans forward with an amused expression as if about to tell a joke, surrounded by posters of vintage comedy acts.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260413000730-53c024ec-955a-4dcf-b8d2-78052cd49fa2.png",
         requirements: [
           {
             requirementId: "describe_strength",
@@ -908,6 +950,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Ms. Ledger",
         caracterPrompt:
           "A composed woman in her early 40s wearing a smart blazer and subtle jewelry. She sits at a tidy desk with a laptop open, her expression attentive and encouraging as she leans slightly forward to listen.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260413000803-575a47a0-1a18-4202-92e2-897ada8f2a8d.png",
         requirements: [
           {
             requirementId: "describe_mistake",
@@ -922,8 +966,8 @@ export const STORIES_SEED: StoryDefinition[] = [
             text: "Describe una debilidad profesional.",
           },
           {
-            requirementId: "describe_weakness_improvement",
-            text: "Describe como una habilidad puede ser una fortaleza.",
+            requirementId: "acknowledge_mistakes",
+            text: "Menciona que no tienes problemas con reconocer cuando cometes un error.",
           },
           {
             requirementId: "habit_phrase",
@@ -942,12 +986,16 @@ export const STORIES_SEED: StoryDefinition[] = [
           "La entrevista entra en la fase final: se discuten salario, beneficios y condiciones. Debes defender tu valor profesional y llegar a un acuerdo equilibrado.",
         aiRole:
           "Eres un gerente de contratación profesional y estratégico. Presentas una oferta inicial, escuchas los argumentos del candidato y negocias salario, beneficios y condiciones con un tono respetuoso y realista.",
-        caracterName: "Lady Bargain",
+        caracterName: "Rudy Bargain",
         caracterPrompt:
           "An elegant, eccentric executive wearing a bright patterned jacket and oversized glasses. She sits at a long table with a bowl of exotic snacks and a stack of benefit brochures, smiling as she listens to offers.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260413000832-28002c5b-0160-46ca-b187-6a448d6509a8.png",
+        videoIntro:
+          "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260414011420-c5882b68-8b1b-4675-8f17-701fe883ec8c.mp4",
         requirements: [
           {
-            requirementId: "ask_budget_range",
+            requirementId: "ask_budget",
             text: "Pregunta cuál es el presupuesto para el puesto.",
           },
           {
@@ -993,6 +1041,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Mr. Hush",
         caracterPrompt:
           "A slender middle-aged man wearing a vintage cardigan and a pocket watch. He has soft gray hair, intense eyes, and a knowing smile. He stands in a dim hallway with warm, old-fashioned lighting, leaning slightly forward as if sharing secrets.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260414030720-00e5b902-2d31-4457-8507-1740388e7f86.png",
         requirements: [
           {
             requirementId: "confirm_checkin_time",
@@ -1026,6 +1076,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Mopilda",
         caracterPrompt:
           "A middle-aged woman in a floral dress with rubber gloves and an old-fashioned cleaning cart. Her expression is cheerful but distant, as if half-listening to another world. She stands in a sunlit, slightly dusty kitchen.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260414031045-8b40db58-8e75-42de-82de-d79356c3c98b.png",
         requirements: [
           {
             requirementId: "ask_personal_history",
@@ -1058,6 +1110,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Professor Tinker",
         caracterPrompt:
           "A quirky older man with messy hair, round glasses, and a stained lab coat covered in pocket gadgets. He holds a peculiar handheld device with blinking lights. The background shows a cluttered workshop with sketches and tools.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260414031155-edaa5036-0100-45aa-afde-71795c722c96.png",
         requirements: [
           {
             requirementId: "ask_device_purpose",
@@ -1072,12 +1126,16 @@ export const STORIES_SEED: StoryDefinition[] = [
             text: "Pregunta cuánto dura el experimento.",
           },
           {
-            requirementId: "step_phrase",
-            text: "Usa una step phrase “First…, then…, finally…”",
-          },
-          {
             requirementId: "phrasal_try_out",
             text: "Usa el phrasal verb “try out”.",
+          },
+          {
+            requirementId: "use_give_it_a_try",
+            text: "Usa el phrasal verb “give it a try”.",
+          },
+          {
+            requirementId: "use_let_me_know",
+            text: "Usa la frase “let me know” para ofrecer ayuda.",
           },
         ],
       },
@@ -1091,6 +1149,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Ms. Purrington",
         caracterPrompt:
           "A cheerful woman in a cozy cardigan holding a large tabby cat. She smiles warmly and gestures as if the cat is speaking. The room is cozy with cushions, a teapot, and a window showing a rainy street.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260414031347-c7e61130-7df7-460e-974b-1d60412ab807.png",
         requirements: [
           {
             requirementId: "describe_current_mood",
@@ -1120,10 +1180,12 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "A medianoche oyes golpes y aparece un vecino con pijama y una lámpara. Está obsesionado con el reloj antiguo del salón y te arrastra a una conversación sobre tiempo y arrepentimientos.",
         aiRole:
-          "Eres el vecino nocturno, melancólico y algo teatral. Habla pausado, usa reflexiones personales y preguntas abiertas para provocar conversación; permite al alumno expresar opiniones y recuerdos.",
+          "Eres el vecino nocturno y melancólico. Habla pausado, usa reflexiones personales y preguntas abiertas para provocar conversación;",
         caracterName: "Noah Night",
         caracterPrompt:
           "A sleepy-looking young man in striped pajamas holding a small lamp. He has messy hair, a warm but tired smile, and leans against the hallway doorframe. The corridor is dim with moonlight filtering in.",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260414031447-4406a098-6ea7-4e28-851d-f123f6b249b3.png",
         requirements: [
           {
             requirementId: "ask_clock_concern",
@@ -1138,11 +1200,11 @@ export const STORIES_SEED: StoryDefinition[] = [
             text: "Anímalo a aceptar el pasado.",
           },
           {
-            requirementId: "soft_advice_phrase",
+            requirementId: "use_have_you_considered",
             text: "Usa “Have you considered…?”",
           },
           {
-            requirementId: "phrasal_move_on",
+            requirementId: "use_move_on",
             text: "Usa el phrasal verb “move on”.",
           },
         ],
@@ -1164,7 +1226,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "Te topas con un autoproclamado guía del festival que sabe poco sobre el lugar pero mucho sobre historias absurdas. Debes encontrar la salida entre sus relatos.",
         aiRole:
-          "Eres un guía improvisado y exagerado: hablador, dramático y con tendencia a inventar hechos increíbles.",
+          "Eres un guía improvisado y exagerado: hablador y con tendencia a inventar hechos increíbles.",
         caracterName: "Marty the Guide",
         caracterPrompt:
           "A middle-aged man wearing a bright, mismatched festival vest covered in badges, with a wide-brimmed hat and a megaphone around his neck. His expression is enthusiastic and slightly bewildered, standing in a crowded festival lane with colorful tents behind him.",
@@ -1226,18 +1288,18 @@ export const STORIES_SEED: StoryDefinition[] = [
       },
       {
         missionId: "festival_confusion_mystical_vendor",
-        title: "La tarotista del pogo",
+        title: "Predicciones desde el mas allá",
         sceneSummary:
           "Una tarotista te ofrece una predicción. Debes sacar información práctica sin caer en supersticiones locas.",
         aiRole:
-          "Eres una tarotista excéntrica y teatral, mitad espiritual. Usa metáforas místicas y humor, pero proporciona al menos una recomendación concreta y verificable cuando se te pida.",
+          "Eres una tarotista excéntrica y teatral, mitad espiritual. Usa bastante humor, te gusta meterte en la vida de los demas.",
         caracterName: "Madame Twirl",
         caracterPrompt:
           "A flamboyant fortune-teller wearing colorful scarves, glittery makeup, and fingerless gloves. She sits at a small round table with tarot cards and a portable speaker playing energetic music. Her expression mixes mystery and playful intensity.",
         requirements: [
           {
             requirementId: "clarify_prediction",
-            text: "Pide que aclare su predicción y cómo se relaciona específicamente con tu situación en el festival.",
+            text: "Pide que aclare su predicción.",
           },
           {
             requirementId: "verify_energy_advice",
@@ -5616,19 +5678,19 @@ export const STORIES_SEED: StoryDefinition[] = [
             requirementId: "ask_opinion",
             text: "Pregunta la opinión del sombrero sobre algo cotidiano.",
           },
-                  {
+          {
             requirementId: "conversation_pedir_anecdota_turista",
             text: "Pídele una anécdota concreta sobre un turista.",
           },
-                {
+          {
             requirementId: "conversation_pedir_consejo_multas",
             text: "Solicita un consejo práctico para evitar multas de estacionamiento.",
           },
-                    {
+          {
             requirementId: "english_use_tourist_trap",
             text: "Usa la expresión 'tourist trap'.",
           },
-                {
+          {
             requirementId: "english_idiom_on_the_fence",
             text: "Declara que estás 'on the fence' sobre un tema.",
           },
@@ -5645,7 +5707,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterPrompt:
           "A person painted in silver with a classic statue pose, wearing a toga-like outfit and standing on a small pedestal. The expression is solemn yet slightly mischievous, with city shoppers and coins scattered at the base.",
         requirements: [
-                    {
+          {
             requirementId: "conversation_aclarar_exigencia_propina",
             text: "Pide que la estatua explique con claridad cuánto exige",
           },
@@ -5657,7 +5719,7 @@ export const STORIES_SEED: StoryDefinition[] = [
             requirementId: "conversation_mencionar_injusticia",
             text: "Menciona que te parece injusta la cantidad exigida.",
           },
-               {
+          {
             requirementId: "english_usar_collocation_fair_and_square",
             text: 'Usa la collocation "fair and square" para insistir en que el trato sea justo.',
           },
@@ -5682,7 +5744,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterPrompt:
           "A flamboyant bandleader in a sequined jacket and oversized sunglasses, holding a megaphone and standing on a small stage with mismatched instruments around. He smiles wildly as the crowd gathers and colorful confetti hangs in the air.",
         requirements: [
-                    {
+          {
             requirementId: "conversation_confirmar_tema_coro",
             text: "Pregunta al líder cuál es el tema del coro.",
           },
@@ -5694,7 +5756,7 @@ export const STORIES_SEED: StoryDefinition[] = [
             requirementId: "english_join_in",
             text: 'Emplea el phrasal verb "join in" para invitar al público a participar.',
           },
-           {
+          {
             requirementId: "english_warm_up_my_voice",
             text: 'Emplea la expresión "warm up my voice" al pedir tiempo para prepararte.',
           },

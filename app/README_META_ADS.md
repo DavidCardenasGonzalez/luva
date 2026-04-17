@@ -19,7 +19,7 @@ La implementacion actual prioriza atribucion y optimizacion de revenue para un p
 1. Usa `Subscribe` como evento final de revenue cuando ya tengas volumen suficiente.
 2. Si todavia no tienes suficiente senal de suscripciones, optimiza primero a `InitiatedCheckout`.
 3. Usa `luva_mission_start`, `luva_mission_complete` y `luva_practice_start` para entender engagement y correlacion con conversion.
-4. Usa `ViewedContent` del paywall solo para diagnostico del funnel, no como evento final de optimizacion.
+4. Usa `ViewedContent` para paywall, practicas y misiones como senal estandar de contenido visto; mantenlo como diagnostico del funnel mientras no haya volumen suficiente para optimizar revenue.
 5. Manten el prompt de ATT fuera del cold start. En esta app se pide en la primera vista del paywall para no degradar onboarding.
 6. Segmenta analisis por origen del paywall. Ya dejamos etiquetados estos entry points:
    - `home_banner`
@@ -37,10 +37,12 @@ La implementacion actual prioriza atribucion y optimizacion de revenue para un p
 | Evento Meta | Cuando se dispara | Para que sirve |
 | --- | --- | --- |
 | `fb_mobile_activate_app` | Auto log del SDK | Instalacion y activacion |
+| `ViewedContent` | Cuando se abre una practica | Senal estandar de contenido educativo visto |
+| `ViewedContent` | Cuando el usuario entra a una mision narrativa | Senal estandar de mision vista |
 | `luva_practice_start` | Cuando se abre una sesion de practica | Medir activacion de aprendizaje |
 | `luva_mission_start` | Cuando el usuario entra a una mision narrativa | Medir engagement temprano |
 | `luva_mission_complete` | Cuando backend confirma `missionCompleted` | Medir progreso de alto valor |
-| `ViewedContent` | Cuando se abre el paywall | Diagnostico de funnel |
+| `ViewedContent` | Cuando se abre el paywall | Diagnostico de funnel de monetizacion |
 | `InitiatedCheckout` | Cuando el usuario toca un plan | Senal temprana de intencion |
 | `Subscribe` | Cuando `RevenueCat` confirma la compra | Revenue / optimizacion final |
 
@@ -119,8 +121,8 @@ Con esta implementacion no estas pidiendo permisos de Facebook Login ni scopes d
 1. Abre la app nativa compilada, no Expo Go.
 2. Navega a un punto que abra el paywall.
 3. En iOS, confirma que el prompt de ATT aparece la primera vez que se llega al paywall.
-4. Abre una practica y revisa `luva_practice_start`.
-5. Entra a una mision y revisa `luva_mission_start`.
+4. Abre una practica y revisa `ViewedContent` con `fb_content_type=practice_card`, `practice_story` o `practice_generic`, ademas de `luva_practice_start`.
+5. Entra a una mision y revisa `ViewedContent` con `fb_content_type=story_mission`, ademas de `luva_mission_start`.
 6. Completa una mision y revisa `luva_mission_complete`.
 7. Toca un plan y revisa `InitiatedCheckout`.
 8. Completa una compra sandbox/test y revisa `Subscribe`.

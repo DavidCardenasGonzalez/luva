@@ -34,6 +34,7 @@ import {
   AppVersionCheckStatus,
 } from "../types";
 import { STORIES_SEED } from "../data/stories-seed";
+import { listPublicFeedPosts } from "../feed-posts";
 import { validatePromoCode } from "../promo-codes";
 
 const s3 = new S3Client({});
@@ -118,6 +119,7 @@ function computeStoriesVersion(stories: StoryDefinition[]): string {
       caracterName: mission.caracterName || '',
       caracterPrompt: mission.caracterPrompt || '',
       avatarImageUrl: mission.avatarImageUrl || '',
+      videoIntro: mission.videoIntro || '',
       requirements: (mission.requirements || []).map((req) => ({
         requirementId: req.requirementId,
         text: req.text,
@@ -301,6 +303,12 @@ function sanitizeStoryMission(input: any): StoryMission | undefined {
       : typeof input.avatar_image_url === 'string'
       ? input.avatar_image_url
       : undefined;
+  const videoIntro =
+    typeof input.videoIntro === 'string'
+      ? input.videoIntro
+      : typeof input.video_intro === 'string'
+      ? input.video_intro
+      : undefined;
   const requirementsRaw = Array.isArray(input.requirements) ? input.requirements : [];
   const requirements = requirementsRaw
     .map((req: any) => sanitizeStoryRequirement(req))
@@ -313,6 +321,7 @@ function sanitizeStoryMission(input: any): StoryMission | undefined {
     caracterName,
     caracterPrompt,
     avatarImageUrl,
+    videoIntro,
     requirements,
   };
 }
@@ -358,7 +367,7 @@ function badRequest(message: string): ApiResponse {
 
 const ROUTE_PREFIX = "/v1";
 const APP_VERSION_POLICY = {
-  latestVersion: "1.1.6",
+  latestVersion: "1.1.7",
   recommendedMinimumVersion: "1.1.3",
   minimumSupportedVersion: "1.1.3",
   iosStoreUrl: "https://apps.apple.com/us/app/luva-ingles/id6758112881",
@@ -548,6 +557,10 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       return json(200, { version, items: stories });
     }
 
+    if (method === "GET" && path === `${ROUTE_PREFIX}/feed/posts`) {
+      return json(200, await listPublicFeedPosts());
+    }
+
     const storyDetail = path.match(/^\/v1\/stories\/([^/]+)$/);
     if (method === "GET" && storyDetail) {
       const storyId = storyDetail[1];
@@ -570,6 +583,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
           caracterName: mission.caracterName,
           caracterPrompt: mission.caracterPrompt,
           avatarImageUrl: mission.avatarImageUrl,
+          videoIntro: mission.videoIntro,
           requirements: initialRequirementStates(mission),
         })) || [],
       });
@@ -1129,11 +1143,10 @@ async function advanceStoryMission(
     sessionState.requirements.every((req) => missionRequirementIds.has(req.requirementId))
       ? sessionState.requirements
       : [];
-  let clientPersistedRequirements =
+  const clientPersistedRequirements =
     Array.isArray(body.persistedRequirements) && body.persistedRequirements.length
       ? alignRequirementStates(mission, body.persistedRequirements)
       : [];
-  const persistedMissionCompleted = body.persistedMissionCompleted === true;
   try {
     const missionEval = await evaluateStoryMissionProgress(
       story,
@@ -1178,15 +1191,6 @@ async function advanceStoryMission(
   if (clientPersistedRequirements.length) {
     requirements = mergeRequirementProgress(clientPersistedRequirements, requirements);
   }
-  if (persistedMissionCompleted && (!clientPersistedRequirements.length || clientPersistedRequirements.some((req) => !req.met))) {
-    clientPersistedRequirements = (mission.requirements || []).map((req) => ({
-      requirementId: req.requirementId,
-      text: req.text,
-      met: true,
-      feedback: 'Listo, requisito cubierto.',
-    }));
-    requirements = mergeRequirementProgress(clientPersistedRequirements, requirements);
-  }
 
   let aiReply = 'Thanks for sharing! Could you add a bit more detail?';
   try {
@@ -1215,14 +1219,6 @@ async function advanceStoryMission(
   }
 
   let missionCompleted = requirements.every((req) => req.met);
-  if (!missionCompleted && persistedMissionCompleted) {
-    requirements = requirements.map((req) => ({
-      ...req,
-      met: true,
-      feedback: req.feedback || 'Listo, requisito cubierto.',
-    }));
-    missionCompleted = true;
-  }
   const nextIndex = missionCompleted ? targetIndex + 1 : targetIndex;
   const storyCompleted = missionCompleted && nextIndex >= missions.length;
 
@@ -1470,10 +1466,12 @@ Rules:
 - Just evaluate the last student message English, don’t evaluate if the message helps to achieve the requirements.
 - Use Spanish for errors and feedback texts.
 - Evaluate the student's last message using the full conversation context (only to interpret meaning, not for grading progress).
+- Do not mark obvious typos, capitalization, or apostrophe mistakes as errors unless they change the meaning or make the message hard to understand.
+- Mark a requirement as met when the student's intention clearly satisfies it, even if the sentence has small grammar or word-order mistakes.
 - Link errors to issues in the last message (max 3).
-- Provide up to 2 natural English alternatives for the last message.
+- Provide up to 2 natural English alternatives for the last message; if it helps the user improve their English, you may add a short optional phrase in parentheses, and that phrase may be in Spanish.
 - Keep the requirements array in the original order.
-- objectives_met must be true only if every requirement is met across the conversation. only 
+- objectives_met must be true only if every requirement is met across the conversation.
 - Do not include any extra keys or commentary.
 
 Language evaluation rubric (for the last message only):
@@ -1781,7 +1779,7 @@ async function generateStoryMissionFeedback(
     : undefined;
   const conversation = history.slice(-STORY_HISTORY_LIMIT);
   const conversationText = conversation
-    .map((msg) => `${msg.role === 'user' ? 'Student' : 'Guide'}: ${msg.content}`)
+    .map((msg) => `${msg.role === 'user' ? 'Student (evaluate)' : 'Guide (context only)'}: ${msg.content}`)
     .join('\n')
     .trim();
   const systemPrompt = `
@@ -1802,7 +1800,8 @@ IMPORTANT:
   explain why and suggest a more natural alternative.
 - Avoid generic feedback like "Good job overall."
 - Be specific and practical.
-- Base everything on the entire conversation.
+- Use the entire conversation for context, but evaluate and correct only Student lines.
+- Treat Guide lines as context only; never give feedback on their English.
 
 Return ONLY JSON with the exact shape:
 

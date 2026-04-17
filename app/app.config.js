@@ -9,6 +9,11 @@ const metaTrackingPermission =
   process.env.META_IOS_USER_TRACKING_PERMISSION?.trim() ||
   "Usamos tu identificador publicitario para medir suscripciones y mejorar nuestras campañas en Meta. No vendemos tu informacion.";
 const metaConfigured = Boolean(metaAppId && metaClientToken);
+const mixpanelProjectToken = process.env.MIXPANEL_PROJECT_TOKEN?.trim();
+const mixpanelServerUrl = process.env.MIXPANEL_SERVER_URL?.trim();
+const mixpanelTrackAutomaticEvents =
+  process.env.MIXPANEL_TRACK_AUTOMATIC_EVENTS?.trim().toLowerCase() === "true";
+const mixpanelConfigured = Boolean(mixpanelProjectToken);
 
 const plugins = [
   "expo-dev-client",
@@ -50,7 +55,7 @@ module.exports = {
     name: "Luva",
     slug: "luva",
     scheme: "myapp",
-    version: "1.1.6",
+    version: "1.1.7",
     orientation: "portrait",
     updates: { fallbackToCacheTimeout: 0 },
     assetBundlePatterns: ["**/*"],
@@ -63,7 +68,7 @@ module.exports = {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.cardi7.luva",
-      buildNumber: "1.1.6",
+      buildNumber: "1.1.7",
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
         NSMicrophoneUsageDescription:
@@ -84,7 +89,7 @@ module.exports = {
         backgroundColor: "#0b1224",
       },
       package: "com.cardi7.luva",
-      versionCode: 6,
+      versionCode: 7,
       intentFilters: [
         {
           action: "VIEW",
@@ -118,6 +123,10 @@ module.exports = {
       META_ENABLED: metaConfigured,
       META_APP_ID: metaAppId,
       META_DISPLAY_NAME: metaDisplayName,
+      MIXPANEL_ENABLED: mixpanelConfigured,
+      MIXPANEL_PROJECT_TOKEN: mixpanelProjectToken,
+      MIXPANEL_SERVER_URL: mixpanelServerUrl,
+      MIXPANEL_TRACK_AUTOMATIC_EVENTS: mixpanelTrackAutomaticEvents,
       eas: { projectId: "f907b78e-85ff-4222-a01f-5c469f016c89" },
     },
   },

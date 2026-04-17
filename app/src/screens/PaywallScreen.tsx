@@ -17,6 +17,7 @@ import Purchases, {
 } from "react-native-purchases";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRevenueCat } from "../purchases/RevenueCatProvider";
+import { useCoins } from "../purchases/CoinBalanceProvider";
 import CoinCountChip from "../components/CoinCountChip";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import {
@@ -25,6 +26,10 @@ import {
   trackPaywallViewed,
   trackSubscriptionPurchased,
 } from "../marketing/metaAppEvents";
+import {
+  trackMixpanelPaywallViewed,
+  trackMixpanelPremiumActivated,
+} from "../marketing/mixpanelEvents";
 
 const COLORS = {
   bg: "#050b1a",
@@ -53,6 +58,12 @@ export default function PaywallScreen() {
   const isModal = !!route.params?.asModal;
   const paywallSource = route.params?.source || "unknown";
   const { isPro, refreshCustomerInfo, loading: rcLoading } = useRevenueCat();
+  const {
+    balance: coinBalance,
+    maxCoins,
+    isUnlimited,
+    loading: coinsLoading,
+  } = useCoins();
   const [offerings, setOfferings] = useState<PurchasesOfferings | null>(null);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -97,13 +108,28 @@ export default function PaywallScreen() {
   }, [isPro, rcLoading, navigation]);
 
   useEffect(() => {
-    if (trackedPaywallRef.current || isPro) {
+    if (trackedPaywallRef.current || isPro || coinsLoading) {
       return;
     }
     trackedPaywallRef.current = true;
     void requestMetaTrackingPermissionIfNeeded();
     void trackPaywallViewed({ source: paywallSource, asModal: isModal });
-  }, [isModal, isPro, paywallSource]);
+    void trackMixpanelPaywallViewed({
+      source: paywallSource,
+      asModal: isModal,
+      coinBalance,
+      maxCoins,
+      isUnlimited,
+    });
+  }, [
+    coinBalance,
+    coinsLoading,
+    isModal,
+    isPro,
+    isUnlimited,
+    maxCoins,
+    paywallSource,
+  ]);
 
   const availablePackages = useMemo<PackageInfo[]>(() => {
     const current = offerings?.current;
@@ -154,6 +180,9 @@ export default function PaywallScreen() {
       });
       const res = await Purchases.purchasePackage(info.pkg);
       if (res.customerInfo) {
+        const entitlement = Object.values(
+          res.customerInfo.entitlements.active || {}
+        )[0];
         void trackSubscriptionPurchased({
           source: paywallSource,
           packageId: info.pkg.identifier,
@@ -163,6 +192,18 @@ export default function PaywallScreen() {
           currency: info.pkg.product.currencyCode,
           subscriptionPeriod: info.pkg.product.subscriptionPeriod,
           hasIntroOffer: Boolean(info.pkg.product.introPrice),
+        });
+        void trackMixpanelPremiumActivated({
+          premiumSource: "subscription",
+          paywallSource,
+          packageId: info.pkg.identifier,
+          productId: info.pkg.product.identifier,
+          price: info.pkg.product.price,
+          priceString: info.pkg.product.priceString,
+          currency: info.pkg.product.currencyCode,
+          subscriptionPeriod: info.pkg.product.subscriptionPeriod,
+          hasIntroOffer: Boolean(info.pkg.product.introPrice),
+          expiresAt: entitlement?.expirationDate || null,
         });
         await refreshCustomerInfo();
         Alert.alert("¡Listo!", "Ya eres Pro. Disfruta monedas ilimitadas.");
@@ -184,6 +225,15 @@ export default function PaywallScreen() {
     try {
       const res = await Purchases.restorePurchases();
       if (res) {
+        const entitlement = Object.values(res.entitlements.active || {})[0];
+        if (entitlement) {
+          void trackMixpanelPremiumActivated({
+            premiumSource: "restore",
+            paywallSource,
+            productId: entitlement.productIdentifier,
+            expiresAt: entitlement.expirationDate || null,
+          });
+        }
         await refreshCustomerInfo();
         Alert.alert("Restaurado", "Tus compras fueron restauradas.");
         navigation.goBack();

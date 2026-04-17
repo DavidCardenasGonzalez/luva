@@ -46,6 +46,13 @@ type MetaPracticeEvent = {
   label?: string;
 };
 
+type MetaViewedContentEvent = {
+  contentId: string;
+  contentType: string;
+  description?: string;
+  params?: Record<string, string | number | boolean | null | undefined>;
+};
+
 type TrackingStatus =
   | "granted"
   | "denied"
@@ -66,6 +73,7 @@ const META_EVENT_PARAMS = AppEventsLogger.AppEventParams || {
   ContentID: "fb_content_id",
   ContentType: "fb_content_type",
   Currency: "fb_currency",
+  Description: "fb_description",
   NumItems: "fb_num_items",
 };
 
@@ -94,6 +102,51 @@ function normalizeParams(
       .filter(([, value]) => value !== undefined && value !== null)
       .map(([key, value]) => [key, typeof value === "boolean" ? Number(value) : value])
   ) as Record<string, string | number>;
+}
+
+function normalizeContentId(value?: string | number | null) {
+  const normalized = String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_");
+  return normalized || "unknown";
+}
+
+function getPracticeContentId({
+  practiceType,
+  cardId,
+  storyId,
+  sceneIndex,
+  label,
+}: MetaPracticeEvent) {
+  if (practiceType === "card" && cardId) {
+    return `practice_card:${normalizeContentId(cardId)}`;
+  }
+
+  if (practiceType === "story" && storyId) {
+    return `story_practice:${normalizeContentId(storyId)}:${normalizeContentId(
+      typeof sceneIndex === "number" ? sceneIndex : 0
+    )}`;
+  }
+
+  return `practice:${normalizeContentId(label || "generic")}`;
+}
+
+function logViewedContent({
+  contentId,
+  contentType,
+  description,
+  params,
+}: MetaViewedContentEvent) {
+  AppEventsLogger.logEvent(
+    META_EVENTS.ViewedContent,
+    normalizeParams({
+      [META_EVENT_PARAMS.ContentID]: contentId,
+      [META_EVENT_PARAMS.ContentType]: contentType,
+      [META_EVENT_PARAMS.Description]: description?.trim() || undefined,
+      ...params,
+    })
+  );
 }
 
 async function syncTrackingPermission(promptIfNeeded: boolean) {
@@ -198,15 +251,14 @@ export async function trackPaywallViewed({
   }
 
   try {
-    AppEventsLogger.logEvent(
-      META_EVENTS.ViewedContent,
-      normalizeParams({
-        [META_EVENT_PARAMS.ContentID]: "luva_pro_paywall",
-        [META_EVENT_PARAMS.ContentType]: "subscription_paywall",
+    logViewedContent({
+      contentId: "luva_pro_paywall",
+      contentType: "subscription_paywall",
+      params: {
         paywall_source: source || "unknown",
         paywall_modal: Boolean(asModal),
-      })
-    );
+      },
+    });
   } catch (err) {
     console.warn("[Meta] No se pudo registrar el paywall", err);
   }
@@ -223,6 +275,26 @@ export async function trackMissionStarted({
   const initialized = await initializeMetaSdk();
   if (!initialized) {
     return;
+  }
+
+  try {
+    logViewedContent({
+      contentId: `story_mission:${normalizeContentId(
+        storyId
+      )}:${normalizeContentId(missionId)}`,
+      contentType: "story_mission",
+      description: missionTitle || storyTitle,
+      params: {
+        story_id: storyId,
+        story_title: storyTitle || undefined,
+        mission_id: missionId,
+        mission_title: missionTitle || undefined,
+        scene_index: sceneIndex,
+        already_completed: Boolean(alreadyCompleted),
+      },
+    });
+  } catch (err) {
+    console.warn("[Meta] No se pudo registrar ViewContent de mision", err);
   }
 
   try {
@@ -283,6 +355,30 @@ export async function trackPracticeStarted({
   const initialized = await initializeMetaSdk();
   if (!initialized) {
     return;
+  }
+
+  try {
+    logViewedContent({
+      contentId: getPracticeContentId({
+        practiceType,
+        cardId,
+        storyId,
+        sceneIndex,
+        label,
+      }),
+      contentType: `practice_${practiceType}`,
+      description: label,
+      params: {
+        practice_type: practiceType,
+        card_id: cardId || undefined,
+        story_id: storyId || undefined,
+        scene_index:
+          typeof sceneIndex === "number" ? sceneIndex : undefined,
+        label: label?.trim() || undefined,
+      },
+    });
+  } catch (err) {
+    console.warn("[Meta] No se pudo registrar ViewContent de practica", err);
   }
 
   try {

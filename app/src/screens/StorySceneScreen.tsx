@@ -16,6 +16,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { Audio, ResizeMode, Video } from 'expo-av';
+import type { AVPlaybackStatus } from 'expo-av';
 import useAudioRecorder from '../shared/useAudioRecorder';
 import useUploadToS3 from '../shared/useUploadToS3';
 import { api } from '../api/api';
@@ -26,7 +28,6 @@ import {
 import { useStoryProgress } from '../progress/StoryProgressProvider';
 import StoryMessageComposer from '../components/StoryMessageComposer';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
-import luviImage from '../image/luvi.png';
 import { useCoins, CHAT_MISSION_COST, RECORDING_COST } from '../purchases/CoinBalanceProvider';
 import CoinCountChip from '../components/CoinCountChip';
 import TourOverlay, { TourHighlight } from '../components/TourOverlay';
@@ -35,6 +36,16 @@ import {
   trackMissionCompleted,
   trackMissionStarted,
 } from '../marketing/metaAppEvents';
+import {
+  trackMixpanelMissionCompleted,
+  trackMixpanelMissionHelpRequested,
+  trackMixpanelMissionMessageSent,
+  trackMixpanelMissionStarted,
+  trackMixpanelMissionVisited,
+} from '../marketing/mixpanelEvents';
+import { prefetchImageUrls } from '../shared/imagePrefetch';
+
+const luviImage = require('../image/luvi.png');
 
 type StoryMessage = {
   id: string;
@@ -201,11 +212,13 @@ export default function StorySceneScreen() {
   const [sceneIndex, setSceneIndex] = useState<number>(initialSceneIndex);
   const insets = useSafeAreaInsets();
   const [showCharacterModal, setShowCharacterModal] = useState(false);
+  const [showIntroVideoModal, setShowIntroVideoModal] = useState(false);
+  const [introVideoLoading, setIntroVideoLoading] = useState(false);
+  const [introVideoError, setIntroVideoError] = useState<string | null>(null);
   const [isStorySceneTourPending, setIsStorySceneTourPending] = useState(false);
   const [showStorySceneTour, setShowStorySceneTour] = useState(false);
   const [storySceneTourHighlight, setStorySceneTourHighlight] = useState<TourHighlight | null>(null);
   const [storySceneTourStepIndex, setStorySceneTourStepIndex] = useState(0);
-  const [allowMappedAvatarFallback, setAllowMappedAvatarFallback] = useState(false);
   const chargedMissions = useRef<Set<string>>(new Set());
   const chargingMissionId = useRef<string | null>(null);
   const [missionUnlocked, setMissionUnlocked] = useState<boolean>(false);
@@ -216,26 +229,20 @@ export default function StorySceneScreen() {
 
   const mission = story?.missions?.[sceneIndex];
   const avatarImageUrl = mission?.avatarImageUrl?.trim();
-
-  useEffect(() => {
-    setAllowMappedAvatarFallback(false);
-    if (!mission || avatarImageUrl) return;
-    const fallbackTimer = setTimeout(() => {
-      setAllowMappedAvatarFallback(true);
-    }, 300);
-    return () => clearTimeout(fallbackTimer);
-  }, [mission?.missionId, avatarImageUrl]);
+  const introVideoUri = mission?.videoIntro?.trim();
 
   const missionAvatar = useMemo(() => {
     if (!mission) return undefined;
-    if (avatarImageUrl) {
-      return { uri: avatarImageUrl };
-    }
-    if (!allowMappedAvatarFallback) {
-      return undefined;
-    }
-    return getChatAvatar(mission.missionId);
-  }, [allowMappedAvatarFallback, avatarImageUrl, mission?.missionId]);
+    return avatarImageUrl ? { uri: avatarImageUrl } : getChatAvatar(mission.missionId);
+  }, [avatarImageUrl, mission?.missionId]);
+
+  useEffect(() => {
+    const nextMission = story?.missions?.[sceneIndex + 1];
+    prefetchImageUrls(
+      [mission, nextMission].map((item) => item?.avatarImageUrl),
+      4
+    );
+  }, [mission, sceneIndex, story?.missions]);
 
   const characterDisplayName = mission?.caracterName || mission?.title || 'Personaje';
   const avatarInitial = useMemo(
@@ -275,6 +282,7 @@ export default function StorySceneScreen() {
         sceneSummary: missionDef.sceneSummary,
         aiRole: missionDef.aiRole,
         avatarImageUrl: missionDef.avatarImageUrl,
+        videoIntro: missionDef.videoIntro,
         requirements: missionDef.requirements.map((req) => ({
           requirementId: req.requirementId,
           text: req.text,
@@ -291,6 +299,7 @@ export default function StorySceneScreen() {
       sceneSummary: mission.sceneSummary,
       aiRole: mission.aiRole,
       avatarImageUrl: mission.avatarImageUrl,
+      videoIntro: mission.videoIntro,
       requirements: mission.requirements.map((req) => ({
         requirementId: req.requirementId,
         text: req.text,
@@ -317,6 +326,11 @@ export default function StorySceneScreen() {
   const [assistanceLoading, setAssistanceLoading] = useState(false);
   const [assistanceError, setAssistanceError] = useState<string | null>(null);
   const hasShownCharacterModal = useRef(false);
+  const hasShownIntroVideo = useRef(false);
+  const hasDismissedIntroVideo = useRef(false);
+  const introVideoRef = useRef<Video | null>(null);
+  const introVideoLoadedRef = useRef(false);
+  const introVideoStartedRef = useRef(false);
   // Force-remount the KeyboardAvoidingView when returning from background so it recalculates sizes.
   const [keyboardAvoiderKey, setKeyboardAvoiderKey] = useState(0);
   const exitWarningMessage = useMemo(
@@ -333,6 +347,8 @@ export default function StorySceneScreen() {
   const requirementsCardRef = useRef<View>(null);
   const assistanceIconRef = useRef<View>(null);
   const trackedMissionStartRef = useRef<string | null>(null);
+  const trackedMixpanelMissionStartedRef = useRef<Set<string>>(new Set());
+  const missionMessageAttemptsRef = useRef<Map<string, number>>(new Map());
   const trackedMissionCompletionRef = useRef<Set<string>>(new Set());
   // Permite saber si todavía estamos en el flujo de `start()` (permiso + prepare).
   const isStartingRecording = useRef(false);
@@ -356,10 +372,17 @@ export default function StorySceneScreen() {
     setAssistanceError(null);
     setAssistanceLoading(false);
     setShowAssistanceModal(false);
+    setShowIntroVideoModal(false);
+    setIntroVideoLoading(false);
+    setIntroVideoError(null);
     setShowStorySceneTour(false);
     setStorySceneTourHighlight(null);
     setStorySceneTourStepIndex(0);
     hasShownCharacterModal.current = false;
+    hasShownIntroVideo.current = false;
+    hasDismissedIntroVideo.current = false;
+    introVideoLoadedRef.current = false;
+    introVideoStartedRef.current = false;
   }, [mission, storyId]);
 
   useEffect(() => {
@@ -379,6 +402,14 @@ export default function StorySceneScreen() {
       return;
     }
     trackedMissionStartRef.current = trackingKey;
+    void trackMixpanelMissionVisited({
+      storyId,
+      storyTitle: story.title,
+      missionId: mission.missionId,
+      missionTitle: mission.title,
+      sceneIndex,
+      alreadyCompleted: isMissionCompleted(storyId, mission.missionId),
+    });
     void trackMissionStarted({
       storyId,
       storyTitle: story.title,
@@ -471,7 +502,7 @@ export default function StorySceneScreen() {
   }, [coinsLoading, isUnlimited, mission?.missionId, navigation, spendCoins]);
 
   const handleAdvance = useCallback(
-    async (transcript: string, sessionId: string) => {
+    async (transcript: string, sessionId: string, inputMethod: 'text' | 'audio') => {
       const trimmed = transcript.trim();
       setErrorMessage(null);
       if (!trimmed) {
@@ -522,6 +553,45 @@ export default function StorySceneScreen() {
       const historyPayload = [...messages, { id: `pending-${Date.now()}`, role: 'user', text: trimmed }].map(
         ({ role, text }) => ({ role, content: text })
       );
+      const missionTrackingKey =
+        storyId && mission?.missionId
+          ? `${storyId}:${mission.missionId}:${sceneIndex}`
+          : undefined;
+      const messageIndex =
+        messages.filter((msg) => msg.role === 'user').length + 1;
+      const messageAttemptIndex = missionTrackingKey
+        ? (missionMessageAttemptsRef.current.get(missionTrackingKey) || 0) + 1
+        : messageIndex;
+
+      if (missionTrackingKey) {
+        missionMessageAttemptsRef.current.set(
+          missionTrackingKey,
+          messageAttemptIndex
+        );
+      }
+
+      if (storyId && story && mission?.missionId) {
+        const missionEvent = {
+          storyId,
+          storyTitle: story.title,
+          missionId: mission.missionId,
+          missionTitle: mission.title,
+          sceneIndex,
+          messageIndex,
+          messageAttemptIndex,
+          inputMethod,
+        };
+
+        if (
+          missionTrackingKey &&
+          !trackedMixpanelMissionStartedRef.current.has(missionTrackingKey)
+        ) {
+          trackedMixpanelMissionStartedRef.current.add(missionTrackingKey);
+          void trackMixpanelMissionStarted(missionEvent);
+        }
+
+        void trackMixpanelMissionMessageSent(missionEvent);
+      }
       appendMessage({ id: `user-${Date.now()}`, role: 'user', text: trimmed });
       try {
         const persistedRequirementPayload = requirements.map((req) => ({
@@ -572,6 +642,19 @@ export default function StorySceneScreen() {
               missionTitle: mission.title,
               sceneIndex,
               storyCompleted: payload.storyCompleted,
+            });
+            void trackMixpanelMissionCompleted({
+              storyId,
+              storyTitle: story?.title,
+              missionId: mission.missionId,
+              missionTitle: mission.title,
+              sceneIndex,
+              storyCompleted: payload.storyCompleted,
+              messageIndex,
+              messageAttemptIndex,
+              inputMethod,
+              result: payload.result,
+              correctness: payload.correctness,
             });
           }
           await markMissionCompleted(storyId, mission.missionId, payload.storyCompleted);
@@ -735,7 +818,7 @@ export default function StorySceneScreen() {
       const transcription = await api.post<{ transcript: string }>(
         `/sessions/${session.sessionId}/transcribe`
       );
-      await handleAdvance(transcription.transcript || '', session.sessionId);
+      await handleAdvance(transcription.transcript || '', session.sessionId, 'audio');
     } catch (err: any) {
       console.error('Story recording error', err);
       setErrorMessage(err?.message || 'No pudimos procesar tu audio.');
@@ -758,7 +841,7 @@ export default function StorySceneScreen() {
           storyId,
           sceneIndex,
         });
-        await handleAdvance(trimmed, session.sessionId);
+        await handleAdvance(trimmed, session.sessionId, 'text');
         return true;
       } catch (err: any) {
         console.error('Story text send error', err);
@@ -817,6 +900,17 @@ export default function StorySceneScreen() {
         met: !!req.met,
         feedback: req.feedback,
       }));
+      void trackMixpanelMissionHelpRequested({
+        storyId,
+        storyTitle: story?.title,
+        missionId: mission.missionId,
+        missionTitle: mission.title,
+        sceneIndex,
+        questionLength: trimmed.length,
+        questionWordCount: trimmed.split(/\s+/).filter(Boolean).length,
+        historyMessageCount: messages.length,
+        requirementsMetCount: requirements.filter((req) => !!req.met).length,
+      });
       const payload = await api.post<StoryAssistanceResponse>(`/stories/${storyId}/assist`, {
         sceneIndex,
         question: trimmed,
@@ -869,10 +963,19 @@ export default function StorySceneScreen() {
   }, [recorder]);
 
   useEffect(() => {
-    if (!mission || hasShownCharacterModal.current) return;
+    if (!mission) return;
+    if (introVideoUri && !hasShownIntroVideo.current) {
+      hasShownIntroVideo.current = true;
+      hasDismissedIntroVideo.current = false;
+      setIntroVideoLoading(true);
+      setIntroVideoError(null);
+      setShowIntroVideoModal(true);
+      return;
+    }
+    if (introVideoUri || hasShownCharacterModal.current) return;
     hasShownCharacterModal.current = true;
     setShowCharacterModal(true);
-  }, [mission]);
+  }, [introVideoUri, mission]);
 
   const storySceneTourSteps = useMemo(
     () => [
@@ -927,13 +1030,112 @@ export default function StorySceneScreen() {
     return () => clearTimeout(timer);
   }, [showStorySceneTour, storySceneTourStepIndex, measureStorySceneTourTarget]);
 
-  const closeCharacterModal = useCallback(() => {
-    setShowCharacterModal(false);
+  const startPendingStorySceneTour = useCallback(() => {
     if (isStorySceneTourPending) {
       setShowStorySceneTour(true);
       setIsStorySceneTourPending(false);
     }
   }, [isStorySceneTourPending]);
+
+  const closeIntroVideoModal = useCallback(() => {
+    if (hasDismissedIntroVideo.current) return;
+    hasDismissedIntroVideo.current = true;
+    void introVideoRef.current?.stopAsync().catch((pauseErr) => {
+      console.warn('Mission intro video stop failed', pauseErr);
+    });
+    setShowIntroVideoModal(false);
+    setIntroVideoLoading(false);
+    setIntroVideoError(null);
+    startPendingStorySceneTour();
+  }, [startPendingStorySceneTour]);
+
+  const closeCharacterModal = useCallback(() => {
+    setShowCharacterModal(false);
+    startPendingStorySceneTour();
+  }, [startPendingStorySceneTour]);
+
+  useEffect(() => {
+    if (!showIntroVideoModal || !introVideoUri) return;
+    introVideoLoadedRef.current = false;
+    introVideoStartedRef.current = false;
+    setIntroVideoLoading(true);
+    setIntroVideoError(null);
+    void Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: true,
+      playThroughEarpieceAndroid: false,
+    }).catch((audioModeErr) => {
+      console.warn('Mission intro video audio mode failed', audioModeErr);
+    });
+
+    const playFallback = setTimeout(() => {
+      void introVideoRef.current?.playAsync().catch((playErr) => {
+        console.warn('Mission intro video play failed', playErr);
+      });
+    }, 350);
+
+    const loadingFallback = setTimeout(() => {
+      setIntroVideoLoading(false);
+    }, 2500);
+    const errorFallback = setTimeout(() => {
+      if (hasDismissedIntroVideo.current) return;
+      if (introVideoLoadedRef.current || introVideoStartedRef.current) return;
+      setIntroVideoLoading(false);
+      setIntroVideoError('No pudimos cargar el video.');
+    }, 12000);
+
+    return () => {
+      clearTimeout(playFallback);
+      clearTimeout(loadingFallback);
+      clearTimeout(errorFallback);
+    };
+  }, [introVideoUri, showIntroVideoModal]);
+
+  const handleIntroVideoStatus = useCallback(
+    (status: AVPlaybackStatus) => {
+      if (!showIntroVideoModal) return;
+      if (!status.isLoaded) {
+        if (status.error) {
+          setIntroVideoLoading(false);
+          setIntroVideoError(status.error);
+        }
+        return;
+      }
+
+      introVideoLoadedRef.current = true;
+      if (status.isPlaying || status.positionMillis > 0) {
+        introVideoStartedRef.current = true;
+      }
+      if (!status.isBuffering || status.isPlaying) {
+        setIntroVideoLoading(false);
+      }
+      if (status.didJustFinish) {
+        closeIntroVideoModal();
+      }
+    },
+    [closeIntroVideoModal, showIntroVideoModal]
+  );
+
+  const handleIntroVideoLoad = useCallback(() => {
+    introVideoLoadedRef.current = true;
+    setIntroVideoLoading(false);
+    setIntroVideoError(null);
+    void introVideoRef.current?.playAsync().catch((playErr) => {
+      console.warn('Mission intro video play failed', playErr);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!isStorySceneTourPending || showCharacterModal || showIntroVideoModal) return;
+    startPendingStorySceneTour();
+  }, [
+    isStorySceneTourPending,
+    showCharacterModal,
+    showIntroVideoModal,
+    startPendingStorySceneTour,
+  ]);
 
   const finishStorySceneTour = useCallback(async () => {
     setShowStorySceneTour(false);
@@ -952,7 +1154,7 @@ export default function StorySceneScreen() {
   }, [finishStorySceneTour, isLastStorySceneTourStep, showStorySceneTour, storySceneTourSteps.length]);
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('beforeRemove', (event) => {
+    const unsubscribe = navigation.addListener('beforeRemove', (event: any) => {
       if (missionCompleted) return;
       event.preventDefault();
       Alert.alert('Salir de la misión', exitWarningMessage, [
@@ -1128,7 +1330,7 @@ export default function StorySceneScreen() {
           ) : (
             <View style={{ gap: 12 }}>
               {messages.map((msg) => {
-                const alignStyle = { alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start' };
+                const alignStyle = { alignSelf: msg.role === 'user' ? 'flex-end' as const : 'flex-start' as const };
                 const bubble = (
                   <View
                     style={{
@@ -1328,6 +1530,120 @@ export default function StorySceneScreen() {
         onNext={handleAdvanceStorySceneTour}
         isLast={isLastStorySceneTourStep}
       />
+      <Modal
+        animationType="fade"
+        visible={showIntroVideoModal}
+        presentationStyle="fullScreen"
+        statusBarTranslucent
+        hardwareAccelerated
+        onRequestClose={closeIntroVideoModal}
+      >
+        <View style={{ flex: 1, backgroundColor: 'black' }}>
+          {showIntroVideoModal && introVideoUri ? (
+            <Video
+              ref={introVideoRef}
+              source={{ uri: introVideoUri }}
+              style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+              resizeMode={ResizeMode.COVER}
+              shouldPlay
+              useNativeControls={false}
+              isLooping={false}
+              progressUpdateIntervalMillis={250}
+              onLoadStart={() => {
+                setIntroVideoLoading(true);
+                setIntroVideoError(null);
+              }}
+              onLoad={handleIntroVideoLoad}
+              onReadyForDisplay={() => setIntroVideoLoading(false)}
+              onError={(videoError) => {
+                setIntroVideoLoading(false);
+                setIntroVideoError(videoError || 'No pudimos cargar el video.');
+              }}
+              onPlaybackStatusUpdate={handleIntroVideoStatus}
+            />
+          ) : null}
+          <View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: insets.top + 96,
+              backgroundColor: 'rgba(0,0,0,0.28)',
+            }}
+          />
+          <Pressable
+            onPress={closeIntroVideoModal}
+            hitSlop={12}
+            style={({ pressed }) => ({
+              position: 'absolute',
+              top: insets.top + 12,
+              right: 16,
+              paddingHorizontal: 14,
+              paddingVertical: 9,
+              borderRadius: 8,
+              backgroundColor: 'rgba(0,0,0,0.58)',
+              borderWidth: 1,
+              borderColor: 'rgba(255,255,255,0.22)',
+              opacity: pressed ? 0.72 : 1,
+            })}
+          >
+            <Text style={{ color: 'white', fontWeight: '800' }}>Saltar</Text>
+          </Pressable>
+          {introVideoLoading ? (
+            <View
+              pointerEvents="none"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'rgba(0,0,0,0.16)',
+              }}
+            >
+              <ActivityIndicator size="large" color="white" />
+            </View>
+          ) : null}
+          {introVideoError ? (
+            <View
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.82)',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 24,
+              }}
+            >
+              <Text style={{ color: 'white', fontSize: 16, fontWeight: '800', textAlign: 'center' }}>
+                No pudimos reproducir este intro.
+              </Text>
+              <Text style={{ color: '#cbd5e1', marginTop: 8, textAlign: 'center' }}>
+                Puedes continuar con la misión.
+              </Text>
+              <Pressable
+                onPress={closeIntroVideoModal}
+                style={({ pressed }) => ({
+                  marginTop: 18,
+                  paddingHorizontal: 18,
+                  paddingVertical: 12,
+                  borderRadius: 8,
+                  backgroundColor: pressed ? '#e2e8f0' : 'white',
+                })}
+              >
+                <Text style={{ color: '#0f172a', fontWeight: '900' }}>Continuar</Text>
+              </Pressable>
+            </View>
+          ) : null}
+        </View>
+      </Modal>
       <Modal
         animationType="fade"
         transparent

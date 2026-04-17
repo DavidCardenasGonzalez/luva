@@ -7,6 +7,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import UnlockModal from '../components/UnlockModal';
 import { useStoryProgress } from '../progress/StoryProgressProvider';
 import CoinCountChip from '../components/CoinCountChip';
+import AppTabBar from '../components/AppTabBar';
 import TourOverlay, { TourHighlight } from '../components/TourOverlay';
 import { hasSeenTour, markTourAsSeen } from '../tour/tourProgress';
 
@@ -98,7 +99,7 @@ export default function StoriesScreen({ navigation }: Props) {
         <FlatList
           data={items}
           keyExtractor={(item) => item.storyId}
-          contentContainerStyle={{ padding: 20, paddingBottom: 32 }}
+          contentContainerStyle={{ padding: 20, paddingBottom: 128 }}
           ListHeaderComponent={
             <View>
               <View
@@ -291,6 +292,8 @@ export default function StoriesScreen({ navigation }: Props) {
           }
         />
       )}
+
+      <AppTabBar active="missions" />
 
       <TourOverlay
         visible={showStoriesTour}

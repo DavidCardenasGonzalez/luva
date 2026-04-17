@@ -68,6 +68,27 @@
   flex-wrap: wrap;
 }
 
+.tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(31, 107, 79, 0.14);
+  background: rgba(31, 107, 79, 0.1);
+  color: #1f6b4f;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.tag-muted {
+  border-color: rgba(116, 122, 115, 0.16);
+  background: rgba(116, 122, 115, 0.08);
+  color: #6f776e;
+}
+
 .admin-nav-link {
   display: inline-flex;
   align-items: center;
@@ -255,6 +276,10 @@
   border-radius: 18px;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.72);
+}
+
+.admin-inline-note-compact {
+  margin-top: 0;
 }
 
 .admin-inline-note p {
@@ -619,7 +644,9 @@
   gap: 8px;
 }
 
-.admin-grant-field input {
+.admin-grant-field input,
+.admin-grant-field select,
+.admin-grant-field textarea {
   width: 100%;
   min-height: 54px;
   padding: 14px 16px;
@@ -628,9 +655,17 @@
   background: rgba(255, 255, 255, 0.86);
   color: var(--text);
   outline: none;
+  font: inherit;
 }
 
-.admin-grant-field input:focus {
+.admin-grant-field textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.admin-grant-field input:focus,
+.admin-grant-field select:focus,
+.admin-grant-field textarea:focus {
   border-color: rgba(31, 107, 79, 0.32);
   box-shadow: 0 0 0 4px rgba(31, 107, 79, 0.08);
 }
@@ -977,6 +1012,113 @@
   color: var(--muted);
 }
 
+.admin-video-edit-grid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 20px;
+}
+
+.admin-video-edit-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-assets-grid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 20px;
+}
+
+.admin-feed-posts-grid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 20px;
+}
+
+.admin-feed-post-form,
+.admin-feed-post-list {
+  margin-top: 22px;
+  display: grid;
+  gap: 18px;
+}
+
+.admin-feed-post-form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-feed-post-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.admin-feed-post-row-active {
+  border-color: rgba(31, 107, 79, 0.28);
+  background: rgba(231, 242, 235, 0.92);
+  box-shadow: 0 22px 38px rgba(31, 107, 79, 0.12);
+}
+
+.admin-feed-post-row-main {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.admin-feed-post-row-main p {
+  color: var(--muted);
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.admin-feed-post-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.admin-asset-form {
+  margin-top: 22px;
+  display: grid;
+  gap: 18px;
+}
+
+.admin-asset-meta-list {
+  margin-top: 0;
+}
+
+.admin-asset-preview {
+  margin-top: 22px;
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.admin-asset-preview img,
+.admin-asset-preview video {
+  display: block;
+  width: 100%;
+  max-height: 520px;
+  object-fit: contain;
+  background: rgba(19, 33, 26, 0.04);
+}
+
+.admin-asset-result a {
+  word-break: break-word;
+}
+
 @media (max-width: 1100px) {
   .admin-frame,
   .admin-hero,
@@ -987,7 +1129,10 @@
   .admin-users-grid,
   .admin-video-summary-grid,
   .admin-videos-dashboard,
-  .admin-videos-detail-grid {
+  .admin-videos-detail-grid,
+  .admin-video-edit-grid,
+  .admin-assets-grid,
+  .admin-feed-posts-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -1009,7 +1154,9 @@
 
   .admin-grant-form,
   .admin-video-action-grid,
-  .admin-calendar-toolbar {
+  .admin-calendar-toolbar,
+  .admin-video-edit-controls,
+  .admin-feed-post-form-row {
     grid-template-columns: 1fr;
   }
 
@@ -1034,9 +1181,18 @@
   }
 
   .admin-video-row,
-  .admin-video-detail-head {
+  .admin-video-detail-head,
+  .admin-feed-post-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .admin-feed-post-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-feed-post-actions {
+    justify-content: flex-start;
   }
 
   .admin-video-row-headline {

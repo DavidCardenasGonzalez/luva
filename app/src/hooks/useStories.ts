@@ -16,6 +16,7 @@ export type StoryMissionDefinition = {
   caracterName?: string;
   caracterPrompt?: string;
   avatarImageUrl?: string;
+  videoIntro?: string;
   requirements: StoryRequirement[];
 };
 
@@ -55,6 +56,7 @@ export type StoryMission = {
   caracterName?: string;
   caracterPrompt?: string;
   avatarImageUrl?: string;
+  videoIntro?: string;
   requirements: StoryRequirementState[];
 };
 
@@ -113,6 +115,12 @@ function sanitizeMission(input: any): StoryMissionDefinition | null {
         : typeof input.avatar_image_url === 'string'
         ? input.avatar_image_url
         : undefined,
+    videoIntro:
+      typeof input.videoIntro === 'string'
+        ? input.videoIntro
+        : typeof input.video_intro === 'string'
+        ? input.video_intro
+        : undefined,
     requirements,
   };
 }
@@ -151,7 +159,10 @@ function makeLocalVersion(stories: StoryDefinition[]): string {
   const payload = JSON.stringify(
     stories.map((story) => ({
       id: story.storyId,
-      missions: (story.missions || []).map((mission) => mission.missionId),
+      missions: (story.missions || []).map((mission) => ({
+        id: mission.missionId,
+        videoIntro: mission.videoIntro || '',
+      })),
     }))
   );
   let hash = 0;
@@ -270,6 +281,7 @@ function storyDetailFromDefinition(story: StoryDefinition): StoryDetail {
       caracterName: mission.caracterName,
       caracterPrompt: mission.caracterPrompt,
       avatarImageUrl: mission.avatarImageUrl,
+      videoIntro: mission.videoIntro,
       requirements: (mission.requirements || []).map((req) => ({
         requirementId: req.requirementId,
         text: req.text,
@@ -407,4 +419,57 @@ export function useStoryDetail(storyId?: string) {
   }, [storyId]);
 
   return { story, loading, error };
+}
+
+export function useStoryCatalog() {
+  const [stories, setStories] = useState<StoryDetail[]>(() =>
+    BUNDLED_CACHE ? BUNDLED_CACHE.stories.map(storyDetailFromDefinition) : []
+  );
+  const [version, setVersion] = useState<string | undefined>(BUNDLED_CACHE?.version);
+  const [loading, setLoading] = useState(stories.length === 0);
+  const [error, setError] = useState<string | undefined>();
+
+  useEffect(() => {
+    let cancelled = false;
+    let hasLocalData = stories.length > 0;
+
+    const applyCache = (cache?: StoriesCache | null) => {
+      if (!cache?.stories?.length) return false;
+      hasLocalData = true;
+      setStories(cache.stories.map(storyDetailFromDefinition));
+      setVersion(cache.version);
+      setError(undefined);
+      setLoading(false);
+      return true;
+    };
+
+    (async () => {
+      const cached = await getLocalStories();
+      if (!cancelled) {
+        applyCache(cached);
+      }
+
+      try {
+        const synced = await syncStories();
+        if (!cancelled) {
+          if (!applyCache(synced)) {
+            setError('No encontramos historias disponibles.');
+            setLoading(false);
+          }
+        }
+      } catch (err: any) {
+        if (cancelled) return;
+        if (!hasLocalData) {
+          setError(err?.message || 'No pudimos cargar las historias.');
+          setLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return { stories, loading, error, version };
 }

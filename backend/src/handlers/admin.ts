@@ -1,5 +1,11 @@
 import type { APIGatewayProxyResultV2 as Result } from 'aws-lambda';
+import { createAdminAssetUpload } from '../admin/assets';
 import { buildAdminOverview } from '../admin/overview';
+import {
+  completeAdminTikTokAuth,
+  createAdminTikTokAuthStart,
+  getAdminTikTokAuthStatus,
+} from '../admin/tiktok-auth';
 import {
   grantManualCodeProAccess,
   revokeManualCodeProAccess,
@@ -7,11 +13,19 @@ import {
 import { verifyRevenueCatPremiumUsers } from '../admin/revenuecat';
 import { listAdminUsers } from '../admin/users';
 import {
+  completeAdminVideoReplace,
+  createAdminVideoReplaceUpload,
   getAdminVideoPreview,
   listAdminVideos,
   updateAdminVideoPublication,
 } from '../admin/videos';
 import { getAdminIdentity, getClaims, hasAdminAccess } from '../admin/auth';
+import {
+  createAdminFeedPost,
+  deleteAdminFeedPost,
+  listFeedPosts,
+  updateAdminFeedPost,
+} from '../feed-posts';
 
 const ROUTE_PREFIX = '/v1';
 
@@ -56,6 +70,146 @@ export const handler = async (event: any): Promise<Result> => {
       return json(200, await listAdminVideos());
     }
 
+    if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/feed-posts`) {
+      try {
+        return json(200, await listFeedPosts());
+      } catch (error) {
+        const handled = handleFeedPostError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/feed-posts`) {
+      try {
+        return json(200, await createAdminFeedPost(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleFeedPostError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/feed-posts/update`) {
+      try {
+        return json(200, await updateAdminFeedPost(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleFeedPostError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/feed-posts/delete`) {
+      try {
+        return json(200, await deleteAdminFeedPost(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleFeedPostError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/assets/upload`) {
+      try {
+        return json(200, await createAdminAssetUpload(parseBody(event.body) || {}));
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message === 'INVALID_ASSET_FOLDER') {
+            return json(400, {
+              code: 'INVALID_ASSET_FOLDER',
+              message: 'Selecciona una carpeta valida para guardar el asset.',
+            });
+          }
+
+          if (error.message === 'INVALID_ASSET_CONTENT_TYPE') {
+            return json(400, {
+              code: 'INVALID_ASSET_CONTENT_TYPE',
+              message:
+                'Sube un asset valido para la carpeta seleccionada: imagen JPG, PNG, WebP, AVIF, GIF, HEIC o HEIF; video MP4, MOV, WebM, M4V o MPEG.',
+            });
+          }
+
+          if (
+            error.message === 'ASSETS_BUCKET_NAME not set' ||
+            error.message === 'ASSETS_CLOUDFRONT_DOMAIN_NAME not set'
+          ) {
+            return json(503, {
+              code: 'ASSETS_NOT_CONFIGURED',
+              message: 'Configura el bucket assets y su distribucion CloudFront en la lambda admin.',
+            });
+          }
+        }
+
+        throw error;
+      }
+    }
+
+    if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/social/tiktok`) {
+      try {
+        return json(200, await getAdminTikTokAuthStatus());
+      } catch (error) {
+        if (error instanceof Error && error.message === 'TIKTOK_ACCESS_TOKEN_PARAM not set') {
+          return json(503, {
+            code: 'TIKTOK_NOT_CONFIGURED',
+            message: 'Configura las variables TikTok en la lambda admin antes de usar esta integración.',
+          });
+        }
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/social/tiktok/start`) {
+      try {
+        return json(200, await createAdminTikTokAuthStart());
+      } catch (error) {
+        if (error instanceof Error && error.message === 'TIKTOK_OAUTH_NOT_CONFIGURED') {
+          return json(503, {
+            code: 'TIKTOK_OAUTH_NOT_CONFIGURED',
+            message: 'Configura TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET y TIKTOK_REDIRECT_URI en la lambda admin.',
+          });
+        }
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/social/tiktok/complete`) {
+      try {
+        return json(200, await completeAdminTikTokAuth(parseBody(event.body) || {}));
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message === 'TIKTOK_OAUTH_NOT_CONFIGURED') {
+            return json(503, {
+              code: 'TIKTOK_OAUTH_NOT_CONFIGURED',
+              message: 'Configura TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET y TIKTOK_REDIRECT_URI en la lambda admin.',
+            });
+          }
+
+          if (error.message === 'INVALID_TIKTOK_CODE') {
+            return json(400, {
+              code: 'INVALID_TIKTOK_CODE',
+              message: 'TikTok no devolvió un code válido para completar la autenticación.',
+            });
+          }
+
+          if (error.message === 'INVALID_TIKTOK_CODE_VERIFIER') {
+            return json(400, {
+              code: 'INVALID_TIKTOK_CODE_VERIFIER',
+              message: 'No se encontró el code verifier PKCE para completar la autenticación de TikTok.',
+            });
+          }
+
+          if (error.message === 'INVALID_TIKTOK_TOKEN_RESPONSE') {
+            return json(502, {
+              code: 'INVALID_TIKTOK_TOKEN_RESPONSE',
+              message: 'TikTok respondió sin access_token o refresh_token válidos.',
+            });
+          }
+        }
+        throw error;
+      }
+    }
+
     if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/videos/preview`) {
       try {
         return json(200, await getAdminVideoPreview({
@@ -75,6 +229,54 @@ export const handler = async (event: any): Promise<Result> => {
             return json(404, {
               code: 'VIDEO_NOT_FOUND',
               message: 'No encontramos ese video o no tiene bucket/key válidos para vista previa.',
+            });
+          }
+        }
+
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/videos/replace-upload`) {
+      try {
+        return json(200, await createAdminVideoReplaceUpload(parseBody(event.body) || {}));
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message === 'INVALID_VIDEO_KEY') {
+            return json(400, {
+              code: 'INVALID_VIDEO_KEY',
+              message: 'Indica storyId y videoId válidos para reemplazar el video.',
+            });
+          }
+
+          if (error.message === 'VIDEO_NOT_FOUND') {
+            return json(404, {
+              code: 'VIDEO_NOT_FOUND',
+              message: 'No encontramos ese video o no tiene bucket/key válidos para reemplazo.',
+            });
+          }
+        }
+
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/videos/replace-complete`) {
+      try {
+        return json(200, await completeAdminVideoReplace(parseBody(event.body) || {}));
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message === 'INVALID_VIDEO_KEY') {
+            return json(400, {
+              code: 'INVALID_VIDEO_KEY',
+              message: 'Indica storyId y videoId válidos para confirmar el reemplazo.',
+            });
+          }
+
+          if (error.message === 'VIDEO_NOT_FOUND') {
+            return json(404, {
+              code: 'VIDEO_NOT_FOUND',
+              message: 'No encontramos ese video para confirmar el reemplazo.',
             });
           }
         }
@@ -240,6 +442,46 @@ function normalizeSearch(event: any): string | undefined {
 
   const raw = typeof params.search === 'string' ? params.search : undefined;
   return raw?.trim() || undefined;
+}
+
+function handleFeedPostError(error: unknown): Result | undefined {
+  if (!(error instanceof Error)) {
+    return undefined;
+  }
+
+  if (error.message === 'FEED_POSTS_TABLE_NAME not set') {
+    return json(503, {
+      code: 'FEED_POSTS_NOT_CONFIGURED',
+      message: 'Configura la tabla de posts del feed en la lambda admin.',
+    });
+  }
+
+  if (error.message === 'FEED_POST_NOT_FOUND') {
+    return json(404, {
+      code: 'FEED_POST_NOT_FOUND',
+      message: 'No encontramos ese post en la tabla del feed.',
+    });
+  }
+
+  const validationMessages: Record<string, string> = {
+    INVALID_FEED_POST_ID: 'Indica un postId valido para actualizar o borrar el post.',
+    INVALID_FEED_POST_TEXT: 'Escribe el texto del post.',
+    INVALID_FEED_POST_ORDER: 'Indica un orden valido. Usa 1 para mostrarlo hasta arriba.',
+    INVALID_FEED_POST_TYPE: 'Selecciona un tipo de post valido.',
+    INVALID_FEED_POST_TARGET: 'Indica el id requerido para el tipo de post seleccionado.',
+    INVALID_FEED_POST_COIN_AMOUNT: 'Indica una cantidad valida de monedas para el post extra.',
+    INVALID_FEED_POST_URL: 'Usa una URL publica valida para imagen o video.',
+  };
+
+  const message = validationMessages[error.message];
+  if (message) {
+    return json(400, {
+      code: error.message,
+      message,
+    });
+  }
+
+  return undefined;
 }
 
 function getQueryParam(event: any, key: string): string | undefined {

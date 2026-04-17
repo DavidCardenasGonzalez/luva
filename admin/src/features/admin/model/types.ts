@@ -86,6 +86,8 @@ export type AdminVideoSummary = {
   videoId: string
   title: string
   status: AdminVideoStatus
+  hasCaption: boolean
+  caption?: string
   publishOn?: string
   bucketPath?: string
   bucketName?: string
@@ -125,6 +127,100 @@ export type AdminVideoPreviewResponse = {
   previewUrl: string
   expiresAt: string
   contentType?: string
+}
+
+export type AdminVideoReplaceUploadResponse = {
+  storyId: string
+  videoId: string
+  uploadUrl: string
+  expiresAt: string
+  contentType: string
+}
+
+export type AdminAssetFolder = 'storiesProfile' | 'missionIntroVideos' | 'feedPostImages' | 'feedPostVideos'
+
+export type AdminAssetUploadResponse = {
+  folder: AdminAssetFolder
+  key: string
+  bucketName: string
+  uploadUrl: string
+  url: string
+  expiresAt: string
+  contentType: string
+  cacheControl: string
+}
+
+export type AdminFeedPostType = 'normal' | 'practice_guide' | 'mission_guide' | 'extra'
+
+export type AdminFeedPost = {
+  postId: string
+  text: string
+  order: number
+  postType: AdminFeedPostType
+  imageUrl?: string
+  videoUrl?: string
+  practiceId?: string
+  missionId?: string
+  coinAmount?: number
+  createdAt: string
+  updatedAt: string
+}
+
+export type AdminFeedPostsResponse = {
+  posts: AdminFeedPost[]
+  generatedAt: string
+}
+
+export type AdminFeedPostMutationResponse = {
+  post: AdminFeedPost
+  updatedAt: string
+}
+
+export type AdminFeedPostDeleteResponse = {
+  postId: string
+  deletedAt: string
+}
+
+export type AdminTikTokAuthStatusResponse = {
+  configured: boolean
+  clientKeyConfigured: boolean
+  clientSecretConfigured: boolean
+  redirectUriConfigured: boolean
+  redirectUri?: string
+  scopes: string[]
+  connected: boolean
+  token: {
+    accessTokenStored: boolean
+    refreshTokenStored: boolean
+    openId?: string
+    scope?: string
+    tokenType?: string
+    accessTokenExpiresAt?: string
+    refreshTokenExpiresAt?: string
+    updatedAt?: string
+  }
+}
+
+export type AdminTikTokAuthStartResponse = {
+  authUrl: string
+  state: string
+  codeVerifier: string
+  redirectUri: string
+  scopes: string[]
+}
+
+export type AdminTikTokAuthCompleteResponse = {
+  connected: boolean
+  redirectUri: string
+  scopes: string[]
+  token: {
+    openId?: string
+    scope?: string
+    tokenType?: string
+    accessTokenExpiresAt?: string
+    refreshTokenExpiresAt?: string
+    updatedAt: string
+  }
 }
 
 export type AdminRevenueCatVerificationItem = {

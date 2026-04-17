@@ -7,6 +7,7 @@ import { RevenueCatProvider } from './purchases/RevenueCatProvider';
 import { CoinBalanceProvider } from './purchases/CoinBalanceProvider';
 import { AppVersionGateProvider } from './version/AppVersionGateProvider';
 import { MetaAdsProvider } from './marketing/MetaAdsProvider';
+import { MixpanelProvider } from './marketing/MixpanelProvider';
 
 export default function App() {
   return (
@@ -14,13 +15,15 @@ export default function App() {
       <RevenueCatProvider>
         <CoinBalanceProvider>
           <MetaAdsProvider>
-            <CardProgressProvider>
-              <StoryProgressProvider>
-                <AppVersionGateProvider>
-                  <AppNavigator />
-                </AppVersionGateProvider>
-              </StoryProgressProvider>
-            </CardProgressProvider>
+            <MixpanelProvider>
+              <CardProgressProvider>
+                <StoryProgressProvider>
+                  <AppVersionGateProvider>
+                    <AppNavigator />
+                  </AppVersionGateProvider>
+                </StoryProgressProvider>
+              </CardProgressProvider>
+            </MixpanelProvider>
           </MetaAdsProvider>
         </CoinBalanceProvider>
       </RevenueCatProvider>

@@ -1,10 +1,15 @@
 [
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
     "target": {
       "namespace": "android_app",
       "package_name": "com.cardi7.luva",
-      "sha256_cert_fingerprints": ["REPLACE_WITH_ANDROID_SIGNING_SHA256"]
+      "sha256_cert_fingerprints": [
+        "7B:DE:4A:F8:FA:34:A5:FD:76:B2:78:21:2E:EC:D4:CB:E2:0C:13:9F:A5:DC:0C:4E:9D:B1:44:1A:9B:71:14:AA"
+      ]
     }
   }
 ]

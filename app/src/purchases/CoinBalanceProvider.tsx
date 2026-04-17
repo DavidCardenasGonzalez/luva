@@ -12,6 +12,8 @@ import { useRevenueCat } from './RevenueCatProvider';
 
 const STORAGE_KEY = '@luva/coins/state';
 const MAX_FREE_COINS = 10;
+const FIRST_LAUNCH_BONUS_COINS = 20;
+const INITIAL_COIN_BALANCE = MAX_FREE_COINS + FIRST_LAUNCH_BONUS_COINS;
 const REGEN_INTERVAL_MS = 60 * 60 * 1000;
 
 export const CHAT_MISSION_COST = 5;
@@ -32,15 +34,16 @@ type CoinsContextValue = {
   refreshBalance: () => Promise<void>;
   canSpend: (amount: number) => Promise<boolean>;
   spendCoins: (amount: number, reason?: string) => Promise<boolean>;
+  addCoins: (amount: number, reason?: string) => Promise<boolean>;
   resetCoins: () => Promise<void>;
 };
 
 const CoinsContext = createContext<CoinsContextValue | undefined>(undefined);
 
 const sanitizeState = (raw: any): CoinsState => {
-  const fallback: CoinsState = { balance: MAX_FREE_COINS, lastUpdated: Date.now() };
+  const fallback: CoinsState = { balance: INITIAL_COIN_BALANCE, lastUpdated: Date.now() };
   if (!raw || typeof raw !== 'object') return fallback;
-  const balance = Number.isFinite(raw.balance) ? Math.max(0, Math.min(MAX_FREE_COINS, Number(raw.balance))) : MAX_FREE_COINS;
+  const balance = Number.isFinite(raw.balance) ? Math.max(0, Number(raw.balance)) : MAX_FREE_COINS;
   const lastUpdated = Number.isFinite(raw.lastUpdated) ? Number(raw.lastUpdated) : Date.now();
   return { balance, lastUpdated };
 };
@@ -60,7 +63,7 @@ const applyRegen = (state: CoinsState, now: number): CoinsState => {
 
 export function CoinBalanceProvider({ children }: { children: React.ReactNode }) {
   const { isPro, loading: revenueLoading } = useRevenueCat();
-  const [state, setState] = useState<CoinsState>({ balance: MAX_FREE_COINS, lastUpdated: Date.now() });
+  const [state, setState] = useState<CoinsState>({ balance: INITIAL_COIN_BALANCE, lastUpdated: Date.now() });
   const [loading, setLoading] = useState(true);
   const stateRef = useRef<CoinsState>(state);
 
@@ -158,6 +161,27 @@ export function CoinBalanceProvider({ children }: { children: React.ReactNode })
     await persist(fresh);
   }, [persist]);
 
+  const addCoins = useCallback(
+    async (amount: number, reason?: string) => {
+      if (amount <= 0) return true;
+      if (isPro) return true;
+      const now = Date.now();
+      const current = applyRegen(stateRef.current, now);
+      const next: CoinsState = {
+        balance: current.balance + Math.floor(amount),
+        lastUpdated: now,
+      };
+      setState(next);
+      stateRef.current = next;
+      await persist(next);
+      if (__DEV__) {
+        console.log('[Coins] Credito registrado', { amount, reason, balance: next.balance });
+      }
+      return true;
+    },
+    [isPro, persist]
+  );
+
   const canSpend = useCallback(
     async (amount: number) => {
       if (amount <= 0) return true;
@@ -189,9 +213,10 @@ export function CoinBalanceProvider({ children }: { children: React.ReactNode })
       refreshBalance,
       canSpend,
       spendCoins,
+      addCoins,
       resetCoins,
     }),
-    [canSpend, isPro, loading, nextRegenAt, refreshBalance, resetCoins, revenueLoading, spendCoins, state.balance]
+    [addCoins, canSpend, isPro, loading, nextRegenAt, refreshBalance, resetCoins, revenueLoading, spendCoins, state.balance]
   );
 
   return <CoinsContext.Provider value={value}>{children}</CoinsContext.Provider>;

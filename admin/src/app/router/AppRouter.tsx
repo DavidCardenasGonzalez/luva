@@ -1,6 +1,10 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { appPaths } from '@/app/router/paths'
+import { AdminAssetsPage } from '@/features/admin/ui/AdminAssetsPage'
+import { AdminFeedPostsPage } from '@/features/admin/ui/AdminFeedPostsPage'
 import { AdminPortalPage } from '@/features/admin/ui/AdminPortalPage'
+import { AdminTikTokAuthPage } from '@/features/admin/ui/AdminTikTokAuthPage'
+import { AdminVideoEditPage } from '@/features/admin/ui/AdminVideoEditPage'
 import { AdminUsersPage } from '@/features/admin/ui/AdminUsersPage'
 import { AdminVideosPage } from '@/features/admin/ui/AdminVideosPage'
 import { LoadingPage } from '@/features/auth/ui/LoadingPage'
@@ -56,6 +60,42 @@ export function AppRouter() {
         }
       />
       <Route
+        path={appPaths.assets}
+        element={
+          <ProtectedRoute
+            requiredRoles={ADMIN_ROLES}
+            deniedTitle="Tu cuenta no tiene acceso al portal administrativo."
+            deniedMessage="Asigna el grupo o rol admin en Cognito y vuelve a iniciar sesión."
+          >
+            <AdminAssetsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={appPaths.posts}
+        element={
+          <ProtectedRoute
+            requiredRoles={ADMIN_ROLES}
+            deniedTitle="Tu cuenta no tiene acceso al portal administrativo."
+            deniedMessage="Asigna el grupo o rol admin en Cognito y vuelve a iniciar sesión."
+          >
+            <AdminFeedPostsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={appPaths.integrationsTikTok}
+        element={
+          <ProtectedRoute
+            requiredRoles={ADMIN_ROLES}
+            deniedTitle="Tu cuenta no tiene acceso al portal administrativo."
+            deniedMessage="Asigna el grupo o rol admin en Cognito y vuelve a iniciar sesión."
+          >
+            <AdminTikTokAuthPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path={appPaths.videos}
         element={
           <ProtectedRoute
@@ -64,6 +104,18 @@ export function AppRouter() {
             deniedMessage="Asigna el grupo o rol admin en Cognito y vuelve a iniciar sesión."
           >
             <AdminVideosPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/videos/:storyId/:videoId/edit"
+        element={
+          <ProtectedRoute
+            requiredRoles={ADMIN_ROLES}
+            deniedTitle="Tu cuenta no tiene acceso al portal administrativo."
+            deniedMessage="Asigna el grupo o rol admin en Cognito y vuelve a iniciar sesión."
+          >
+            <AdminVideoEditPage />
           </ProtectedRoute>
         }
       />

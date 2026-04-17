@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { appPaths, buildStoryChatPath, buildStoryMissionsPath } from '@/app/router/paths'
 import { api } from '@/shared/api/client'
@@ -13,11 +13,7 @@ import {
   type StoryDetail,
   type StoryRequirementState,
 } from '@/features/stories/api/story-catalog'
-import {
-  isStoryCompleted as isStoryCompletedInProgress,
-  isStoryMissionCompleted,
-  mergeStoryMissionCompletionIntoProgress,
-} from '@/features/stories/lib/story-progress'
+import { mergeStoryMissionCompletionIntoProgress } from '@/features/stories/lib/story-progress'
 import { getErrorMessage } from '@/shared/lib/error-message'
 import luviImage from '../../../../../app/src/image/luvi.png'
 
@@ -74,7 +70,7 @@ export function StoryChatPage() {
   const { storyId, sceneIndex } = useParams<{ storyId: string; sceneIndex: string }>()
   const numericSceneIndex = Number.isFinite(Number(sceneIndex)) ? Math.max(0, Number(sceneIndex)) : 0
   const [story, setStory] = useState<StoryDetail | undefined>()
-  const [progress, setProgress] = useState<UserProgressRecord>(EMPTY_PROGRESS)
+  const progressRef = useRef<UserProgressRecord>(EMPTY_PROGRESS)
   const [loading, setLoading] = useState(true)
   const [pageError, setPageError] = useState<string | undefined>()
   const [messages, setMessages] = useState<StoryMessage[]>([])
@@ -115,7 +111,8 @@ export function StoryChatPage() {
         }
 
         setStory(storyResult.value)
-        setProgress(progressResult.status === 'fulfilled' ? progressResult.value : EMPTY_PROGRESS)
+        progressRef.current =
+          progressResult.status === 'fulfilled' ? progressResult.value : EMPTY_PROGRESS
       } catch (loadError) {
         if (!cancelled) {
           setPageError(getErrorMessage(loadError, 'No pudimos cargar esta misión.'))
@@ -155,8 +152,8 @@ export function StoryChatPage() {
     setRequirements(mission.requirements.map((requirement) => ({ ...requirement, met: false })))
     setMessages([])
     setAnalysis(null)
-    setMissionCompleted(isStoryMissionCompleted(progress, storyId, mission.missionId))
-    setStoryCompleted(isStoryCompletedInProgress(progress, storyId))
+    setMissionCompleted(false)
+    setStoryCompleted(false)
     setPendingNext(null)
     setConversationFeedback(null)
     setRetryState('none')
@@ -167,16 +164,7 @@ export function StoryChatPage() {
     setAssistanceAnswer('')
     setAssistanceError(null)
     setShowAssistanceModal(false)
-  }, [mission?.missionId, numericSceneIndex, storyId])
-
-  useEffect(() => {
-    if (!mission || !storyId || messages.length > 0) {
-      return
-    }
-
-    setMissionCompleted(isStoryMissionCompleted(progress, storyId, mission.missionId))
-    setStoryCompleted(isStoryCompletedInProgress(progress, storyId))
-  }, [messages.length, mission, progress, storyId])
+  }, [mission, numericSceneIndex, storyId])
 
   const appendMessage = useCallback((message: StoryMessage) => {
     setMessages((current) => [...current, message])
@@ -327,14 +315,12 @@ export function StoryChatPage() {
 
         if (payload.missionCompleted) {
           const completedAt = new Date().toISOString()
-          setProgress((current) =>
-            mergeStoryMissionCompletionIntoProgress(
-              current,
-              storyId,
-              mission.missionId,
-              payload.storyCompleted,
-              completedAt,
-            ),
+          progressRef.current = mergeStoryMissionCompletionIntoProgress(
+            progressRef.current,
+            storyId,
+            mission.missionId,
+            payload.storyCompleted,
+            completedAt,
           )
           void mergeUserProgress({
             stories: {

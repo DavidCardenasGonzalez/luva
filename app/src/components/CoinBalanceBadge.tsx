@@ -24,6 +24,7 @@ const formatEta = (nextRegenAt: number | null) => {
 export default function CoinBalanceBadge({ style, variant = 'dark' }: Props) {
   const { balance, maxCoins, isUnlimited, loading, nextRegenAt } = useCoins();
   const eta = useMemo(() => formatEta(nextRegenAt), [nextRegenAt]);
+  const isAboveFreeCap = !isUnlimited && !loading && balance > maxCoins;
 
   const palette =
     variant === 'light'
@@ -57,13 +58,15 @@ export default function CoinBalanceBadge({ style, variant = 'dark' }: Props) {
         Monedas
       </Text>
       <Text style={{ color: palette.text, fontSize: 20, fontWeight: '800', marginTop: 2 }}>
-        {isUnlimited ? '∞ ilimitadas' : `${loading ? '...' : balance}/${maxCoins}`}
+        {isUnlimited ? '∞ ilimitadas' : loading ? '...' : isAboveFreeCap ? `${balance} monedas` : `${balance}/${maxCoins}`}
       </Text>
       <Text style={{ color: palette.text, marginTop: 2, fontSize: 12 }}>
         {isUnlimited
           ? 'Pro: uso sin límites'
           : loading
           ? 'Sincronizando saldo...'
+          : isAboveFreeCap
+          ? `La regeneración vuelve debajo de ${maxCoins}`
           : eta
           ? `+1 en ${eta}`
           : `+1 cada hora hasta ${maxCoins}`}

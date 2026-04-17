@@ -20,6 +20,7 @@ import {
 } from '../progress/CardProgressProvider';
 import { useCoins, CARD_OPEN_COST } from '../purchases/CoinBalanceProvider';
 import CoinCountChip from '../components/CoinCountChip';
+import AppTabBar from '../components/AppTabBar';
 import TourOverlay, { TourHighlight } from '../components/TourOverlay';
 import { hasSeenTour, markTourAsSeen } from '../tour/tourProgress';
 
@@ -423,7 +424,7 @@ export default function DeckScreen({ navigation }: Props) {
         ref={deckListRef}
         data={filteredItems}
         keyExtractor={(i) => String(i.id)}
-        contentContainerStyle={{ padding: 20, paddingBottom: 32 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: 128 }}
         ListHeaderComponent={
           <View>
             <View
@@ -582,6 +583,7 @@ export default function DeckScreen({ navigation }: Props) {
           </View>
         }
       />
+      <AppTabBar active="practice" />
       <TourOverlay
         visible={showDeckTour}
         highlight={deckTourHighlight}

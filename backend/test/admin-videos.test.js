@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
+  buildAdminVideoPublicationUpdate,
   buildAdminVideoPublicationState,
   buildAdminVideosResponse,
 } = require('../dist/admin/videos.js');
@@ -96,4 +97,38 @@ test('buildAdminVideoPublicationState rejects invalid dates for publishOn', () =
       ),
     /INVALID_PUBLISH_ON/,
   );
+});
+
+test('buildAdminVideoPublicationUpdate removes stored publishOn when the raw item still has null', () => {
+  const nextVideo = buildAdminVideoPublicationState(
+    {
+      storyId: 'story_3',
+      videoId: 'video_3',
+      title: 'Video 3',
+      status: 'por_programar',
+      uploadedAt: '2026-04-05T10:00:00.000Z',
+      updatedAt: '2026-04-05T10:00:00.000Z',
+    },
+    {
+      status: 'descartado',
+    },
+    {
+      now: '2026-04-06T10:00:00.000Z',
+    },
+  );
+
+  const update = buildAdminVideoPublicationUpdate(
+    {
+      storyId: 'story_3',
+      videoId: 'video_3',
+      status: 'por_programar',
+      publishOn: null,
+    },
+    nextVideo,
+  );
+
+  assert.match(update.updateExpression, /REMOVE publishOn/);
+  assert.equal(update.expressionAttributeValues[':status'], 'descartado');
+  assert.equal(update.expressionAttributeValues[':updatedAt'], '2026-04-06T10:00:00.000Z');
+  assert.equal(Object.hasOwn(update.expressionAttributeValues, ':publishOn'), false);
 });

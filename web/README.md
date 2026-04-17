@@ -17,7 +17,7 @@ npm run dev
 - `VITE_COGNITO_DOMAIN`: Hosted UI domain de Cognito.
 - `VITE_COGNITO_CLIENT_ID`: client id del mismo user pool client que usa el app.
 - `VITE_API_BASE_URL`: API base para sincronizar `/users/me`.
-- `VITE_REDIRECT_URI`: opcional. Si no se define, se usa la raíz actual de la web.
+- `VITE_REDIRECT_URI`: opcional en local. Si no se define, se usa la raíz actual de la web. En producción debe ser `https://www.luvaenglish.com/`; `npm run publish` lo fuerza durante el build.
 
 ## Cognito
 Para que el login web funcione, el app client de Cognito debe incluir también las URLs web dentro de:
@@ -30,7 +30,7 @@ COGNITO_CALLBACK_URLS=myapp://callback,http://localhost:5173/
 COGNITO_LOGOUT_URLS=myapp://callback,http://localhost:5173/
 ```
 
-En producción agrega además tu dominio web real.
+En producción agrega además `https://www.luvaenglish.com/`.
 
 ## Estructura
 - `src/app`: shell de la aplicación, providers, routing y estilos globales.

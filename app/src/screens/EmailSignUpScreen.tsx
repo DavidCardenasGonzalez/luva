@@ -13,6 +13,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useAuth } from '../auth/AuthProvider';
+import { trackMixpanelEvent } from '../marketing/mixpanelEvents';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EmailSignUp'>;
 type Step = 'credentials' | 'confirmation';
@@ -35,10 +36,17 @@ export default function EmailSignUpScreen({ navigation, route }: Props) {
   const [deliveryHint, setDeliveryHint] = useState<string | undefined>();
 
   useEffect(() => {
+    void trackMixpanelEvent('signup_started', {
+      event_category: 'auth',
+      auth_provider: 'email',
+    });
+  }, []);
+
+  useEffect(() => {
     if (!isSignedIn) return;
     navigation.reset({
       index: 0,
-      routes: [{ name: 'Home' }],
+      routes: [{ name: 'Feed' }],
     });
   }, [isSignedIn, navigation]);
 
@@ -67,7 +75,7 @@ export default function EmailSignUpScreen({ navigation, route }: Props) {
       if (!result.requiresConfirmation) {
         navigation.reset({
           index: 0,
-          routes: [{ name: 'Home' }],
+          routes: [{ name: 'Feed' }],
         });
         return;
       }
@@ -90,7 +98,7 @@ export default function EmailSignUpScreen({ navigation, route }: Props) {
       await confirmEmailSignUp(email, code, password);
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Home' }],
+        routes: [{ name: 'Feed' }],
       });
     } catch {
       // The provider already exposes the message through authError.
