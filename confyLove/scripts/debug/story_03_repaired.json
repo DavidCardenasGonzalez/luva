@@ -1,0 +1,36 @@
+{
+  "id": "ancient_revenge_chip_heist",
+  "title": "Will the chip unlock the fury?",
+  "caption": "The dictator's clock is ticking... ⏳ Our agent must secure the memory chip before ancient vengeance explodes! Who will make the final move? #AccionMisterio #VenganzaAntigua #EnglishLearning",
+  "promptImage": "Cinematic shot, dark opulent room resembling a high-security vault. Two figures are centered: Agent Kael (wearing a tight black tactical suit with glowing neon blue accents, standing poised and focused) is facing Director Serra (wearing a richly colored crimson velvet coat over sleek grey trousers, leaning slightly forward with an air of cunning authority). They are in close proximity, suggesting high tension. Dramatic low-key lighting emphasizes deep shadows, shallow depth of field focuses sharply on Kael's intense gaze and Serra's slight smirk. High contrast, action-ready pose.",
+  "width": 1664,
+  "height": 928,
+  "duration": 30,
+  "characters": [
+    {
+      "name": "Agent Kael",
+      "description": "Tight black tactical suit with glowing neon blue accents. Posture is highly alert and defensive-offensive. Personality: Intense, disciplined, relentless. Positioned slightly to the left."
+    },
+    {
+      "name": "Director Serra",
+      "description": "Rich crimson velvet coat over sleek grey trousers. Posture is confidently relaxed yet commanding. Personality: Cunning, dramatic, arrogant. Positioned slightly to the right."
+    }
+  ],
+  "chapters": [
+    {
+      "id": 1,
+      "level": "B1",
+      "prompt": "(Agent Kael pulls his black gloves tight, looking at Director Serra with concern) and say: \"We must take the chip now. The boss wants it.\" (Director Serra slowly raises a hand, gesturing toward the central pedestal) and respond: \"Yes, Agent Kael. But this is hard. You need speed.\" (Agent Kael nods quickly, stepping one pace forward) and say: \"I am fast! I will get it safe for you.\" (Director Serra smiles widely, tapping his coat sleeve) and respond: \"Good boy. Do not fail the mission!\""
+    },
+    {
+      "id": 2,
+      "level": "B2",
+      "prompt": "(Agent Kael adjusts his neon blue collar nervously, meeting Director Serra's gaze steadily) and say: \"We absolutely need to retrieve this chip immediately. The dictator is set to activate it soon.\" (Director Serra leans in conspiratorially, tapping a finger near the chip location) and respond: \"Actually, Agent Kael, that's precisely what I'm worried about. This retrieval isn't simple; you have to be sharp.\" (Agent Kael takes a deliberate half-step forward, showing resolve) and say: \"I mean, no problem at all. I will secure it before anything goes wrong.\" (Director Serra throws his head back slightly in mock exasperation) and respond: \"See? That's the spirit. Don't let your guard down, though.\""
+    },
+    {
+      "id": 3,
+      "level": "Native",
+      "prompt": "(Agent Kael tightens his jawline, scanning the room before addressing Serra with grit) and say: \"We need to grab this chip right now. The clock is running down on the dictator's whole scheme.\" (Director Serra pushes off the wall with a smooth movement, radiating menace) and respond: \"Kael, darling, 'right now' is too weak a phrase. You have to snatch it before the fuse burns through.\""
+    }
+  ]
+}

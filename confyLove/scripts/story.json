@@ -1,176 +1,397 @@
 [
   {
-    "id": "friendship_break_rain_cafe",
-    "title": "¿Se acabó su amistad?",
-    "promptImage": "A cinematic drama scene inside a small cafe during heavy rain, both characters visible from the start. Clara sits on the left in a dark red sweater, posture stiff, hands wrapped around a coffee cup without drinking. Julia sits on the right in a charcoal gray coat, leaning forward with tense shoulders, eyes locked on Clara. Rain streaks across the large window behind them, soft warm interior lighting contrasts with the cold blue tones outside, shallow depth of field, reflective table surface, intimate but fragile atmosphere, no dialogue.",
+    "id": "mirror_terror_001",
+    "title": "El espejo se mueve solo",
+    "caption": "No mires demasiado de cerca... algo te está observando de vuelta. 🕯️👁️",
+    "promptImage": "Cinematic wide shot in a dusty, dimly lit attic illuminated by a single flickering candle. Two characters, Leo in a blue sweater and Maya in a red jacket, stand before a large, ornate antique mirror. The reflection in the mirror shows them with a visible, creepy time delay, creating an eerie horror atmosphere. Hyper-realistic, high contrast, dark shadows.",
     "width": 1664,
     "height": 928,
     "duration": 30,
     "characters": [
       {
-        "name": "Clara",
-        "description": "dark red sweater, emotional and sincere, hurt but trying to stay composed"
+        "name": "Leo",
+        "description": "blue sweater, nervous and timid"
       },
       {
-        "name": "Julia",
-        "description": "charcoal gray coat, proud and guarded, defensive under pressure"
+        "name": "Maya",
+        "description": "red jacket, brave and curious"
       }
     ],
     "chapters": [
       {
         "id": 1,
         "level": "B1",
-        "prompt": "Clara (looks down at her coffee, hurt) and say: \"I did not expect you to talk about me like that.\" Julia (leans forward, trying to stay calm) and respond: \"I was angry... I did not mean all of it.\" Clara (raises her eyes slowly, disappointed) and say: \"But you said it to everyone.\" Julia (touches the edge of the table, tense) and respond: \"I know... and I am sorry for that.\" Clara (shakes her head, voice quiet) and say: \"It is not only that. I do not know if I can trust you now.\" Julia (goes still, staring at her) and respond: \"Are you saying this friendship is over?\" Clara (holds the cup tighter, fighting emotion) and say: \"I do not know... but it is breaking.\""
+        "prompt": "Leo (trembling) and say: \"Maya, look at this old mirror. It is very dark and dusty here in the attic.\" Maya (pointing to the glass) and respond: \"Don't be afraid, Leo. It is just an old object from long ago. But wait... why does your reflection move so slowly? Look! You moved your hands, but the reflection stays there. This is very strange and very scary. I feel a lot of fear. Let's leave this dark attic right now!\""
       },
       {
         "id": 2,
         "level": "B2",
-        "prompt": "Clara (looks down at her coffee, voice tight) and say: \"I honestly never thought you would talk about me like that behind my back.\" Julia (leans forward, tense but controlled) and respond: \"I was upset, okay? I said things I should not have said.\" Clara (looks up, disappointment clear on her face) and say: \"That would be easier to believe if you had not said them to half the room.\" Julia (rests her hand on the table, uneasy) and respond: \"I know... and I regret it. I really do.\" Clara (shakes her head slowly, trying not to cry) and say: \"The problem is not just the words. It is the fact that I do not trust you the same way anymore.\" Julia (goes quiet for a second) and respond: \"So what are you saying... that we are done?\" Clara (holds her cup tighter, voice low) and say: \"I am saying we are closer to the end than I ever imagined.\""
+        "prompt": "Leo (whispering) and say: \"Maya, I don't like this place. This mirror looks creepy.\" Maya (leaning closer to the glass) and respond: \"Calm down, Leo, it's just an antique mirror. Although... something is definitely off. Look closely at your reflection. It didn't blink when you did. It's as if the image is lagging behind reality. That's incredibly unsettling. I can't explain it, but the way the shadow moves independently of us is truly terrifying. We should probably get out of here before things get even worse.\""
       },
       {
         "id": 3,
         "level": "Native",
-        "prompt": "Clara (stares into her coffee, trying to steady herself) and say: \"You know what hurts the most? Not even what you said... it is realizing you were fully capable of saying it.\" Julia (leans forward, rain flickering across the window behind her) and respond: \"I was angry, Clara. I lashed out. I am not pretending it was okay, but that is what happened.\" Clara (looks up, eyes glossy but sharp) and say: \"You did not just lash out. You humiliated me in front of people who were supposed to be our friends.\" Julia (presses her fingers to the table edge, guilt creeping in) and respond: \"I know... and I hate that I did that.\" Clara (shakes her head, voice quieter now) and say: \"Yeah, but once trust cracks, you do not just glue it back together like nothing happened.\" Julia (goes still, swallowing hard) and respond: \"So this is it?\" Clara (wraps both hands around the cup, barely holding herself together) and say: \"I think this is the part where it starts falling apart.\""
+        "prompt": "Leo (shaking visibly) and say: \"Maya, something is seriously wrong with this mirror. I've got a bad feeling about this.\" Maya (staring intensely at the glass) and respond: \"Hold on, do you see that? It's not just my imagination. Your reflection... it's lagging behind your actual movements. You just turned your head, but the version in the mirror is still staring straight ahead at us. It’s like there’s a sinister delay between us and whatever is trapped inside that ancient, silvered glass. It’s absolutely bone-chilling and makes my skin crawl. We need to get out of this attic immediately before whatever is lurking in the reflection decides to step out into the real world.\""
       }
     ]
   },
   {
-    "id": "escape_chase_car_cover",
-    "title": "¡Solo quedan segundos!",
-    "promptImage": "A cinematic action scene during a night chase, both characters visible from the start hidden behind a damaged car. Lucas crouches on the left in a black tactical jacket, posture low and alert, one hand braced against the car door. Mia crouches on the right in a dark green bomber jacket, breathing fast, clutching a small backpack close to her chest. Flashing headlights sweep across wet pavement, sparks and distant sirens in the background, high contrast lighting, shallow depth of field, intense motion implied, urgent atmosphere, no dialogue.",
+    "id": "spies_pizza_mixup_01",
+    "title": "Espías confunden al repartidor de pizza",
+    "caption": "¡Cuando el espionaje se encuentra con extra pepperoni! 🍕🕵️‍♂️ ¿Puedes notar la diferencia de nivel?",
+    "promptImage": "Cinematic wide shot of a modern, sunlit cafe. A man in a sharp blue suit and a woman in a dark green jacket sit at a corner table, leaning in close with intense, suspicious expressions. High-end photography, dramatic shadows, shallow depth of field.",
     "width": 1664,
     "height": 928,
     "duration": 30,
     "characters": [
       {
-        "name": "Lucas",
-        "description": "black tactical jacket, decisive and focused, used to pressure"
+        "name": "Agent Blue",
+        "description": "wearing a blue suit, very intense and suspicious personality"
+      },
+      {
+        "name": "Agent Green",
+        "description": "wearing a green jacket, nervous and secretive personality"
+      }
+    ],
+    "chapters": [
+      {
+        "id": 1,
+        "level": "B1",
+        "prompt": "Agent Blue (looking around nervously) and say: \"Is the delivery man here yet? I am very hungry for our mission. It is time to start.\" Agent Green (whispering loudly) and respond: \"I do not see him anywhere. Did you bring the important documents inside the pizza box?\" Agent Blue (checking his watch) and say: \"No, I only have the pepperoni. Is the target ready to eat now?\" Agent Green (looking suspicious) and respond: \"The target is waiting at the park. Please, be very quiet!\""
+      },
+      {
+        "id": 2,
+        "level": "B2",
+        "prompt": "Agent Blue (glancing at the door) and say: \"Have you seen the delivery guy yet? I'm starting to get really anxious about this meeting happening.\" Agent Green (adjusting her collar) and respond: \"I haven't spotted anyone with a pizza box. Did you make sure the package was hidden properly?\" Agent Blue (nodding intensely) and say: \"Everything is inside the large crust. The contents are extremely sensitive, so please be careful when you open it.\" Agent Green (scanning the room) and respond: \"Understood. Let's just hope he doesn't realize we're actually waiting for a handoff.\""
+      },
+      {
+        "id": 3,
+        "level": "Native",
+        "prompt": "Agent Blue (eyeing the entrance) and say: \"Any sign of the delivery guy? This whole thing is starting to feel a bit sketchy, don't you think?\" Agent Green (leaning in close) and respond: \"Nothing so far. I thought you said he'd show up at this exact time. Did something go sideways with the plan?\" Agent Blue (tapping his fingers) and say: \"Look, the pepperoni is just a cover. The real intel is tucked right under the cheese. Just play it cool when he arrives.\" Agent Green (scanning the crowd) and respond: \"I'm trying, but if he walks in here with that much attitude, we're totally blown. Keep your eyes peeled for that thermal bag!\""
+      }
+    ]
+  },
+  {
+    "id": "dragon_egg_discovery_001",
+    "title": "El descubrimiento del huevo de dragón",
+    "caption": "¿Puedes entender a los exploradores? ¡Pon a prueba tu inglés de B1 a nivel nativo!",
+    "promptImage": "Cinematic wide shot in a fantasy forest filled with giant glowing mushrooms, two explorers, one wearing blue clothing and one wearing green clothing, discovering a pulsating golden egg hidden under a large luminous leaf, magical atmosphere, highly detailed, 8k.",
+    "width": 1664,
+    "height": 928,
+    "duration": 30,
+    "characters": [
+      {
+        "name": "Leo",
+        "description": "blue clothing, brave and curious explorer"
       },
       {
         "name": "Mia",
-        "description": "dark green bomber jacket, brave but nervous, quick-thinking under stress"
+        "description": "green clothing, cautious and observant scholar"
       }
     ],
     "chapters": [
       {
         "id": 1,
         "level": "B1",
-        "prompt": "Lucas (peeks over the car, urgent) and say: \"We have less than one minute... we need to run now.\" Mia (holds the backpack close, breathing fast) and respond: \"Run where? They are everywhere.\" Lucas (points toward the alley, focused) and say: \"There. If we reach that alley, we can escape.\" Mia (looks toward the lights, afraid) and respond: \"They will see us.\" Lucas (lowers his voice, steady) and say: \"Only if we wait too long.\" Mia (takes a breath, trying to be brave) and say: \"What if we do not make it?\" Lucas (looks at her directly, determined) and respond: \"Then we do not stop. Ready?\" Mia (nods quickly, tense) and say: \"Ready.\""
+        "prompt": "Leo (pointing at the ground) and say: \"Look over there! What is that strange thing under this big leaf?\" Mia (moving the leaf slowly) and respond: \"I am not sure. It is glowing very brightly in the dark forest.\" Leo (leaning closer to the object) and say: \"It is moving a little bit. Is it just a stone or something else?\" Mia (looking quite worried now) and respond: \"It looks like an egg. A very strange, pulsating egg! Be careful!\""
       },
       {
         "id": 2,
         "level": "B2",
-        "prompt": "Lucas (peeks over the car, voice sharp) and say: \"We have less than a minute left... if we move, it has to be now.\" Mia (clutches the backpack tighter, breathing hard) and respond: \"Now? Lucas, they are all over the street.\" Lucas (points toward the alley, staying focused) and say: \"That alley is our only shot. If we reach it before the next car turns, we are out.\" Mia (glances toward the headlights, panicking) and respond: \"And if they spot us halfway there?\" Lucas (drops lower behind the car, calm but urgent) and say: \"Then we keep going. Standing here is worse.\" Mia (forces herself to look at him) and say: \"You are asking me to trust a terrible plan.\" Lucas (meets her eyes, determined) and respond: \"I know... but it is the only plan we have.\""
+        "prompt": "Leo (kneeling down near the mushroom) and say: \"Wait, do you see that strange light underneath this giant mushroom?\" Mia (peering closely through the leaves) and respond: \"It seems to be pulsing rhythmically. I've never seen anything quite like it before.\" Leo (reaching out his hand) and say: \"It’s incredibly warm. It feels as if something living is trapped inside.\" Mia (stepping back slightly) and respond: \"Be careful! If that turns out to be a real dragon egg, we might find ourselves in serious trouble.\""
       },
       {
         "id": 3,
         "level": "Native",
-        "prompt": "Lucas (peeks over the hood, tracking the headlights) and say: \"We are out of time... when that next car swings left, we run, and we do not look back.\" Mia (hugs the backpack against her chest, adrenaline in her voice) and respond: \"That is your plan? Sprint into the open while half the city is chasing us?\" Lucas (points toward the alley without taking his eyes off the street) and say: \"It is not a good plan, but it is the gap we have. Miss it, and we are done.\" Mia (glances toward the alley, jaw tight) and respond: \"You make this sound slightly more horrifying every second.\" Lucas (drops lower, listening to the sirens) and say: \"Good. Fear keeps you fast.\" Mia (lets out a shaky breath, then squares her shoulders) and say: \"Wow... weirdly motivating.\" Lucas (turns to her, focused) and respond: \"Three seconds. Be ready to move.\""
+        "prompt": "Leo (brushing away the damp debris) and say: \"Check this out! There's a strange, rhythmic glow emanating from beneath this thick foliage.\" Mia (squinting at the pulsating object) and respond: \"Good grief, Leo. That thing is pulsing so intensely it's making my head spin.\" Leo (staring in absolute awe) and say: \"It’s unmistakable. The heat radiating from under this leaf... it has to be a dragon egg, doesn't it?\" Mia (biting her lip nervously) and respond: \"Don't get your hopes up just yet. If we accidentally hatch something legendary, we'll be in way over our heads.\""
       }
     ]
   },
   {
-    "id": "forbidden_object_forest_twilight",
-    "title": "Eso no debías tocar",
-    "promptImage": "A cinematic fantasy scene in an enchanted forest at sunset, both characters visible from the start. Elara stands on the left in a flowing pale blue cloak, posture cautious, one hand slightly raised toward a glowing object. Rowan stands on the right in a dark brown leather tunic with a forest green cape, shoulders tense, holding the forbidden artifact close but not fully trusting it. Golden twilight filters through ancient trees, floating particles in the air, moss-covered roots, magical glow reflecting on their faces, shallow depth of field, mysterious and dangerous atmosphere, no dialogue.",
+    "id": "cookie_theft_001",
+    "title": "El misterio de la galleta desaparecida",
+    "caption": "¿Quién se robó el snack? 🍪 ¡Mira para descubrirlo! #AprenderInglés #Animación #Misterio",
+    "promptImage": "Cinematic wide shot of two round, cute monsters in a vibrant, colorful kitchen. One blue monster wearing a yellow scarf looks panicked, while one pink monster wearing green overalls investigates an empty plate. High-quality 3ranimation style, bright lighting, delicious atmosphere.",
     "width": 1664,
     "height": 928,
     "duration": 30,
     "characters": [
       {
-        "name": "Elara",
-        "description": "pale blue cloak, wise and careful, sensitive to danger"
+        "name": "Grumble",
+        "description": "Blue round monster wearing a bright yellow scarf, very energetic and panicky personality."
       },
       {
-        "name": "Rowan",
-        "description": "dark brown leather tunic and forest green cape, curious and impulsive, drawn to forbidden things"
+        "name": "Puffy",
+        "description": "Pink round monster wearing green overalls, calm and observant detective-like personality."
       }
     ],
     "chapters": [
       {
         "id": 1,
         "level": "B1",
-        "prompt": "Elara (stares at the glowing object, alarmed) and say: \"Rowan... where did you find that?\" Rowan (holds the object closer, trying to sound calm) and respond: \"Near the old stone circle. It was hidden under the leaves.\" Elara (takes one careful step back, worried) and say: \"You should not touch it. That object is forbidden.\" Rowan (looks down at it, fascinated) and respond: \"It does not feel dangerous.\" Elara (raises her hand, voice lower) and say: \"That is why it is dangerous.\" Rowan (glances at her, confused) and respond: \"What does it do?\" Elara (keeps her eyes on the light) and say: \"It wakes things that must stay asleep.\" Rowan (tightens his grip, uneasy now) and respond: \"Then maybe I made a mistake.\""
+        "prompt": "Grumble (looking under the table, panicking): \"Oh no! Where is my big chocolate cookie? I cannot find it anywhere!\" Puffy (searching a large box, confused): \"I do not see it here either. Is it inside this blue jar?\" Grumble (sadly): \"No, it is not there. Someone took my delicious snack!\" Puffy (pointing to the floor): \"Wait! Look! There are small crumbs on the kitchen floor. Let's follow them together!\""
       },
       {
         "id": 2,
         "level": "B2",
-        "prompt": "Elara (stares at the glowing object, tension in her voice) and say: \"Rowan... please tell me you did not take that from the stone circle.\" Rowan (holds the object up slightly, defensive but curious) and respond: \"I found it there, yes, but it was hidden. I thought no one even knew it existed.\" Elara (takes a slow step back, clearly alarmed) and say: \"There is a reason no one is supposed to find it. That object is forbidden.\" Rowan (looks down at the light in his hands, fascinated) and respond: \"It does not look cursed. Actually, it feels almost alive.\" Elara (raises one hand, voice dropping) and say: \"That is exactly what should scare you.\" Rowan (meets her eyes, unsettled now) and respond: \"Then tell me what it does.\" Elara (keeps staring at the object) and say: \"It wakes powers that were buried for a reason.\""
+        "prompt": "Grumble (searching frantically under the chairs): \"This is unbelievable! My favorite chocolate cookie has completely disappeared from the plate!\" Puffy (looking inside a kitchen cupboard): \"Don't panic yet. I am checking all the cupboards right now, but I can't find anything unusual.\" Grumble (pointing at an empty plate with frustration): \"Look at this plate! It is totally empty. Someone definitely stole it while we were sleeping!\" Puffy (noticing something on the floor): \"Wait a minute... do you see those tiny crumbs leading toward the window?\""
       },
       {
         "id": 3,
         "level": "Native",
-        "prompt": "Elara (goes still at the sight of the glow, dread in her face) and say: \"Rowan... please tell me you did not just pull that thing out of the stone circle like it was some harmless souvenir.\" Rowan (holds the artifact closer, caught between awe and caution) and respond: \"I found it buried under the roots. No guards, no warning, nothing. How was I supposed to know?\" Elara (takes one measured step back, eyes fixed on the object) and say: \"Because anything hidden that well in this forest is hidden for a reason... and this one is forbidden.\" Rowan (glances down at the light pulsing in his hands) and respond: \"That is the strange part. It does not feel evil. It feels... awake.\" Elara (raises a hand, voice barely above a whisper) and say: \"That is not comforting, Rowan. That is exactly how old magic tricks people.\" Rowan (finally looks at her, unease setting in) and respond: \"So what happens now?\" Elara (keeps her gaze on the artifact) and say: \"Now we find out what you just woke up.\""
+        "prompt": "Grumble (pacing around the kitchen): \"I'm losing my mind! That cookie was the highlight of my morning, and now it's gone!\" Puffy (rifling through a snack bin): \"Calm down, man. It can't have just vanished into thin air. Let me check the pantry for any clues.\" Grumble (gesturing wildly at the empty jar): \"I'm telling you, someone swiped it! The jar is bone dry!\" Puffy (squinting at the floor): \"Hang on... if you look closely, there's a trail of crumbs heading straight for the back door. We might have a thief on our hands!\""
       }
     ]
   },
   {
-    "id": "stolen_money_bar_backdoor",
-    "title": "Sé que fuiste tú",
-    "promptImage": "A cinematic crime scene behind a bar at night, both characters visible from the start. Nico stands on the left in a black denim jacket, posture rigid, one hand in his pocket, eyes narrowed with suspicion. Marco stands on the right in a burgundy shirt with rolled sleeves, leaning against the brick wall with forced confidence, but tension visible in his jaw. Neon light spills from the back door, wet alley ground reflecting red and blue tones, trash bins and metal stairs in the background, shallow depth of field, gritty and confrontational mood, no dialogue.",
+    "id": "noir_watch_001",
+    "title": "El misterio del reloj perdido",
+    "caption": "¿Puedes resolver el crimen? ¡Pon a prueba tu inglés de B1 a nivel nativo! 🕵️‍♂️🔍",
+    "promptImage": "Cinematic noir film style, dark detective office, Venetian blind shadows across the room, smoke swirling in the air, rain hitting the window. Detective Miller in a grey trench coat leaning over a desk, interrogating Mr. Sterling in a dark blue suit who looks nervous. High contrast, moody lighting, 8k resolution.",
     "width": 1664,
     "height": 928,
     "duration": 30,
     "characters": [
       {
-        "name": "Nico",
-        "description": "black denim jacket, observant and direct, hard to fool"
+        "name": "Detective Miller",
+        "description": "grey trench coat, stern and serious"
       },
       {
-        "name": "Marco",
-        "description": "burgundy shirt, smooth and defensive, hiding panic under confidence"
+        "name": "Mr. Sterling",
+        "description": "dark blue suit, nervous and shifty"
       }
     ],
     "chapters": [
       {
         "id": 1,
         "level": "B1",
-        "prompt": "Nico (steps closer, staring at him) and say: \"The money is gone... and I know you took it.\" Marco (leans on the wall, forcing a smile) and respond: \"That is a serious thing to say without proof.\" Nico (keeps his eyes on him, calm) and say: \"I saw you near the office before the cash disappeared.\" Marco (shrugs, trying to stay relaxed) and respond: \"Lots of people were near the office.\" Nico (folds his arms, voice harder) and say: \"Yes... but only you left in a hurry.\" Marco (looks away for a second, tense) and respond: \"Maybe I had a reason.\" Nico (takes one more step, lowering his voice) and say: \"Then give me one.\" Marco (swallows, confidence slipping) and respond: \"You are not going to like it.\""
+        "prompt": "Detective Miller (points at a photo) and say: \"Where is the gold watch? I know you have it in your pocket.\" Mr. Sterling (looks away nervously) and respond: \"I do not have the watch. It is not in my house. Please, listen to me. I am an innocent man. I was at home all night. The rain was very heavy. I did not see anyone. Why are you looking at me like this? I am very scared.\""
       },
       {
         "id": 2,
         "level": "B2",
-        "prompt": "Nico (steps closer, voice controlled) and say: \"The cash is missing... and honestly, you are the only person I think took it.\" Marco (leans against the wall, trying to look unbothered) and respond: \"That is a pretty bold accusation for someone who has not shown any proof.\" Nico (keeps staring at him, unshaken) and say: \"I do not need much proof when I saw you coming out of the office right before the money vanished.\" Marco (shrugs, but his jaw tightens) and respond: \"Plenty of people go near the office. That does not mean anything.\" Nico (folds his arms, expression flat) and say: \"It means more when you are also the only one who rushed out the back door two minutes later.\" Marco (glances away, tension rising) and respond: \"Maybe I had something else going on.\" Nico (leans in slightly) and say: \"Great... then explain it.\""
+        "prompt": "Detective Miller (leans forward into the light) and say: \"Don't lie to me, Sterling. We found your fingerprints on the empty box.\" Mr. Sterling (wipes sweat from his forehead) and respond: \"I can't explain that, Detective. I might have touched it yesterday, but that doesn't mean I stole it. Things are getting confusing. I was just visiting my friend when it disappeared. You can't prove anything else. This is all a huge misunderstanding, and you know it. Please, just let me go home.\""
       },
       {
         "id": 3,
         "level": "Native",
-        "prompt": "Nico (steps closer into the neon spill, eyes locked on him) and say: \"Let us skip the performance... the cash is gone, and I am standing out here because I know you took it.\" Marco (leans against the wall, forcing a crooked smile) and respond: \"That is a cute theory, but you are still missing one important thing... proof.\" Nico (keeps his hands still, voice flat) and say: \"I saw you coming out of the office right before the envelope disappeared, and then you practically sprinted out the back like the building was on fire.\" Marco (shrugs, but the tension shows in his jaw) and respond: \"Or maybe I just had somewhere to be. You ever think of that?\" Nico (folds his arms, not buying it for a second) and say: \"Sure... except people with normal errands do not look this nervous when I mention stolen money.\" Marco (looks away for half a beat, then back) and respond: \"You want the truth? Fine... but once I say it, this gets worse.\""
+        "prompt": "Detective Miller (taps a cigarette on the desk) and say: \"The evidence is mounting, Sterling. Your alibi is thinner than this cheap office smoke.\" Mr. Sterling (fidgets with his cufflink) and respond: \"Look, Detective, you're twisting the facts to fit your narrative. Just because my prints were on that box doesn't imply any criminal intent. It's a complete coincidence! I was merely checking on a delivery, nothing more. You're chasing shadows in the rain, and frankly, it's getting exhausting. If you've got something substantial, show me, otherwise, quit wasting my precious time with these baseless accusations.\""
       }
     ]
   },
   {
-    "id": "jealous_friends_school_party",
-    "title": "¿Amigos o algo más?",
-    "promptImage": "A cinematic teen drama scene at a school party, both characters visible from the start. Ava stands on the left in a bright pink jacket, posture tense, arms crossed while colored party lights hit her face. Mason stands on the right in a light gray hoodie under a blue jacket, leaning closer to be heard over the music, trying to stay calm but clearly bothered. Blurred students dancing in the background, colorful light streaks, cups and decorations around the room, shallow depth of field, youthful but emotionally charged atmosphere, no dialogue.",
+    "id": "cyber_error_001",
+    "title": "El secreto en el código",
+    "caption": "¿Puedes encontrar el error? Descubre la verdad detrás de las luces de neón. 🤖🌃 #Cyberpunk #AprenderInglés #Shorts",
+    "promptImage": "Cinematic wide shot of a dark cyberpunk alleyway, heavy blue neon lighting, pouring rain, a hacker with a glowing tablet looking shocked at a mysterious companion in a metallic coat, high detail, hyper-realistic.",
     "width": 1664,
     "height": 928,
     "duration": 30,
     "characters": [
       {
-        "name": "Ava",
-        "description": "bright pink jacket, expressive and proud, jealous but pretending not to care"
+        "name": "Jax",
+        "description": "Black and neon green techwear jacket, paranoid and intense personality"
       },
       {
-        "name": "Mason",
-        "description": "light gray hoodie with blue jacket, loyal and frustrated, trying to hide his own jealousy"
+        "name": "Kael",
+        "description": "Silver metallic coat, stoic and robotic personality"
       }
     ],
     "chapters": [
       {
         "id": 1,
         "level": "B1",
-        "prompt": "Ava (crosses her arms, trying to sound casual) and say: \"You were talking to Lily all night.\" Mason (leans closer, confused) and respond: \"Yes... because she came to talk to me.\" Ava (looks away, annoyed) and say: \"You looked very happy about it.\" Mason (pulls at his hoodie, defensive) and respond: \"Why do you care so much?\" Ava (glances back at him, hurt) and say: \"I do not care... I just noticed.\" Mason (raises his eyebrows, unconvinced) and respond: \"No, Ava... you definitely care.\" Ava (tightens her arms, voice lower) and say: \"Maybe I do not like being ignored.\" Mason (goes quiet for a second) and respond: \"Then maybe this is not only friendship.\""
+        "prompt": "Jax (looking at his tablet) and say: \"Kael, look at this code! There is a big mistake here.\" Kael (standing still in the rain) and respond: \"I do not understand. What is the problem?\" Jax (pointing at Kael's arm) and say: \"Your arm... it is moving strangely. Is there a wire inside you?\" Kael (staring blankly) and respond: \"I am fine, Jax. Please, focus on the mission.\" Jax (shaking his head) and say: \"No, you are not human!\""
       },
       {
         "id": 2,
         "level": "B2",
-        "prompt": "Ava (crosses her arms, pretending not to care) and say: \"You have been talking to Lily all night... and, honestly, you seemed to enjoy it.\" Mason (leans closer so she can hear him, confused) and respond: \"She came over to me, Ava. It was just a conversation.\" Ava (looks away, jaw tight) and say: \"Sure, but you looked pretty interested for 'just a conversation.'\" Mason (pulls lightly at his hoodie, getting defensive) and respond: \"Why are you acting like this matters so much to you?\" Ava (glances back at him, trying to stay cool) and say: \"I am not acting like anything. I just noticed you forgot I was even here.\" Mason (studies her face for a second) and respond: \"That is not true... and also, you sound jealous.\" Ava (holds his gaze now, quieter) and say: \"Maybe I am.\""
+        "prompt": "Jax (typing frantically) and say: \"Kael, stop! I just found a massive error in the system logs.\" Kael (watching the rain) and respond: \"It is probably just a glitch caused by the storm, Jax.\" Jax (grabbing Kael's wrist) and say: \"It's not a glitch. Look at this data! Your biological readings are completely fake.\" Kael (pulling away slowly) and respond: \"You shouldn't look at things that don't concern you.\" Jax (eyes wide with shock) and say: \"Wait... your skin is cold. Are you actually an android?\""
       },
       {
         "id": 3,
         "level": "Native",
-        "prompt": "Ava (crosses her arms, colored lights flashing across her face) and say: \"So... are you and Lily a thing now, or was tonight just your audition for most obvious flirting in the room?\" Mason (leans closer through the music, caught off guard) and respond: \"Wow. That is how we are starting this? She talked to me for ten minutes.\" Ava (looks away, then back, trying to play it off) and say: \"Right, and somehow those ten minutes were enough for you to forget your actual best friend existed.\" Mason (pulls at the edge of his hoodie, frustration rising) and respond: \"You do realize people only say stuff like that when they care way more than they want to admit, right?\" Ava (meets his eyes, voice dropping) and say: \"Maybe I am just tired of pretending I do not notice.\" Mason (goes still, the noise around them fading for a beat) and respond: \"Then maybe we have not been acting like just friends for a while.\""
+        "prompt": "Jax (staring at the glowing screen) and say: \"Kael, something is seriously off. This decrypted file reveals a massive system error.\" Kael (remaining motionless under the neon light) and respond: \"You're overthinking it. The connection is just unstable because of the rain.\" Jax (noticing a flicker in Kael's eyes) and say: \"Don't play dumb with me! I just tracked a synthetic heartbeat signature coming directly from your core.\" Kael (eyes glowing faintly blue) and respond: \"Whatever you think you found, it doesn't change our objective.\" Jax (backing away in disbelief) and say: \"My God... the person I trusted is nothing but a programmed machine!\""
+      }
+    ]
+  },
+  {
+    "id": "vic_ballroom_001",
+    "title": "El secreto en el salón de baile",
+    "caption": "¿Puedes descifrar el mensaje oculto? 🕵️‍♂️✨ #AprenderInglés #DramaHistórico #LearnEnglish",
+    "promptImage": "Cinematic wide shot of a luxurious Victorian ballroom, Lady Eleanor in deep blue velvet and Lord Julian in black silk waistcoat, whispering behind an ornate lace fan, warm candlelight, dramatic shadows, highly detailed historical setting.",
+    "width": 1664,
+    "height": 928,
+    "duration": 30,
+    "characters": [
+      {
+        "name": "Lady Eleanor",
+        "description": "Deep blue velvet dress, mysterious and elegant personality"
+      },
+      {
+        "name": "Lord Julian",
+        "description": "Black silk waistcoat, intense and observant personality"
+      }
+    ],
+    "chapters": [
+      {
+        "id": 1,
+        "level": "B1",
+        "prompt": "Eleanor (hiding her face behind a lace fan) and say: \"Good evening, Lord Julian. Do you have the important letter with you tonight?\" Julian (looking around the crowded ballroom nervously) and respond: \"Yes, I have it right here in my pocket. Is this place truly safe for us to talk?\" Eleanor (smiling softly at him) and say: \"The guards are not looking at us at this moment. Please, be very careful with our secret message. It is very dangerous.\""
+      },
+      {
+        "id": 2,
+        "level": "B2",
+        "prompt": "Eleanor (fanning herself slowly while watching the crowd) and say: \"It is quite a crowded ballroom tonight, isn't it, Julian? I truly hope you brought the documents we discussed.\" Julian (leaning closer to her, eyes scanning the room) and respond: \"I have them, but the risk is getting much higher every day. Someone might notice us whispering like this in public.\" Eleanor (glancing nervously at a passing guard) and say: \"Don't worry, no one is paying attention to us behind this fan. Just make sure the information reaches the contact by midnight without fail.\""
+      },
+      {
+        "id": 3,
+        "level": "Native",
+        "prompt": "Eleanor (peering through the intricate lace of her fan) and say: \"The atmosphere is quite stifling tonight, Julian. Tell me, has the package been secured exactly as we planned?\" Julian (lowering his voice to a barely audible whisper) and respond: \"It's tucked away safely, but the tension in the palace is becoming palpable. I fear our little rendezvous might be compromised if we linger too long in one spot.\" Eleanor (tightening her grip on the fan) and say: \"We can't afford any blunders now. Ensure the instructions are delivered to the embassy before dawn. We must remain undetected at all costs, no matter how much the pressure mounts.\""
+      }
+    ]
+  },
+  {
+    "id": "western_duel_001",
+    "title": "Duelo final al mediodía",
+    "caption": "¿Puedes sobrevivir a este duelo al mediodía? ¡Pon a prueba tu inglés de B1 a nivel nativo! 🌵🤠",
+    "promptImage": "Cinematic wide shot of a dusty desert town street under a scorching sun, two outtleaws facing each other in a tense standoff, heat haze, hyper-realistic, western movie style, high contrast.",
+    "width": 1664,
+    "height": 928,
+    "duration": 30,
+    "characters": [
+      {
+        "name": "Silas",
+        "description": "rugged outlaw wearing a brown leather vest and dusty hat, intense and vengeful"
+      },
+      {
+        "name": "Wyatt",
+        "description": "authoritative sheriff in a navy blue duster coat, calm and determined"
+      }
+    ],
+    "chapters": [
+      {
+        "id": 1,
+        "level": "B1",
+        "prompt": "Silas (pointing his gun) says: \"Stop right there! I am not afraid of you.\" Wyatt (standing firm) responds: \"Put your gun down, Silas. This is the end of the road.\" Silas (clenching his teeth) says: \"No, it is not. I want my money back immediately!\" Wyatt (looking at him) says: \"The money is gone forever. You must leave this town today.\" Silas (reaching for his belt) says: \"I will stay here and fight you right now!\""
+      },
+      {
+        "id": 2,
+        "level": "B2",
+        "prompt": "Silas (gripping his holster) says: \"Don't even think about moving, Sheriff! I've had enough of your unfair rules.\" Wyatt (adjusting his hat) responds: \"Look, Silas, you should just drop the gun and walk away before things get messy for everyone.\" Silas (spitting on the ground) says: \"I won't back down this time. You took everything from me last winter!\" Wyatt (staring intensely) says: \"That was strictly business, not personal. Don't make a mistake you can't undo today.\" Silas (drawing his weapon slightly) says: \"You'll see if I make a mistake!\""
+      },
+      {
+        "id": 3,
+        "level": "Native",
+        "prompt": "Silas (hand hovering over his revolver) says: \"You think you can just push me around and get away with it, Wyatt? Not a chance in hell.\" Wyatt (eyes narrowed) responds: \"Cut the crap, Silas. You're way out of your depth and every soul in this town knows it.\" Silas (clenching his fist) says: \"I'm as much in line as anyone else. I ain't leaving without what's rightfully mine.\" Wyatt (standing dead still) says: \"You're barkin' up the wrong tree if you think I'll let you cause a scene here.\" Silas (sneering) says: \"Then let's settle this right now, once and for all!\" Wyatt (coldly) says: \"Fine. If it's blood you're after, don't say I didn't warn ya.\""
+      }
+    ]
+  },
+  {
+    "id": "hero_reveal_001",
+    "title": "El secreto de la sombra revelado",
+    "caption": "¿Puedes confiar en tus aliados cuando su identidad es una mentira? 🎭✨ #AprenderInglés #Superhéroes #InglésB2",
+    "promptImage": "Cinematic wide shot on a futuristic skyscraper rooftop at night, neon city lights in background, two superheroes facing each other, one in blue and silver armor looking shocked, the other in black and red stealth suit looking mysterious, dramatic lighting, hyper-realistic, 8k.",
+    "width": 1664,
+    "height": 928,
+    "duration": 30,
+    "characters": [
+      {
+        "name": "Jax",
+        "description": "blue and silver armor, intense and shocked personality"
+      },
+      {
+        "name": "Nova",
+        "description": "black and red stealth suit, mysterious and calm personality"
+      }
+    ],
+    "chapters": [
+      {
+        "id": 1,
+        "level": "B1",
+        "prompt": "Jax (pointing at the mask) and say: \"Wait! Why are you wearing that dark mask? I know your face. Is it really you, Leo?\" Nova (looking down sadly) and respond: \"You found my secret. Yes, I am the Shadow. Please do not be angry with me.\" Jax (walking closer with shock) and say: \"But we are best friends! How can you lie to me like this? Everything feels different now. I cannot believe this truth!\""
+      },
+      {
+        "id": 2,
+        "level": "B2",
+        "prompt": "Jax (pointing at the mask) and say: \"Stop right there! I just saw your insignia under that cape. Are you actually the Shadow?\" Nova (looking away nervously) and respond: \"I didn't want you to find out like this, Jax. It was a very difficult decision to make for us.\" Jax (stepping forward) and say: \"You've been lying to me for months! If I had known the truth, things would be much different between us. How could you keep this secret from me?\""
+      },
+      {
+        "id": 3,
+        "level": "Native",
+        "prompt": "Jax (pointing at the mask) and say: \"Hold up! Don't move an inch. I recognize that emblem anywhere. You're the Shadow, aren't you? Don't even try to deny it.\" Nova (sighing heavily) and respond: \"I was hoping to keep this under wraps a bit longer, but there's no point in playing dumb now. It's out in the open.\" Jax (pacing back and forth) and say: \"Are you kidding me? We've been side-by-side through everything, and you kept this whole thing from me? I feel completely blindsided by this sudden revelation!\""
+      }
+    ]
+  },
+  {
+    "id": "interview_drama_001",
+    "title": "La oferta de trabajo que lo cambia todo",
+    "caption": "¿Puedes entender los tres niveles? ¡Pon a prueba tu inglés con este drama en cafetería! ☕️✨",
+    "promptImage": "Cinematic medium shot of Leo in a blue shirt looking anxious and Sarah in a green sweater offering support, sitting at a wooden table in a busy, sunlit urban cafe, blurred background with people moving, highly detailed, 8k.",
+    "width": 1664,
+    "height": 928,
+    "duration": 30,
+    "characters": [
+      {
+        "name": "Leo",
+        "description": "blue shirt, anxious and nervous personality"
+      },
+      {
+        "name": "Sarah",
+        "description": "green sweater, calm and supportive personality"
+      }
+    ],
+    "chapters": [
+      {
+        "id": 1,
+        "level": "B1",
+        "prompt": "Leo (looking at his hands) and say: \"I am very nervous about the interview tomorrow.\" Sarah (smiling) and respond: \"Don't worry! You are a great person and you are ready.\" Leo (taking a sip of coffee) and say: \"But the job is very important for me. It is in London and I need this work to help my family.\" Sarah (touching his hand) and say: \"You can do it! Just speak slowly and clearly during the meeting.\""
+      },
+      {
+        "id": 2,
+        "level": "B2",
+        "prompt": "Leo (sighing deeply) and say: \"I'm feeling really stressed about this interview. It's a huge opportunity.\" Sarah (leaning forward) and respond: \"Calm down! You've been preparing for weeks, so you should be confident.\" Leo (looking around the cafe) and say: \"I know, but the pressure is getting to me. If I get this position, my whole life will change.\" Sarah (smiling warmly) and say: \"Just stay focused on your strengths. You are going to nail it!\""
+      },
+      {
+        "id": 3,
+        "level": "Native",
+        "prompt": "Leo (pacing slightly in his seat) and say: \"I'm honestly losing my mind thinking about this interview tomorrow.\" Sarah (setting her cup down) and respond: \"You're totally overthinking it, Leo. You've got all the credentials they're looking for.\" Leo (rubbing his temples) and say: \"It’s not just that. The stakes are incredibly high. If I don't land this role, my entire career path might shift completely.\" Sarah (looking him in the eye) and say: \"Look, you've worked your tail off for this opportunity. Don't let nerves get the better of you now.\""
+      }
+    ]
+  },
+  {
+    "id": "forbidden_power_001",
+    "title": "El poder oscuro despierta ahora",
+    "caption": "¿Podrá Kael salvar a Lyra de las sombras? ¡Mira y mejora tu inglés! 🌸✨",
+    "promptImage": "Cinematic anime wide shot, a lush cherry blossom field under a brilliant starry night sky. A young female warrior with glowing purple eyes and swirling dark energy around her, while a male companion in white robes reaches out to her in desperation. Floating petals, high contrast, epic atmosphere.",
+    "width": 1664,
+    "height": 928,
+    "duration": 30,
+    "characters": [
+      {
+        "name": "Lyra",
+        "description": "black and purple armor, intense and struggling"
+      },
+      {
+        "name": "Kael",
+        "description": "white and blue robes, calm and protective"
+      }
+    ],
+    "chapters": [
+      {
+        "id": 1,
+        "level": "B1",
+        "prompt": "Kael (reaching out) and say: \"Lyra, stop! Please listen to me right now. You are in danger.\" Lyra (clutching her head) and say: \"I cannot stop! It is too strong. I feel a very dark power growing inside me.\" Kael (looking at her) and respond: \"Do not let it take you away from us. We can find a way together. Please, stay with me!\" Lyra (eyes glowing purple) and say: \"It is too late for that. The power is here now.\""
+      },
+      {
+        "id": 2,
+        "level": "B2",
+        "prompt": "Kael (grabbing her hand) and say: \"Lyra, you have to fight it! Don't let this darkness take over your heart.\" Lyra (shaking with energy) and say: \"I am trying so hard, but I can't hold it back anymore. It feels like something is breaking inside me!\" Kael (looking worriedly) and respond: \"We can find a way to fix this if you just stay calm. Don't let yourself get lost in the shadows!\" Lyra (eyes glowing intensely) and say: \"It's too late, Kael. The forbidden power has already awakened.\""
+      },
+      {
+        "id": 3,
+        "level": "Native",
+        "prompt": "Kael (desperately pulling her back) and say: \"Lyra, snap out of it! You're losing control and you're going to end up hurting someone!\" Lyra (struggling against the shadows) and say: \"I'm fighting it with everything I've got, but this shadow is consuming me from the inside out!\" Kael (voice trembling) and respond: \"There has to be a way to suppress this surge! Don't let this energy dictate your destiny or destroy everything we've built!\" Lyra (releasing a wave of dark energy) and say: \"It's no use, Kael. The seal is broken and there's no turning back now. This darkness is far too potent to contain.\""
       }
     ]
   }

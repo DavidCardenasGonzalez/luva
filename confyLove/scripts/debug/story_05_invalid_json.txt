@@ -1,0 +1,28 @@
+{
+  "id": "noir_mystery_001",
+  "title": "The Case of the Lost Watch",
+  "caption": "Can you crack the case? 🕵️‍♂️ Test your English skills in this noir mystery!",
+  "promptImage": "Cinematic film noir scene, a dark detective office with venetian blinds casting long dramatic shadows, smoke and rain mist in the air. A stern detective in a brown trench coat is interrogating a nervous man in a black turtleneck sitting under a single desk lamp.",
+  "width": 1664,
+  "height": 928,
+  "duration": 30,
+  "characters": [
+    {
+      "name": "Detective Miller",
+      "description": "brown trench coat, stern and suspicious personality"
+    },
+    {
+      "name": "Leo",
+      "description": "black turtleneck, nervous and evasive personality"
+    }
+  ],
+  "chapters": [
+    {
+      "id": 1,
+      "level": "B1",
+      "prompt": "Detective Miller (pointing at a photo) and say: \"Tell me the truth right now. Where is the expensive gold watch? It is very important to us.\" Leo (looking down nervously) and respond: \"I do not have it, detective. I was at my home all night sleeping alone. I did not go out at all.\" Detective Miller (leaning forward under the lamp) and say: \"A witness saw you near the office at ten o'clock last night. Why did you lie to me?\" Leo (shaking his hands) and respond: \"I am telling the truth. Please believe me. I really need this job to live a good life.\""
+    },
+    {
+      "id": 2,
+      "level": "B2",
+      "prompt": "Detective Miller (slamming the desk) and say: \"Stop playing games, Leo. I know you're hiding something. Where is the missing gold watch?\" Leo (avoiding eye contact) and respond: \"I told you already, detective, I haven't seen it anywhere. I was nowhere near that building last night.\" Detective Miller (lighting a cigarette) and say: \"Don't lie to me. We found your fingerprints on the empty jewelry case this morning.\" Leo (wiping sweat from his forehead) and respond: \"That doesn't mean I actually stole anything! Someone could have easily planted them there. You are making a huge

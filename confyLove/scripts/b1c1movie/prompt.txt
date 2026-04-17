@@ -1,173 +1,37 @@
-Generate a structured JSON object for a 30-second educational video designed to teach English through three levels (B1, B2, Native), featuring two clearly defined characters.
+Generate JSON for a 30-second English teaching video with two characters in B1, B2, Native levels.
 
-INPUT VARIABLES:
 Genre: [INSERT GENRE]
 Theme: [INSERT THEME]
 Scenario: [INSERT SCENARIO]
 
-OUTPUT FORMAT (STRICT JSON):
-
+Output strict JSON:
 {
-  "id": "short_title_based_on_theme_and_scenario",
-  "title": "short hook related to the story, max 6 words, may include emojis",
-  "promptImage": "string",
+  "id": "short_id",
+  "title": "hook max 6 words no emojis",
+  "caption": "social media teaser",
+  "promptImage": "cinematic scene with both characters",
   "width": 1664,
   "height": 928,
   "duration": 30,
   "characters": [
-    {
-      "name": "string",
-      "description": "clear visual identity including clothing, color, and personality"
-    },
-    {
-      "name": "string",
-      "description": "clear visual identity including clothing, color, and personality"
-    }
+    {"name": "Name", "description": "clothing color personality"},
+    {"name": "Name", "description": "clothing color personality"}
   ],
   "chapters": [
-    {
-      "id": 1,
-      "level": "B1",
-      "prompt": "string"
-    },
-    {
-      "id": 2,
-      "level": "B2",
-      "prompt": "string"
-    },
-    {
-      "id": 3,
-      "level": "Native",
-      "prompt": "string"
-    }
+    {"id": 1, "level": "B1", "prompt": "dialogue script"},
+    {"id": 2, "level": "B2", "prompt": "dialogue script"},
+    {"id": 3, "level": "Native", "prompt": "dialogue script"}
   ]
 }
 
-TITLE RULES
-Add a new field called "title".
-This title will be used as on-screen hook text for Reels.
-It must always be directly related to the story.
-It can be:
-- a question
-- a short comment
-Maximum length: 6 words
-It may include emojis
-It must feel attention-grabbing and help increase curiosity.
-
-🎥 VISUAL RULES (CRITICAL)
-BOTH characters must be visible from the start in promptImage.
-Clearly define:
-- clothing (color is mandatory)
-- posture
-- relative position
-Environment must reflect the selected Genre + Theme.
-Use cinematic language (lighting, mood, depth of field, etc.).
-NO dialogue in promptImage.
-
-🧍 CHARACTER RULES
-Always define TWO characters.
-Each must have:
-- Name
-- Distinct clothing (color contrast recommended)
-- Personality cue
-
-Example:
-Emma: yellow jacket, expressive
-Sofia: dark denim jacket, reserved
-
-🚨 DIALOGUE STRUCTURE (MANDATORY – NON-NEGOTIABLE)
-
-Every spoken line MUST follow EXACTLY this format:
-
-Name (clear visual action) and say: "..."
-Name (clear visual action) and respond: "..."
-
-❗ HARD CONSTRAINTS
-NEVER omit "and say" or "and respond".
-NEVER write dialogue without this structure.
-NEVER use pronouns (he/she) without names.
-ALWAYS alternate speakers clearly.
-
-🎭 ACTION RULES
-Actions must be:
-- short
-- visual
-- placed BEFORE dialogue
-
-Actions should reinforce identity when possible.
-
-Examples:
-(adjusts her yellow jacket, nervous)
-(pulls his gray hoodie, relaxed)
-(leans forward, lowering voice)
-
-🔁 CORE CONSISTENCY RULE
-All 3 levels MUST:
-- Have the SAME scene
-- Have the SAME actions
-- Have the SAME blocking
-- Have the SAME emotional beats
-
-ONLY the language complexity changes.
-
-🧠 HOOK RULES FOR THE SCRIPT
-The first spoken line of each chapter must function as a strong hook.
-It must immediately generate curiosity, tension, surprise, emotion, or intrigue.
-The viewer should feel a reason to keep watching from the very first sentence.
-This is especially important for short-form video retention.
-
-For B1 specifically:
-Try to make the dialogue begin from second 0 if possible.
-Avoid long setup before the first spoken line.
-
-🧠 LANGUAGE LEVEL RULES
-
-🟢 B1:
-- simple vocabulary
-- short sentences
-- very clear structure
-- slower pacing
-- ~70–90 words
-- if possible, begin the dialogue from second 0
-- the first line must still feel like a hook, even with simple language
-
-🟡 B2:
-- more natural phrasing
-- connectors such as but, actually, I mean
-- moderate pacing
-- ~80–100 words
-- the first line must feel like a hook that creates immediate interest
-
-🔴 Native:
-- realistic conversation
-- subtext and personality
-- idioms or natural phrasing
-- genre-driven tone (comedy, tension, romance, etc.)
-- ~90–110 words
-- the first line must feel like a strong hook with native-level impact
-
-🎯 PERFORMANCE DETAILS
-- Include natural pauses using "..."
-- Include micro-actions in every line
-- Maintain conversational rhythm
-- Avoid formal or robotic language
-
-🔒 STRING ESCAPING RULES
-All JSON string values must be fully escaped.
-All double quotes inside string content must appear escaped as \\"
-This applies especially to:
-- promptImage
-- character descriptions
-- chapter prompts
-- any dialogue line inside prompts
-
-Never output unescaped double quotes inside any JSON string.
-The final output must be valid JSON that can be parsed without manual fixes.
-
-⚙️ TECHNICAL CONSTRAINTS
-- Output ONLY valid JSON
-- No explanations
-- Escape all quotes properly
-- All double quotes inside string values must be escaped as \\"
-- Do not include malformed strings
-- Optimize for AI video generation
+Rules:
+- Title: story-related hook, max 6 words.
+- Caption: engaging teaser.
+- Visual: Both characters visible, cinematic, no dialogue.
+- Characters: Two distinct, color clothing.
+- Dialogue: Name (action) and say: "..." or respond: "..."
+- Consistency: Same scene/actions across levels.
+- Hook: First line hooks viewer.
+- Levels: B1 70-90 words simple, B2 80-100 natural, Native 90-110 realistic.
+- Escape " as \\" in strings.
+- Output only valid JSON.
