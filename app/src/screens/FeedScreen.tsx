@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -11,10 +11,11 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
 import { Audio, ResizeMode, Video } from 'expo-av';
+import type { AVPlaybackStatus } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { LearningItem, useLearningItems } from '../hooks/useLearningItems';
@@ -26,12 +27,17 @@ import {
   useCardProgress,
 } from '../progress/CardProgressProvider';
 import { useStoryProgress } from '../progress/StoryProgressProvider';
+import type { StoryActiveMission } from '../progress/types';
 import { CARD_OPEN_COST, CHAT_MISSION_COST, useCoins } from '../purchases/CoinBalanceProvider';
 import CoinCountChip from '../components/CoinCountChip';
 import AppTabBar from '../components/AppTabBar';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
 import { trackMixpanelFeedLoadMore } from '../marketing/mixpanelEvents';
 import { prefetchImageUrls } from '../shared/imagePrefetch';
+import {
+  shouldShowMissionInterstitialForMission,
+  showMissionInterstitialBeforeNavigation,
+} from '../shared/missionInterstitial';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Feed'>;
 
@@ -42,6 +48,16 @@ type PendingMission = {
   storyTitle: string;
   sceneIndex: number;
   mission: StoryMission;
+};
+
+type ResumeMission = {
+  kind: 'resumeMission';
+  feedId: string;
+  storyId: string;
+  storyTitle: string;
+  sceneIndex: number;
+  mission: StoryMission;
+  updatedAt: string;
 };
 
 type PendingVocab = LearningItem & {
@@ -56,7 +72,7 @@ type FeedPostItem = FeedPost & {
   claimed?: boolean;
 };
 
-type FeedItem = PendingMission | PendingVocab | FeedPostItem;
+type FeedItem = ResumeMission | PendingMission | PendingVocab | FeedPostItem;
 
 const COLORS = {
   background: '#0b1224',
@@ -127,11 +143,24 @@ function buildFeedItems(missions: PendingMission[], vocabulary: PendingVocab[], 
 function MissionCard({
   item,
   onStart,
+  playbackEnabled,
 }: {
   item: PendingMission;
   onStart: (item: PendingMission) => void;
+  playbackEnabled: boolean;
 }) {
   const avatarImageUrl = item.mission.avatarImageUrl?.trim();
+  const introVideoUrl = item.mission.videoIntro?.trim();
+  const introVideoRef = useRef<Video | null>(null);
+  const [hasVideoError, setHasVideoError] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [hasVideoEnded, setHasVideoEnded] = useState(false);
+
+  useEffect(() => {
+    setHasVideoError(false);
+    setIsVideoPlaying(false);
+    setHasVideoEnded(false);
+  }, [introVideoUrl]);
 
   const missionAvatar = useMemo<ImageSourcePropType | undefined>(() => {
     return avatarImageUrl ? { uri: avatarImageUrl } : getChatAvatar(item.mission.missionId);
@@ -140,6 +169,59 @@ function MissionCard({
   const displayName = item.mission.caracterName || item.mission.title || 'Personaje';
   const avatarInitial = (displayName.trim().charAt(0) || '?').toUpperCase();
   const description = item.mission.sceneSummary || 'Habla con el personaje y completa los objetivos de la escena.';
+
+  const handleIntroVideoStatus = useCallback((status: AVPlaybackStatus) => {
+    if (!status.isLoaded) {
+      setIsVideoPlaying(false);
+      return;
+    }
+
+    setIsVideoPlaying(status.isPlaying);
+    if (status.didJustFinish) {
+      setHasVideoEnded(true);
+      setIsVideoPlaying(false);
+    }
+  }, []);
+
+  const handlePlayVideo = useCallback(async () => {
+    setHasVideoEnded(false);
+    try {
+      if (hasVideoEnded) {
+        await introVideoRef.current?.replayAsync();
+      } else {
+        await introVideoRef.current?.playAsync();
+      }
+    } catch (playErr) {
+      console.warn('[Feed] No se pudo reproducir el intro de la mision', playErr);
+    }
+  }, [hasVideoEnded]);
+
+  const handlePauseVideo = useCallback(async () => {
+    try {
+      await introVideoRef.current?.pauseAsync();
+    } catch (pauseErr) {
+      console.warn('[Feed] No se pudo pausar el intro de la mision', pauseErr);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (playbackEnabled) {
+      return;
+    }
+
+    setIsVideoPlaying(false);
+    void introVideoRef.current?.pauseAsync().catch((pauseErr) => {
+      console.warn('[Feed] No se pudo pausar el intro al salir de la pantalla', pauseErr);
+    });
+  }, [playbackEnabled]);
+
+  useEffect(() => {
+    return () => {
+      void introVideoRef.current?.pauseAsync().catch(() => {
+        // Best effort cleanup on unmount.
+      });
+    };
+  }, []);
 
   const visualContent = (
     <View style={{ flex: 1, justifyContent: 'space-between', padding: 16 }}>
@@ -202,13 +284,94 @@ function MissionCard({
         shadowRadius: 12,
       }}
     >
-      <View style={{ aspectRatio: 1, backgroundColor: COLORS.surfaceAlt }}>
-        {missionAvatar ? (
-          <ImageBackground
-            source={missionAvatar}
-            style={{ flex: 1 }}
-            imageStyle={{ resizeMode: 'cover' }}
-          >
+      <View style={{ aspectRatio: 0.9, backgroundColor: COLORS.surfaceAlt }}>
+        {introVideoUrl && !hasVideoError ? (
+          <View style={{ flex: 1 }}>
+            <Video
+              ref={introVideoRef}
+              source={{ uri: introVideoUrl }}
+              style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+              resizeMode={ResizeMode.COVER}
+              shouldPlay={false}
+              isLooping={false}
+              useNativeControls={false}
+              onPlaybackStatusUpdate={handleIntroVideoStatus}
+              onError={() => {
+                setHasVideoError(true);
+                setIsVideoPlaying(false);
+              }}
+            />
+            <View
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(11, 18, 36, 0.38)',
+              }}
+            />
+            <View
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: 100,
+                backgroundColor: 'rgba(11, 18, 36, 0.66)',
+              }}
+            />
+            {visualContent}
+            {isVideoPlaying ? (
+              <Pressable
+                onPress={() => {
+                  void handlePauseVideo();
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="Pausar video"
+                style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+              />
+            ) : (
+              <View
+                pointerEvents="box-none"
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  bottom: 0,
+                  left: 0,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Pressable
+                  onPress={() => {
+                    void handlePlayVideo();
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={hasVideoEnded ? 'Reproducir de nuevo' : 'Reproducir video'}
+                  style={({ pressed }) => ({
+                    width: 72,
+                    height: 72,
+                    borderRadius: 999,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: pressed ? 'rgba(11, 18, 36, 0.92)' : 'rgba(11, 18, 36, 0.82)',
+                    borderWidth: 1,
+                    borderColor: 'rgba(226, 232, 240, 0.26)',
+                  })}
+                >
+                  <MaterialIcons
+                    name={hasVideoEnded ? 'replay' : 'play-arrow'}
+                    size={hasVideoEnded ? 30 : 34}
+                    color="white"
+                  />
+                </Pressable>
+              </View>
+            )}
+          </View>
+        ) : missionAvatar ? (
+          <ImageBackground source={missionAvatar} style={{ flex: 1 }} imageStyle={{ resizeMode: 'cover' }}>
             <View
               style={{
                 position: 'absolute',
@@ -256,6 +419,88 @@ function MissionCard({
           <Text style={{ color: 'white', fontWeight: '900' }}>Empezar misión</Text>
         </Pressable>
       </View>
+    </View>
+  );
+}
+
+function ResumeMissionCard({
+  item,
+  onContinue,
+}: {
+  item: ResumeMission;
+  onContinue: (item: ResumeMission) => void;
+}) {
+  const avatarImageUrl = item.mission.avatarImageUrl?.trim();
+
+  const missionAvatar = useMemo<ImageSourcePropType | undefined>(() => {
+    return avatarImageUrl ? { uri: avatarImageUrl } : getChatAvatar(item.mission.missionId);
+  }, [avatarImageUrl, item.mission.missionId]);
+
+  const displayName = item.mission.caracterName || item.mission.title || 'Personaje';
+  const avatarInitial = (displayName.trim().charAt(0) || '?').toUpperCase();
+  const description =
+    item.mission.sceneSummary || 'Tu conversación sigue pendiente. Vuelve exactamente donde la dejaste.';
+
+  return (
+    <View
+      style={{
+        padding: 18,
+        borderRadius: 18,
+        backgroundColor: '#082f49',
+        borderWidth: 1,
+        borderColor: '#0ea5e9',
+        shadowColor: '#000',
+        shadowOpacity: 0.18,
+        shadowRadius: 12,
+      }}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View
+          style={{
+            width: 54,
+            height: 54,
+            borderRadius: 999,
+            overflow: 'hidden',
+            backgroundColor: 'rgba(11, 18, 36, 0.78)',
+            borderWidth: 1,
+            borderColor: 'rgba(125, 211, 252, 0.5)',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {missionAvatar ? (
+            <Image source={missionAvatar} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+          ) : (
+            <Text style={{ color: 'white', fontSize: 20, fontWeight: '900' }}>{avatarInitial}</Text>
+          )}
+        </View>
+        <View style={{ flex: 1, marginLeft: 14 }}>
+          <Text style={{ color: '#7dd3fc', fontSize: 11, fontWeight: '800', textTransform: 'uppercase' }}>
+            Continúa tu misión
+          </Text>
+          <Text style={{ color: 'white', fontSize: 20, fontWeight: '900', marginTop: 4 }}>
+            {item.mission.title}
+          </Text>
+          <Text style={{ color: '#cbd5e1', marginTop: 4 }} numberOfLines={1}>
+            {item.storyTitle}
+          </Text>
+        </View>
+      </View>
+
+      <Text style={{ color: '#dbeafe', lineHeight: 21, marginTop: 14 }}>{description}</Text>
+
+      <Pressable
+        onPress={() => onContinue(item)}
+        style={({ pressed }) => ({
+          marginTop: 16,
+          paddingVertical: 13,
+          borderRadius: 12,
+          alignItems: 'center',
+          backgroundColor: pressed ? '#0f766e' : '#14b8a6',
+        })}
+      >
+        <Text style={{ color: '#032a2a', fontWeight: '900' }}>Continuar donde la dejé</Text>
+      </Pressable>
     </View>
   );
 }
@@ -388,17 +633,38 @@ function FeedPostCard({
   onMission,
   onClaimExtra,
   claiming,
+  playbackEnabled,
 }: {
   item: FeedPostItem;
   onPractice: (item: FeedPostItem) => void;
   onMission: (item: FeedPostItem) => void;
   onClaimExtra: (item: FeedPostItem) => void;
   claiming: boolean;
+  playbackEnabled: boolean;
 }) {
   const imageUrl = item.imageUrl?.trim();
   const videoUrl = item.videoUrl?.trim();
+  const videoRef = useRef<Video | null>(null);
   const hasMedia = !!imageUrl || !!videoUrl;
   const canClaimExtra = item.postType === 'extra' && !!item.coinAmount && !item.claimed;
+
+  useEffect(() => {
+    if (playbackEnabled || !videoUrl) {
+      return;
+    }
+
+    void videoRef.current?.pauseAsync().catch((pauseErr) => {
+      console.warn('[Feed] No se pudo pausar el video del post al salir de la pantalla', pauseErr);
+    });
+  }, [playbackEnabled, videoUrl]);
+
+  useEffect(() => {
+    return () => {
+      void videoRef.current?.pauseAsync().catch(() => {
+        // Best effort cleanup on unmount.
+      });
+    };
+  }, []);
 
   const action =
     item.postType === 'practice_guide'
@@ -442,6 +708,7 @@ function FeedPostCard({
         <View style={{ aspectRatio: videoUrl ? 9 / 11 : 1, backgroundColor: COLORS.surfaceAlt }}>
           {videoUrl ? (
             <Video
+              ref={videoRef}
               source={{ uri: videoUrl }}
               style={{ width: '100%', height: '100%' }}
               resizeMode={ResizeMode.COVER}
@@ -491,6 +758,7 @@ function FeedPostCard({
 
 export default function FeedScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const isFeedFocused = useIsFocused();
   const { items: learningItems } = useLearningItems();
   const { stories, loading: storiesLoading, error: storiesError } = useStoryCatalog();
   const {
@@ -506,6 +774,7 @@ export default function FeedScreen({ navigation }: Props) {
     setStatus,
   } = useCardProgress();
   const {
+    activeMission,
     loading: storyProgressLoading,
     isMissionCompleted,
     progress: storyProgress,
@@ -516,7 +785,37 @@ export default function FeedScreen({ navigation }: Props) {
   const [visibleVocabularyCount, setVisibleVocabularyCount] = useState(VOCABULARY_BATCH_SIZE);
   const [claimedExtraPostIds, setClaimedExtraPostIds] = useState<Set<string>>(() => new Set());
   const [claimingPostId, setClaimingPostId] = useState<string>();
+  const [isInterstitialLoading, setIsInterstitialLoading] = useState(false);
   const [postActionMessage, setPostActionMessage] = useState<string>();
+  const [suspendFeedVideoPlayback, setSuspendFeedVideoPlayback] = useState(false);
+  const isOpeningMissionRef = useRef(false);
+
+  const videoPlaybackEnabled = isFeedFocused && !suspendFeedVideoPlayback;
+
+  useEffect(() => {
+    if (isFeedFocused) {
+      setSuspendFeedVideoPlayback(false);
+      return;
+    }
+
+    setSuspendFeedVideoPlayback(true);
+  }, [isFeedFocused]);
+
+  const stopFeedVideos = useCallback(() => {
+    setSuspendFeedVideoPlayback(true);
+  }, []);
+
+  useEffect(() => {
+    void Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: true,
+      playThroughEarpieceAndroid: false,
+    }).catch((audioModeErr) => {
+      console.warn('[Feed] No se pudo configurar audio mode para videos', audioModeErr);
+    });
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -548,6 +847,55 @@ export default function FeedScreen({ navigation }: Props) {
     };
   }, []);
 
+  const activeMissionKey = useMemo(() => {
+    if (!activeMission) {
+      return undefined;
+    }
+    return `${activeMission.storyId}:${activeMission.missionId}`;
+  }, [activeMission]);
+
+  const resumeMission = useMemo<ResumeMission | undefined>(() => {
+    if (!activeMission) {
+      return undefined;
+    }
+
+    let storyTitle = activeMission.storyTitle || 'Historia';
+    let mission: StoryMission | undefined;
+
+    for (const story of stories) {
+      if (story.storyId !== activeMission.storyId) {
+        continue;
+      }
+      storyTitle = story.title;
+      mission =
+        story.missions[activeMission.sceneIndex] ||
+        story.missions.find((item) => item.missionId === activeMission.missionId);
+      break;
+    }
+
+    if (!mission) {
+      mission = {
+        missionId: activeMission.missionId,
+        title: activeMission.missionTitle || 'Tu misión pendiente',
+        sceneSummary: activeMission.sceneSummary,
+        aiRole: 'assistant',
+        caracterName: activeMission.caracterName,
+        avatarImageUrl: activeMission.avatarImageUrl,
+        requirements: activeMission.requirements.map((requirement) => ({ ...requirement })),
+      };
+    }
+
+    return {
+      kind: 'resumeMission',
+      feedId: `resume:${activeMission.storyId}:${activeMission.missionId}`,
+      storyId: activeMission.storyId,
+      storyTitle,
+      sceneIndex: activeMission.sceneIndex,
+      mission,
+      updatedAt: activeMission.updatedAt,
+    };
+  }, [activeMission, stories]);
+
   const pendingMissions = useMemo<PendingMission[]>(() => {
     return stories.flatMap((story) =>
       story.missions
@@ -559,9 +907,13 @@ export default function FeedScreen({ navigation }: Props) {
           sceneIndex,
           mission,
         }))
-        .filter((item) => !isMissionCompleted(item.storyId, item.mission.missionId))
+        .filter(
+          (item) =>
+            !isMissionCompleted(item.storyId, item.mission.missionId) &&
+            `${item.storyId}:${item.mission.missionId}` !== activeMissionKey
+        )
     );
-  }, [isMissionCompleted, stories, storyProgress]);
+  }, [activeMissionKey, isMissionCompleted, stories, storyProgress]);
 
   const pendingVocabulary = useMemo<PendingVocab[]>(() => {
     return learningItems
@@ -599,8 +951,11 @@ export default function FeedScreen({ navigation }: Props) {
   );
 
   const feedItems = useMemo(
-    () => buildFeedItems(visibleMissions, visibleVocabulary, feedPostItems),
-    [feedPostItems, visibleMissions, visibleVocabulary]
+    () => {
+      const next = buildFeedItems(visibleMissions, visibleVocabulary, feedPostItems);
+      return resumeMission ? [resumeMission, ...next] : next;
+    },
+    [feedPostItems, resumeMission, visibleMissions, visibleVocabulary]
   );
 
   const imageUrlsToPrefetch = useMemo(() => {
@@ -609,9 +964,10 @@ export default function FeedScreen({ navigation }: Props) {
       Math.min(shuffledMissions.length, visibleMissionsCount + MISSION_BATCH_SIZE)
     );
     const missionUrls = upcomingMissions.map((item) => item.mission.avatarImageUrl);
+    const resumeMissionUrls = resumeMission ? [resumeMission.mission.avatarImageUrl] : [];
     const postUrls = feedPostItems.map((item) => item.imageUrl);
-    return [...missionUrls, ...postUrls];
-  }, [feedPostItems, shuffledMissions, visibleMissionsCount]);
+    return [...resumeMissionUrls, ...missionUrls, ...postUrls];
+  }, [feedPostItems, resumeMission, shuffledMissions, visibleMissionsCount]);
 
   useEffect(() => {
     prefetchImageUrls(imageUrlsToPrefetch, 16);
@@ -709,6 +1065,7 @@ export default function FeedScreen({ navigation }: Props) {
 
   const openPractice = useCallback(
     async (item: LearningItem) => {
+      stopFeedVideos();
       if (!isUnlimited) {
         if (coinsLoading) return;
         const enough = await canSpend(CARD_OPEN_COST);
@@ -727,7 +1084,7 @@ export default function FeedScreen({ navigation }: Props) {
         prompt: item.prompt,
       });
     },
-    [canSpend, coinsLoading, isUnlimited, navigation]
+    [canSpend, coinsLoading, isUnlimited, navigation, stopFeedVideos]
   );
 
   const handlePractice = useCallback(
@@ -739,24 +1096,47 @@ export default function FeedScreen({ navigation }: Props) {
 
   const openMission = useCallback(
     async (storyId: string, sceneIndex: number) => {
-      if (!isUnlimited) {
-        if (coinsLoading) return;
-        const enough = await canSpend(CHAT_MISSION_COST);
-        if (!enough) {
-          navigation.navigate('Paywall', { source: 'story_mission_unlock' });
-          return;
+      if (isOpeningMissionRef.current) return;
+      isOpeningMissionRef.current = true;
+      try {
+        stopFeedVideos();
+        if (!isUnlimited) {
+          if (coinsLoading) return;
+          const enough = await canSpend(CHAT_MISSION_COST);
+          if (!enough) {
+            navigation.navigate('Paywall', { source: 'story_mission_unlock' });
+            return;
+          }
+
+          const missionId = stories.find((story) => story.storyId === storyId)?.missions?.[sceneIndex]?.missionId;
+          const shouldShowInterstitial = await shouldShowMissionInterstitialForMission(storyId, missionId);
+          if (shouldShowInterstitial) {
+            setIsInterstitialLoading(true);
+            await showMissionInterstitialBeforeNavigation();
+          }
         }
+
+        navigation.navigate('StoryScene', {
+          storyId,
+          sceneIndex,
+        });
+      } finally {
+        setIsInterstitialLoading(false);
+        isOpeningMissionRef.current = false;
       }
-      navigation.navigate('StoryScene', {
-        storyId,
-        sceneIndex,
-      });
     },
-    [canSpend, coinsLoading, isUnlimited, navigation]
+    [canSpend, coinsLoading, isUnlimited, navigation, stopFeedVideos, stories]
   );
 
   const handleStartMission = useCallback(
     async (item: PendingMission) => {
+      await openMission(item.storyId, item.sceneIndex);
+    },
+    [openMission]
+  );
+
+  const handleContinueMission = useCallback(
+    async (item: ResumeMission) => {
       await openMission(item.storyId, item.sceneIndex);
     },
     [openMission]
@@ -867,7 +1247,10 @@ export default function FeedScreen({ navigation }: Props) {
                 style={{ width: 180, height: 48, resizeMode: 'contain' }}
               />
               <Pressable
-                onPress={() => navigation.navigate('Settings')}
+                onPress={() => {
+                  stopFeedVideos();
+                  navigation.navigate('Settings');
+                }}
                 hitSlop={12}
                 style={({ pressed }) => ({
                   position: 'absolute',
@@ -928,8 +1311,14 @@ export default function FeedScreen({ navigation }: Props) {
           </View>
         }
         renderItem={({ item }) =>
-          item.kind === 'mission' ? (
-            <MissionCard item={item} onStart={handleStartMission} />
+          item.kind === 'resumeMission' ? (
+            <ResumeMissionCard item={item} onContinue={handleContinueMission} />
+          ) : item.kind === 'mission' ? (
+            <MissionCard
+              item={item}
+              onStart={handleStartMission}
+              playbackEnabled={videoPlaybackEnabled}
+            />
           ) : item.kind === 'vocab' ? (
             <VocabularyCard
               item={item}
@@ -944,6 +1333,7 @@ export default function FeedScreen({ navigation }: Props) {
               onMission={handleMissionPost}
               onClaimExtra={handleClaimExtraPost}
               claiming={claimingPostId === item.postId}
+              playbackEnabled={videoPlaybackEnabled}
             />
           )
         }
@@ -975,6 +1365,40 @@ export default function FeedScreen({ navigation }: Props) {
           )
         }
       />
+      {isInterstitialLoading ? (
+        <View
+          pointerEvents="auto"
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(11, 18, 36, 0.65)',
+            paddingHorizontal: 24,
+          }}
+        >
+          <View
+            style={{
+              minWidth: 220,
+              paddingHorizontal: 20,
+              paddingVertical: 18,
+              borderRadius: 18,
+              backgroundColor: COLORS.surface,
+              borderWidth: 1,
+              borderColor: COLORS.border,
+              alignItems: 'center',
+            }}
+          >
+            <ActivityIndicator size="large" color={COLORS.accent} />
+            <Text style={{ color: COLORS.text, marginTop: 10, fontWeight: '800', textAlign: 'center' }}>
+              Abriendo mision...
+            </Text>
+          </View>
+        </View>
+      ) : null}
       <AppTabBar active="feed" />
     </SafeAreaView>
   );

@@ -14,6 +14,33 @@ import {
 } from '@/features/stories/lib/story-progress'
 import { getErrorMessage } from '@/shared/lib/error-message'
 
+type MissionAvatarProps = {
+  imageUrl?: string
+  name: string
+}
+
+function MissionAvatar({ imageUrl, name }: MissionAvatarProps) {
+  const [hasImageError, setHasImageError] = useState(false)
+  const initial = (name.trim().charAt(0) || '?').toUpperCase()
+
+  return (
+    <span className="mission-avatar" aria-hidden={!imageUrl || hasImageError}>
+      {imageUrl && !hasImageError ? (
+        <img
+          src={imageUrl}
+          alt={name}
+          loading="lazy"
+          onError={() => {
+            setHasImageError(true)
+          }}
+        />
+      ) : (
+        <span>{initial}</span>
+      )}
+    </span>
+  )
+}
+
 export function StoryMissionsPage() {
   const navigate = useNavigate()
   const { storyId } = useParams<{ storyId: string }>()
@@ -166,15 +193,22 @@ export function StoryMissionsPage() {
       <section className="mission-list">
         {story.missions.map((mission, index) => {
           const completed = isStoryMissionCompleted(progress, story.storyId, mission.missionId)
+          const characterName = mission.caracterName || mission.title
 
           return (
             <article key={mission.missionId} className="mission-card">
               <div className="mission-card-head">
-                <div>
-                  <h2>
-                    {index + 1}. {mission.title}
-                  </h2>
-                  {mission.sceneSummary ? <p>{mission.sceneSummary}</p> : null}
+                <div className="mission-card-character">
+                  <MissionAvatar imageUrl={mission.avatarImageUrl} name={characterName} />
+                  <div className="mission-card-copy">
+                    {mission.caracterName ? (
+                      <span className="mission-character-name">{mission.caracterName}</span>
+                    ) : null}
+                    <h2>
+                      {index + 1}. {mission.title}
+                    </h2>
+                    {mission.sceneSummary ? <p>{mission.sceneSummary}</p> : null}
+                  </div>
                 </div>
                 <span
                   className={`story-status-pill${completed ? ' story-status-pill-complete' : ''}`}

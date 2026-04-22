@@ -26,6 +26,13 @@ import {
   useStoryDetail,
 } from '../hooks/useStories';
 import { useStoryProgress } from '../progress/StoryProgressProvider';
+import type {
+  StoryAnalysis,
+  StoryAttemptSnapshot,
+  StoryConversationFeedback,
+  StoryRequirementProgress,
+  StoryRetryState,
+} from '../progress/types';
 import StoryMessageComposer from '../components/StoryMessageComposer';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
 import { useCoins, CHAT_MISSION_COST, RECORDING_COST } from '../purchases/CoinBalanceProvider';
@@ -69,27 +76,61 @@ type StoryAdvancePayload = {
   } | null;
 };
 
-type StoryAttemptSnapshot = {
-  messages: StoryMessage[];
-  requirements: StoryRequirementState[];
-  analysis: {
-    correctness: number;
-    result: 'correct' | 'partial' | 'incorrect';
-    errors: string[];
-    reformulations: string[];
-  } | null;
-  missionCompleted: boolean;
-  storyCompleted: boolean;
-  pendingNext: number | null;
-  conversationFeedback: {
-    summary: string;
-    improvements: string[];
-  } | null;
-};
-
 type StoryAssistanceResponse = {
   answer: string;
 };
+
+function cloneStoryAnalysis(analysis: StoryAnalysis | null): StoryAnalysis | null {
+  if (!analysis) {
+    return null;
+  }
+  return {
+    correctness: analysis.correctness,
+    result: analysis.result,
+    errors: [...analysis.errors],
+    reformulations: [...analysis.reformulations],
+  };
+}
+
+function cloneConversationFeedback(
+  feedback: StoryConversationFeedback | null
+): StoryConversationFeedback | null {
+  if (!feedback) {
+    return null;
+  }
+  return {
+    summary: feedback.summary,
+    improvements: [...feedback.improvements],
+  };
+}
+
+function cloneAttemptSnapshot(
+  snapshot: StoryAttemptSnapshot | null
+): StoryAttemptSnapshot | null {
+  if (!snapshot) {
+    return null;
+  }
+  return {
+    messages: snapshot.messages.map((message) => ({ ...message })),
+    requirements: snapshot.requirements.map((requirement) => ({ ...requirement })),
+    analysis: cloneStoryAnalysis(snapshot.analysis),
+    missionCompleted: snapshot.missionCompleted,
+    storyCompleted: snapshot.storyCompleted,
+    pendingNext: snapshot.pendingNext,
+    conversationFeedback: cloneConversationFeedback(snapshot.conversationFeedback),
+  };
+}
+
+function toProgressRequirement(
+  requirement: StoryRequirementState | StoryRequirementProgress
+): StoryRequirementProgress {
+  return {
+    requirementId: requirement.requirementId,
+    text: requirement.text,
+    met: !!requirement.met,
+    ...(requirement.feedback ? { feedback: requirement.feedback } : {}),
+  };
+}
 
 // Reemplaza estos IDs por tus ad units reales de rewarded en producción.
 const PROD_REWARDED_AD_UNIT_ID =
@@ -207,7 +248,14 @@ export default function StorySceneScreen() {
   const storyId: string | undefined = route.params?.storyId;
   const initialSceneIndex: number = route.params?.sceneIndex ?? 0;
   const { story, loading, error } = useStoryDetail(storyId);
-  const { markMissionCompleted, isMissionCompleted, storyCompleted: isStoryCompleted } = useStoryProgress();
+  const {
+    activeMission,
+    clearActiveMission,
+    markMissionCompleted,
+    isMissionCompleted,
+    saveActiveMission,
+    storyCompleted: isStoryCompleted,
+  } = useStoryProgress();
   const { spendCoins, canSpend, loading: coinsLoading, isUnlimited, balance } = useCoins();
   const [sceneIndex, setSceneIndex] = useState<number>(initialSceneIndex);
   const insets = useSafeAreaInsets();
@@ -309,17 +357,16 @@ export default function StorySceneScreen() {
 
   const [requirements, setRequirements] = useState<StoryRequirementState[]>([]);
   const [messages, setMessages] = useState<StoryMessage[]>([]);
-  const [analysis, setAnalysis] = useState<
-    { correctness: number; result: 'correct' | 'partial' | 'incorrect'; errors: string[]; reformulations: string[] } | null
-  >(null);
+  const [analysis, setAnalysis] = useState<StoryAnalysis | null>(null);
   const [missionCompleted, setMissionCompleted] = useState<boolean>(false);
   const [storyCompleted, setStoryCompleted] = useState<boolean>(false);
   const [pendingNext, setPendingNext] = useState<number | null>(null);
-  const [conversationFeedback, setConversationFeedback] = useState<{ summary: string; improvements: string[] } | null>(null);
+  const [conversationFeedback, setConversationFeedback] = useState<StoryConversationFeedback | null>(null);
   const [flowState, setFlowState] = useState<'idle' | 'recording' | 'uploading' | 'transcribing' | 'evaluating'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [retryState, setRetryState] = useState<'none' | 'optional' | 'required'>('none');
+  const [retryState, setRetryState] = useState<StoryRetryState>('none');
   const [lastAttemptSnapshot, setLastAttemptSnapshot] = useState<StoryAttemptSnapshot | null>(null);
+  const [activeMissionStartedAt, setActiveMissionStartedAt] = useState<string | null>(null);
   const [showAssistanceModal, setShowAssistanceModal] = useState(false);
   const [assistanceQuestion, setAssistanceQuestion] = useState('');
   const [assistanceAnswer, setAssistanceAnswer] = useState('');
@@ -334,11 +381,8 @@ export default function StorySceneScreen() {
   // Force-remount the KeyboardAvoidingView when returning from background so it recalculates sizes.
   const [keyboardAvoiderKey, setKeyboardAvoiderKey] = useState(0);
   const exitWarningMessage = useMemo(
-    () =>
-      isUnlimited
-        ? 'No has terminado la misión. Si sales ahora, perderás tu avance.'
-        : 'No has terminado la misión. Si sales ahora, perderás tu avance y las monedas/créditos utilizados durante la misión y para grabar.',
-    [isUnlimited]
+    () => 'No has terminado la misión. Si sales ahora, podrás retomarla después desde el feed.',
+    []
   );
 
   const recorder = useAudioRecorder();
@@ -354,18 +398,55 @@ export default function StorySceneScreen() {
   const isStartingRecording = useRef(false);
   // Si el usuario suelta el botón mientras seguimos pidiendo permiso, guardamos la intención de parar.
   const stopRequestedWhileStarting = useRef(false);
+  const restoredMissionRef = useRef<string | null>(null);
+
+  const matchingActiveMission = useMemo(() => {
+    if (!activeMission || !storyId || !mission?.missionId) {
+      return null;
+    }
+    if (
+      activeMission.storyId !== storyId ||
+      activeMission.missionId !== mission.missionId ||
+      activeMission.sceneIndex !== sceneIndex
+    ) {
+      return null;
+    }
+    return activeMission;
+  }, [activeMission, mission?.missionId, sceneIndex, storyId]);
 
   useEffect(() => {
     if (!mission) return;
-    // Reset UI state when mission data changes (even if missionId stays the same but requirements update).
-    setRequirements(mission.requirements.map((req) => ({ ...req, met: req.met ?? false })));
-    setMessages([]);
-    setAnalysis(null);
-    setPendingNext(null);
-    setConversationFeedback(null);
+    const restoreKey = `${storyId || 'none'}:${mission.missionId}:${sceneIndex}:${matchingActiveMission?.startedAt || 'empty'}`;
+    if (restoredMissionRef.current === restoreKey) {
+      return;
+    }
+    restoredMissionRef.current = restoreKey;
+    if (matchingActiveMission?.missionUnlocked && mission.missionId) {
+      chargedMissions.current.add(mission.missionId);
+    }
+    setRequirements(
+      matchingActiveMission
+        ? matchingActiveMission.requirements.map((req) => ({ ...req }))
+        : mission.requirements.map((req) => ({ ...req, met: req.met ?? false }))
+    );
+    setMessages(
+      matchingActiveMission
+        ? matchingActiveMission.messages.map((message, index) => ({
+            id: `restored-${index}-${message.role}`,
+            role: message.role,
+            text: message.text,
+          }))
+        : []
+    );
+    setAnalysis(cloneStoryAnalysis(matchingActiveMission?.analysis ?? null));
+    setMissionCompleted(matchingActiveMission?.missionCompleted ?? false);
+    setStoryCompleted(matchingActiveMission?.storyCompleted ?? false);
+    setPendingNext(matchingActiveMission?.pendingNext ?? null);
+    setConversationFeedback(cloneConversationFeedback(matchingActiveMission?.conversationFeedback ?? null));
     setErrorMessage(null);
-    setRetryState('none');
-    setLastAttemptSnapshot(null);
+    setRetryState(matchingActiveMission?.retryState ?? 'none');
+    setLastAttemptSnapshot(cloneAttemptSnapshot(matchingActiveMission?.lastAttemptSnapshot ?? null));
+    setActiveMissionStartedAt(matchingActiveMission?.startedAt ?? null);
     setFlowState('idle');
     setAssistanceQuestion('');
     setAssistanceAnswer('');
@@ -383,7 +464,7 @@ export default function StorySceneScreen() {
     hasDismissedIntroVideo.current = false;
     introVideoLoadedRef.current = false;
     introVideoStartedRef.current = false;
-  }, [mission, storyId]);
+  }, [matchingActiveMission, mission, sceneIndex, storyId]);
 
   useEffect(() => {
     if (!mission || !storyId) return;
@@ -392,6 +473,75 @@ export default function StorySceneScreen() {
     setMissionCompleted(missionDone);
     setStoryCompleted(storyDone);
   }, [isMissionCompleted, isStoryCompleted, mission?.missionId, storyId]);
+
+  useEffect(() => {
+    if (!storyId || !story || !mission?.missionId) {
+      return;
+    }
+
+    if (missionCompleted || isMissionCompleted(storyId, mission.missionId)) {
+      if (activeMissionStartedAt) {
+        setActiveMissionStartedAt(null);
+      }
+      void clearActiveMission(storyId, mission.missionId);
+      return;
+    }
+
+    if (!messages.length) {
+      return;
+    }
+
+    const startedAt = activeMissionStartedAt || new Date().toISOString();
+    if (!activeMissionStartedAt) {
+      setActiveMissionStartedAt(startedAt);
+    }
+
+    void saveActiveMission({
+      storyId,
+      missionId: mission.missionId,
+      sceneIndex,
+      updatedAt: new Date().toISOString(),
+      startedAt,
+      storyTitle: story.title,
+      missionTitle: mission.title,
+      sceneSummary: mission.sceneSummary,
+      caracterName: mission.caracterName,
+      avatarImageUrl: mission.avatarImageUrl,
+      messages: messages.map(({ role, text }) => ({ role, text })),
+      requirements: requirements.map((requirement) => toProgressRequirement(requirement)),
+      analysis: cloneStoryAnalysis(analysis),
+      missionCompleted,
+      storyCompleted,
+      pendingNext,
+      conversationFeedback: cloneConversationFeedback(conversationFeedback),
+      retryState,
+      lastAttemptSnapshot: cloneAttemptSnapshot(lastAttemptSnapshot),
+      missionUnlocked,
+    });
+  }, [
+    activeMissionStartedAt,
+    analysis,
+    clearActiveMission,
+    conversationFeedback,
+    isMissionCompleted,
+    lastAttemptSnapshot,
+    messages,
+    mission?.avatarImageUrl,
+    mission?.caracterName,
+    mission?.missionId,
+    mission?.sceneSummary,
+    mission?.title,
+    missionCompleted,
+    missionUnlocked,
+    pendingNext,
+    requirements,
+    retryState,
+    saveActiveMission,
+    sceneIndex,
+    story,
+    storyCompleted,
+    storyId,
+  ]);
 
   useEffect(() => {
     if (!storyId || !story || !mission?.missionId) {
@@ -521,25 +671,13 @@ export default function StorySceneScreen() {
         return;
       }
       const snapshot: StoryAttemptSnapshot = {
-        messages: messages.map((msg) => ({ ...msg })),
-        requirements: requirements.map((req) => ({ ...req })),
-        analysis: analysis
-          ? {
-              correctness: analysis.correctness,
-              result: analysis.result,
-            errors: [...analysis.errors],
-            reformulations: [...analysis.reformulations],
-          }
-          : null,
+        messages: messages.map(({ role, text }) => ({ role, text })),
+        requirements: requirements.map((req) => toProgressRequirement(req)),
+        analysis: cloneStoryAnalysis(analysis),
         missionCompleted,
         storyCompleted,
         pendingNext,
-        conversationFeedback: conversationFeedback
-          ? {
-              summary: conversationFeedback.summary,
-              improvements: [...conversationFeedback.improvements],
-            }
-          : null,
+        conversationFeedback: cloneConversationFeedback(conversationFeedback),
       };
       setRetryState('none');
       setFlowState('evaluating');
@@ -633,6 +771,8 @@ export default function StorySceneScreen() {
         setStoryCompleted((prev) => prev || payload.storyCompleted);
         setConversationFeedback(payload.conversationFeedback ?? null);
         if (payload.missionCompleted && storyId && mission?.missionId) {
+          setActiveMissionStartedAt(null);
+          void clearActiveMission(storyId, mission.missionId);
           if (!trackedMissionCompletionRef.current.has(mission.missionId)) {
             trackedMissionCompletionRef.current.add(mission.missionId);
             void trackMissionCompleted({
@@ -699,6 +839,7 @@ export default function StorySceneScreen() {
       storyDefinitionPayload,
       storyId,
       ensureMissionCharge,
+      clearActiveMission,
     ]
   );
 
@@ -706,29 +847,19 @@ export default function StorySceneScreen() {
     if (!lastAttemptSnapshot) {
       return;
     }
-    setMessages(lastAttemptSnapshot.messages.map((msg) => ({ ...msg })));
-    setRequirements(lastAttemptSnapshot.requirements.map((req) => ({ ...req })));
-    setAnalysis(
-      lastAttemptSnapshot.analysis
-        ? {
-            correctness: lastAttemptSnapshot.analysis.correctness,
-            result: lastAttemptSnapshot.analysis.result,
-            errors: [...lastAttemptSnapshot.analysis.errors],
-            reformulations: [...lastAttemptSnapshot.analysis.reformulations],
-          }
-        : null
+    setMessages(
+      lastAttemptSnapshot.messages.map((msg, index) => ({
+        id: `retry-${index}-${msg.role}`,
+        role: msg.role,
+        text: msg.text,
+      }))
     );
+    setRequirements(lastAttemptSnapshot.requirements.map((req) => ({ ...req })));
+    setAnalysis(cloneStoryAnalysis(lastAttemptSnapshot.analysis));
     setMissionCompleted(lastAttemptSnapshot.missionCompleted);
     setStoryCompleted(lastAttemptSnapshot.storyCompleted);
     setPendingNext(lastAttemptSnapshot.pendingNext);
-    setConversationFeedback(
-      lastAttemptSnapshot.conversationFeedback
-        ? {
-            summary: lastAttemptSnapshot.conversationFeedback.summary,
-            improvements: [...lastAttemptSnapshot.conversationFeedback.improvements],
-          }
-        : null
-    );
+    setConversationFeedback(cloneConversationFeedback(lastAttemptSnapshot.conversationFeedback));
     setLastAttemptSnapshot(null);
     setRetryState('none');
     setErrorMessage(null);
@@ -962,20 +1093,27 @@ export default function StorySceneScreen() {
     return () => sub.remove();
   }, [recorder]);
 
+  const openIntroVideoModal = useCallback(() => {
+    if (!introVideoUri) return;
+    hasShownIntroVideo.current = true;
+    hasDismissedIntroVideo.current = false;
+    introVideoLoadedRef.current = false;
+    introVideoStartedRef.current = false;
+    setIntroVideoLoading(true);
+    setIntroVideoError(null);
+    setShowIntroVideoModal(true);
+  }, [introVideoUri]);
+
   useEffect(() => {
     if (!mission) return;
     if (introVideoUri && !hasShownIntroVideo.current) {
-      hasShownIntroVideo.current = true;
-      hasDismissedIntroVideo.current = false;
-      setIntroVideoLoading(true);
-      setIntroVideoError(null);
-      setShowIntroVideoModal(true);
+      openIntroVideoModal();
       return;
     }
     if (introVideoUri || hasShownCharacterModal.current) return;
     hasShownCharacterModal.current = true;
     setShowCharacterModal(true);
-  }, [introVideoUri, mission]);
+  }, [introVideoUri, mission, openIntroVideoModal]);
 
   const storySceneTourSteps = useMemo(
     () => [
@@ -1038,7 +1176,6 @@ export default function StorySceneScreen() {
   }, [isStorySceneTourPending]);
 
   const closeIntroVideoModal = useCallback(() => {
-    if (hasDismissedIntroVideo.current) return;
     hasDismissedIntroVideo.current = true;
     void introVideoRef.current?.stopAsync().catch((pauseErr) => {
       console.warn('Mission intro video stop failed', pauseErr);
@@ -1814,13 +1951,29 @@ export default function StorySceneScreen() {
               <Text style={{ marginTop: 6, fontSize: 14, color: '#475569', textAlign: 'center' }}>
                 {mission.title}
               </Text>
-              <Text style={{ marginTop: 12, fontSize: 14, color: '#1f2937', textAlign: 'center' }}>
-                Debes usar el chat para hablar con este personaje y completar la mision.
-              </Text>
               {mission.sceneSummary ? (
                 <Text style={{ marginTop: 12, fontSize: 14, color: '#1f2937', textAlign: 'center' }}>
                   {mission.sceneSummary}
                 </Text>
+              ) : null}
+              {introVideoUri ? (
+                <Pressable
+                  onPress={() => {
+                    setShowCharacterModal(false);
+                    openIntroVideoModal();
+                  }}
+                  style={({ pressed }) => ({
+                    marginTop: 18,
+                    minWidth: 160,
+                    paddingHorizontal: 18,
+                    paddingVertical: 12,
+                    borderRadius: 999,
+                    alignItems: 'center',
+                    backgroundColor: pressed ? '#1d4ed8' : '#2563eb',
+                  })}
+                >
+                  <Text style={{ color: 'white', fontWeight: '700' }}>Ver video</Text>
+                </Pressable>
               ) : null}
             </View>
           </Pressable>

@@ -10,6 +10,7 @@ import {
   parseStoredStoryProgressDocument,
 } from './sync';
 import type {
+  StoryActiveMission,
   StoryProgressDocument,
   StoryProgressEntry,
   StoryProgressState,
@@ -22,10 +23,13 @@ export type { StoryProgressEntry, StoryProgressState } from './types';
 type StoryProgressContextValue = {
   loading: boolean;
   progress: StoryProgressState;
+  activeMission: StoryActiveMission | null;
   isMissionCompleted: (storyId?: string, missionId?: string) => boolean;
   completedCountFor: (storyId?: string) => number;
   storyCompleted: (storyId?: string) => boolean;
   markMissionCompleted: (storyId: string, missionId: string, storyCompleted?: boolean) => Promise<void>;
+  saveActiveMission: (mission: StoryActiveMission) => Promise<void>;
+  clearActiveMission: (storyId?: string, missionId?: string) => Promise<void>;
   resetStory: (storyId: string) => Promise<void>;
   resetAll: () => Promise<void>;
 };
@@ -250,6 +254,133 @@ export function StoryProgressProvider({ children }: { children: React.ReactNode 
   }, [applyDocument, enqueueRemoteMerge, isSignedIn, persist, user?.email]);
 
   const progress = useMemo(() => buildStoryProgressState(document), [document]);
+  const activeMission = useMemo(() => {
+    let latest: StoryActiveMission | null = null;
+    for (const item of Object.values(document.items)) {
+      const candidate = item.activeMission;
+      if (!candidate) {
+        continue;
+      }
+      if (!latest || candidate.updatedAt.localeCompare(latest.updatedAt) > 0) {
+        latest = candidate;
+      }
+    }
+    return latest;
+  }, [document]);
+
+  const saveActiveMission = useCallback(
+    async (mission: StoryActiveMission) => {
+      const storyKey = String(mission.storyId || '').trim();
+      const missionKey = String(mission.missionId || '').trim();
+      if (!storyKey || !missionKey) {
+        return;
+      }
+
+      const nextItems: Record<string, StoryProgressItem> = {};
+      let changed = false;
+
+      for (const [existingStoryId, item] of Object.entries(documentRef.current.items)) {
+        if (!item.activeMission) {
+          nextItems[existingStoryId] = item;
+          continue;
+        }
+
+        if (existingStoryId === storyKey && item.activeMission.missionId === missionKey) {
+          nextItems[existingStoryId] = item;
+          continue;
+        }
+
+        changed = true;
+        const { activeMission: _activeMission, ...rest } = item;
+        if (rest.deletedAt || rest.storyCompletedAt || Object.keys(rest.completedMissions || {}).length) {
+          nextItems[existingStoryId] = {
+            ...rest,
+            updatedAt: maxTimestamp(rest.updatedAt, mission.updatedAt),
+          };
+        }
+      }
+
+      const previousItem = documentRef.current.items[storyKey];
+      const hasSameMissionContent = areActiveMissionContentsEqual(previousItem?.activeMission, mission);
+      const nextItem: StoryProgressItem = {
+        updatedAt: maxTimestamp(previousItem?.updatedAt, hasSameMissionContent ? previousItem?.activeMission?.updatedAt : mission.updatedAt),
+        ...(previousItem?.deletedAt ? { deletedAt: previousItem.deletedAt } : {}),
+        ...(previousItem?.storyCompletedAt ? { storyCompletedAt: previousItem.storyCompletedAt } : {}),
+        completedMissions: {
+          ...(previousItem?.completedMissions || {}),
+        },
+        activeMission: hasSameMissionContent && previousItem?.activeMission
+          ? previousItem.activeMission
+          : mission,
+      };
+
+      if (!previousItem || !hasSameMissionContent) {
+        changed = true;
+      }
+
+      nextItems[storyKey] = nextItem;
+
+      if (!changed) {
+        return;
+      }
+
+      const next: StoryProgressDocument = {
+        ...documentRef.current,
+        updatedAt: maxTimestamp(documentRef.current.updatedAt, mission.updatedAt),
+        items: nextItems,
+      };
+
+      applyDocument(next);
+      await persist(next);
+    },
+    [applyDocument, persist]
+  );
+
+  const clearActiveMission = useCallback(
+    async (storyId?: string, missionId?: string) => {
+      const storyKey = storyId?.trim();
+      const missionKey = missionId?.trim();
+      const changedAt = new Date().toISOString();
+      const nextItems: Record<string, StoryProgressItem> = {};
+      let changed = false;
+
+      for (const [existingStoryId, item] of Object.entries(documentRef.current.items)) {
+        const active = item.activeMission;
+        const matches =
+          !!active &&
+          (!storyKey || active.storyId === storyKey) &&
+          (!missionKey || active.missionId === missionKey);
+
+        if (!matches) {
+          nextItems[existingStoryId] = item;
+          continue;
+        }
+
+        changed = true;
+        const { activeMission: _activeMission, ...rest } = item;
+        if (rest.deletedAt || rest.storyCompletedAt || Object.keys(rest.completedMissions || {}).length) {
+          nextItems[existingStoryId] = {
+            ...rest,
+            updatedAt: maxTimestamp(rest.updatedAt, changedAt),
+          };
+        }
+      }
+
+      if (!changed) {
+        return;
+      }
+
+      const next: StoryProgressDocument = {
+        ...documentRef.current,
+        updatedAt: maxTimestamp(documentRef.current.updatedAt, changedAt),
+        items: nextItems,
+      };
+
+      applyDocument(next);
+      await persist(next);
+    },
+    [applyDocument, persist]
+  );
 
   const value = useMemo<StoryProgressContextValue>(() => {
     const isMissionCompleted = (storyId?: string, missionId?: string) => {
@@ -271,14 +402,26 @@ export function StoryProgressProvider({ children }: { children: React.ReactNode 
     return {
       loading,
       progress,
+      activeMission,
       isMissionCompleted,
       completedCountFor,
       storyCompleted,
       markMissionCompleted,
+      saveActiveMission,
+      clearActiveMission,
       resetStory,
       resetAll,
     };
-  }, [loading, markMissionCompleted, progress, resetAll, resetStory]);
+  }, [
+    activeMission,
+    clearActiveMission,
+    loading,
+    markMissionCompleted,
+    progress,
+    resetAll,
+    resetStory,
+    saveActiveMission,
+  ]);
 
   return <StoryProgressContext.Provider value={value}>{children}</StoryProgressContext.Provider>;
 }
@@ -289,4 +432,30 @@ export function useStoryProgress() {
     throw new Error('useStoryProgress debe usarse dentro de StoryProgressProvider');
   }
   return ctx;
+}
+
+function maxTimestamp(...values: Array<string | undefined>) {
+  let next = '1970-01-01T00:00:00.000Z';
+  for (const value of values) {
+    if (!value) {
+      continue;
+    }
+    if (value.localeCompare(next) > 0) {
+      next = value;
+    }
+  }
+  return next;
+}
+
+function areActiveMissionContentsEqual(
+  left?: StoryActiveMission | null,
+  right?: StoryActiveMission | null
+) {
+  if (!left && !right) {
+    return true;
+  }
+  if (!left || !right) {
+    return false;
+  }
+  return JSON.stringify({ ...left, updatedAt: '' }) === JSON.stringify({ ...right, updatedAt: '' });
 }

@@ -4,10 +4,17 @@ import {
   CardProgressState,
   CardProgressStatus,
   MIN_PROGRESS_TIMESTAMP,
+  StoryActiveMission,
+  StoryAnalysis,
+  StoryAttemptSnapshot,
+  StoryChatMessage,
+  StoryConversationFeedback,
   StoryMissionProgress,
   StoryProgressDocument,
   StoryProgressEntry,
   StoryProgressItem,
+  StoryRequirementProgress,
+  StoryRetryState,
   StoryProgressState,
   UserProgressRecord,
 } from './types';
@@ -228,13 +235,21 @@ export function buildStoryProgressState(document: StoryProgressDocument): StoryP
   for (const [storyId, item] of Object.entries(document.items)) {
     const completedMissions = filterCompletedMissions(item.completedMissions, document.resetAt, item.deletedAt);
     const storyCompletedAt = filterTimestamp(item.storyCompletedAt, document.resetAt, item.deletedAt);
-    if (!storyCompletedAt && !Object.keys(completedMissions).length) {
+    const activeMission = normalizeStoryActiveMission(
+      item.activeMission,
+      document.resetAt,
+      item.deletedAt,
+      storyCompletedAt,
+      completedMissions
+    );
+    if (!storyCompletedAt && !Object.keys(completedMissions).length && !activeMission) {
       continue;
     }
     state[storyId] = {
       completedMissions,
       storyCompleted: Boolean(storyCompletedAt),
       ...(storyCompletedAt ? { storyCompletedAt } : {}),
+      ...(activeMission ? { activeMission } : {}),
     };
   }
   return state;
@@ -282,7 +297,8 @@ export function areStoryProgressDocumentsEqual(
     if (
       leftItem.updatedAt !== rightItem.updatedAt ||
       leftItem.deletedAt !== rightItem.deletedAt ||
-      leftItem.storyCompletedAt !== rightItem.storyCompletedAt
+      leftItem.storyCompletedAt !== rightItem.storyCompletedAt ||
+      !areStoryActiveMissionsEqual(leftItem.activeMission, rightItem.activeMission)
     ) {
       return false;
     }
@@ -356,14 +372,22 @@ function normalizeStoryProgressItem(
   const completedMissions = filterCompletedMissions(asRecord(raw.completedMissions), resetAt, asTimestamp(raw.deletedAt));
   const deletedAt = asTimestamp(raw.deletedAt);
   const storyCompletedAt = filterTimestamp(asTimestamp(raw.storyCompletedAt), resetAt, deletedAt);
+  const activeMission = normalizeStoryActiveMission(
+    raw.activeMission,
+    resetAt,
+    deletedAt,
+    storyCompletedAt,
+    completedMissions
+  );
   const updatedAt = maxTimestamp(
     asTimestamp(raw.updatedAt),
     deletedAt,
     storyCompletedAt,
+    activeMission?.updatedAt,
     ...Object.values(completedMissions)
   );
 
-  if (!deletedAt && !storyCompletedAt && !Object.keys(completedMissions).length) {
+  if (!deletedAt && !storyCompletedAt && !Object.keys(completedMissions).length && !activeMission) {
     return undefined;
   }
 
@@ -372,6 +396,7 @@ function normalizeStoryProgressItem(
     ...(deletedAt ? { deletedAt } : {}),
     ...(storyCompletedAt ? { storyCompletedAt } : {}),
     completedMissions,
+    ...(activeMission ? { activeMission } : {}),
   };
 }
 
@@ -409,7 +434,17 @@ function mergeStoryProgressItems(
     updatedAt = maxTimestamp(updatedAt, completedAt);
   }
 
-  if (!deletedAt && !storyCompletedAt && !Object.keys(completedMissions).length) {
+  const activeMission = mergeStoryActiveMission(
+    left.activeMission,
+    right.activeMission,
+    resetAt,
+    deletedAt,
+    storyCompletedAt,
+    completedMissions
+  );
+  updatedAt = maxTimestamp(updatedAt, activeMission?.updatedAt);
+
+  if (!deletedAt && !storyCompletedAt && !Object.keys(completedMissions).length && !activeMission) {
     return undefined;
   }
 
@@ -418,7 +453,194 @@ function mergeStoryProgressItems(
     ...(deletedAt ? { deletedAt } : {}),
     ...(storyCompletedAt ? { storyCompletedAt } : {}),
     completedMissions,
+    ...(activeMission ? { activeMission } : {}),
   };
+}
+
+function normalizeStoryActiveMission(
+  input: unknown,
+  resetAt?: string,
+  deletedAt?: string,
+  storyCompletedAt?: string,
+  completedMissions?: StoryMissionProgress
+): StoryActiveMission | undefined {
+  const raw = asRecord(input);
+  if (!raw) return undefined;
+
+  const storyId = asNonEmptyString(raw.storyId);
+  const missionId = asNonEmptyString(raw.missionId);
+  const sceneIndex = asSceneIndex(raw.sceneIndex);
+  const startedAt = asTimestamp(raw.startedAt);
+  const messages = normalizeStoryChatMessages(raw.messages);
+  const requirements = normalizeStoryRequirementProgressList(raw.requirements);
+
+  if (!storyId || !missionId || sceneIndex === undefined || !startedAt || !messages.length) {
+    return undefined;
+  }
+
+  const updatedAt = filterTimestamp(
+    maxTimestamp(asTimestamp(raw.updatedAt), startedAt),
+    resetAt,
+    deletedAt
+  );
+
+  if (!updatedAt || storyCompletedAt) {
+    return undefined;
+  }
+
+  const completedAt = completedMissions?.[missionId];
+  if (completedAt && compareTimestamps(completedAt, updatedAt) >= 0) {
+    return undefined;
+  }
+
+  return {
+    storyId,
+    missionId,
+    sceneIndex,
+    updatedAt,
+    startedAt,
+    ...(asNonEmptyString(raw.storyTitle) ? { storyTitle: asNonEmptyString(raw.storyTitle) } : {}),
+    ...(asNonEmptyString(raw.missionTitle) ? { missionTitle: asNonEmptyString(raw.missionTitle) } : {}),
+    ...(asNonEmptyString(raw.sceneSummary) ? { sceneSummary: asNonEmptyString(raw.sceneSummary) } : {}),
+    ...(asNonEmptyString(raw.caracterName) ? { caracterName: asNonEmptyString(raw.caracterName) } : {}),
+    ...(asNonEmptyString(raw.avatarImageUrl) ? { avatarImageUrl: asNonEmptyString(raw.avatarImageUrl) } : {}),
+    messages,
+    requirements,
+    analysis: normalizeStoryAnalysis(raw.analysis),
+    missionCompleted: raw.missionCompleted === true,
+    storyCompleted: raw.storyCompleted === true,
+    pendingNext: asNullableSceneIndex(raw.pendingNext),
+    conversationFeedback: normalizeStoryConversationFeedback(raw.conversationFeedback),
+    retryState: asStoryRetryState(raw.retryState) || 'none',
+    lastAttemptSnapshot: normalizeStoryAttemptSnapshot(raw.lastAttemptSnapshot),
+    missionUnlocked: raw.missionUnlocked === true,
+  };
+}
+
+function normalizeStoryChatMessages(input: unknown): StoryChatMessage[] {
+  if (!Array.isArray(input)) return [];
+  return input
+    .map((value) => normalizeStoryChatMessage(value))
+    .filter((value): value is StoryChatMessage => !!value);
+}
+
+function normalizeStoryChatMessage(input: unknown): StoryChatMessage | undefined {
+  const raw = asRecord(input);
+  if (!raw) return undefined;
+  const role = raw.role === 'user' || raw.role === 'assistant' ? raw.role : undefined;
+  const text = asNonEmptyString(raw.text);
+  if (!role || !text) return undefined;
+  return { role, text };
+}
+
+function normalizeStoryRequirementProgressList(input: unknown): StoryRequirementProgress[] {
+  if (!Array.isArray(input)) return [];
+  return input
+    .map((value) => normalizeStoryRequirementProgress(value))
+    .filter((value): value is StoryRequirementProgress => !!value);
+}
+
+function normalizeStoryRequirementProgress(input: unknown): StoryRequirementProgress | undefined {
+  const raw = asRecord(input);
+  if (!raw) return undefined;
+  const requirementId = asNonEmptyString(raw.requirementId);
+  const text = asNonEmptyString(raw.text);
+  if (!requirementId || !text) return undefined;
+  return {
+    requirementId,
+    text,
+    met: raw.met === true,
+    ...(asNonEmptyString(raw.feedback) ? { feedback: asNonEmptyString(raw.feedback) } : {}),
+  };
+}
+
+function normalizeStoryAnalysis(input: unknown): StoryAnalysis | null {
+  const raw = asRecord(input);
+  if (!raw) return null;
+  const correctness = typeof raw.correctness === 'number' && Number.isFinite(raw.correctness)
+    ? Math.max(0, Math.round(raw.correctness))
+    : undefined;
+  const result =
+    raw.result === 'correct' || raw.result === 'partial' || raw.result === 'incorrect'
+      ? raw.result
+      : undefined;
+  if (correctness === undefined || !result) {
+    return null;
+  }
+  return {
+    correctness,
+    result,
+    errors: normalizeStringList(raw.errors),
+    reformulations: normalizeStringList(raw.reformulations),
+  };
+}
+
+function normalizeStoryConversationFeedback(input: unknown): StoryConversationFeedback | null {
+  const raw = asRecord(input);
+  if (!raw) return null;
+  const summary = asNonEmptyString(raw.summary);
+  const improvements = normalizeStringList(raw.improvements);
+  if (!summary && !improvements.length) {
+    return null;
+  }
+  return {
+    summary: summary || '',
+    improvements,
+  };
+}
+
+function normalizeStoryAttemptSnapshot(input: unknown): StoryAttemptSnapshot | null {
+  const raw = asRecord(input);
+  if (!raw) return null;
+  const messages = normalizeStoryChatMessages(raw.messages);
+  const requirements = normalizeStoryRequirementProgressList(raw.requirements);
+  return {
+    messages,
+    requirements,
+    analysis: normalizeStoryAnalysis(raw.analysis),
+    missionCompleted: raw.missionCompleted === true,
+    storyCompleted: raw.storyCompleted === true,
+    pendingNext: asNullableSceneIndex(raw.pendingNext),
+    conversationFeedback: normalizeStoryConversationFeedback(raw.conversationFeedback),
+  };
+}
+
+function mergeStoryActiveMission(
+  left: StoryActiveMission | undefined,
+  right: StoryActiveMission | undefined,
+  resetAt?: string,
+  deletedAt?: string,
+  storyCompletedAt?: string,
+  completedMissions?: StoryMissionProgress
+): StoryActiveMission | undefined {
+  const normalizedLeft = normalizeStoryActiveMission(
+    left,
+    resetAt,
+    deletedAt,
+    storyCompletedAt,
+    completedMissions
+  );
+  const normalizedRight = normalizeStoryActiveMission(
+    right,
+    resetAt,
+    deletedAt,
+    storyCompletedAt,
+    completedMissions
+  );
+  if (!normalizedLeft) return normalizedRight;
+  if (!normalizedRight) return normalizedLeft;
+  return compareTimestamps(normalizedLeft.updatedAt, normalizedRight.updatedAt) >= 0
+    ? normalizedLeft
+    : normalizedRight;
+}
+
+function areStoryActiveMissionsEqual(
+  left?: StoryActiveMission,
+  right?: StoryActiveMission
+): boolean {
+  if (!left && !right) return true;
+  if (!left || !right) return false;
+  return JSON.stringify(left) === JSON.stringify(right);
 }
 
 function filterCompletedMissions(
@@ -464,6 +686,36 @@ function asCardStatus(value: unknown): CardProgressStatus | undefined {
   return typeof value === 'string' && CARD_STATUSES.includes(value as CardProgressStatus)
     ? (value as CardProgressStatus)
     : undefined;
+}
+
+function asStoryRetryState(value: unknown): StoryRetryState | undefined {
+  return value === 'none' || value === 'optional' || value === 'required' ? value : undefined;
+}
+
+function asNonEmptyString(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  return trimmed || undefined;
+}
+
+function asSceneIndex(value: unknown): number | undefined {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return undefined;
+  return Math.max(0, Math.floor(parsed));
+}
+
+function asNullableSceneIndex(value: unknown): number | null {
+  if (value == null) return null;
+  const parsed = asSceneIndex(value);
+  return parsed === undefined ? null : parsed;
+}
+
+function normalizeStringList(input: unknown): string[] {
+  if (!Array.isArray(input)) return [];
+  return input
+    .filter((value): value is string => typeof value === 'string')
+    .map((value) => value.trim())
+    .filter(Boolean);
 }
 
 function maxTimestamp(...values: Array<string | undefined>): string {

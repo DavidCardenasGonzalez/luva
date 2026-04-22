@@ -17,10 +17,70 @@ export type CardProgressDocument = {
 
 export type StoryMissionProgress = Record<string, string>;
 
+export type StoryChatMessage = {
+  role: 'user' | 'assistant';
+  text: string;
+};
+
+export type StoryRequirementProgress = {
+  requirementId: string;
+  text: string;
+  met: boolean;
+  feedback?: string;
+};
+
+export type StoryAnalysis = {
+  correctness: number;
+  result: 'correct' | 'partial' | 'incorrect';
+  errors: string[];
+  reformulations: string[];
+};
+
+export type StoryConversationFeedback = {
+  summary: string;
+  improvements: string[];
+};
+
+export type StoryAttemptSnapshot = {
+  messages: StoryChatMessage[];
+  requirements: StoryRequirementProgress[];
+  analysis: StoryAnalysis | null;
+  missionCompleted: boolean;
+  storyCompleted: boolean;
+  pendingNext: number | null;
+  conversationFeedback: StoryConversationFeedback | null;
+};
+
+export type StoryRetryState = 'none' | 'optional' | 'required';
+
+export type StoryActiveMission = {
+  storyId: string;
+  missionId: string;
+  sceneIndex: number;
+  updatedAt: string;
+  startedAt: string;
+  storyTitle?: string;
+  missionTitle?: string;
+  sceneSummary?: string;
+  caracterName?: string;
+  avatarImageUrl?: string;
+  messages: StoryChatMessage[];
+  requirements: StoryRequirementProgress[];
+  analysis: StoryAnalysis | null;
+  missionCompleted: boolean;
+  storyCompleted: boolean;
+  pendingNext: number | null;
+  conversationFeedback: StoryConversationFeedback | null;
+  retryState: StoryRetryState;
+  lastAttemptSnapshot: StoryAttemptSnapshot | null;
+  missionUnlocked: boolean;
+};
+
 export type StoryProgressEntry = {
   completedMissions: StoryMissionProgress;
   storyCompleted: boolean;
   storyCompletedAt?: string;
+  activeMission?: StoryActiveMission;
 };
 
 export type StoryProgressState = Record<string, StoryProgressEntry>;
@@ -30,6 +90,7 @@ export type StoryProgressItem = {
   deletedAt?: string;
   storyCompletedAt?: string;
   completedMissions: StoryMissionProgress;
+  activeMission?: StoryActiveMission;
 };
 
 export type StoryProgressDocument = {
