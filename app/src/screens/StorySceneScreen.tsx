@@ -13,11 +13,16 @@ import {
   TextInput,
   AppState,
   NativeModules,
+  Animated,
+  Easing,
+  StyleSheet,
+  useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Audio, ResizeMode, Video } from 'expo-av';
 import type { AVPlaybackStatus } from 'expo-av';
+import ConfettiCannon from 'react-native-confetti-cannon';
 import useAudioRecorder from '../shared/useAudioRecorder';
 import useUploadToS3 from '../shared/useUploadToS3';
 import { api } from '../api/api';
@@ -53,6 +58,7 @@ import {
 import { prefetchImageUrls } from '../shared/imagePrefetch';
 
 const luviImage = require('../image/luvi.png');
+const successRequirementSoundAsset = require('../sound/succes_req.mp3');
 
 type StoryMessage = {
   id: string;
@@ -79,6 +85,249 @@ type StoryAdvancePayload = {
 type StoryAssistanceResponse = {
   answer: string;
 };
+
+type RequirementCelebrationPiece = {
+  key: string;
+  angle: number;
+  distance: number;
+  size: number;
+  color: string;
+  rotation: string;
+};
+
+type RequirementRowProps = {
+  requirement: StoryRequirementState;
+  celebrationToken: number;
+  onPress: (text: string) => void;
+};
+
+type RequirementConfettiBurst = {
+  key: number;
+  count: number;
+};
+
+const REQUIREMENT_BURST_COLORS = [
+  '#22c55e',
+  '#38bdf8',
+  '#f59e0b',
+  '#f472b6',
+  '#a78bfa',
+  '#facc15',
+];
+
+function hashString(value: string): number {
+  let hash = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(index);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+function createRequirementCelebrationPieces(seed: string): RequirementCelebrationPiece[] {
+  const hashedSeed = hashString(seed);
+  const count = 10;
+  const angleOffset = ((hashedSeed % 360) * Math.PI) / 180;
+
+  return Array.from({ length: count }, (_, index) => {
+    const angle = angleOffset + (index / count) * Math.PI * 2;
+    return {
+      key: `${seed}-${index}`,
+      angle,
+      distance: 18 + ((hashedSeed + index * 13) % 14),
+      size: 5 + ((hashedSeed + index * 7) % 4),
+      color: REQUIREMENT_BURST_COLORS[(hashedSeed + index) % REQUIREMENT_BURST_COLORS.length],
+      rotation: `${((hashedSeed + index * 29) % 120) - 60}deg`,
+    };
+  });
+}
+
+function RequirementRow({ requirement, celebrationToken, onPress }: RequirementRowProps) {
+  const iconScale = useRef(new Animated.Value(1)).current;
+  const burstProgress = useRef(new Animated.Value(0)).current;
+  const highlightOpacity = useRef(new Animated.Value(0)).current;
+  const pieces = useMemo(
+    () => createRequirementCelebrationPieces(requirement.requirementId),
+    [requirement.requirementId]
+  );
+
+  useEffect(() => {
+    if (!requirement.met || celebrationToken < 1) {
+      return;
+    }
+
+    iconScale.stopAnimation();
+    burstProgress.stopAnimation();
+    highlightOpacity.stopAnimation();
+
+    iconScale.setValue(0.92);
+    burstProgress.setValue(0);
+    highlightOpacity.setValue(0);
+
+    Animated.parallel([
+      Animated.sequence([
+        Animated.spring(iconScale, {
+          toValue: 1.22,
+          tension: 220,
+          friction: 7,
+          useNativeDriver: true,
+        }),
+        Animated.spring(iconScale, {
+          toValue: 1,
+          tension: 180,
+          friction: 10,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.sequence([
+        Animated.timing(highlightOpacity, {
+          toValue: 0.95,
+          duration: 150,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(highlightOpacity, {
+          toValue: 0,
+          duration: 540,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.timing(burstProgress, {
+        toValue: 1,
+        duration: 850,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start(({ finished }) => {
+      if (finished) {
+        burstProgress.setValue(0);
+      }
+    });
+  }, [burstProgress, celebrationToken, highlightOpacity, iconScale, requirement.met]);
+
+  const ringScale = burstProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.5, 1.9],
+  });
+  const ringOpacity = burstProgress.interpolate({
+    inputRange: [0, 0.12, 0.7, 1],
+    outputRange: [0, 0.75, 0.2, 0],
+  });
+  const particleOpacity = burstProgress.interpolate({
+    inputRange: [0, 0.08, 0.65, 1],
+    outputRange: [0, 1, 0.45, 0],
+  });
+  const particleScale = burstProgress.interpolate({
+    inputRange: [0, 0.18, 1],
+    outputRange: [0.35, 1, 0.8],
+  });
+
+  return (
+    <View style={{ marginBottom: 8, position: 'relative' }}>
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          StyleSheet.absoluteFillObject,
+          {
+            borderRadius: 14,
+            backgroundColor: '#dcfce7',
+            opacity: highlightOpacity,
+          },
+        ]}
+      />
+      <Pressable
+        onPress={() => onPress(requirement.text)}
+        style={({ pressed }) => ({
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          paddingVertical: 4,
+          opacity: pressed ? 0.8 : 1,
+        })}
+        hitSlop={6}
+      >
+        <View
+          style={{
+            width: 30,
+            minHeight: 28,
+            marginRight: 8,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Animated.View
+            style={{
+              width: 28,
+              height: 28,
+              alignItems: 'center',
+              justifyContent: 'center',
+              transform: [{ scale: iconScale }],
+            }}
+          >
+            <Animated.View
+              pointerEvents="none"
+              style={{
+                position: 'absolute',
+                width: 30,
+                height: 30,
+                borderRadius: 15,
+                borderWidth: 2,
+                borderColor: '#86efac',
+                opacity: ringOpacity,
+                transform: [{ scale: ringScale }],
+              }}
+            />
+            {pieces.map((piece) => {
+              const translateX = burstProgress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, Math.cos(piece.angle) * piece.distance],
+              });
+              const translateY = burstProgress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, Math.sin(piece.angle) * piece.distance],
+              });
+
+              return (
+                <Animated.View
+                  key={piece.key}
+                  pointerEvents="none"
+                  style={{
+                    position: 'absolute',
+                    width: piece.size,
+                    height: Math.max(4, Math.round(piece.size * 0.6)),
+                    borderRadius: 999,
+                    backgroundColor: piece.color,
+                    opacity: particleOpacity,
+                    transform: [
+                      { translateX },
+                      { translateY },
+                      { rotate: piece.rotation },
+                      { scale: particleScale },
+                    ],
+                  }}
+                />
+              );
+            })}
+            <Text style={{ fontSize: 18 }}>{requirement.met ? '✅' : '⬜'}</Text>
+          </Animated.View>
+        </View>
+        <View style={{ flex: 1, paddingTop: 2 }}>
+          <Text
+            style={{
+              fontWeight: requirement.met ? '600' : '500',
+              color: requirement.met ? '#15803d' : '#1f2937',
+            }}
+          >
+            {requirement.text}
+          </Text>
+          {requirement.feedback ? (
+            <Text style={{ marginTop: 4, fontSize: 12, color: '#475569' }}>{requirement.feedback}</Text>
+          ) : null}
+        </View>
+      </Pressable>
+    </View>
+  );
+}
 
 function cloneStoryAnalysis(analysis: StoryAnalysis | null): StoryAnalysis | null {
   if (!analysis) {
@@ -259,6 +508,7 @@ export default function StorySceneScreen() {
   const { spendCoins, canSpend, loading: coinsLoading, isUnlimited, balance } = useCoins();
   const [sceneIndex, setSceneIndex] = useState<number>(initialSceneIndex);
   const insets = useSafeAreaInsets();
+  const { width: windowWidth } = useWindowDimensions();
   const [showCharacterModal, setShowCharacterModal] = useState(false);
   const [showIntroVideoModal, setShowIntroVideoModal] = useState(false);
   const [introVideoLoading, setIntroVideoLoading] = useState(false);
@@ -372,6 +622,8 @@ export default function StorySceneScreen() {
   const [assistanceAnswer, setAssistanceAnswer] = useState('');
   const [assistanceLoading, setAssistanceLoading] = useState(false);
   const [assistanceError, setAssistanceError] = useState<string | null>(null);
+  const [requirementCelebrationTokens, setRequirementCelebrationTokens] = useState<Record<string, number>>({});
+  const [activeRequirementConfetti, setActiveRequirementConfetti] = useState<RequirementConfettiBurst | null>(null);
   const hasShownCharacterModal = useRef(false);
   const hasShownIntroVideo = useRef(false);
   const hasDismissedIntroVideo = useRef(false);
@@ -394,6 +646,9 @@ export default function StorySceneScreen() {
   const trackedMixpanelMissionStartedRef = useRef<Set<string>>(new Set());
   const missionMessageAttemptsRef = useRef<Map<string, number>>(new Map());
   const trackedMissionCompletionRef = useRef<Set<string>>(new Set());
+  const requirementsCardFlash = useRef(new Animated.Value(0)).current;
+  const requirementConfettiKeyRef = useRef(0);
+  const requirementSuccessSoundRef = useRef<Audio.Sound | null>(null);
   // Permite saber si todavía estamos en el flujo de `start()` (permiso + prepare).
   const isStartingRecording = useRef(false);
   // Si el usuario suelta el botón mientras seguimos pidiendo permiso, guardamos la intención de parar.
@@ -414,6 +669,109 @@ export default function StorySceneScreen() {
     return activeMission;
   }, [activeMission, mission?.missionId, sceneIndex, storyId]);
 
+  const unloadRequirementSuccessSound = useCallback(async () => {
+    const sound = requirementSuccessSoundRef.current;
+    if (!sound) {
+      return;
+    }
+
+    requirementSuccessSoundRef.current = null;
+
+    try {
+      sound.setOnPlaybackStatusUpdate(null);
+      await sound.unloadAsync();
+    } catch (soundUnloadErr) {
+      console.warn('Requirement success sound cleanup failed', soundUnloadErr);
+    }
+  }, []);
+
+  const playRequirementSuccessSound = useCallback(async () => {
+    try {
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: false,
+      });
+    } catch (audioModeErr) {
+      console.warn('Requirement success audio mode failed', audioModeErr);
+    }
+
+    await unloadRequirementSuccessSound();
+
+    try {
+      const { sound } = await Audio.Sound.createAsync(successRequirementSoundAsset, {
+        shouldPlay: true,
+        volume: 1,
+      });
+
+      requirementSuccessSoundRef.current = sound;
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (!status.isLoaded || !status.didJustFinish) {
+          return;
+        }
+
+        sound.setOnPlaybackStatusUpdate(null);
+        if (requirementSuccessSoundRef.current === sound) {
+          requirementSuccessSoundRef.current = null;
+        }
+        void sound.unloadAsync().catch((soundUnloadErr) => {
+          console.warn('Requirement success sound unload failed', soundUnloadErr);
+        });
+      });
+    } catch (playSoundErr) {
+      console.warn('Requirement success sound playback failed', playSoundErr);
+    }
+  }, [unloadRequirementSuccessSound]);
+
+  const triggerRequirementCelebration = useCallback(
+    (requirementIds: string[]) => {
+      if (!requirementIds.length) {
+        return;
+      }
+
+      setRequirementCelebrationTokens((current) => {
+        const next = { ...current };
+        requirementIds.forEach((requirementId) => {
+          next[requirementId] = (next[requirementId] || 0) + 1;
+        });
+        return next;
+      });
+
+      requirementConfettiKeyRef.current += 1;
+      setActiveRequirementConfetti({
+        key: requirementConfettiKeyRef.current,
+        count: Math.min(220, 120 + Math.max(0, requirementIds.length - 1) * 50),
+      });
+      void playRequirementSuccessSound();
+
+      requirementsCardFlash.stopAnimation();
+      requirementsCardFlash.setValue(0);
+      Animated.sequence([
+        Animated.timing(requirementsCardFlash, {
+          toValue: 1,
+          duration: 180,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(requirementsCardFlash, {
+          toValue: 0,
+          duration: 650,
+          easing: Easing.in(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]).start();
+    },
+    [playRequirementSuccessSound, requirementsCardFlash]
+  );
+
+  useEffect(() => {
+    return () => {
+      void unloadRequirementSuccessSound();
+    };
+  }, [unloadRequirementSuccessSound]);
+
   useEffect(() => {
     if (!mission) return;
     const restoreKey = `${storyId || 'none'}:${mission.missionId}:${sceneIndex}:${matchingActiveMission?.startedAt || 'empty'}`;
@@ -424,6 +782,10 @@ export default function StorySceneScreen() {
     if (matchingActiveMission?.missionUnlocked && mission.missionId) {
       chargedMissions.current.add(mission.missionId);
     }
+    requirementsCardFlash.stopAnimation();
+    requirementsCardFlash.setValue(0);
+    setRequirementCelebrationTokens({});
+    setActiveRequirementConfetti(null);
     setRequirements(
       matchingActiveMission
         ? matchingActiveMission.requirements.map((req) => ({ ...req }))
@@ -746,20 +1108,25 @@ export default function StorySceneScreen() {
           persistedMissionCompleted: wasPreviouslyCompleted ? false : missionCompleted,
         });
         console.log('Advance payload', payload);
-        setRequirements((prev) => {
-          const prevById = new Map(prev.map((item) => [item.requirementId, item]));
-          return payload.requirements.map((req) => {
-            const prevReq = prevById.get(req.requirementId);
-            if (prevReq?.met) {
-              return {
-                ...req,
-                met: true,
-                feedback: req.feedback || prevReq.feedback,
-              };
-            }
-            return { ...req };
-          });
+        const previousRequirementsById = new Map(
+          requirements.map((item) => [item.requirementId, item])
+        );
+        const nextRequirements = payload.requirements.map((req) => {
+          const previousRequirement = previousRequirementsById.get(req.requirementId);
+          if (previousRequirement?.met) {
+            return {
+              ...req,
+              met: true,
+              feedback: req.feedback || previousRequirement.feedback,
+            };
+          }
+          return { ...req };
         });
+        const newlyMetRequirementIds = nextRequirements
+          .filter((req) => req.met && !previousRequirementsById.get(req.requirementId)?.met)
+          .map((req) => req.requirementId);
+        setRequirements(nextRequirements);
+        triggerRequirementCelebration(newlyMetRequirementIds);
         appendMessage({ id: `ai-${Date.now()}`, role: 'assistant', text: payload.aiReply });
         setAnalysis({
           correctness: payload.correctness,
@@ -840,6 +1207,7 @@ export default function StorySceneScreen() {
       storyId,
       ensureMissionCharge,
       clearActiveMission,
+      triggerRequirementCelebration,
     ]
   );
 
@@ -1357,6 +1725,26 @@ export default function StorySceneScreen() {
       // keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
     >
       <View style={{ flex: 1 }}>
+        {activeRequirementConfetti ? (
+          <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
+            <ConfettiCannon
+              key={activeRequirementConfetti.key}
+              count={activeRequirementConfetti.count}
+              origin={{
+                x: windowWidth / 2,
+                y: insets.top + 72,
+              }}
+              fadeOut
+              fallSpeed={2800}
+              explosionSpeed={420}
+              onAnimationEnd={() => {
+                setActiveRequirementConfetti((current) =>
+                  current?.key === activeRequirementConfetti.key ? null : current
+                );
+              }}
+            />
+          </View>
+        ) : null}
         <View style={{ backgroundColor: '#0b1224', paddingTop: insets.top + 8, paddingBottom: 12, paddingHorizontal: 16 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, minWidth: 0 }}>
@@ -1425,31 +1813,35 @@ export default function StorySceneScreen() {
           ref={requirementsCardRef}
           collapsable={false}
           onLayout={measureStorySceneTourTarget}
-          style={{ marginTop: 16, padding: 16, backgroundColor: 'white', borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0' }}
+          style={{
+            marginTop: 16,
+            padding: 16,
+            backgroundColor: 'white',
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: '#e2e8f0',
+            position: 'relative',
+          }}
         >
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              StyleSheet.absoluteFillObject,
+              {
+                borderRadius: 12,
+                backgroundColor: '#dcfce7',
+                opacity: requirementsCardFlash,
+              },
+            ]}
+          />
           <Text style={{ fontWeight: '700', color: '#1e293b', marginBottom: 8 }}>Requisitos</Text>
           {requirements.map((req) => (
-            <Pressable
+            <RequirementRow
               key={req.requirementId}
-              onPress={() => handleRequirementPress(req.text)}
-              style={({ pressed }) => ({
-                flexDirection: 'row',
-                alignItems: 'flex-start',
-                marginBottom: 8,
-                opacity: pressed ? 0.8 : 1,
-              })}
-              hitSlop={6}
-            >
-              <Text style={{ fontSize: 18, marginRight: 8 }}>{req.met ? '✅' : '⬜'}</Text>
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontWeight: req.met ? '600' : '500', color: req.met ? '#15803d' : '#1f2937' }}>
-                  {req.text}
-                </Text>
-                {req.feedback ? (
-                  <Text style={{ marginTop: 4, fontSize: 12, color: '#475569' }}>{req.feedback}</Text>
-                ) : null}
-              </View>
-            </Pressable>
+              requirement={req}
+              celebrationToken={requirementCelebrationTokens[req.requirementId] || 0}
+              onPress={handleRequirementPress}
+            />
           ))}
           {!requirements.length ? (
             <Text style={{ color: '#475569' }}>Esta misión no tiene requisitos explícitos.</Text>
