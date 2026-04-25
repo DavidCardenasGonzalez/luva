@@ -10,6 +10,8 @@ import DeckScreen from '../screens/DeckScreen';
 import PracticeScreen from '../screens/PracticeScreen';
 import StoriesScreen from '../screens/StoriesScreen';
 import FeedScreen from '../screens/FeedScreen';
+import FriendsScreen from '../screens/FriendsScreen';
+import FriendChatScreen from '../screens/FriendChatScreen';
 import StoryMissionsScreen from '../screens/StoryMissionsScreen';
 import StorySceneScreen from '../screens/StorySceneScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -47,6 +49,8 @@ export type RootStackParamList = {
   };
   Stories: undefined;
   Feed: undefined;
+  Friends: undefined;
+  FriendChat: { friendId: string };
   StoryMissions: { storyId: string };
   StoryScene: { storyId: string; sceneIndex: number };
   Profile: undefined;
@@ -111,6 +115,8 @@ export default function AppNavigator() {
         <Stack.Screen name="Practice" component={PracticeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Stories" component={StoriesScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Feed" component={FeedScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Friends" component={FriendsScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="FriendChat" component={FriendChatScreen} options={{ headerShown: false }} />
         <Stack.Screen name="StoryMissions" component={StoryMissionsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="StoryScene" component={StorySceneScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />

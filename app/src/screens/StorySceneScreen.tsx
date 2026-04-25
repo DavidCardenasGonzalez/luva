@@ -20,16 +20,20 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { MaterialIcons } from '@expo/vector-icons';
+import * as Speech from 'expo-speech';
 import { Audio, ResizeMode, Video } from 'expo-av';
 import type { AVPlaybackStatus } from 'expo-av';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import useAudioRecorder from '../shared/useAudioRecorder';
 import useUploadToS3 from '../shared/useUploadToS3';
 import { api } from '../api/api';
+import { useAuth } from '../auth/AuthProvider';
 import {
   StoryRequirementState,
   useStoryDetail,
 } from '../hooks/useStories';
+import { addFriendFromMission } from '../hooks/useFriends';
 import { useStoryProgress } from '../progress/StoryProgressProvider';
 import type {
   StoryAnalysis,
@@ -84,6 +88,18 @@ type StoryAdvancePayload = {
 
 type StoryAssistanceResponse = {
   answer: string;
+};
+
+type TranslationResponse = {
+  translatedText: string;
+  sourceLanguage?: string;
+  targetLanguage: string;
+};
+
+type MessageTranslationState = {
+  text?: string;
+  loading?: boolean;
+  error?: string;
 };
 
 type RequirementCelebrationPiece = {
@@ -496,6 +512,7 @@ export default function StorySceneScreen() {
   const navigation = useNavigation<any>();
   const storyId: string | undefined = route.params?.storyId;
   const initialSceneIndex: number = route.params?.sceneIndex ?? 0;
+  const { isSignedIn } = useAuth();
   const { story, loading, error } = useStoryDetail(storyId);
   const {
     activeMission,
@@ -579,6 +596,8 @@ export default function StorySceneScreen() {
         title: missionDef.title,
         sceneSummary: missionDef.sceneSummary,
         aiRole: missionDef.aiRole,
+        caracterName: missionDef.caracterName,
+        caracterPrompt: missionDef.caracterPrompt,
         avatarImageUrl: missionDef.avatarImageUrl,
         videoIntro: missionDef.videoIntro,
         requirements: missionDef.requirements.map((req) => ({
@@ -596,6 +615,8 @@ export default function StorySceneScreen() {
       title: mission.title,
       sceneSummary: mission.sceneSummary,
       aiRole: mission.aiRole,
+      caracterName: mission.caracterName,
+      caracterPrompt: mission.caracterPrompt,
       avatarImageUrl: mission.avatarImageUrl,
       videoIntro: mission.videoIntro,
       requirements: mission.requirements.map((req) => ({
@@ -607,9 +628,13 @@ export default function StorySceneScreen() {
 
   const [requirements, setRequirements] = useState<StoryRequirementState[]>([]);
   const [messages, setMessages] = useState<StoryMessage[]>([]);
+  const [messageTranslations, setMessageTranslations] = useState<Record<string, MessageTranslationState>>({});
   const [analysis, setAnalysis] = useState<StoryAnalysis | null>(null);
   const [missionCompleted, setMissionCompleted] = useState<boolean>(false);
   const [storyCompleted, setStoryCompleted] = useState<boolean>(false);
+  const [addingFriend, setAddingFriend] = useState(false);
+  const [addedFriendId, setAddedFriendId] = useState<string | null>(null);
+  const [friendAddError, setFriendAddError] = useState<string | null>(null);
   const [pendingNext, setPendingNext] = useState<number | null>(null);
   const [conversationFeedback, setConversationFeedback] = useState<StoryConversationFeedback | null>(null);
   const [flowState, setFlowState] = useState<'idle' | 'recording' | 'uploading' | 'transcribing' | 'evaluating'>('idle');
@@ -653,7 +678,10 @@ export default function StorySceneScreen() {
   const isStartingRecording = useRef(false);
   // Si el usuario suelta el botón mientras seguimos pidiendo permiso, guardamos la intención de parar.
   const stopRequestedWhileStarting = useRef(false);
-  const restoredMissionRef = useRef<string | null>(null);
+  const restoredMissionRef = useRef<{
+    missionKey: string;
+    activeStartedAt: string | null;
+  } | null>(null);
 
   const matchingActiveMission = useMemo(() => {
     if (!activeMission || !storyId || !mission?.missionId) {
@@ -769,16 +797,30 @@ export default function StorySceneScreen() {
   useEffect(() => {
     return () => {
       void unloadRequirementSuccessSound();
+      Speech.stop();
     };
   }, [unloadRequirementSuccessSound]);
 
   useEffect(() => {
     if (!mission) return;
-    const restoreKey = `${storyId || 'none'}:${mission.missionId}:${sceneIndex}:${matchingActiveMission?.startedAt || 'empty'}`;
-    if (restoredMissionRef.current === restoreKey) {
+    const missionKey = `${storyId || 'none'}:${mission.missionId}:${sceneIndex}`;
+    const activeStartedAt = matchingActiveMission?.startedAt ?? null;
+    const previousRestore = restoredMissionRef.current;
+    const isSameMission = previousRestore?.missionKey === missionKey;
+
+    // Completion clears the persisted draft; keep the current transcript and feedback visible.
+    if (isSameMission && !matchingActiveMission) {
       return;
     }
-    restoredMissionRef.current = restoreKey;
+
+    if (
+      isSameMission &&
+      previousRestore?.activeStartedAt === activeStartedAt
+    ) {
+      return;
+    }
+
+    restoredMissionRef.current = { missionKey, activeStartedAt };
     if (matchingActiveMission?.missionUnlocked && mission.missionId) {
       chargedMissions.current.add(mission.missionId);
     }
@@ -800,9 +842,13 @@ export default function StorySceneScreen() {
           }))
         : []
     );
+    setMessageTranslations({});
     setAnalysis(cloneStoryAnalysis(matchingActiveMission?.analysis ?? null));
     setMissionCompleted(matchingActiveMission?.missionCompleted ?? false);
     setStoryCompleted(matchingActiveMission?.storyCompleted ?? false);
+    setAddingFriend(false);
+    setAddedFriendId(null);
+    setFriendAddError(null);
     setPendingNext(matchingActiveMission?.pendingNext ?? null);
     setConversationFeedback(cloneConversationFeedback(matchingActiveMission?.conversationFeedback ?? null));
     setErrorMessage(null);
@@ -1222,6 +1268,7 @@ export default function StorySceneScreen() {
         text: msg.text,
       }))
     );
+    setMessageTranslations({});
     setRequirements(lastAttemptSnapshot.requirements.map((req) => ({ ...req })));
     setAnalysis(cloneStoryAnalysis(lastAttemptSnapshot.analysis));
     setMissionCompleted(lastAttemptSnapshot.missionCompleted);
@@ -1373,6 +1420,74 @@ export default function StorySceneScreen() {
     setShowAssistanceModal(true);
   }, []);
 
+  const speakAssistantMessage = useCallback(async (text: string) => {
+    const speechText = text.trim();
+    if (!speechText) {
+      return;
+    }
+    try {
+      try {
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: false,
+          shouldDuckAndroid: true,
+          playThroughEarpieceAndroid: false,
+        });
+      } catch (audioErr) {
+        console.warn('Story speech audio mode failed', audioErr);
+      }
+      Speech.stop();
+      Speech.speak(speechText, { language: 'en-US', pitch: 1.05 });
+    } catch (err: any) {
+      console.warn('Story speech playback failed', err?.message || err);
+    }
+  }, []);
+
+  const translateAssistantMessage = useCallback(async (messageId: string, text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) {
+      return;
+    }
+    const existing = messageTranslations[messageId];
+    if (existing?.loading || existing?.text) {
+      return;
+    }
+
+    setMessageTranslations((current) => ({
+      ...current,
+      [messageId]: {
+        ...current[messageId],
+        loading: true,
+        error: undefined,
+      },
+    }));
+
+    try {
+      const payload = await api.post<TranslationResponse>('/translate', {
+        text: trimmed,
+        source: 'en',
+        target: 'es',
+      });
+      setMessageTranslations((current) => ({
+        ...current,
+        [messageId]: {
+          text: payload.translatedText || '',
+          loading: false,
+        },
+      }));
+    } catch (err: any) {
+      console.error('Story translation error', err);
+      setMessageTranslations((current) => ({
+        ...current,
+        [messageId]: {
+          loading: false,
+          error: err?.message || 'No pudimos traducir este mensaje.',
+        },
+      }));
+    }
+  }, [messageTranslations]);
+
   const handleRequestAssistance = useCallback(async () => {
     const trimmed = assistanceQuestion.trim();
     if (!trimmed) {
@@ -1437,6 +1552,46 @@ export default function StorySceneScreen() {
     storyDefinitionPayload,
     storyId,
     isUnlimited,
+  ]);
+
+  const handleAddFriend = useCallback(async () => {
+    if (!storyId || !mission) {
+      setFriendAddError('No encontramos este personaje.');
+      return;
+    }
+    if (!isSignedIn) {
+      navigation.navigate('EmailSignUp', undefined);
+      return;
+    }
+    if (addingFriend) {
+      return;
+    }
+
+    setAddingFriend(true);
+    setFriendAddError(null);
+    try {
+      const friend = await addFriendFromMission({
+        storyId,
+        missionId: mission.missionId,
+        sceneIndex,
+        storyDefinition: storyDefinitionPayload,
+        missionDefinition: missionDefinitionPayload,
+      });
+      setAddedFriendId(friend.friendId);
+    } catch (err: any) {
+      setFriendAddError(err?.message || 'No pudimos agregar este personaje a amigos.');
+    } finally {
+      setAddingFriend(false);
+    }
+  }, [
+    addingFriend,
+    isSignedIn,
+    mission,
+    missionDefinitionPayload,
+    navigation,
+    sceneIndex,
+    storyDefinitionPayload,
+    storyId,
   ]);
 
   useEffect(() => {
@@ -1860,6 +2015,7 @@ export default function StorySceneScreen() {
             <View style={{ gap: 12 }}>
               {messages.map((msg) => {
                 const alignStyle = { alignSelf: msg.role === 'user' ? 'flex-end' as const : 'flex-start' as const };
+                const translationState = messageTranslations[msg.id];
                 const bubble = (
                   <View
                     style={{
@@ -1872,19 +2028,83 @@ export default function StorySceneScreen() {
                       borderColor: '#e2e8f0',
                     }}
                   >
-                    <Text style={{ color: msg.role === 'user' ? 'white' : '#0f172a' }}>{msg.text}</Text>
+                    {msg.role === 'assistant' ? (
+                      <Pressable
+                        onPress={() => handleAssistantMessagePress(msg.text)}
+                        style={({ pressed }) => ({ opacity: pressed ? 0.75 : 1 })}
+                        hitSlop={6}
+                      >
+                        <Text style={{ color: '#0f172a' }}>{msg.text}</Text>
+                      </Pressable>
+                    ) : (
+                      <Text style={{ color: 'white' }}>{msg.text}</Text>
+                    )}
+                    {msg.role === 'assistant' && translationState?.text ? (
+                      <>
+                        <View style={{ height: 1, backgroundColor: '#e2e8f0', marginVertical: 10 }} />
+                        <Text style={{ color: '#475569', lineHeight: 20 }}>{translationState.text}</Text>
+                      </>
+                    ) : null}
+                    {msg.role === 'assistant' && translationState?.error ? (
+                      <Text style={{ marginTop: 8, color: '#dc2626', fontSize: 12 }}>
+                        {translationState.error}
+                      </Text>
+                    ) : null}
+                    {msg.role === 'assistant' ? (
+                      <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 10 }}>
+                        <Pressable
+                          accessibilityLabel="Reproducir mensaje"
+                          onPress={() => speakAssistantMessage(msg.text)}
+                          hitSlop={8}
+                          style={({ pressed }) => ({
+                            width: 34,
+                            height: 34,
+                            borderRadius: 999,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: pressed ? '#dbeafe' : '#eff6ff',
+                            borderWidth: 1,
+                            borderColor: '#bfdbfe',
+                          })}
+                        >
+                          <MaterialIcons name="volume-up" size={18} color="#1d4ed8" />
+                        </Pressable>
+                        <Pressable
+                          accessibilityLabel="Traducir mensaje"
+                          onPress={() => translateAssistantMessage(msg.id, msg.text)}
+                          disabled={!!translationState?.loading}
+                          hitSlop={8}
+                          style={({ pressed }) => ({
+                            width: 34,
+                            height: 34,
+                            borderRadius: 999,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: translationState?.loading
+                              ? '#f1f5f9'
+                              : pressed
+                              ? '#dcfce7'
+                              : '#f0fdf4',
+                            borderWidth: 1,
+                            borderColor: '#bbf7d0',
+                            opacity: translationState?.loading ? 0.75 : 1,
+                          })}
+                        >
+                          {translationState?.loading ? (
+                            <ActivityIndicator size="small" color="#15803d" />
+                          ) : (
+                            <MaterialIcons name="translate" size={18} color="#15803d" />
+                          )}
+                        </Pressable>
+                      </View>
+                    ) : null}
                   </View>
                 );
                 if (msg.role === 'assistant') {
                   return (
-                    <Pressable
-                      key={msg.id}
-                      onPress={() => handleAssistantMessagePress(msg.text)}
-                      style={({ pressed }) => ({ ...alignStyle, opacity: pressed ? 0.85 : 1 })}
-                      hitSlop={6}
-                    >
+                    <View key={msg.id} style={alignStyle}>
                       {bubble}
-                    </Pressable>
+                    </View>
                   );
                 }
                 return (
@@ -1902,23 +2122,18 @@ export default function StorySceneScreen() {
             style={{
               marginTop: 16,
               padding: 16,
-              backgroundColor: retryState === 'required' ? '#fef2f2' : 'white',
+              backgroundColor: 'white',
               borderRadius: 12,
               borderWidth: 1,
-              borderColor: retryState === 'required' ? '#fecdd3' : '#e2e8f0',
+              borderColor: '#e2e8f0',
             }}
           >
             <Text style={{ fontWeight: '700', color: '#1e293b' }}>
-              Correctness: {analysis.correctness}% ({analysis.result === 'correct' ? 'Correcto' : analysis.result === 'partial' ? 'Parcial' : 'Reintenta'})
+              Correctness: {analysis.correctness}% ({analysis.result === 'correct' ? 'Correcto' : analysis.result === 'partial' ? 'Parcial' : 'Incorrecto'})
             </Text>
             {retryState === 'optional' ? (
               <Text style={{ marginTop: 8, color: '#1e293b' }}>
-                Resultado parcial. Puedes volver a intentar o seguir la conversación.
-              </Text>
-            ) : null}
-            {retryState === 'required' ? (
-              <Text style={{ marginTop: 8, color: '#dc2626' }}>
-                Resultado incorrecto. Debes volver a intentar antes de continuar.
+                Puedes volver a intentar o seguir la conversación.
               </Text>
             ) : null}
             {analysis.errors.length ? (
@@ -1978,6 +2193,44 @@ export default function StorySceneScreen() {
                   </View>
                 ) : null}
               </View>
+            ) : null}
+            <Pressable
+              onPress={() => {
+                if (addedFriendId) {
+                  navigation.navigate('FriendChat', { friendId: addedFriendId });
+                  return;
+                }
+                void handleAddFriend();
+              }}
+              disabled={addingFriend}
+              style={({ pressed }) => ({
+                marginTop: 12,
+                paddingVertical: 10,
+                borderRadius: 999,
+                alignItems: 'center',
+                backgroundColor: addingFriend
+                  ? '#bbf7d0'
+                  : addedFriendId
+                  ? pressed
+                    ? '#0f766e'
+                    : '#14b8a6'
+                  : pressed
+                  ? '#15803d'
+                  : '#16a34a',
+              })}
+            >
+              <Text style={{ color: addedFriendId ? '#032a2a' : 'white', fontWeight: '800' }}>
+                {addingFriend
+                  ? 'Agregando...'
+                  : addedFriendId
+                  ? `Conversar con ${characterDisplayName}`
+                  : isSignedIn
+                  ? 'Agregar a amigos'
+                  : 'Inicia sesión para agregar a amigos'}
+              </Text>
+            </Pressable>
+            {friendAddError ? (
+              <Text style={{ color: '#b91c1c', marginTop: 8 }}>{friendAddError}</Text>
             ) : null}
             {storyCompleted ? (
               <Text style={{ marginTop: 6, color: '#166534' }}>

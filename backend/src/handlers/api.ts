@@ -10,6 +10,14 @@ import {
   PutObjectCommand,
   GetObjectCommand,
 } from "@aws-sdk/client-s3";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand,
+  QueryCommand,
+  UpdateCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import {
@@ -27,11 +35,18 @@ import {
   EvalResult,
   StoryAssistanceRequest,
   StoryAssistanceResponse,
+  TranslationRequest,
+  TranslationResponse,
   PromoCodeValidationRequest,
   PromoCodeValidationResponse,
   AppVersionCheckRequest,
   AppVersionCheckResponse,
   AppVersionCheckStatus,
+  CreateFriendRequest,
+  FriendCharacter,
+  FriendChatRequest,
+  FriendChatPayload,
+  FriendsListResponse,
 } from "../types";
 import { STORIES_SEED } from "../data/stories-seed";
 import { listPublicFeedPosts } from "../feed-posts";
@@ -39,7 +54,14 @@ import { validatePromoCode } from "../promo-codes";
 
 const s3 = new S3Client({});
 const ssm = new SSMClient({});
+const dynamo = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
+  marshallOptions: {
+    removeUndefinedValues: true,
+  },
+});
 let OPENAI_API_KEY_CACHE: string | undefined;
+let GOOGLE_TRANSLATE_API_KEY_CACHE: string | undefined;
+const DEFAULT_OPENAI_CHAT_MODEL = "gpt-5.4-nano";
 const STORIES_PATH_CANDIDATES: (string | undefined)[] = [
   // Only allow override via explicit env var; default source is STORIES_SEED.
   process.env.STORIES_PATH,
@@ -169,6 +191,7 @@ function initialRequirementStates(mission: StoryMission): StoryAdvanceRequiremen
 
 type StoryMessage = { role: 'user' | 'assistant'; content: string };
 const STORY_HISTORY_LIMIT = 20;
+const FRIEND_HISTORY_LIMIT = 24;
 
 type StorySessionState = {
   storyId?: string;
@@ -177,6 +200,20 @@ type StorySessionState = {
   requirements: StoryAdvanceRequirementState[];
   story?: StoryDefinition;
   lastUpdated: number;
+};
+
+type CognitoClaims = Record<string, string | undefined>;
+
+type UserIdentity = {
+  userId: string;
+  email?: string;
+  sub?: string;
+};
+
+type FriendRecord = FriendCharacter & {
+  userId: string;
+  lastUserMessage?: string;
+  messageCount?: number;
 };
 
 const STORY_SESSIONS = new Map<string, StorySessionState>();
@@ -364,6 +401,9 @@ function notFound(): ApiResponse {
 function badRequest(message: string): ApiResponse {
   return json(400, { message });
 }
+function unauthorized(message: string = "Unauthorized"): ApiResponse {
+  return json(401, { code: "UNAUTHORIZED", message });
+}
 
 const ROUTE_PREFIX = "/v1";
 const APP_VERSION_POLICY = {
@@ -452,6 +492,33 @@ function buildVersionCheckResponse(
       fallback: APP_VERSION_POLICY.fallbackStoreUrl,
     },
   };
+}
+
+function getClaims(event: any): CognitoClaims {
+  const rawClaims =
+    event?.requestContext?.authorizer?.claims ||
+    event?.requestContext?.authorizer?.jwt?.claims ||
+    {};
+  const claims: CognitoClaims = {};
+  for (const [key, value] of Object.entries(rawClaims)) {
+    if (value == null) continue;
+    claims[key] = typeof value === "string" ? value : String(value);
+  }
+  return claims;
+}
+
+function normalizeIdentityValue(value?: string): string | undefined {
+  const normalized = (value || "").trim().toLowerCase();
+  return normalized || undefined;
+}
+
+function getUserIdentity(event: any): UserIdentity | undefined {
+  const claims = getClaims(event);
+  const email = normalizeIdentityValue(claims.email || claims["cognito:username"]);
+  const sub = normalizeIdentityValue(claims.sub);
+  const userId = email || sub;
+  if (!userId) return undefined;
+  return { userId, email, sub };
 }
 
 export const handler = async (event: any, context?: any): Promise<Result> => {
@@ -559,6 +626,97 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
 
     if (method === "GET" && path === `${ROUTE_PREFIX}/feed/posts`) {
       return json(200, await listPublicFeedPosts());
+    }
+
+    if (method === "GET" && path === `${ROUTE_PREFIX}/friends`) {
+      const identity = getUserIdentity(event);
+      if (!identity) {
+        return unauthorized("Missing user identity");
+      }
+      return json(200, { items: await listFriends(identity.userId) } satisfies FriendsListResponse);
+    }
+
+    if (method === "POST" && path === `${ROUTE_PREFIX}/friends`) {
+      const identity = getUserIdentity(event);
+      if (!identity) {
+        return unauthorized("Missing user identity");
+      }
+      const body = parseBody(event.body) as CreateFriendRequest | undefined;
+      try {
+        const friend = await createFriendFromMission(identity.userId, body || {});
+        return json(200, { friend });
+      } catch (err: any) {
+        if (err?.message === "FRIEND_STORY_NOT_FOUND" || err?.message === "FRIEND_MISSION_NOT_FOUND") {
+          return badRequest("Mission not found");
+        }
+        throw err;
+      }
+    }
+
+    const friendChat = path.match(/^\/v1\/friends\/([^/]+)\/chat$/);
+    if (method === "POST" && friendChat) {
+      const identity = getUserIdentity(event);
+      if (!identity) {
+        return unauthorized("Missing user identity");
+      }
+      const friendId = decodeURIComponent(friendChat[1]);
+      const body = parseBody(event.body) as FriendChatRequest | undefined;
+      const transcript = typeof body?.transcript === "string" ? body.transcript.trim() : "";
+      if (!transcript) {
+        return badRequest("Missing transcript");
+      }
+      try {
+        const payload = await advanceFriendChat(identity.userId, friendId, {
+          ...(body || {}),
+          transcript,
+        });
+        return json(200, payload);
+      } catch (err: any) {
+        if (err?.message === "FRIEND_NOT_FOUND") {
+          return notFound();
+        }
+        throw err;
+      }
+    }
+
+    if (method === "POST" && path === `${ROUTE_PREFIX}/translate`) {
+      const body = parseBody(event.body) as TranslationRequest | undefined;
+      const text = typeof body?.text === "string" ? body.text.trim() : "";
+      if (!text) {
+        return badRequest("Missing text");
+      }
+      if (text.length > 5000) {
+        return badRequest("Text is too long");
+      }
+      const target = normalizeLanguageCode(body?.target, "es");
+      const source = normalizeLanguageCode(body?.source, "en");
+      log("translate.begin", {
+        tLen: text.length,
+        source,
+        target,
+      });
+      try {
+        const translated = await translateTextWithGoogle(text, {
+          source,
+          target,
+        });
+        log("translate.success", {
+          translatedLen: translated.translatedText.length,
+          detectedSourceLanguage: translated.sourceLanguage,
+        });
+        return json(200, translated satisfies TranslationResponse);
+      } catch (err: any) {
+        console.error(
+          JSON.stringify({
+            scope: "translate.google.error",
+            message: err?.message || "unknown",
+          })
+        );
+        return json(500, {
+          message: "No pudimos traducir el mensaje",
+          code: "TRANSLATION_FAILED",
+        });
+      }
     }
 
     const storyDetail = path.match(/^\/v1\/stories\/([^/]+)$/);
@@ -734,6 +892,307 @@ function parseBody(body: any): any {
   }
 }
 
+function getFriendshipsTableName(): string {
+  const tableName = process.env.FRIENDSHIPS_TABLE_NAME?.trim();
+  if (!tableName) {
+    throw new Error("FRIENDSHIPS_TABLE_NAME not set");
+  }
+  return tableName;
+}
+
+function buildFriendId(storyId: string, missionId: string): string {
+  return `${storyId}:${missionId}`;
+}
+
+function publicFriend(record: FriendRecord): FriendCharacter {
+  return {
+    friendId: record.friendId,
+    storyId: record.storyId,
+    missionId: record.missionId,
+    sceneIndex: record.sceneIndex,
+    storyTitle: record.storyTitle,
+    missionTitle: record.missionTitle,
+    characterName: record.characterName,
+    aiRole: record.aiRole,
+    ...(record.characterPrompt ? { characterPrompt: record.characterPrompt } : {}),
+    ...(record.avatarImageUrl ? { avatarImageUrl: record.avatarImageUrl } : {}),
+    ...(record.videoIntro ? { videoIntro: record.videoIntro } : {}),
+    ...(record.sceneSummary ? { sceneSummary: record.sceneSummary } : {}),
+    createdAt: record.createdAt,
+    updatedAt: record.updatedAt,
+    ...(record.lastMessageAt ? { lastMessageAt: record.lastMessageAt } : {}),
+  };
+}
+
+function sanitizeFriendRecord(input: any): FriendRecord | undefined {
+  if (!input || typeof input !== "object") return undefined;
+  const userId = typeof input.userId === "string" ? input.userId : undefined;
+  const friendId = typeof input.friendId === "string" ? input.friendId : undefined;
+  const storyId = typeof input.storyId === "string" ? input.storyId : undefined;
+  const missionId = typeof input.missionId === "string" ? input.missionId : undefined;
+  const sceneIndex = Number(input.sceneIndex);
+  const storyTitle = typeof input.storyTitle === "string" ? input.storyTitle : undefined;
+  const missionTitle = typeof input.missionTitle === "string" ? input.missionTitle : undefined;
+  const characterName = typeof input.characterName === "string" ? input.characterName : undefined;
+  const aiRole = typeof input.aiRole === "string" ? input.aiRole : undefined;
+  const createdAt = typeof input.createdAt === "string" ? input.createdAt : undefined;
+  const updatedAt = typeof input.updatedAt === "string" ? input.updatedAt : undefined;
+  if (
+    !userId ||
+    !friendId ||
+    !storyId ||
+    !missionId ||
+    !Number.isFinite(sceneIndex) ||
+    !storyTitle ||
+    !missionTitle ||
+    !characterName ||
+    !aiRole ||
+    !createdAt ||
+    !updatedAt
+  ) {
+    return undefined;
+  }
+
+  return {
+    userId,
+    friendId,
+    storyId,
+    missionId,
+    sceneIndex: Math.max(0, Math.floor(sceneIndex)),
+    storyTitle,
+    missionTitle,
+    characterName,
+    aiRole,
+    ...(typeof input.characterPrompt === "string" ? { characterPrompt: input.characterPrompt } : {}),
+    ...(typeof input.avatarImageUrl === "string" ? { avatarImageUrl: input.avatarImageUrl } : {}),
+    ...(typeof input.videoIntro === "string" ? { videoIntro: input.videoIntro } : {}),
+    ...(typeof input.sceneSummary === "string" ? { sceneSummary: input.sceneSummary } : {}),
+    createdAt,
+    updatedAt,
+    ...(typeof input.lastMessageAt === "string" ? { lastMessageAt: input.lastMessageAt } : {}),
+    ...(typeof input.lastUserMessage === "string" ? { lastUserMessage: input.lastUserMessage } : {}),
+    ...(typeof input.messageCount === "number" ? { messageCount: input.messageCount } : {}),
+  };
+}
+
+async function getFriendRecord(userId: string, friendId: string): Promise<FriendRecord | undefined> {
+  const out = await dynamo.send(
+    new GetCommand({
+      TableName: getFriendshipsTableName(),
+      Key: { userId, friendId },
+    })
+  );
+  return sanitizeFriendRecord(out.Item);
+}
+
+async function listFriends(userId: string): Promise<FriendCharacter[]> {
+  const out = await dynamo.send(
+    new QueryCommand({
+      TableName: getFriendshipsTableName(),
+      KeyConditionExpression: "userId = :userId",
+      ExpressionAttributeValues: {
+        ":userId": userId,
+      },
+    })
+  );
+  return (out.Items || [])
+    .map((item) => sanitizeFriendRecord(item))
+    .filter((item): item is FriendRecord => !!item)
+    .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))
+    .map(publicFriend);
+}
+
+async function createFriendFromMission(
+  userId: string,
+  body: CreateFriendRequest
+): Promise<FriendCharacter> {
+  const fallbackStoryId =
+    typeof body.storyId === "string" && body.storyId.trim()
+      ? body.storyId.trim()
+      : body.storyDefinition?.storyId;
+  const story =
+    (fallbackStoryId ? getStory(fallbackStoryId) : undefined) ||
+    sanitizeStoryDefinition(body.storyDefinition, fallbackStoryId);
+  const rawSceneIndex = Number(body.sceneIndex);
+  const requestedSceneIndex = Number.isFinite(rawSceneIndex)
+    ? Math.max(0, Math.floor(rawSceneIndex))
+    : undefined;
+  const requestedMissionId =
+    typeof body.missionId === "string" && body.missionId.trim()
+      ? body.missionId.trim()
+      : body.missionDefinition?.missionId;
+  let sceneIndex = requestedSceneIndex ?? 0;
+  let mission: StoryMission | undefined;
+
+  if (story) {
+    if (requestedMissionId) {
+      const byIdIndex = story.missions.findIndex((item) => item.missionId === requestedMissionId);
+      if (byIdIndex >= 0) {
+        sceneIndex = byIdIndex;
+        mission = story.missions[byIdIndex];
+      }
+    }
+    if (!mission && requestedSceneIndex !== undefined) {
+      mission = story.missions[requestedSceneIndex];
+      sceneIndex = requestedSceneIndex;
+    }
+    if (!mission) {
+      mission = story.missions[sceneIndex];
+    }
+  }
+
+  if (!mission && body.missionDefinition) {
+    mission = sanitizeStoryMission(body.missionDefinition);
+  }
+
+  if (!fallbackStoryId && !story?.storyId) {
+    throw new Error("FRIEND_STORY_NOT_FOUND");
+  }
+  if (!mission) {
+    throw new Error("FRIEND_MISSION_NOT_FOUND");
+  }
+
+  const storyId = story?.storyId || fallbackStoryId || "story";
+  const friendId = buildFriendId(storyId, mission.missionId);
+  const existing = await getFriendRecord(userId, friendId);
+  const now = new Date().toISOString();
+  const item: FriendRecord = {
+    userId,
+    friendId,
+    storyId,
+    missionId: mission.missionId,
+    sceneIndex,
+    storyTitle: story?.title || "Historia",
+    missionTitle: mission.title,
+    characterName: mission.caracterName || mission.title || "Personaje",
+    aiRole: mission.aiRole,
+    ...(mission.caracterPrompt ? { characterPrompt: mission.caracterPrompt } : {}),
+    ...(mission.avatarImageUrl ? { avatarImageUrl: mission.avatarImageUrl } : {}),
+    ...(mission.videoIntro ? { videoIntro: mission.videoIntro } : {}),
+    ...(mission.sceneSummary ? { sceneSummary: mission.sceneSummary } : {}),
+    createdAt: existing?.createdAt || now,
+    updatedAt: now,
+    ...(existing?.lastMessageAt ? { lastMessageAt: existing.lastMessageAt } : {}),
+    ...(existing?.lastUserMessage ? { lastUserMessage: existing.lastUserMessage } : {}),
+    ...(typeof existing?.messageCount === "number" ? { messageCount: existing.messageCount } : {}),
+  };
+
+  await dynamo.send(
+    new PutCommand({
+      TableName: getFriendshipsTableName(),
+      Item: item,
+    })
+  );
+
+  return publicFriend(item);
+}
+
+async function touchFriendChat(
+  userId: string,
+  friendId: string,
+  transcript: string
+): Promise<void> {
+  try {
+    await dynamo.send(
+      new UpdateCommand({
+        TableName: getFriendshipsTableName(),
+        Key: { userId, friendId },
+        UpdateExpression:
+          "SET lastMessageAt = :now, lastUserMessage = :message, updatedAt = :now ADD messageCount :one",
+        ExpressionAttributeValues: {
+          ":now": new Date().toISOString(),
+          ":message": transcript.slice(0, 500),
+          ":one": 1,
+        },
+      })
+    );
+  } catch (err) {
+    console.warn(
+      JSON.stringify({
+        scope: "friends.chat.touch_error",
+        message: (err as Error)?.message || "unknown",
+      })
+    );
+  }
+}
+
+async function advanceFriendChat(
+  userId: string,
+  friendId: string,
+  body: FriendChatRequest
+): Promise<FriendChatPayload> {
+  const friend = await getFriendRecord(userId, friendId);
+  if (!friend) {
+    throw new Error("FRIEND_NOT_FOUND");
+  }
+
+  const transcript = body.transcript.trim();
+  let conversationHistory = sanitizeHistory(body.history).slice(-FRIEND_HISTORY_LIMIT);
+  conversationHistory = appendHistoryEntry(conversationHistory, {
+    role: "user",
+    content: transcript,
+  }).slice(-FRIEND_HISTORY_LIMIT);
+
+  let correctness = 0;
+  let result: EvalResult = "incorrect";
+  let errors: string[] = [];
+  let reformulations: string[] = [];
+  const englishEvalResult = await Promise.allSettled([
+    evaluateStoryEnglish(conversationHistory, transcript),
+  ]);
+
+  const englishEval = englishEvalResult[0];
+  if (englishEval.status === "fulfilled") {
+    const value = englishEval.value;
+    correctness = Math.max(0, Math.min(100, Math.round(Number(value.score ?? value.correctness ?? 0))));
+    const rawResult = (value.result || value.status || "").toString().toLowerCase();
+    result =
+      rawResult === "correct" || rawResult === "partial" || rawResult === "incorrect"
+        ? (rawResult as EvalResult)
+        : correctness >= 85
+        ? "correct"
+        : correctness >= 60
+        ? "partial"
+        : "incorrect";
+    errors = value.errors.slice(0, 3).map((item) => String(item));
+    const alternatives = value.alternatives ?? value.improvements ?? value.suggestions ?? [];
+    reformulations = alternatives.slice(0, 2).map((item) => String(item));
+  } else {
+    console.error(
+      JSON.stringify({
+        scope: "friends.chat.english_error",
+        message: (englishEval.reason as Error)?.message || "unknown",
+      })
+    );
+  }
+
+  let aiReply = "Tell me more about that.";
+  try {
+    aiReply = await generateFriendReply(friend, conversationHistory, {
+      result,
+      correctness,
+    });
+  } catch (err) {
+    console.error(
+      JSON.stringify({
+        scope: "friends.chat.reply_error",
+        message: (err as Error)?.message || "unknown",
+      })
+    );
+  }
+
+  await touchFriendChat(userId, friendId, transcript);
+
+  return {
+    friendId,
+    aiReply,
+    correctness,
+    result,
+    errors,
+    reformulations,
+  };
+}
+
 async function startSession(body?: any): Promise<{
   sessionId: string;
   uploadUrl: string;
@@ -863,6 +1322,125 @@ async function getOpenAIKey(): Promise<string> {
   return value;
 }
 
+async function getGoogleTranslateApiKey(): Promise<string> {
+  if (GOOGLE_TRANSLATE_API_KEY_CACHE) return GOOGLE_TRANSLATE_API_KEY_CACHE;
+  const directKey =
+    process.env.GOOGLE_TRANSLATE_API_KEY || process.env.GOOGLE_API_KEY;
+  if (directKey && directKey !== "SET_IN_SSM") {
+    GOOGLE_TRANSLATE_API_KEY_CACHE = directKey;
+    return directKey;
+  }
+  console.log("Fetching Google Translate API key from SSM param", process.env.GOOGLE_TRANSLATE_API_KEY_PARAM);
+  const name = process.env.GOOGLE_TRANSLATE_API_KEY_PARAM;
+  if (!name) throw new Error("GOOGLE_TRANSLATE_API_KEY_PARAM not set");
+  const out = await ssm.send(
+    new GetParameterCommand({ Name: name, WithDecryption: true })
+  );
+  const value = out.Parameter?.Value;
+  if (!value || value === "SET_IN_SSM") {
+    throw new Error("Google Translate API key not configured");
+  }
+  GOOGLE_TRANSLATE_API_KEY_CACHE = value;
+  return value;
+}
+
+function normalizeLanguageCode(value: unknown, fallback: string): string {
+  if (typeof value !== "string") return fallback;
+  const normalized = value.trim().toLowerCase();
+  return /^[a-z]{2,3}(-[a-z0-9]{2,8})?$/i.test(normalized)
+    ? normalized
+    : fallback;
+}
+
+function decodeHtmlEntities(input: string): string {
+  return input
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&#(\d+);/g, (_match, code) => {
+      const value = Number(code);
+      return Number.isFinite(value) ? String.fromCodePoint(value) : _match;
+    })
+    .replace(/&#x([0-9a-f]+);/gi, (_match, code) => {
+      const value = Number.parseInt(code, 16);
+      return Number.isFinite(value) ? String.fromCodePoint(value) : _match;
+    });
+}
+
+async function translateTextWithGoogle(
+  text: string,
+  options: { source?: string; target: string }
+): Promise<TranslationResponse> {
+  const apiKey = await getGoogleTranslateApiKey();
+  const timeoutMs = Number(process.env.TRANSLATE_TIMEOUT_MS || 8000);
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), timeoutMs);
+
+  try {
+    const body: Record<string, string> = {
+      q: text,
+      target: options.target,
+      format: "text",
+    };
+    if (options.source) {
+      body.source = options.source;
+    }
+
+    const res = await fetch(
+      `https://translation.googleapis.com/language/translate/v2?key=${encodeURIComponent(
+        apiKey
+      )}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: ac.signal,
+      }
+    );
+    const payload: any = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const reason = payload?.error?.message || res.statusText;
+      console.error(
+        JSON.stringify({
+          scope: "translate.google.httpError",
+          status: res.status,
+          body: String(reason).slice(0, 200),
+        })
+      );
+      throw new Error(`GOOGLE_TRANSLATE_HTTP_${res.status}`);
+    }
+
+    const first = payload?.data?.translations?.[0];
+    const translatedText =
+      typeof first?.translatedText === "string"
+        ? decodeHtmlEntities(first.translatedText)
+        : "";
+    if (!translatedText) {
+      throw new Error("GOOGLE_TRANSLATE_EMPTY_RESPONSE");
+    }
+
+    return {
+      translatedText,
+      ...(typeof first?.detectedSourceLanguage === "string"
+        ? { sourceLanguage: first.detectedSourceLanguage }
+        : options.source
+        ? { sourceLanguage: options.source }
+        : {}),
+      targetLanguage: options.target,
+    };
+  } catch (err: any) {
+    if (err?.name === "AbortError") {
+      throw new Error("GOOGLE_TRANSLATE_TIMEOUT");
+    }
+    throw err;
+  } finally {
+    clearTimeout(to);
+  }
+}
+
 async function evaluateAI(
   transcript: string,
   context: { label?: string; example?: string }
@@ -870,7 +1448,7 @@ async function evaluateAI(
   EvaluationResponse & { errors?: string[]; improvements?: string[] }
 > {
   const apiKey = await getOpenAIKey();
-  const model = process.env.OPENAI_CHAT_MODEL || "gpt-5-nano";
+  const model = process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.EVAL_TIMEOUT_MS || 8000);
   const isGpt5 = /gpt-5/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
@@ -882,7 +1460,7 @@ async function evaluateAI(
 
 Devuelve SOLO JSON (sin texto extra) con estas claves:
   - correctness: nÃºmero 0-100 que indique quÃ© tan correcta es la respuesta.
-  - errors: arreglo con hasta 3 puntos breves y accionables en espaÃ±ol (solo si hay errores reales, no inventes errores). Cuando detectes un problema de estructura o de colocaciÃ³n clave, indica claramente quÃ© parte de la estructura estÃ¡ mal y ofrece una guÃ­a corta para corregirla (por ejemplo â€œEstructura: falta el auxiliar ...â€ o â€œEstructura: orden incorrecto, deberÃ­a ser ...â€).
+  - errors: arreglo con hasta 3 mensajes cortos en español, escritos de forma muy sencilla y amable, como si le explicaras a un niño de 10 años (solo si hay errores reales, no inventes errores). Sin términos técnicos de gramática: di qué salió un poquito mal con palabras simples y agrega un pequeño consejo positivo para mejorar.
   - improvements: arreglo con 1 reformulaciÃ³n mÃ¡s natural para un nativo en inglÃ©s (frase concisa), sin explicaciones. Opcional si ya estÃ¡ perfecto.
 
 Responde Ãºnicamente el JSON, da tu respuesta de una forma amable.`;
@@ -1147,42 +1725,41 @@ async function advanceStoryMission(
     Array.isArray(body.persistedRequirements) && body.persistedRequirements.length
       ? alignRequirementStates(mission, body.persistedRequirements)
       : [];
-  try {
-    const missionEval = await evaluateStoryMissionProgress(
-      story,
-      mission,
-      conversationHistory,
-      transcript
-    );
-    const rawScore = Number(missionEval.score ?? (missionEval as any).correctness ?? 0);
+  const [englishEvalResult, requirementEvalResult] = await Promise.allSettled([
+    evaluateStoryEnglish(conversationHistory, transcript),
+    evaluateStoryRequirementProgress(story, mission, conversationHistory),
+  ]);
+
+  if (englishEvalResult.status === 'fulfilled') {
+    const englishEval = englishEvalResult.value;
+    const rawScore = Number(englishEval.score ?? englishEval.correctness ?? 0);
     correctness = Math.max(0, Math.min(100, Math.round(rawScore)));
-    const rawResult = (missionEval.result || (missionEval as any).status || '')
-      .toString()
-      .toLowerCase();
+    const rawResult = (englishEval.result || englishEval.status || '').toString().toLowerCase();
     if (rawResult === 'correct' || rawResult === 'partial' || rawResult === 'incorrect') {
       result = rawResult as EvalResult;
     } else {
       result = correctness >= 85 ? 'correct' : correctness >= 60 ? 'partial' : 'incorrect';
     }
-    if (Array.isArray(missionEval.errors)) {
-      errors = missionEval.errors.slice(0, 3).map((item) => String(item));
-    }
-    const alternatives =
-      missionEval.alternatives ??
-      (missionEval as any).improvements ??
-      (missionEval as any).suggestions ??
-      [];
-    if (Array.isArray(alternatives)) {
-      reformulations = alternatives.slice(0, 2).map((item) => String(item));
-    }
-    if (Array.isArray(missionEval.requirements)) {
-      requirements = alignRequirementStates(mission, missionEval.requirements);
-    }
-  } catch (err) {
+    errors = englishEval.errors.slice(0, 3).map((item) => String(item));
+    const alternatives = englishEval.alternatives ?? englishEval.improvements ?? englishEval.suggestions ?? [];
+    reformulations = alternatives.slice(0, 2).map((item) => String(item));
+  } else {
     console.error(
       JSON.stringify({
-        scope: 'stories.advance.progress_error',
-        message: (err as Error)?.message || 'unknown',
+        scope: 'stories.advance.english_error',
+        message: (englishEvalResult.reason as Error)?.message || 'unknown',
+      })
+    );
+  }
+
+  if (requirementEvalResult.status === 'fulfilled') {
+    const requirementEval = requirementEvalResult.value;
+    requirements = alignRequirementStates(mission, requirementEval.requirements);
+  } else {
+    console.error(
+      JSON.stringify({
+        scope: 'stories.advance.requirements_error',
+        message: (requirementEvalResult.reason as Error)?.message || 'unknown',
       })
     );
   }
@@ -1274,7 +1851,7 @@ async function generateAssistanceAnswer(args: {
   const { story, mission, history, requirements, question, conversationFeedback } = args;
   const apiKey = await getOpenAIKey();
   const model =
-    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || 'gpt-5-nano';
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
   const isGpt5 = /gpt-5/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
@@ -1416,18 +1993,14 @@ Resuelve su pregunta con ayuda concreta para cumplir la misión. Si consideras n
 }
 
 
-async function evaluateStoryMissionProgress(
-  story: StoryDefinition,
-  mission: StoryMission,
+async function evaluateStoryEnglish(
   history: StoryMessage[],
   transcript: string
 ): Promise<{
-  requirements: any[];
   score: number;
   result?: string;
   errors: string[];
   alternatives: string[];
-  objectivesMet: boolean;
   correctness?: number;
   status?: string;
   suggestions?: string[];
@@ -1435,7 +2008,7 @@ async function evaluateStoryMissionProgress(
 }> {
   const apiKey = await getOpenAIKey();
   const model =
-    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || 'gpt-5-nano';
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
   const isGpt5 = /gpt-5/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
@@ -1447,49 +2020,46 @@ async function evaluateStoryMissionProgress(
     .map((msg) => `${msg.role === 'user' ? 'Student' : 'Guide'}: ${msg.content}`)
     .join('\n')
     .trim();
-  const requirementsList = (mission.requirements || [])
-    .map((req, index) => `${index + 1}. ${req.requirementId}: ${req.text}`)
-    .join('\n');
-  const systemPrompt = `You are an English coach evaluating the student's latest message inside a role-play mission.
+  const systemPrompt = `You are an English coach evaluating only the English quality of the student's latest message.
 Return ONLY JSON with this exact shape:{
   "score": number,
   "result": "correct" | "partial" | "incorrect",
   "errors": string[],
-  "alternatives": string[],
-  "requirements": [
-    {"requirementId": "string", "met": boolean, "feedback": "string"}
-  ],
-  "objectives_met": boolean
+  "alternatives": string[]
 }
 
 Rules:
-- Just evaluate the last student message English, don’t evaluate if the message helps to achieve the requirements.
+- Evaluate ONLY grammar, word order, word choice, and naturalness of the latest student message.
+- NEVER penalize because the message is short, simple, or does not match the conversation topic.
+- NEVER penalize because the message does not advance the mission or role-play scenario.
+- NEVER penalize because the message seems off-topic or irrelevant to what the guide said.
+- A single valid English word or phrase (e.g. "Hello", "Hi", "Yes", "I see") is grammatically correct and must score 90–100.
+- Brevity is not an English error. A short message with no grammar mistakes is always "correct".
+- Mission objectives and task completion are evaluated separately by another system; do not consider them here.
 - Use Spanish for errors and feedback texts.
-- Evaluate the student's last message using the full conversation context (only to interpret meaning, not for grading progress).
-- Do not mark obvious typos, capitalization, or apostrophe mistakes as errors unless they change the meaning or make the message hard to understand.
-- Mark a requirement as met when the student's intention clearly satisfies it, even if the sentence has small grammar or word-order mistakes.
-- Link errors to issues in the last message (max 3).
-- Provide up to 2 natural English alternatives for the last message; if it helps the user improve their English, you may add a short optional phrase in parentheses, and that phrase may be in Spanish.
-- Keep the requirements array in the original order.
-- objectives_met must be true only if every requirement is met across the conversation.
+- Use the full conversation only to understand meaning and pronoun references, not to judge relevance.
+- Do not mark obvious typos, capitalization, or apostrophe mistakes as errors unless they change the meaning.
+- Mark malformed questions as errors. Example: "the dish is spicy?" should be partial; the natural correction is "Is the dish spicy?"
+- Mark indirect question word order errors. Example: "I don't know what is the star dish?" should be partial.
+- Link errors only to actual grammar/usage issues in the last message (max 3).
+- Provide up to 2 natural English alternatives only if the message has real grammar or naturalness issues. If the message is already correct, leave "alternatives" as an empty array.
 - Do not include any extra keys or commentary.
 
 Language evaluation rubric (for the last message only):
-- correct: No significant grammar or usage errors; natural and fluent.
-- partial: Understandable but with 1–2 noticeable grammar or word choice issues.
-- incorrect: Serious grammatical or lexical errors that make the message hard to understand.
+- correct: No grammar or usage errors; natural and fluent. Score 85–100. This includes any short but valid message like "Hello" or "I agree".
+- partial: Understandable but with 1–2 noticeable grammar, word order, or word choice issues. Score 60–84.
+- incorrect: Serious grammatical or lexical errors that make the message hard to understand. Score 0–59.
 
 Scoring:
-- Start from 100 and subtract 10–40 points per error depending on severity.
+- Start from 100 and subtract 10–40 points per real grammar/usage error.
+- Do NOT subtract points for brevity, topic irrelevance, or not completing a mission requirement.
 `;
 
-  const userPrompt = `Story: ${story.title}\nMission: ${mission.title}\nRole: ${mission.aiRole}\nMission summary: ${mission.sceneSummary || 'No summary provided.'}\nObjectives:\n${requirementsList || 'No explicit objectives listed.'}\n\nFull conversation so far (Student is the learner, Guide is the coach):\n
-  ${conversationText || 'No prior conversation.'}\n\nLast student message to evaluate:\n${transcript || '<empty>'}`;
+  const userPrompt = `Full conversation so far (Student is the learner, Guide is the coach):\n
+  ${conversationText || 'No prior conversation.'}\n\nLast student message to evaluate:\n${transcript || '<empty>'}\n\nReturn json only.`;
   console.log(
     JSON.stringify({
-      scope: 'stories.evaluate.begin',
-      storyId: story.storyId,
-      missionId: mission.missionId,
+      scope: 'stories.english.evaluate.begin',
       userPrompt,
       systemPrompt,
     })
@@ -1509,7 +2079,7 @@ Scoring:
             content: [{ type: 'input_text', text: userPrompt }],
           },
         ],
-        response_format: { type: 'json_object' },
+        text: { format: { type: 'json_object' } },
         max_output_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 600),
       };
       if (reasoningConfig) body.reasoning = reasoningConfig;
@@ -1596,6 +2166,165 @@ Scoring:
   const alternatives = Array.isArray(parsed?.alternatives)
     ? parsed.alternatives.slice(0, 2).map((item: any) => String(item))
     : [];
+  return {
+    score,
+    result,
+    errors,
+    alternatives,
+    correctness: score,
+    status: result,
+    suggestions: alternatives,
+    improvements: alternatives,
+  };
+}
+
+async function evaluateStoryRequirementProgress(
+  story: StoryDefinition,
+  mission: StoryMission,
+  history: StoryMessage[]
+): Promise<{
+  requirements: any[];
+  objectivesMet: boolean;
+}> {
+  const apiKey = await getOpenAIKey();
+  const model =
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
+  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
+  const isGpt5 = /gpt-5/i.test(model);
+  const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
+  const reasoningConfig = isGpt5
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'low' }
+    : undefined;
+  const conversation = history.slice(-STORY_HISTORY_LIMIT);
+  const conversationText = conversation
+    .map((msg) => `${msg.role === 'user' ? 'Student' : 'Guide'}: ${msg.content}`)
+    .join('\n')
+    .trim();
+  const requirementsList = (mission.requirements || [])
+    .map((req, index) => `${index + 1}. ${req.requirementId}: ${req.text}`)
+    .join('\n');
+  const systemPrompt = `You evaluate only mission requirement progress in a role-play.
+Return ONLY JSON with this exact shape:{
+  "requirements": [
+    {"requirementId": "string", "met": boolean, "feedback": "string"}
+  ],
+  "objectives_met": boolean
+}
+
+Rules:
+- Do not grade English grammar, spelling, word order, or naturalness. English quality is evaluated separately.
+- Mark a requirement as met when the student's intention clearly satisfies it anywhere in the conversation, even if the English has small mistakes.
+- Keep the requirements array in the original order and include every requirement exactly once.
+- Use Spanish for feedback texts.
+- For unmet requirements, use neutral progress feedback like "Pendiente" or "Todavia no se ha cubierto"; do not call it an English error.
+- objectives_met must be true only if every requirement is met across the conversation.
+- Do not include any extra keys or commentary.
+`;
+
+  const userPrompt = `Story: ${story.title}\nMission: ${mission.title}\nRole: ${mission.aiRole}\nMission summary: ${mission.sceneSummary || 'No summary provided.'}\nObjectives:\n${requirementsList || 'No explicit objectives listed.'}\n\nFull conversation so far (Student is the learner, Guide is the coach):\n${conversationText || 'No prior conversation.'}\n\nReturn json only.`;
+  console.log(
+    JSON.stringify({
+      scope: 'stories.requirements.evaluate.begin',
+      storyId: story.storyId,
+      missionId: mission.missionId,
+      userPrompt,
+      systemPrompt,
+    })
+  );
+
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), timeoutMs);
+  let raw = '';
+  try {
+    if (useResponses) {
+      const body: Record<string, any> = {
+        model,
+        instructions: systemPrompt,
+        input: [
+          {
+            role: 'user',
+            content: [{ type: 'input_text', text: userPrompt }],
+          },
+        ],
+        text: { format: { type: 'json_object' } },
+        max_output_tokens: Number(process.env.STORY_REQUIREMENTS_MAX_OUTPUT_TOKENS || 500),
+      };
+      if (reasoningConfig) body.reasoning = reasoningConfig;
+      const res = await fetch('https://api.openai.com/v1/responses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(body),
+        signal: ac.signal,
+      });
+      const payload: any = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const reason = payload?.error?.message || res.statusText;
+        throw new Error(`STORY_REQUIREMENTS_HTTP_${res.status}_${reason}`);
+      }
+      if (Array.isArray(payload?.output)) {
+        for (const item of payload.output) {
+          if (item?.type === 'message' && Array.isArray(item.content)) {
+            const texts = item.content
+              .filter((c: any) => c?.type === 'output_text' && typeof c.text === 'string')
+              .map((c: any) => c.text);
+            if (texts.length) {
+              raw = texts.join('\n');
+              break;
+            }
+          }
+        }
+      }
+      if (!raw && payload?.output_text) {
+        raw = payload.output_text;
+      }
+    } else {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          response_format: { type: 'json_object' },
+          max_tokens: Number(process.env.STORY_REQUIREMENTS_MAX_OUTPUT_TOKENS || 500),
+        }),
+        signal: ac.signal,
+      });
+      if (!res.ok) {
+        const bodyTxt = await res.text();
+        throw new Error(`STORY_REQUIREMENTS_HTTP_${res.status}_${bodyTxt.slice(0, 120)}`);
+      }
+      const data: any = await res.json();
+      raw = data.choices?.[0]?.message?.content || '';
+    }
+  } catch (err) {
+    if ((err as any)?.name === 'AbortError') {
+      throw new Error('STORY_REQUIREMENTS_TIMEOUT');
+    }
+    throw err;
+  } finally {
+    clearTimeout(to);
+  }
+
+  if (!raw) {
+    throw new Error('STORY_REQUIREMENTS_EMPTY_RESPONSE');
+  }
+
+  let parsed: any;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    throw new Error('STORY_REQUIREMENTS_BAD_JSON');
+  }
+
   const requirements = Array.isArray(parsed?.requirements) ? parsed.requirements : [];
   const objectivesMet =
     typeof parsed?.objectives_met === 'boolean'
@@ -1604,18 +2333,7 @@ Scoring:
       ? requirements.every((item: any) => !!(item?.met ?? item?.completed ?? false))
       : true;
 
-  return {
-    requirements,
-    score,
-    result,
-    errors,
-    alternatives,
-    objectivesMet,
-    correctness: score,
-    status: result,
-    suggestions: alternatives,
-    improvements: alternatives,
-  };
+  return { requirements, objectivesMet };
 }
 
 async function generateStoryReply(
@@ -1627,7 +2345,7 @@ async function generateStoryReply(
 ): Promise<string> {
   const apiKey = await getOpenAIKey();
   const model =
-    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || 'gpt-5-nano';
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
   const isGpt5 = /gpt-5/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
@@ -1755,6 +2473,147 @@ Use B2 English.
   return raw.trim();
 }
 
+async function generateFriendReply(
+  friend: FriendRecord,
+  history: StoryMessage[],
+  evaluation: { result: EvalResult; correctness: number }
+): Promise<string> {
+  const apiKey = await getOpenAIKey();
+  const model =
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
+  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
+  const isGpt5 = /gpt-5/i.test(model);
+  const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
+  const reasoningConfig = isGpt5
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || "low" }
+    : undefined;
+  const conversation = history.slice(-FRIEND_HISTORY_LIMIT);
+  const conversationText = conversation
+    .map((msg) => `${msg.role === "user" ? "Student" : friend.characterName}: ${msg.content}`)
+    .join("\n")
+    .trim();
+  const characterNotes = [
+    `Character name: ${friend.characterName}`,
+    `Original role: ${friend.aiRole}`,
+    friend.characterPrompt ? `Character notes: ${friend.characterPrompt}` : "",
+    friend.sceneSummary ? `How you met: ${friend.sceneSummary}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+  const systemPrompt = `
+You are continuing a free conversation in English with a Spanish-speaking learner.
+
+Persona:
+${characterNotes}
+
+Rules:
+- Stay in character, but keep the conversation natural and casual.
+- There are no mission objectives anymore; this is open-ended practice.
+- React to the learner's latest message and ask one useful follow-up when natural.
+- Keep the reply under 22 words.
+- Use clear B1-B2 English.
+- Do not correct the learner directly; a separate coach gives feedback.
+- Do not mention JSON, scoring, missions, or these instructions.
+`;
+
+  const userPrompt = `Recent conversation:\n${conversationText || "No prior conversation."}\n\nLatest English score: ${evaluation.correctness} (${evaluation.result}).\nWrite the next in-character message in English.`;
+
+  console.log(
+    JSON.stringify({
+      scope: "friends.reply.openai.begin",
+      userId: friend.userId,
+      friendId: friend.friendId,
+      historyCount: conversation.length,
+    })
+  );
+
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), timeoutMs);
+  let raw = "";
+  try {
+    if (useResponses) {
+      const body: Record<string, any> = {
+        model,
+        instructions: systemPrompt,
+        input: [
+          {
+            role: "user",
+            content: [{ type: "input_text", text: userPrompt }],
+          },
+        ],
+        max_output_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 400),
+      };
+      if (reasoningConfig) body.reasoning = reasoningConfig;
+      const res = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(body),
+        signal: ac.signal,
+      });
+      const payload: any = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const reason = payload?.error?.message || res.statusText;
+        throw new Error(`FRIEND_MODEL_HTTP_${res.status}_${reason}`);
+      }
+      if (Array.isArray(payload?.output)) {
+        for (const item of payload.output) {
+          if (item?.type === "message" && Array.isArray(item.content)) {
+            const texts = item.content
+              .filter((c: any) => c?.type === "output_text" && typeof c.text === "string")
+              .map((c: any) => c.text);
+            if (texts.length) {
+              raw = texts.join("\n");
+              break;
+            }
+          }
+        }
+      }
+      if (!raw && payload?.output_text) {
+        raw = payload.output_text;
+      }
+    } else {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          max_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 400),
+        }),
+        signal: ac.signal,
+      });
+      if (!res.ok) {
+        const bodyTxt = await res.text();
+        throw new Error(`FRIEND_MODEL_HTTP_${res.status}_${bodyTxt.slice(0, 120)}`);
+      }
+      const data: any = await res.json();
+      raw = data.choices?.[0]?.message?.content || "";
+    }
+  } catch (err) {
+    if ((err as any)?.name === "AbortError") {
+      throw new Error("FRIEND_MODEL_TIMEOUT");
+    }
+    throw err;
+  } finally {
+    clearTimeout(to);
+  }
+
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    throw new Error("FRIEND_MODEL_EMPTY_RESPONSE");
+  }
+  return trimmed;
+}
+
 
 async function generateStoryMissionFeedback(
   story: StoryDefinition,
@@ -1770,7 +2629,7 @@ async function generateStoryMissionFeedback(
   );
   const apiKey = await getOpenAIKey();
   const model =
-    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || 'gpt-5-nano';
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
   const isGpt5 = /gpt-5/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
@@ -1850,7 +2709,7 @@ ${conversationText || 'No conversation available.'}`;
             content: [{ type: 'input_text', text: userPrompt }],
           },
         ],
-        max_output_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 400),
+        max_output_tokens: Number(process.env.STORY_FEEDBACK_MAX_OUTPUT_TOKENS || 800),
       };
       if (reasoningConfig) body.reasoning = reasoningConfig;
       const res = await fetch('https://api.openai.com/v1/responses', {
@@ -1896,7 +2755,7 @@ ${conversationText || 'No conversation available.'}`;
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt },
           ],
-          max_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 400),
+          max_tokens: Number(process.env.STORY_FEEDBACK_MAX_OUTPUT_TOKENS || 800),
         }),
         signal: ac.signal,
       });

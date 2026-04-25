@@ -127,6 +127,63 @@ export interface StoryAssistanceResponse {
   answer: string;
 }
 
+export interface FriendCharacter {
+  friendId: string;
+  storyId: string;
+  missionId: string;
+  sceneIndex: number;
+  storyTitle: string;
+  missionTitle: string;
+  characterName: string;
+  aiRole: string;
+  characterPrompt?: string;
+  avatarImageUrl?: string;
+  videoIntro?: string;
+  sceneSummary?: string;
+  createdAt: string;
+  updatedAt: string;
+  lastMessageAt?: string;
+}
+
+export interface CreateFriendRequest {
+  storyId?: string;
+  missionId?: string;
+  sceneIndex?: number;
+  storyDefinition?: StoryDefinition;
+  missionDefinition?: StoryMission;
+}
+
+export interface FriendsListResponse {
+  items: FriendCharacter[];
+}
+
+export interface FriendChatRequest {
+  sessionId?: string;
+  transcript: string;
+  history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+}
+
+export interface FriendChatPayload {
+  friendId: string;
+  aiReply: string;
+  correctness: number;
+  result: EvalResult;
+  errors: string[];
+  reformulations: string[];
+}
+
+export interface TranslationRequest {
+  text: string;
+  source?: string;
+  target?: string;
+}
+
+export interface TranslationResponse {
+  translatedText: string;
+  sourceLanguage?: string;
+  targetLanguage: string;
+}
+
 export interface PromoCodeValidationRequest {
   code: string;
 }

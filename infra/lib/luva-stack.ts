@@ -159,6 +159,13 @@ export class LuvaStack extends Stack {
       projectionType: ProjectionType.ALL,
     });
 
+    const friendshipsTable = new Table(this, 'FriendshipsTable', {
+      partitionKey: { name: 'userId', type: AttributeType.STRING },
+      sortKey: { name: 'friendId', type: AttributeType.STRING },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.RETAIN,
+    });
+
     // S3 Buckets
     const audioRawBucket = new Bucket(this, 'AudioRawBucket', {
       bucketName: undefined, // Let AWS name it; set if needed
@@ -355,6 +362,8 @@ export class LuvaStack extends Stack {
       stringValue: 'SET_IN_SSM',
       description: 'OpenAI API key (placeholder, override in SSM)',
     });
+    const googleTranslateKeyParamName = '/luva/google/translateApiKey';
+    const googleTranslateKeyParamArn = `arn:aws:ssm:${this.region}:${this.account}:parameter${googleTranslateKeyParamName}`;
     const instagramAccessTokenParam = new StringParameter(this, 'InstagramAccessTokenParam', {
       parameterName: '/luva/social/instagram/accessToken',
       stringValue: 'SET_IN_SSM',
@@ -388,23 +397,26 @@ export class LuvaStack extends Stack {
       logGroup: apiFnLogGroup,
       environment: {
         TABLE_NAME: table.tableName,
+        FRIENDSHIPS_TABLE_NAME: friendshipsTable.tableName,
         FEED_POSTS_TABLE_NAME: feedPostsTable.tableName,
         FEED_POSTS_BY_ORDER_INDEX_NAME: 'FeedPostsByOrderIndex',
         AUDIO_BUCKET: audioRawBucket.bucketName,
         OPENAI_KEY_PARAM: openAiKeyParam.parameterName,
-        OPENAI_CHAT_MODEL: 'gpt-4.1-nano',
+        GOOGLE_TRANSLATE_API_KEY_PARAM: googleTranslateKeyParamName,
+        OPENAI_CHAT_MODEL: 'gpt-5.4-nano',
         EVAL_TIMEOUT_MS: '20000',
         STAGE: 'prod',
       },
     });
 
     table.grantReadWriteData(apiFn);
+    friendshipsTable.grantReadWriteData(apiFn);
     feedPostsTable.grantReadData(apiFn);
     audioRawBucket.grantReadWrite(apiFn);
     publicBucket.grantReadWrite(apiFn);
     apiFn.addToRolePolicy(new PolicyStatement({
       actions: ['ssm:GetParameter', 'ssm:GetParameters', 'ssm:GetParameterHistory'],
-      resources: [openAiKeyParam.parameterArn],
+      resources: [openAiKeyParam.parameterArn, googleTranslateKeyParamArn],
     }));
 
     const usersFnLogGroup = new LogGroup(this, 'UsersFnLogs', { retention: RetentionDays.ONE_WEEK });
@@ -524,6 +536,9 @@ export class LuvaStack extends Stack {
     const users = v1.addResource('users');
     const usersMe = users.addResource('me');
     const usersMeProgress = usersMe.addResource('progress');
+    const friends = v1.addResource('friends');
+    const friendById = friends.addResource('{friendId}');
+    const friendChat = friendById.addResource('chat');
     const admin = v1.addResource('admin');
     const adminProxy = admin.addResource('{proxy+}');
     const proxy = v1.addResource('{proxy+}');
@@ -546,6 +561,18 @@ export class LuvaStack extends Stack {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
     });
+    friends.addMethod('GET', lambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    friends.addMethod('POST', lambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    friendChat.addMethod('POST', lambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
     admin.addMethod('ANY', adminLambdaIntegration, {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
@@ -559,7 +586,7 @@ export class LuvaStack extends Stack {
 
     const deployment = new Deployment(this, 'Deployment', { api });
     deployment.addToLogicalId({
-      routeManifestVersion: '2026-04-13-feed-posts-v1',
+      routeManifestVersion: '2026-04-24-friends-v1',
       routes: {
         apiRoot: ['ANY /v1', 'ANY /v1/{proxy+}'],
         users: [
@@ -567,6 +594,11 @@ export class LuvaStack extends Stack {
           'POST /v1/users/me',
           'GET /v1/users/me/progress',
           'POST /v1/users/me/progress',
+        ],
+        friends: [
+          'GET /v1/friends',
+          'POST /v1/friends',
+          'POST /v1/friends/{friendId}/chat',
         ],
         admin: [
           'ANY /v1/admin',
@@ -603,6 +635,9 @@ export class LuvaStack extends Stack {
     });
     new CfnOutput(this, 'FeedPostsTableName', {
       value: feedPostsTable.tableName,
+    });
+    new CfnOutput(this, 'FriendshipsTableName', {
+      value: friendshipsTable.tableName,
     });
     new CfnOutput(this, 'GeneratedVideosBucketName', {
       value: generatedVideosBucket.bucketName,

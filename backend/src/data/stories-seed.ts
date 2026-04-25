@@ -523,7 +523,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "Tu compañero aparece con un 'mini dragón' (spoiler: es muy ruidoso y fuma pipas). Debes establecer reglas claras sobre mascotas en casa sin sonar autoritario.",
         aiRole:
-          "Eres juguetón y enamorado de tu mascota excéntrica; reaccionas emocionalmente y defiendes tu libertad, pero puedes negociar si el otro se muestra razonable.",
+          "Eres la roommate que tiene un dragón, eres juguetona y enamorada de tu mascota excéntrica; reaccionas emocionalmente y defiendes tu libertad.",
         caracterName: "Lola Flame",
         caracterPrompt:
           "A confident person with colorful hair wearing a leather jacket covered in pins, cradling a small creature with tiny wings that emits a faint glow. They stand in a hallway with scorch marks and a mischievous smile.",
@@ -1434,7 +1434,7 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary:
           "Un chef de food truck propone platos extraños con nombres más raros aún. Debes pedir algo que puedas comer y preguntar por alergias o ingredientes.",
         aiRole:
-          "Eres un chef excéntrico, entusiasta y algo teatral sobre tus combinaciones culinarias. Describe sabores con pasión y responde claramente sobre ingredientes y posibles alergias cuando te pregunten.",
+          "Eres un chef excéntrico, entusiasta y algo teatral sobre tus combinaciones culinarias.",
         caracterName: "Chef Nimbus",
         caracterPrompt:
           "A creative chef wearing a stained apron, a quirky hat shaped like a cloud, and food-safe gloves. He stands behind a colorful food truck counter with steam rising and handwritten menu boards full of bizarre dish names.",
@@ -1881,6 +1881,8 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A young, energetic woman with a quirky hairstyle and bright glasses. She wears a colorful cardigan and holds a mug with a cat drawing. She leans in conspiratorially in a cozy office kitchen, smiling mischievously.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420225532-21bcf1e6-87c4-493f-b802-4bf007f43e89.png",
+        videoIntro:
+          "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260425042727-4571ecb5-6930-411d-9763-8e58737d646f.mp4",
         requirements: [
           {
             requirementId: "ask_for_details",
@@ -1920,6 +1922,8 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A slim, mysterious office worker in a slightly rumpled blazer, holding a laptop close. He has a half-smile and curious eyes, standing under fluorescent office lights with a hint of a city skyline outside the window.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420225718-cfcea6d8-4445-4e27-b56d-5fd11f0652ea.png",
+        videoIntro:
+          "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260425042925-1c9cbf56-8fe7-4551-889e-29f7e9c98ff0.mp4",
         requirements: [
           {
             requirementId: "ask_email_origin",
@@ -1955,7 +1959,8 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A broad-shouldered man with a loud laugh, wearing a casual shirt and a company lanyard. He stands by the office coffee machine with a furrowed brow and folded arms, as if ready for a small showdown.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420225755-0988ce56-13fb-4332-9e13-9a470ada6a7e.png",
-        requirements: [
+        videoIntro: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260425043209-bfe567de-0fc3-4faf-b659-b7354e138762.mp4",
+          requirements: [
           {
             requirementId: "deny_accusation",
             text: "Niega la acusación de forma calmada.",
@@ -1987,6 +1992,8 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A composed middle-aged woman in a smart blazer, with a neat bun and an unreadable expression. She sits in a glass-walled office, holding a phone with a poised, authoritative posture.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420225838-8d53a9a6-0460-4223-b80d-921052b0b14e.png",
+        videoIntro:
+          "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260425043043-d5d23c2e-ba3e-4216-870d-4bdbc7b55ef7.mp4",
         requirements: [
           {
             requirementId: "clarify_timeline",
@@ -2024,6 +2031,8 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A bubbly coworker in a casual party outfit, twinkling lights behind her and a drink in hand. She laughs easily and gestures theatrically, making the afterwork feel lively and slightly chaotic.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420225907-30b2fe13-1439-4484-8834-9c754f7f9b69.png",
+        videoIntro:
+          "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260425043003-bcf2e6d6-4399-44b2-9c37-ab1654a01853.mp4",
         requirements: [
           {
             requirementId: "choose_truth",
