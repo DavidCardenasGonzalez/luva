@@ -19,6 +19,12 @@ const ASSET_FOLDER_OPTIONS: Array<{
     mediaKind: 'image',
   },
   {
+    value: 'avatarPosts',
+    label: 'avatarPosts',
+    accept: 'image/*',
+    mediaKind: 'image',
+  },
+  {
     value: 'missionIntroVideos',
     label: 'missionIntroVideos',
     accept: 'video/mp4,video/quicktime,video/webm,video/x-m4v,video/mpeg',

@@ -49,6 +49,7 @@ import {
   FriendsListResponse,
 } from "../types";
 import { STORIES_SEED } from "../data/stories-seed";
+import { listPublicCharacterPosts } from "../character-posts";
 import { listPublicFeedPosts } from "../feed-posts";
 import { validatePromoCode } from "../promo-codes";
 
@@ -651,6 +652,25 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
         }
         throw err;
       }
+    }
+
+    const friendProfile = path.match(/^\/v1\/friends\/([^/]+)\/profile$/);
+    if (method === "GET" && friendProfile) {
+      const identity = getUserIdentity(event);
+      if (!identity) {
+        return unauthorized("Missing user identity");
+      }
+
+      const friendId = decodeURIComponent(friendProfile[1]);
+      const friend = await getFriendRecord(identity.userId, friendId);
+      if (!friend) {
+        return notFound();
+      }
+
+      return json(200, {
+        friend: publicFriend(friend),
+        posts: await listPublicCharacterPosts(friend.friendId),
+      });
     }
 
     const friendChat = path.match(/^\/v1\/friends\/([^/]+)\/chat$/);

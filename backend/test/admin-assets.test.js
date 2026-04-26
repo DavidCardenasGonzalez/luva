@@ -84,6 +84,20 @@ test('normalizeAdminAssetUploadRequest accepts feed post image and video folders
   );
 });
 
+test('normalizeAdminAssetUploadRequest accepts avatar post image folder', () => {
+  assert.deepEqual(
+    normalizeAdminAssetUploadRequest({
+      folder: 'avatarPosts',
+      contentType: '',
+      fileName: 'avatar-post.webp',
+    }),
+    {
+      folder: 'avatarPosts',
+      contentType: 'image/webp',
+    },
+  );
+});
+
 test('normalizeAdminAssetUploadRequest rejects unknown folders and mismatched asset types', () => {
   assert.throws(
     () =>

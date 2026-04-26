@@ -6,6 +6,7 @@ const s3 = new S3Client({});
 
 export const ADMIN_ASSET_FOLDERS = [
   'storiesProfile',
+  'avatarPosts',
   'missionIntroVideos',
   'feedPostImages',
   'feedPostVideos',
@@ -63,6 +64,13 @@ const ASSET_CONTENT_TYPE_CONFIG: Record<
   }
 > = {
   storiesProfile: {
+    contentTypes: IMAGE_CONTENT_TYPES,
+    contentTypeByExtension: buildContentTypeByExtension(IMAGE_CONTENT_TYPES, {
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+    }),
+  },
+  avatarPosts: {
     contentTypes: IMAGE_CONTENT_TYPES,
     contentTypeByExtension: buildContentTypeByExtension(IMAGE_CONTENT_TYPES, {
       jpg: 'image/jpeg',

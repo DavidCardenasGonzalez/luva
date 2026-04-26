@@ -26,6 +26,15 @@ import {
   listFeedPosts,
   updateAdminFeedPost,
 } from '../feed-posts';
+import {
+  createAdminCharacterPost,
+  deleteAdminCharacterPost,
+  findStoryCharacter,
+  listCharacterPosts,
+  listStoryCharacters,
+  updateAdminCharacterPost,
+} from '../character-posts';
+import { STORIES_SEED } from '../data/stories-seed';
 
 const ROUTE_PREFIX = '/v1';
 
@@ -75,6 +84,80 @@ export const handler = async (event: any): Promise<Result> => {
         return json(200, await listFeedPosts());
       } catch (error) {
         const handled = handleFeedPostError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/story-characters`) {
+      return json(200, listStoryCharacters(STORIES_SEED));
+    }
+
+    const characterPosts = path.match(/^\/v1\/admin\/story-characters\/([^/]+)\/posts$/);
+    if (method === 'GET' && characterPosts) {
+      const character = findStoryCharacter(STORIES_SEED, decodeURIComponent(characterPosts[1]));
+      if (!character) {
+        return json(404, {
+          code: 'STORY_CHARACTER_NOT_FOUND',
+          message: 'No encontramos ese personaje en las stories.',
+        });
+      }
+
+      try {
+        return json(200, await listCharacterPosts(character));
+      } catch (error) {
+        const handled = handleCharacterPostError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && characterPosts) {
+      const character = findStoryCharacter(STORIES_SEED, decodeURIComponent(characterPosts[1]));
+      if (!character) {
+        return json(404, {
+          code: 'STORY_CHARACTER_NOT_FOUND',
+          message: 'No encontramos ese personaje en las stories.',
+        });
+      }
+
+      try {
+        return json(200, await createAdminCharacterPost(character, parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleCharacterPostError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    const characterPostUpdate = path.match(/^\/v1\/admin\/story-characters\/([^/]+)\/posts\/update$/);
+    if (method === 'POST' && characterPostUpdate) {
+      const character = findStoryCharacter(STORIES_SEED, decodeURIComponent(characterPostUpdate[1]));
+      if (!character) {
+        return json(404, {
+          code: 'STORY_CHARACTER_NOT_FOUND',
+          message: 'No encontramos ese personaje en las stories.',
+        });
+      }
+
+      try {
+        return json(200, await updateAdminCharacterPost(character, parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleCharacterPostError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    const characterPostDelete = path.match(/^\/v1\/admin\/story-characters\/([^/]+)\/posts\/delete$/);
+    if (method === 'POST' && characterPostDelete) {
+      try {
+        return json(200, await deleteAdminCharacterPost(
+          decodeURIComponent(characterPostDelete[1]),
+          parseBody(event.body) || {},
+        ));
+      } catch (error) {
+        const handled = handleCharacterPostError(error);
         if (handled) return handled;
         throw error;
       }
@@ -478,6 +561,63 @@ function handleFeedPostError(error: unknown): Result | undefined {
     return json(400, {
       code: error.message,
       message,
+    });
+  }
+
+  return undefined;
+}
+
+function handleCharacterPostError(error: unknown): Result | undefined {
+  if (!(error instanceof Error)) {
+    return undefined;
+  }
+
+  if (error.message === 'CHARACTER_POSTS_TABLE_NAME not set') {
+    return json(503, {
+      code: 'CHARACTER_POSTS_NOT_CONFIGURED',
+      message: 'Configura la tabla de posts de personajes en la lambda admin.',
+    });
+  }
+
+  if (error.message === 'INVALID_CHARACTER_ID') {
+    return json(400, {
+      code: 'INVALID_CHARACTER_ID',
+      message: 'Indica un personaje valido para administrar posts.',
+    });
+  }
+
+  if (error.message === 'INVALID_CHARACTER_POST_ID') {
+    return json(400, {
+      code: 'INVALID_CHARACTER_POST_ID',
+      message: 'Indica un post valido del perfil.',
+    });
+  }
+
+  if (error.message === 'CHARACTER_POST_NOT_FOUND') {
+    return json(404, {
+      code: 'CHARACTER_POST_NOT_FOUND',
+      message: 'No encontramos ese post del perfil.',
+    });
+  }
+
+  if (error.message === 'INVALID_CHARACTER_POST_CAPTION') {
+    return json(400, {
+      code: 'INVALID_CHARACTER_POST_CAPTION',
+      message: 'Escribe un caption para el post.',
+    });
+  }
+
+  if (error.message === 'INVALID_CHARACTER_POST_IMAGE_URL') {
+    return json(400, {
+      code: 'INVALID_CHARACTER_POST_IMAGE_URL',
+      message: 'Sube una imagen valida o usa una URL https valida.',
+    });
+  }
+
+  if (error.message === 'INVALID_CHARACTER_POST_ORDER') {
+    return json(400, {
+      code: 'INVALID_CHARACTER_POST_ORDER',
+      message: 'Usa un orden numerico mayor a cero.',
     });
   }
 

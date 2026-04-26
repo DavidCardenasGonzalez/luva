@@ -304,6 +304,22 @@ export default function SettingsScreen({ navigation }: Props) {
                 </Text>
               </Pressable>
             )}
+            <Pressable
+              onPress={() => navigation.navigate('Paywall', { source: 'settings_lite', variant: 'lite' })}
+              style={({ pressed }) => ({
+                marginTop: 10,
+                padding: 14,
+                borderRadius: 14,
+                backgroundColor: pressed ? '#0e7490' : '#0891b2',
+                borderWidth: 1,
+                borderColor: '#155e75',
+                opacity: pressed ? 0.92 : 1,
+              })}
+            >
+              <Text style={{ color: 'white', fontWeight: '800', textAlign: 'center' }}>
+                Ver Versión Lite
+              </Text>
+            </Pressable>
           </View>
 
           {__DEV__ || Platform.OS === 'android' ? (

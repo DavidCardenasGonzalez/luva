@@ -12,6 +12,7 @@ import StoriesScreen from '../screens/StoriesScreen';
 import FeedScreen from '../screens/FeedScreen';
 import FriendsScreen from '../screens/FriendsScreen';
 import FriendChatScreen from '../screens/FriendChatScreen';
+import FriendProfileScreen from '../screens/FriendProfileScreen';
 import StoryMissionsScreen from '../screens/StoryMissionsScreen';
 import StorySceneScreen from '../screens/StorySceneScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -28,6 +29,7 @@ export type PaywallSource =
   | 'home_banner'
   | 'practice_card_unlock'
   | 'practice_recording'
+  | 'settings_lite'
   | 'settings_subscription'
   | 'story_mission_unlock'
   | 'story_scene_mission_unlock'
@@ -51,13 +53,14 @@ export type RootStackParamList = {
   Feed: undefined;
   Friends: undefined;
   FriendChat: { friendId: string };
+  FriendProfile: { friendId: string };
   StoryMissions: { storyId: string };
   StoryScene: { storyId: string; sceneIndex: number };
   Profile: undefined;
   AuthCallback: undefined;
   Settings: undefined;
   EmailSignUp: { prefillEmail?: string } | undefined;
-  Paywall: { asModal?: boolean; source?: PaywallSource } | undefined;
+  Paywall: { asModal?: boolean; source?: PaywallSource; variant?: 'pro' | 'lite' } | undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -117,6 +120,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Feed" component={FeedScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Friends" component={FriendsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FriendChat" component={FriendChatScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="FriendProfile" component={FriendProfileScreen} options={{ headerShown: false }} />
         <Stack.Screen name="StoryMissions" component={StoryMissionsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="StoryScene" component={StorySceneScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />

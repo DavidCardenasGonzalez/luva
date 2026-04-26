@@ -57,6 +57,8 @@ export default function PaywallScreen() {
   const insets = useSafeAreaInsets();
   const isModal = !!route.params?.asModal;
   const paywallSource = route.params?.source || "unknown";
+  const paywallVariant = route.params?.variant || "pro";
+  const isLitePaywall = paywallVariant === "lite";
   const { isPro, refreshCustomerInfo, loading: rcLoading } = useRevenueCat();
   const {
     balance: coinBalance,
@@ -85,6 +87,10 @@ export default function PaywallScreen() {
       setLoading(true);
       setError(null);
       try {
+        if (isLitePaywall) {
+          if (mounted) setOfferings(null);
+          return;
+        }
         const res = await Purchases.getOfferings();
         if (mounted) setOfferings(res);
       } catch (err: any) {
@@ -98,17 +104,17 @@ export default function PaywallScreen() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [isLitePaywall]);
 
   useEffect(() => {
-    if (isPro && !rcLoading) {
+    if (!isLitePaywall && isPro && !rcLoading) {
       Alert.alert("Suscripción activa", "Ya tienes acceso Pro.");
       navigation.goBack();
     }
-  }, [isPro, rcLoading, navigation]);
+  }, [isLitePaywall, isPro, rcLoading, navigation]);
 
   useEffect(() => {
-    if (trackedPaywallRef.current || isPro || coinsLoading) {
+    if (trackedPaywallRef.current || (!isLitePaywall && isPro) || coinsLoading) {
       return;
     }
     trackedPaywallRef.current = true;
@@ -125,6 +131,7 @@ export default function PaywallScreen() {
     coinBalance,
     coinsLoading,
     isModal,
+    isLitePaywall,
     isPro,
     isUnlimited,
     maxCoins,
@@ -320,6 +327,49 @@ export default function PaywallScreen() {
     );
   };
 
+  const handleLitePurchase = () => {
+    Alert.alert(
+      "Versión Lite",
+      "Esta oferta todavía está hardcodeada. Configura el producto en la tienda para activar la compra."
+    );
+  };
+
+  const renderLitePackageCard = () => (
+    <Pressable
+      onPress={handleLitePurchase}
+      style={({ pressed }) => ({
+        marginBottom: 12,
+        padding: 16,
+        borderRadius: 18,
+        backgroundColor: "#0f172a",
+        borderWidth: 1,
+        borderColor: COLORS.accent,
+        opacity: pressed ? 0.9 : 1,
+        shadowColor: "#000",
+        shadowOpacity: 0.12,
+        shadowRadius: 10,
+      })}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+        <View style={{ flex: 1, paddingRight: 8 }}>
+          <Text style={{ color: COLORS.text, fontSize: 17, fontWeight: "800" }}>Versión Lite</Text>
+          <Text style={{ color: COLORS.muted, marginTop: 4, fontSize: 13 }}>
+            Misiones Ilimitadas
+          </Text>
+        </View>
+      </View>
+      <View style={{ flexDirection: "row", alignItems: "flex-end", marginTop: 10 }}>
+        <Text style={{ color: COLORS.text, fontSize: 26, fontWeight: "900" }}>$29.99</Text>
+        <Text style={{ color: COLORS.muted, fontSize: 16, fontWeight: "800", marginLeft: 4 }}>
+          USD
+        </Text>
+      </View>
+      <Text style={{ color: COLORS.accent, marginTop: 10, fontWeight: "800" }}>
+        Tocar para continuar con $29.99 USD
+      </Text>
+    </Pressable>
+  );
+
   const content = (
     <View style={{ flex: 1 }}>
       <View style={{ position: "absolute", top: -80, right: -60, width: 260, height: 260, borderRadius: 200, backgroundColor: "#0ea5e91b" }} />
@@ -364,20 +414,25 @@ export default function PaywallScreen() {
           }}
         >
           <Text style={{ color: COLORS.accent2, fontSize: 12, fontWeight: "800", letterSpacing: 1, textTransform: "uppercase" }}>
-            Hazte Pro
+            {isLitePaywall ? "Versión Lite" : "Hazte Pro"}
           </Text>
           <Text style={{ color: COLORS.text, fontSize: 26, fontWeight: "900", marginTop: 6 }}>
-            Monedas ilimitadas y acceso completo
+            {isLitePaywall ? "Versión Lite" : "Monedas ilimitadas y acceso completo"}
           </Text>
           <Text style={{ color: COLORS.muted, marginTop: 8, lineHeight: 20 }}>
-            Verás los precios en tu moneda local y podrás restaurar tus compras cuando quieras.
+            {isLitePaywall
+              ? "Accede a misiones ilimitadas con un pago fijo de $29.99 USD."
+              : "Verás los precios en tu moneda local y podrás restaurar tus compras cuando quieras."}
           </Text>
           <View style={{ marginTop: 14, flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-            {[
-              "Misiones y cartas ilimitadas sin esperar regeneración",
-              "Uso ilimitado de escritura por voz",
-              "Acceso a nuestra plataforma web"
-            ].map((item) => (
+            {(isLitePaywall
+              ? ["Misiones Ilimitadas"]
+              : [
+                  "Misiones y cartas ilimitadas sin esperar regeneración",
+                  "Uso ilimitado de escritura por voz",
+                  "Acceso a nuestra plataforma web",
+                ]
+            ).map((item) => (
               <View
                 key={item}
                 style={{
@@ -399,7 +454,9 @@ export default function PaywallScreen() {
         </View>
 
         <View style={{ marginTop: 16 }}>
-          {loading || rcLoading ? (
+          {isLitePaywall ? (
+            renderLitePackageCard()
+          ) : loading || rcLoading ? (
             <View style={{ padding: 16, borderRadius: 16, backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border, alignItems: "center" }}>
               <ActivityIndicator color={COLORS.accent} />
               <Text style={{ color: COLORS.muted, marginTop: 8 }}>Cargando ofertas...</Text>

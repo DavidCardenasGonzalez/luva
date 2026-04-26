@@ -62,6 +62,12 @@ const INITIAL_MODULES: AdminModuleSummary[] = [
     description: 'Administra posts ordenados del feed con texto, media y acciones configurables.',
     status: 'ready',
   },
+  {
+    id: 'story-character-posts',
+    label: 'Stories de personajes',
+    description: 'Administra perfiles tipo Instagram para personajes y sus posts con imagen y caption.',
+    status: 'ready',
+  },
 ];
 
 export function buildAdminOverview(

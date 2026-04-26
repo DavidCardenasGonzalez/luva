@@ -33,10 +33,12 @@ const COLORS = {
 
 function FriendCard({
   friend,
-  onPress,
+  onOpenChat,
+  onOpenProfile,
 }: {
   friend: FriendCharacter;
-  onPress: (friend: FriendCharacter) => void;
+  onOpenChat: (friend: FriendCharacter) => void;
+  onOpenProfile: (friend: FriendCharacter) => void;
 }) {
   const avatarSource = useMemo<ImageSourcePropType | undefined>(() => {
     return friend.avatarImageUrl?.trim()
@@ -108,7 +110,25 @@ function FriendCard({
           </Text>
         </View>
         <Pressable
-          onPress={() => onPress(friend)}
+          onPress={() => onOpenProfile(friend)}
+          accessibilityRole="button"
+          accessibilityLabel={`Ver perfil de ${friend.characterName}`}
+          style={({ pressed }) => ({
+            width: 44,
+            height: 44,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: COLORS.border,
+            backgroundColor: pressed ? '#111827' : '#0b172b',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginLeft: 10,
+          })}
+        >
+          <MaterialIcons name="person-outline" size={20} color={COLORS.text} />
+        </Pressable>
+        <Pressable
+          onPress={() => onOpenChat(friend)}
           accessibilityRole="button"
           accessibilityLabel={`Conversar con ${friend.characterName}`}
           style={({ pressed }) => ({
@@ -146,6 +166,13 @@ export default function FriendsScreen({ navigation }: Props) {
   const handleOpenFriend = useCallback(
     (friend: FriendCharacter) => {
       navigation.navigate('FriendChat', { friendId: friend.friendId });
+    },
+    [navigation]
+  );
+
+  const handleOpenProfile = useCallback(
+    (friend: FriendCharacter) => {
+      navigation.navigate('FriendProfile', { friendId: friend.friendId });
     },
     [navigation]
   );
@@ -243,7 +270,12 @@ export default function FriendsScreen({ navigation }: Props) {
         ) : friends.length ? (
           <View style={{ gap: 14 }}>
             {friends.map((friend) => (
-              <FriendCard key={friend.friendId} friend={friend} onPress={handleOpenFriend} />
+              <FriendCard
+                key={friend.friendId}
+                friend={friend}
+                onOpenChat={handleOpenFriend}
+                onOpenProfile={handleOpenProfile}
+              />
             ))}
           </View>
         ) : (

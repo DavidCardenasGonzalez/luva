@@ -137,7 +137,7 @@ export type AdminVideoReplaceUploadResponse = {
   contentType: string
 }
 
-export type AdminAssetFolder = 'storiesProfile' | 'missionIntroVideos' | 'feedPostImages' | 'feedPostVideos'
+export type AdminAssetFolder = 'storiesProfile' | 'avatarPosts' | 'missionIntroVideos' | 'feedPostImages' | 'feedPostVideos'
 
 export type AdminAssetUploadResponse = {
   folder: AdminAssetFolder
@@ -177,6 +177,57 @@ export type AdminFeedPostMutationResponse = {
 }
 
 export type AdminFeedPostDeleteResponse = {
+  postId: string
+  deletedAt: string
+}
+
+export type AdminStoryCharacter = {
+  characterId: string
+  storyId: string
+  missionId: string
+  sceneIndex: number
+  storyTitle: string
+  missionTitle: string
+  characterName: string
+  avatarImageUrl?: string
+  sceneSummary?: string
+}
+
+export type AdminStoryCharactersResponse = {
+  characters: AdminStoryCharacter[]
+  generatedAt: string
+}
+
+export type AdminCharacterPost = {
+  characterId: string
+  postId: string
+  storyId: string
+  missionId: string
+  sceneIndex: number
+  storyTitle: string
+  missionTitle: string
+  characterName: string
+  caption: string
+  imageUrl: string
+  order: number
+  avatarImageUrl?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type AdminCharacterPostsResponse = {
+  character: AdminStoryCharacter
+  posts: AdminCharacterPost[]
+  generatedAt: string
+}
+
+export type AdminCharacterPostMutationResponse = {
+  post: AdminCharacterPost
+  updatedAt: string
+}
+
+export type AdminCharacterPostDeleteResponse = {
+  characterId: string
   postId: string
   deletedAt: string
 }

@@ -2,6 +2,9 @@ import { adminApi } from '@/shared/api/client'
 import type {
   AdminAssetFolder,
   AdminAssetUploadResponse,
+  AdminCharacterPostDeleteResponse,
+  AdminCharacterPostMutationResponse,
+  AdminCharacterPostsResponse,
   AdminFeedPostDeleteResponse,
   AdminFeedPostMutationResponse,
   AdminFeedPostsResponse,
@@ -15,6 +18,7 @@ import type {
   AdminVideoPreviewResponse,
   AdminVideoReplaceUploadResponse,
   AdminRevenueCatVerificationResponse,
+  AdminStoryCharactersResponse,
   AdminVideoStatus,
   AdminVideoUpdateResponse,
   AdminVideosResponse,
@@ -31,6 +35,13 @@ export type AdminFeedPostWritePayload = {
   practiceId?: string
   missionId?: string
   coinAmount?: number
+}
+
+export type AdminCharacterPostWritePayload = {
+  postId?: string
+  caption: string
+  imageUrl: string
+  order?: number
 }
 
 export function getAdminOverview() {
@@ -53,6 +64,43 @@ export function getAdminVideos() {
 
 export function getAdminFeedPosts() {
   return adminApi.get<AdminFeedPostsResponse>('/feed-posts')
+}
+
+export function getAdminStoryCharacters() {
+  return adminApi.get<AdminStoryCharactersResponse>('/story-characters')
+}
+
+export function getAdminCharacterPosts(characterId: string) {
+  return adminApi.get<AdminCharacterPostsResponse>(
+    `/story-characters/${encodeURIComponent(characterId)}/posts`,
+  )
+}
+
+export function createAdminCharacterPost(
+  characterId: string,
+  payload: AdminCharacterPostWritePayload,
+) {
+  return adminApi.post<AdminCharacterPostMutationResponse>(
+    `/story-characters/${encodeURIComponent(characterId)}/posts`,
+    payload,
+  )
+}
+
+export function updateAdminCharacterPost(
+  characterId: string,
+  payload: AdminCharacterPostWritePayload & { postId: string },
+) {
+  return adminApi.post<AdminCharacterPostMutationResponse>(
+    `/story-characters/${encodeURIComponent(characterId)}/posts/update`,
+    payload,
+  )
+}
+
+export function deleteAdminCharacterPost(characterId: string, postId: string) {
+  return adminApi.post<AdminCharacterPostDeleteResponse>(
+    `/story-characters/${encodeURIComponent(characterId)}/posts/delete`,
+    { postId },
+  )
 }
 
 export function createAdminFeedPost(payload: AdminFeedPostWritePayload) {

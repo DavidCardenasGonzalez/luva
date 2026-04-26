@@ -4,10 +4,12 @@ import {
   AppState,
   Image,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -39,6 +41,10 @@ type TranslationResponse = {
   targetLanguage: string;
 };
 
+type FriendAssistanceResponse = {
+  answer: string;
+};
+
 type MessageTranslationState = {
   text?: string;
   loading?: boolean;
@@ -53,6 +59,8 @@ const COLORS = {
   assistantText: '#0f172a',
   muted: '#475569',
 };
+
+const luviImage = require('../image/luvi.png');
 
 function AnalysisCard({ analysis }: { analysis: FriendChatPayload }) {
   return (
@@ -109,6 +117,11 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const [analysis, setAnalysis] = useState<FriendChatPayload | null>(null);
   const [flowState, setFlowState] = useState<StoryFlowState>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showAssistanceModal, setShowAssistanceModal] = useState(false);
+  const [assistanceQuestion, setAssistanceQuestion] = useState('');
+  const [assistanceAnswer, setAssistanceAnswer] = useState('');
+  const [assistanceLoading, setAssistanceLoading] = useState(false);
+  const [assistanceError, setAssistanceError] = useState<string | null>(null);
   const [keyboardAvoiderKey, setKeyboardAvoiderKey] = useState(0);
   const recorder = useAudioRecorder();
   const uploader = useUploadToS3();
@@ -171,6 +184,69 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const handleCreateAccount = useCallback((prefillEmail?: string) => {
     navigation.navigate('EmailSignUp', { prefillEmail });
   }, [navigation]);
+
+  const handleOpenAssistance = useCallback(() => {
+    setAssistanceQuestion('');
+    setAssistanceAnswer('');
+    setAssistanceError(null);
+    setShowAssistanceModal(true);
+  }, []);
+
+  const handleRequestAssistance = useCallback(async () => {
+    const trimmed = assistanceQuestion.trim();
+    if (!trimmed) {
+      setAssistanceError('Escribe tu pregunta.');
+      return;
+    }
+    if (!friend) {
+      setAssistanceError('No encontramos este amigo.');
+      return;
+    }
+
+    setAssistanceLoading(true);
+    setAssistanceError(null);
+    setAssistanceAnswer('');
+
+    try {
+      const historyPayload = messages.map(({ role, text }) => ({ role, content: text }));
+      const missionDefinition = {
+        missionId: friend.missionId,
+        title: friend.missionTitle,
+        sceneSummary: friend.sceneSummary,
+        aiRole: friend.aiRole,
+        caracterName: friend.characterName,
+        caracterPrompt: friend.characterPrompt,
+        avatarImageUrl: friend.avatarImageUrl,
+        videoIntro: friend.videoIntro,
+        requirements: [],
+      };
+      const storyDefinition = {
+        storyId: friend.storyId,
+        title: friend.storyTitle,
+        summary: friend.sceneSummary || friend.missionTitle,
+        missions: [missionDefinition],
+      };
+
+      const payload = await api.post<FriendAssistanceResponse>(
+        `/stories/${encodeURIComponent(friend.storyId)}/assist`,
+        {
+          sceneIndex: 0,
+          question: trimmed,
+          history: historyPayload,
+          storyDefinition,
+          missionDefinition,
+          requirements: [],
+          conversationFeedback: null,
+        }
+      );
+      setAssistanceAnswer(payload?.answer || '');
+    } catch (err: any) {
+      console.error('Friend assistance error', err);
+      setAssistanceError(err?.message || 'No pudimos obtener la asistencia.');
+    } finally {
+      setAssistanceLoading(false);
+    }
+  }, [assistanceQuestion, friend, messages]);
 
   const speakAssistantMessage = useCallback(async (text: string) => {
     const speechText = text.trim();
@@ -454,6 +530,24 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                 Conversación libre
               </Text>
             </View>
+            <Pressable
+              hitSlop={12}
+              onPress={handleOpenAssistance}
+              accessibilityRole="button"
+              accessibilityLabel="Abrir ayuda"
+              style={({ pressed }) => ({
+                width: 38,
+                height: 38,
+                borderRadius: 999,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: pressed ? 'rgba(34, 211, 238, 0.1)' : 'transparent',
+                marginLeft: 10,
+                opacity: pressed ? 0.75 : 1,
+              })}
+            >
+              <MaterialIcons name="help-outline" size={24} color="#a5f3fc" />
+            </Pressable>
           </View>
         </View>
 
@@ -582,6 +676,132 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           onRecordPressIn={handleRecordPressIn}
           onRecordRelease={handleRecordRelease}
         />
+
+        <Modal
+          visible={showAssistanceModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowAssistanceModal(false)}
+        >
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          >
+            <Pressable
+              style={{ flex: 1, backgroundColor: 'rgba(4,7,17,0.7)', padding: 20 }}
+              onPress={() => setShowAssistanceModal(false)}
+            >
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+              >
+                <Pressable
+                  onPress={() => {}}
+                  style={{
+                    backgroundColor: 'white',
+                    borderRadius: 18,
+                    padding: 20,
+                    shadowColor: '#0f172a',
+                    shadowOpacity: 0.12,
+                    shadowRadius: 16,
+                    elevation: 6,
+                  }}
+                >
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <Pressable
+                      onPress={() => setShowAssistanceModal(false)}
+                      hitSlop={12}
+                      style={({ pressed }) => ({ padding: 4, opacity: pressed ? 0.6 : 1 })}
+                    >
+                      <Text style={{ fontSize: 20, color: '#0f172a' }}>✕</Text>
+                    </Pressable>
+                  </View>
+                  <View style={{ alignItems: 'center', marginBottom: 12 }}>
+                    <View
+                      style={{
+                        width: 80,
+                        height: 80,
+                        borderRadius: 20,
+                        backgroundColor: '#0b1224',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <Image source={luviImage} style={{ width: '90%', height: '90%' }} resizeMode="contain" />
+                    </View>
+                    <Text style={{ marginTop: 12, fontSize: 18, fontWeight: '800', color: '#0f172a' }}>
+                      ¿Cómo puedo ayudarte?
+                    </Text>
+                    <Text style={{ marginTop: 6, fontSize: 13, color: '#475569', textAlign: 'center' }}>
+                      Luvi puede ayudarte a seguir la conversación libre con {friend.characterName}.
+                    </Text>
+                    <Text style={{ marginTop: 4, fontSize: 12, color: '#64748b', textAlign: 'center' }}>
+                      Chat: {friend.missionTitle}
+                    </Text>
+                  </View>
+                  <TextInput
+                    value={assistanceQuestion}
+                    onChangeText={(text) => {
+                      setAssistanceQuestion(text);
+                      if (assistanceError) setAssistanceError(null);
+                    }}
+                    placeholder="Cuéntame qué quieres decir, cómo responder o qué frase necesitas..."
+                    placeholderTextColor="#94a3b8"
+                    multiline
+                    style={{
+                      minHeight: 90,
+                      borderRadius: 12,
+                      borderWidth: 1,
+                      borderColor: '#e2e8f0',
+                      backgroundColor: '#f8fafc',
+                      paddingHorizontal: 12,
+                      paddingVertical: 10,
+                      fontSize: 14,
+                      color: '#0f172a',
+                    }}
+                  />
+                  {assistanceError ? (
+                    <Text style={{ marginTop: 6, color: '#dc2626' }}>{assistanceError}</Text>
+                  ) : null}
+                  <Pressable
+                    onPress={handleRequestAssistance}
+                    disabled={assistanceLoading}
+                    style={({ pressed }) => ({
+                      marginTop: 12,
+                      paddingVertical: 12,
+                      borderRadius: 999,
+                      alignItems: 'center',
+                      backgroundColor: assistanceLoading ? '#cbd5f5' : pressed ? '#0b1224' : '#2563eb',
+                    })}
+                  >
+                    {assistanceLoading ? (
+                      <ActivityIndicator color="white" />
+                    ) : (
+                      <Text style={{ color: 'white', fontWeight: '700' }}>Pedir asistencia</Text>
+                    )}
+                  </Pressable>
+                  {assistanceAnswer ? (
+                    <View
+                      style={{
+                        marginTop: 14,
+                        padding: 12,
+                        borderRadius: 12,
+                        backgroundColor: '#f8fafc',
+                        borderWidth: 1,
+                        borderColor: '#e2e8f0',
+                      }}
+                    >
+                      <Text style={{ fontWeight: '700', color: '#0f172a', marginBottom: 6 }}>Sugerencia</Text>
+                      <Text style={{ color: '#0f172a', lineHeight: 20 }}>{assistanceAnswer}</Text>
+                    </View>
+                  ) : null}
+                </Pressable>
+              </ScrollView>
+            </Pressable>
+          </KeyboardAvoidingView>
+        </Modal>
       </View>
     </KeyboardAvoidingView>
   );
