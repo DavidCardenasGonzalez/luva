@@ -320,3 +320,62 @@ export type AdminManualCodeProRevokeResponse = {
   source: 'subscription' | 'free'
   updatedAt: string
 }
+
+export type AdminQuizQuestion = {
+  question: string
+  options: string[]
+  correctIndex: number
+}
+
+export type AdminLesson = {
+  lessonId: string
+  title: string
+  prompt: string
+  script?: string
+  quiz?: AdminQuizQuestion[]
+  voiceId?: string
+  audioKey?: string
+  audioUrl?: string
+  subtitlesKey?: string
+  subtitlesUrl?: string
+  translatedSubtitlesKey?: string
+  translatedSubtitlesUrl?: string
+  videoKey?: string
+  videoUrl?: string
+  status: 'draft' | 'ready'
+  createdAt: string
+  updatedAt: string
+}
+
+export type AdminLessonsResponse = {
+  lessons: AdminLesson[]
+  generatedAt: string
+}
+
+export type AdminLessonMutationResponse = {
+  lesson: AdminLesson
+  updatedAt: string
+}
+
+export type AdminLessonDeleteResponse = {
+  lessonId: string
+  deletedAt: string
+}
+
+export type AdminLessonVoice = {
+  id: string
+  name: string
+  languageCode: string
+  gender: 'MALE' | 'FEMALE' | 'NEUTRAL'
+  type: 'Standard' | 'WaveNet' | 'Neural2' | 'Studio' | 'Gemini'
+}
+
+export type AdminLessonVoicesResponse = {
+  voices: AdminLessonVoice[]
+}
+
+export type AdminLessonVideoUploadResponse = {
+  uploadUrl: string
+  key: string
+  expiresAt: string
+}

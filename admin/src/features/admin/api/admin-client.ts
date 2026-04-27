@@ -23,6 +23,11 @@ import type {
   AdminVideoUpdateResponse,
   AdminVideosResponse,
   AdminUsersResponse,
+  AdminLessonsResponse,
+  AdminLessonMutationResponse,
+  AdminLessonDeleteResponse,
+  AdminLessonVoicesResponse,
+  AdminLessonVideoUploadResponse,
 } from '@/features/admin/model/types'
 
 export type AdminFeedPostWritePayload = {
@@ -206,4 +211,77 @@ export function revokeManualCodeProAccess(email: string) {
   return adminApi.post<AdminManualCodeProRevokeResponse>('/users/pro-access/code-revoke', {
     email,
   })
+}
+
+// ── Lessons ───────────────────────────────────────────────────────────────────
+export function getAdminLessons() {
+  return adminApi.get<AdminLessonsResponse>('/lessons')
+}
+
+export function createAdminLesson(payload: { title: string; prompt: string }) {
+  return adminApi.post<AdminLessonMutationResponse>('/lessons', payload)
+}
+
+export function deleteAdminLesson(lessonId: string) {
+  return adminApi.post<AdminLessonDeleteResponse>('/lessons/delete', { lessonId })
+}
+
+export function getLessonVoices() {
+  return adminApi.get<AdminLessonVoicesResponse>('/lessons/voices')
+}
+
+export function generateLessonScript(lessonId: string) {
+  return adminApi.post<AdminLessonMutationResponse>(
+    `/lessons/${encodeURIComponent(lessonId)}/generate-script`,
+    {},
+  )
+}
+
+export function updateLessonScript(lessonId: string, script: string) {
+  return adminApi.post<AdminLessonMutationResponse>(
+    `/lessons/${encodeURIComponent(lessonId)}/update-script`,
+    { script },
+  )
+}
+
+export function generateLessonQuiz(lessonId: string) {
+  return adminApi.post<AdminLessonMutationResponse>(
+    `/lessons/${encodeURIComponent(lessonId)}/generate-quiz`,
+    {},
+  )
+}
+
+export function generateLessonAudio(lessonId: string, voiceId: string) {
+  return adminApi.post<AdminLessonMutationResponse>(
+    `/lessons/${encodeURIComponent(lessonId)}/generate-audio`,
+    { voiceId },
+  )
+}
+
+export function generateLessonSubtitles(lessonId: string) {
+  return adminApi.post<AdminLessonMutationResponse>(
+    `/lessons/${encodeURIComponent(lessonId)}/generate-subtitles`,
+    {},
+  )
+}
+
+export function translateLessonSubtitles(lessonId: string, targetLanguage = 'es') {
+  return adminApi.post<AdminLessonMutationResponse>(
+    `/lessons/${encodeURIComponent(lessonId)}/translate-subtitles`,
+    { targetLanguage },
+  )
+}
+
+export function createLessonVideoUpload(lessonId: string, contentType: string) {
+  return adminApi.post<AdminLessonVideoUploadResponse>(
+    `/lessons/${encodeURIComponent(lessonId)}/video-upload`,
+    { contentType },
+  )
+}
+
+export function completeLessonVideoUpload(lessonId: string, videoKey: string) {
+  return adminApi.post<AdminLessonMutationResponse>(
+    `/lessons/${encodeURIComponent(lessonId)}/video-complete`,
+    { videoKey },
+  )
 }

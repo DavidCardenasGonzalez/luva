@@ -173,6 +173,12 @@ export class LuvaStack extends Stack {
       removalPolicy: RemovalPolicy.RETAIN,
     });
 
+    const lessonsTable = new Table(this, 'LessonsTable', {
+      partitionKey: { name: 'lessonId', type: AttributeType.STRING },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.RETAIN,
+    });
+
     // S3 Buckets
     const audioRawBucket = new Bucket(this, 'AudioRawBucket', {
       bucketName: undefined, // Let AWS name it; set if needed
@@ -371,6 +377,11 @@ export class LuvaStack extends Stack {
     });
     const googleTranslateKeyParamName = '/luva/google/translateApiKey';
     const googleTranslateKeyParamArn = `arn:aws:ssm:${this.region}:${this.account}:parameter${googleTranslateKeyParamName}`;
+    const geminiKeyParam = new StringParameter(this, 'GeminiKeyParam', {
+      parameterName: '/luva/gemini/apiKey',
+      stringValue: 'SET_IN_SSM',
+      description: 'Gemini API key for lesson text-to-speech (placeholder, override in SSM)',
+    });
     const instagramAccessTokenParam = new StringParameter(this, 'InstagramAccessTokenParam', {
       parameterName: '/luva/social/instagram/accessToken',
       stringValue: 'SET_IN_SSM',
@@ -408,7 +419,10 @@ export class LuvaStack extends Stack {
         FEED_POSTS_TABLE_NAME: feedPostsTable.tableName,
         FEED_POSTS_BY_ORDER_INDEX_NAME: 'FeedPostsByOrderIndex',
         CHARACTER_POSTS_TABLE_NAME: characterPostsTable.tableName,
+        LESSONS_TABLE_NAME: lessonsTable.tableName,
         AUDIO_BUCKET: audioRawBucket.bucketName,
+        ASSETS_CLOUDFRONT_DOMAIN_NAME: assetsDistribution.domainName,
+        ASSETS_CLOUDFRONT_URL: assetsCloudFrontUrl,
         OPENAI_KEY_PARAM: openAiKeyParam.parameterName,
         GOOGLE_TRANSLATE_API_KEY_PARAM: googleTranslateKeyParamName,
         OPENAI_CHAT_MODEL: 'gpt-5.4-nano',
@@ -421,6 +435,7 @@ export class LuvaStack extends Stack {
     friendshipsTable.grantReadWriteData(apiFn);
     feedPostsTable.grantReadData(apiFn);
     characterPostsTable.grantReadData(apiFn);
+    lessonsTable.grantReadData(apiFn);
     audioRawBucket.grantReadWrite(apiFn);
     publicBucket.grantReadWrite(apiFn);
     apiFn.addToRolePolicy(new PolicyStatement({
@@ -466,6 +481,13 @@ export class LuvaStack extends Stack {
         TIKTOK_ACCESS_TOKEN_PARAM: tiktokAccessTokenParam.parameterName,
         TIKTOK_REFRESH_TOKEN_PARAM: tiktokRefreshTokenParam.parameterName,
         TIKTOK_TOKEN_META_PARAM: tiktokTokenMetaParam.parameterName,
+        LESSONS_TABLE_NAME: lessonsTable.tableName,
+        OPENAI_KEY_PARAM: openAiKeyParam.parameterName,
+        GEMINI_API_KEY_PARAM: geminiKeyParam.parameterName,
+        GEMINI_TTS_MODEL: 'gemini-3.1-flash-tts-preview',
+        GOOGLE_TRANSLATE_API_KEY_PARAM: googleTranslateKeyParamName,
+        GOOGLE_TTS_API_KEY_PARAM: googleTranslateKeyParamName,
+        OPENAI_CHAT_MODEL: 'gpt-5.5',
         ASSETS_BUCKET_NAME: assetsBucket.bucketName,
         ASSETS_CLOUDFRONT_DOMAIN_NAME: assetsDistribution.domainName,
         ASSETS_CLOUDFRONT_URL: assetsCloudFrontUrl,
@@ -476,6 +498,7 @@ export class LuvaStack extends Stack {
     generatedVideosTable.grantReadWriteData(adminFn);
     feedPostsTable.grantReadWriteData(adminFn);
     characterPostsTable.grantReadWriteData(adminFn);
+    lessonsTable.grantReadWriteData(adminFn);
     generatedVideosBucket.grantReadWrite(adminFn);
     assetsBucket.grantReadWrite(adminFn);
     adminFn.addToRolePolicy(new PolicyStatement({
@@ -484,6 +507,9 @@ export class LuvaStack extends Stack {
         tiktokAccessTokenParam.parameterArn,
         tiktokRefreshTokenParam.parameterArn,
         tiktokTokenMetaParam.parameterArn,
+        openAiKeyParam.parameterArn,
+        geminiKeyParam.parameterArn,
+        googleTranslateKeyParamArn,
       ],
     }));
 

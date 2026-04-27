@@ -9,6 +9,9 @@ import HomeScreen from '../screens/HomeScreen';
 import DeckScreen from '../screens/DeckScreen';
 import PracticeScreen from '../screens/PracticeScreen';
 import StoriesScreen from '../screens/StoriesScreen';
+import LessonsScreen from '../screens/LessonsScreen';
+import LessonDetailScreen from '../screens/LessonDetailScreen';
+import LessonTestScreen from '../screens/LessonTestScreen';
 import FeedScreen from '../screens/FeedScreen';
 import FriendsScreen from '../screens/FriendsScreen';
 import FriendChatScreen from '../screens/FriendChatScreen';
@@ -50,6 +53,9 @@ export type RootStackParamList = {
     explanation?: string;
   };
   Stories: undefined;
+  Lessons: undefined;
+  LessonDetail: { lessonId: string };
+  LessonTest: { lessonId: string };
   Feed: undefined;
   Friends: undefined;
   FriendChat: { friendId: string };
@@ -117,6 +123,9 @@ export default function AppNavigator() {
         <Stack.Screen name="Deck" component={DeckScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Practice" component={PracticeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Stories" component={StoriesScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Lessons" component={LessonsScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="LessonDetail" component={LessonDetailScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="LessonTest" component={LessonTestScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Feed" component={FeedScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Friends" component={FriendsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FriendChat" component={FriendChatScreen} options={{ headerShown: false }} />

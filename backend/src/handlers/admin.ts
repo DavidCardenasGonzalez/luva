@@ -27,6 +27,20 @@ import {
   updateAdminFeedPost,
 } from '../feed-posts';
 import {
+  listAdminLessons,
+  createAdminLesson,
+  deleteAdminLesson,
+  generateLessonScript,
+  updateLessonScript,
+  generateLessonQuiz,
+  listLessonVoices,
+  generateLessonAudio,
+  generateLessonSubtitles,
+  translateLessonSubtitles,
+  createLessonVideoUpload,
+  completeLessonVideoUpload,
+} from '../admin/lessons';
+import {
   createAdminCharacterPost,
   deleteAdminCharacterPost,
   findStoryCharacter,
@@ -489,6 +503,144 @@ export const handler = async (event: any): Promise<Result> => {
       }
     }
 
+    // ── Lessons ───────────────────────────────────────────────────────────────
+    if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/lessons`) {
+      try {
+        return json(200, await listAdminLessons());
+      } catch (error) {
+        const handled = handleLessonError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/lessons`) {
+      try {
+        return json(200, await createAdminLesson(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleLessonError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/lessons/delete`) {
+      try {
+        return json(200, await deleteAdminLesson(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleLessonError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/lessons/voices`) {
+      return json(200, listLessonVoices());
+    }
+
+    const lessonScriptGenerate = path.match(/^\/v1\/admin\/lessons\/([^/]+)\/generate-script$/);
+    if (method === 'POST' && lessonScriptGenerate) {
+      try {
+        return json(200, await generateLessonScript({ lessonId: decodeURIComponent(lessonScriptGenerate[1]) }));
+      } catch (error) {
+        const handled = handleLessonError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    const lessonScriptUpdate = path.match(/^\/v1\/admin\/lessons\/([^/]+)\/update-script$/);
+    if (method === 'POST' && lessonScriptUpdate) {
+      try {
+        return json(200, await updateLessonScript({
+          lessonId: decodeURIComponent(lessonScriptUpdate[1]),
+          ...(parseBody(event.body) || {}),
+        }));
+      } catch (error) {
+        const handled = handleLessonError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    const lessonQuizGenerate = path.match(/^\/v1\/admin\/lessons\/([^/]+)\/generate-quiz$/);
+    if (method === 'POST' && lessonQuizGenerate) {
+      try {
+        return json(200, await generateLessonQuiz({ lessonId: decodeURIComponent(lessonQuizGenerate[1]) }));
+      } catch (error) {
+        const handled = handleLessonError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    const lessonAudioGenerate = path.match(/^\/v1\/admin\/lessons\/([^/]+)\/generate-audio$/);
+    if (method === 'POST' && lessonAudioGenerate) {
+      try {
+        return json(200, await generateLessonAudio({
+          lessonId: decodeURIComponent(lessonAudioGenerate[1]),
+          ...(parseBody(event.body) || {}),
+        }));
+      } catch (error) {
+        const handled = handleLessonError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    const lessonSubtitlesGenerate = path.match(/^\/v1\/admin\/lessons\/([^/]+)\/generate-subtitles$/);
+    if (method === 'POST' && lessonSubtitlesGenerate) {
+      try {
+        return json(200, await generateLessonSubtitles({ lessonId: decodeURIComponent(lessonSubtitlesGenerate[1]) }));
+      } catch (error) {
+        const handled = handleLessonError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    const lessonSubtitlesTranslate = path.match(/^\/v1\/admin\/lessons\/([^/]+)\/translate-subtitles$/);
+    if (method === 'POST' && lessonSubtitlesTranslate) {
+      try {
+        return json(200, await translateLessonSubtitles({
+          lessonId: decodeURIComponent(lessonSubtitlesTranslate[1]),
+          ...(parseBody(event.body) || {}),
+        }));
+      } catch (error) {
+        const handled = handleLessonError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    const lessonVideoUpload = path.match(/^\/v1\/admin\/lessons\/([^/]+)\/video-upload$/);
+    if (method === 'POST' && lessonVideoUpload) {
+      try {
+        return json(200, await createLessonVideoUpload({
+          lessonId: decodeURIComponent(lessonVideoUpload[1]),
+          ...(parseBody(event.body) || {}),
+        }));
+      } catch (error) {
+        const handled = handleLessonError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    const lessonVideoComplete = path.match(/^\/v1\/admin\/lessons\/([^/]+)\/video-complete$/);
+    if (method === 'POST' && lessonVideoComplete) {
+      try {
+        return json(200, await completeLessonVideoUpload({
+          lessonId: decodeURIComponent(lessonVideoComplete[1]),
+          ...(parseBody(event.body) || {}),
+        }));
+      } catch (error) {
+        const handled = handleLessonError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
     return json(404, { code: 'NOT_FOUND', message: 'Not found' });
   } catch (err: any) {
     console.error(
@@ -619,6 +771,67 @@ function handleCharacterPostError(error: unknown): Result | undefined {
       code: 'INVALID_CHARACTER_POST_ORDER',
       message: 'Usa un orden numerico mayor a cero.',
     });
+  }
+
+  return undefined;
+}
+
+function handleLessonError(error: unknown): Result | undefined {
+  if (!(error instanceof Error)) return undefined;
+
+  const notConfigured: Record<string, string> = {
+    'LESSONS_TABLE_NAME not set': 'Configura la tabla de lecciones en la lambda admin.',
+    'ASSETS_BUCKET_NAME not set': 'Configura el bucket de assets en la lambda admin.',
+    'ASSETS_CLOUDFRONT_DOMAIN_NAME not set': 'Configura el dominio CloudFront de assets en la lambda admin.',
+    'OPENAI_KEY_PARAM not set': 'Configura la clave de OpenAI en la lambda admin.',
+    'GEMINI_API_KEY_PARAM not set': 'Configura la clave de Gemini en la lambda admin.',
+    'GOOGLE_TTS_API_KEY_PARAM not set': 'Configura la clave de Google TTS en la lambda admin.',
+    'GOOGLE_TRANSLATE_API_KEY_PARAM not set': 'Configura la clave de Google Translate en la lambda admin.',
+  };
+
+  for (const [msg, hint] of Object.entries(notConfigured)) {
+    if (error.message === msg) {
+      return json(503, { code: 'NOT_CONFIGURED', message: hint });
+    }
+  }
+
+  const validationMessages: Record<string, [number, string]> = {
+    INVALID_LESSON_ID: [400, 'Indica un lessonId válido.'],
+    INVALID_LESSON_TITLE: [400, 'Escribe un título para la lección.'],
+    INVALID_LESSON_PROMPT: [400, 'Escribe el tema o prompt de la lección.'],
+    INVALID_LESSON_SCRIPT: [400, 'El guion no puede estar vacío.'],
+    INVALID_LESSON_VOICE: [400, 'Selecciona una voz válida para el audio.'],
+    INVALID_VIDEO_CONTENT_TYPE: [400, 'Sube un video en formato MP4, MOV, WebM, M4V o MPEG.'],
+    INVALID_VIDEO_KEY: [400, 'La clave del video no es válida.'],
+    LESSON_NOT_FOUND: [404, 'No encontramos esa lección.'],
+    LESSON_SCRIPT_REQUIRED: [400, 'Genera o escribe el guion antes de continuar con este paso.'],
+    LESSON_SUBTITLES_REQUIRED: [400, 'Genera los subtítulos antes de traducirlos.'],
+    QUIZ_PARSE_FAILED: [502, 'No pudimos procesar el quiz generado. Intenta de nuevo.'],
+    QUIZ_TOO_SHORT: [502, 'El quiz generado tiene menos de 3 preguntas. Intenta de nuevo.'],
+  };
+
+  for (const [code, [status, message]] of Object.entries(validationMessages)) {
+    if (error.message === code) {
+      return json(status, { code, message });
+    }
+  }
+
+  if (error.message.startsWith('OPENAI_HTTP_') || error.message === 'OPENAI_EMPTY_RESPONSE') {
+    return json(502, { code: 'OPENAI_ERROR', message: 'Error al llamar a OpenAI. Intenta de nuevo.' });
+  }
+
+  if (
+    error.message.startsWith('GEMINI_TTS_HTTP_') ||
+    error.message === 'GEMINI_TTS_EMPTY_RESPONSE' ||
+    error.message === 'GEMINI_TTS_REQUEST_FAILED' ||
+    error.message.startsWith('GOOGLE_TTS_HTTP_') ||
+    error.message === 'GOOGLE_TTS_EMPTY_RESPONSE'
+  ) {
+    return json(502, { code: 'GEMINI_TTS_ERROR', message: 'Error al generar el audio con Gemini TTS. Intenta de nuevo.' });
+  }
+
+  if (error.message.startsWith('GOOGLE_TRANSLATE_HTTP_')) {
+    return json(502, { code: 'GOOGLE_TRANSLATE_ERROR', message: 'Error al traducir los subtítulos. Intenta de nuevo.' });
   }
 
   return undefined;

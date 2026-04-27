@@ -51,6 +51,11 @@ import {
 import { STORIES_SEED } from "../data/stories-seed";
 import { listPublicCharacterPosts } from "../character-posts";
 import { listPublicFeedPosts } from "../feed-posts";
+import {
+  answerLessonHelp,
+  getPublicLesson,
+  listPublicLessons,
+} from "../admin/lessons";
 import { validatePromoCode } from "../promo-codes";
 
 const s3 = new S3Client({});
@@ -633,6 +638,52 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
 
     if (method === "GET" && path === `${ROUTE_PREFIX}/feed/posts`) {
       return json(200, await listPublicFeedPosts());
+    }
+
+    if (method === "GET" && path === `${ROUTE_PREFIX}/lessons`) {
+      return json(200, await listPublicLessons());
+    }
+
+    const lessonDetail = path.match(/^\/v1\/lessons\/([^/]+)$/);
+    if (method === "GET" && lessonDetail) {
+      try {
+        return json(200, await getPublicLesson({ lessonId: decodeURIComponent(lessonDetail[1]) }));
+      } catch (err: any) {
+        if (err?.message === 'LESSON_NOT_FOUND') {
+          return notFound();
+        }
+        if (err?.message === 'INVALID_LESSON_ID') {
+          return badRequest('Missing lessonId');
+        }
+        throw err;
+      }
+    }
+
+    const lessonHelp = path.match(/^\/v1\/lessons\/([^/]+)\/help$/);
+    if (method === "POST" && lessonHelp) {
+      try {
+        return json(200, await answerLessonHelp({
+          lessonId: decodeURIComponent(lessonHelp[1]),
+          ...(parseBody(event.body) || {}),
+        }));
+      } catch (err: any) {
+        if (err?.message === 'LESSON_NOT_FOUND') {
+          return notFound();
+        }
+        if (
+          err?.message === 'INVALID_LESSON_ID' ||
+          err?.message === 'INVALID_LESSON_HELP_QUESTION'
+        ) {
+          return badRequest(err?.message === 'INVALID_LESSON_HELP_QUESTION' ? 'Missing question' : 'Missing lessonId');
+        }
+        console.error(
+          JSON.stringify({
+            scope: 'lessons.help.error',
+            message: err?.message || 'unknown',
+          })
+        );
+        return json(500, { message: 'No pudimos generar la ayuda', code: 'LESSON_HELP_FAILED' });
+      }
     }
 
     if (method === "GET" && path === `${ROUTE_PREFIX}/friends`) {
@@ -2190,7 +2241,9 @@ Rules:
 - Mark malformed questions as errors. Example: "the dish is spicy?" should be partial; the natural correction is "Is the dish spicy?"
 - Mark indirect question word order errors. Example: "I don't know what is the star dish?" should be partial.
 - Link errors only to actual grammar/usage issues in the last message (max 3).
-- Provide up to 2 natural English alternatives only if the message has real grammar or naturalness issues. If the message is already correct, leave "alternatives" as an empty array.
+- Always provide 1-2 natural English alternatives in "alternatives", even when the message is correct.
+- If the latest message has errors, make the alternatives corrected, natural versions of the same idea.
+- If the latest message is already correct, make the alternatives optional natural variants or slightly richer native-sounding versions with the same meaning. Do not present them as errors.
 - Do not include any extra keys or commentary.
 
 Language evaluation rubric (for the last message only):
