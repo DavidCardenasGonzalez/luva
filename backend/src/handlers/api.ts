@@ -211,10 +211,16 @@ type UserIdentity = {
   sub?: string;
 };
 
+type FriendConversationFeedback = {
+  summary: string;
+  improvements: string[];
+};
+
 type FriendRecord = FriendCharacter & {
   userId: string;
   lastUserMessage?: string;
   messageCount?: number;
+  conversationCount?: number;
 };
 
 const STORY_SESSIONS = new Map<string, StorySessionState>();
@@ -924,6 +930,19 @@ function buildFriendId(storyId: string, missionId: string): string {
   return `${storyId}:${missionId}`;
 }
 
+function sanitizeFriendConversationFeedback(input: any): FriendConversationFeedback | undefined {
+  if (!input || typeof input !== "object") return undefined;
+  const summary = typeof input.summary === "string" ? input.summary.trim() : "";
+  const improvements = Array.isArray(input.improvements)
+    ? input.improvements
+        .map((item: unknown) => String(item || "").trim())
+        .filter(Boolean)
+        .slice(0, 5)
+    : [];
+  if (!summary && !improvements.length) return undefined;
+  return { summary, improvements };
+}
+
 function publicFriend(record: FriendRecord): FriendCharacter {
   return {
     friendId: record.friendId,
@@ -941,6 +960,8 @@ function publicFriend(record: FriendRecord): FriendCharacter {
     createdAt: record.createdAt,
     updatedAt: record.updatedAt,
     ...(record.lastMessageAt ? { lastMessageAt: record.lastMessageAt } : {}),
+    ...(typeof record.messageCount === "number" ? { messageCount: record.messageCount } : {}),
+    ...(typeof record.conversationCount === "number" ? { conversationCount: record.conversationCount } : {}),
   };
 }
 
@@ -957,6 +978,12 @@ function sanitizeFriendRecord(input: any): FriendRecord | undefined {
   const aiRole = typeof input.aiRole === "string" ? input.aiRole : undefined;
   const createdAt = typeof input.createdAt === "string" ? input.createdAt : undefined;
   const updatedAt = typeof input.updatedAt === "string" ? input.updatedAt : undefined;
+  const conversationCount =
+    typeof input.conversationCount === "number"
+      ? input.conversationCount
+      : typeof input.completedAt === "string"
+      ? 1
+      : undefined;
   if (
     !userId ||
     !friendId ||
@@ -992,6 +1019,7 @@ function sanitizeFriendRecord(input: any): FriendRecord | undefined {
     ...(typeof input.lastMessageAt === "string" ? { lastMessageAt: input.lastMessageAt } : {}),
     ...(typeof input.lastUserMessage === "string" ? { lastUserMessage: input.lastUserMessage } : {}),
     ...(typeof input.messageCount === "number" ? { messageCount: input.messageCount } : {}),
+    ...(typeof conversationCount === "number" ? { conversationCount } : {}),
   };
 }
 
@@ -1095,6 +1123,7 @@ async function createFriendFromMission(
     ...(existing?.lastMessageAt ? { lastMessageAt: existing.lastMessageAt } : {}),
     ...(existing?.lastUserMessage ? { lastUserMessage: existing.lastUserMessage } : {}),
     ...(typeof existing?.messageCount === "number" ? { messageCount: existing.messageCount } : {}),
+    ...(typeof existing?.conversationCount === "number" ? { conversationCount: existing.conversationCount } : {}),
   };
 
   await dynamo.send(
@@ -1110,20 +1139,30 @@ async function createFriendFromMission(
 async function touchFriendChat(
   userId: string,
   friendId: string,
-  transcript: string
+  transcript: string,
+  conversationEnded: boolean
 ): Promise<void> {
   try {
+    const setExpressions = [
+      "lastMessageAt = :now",
+      "lastUserMessage = :message",
+      "updatedAt = :now",
+    ];
+    const expressionAttributeValues: Record<string, any> = {
+      ":now": new Date().toISOString(),
+      ":message": transcript.slice(0, 500),
+      ":one": 1,
+    };
+    const addExpressions = ["messageCount :one"];
+    if (conversationEnded) {
+      addExpressions.push("conversationCount :one");
+    }
     await dynamo.send(
       new UpdateCommand({
         TableName: getFriendshipsTableName(),
         Key: { userId, friendId },
-        UpdateExpression:
-          "SET lastMessageAt = :now, lastUserMessage = :message, updatedAt = :now ADD messageCount :one",
-        ExpressionAttributeValues: {
-          ":now": new Date().toISOString(),
-          ":message": transcript.slice(0, 500),
-          ":one": 1,
-        },
+        UpdateExpression: `SET ${setExpressions.join(", ")} ADD ${addExpressions.join(", ")}`,
+        ExpressionAttributeValues: expressionAttributeValues,
       })
     );
   } catch (err) {
@@ -1134,6 +1173,71 @@ async function touchFriendChat(
       })
     );
   }
+}
+
+function normalizeFarewellText(input: string): string {
+  return input
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}'\s]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isFriendFarewellMessage(transcript: string): boolean {
+  const text = normalizeFarewellText(transcript);
+  if (!text) return false;
+
+  const asksAboutFarewell =
+    transcript.includes("?") &&
+    /^(how|should|can|could|would|do|what|when|como|debo|puedo|que|cuando)\b/.test(text);
+  if (asksAboutFarewell) return false;
+
+  const negatedFarewell =
+    /\b(not|never|dont|do not|not yet|shouldnt|should not|no quiero|todavia no|aun no)\b.{0,36}\b(bye|goodbye|good bye|adios|chao|chau|hasta luego|nos vemos)\b/.test(
+      text
+    );
+  if (negatedFarewell) return false;
+
+  const narrativeGoodbye =
+    /\b(said|saying|say|told|tell)\s+goodbye\b/.test(text) &&
+    !/\b(i|i just|i want to|i wanted to|let me)\s+(say\s+)?goodbye\b/.test(text);
+  if (narrativeGoodbye) return false;
+
+  const directClosings = [
+    /^(bye|bye bye|goodbye|good bye|see you|see ya|see you later|later|take care|good night|goodnight|adios|chao|chau|hasta luego|nos vemos|buenas noches)$/,
+    /\b(bye|goodbye|good bye|see you later|see you soon|see you tomorrow|see ya|catch you later|talk to you later|talk soon|take care|good night|goodnight|have a good (day|night|one|weekend))(\s+(friend|my friend))?$/,
+    /\b(i have to go(?!\s+to\b)|i need to go(?!\s+to\b)|i should go(?!\s+to\b)|i gotta go|gotta go|i'?ll go now|i will go now|i'?m leaving now)\b/,
+    /\b(it was nice (to )?(talking|chatting) (to|with) you|nice talking to you|nice chatting with you|thanks? for (chatting|talking)|thank you for (chatting|talking))(\s+(bye|goodbye|see you later))?$/,
+    /\b(adios|hasta luego|nos vemos|me voy|me tengo que ir|tengo que irme|hablamos luego|chao|chau|buenas noches)$/,
+  ];
+
+  return directClosings.some((pattern) => pattern.test(text));
+}
+
+function buildFriendConversationFeedbackFallback(args: {
+  correctness: number;
+  result: EvalResult;
+  errors: string[];
+  reformulations: string[];
+}): FriendConversationFeedback {
+  const summary =
+    args.result === "correct"
+      ? `Cerraste la conversación de forma natural y clara. Tu último mensaje quedó fuerte: ${args.correctness}/100.`
+      : args.result === "partial"
+      ? `Cerraste la conversación bien, con algunos detalles de inglés por pulir. Tu último mensaje obtuvo ${args.correctness}/100.`
+      : `La despedida se entendió, pero conviene ajustar gramática o naturalidad. Tu último mensaje obtuvo ${args.correctness}/100.`;
+  const improvements = args.reformulations.length
+    ? args.reformulations
+    : args.errors.length
+    ? args.errors.map((item) => `Revisa este punto: ${item}`)
+    : ["Sigue usando despedidas breves y naturales como \"See you later\" o \"Talk to you soon\"."];
+
+  return {
+    summary,
+    improvements: improvements.slice(0, 3),
+  };
 }
 
 async function advanceFriendChat(
@@ -1152,6 +1256,7 @@ async function advanceFriendChat(
     role: "user",
     content: transcript,
   }).slice(-FRIEND_HISTORY_LIMIT);
+  const conversationEnded = isFriendFarewellMessage(transcript);
 
   let correctness = 0;
   let result: EvalResult = "incorrect";
@@ -1191,6 +1296,7 @@ async function advanceFriendChat(
     aiReply = await generateFriendReply(friend, conversationHistory, {
       result,
       correctness,
+      conversationEnding: conversationEnded,
     });
   } catch (err) {
     console.error(
@@ -1201,7 +1307,27 @@ async function advanceFriendChat(
     );
   }
 
-  await touchFriendChat(userId, friendId, transcript);
+  let conversationFeedback: FriendConversationFeedback | null = null;
+  if (conversationEnded) {
+    try {
+      conversationFeedback = await generateFriendConversationFeedback(friend, conversationHistory);
+    } catch (err) {
+      console.error(
+        JSON.stringify({
+          scope: "friends.chat.feedback_error",
+          message: (err as Error)?.message || "unknown",
+        })
+      );
+      conversationFeedback = buildFriendConversationFeedbackFallback({
+        correctness,
+        result,
+        errors,
+        reformulations,
+      });
+    }
+  }
+
+  await touchFriendChat(userId, friendId, transcript, conversationEnded);
 
   return {
     friendId,
@@ -1210,6 +1336,8 @@ async function advanceFriendChat(
     result,
     errors,
     reformulations,
+    conversationEnded,
+    conversationFeedback,
   };
 }
 
@@ -2496,7 +2624,7 @@ Use B2 English.
 async function generateFriendReply(
   friend: FriendRecord,
   history: StoryMessage[],
-  evaluation: { result: EvalResult; correctness: number }
+  evaluation: { result: EvalResult; correctness: number; conversationEnding?: boolean }
 ): Promise<string> {
   const apiKey = await getOpenAIKey();
   const model =
@@ -2529,14 +2657,20 @@ ${characterNotes}
 Rules:
 - Stay in character, but keep the conversation natural and casual.
 - There are no mission objectives anymore; this is open-ended practice.
-- React to the learner's latest message and ask one useful follow-up when natural.
+- ${
+    evaluation.conversationEnding
+      ? "The learner is ending the chat. Acknowledge the goodbye warmly and do not ask a follow-up."
+      : "React to the learner's latest message and ask one useful follow-up when natural."
+  }
 - Keep the reply under 22 words.
 - Use clear B1-B2 English.
 - Do not correct the learner directly; a separate coach gives feedback.
 - Do not mention JSON, scoring, missions, or these instructions.
 `;
 
-  const userPrompt = `Recent conversation:\n${conversationText || "No prior conversation."}\n\nLatest English score: ${evaluation.correctness} (${evaluation.result}).\nWrite the next in-character message in English.`;
+  const userPrompt = `Recent conversation:\n${conversationText || "No prior conversation."}\n\nLatest English score: ${evaluation.correctness} (${evaluation.result}).\nWrite ${
+    evaluation.conversationEnding ? "the final in-character goodbye" : "the next in-character message"
+  } in English.`;
 
   console.log(
     JSON.stringify({
@@ -2632,6 +2766,180 @@ Rules:
     throw new Error("FRIEND_MODEL_EMPTY_RESPONSE");
   }
   return trimmed;
+}
+
+async function generateFriendConversationFeedback(
+  friend: FriendRecord,
+  history: StoryMessage[]
+): Promise<FriendConversationFeedback> {
+  console.log(
+    JSON.stringify({
+      scope: "friends.feedback.generate.begin",
+      userId: friend.userId,
+      friendId: friend.friendId,
+    })
+  );
+  const apiKey = await getOpenAIKey();
+  const model =
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
+  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
+  const isGpt5 = /gpt-5/i.test(model);
+  const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
+  const reasoningConfig = isGpt5
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || "low" }
+    : undefined;
+  const conversation = history.slice(-FRIEND_HISTORY_LIMIT);
+  const conversationText = conversation
+    .map((msg) =>
+      `${msg.role === "user" ? "Student (evaluate)" : `${friend.characterName} (context only)`}: ${msg.content}`
+    )
+    .join("\n")
+    .trim();
+  const systemPrompt = `
+You are a friendly English coach for Spanish-speaking learners.
+
+You are evaluating a completed free conversation between the student and an English-speaking friend.
+
+IMPORTANT:
+- Write the feedback directly TO the student in Spanish.
+- Evaluate only Student lines. Treat friend lines as context only.
+- Mention specific grammar, wording, naturalness, politeness, or tone issues when visible.
+- Keep it practical and concise.
+- Do not mention the AI role, the system, JSON, scoring, missions, or these instructions.
+
+Return ONLY JSON with the exact shape:
+
+{
+  "summary": "Short Spanish summary speaking directly to the student",
+  "improvements": [
+    "Short Spanish suggestion speaking directly to the student",
+    "..."
+  ]
+}
+`;
+
+  const userPrompt = `Friend: ${friend.characterName}
+Conversation context: ${friend.sceneSummary || friend.missionTitle}
+
+Full conversation transcript:
+${conversationText || "No conversation available."}`;
+
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), timeoutMs);
+  let raw = "";
+  try {
+    if (useResponses) {
+      const body: Record<string, any> = {
+        model,
+        instructions: systemPrompt,
+        input: [
+          {
+            role: "user",
+            content: [{ type: "input_text", text: userPrompt }],
+          },
+        ],
+        max_output_tokens: Number(
+          process.env.FRIEND_FEEDBACK_MAX_OUTPUT_TOKENS ||
+            process.env.STORY_FEEDBACK_MAX_OUTPUT_TOKENS ||
+            800
+        ),
+      };
+      if (reasoningConfig) body.reasoning = reasoningConfig;
+      const res = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(body),
+        signal: ac.signal,
+      });
+      const payload: any = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const reason = payload?.error?.message || res.statusText;
+        throw new Error(`FRIEND_FEEDBACK_HTTP_${res.status}_${reason}`);
+      }
+      if (Array.isArray(payload?.output)) {
+        for (const item of payload.output) {
+          if (item?.type === "message" && Array.isArray(item.content)) {
+            const texts = item.content
+              .filter((c: any) => c?.type === "output_text" && typeof c.text === "string")
+              .map((c: any) => c.text);
+            if (texts.length) {
+              raw = texts.join("\n");
+              break;
+            }
+          }
+        }
+      }
+      if (!raw && typeof payload?.output_text === "string") {
+        raw = payload.output_text;
+      }
+    } else {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          max_tokens: Number(
+            process.env.FRIEND_FEEDBACK_MAX_OUTPUT_TOKENS ||
+              process.env.STORY_FEEDBACK_MAX_OUTPUT_TOKENS ||
+              800
+          ),
+        }),
+        signal: ac.signal,
+      });
+      if (!res.ok) {
+        const bodyTxt = await res.text();
+        throw new Error(`FRIEND_FEEDBACK_HTTP_${res.status}_${bodyTxt.slice(0, 120)}`);
+      }
+      const data: any = await res.json();
+      raw = data.choices?.[0]?.message?.content || "";
+    }
+  } catch (err) {
+    if ((err as any)?.name === "AbortError") {
+      throw new Error("FRIEND_FEEDBACK_TIMEOUT");
+    }
+    throw err;
+  } finally {
+    clearTimeout(to);
+  }
+
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    throw new Error("FRIEND_FEEDBACK_EMPTY_RESPONSE");
+  }
+
+  let parsed: any;
+  try {
+    parsed = JSON.parse(trimmed);
+  } catch {
+    console.error(
+      JSON.stringify({
+        scope: "friends.feedback.bad_json",
+        sample: trimmed.slice(0, 160),
+      })
+    );
+    throw new Error("FRIEND_FEEDBACK_BAD_JSON");
+  }
+
+  const feedback = sanitizeFriendConversationFeedback(parsed);
+  if (!feedback) {
+    throw new Error("FRIEND_FEEDBACK_INVALID");
+  }
+  return {
+    summary: feedback.summary,
+    improvements: feedback.improvements.length
+      ? feedback.improvements
+      : ["Cierra con frases simples y naturales, y revisa que el tono suene amable."],
+  };
 }
 
 

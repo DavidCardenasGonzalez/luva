@@ -47,6 +47,8 @@ function FriendCard({
   }, [friend.avatarImageUrl, friend.missionId]);
   const initial = (friend.characterName.trim().charAt(0) || '?').toUpperCase();
   const lastActivity = friend.lastMessageAt || friend.updatedAt;
+  const conversationCount = friend.conversationCount ?? 0;
+  const messageCount = friend.messageCount ?? 0;
 
   return (
     <View
@@ -99,6 +101,37 @@ function FriendCard({
           {friend.sceneSummary}
         </Text>
       ) : null}
+
+      <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
+        <View
+          style={{
+            flex: 1,
+            paddingVertical: 10,
+            paddingHorizontal: 12,
+            borderRadius: 12,
+            backgroundColor: '#0b172b',
+            borderWidth: 1,
+            borderColor: COLORS.border,
+          }}
+        >
+          <Text style={{ color: COLORS.text, fontWeight: '900', fontSize: 18 }}>{conversationCount}</Text>
+          <Text style={{ color: COLORS.muted, marginTop: 2, fontSize: 12 }}>Conversaciones</Text>
+        </View>
+        <View
+          style={{
+            flex: 1,
+            paddingVertical: 10,
+            paddingHorizontal: 12,
+            borderRadius: 12,
+            backgroundColor: '#0b172b',
+            borderWidth: 1,
+            borderColor: COLORS.border,
+          }}
+        >
+          <Text style={{ color: COLORS.text, fontWeight: '900', fontSize: 18 }}>{messageCount}</Text>
+          <Text style={{ color: COLORS.muted, marginTop: 2, fontSize: 12 }}>Mensajes</Text>
+        </View>
+      </View>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 14 }}>
         <View style={{ flex: 1, minWidth: 0 }}>

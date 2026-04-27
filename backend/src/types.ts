@@ -143,6 +143,8 @@ export interface FriendCharacter {
   createdAt: string;
   updatedAt: string;
   lastMessageAt?: string;
+  messageCount?: number;
+  conversationCount?: number;
 }
 
 export interface CreateFriendRequest {
@@ -170,6 +172,11 @@ export interface FriendChatPayload {
   result: EvalResult;
   errors: string[];
   reformulations: string[];
+  conversationEnded: boolean;
+  conversationFeedback?: {
+    summary: string;
+    improvements: string[];
+  } | null;
 }
 
 export interface TranslationRequest {

@@ -19,6 +19,13 @@ export type FriendCharacter = {
   createdAt: string;
   updatedAt: string;
   lastMessageAt?: string;
+  messageCount?: number;
+  conversationCount?: number;
+};
+
+export type FriendConversationFeedback = {
+  summary: string;
+  improvements: string[];
 };
 
 export type AddFriendPayload = {
@@ -36,6 +43,8 @@ export type FriendChatPayload = {
   result: 'correct' | 'partial' | 'incorrect';
   errors: string[];
   reformulations: string[];
+  conversationEnded: boolean;
+  conversationFeedback?: FriendConversationFeedback | null;
 };
 
 type FriendsListResponse = {

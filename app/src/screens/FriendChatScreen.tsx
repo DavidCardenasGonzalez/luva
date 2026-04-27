@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   AppState,
   Image,
   KeyboardAvoidingView,
@@ -8,8 +9,10 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +20,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
 import { Audio } from 'expo-av';
+import ConfettiCannon from 'react-native-confetti-cannon';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import StoryMessageComposer, { StoryFlowState } from '../components/StoryMessageComposer';
 import AccountProgressCard from '../components/AccountProgressCard';
@@ -24,7 +28,12 @@ import { useAuth } from '../auth/AuthProvider';
 import { api } from '../api/api';
 import useAudioRecorder from '../shared/useAudioRecorder';
 import useUploadToS3 from '../shared/useUploadToS3';
-import { FriendChatPayload, sendFriendChatMessage, useFriends } from '../hooks/useFriends';
+import {
+  FriendChatPayload,
+  FriendConversationFeedback,
+  sendFriendChatMessage,
+  useFriends,
+} from '../hooks/useFriends';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FriendChat'>;
@@ -103,8 +112,57 @@ function AnalysisCard({ analysis }: { analysis: FriendChatPayload }) {
   );
 }
 
+function CompletionCard({
+  feedback,
+  friendName,
+}: {
+  feedback: FriendConversationFeedback | null;
+  friendName: string;
+}) {
+  return (
+    <View
+      style={{
+        marginTop: 16,
+        padding: 16,
+        backgroundColor: '#f0fdf4',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#bbf7d0',
+      }}
+    >
+      <Text style={{ fontWeight: '800', color: '#15803d' }}>Conversación terminada</Text>
+      <Text style={{ marginTop: 6, color: '#166534', lineHeight: 20 }}>
+        Te despediste de {friendName}. Esta práctica quedó marcada como terminada.
+      </Text>
+      {feedback ? (
+        <View style={{ marginTop: 12 }}>
+          <Text style={{ fontWeight: '700', color: '#14532d' }}>Feedback general</Text>
+          {feedback.summary ? (
+            <Text style={{ marginTop: 6, color: '#166534', lineHeight: 20 }}>{feedback.summary}</Text>
+          ) : null}
+          {feedback.improvements.length ? (
+            <View style={{ marginTop: 8 }}>
+              <Text style={{ fontWeight: '700', color: '#166534', marginBottom: 4 }}>Puntos a mejorar</Text>
+              {feedback.improvements.map((item, index) => (
+                <Text key={`${item}-${index}`} style={{ color: '#166534', marginBottom: 2, lineHeight: 20 }}>
+                  - {item}
+                </Text>
+              ))}
+            </View>
+          ) : null}
+        </View>
+      ) : (
+        <Text style={{ marginTop: 10, color: '#166534' }}>
+          El feedback general aparecerá aquí cuando esté disponible.
+        </Text>
+      )}
+    </View>
+  );
+}
+
 export default function FriendChatScreen({ navigation, route }: Props) {
   const friendId = route.params?.friendId;
+  const { width: windowWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const { isSignedIn } = useAuth();
   const { friends, loading, loaded, error, reload } = useFriends();
@@ -115,6 +173,9 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messageTranslations, setMessageTranslations] = useState<Record<string, MessageTranslationState>>({});
   const [analysis, setAnalysis] = useState<FriendChatPayload | null>(null);
+  const [conversationEnded, setConversationEnded] = useState(false);
+  const [conversationFeedback, setConversationFeedback] = useState<FriendConversationFeedback | null>(null);
+  const [completionConfettiKey, setCompletionConfettiKey] = useState<number | null>(null);
   const [flowState, setFlowState] = useState<StoryFlowState>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showAssistanceModal, setShowAssistanceModal] = useState(false);
@@ -128,6 +189,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const scrollRef = useRef<ScrollView>(null);
   const isStartingRecording = useRef(false);
   const stopRequestedWhileStarting = useRef(false);
+  const skipExitPromptRef = useRef(false);
 
   const avatarSource = useMemo(() => {
     if (!friend) return undefined;
@@ -136,6 +198,10 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       : getChatAvatar(friend.missionId);
   }, [friend]);
   const avatarInitial = (friend?.characterName.trim().charAt(0) || '?').toUpperCase();
+  const hasStartedConversation = useMemo(
+    () => messages.some((message) => message.role === 'user'),
+    [messages]
+  );
 
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
@@ -148,6 +214,17 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   }, [friendId, reload]);
 
   useEffect(() => {
+    skipExitPromptRef.current = false;
+    setMessages([]);
+    setMessageTranslations({});
+    setAnalysis(null);
+    setConversationEnded(false);
+    setConversationFeedback(null);
+    setCompletionConfettiKey(null);
+    setErrorMessage(null);
+  }, [friendId]);
+
+  useEffect(() => {
     if (messages.length > 0) {
       scrollRef.current?.scrollToEnd({ animated: true });
     }
@@ -158,6 +235,30 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       Speech.stop();
     };
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (event: any) => {
+      if (skipExitPromptRef.current) return;
+      if (!hasStartedConversation || conversationEnded) return;
+      event.preventDefault();
+      Alert.alert(
+        'Despídete de tu amigo',
+        `Envía una despedida a ${friend?.characterName || 'tu amigo'} para cerrar la conversación y ver tu feedback final.`,
+        [
+          { text: 'Seguir hablando', style: 'cancel' },
+          {
+            text: 'Salir sin feedback',
+            style: 'destructive',
+            onPress: () => {
+              skipExitPromptRef.current = true;
+              navigation.dispatch(event.data.action);
+            },
+          },
+        ]
+      );
+    });
+    return unsubscribe;
+  }, [conversationEnded, friend?.characterName, hasStartedConversation, navigation]);
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (nextState) => {
@@ -190,6 +291,17 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     setAssistanceAnswer('');
     setAssistanceError(null);
     setShowAssistanceModal(true);
+  }, []);
+
+  const handleStartNewConversation = useCallback(() => {
+    skipExitPromptRef.current = false;
+    setMessages([]);
+    setMessageTranslations({});
+    setAnalysis(null);
+    setConversationEnded(false);
+    setConversationFeedback(null);
+    setCompletionConfettiKey(null);
+    setErrorMessage(null);
   }, []);
 
   const handleRequestAssistance = useCallback(async () => {
@@ -315,6 +427,11 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         setFlowState('idle');
         return;
       }
+      if (conversationEnded) {
+        setErrorMessage('Esta conversación ya terminó.');
+        setFlowState('idle');
+        return;
+      }
 
       setErrorMessage(null);
       setFlowState('evaluating');
@@ -344,13 +461,19 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           },
         ]);
         setAnalysis(payload);
+        if (payload.conversationEnded) {
+          setConversationEnded(true);
+          setConversationFeedback(payload.conversationFeedback ?? null);
+          setCompletionConfettiKey(Date.now());
+          void reload();
+        }
       } catch (err: any) {
         setErrorMessage(err?.message || 'No pudimos continuar la conversación.');
       } finally {
         setFlowState('idle');
       }
     },
-    [friendId, messages]
+    [conversationEnded, friendId, messages, reload]
   );
 
   const handleSendText = useCallback(
@@ -499,6 +622,26 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={{ flex: 1 }}>
+        {completionConfettiKey !== null ? (
+          <View pointerEvents="none" style={[StyleSheet.absoluteFillObject, { zIndex: 20 }]}>
+            <ConfettiCannon
+              key={completionConfettiKey}
+              count={140}
+              origin={{
+                x: windowWidth / 2,
+                y: insets.top + 72,
+              }}
+              fadeOut
+              fallSpeed={2800}
+              explosionSpeed={420}
+              onAnimationEnd={() => {
+                setCompletionConfettiKey((current) =>
+                  current === completionConfettiKey ? null : current
+                );
+              }}
+            />
+          </View>
+        ) : null}
         <View style={{ backgroundColor: COLORS.header, paddingTop: insets.top + 8, paddingBottom: 12, paddingHorizontal: 16 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Pressable
@@ -527,7 +670,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                 {friend.characterName}
               </Text>
               <Text style={{ fontSize: 12, color: '#e2e8f0' }} numberOfLines={1}>
-                Conversación libre
+                {conversationEnded ? 'Conversación terminada' : 'Conversación libre'}
               </Text>
             </View>
             <Pressable
@@ -560,7 +703,9 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           <View style={{ padding: 14, borderRadius: 12, backgroundColor: 'white', borderWidth: 1, borderColor: COLORS.border }}>
             <Text style={{ fontWeight: '800', color: '#1e293b' }}>{friend.missionTitle}</Text>
             <Text style={{ color: COLORS.muted, marginTop: 6, lineHeight: 20 }}>
-              Ahora puedes practicar sin requisitos. Mantén la conversación en inglés y revisa el feedback después de cada mensaje.
+              {conversationEnded
+                ? 'Esta práctica ya terminó. Puedes revisar la conversación y el feedback final.'
+                : 'Ahora puedes practicar sin requisitos. Mantén la conversación en inglés y revisa el feedback después de cada mensaje.'}
             </Text>
           </View>
 
@@ -569,7 +714,9 @@ export default function FriendChatScreen({ navigation, route }: Props) {
             {messages.length === 0 ? (
               <View style={{ padding: 16, borderRadius: 12, backgroundColor: 'white', borderWidth: 1, borderColor: COLORS.border }}>
                 <Text style={{ color: COLORS.muted }}>
-                  Escríbele o graba tu primer mensaje para empezar una práctica libre.
+                  {conversationEnded
+                    ? 'Esta conversación ya fue marcada como terminada.'
+                    : 'Escríbele o graba tu primer mensaje para empezar una práctica libre.'}
                 </Text>
               </View>
             ) : (
@@ -659,6 +806,9 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           </View>
 
           {analysis ? <AnalysisCard analysis={analysis} /> : null}
+          {conversationEnded ? (
+            <CompletionCard feedback={conversationFeedback} friendName={friend.characterName} />
+          ) : null}
         </ScrollView>
 
         {errorMessage ? (
@@ -667,15 +817,45 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           </View>
         ) : null}
 
-        <StoryMessageComposer
-          flowState={flowState}
-          retryBlocked={false}
-          recordBlocked={false}
-          statusLabel={statusLabel}
-          onSendText={handleSendText}
-          onRecordPressIn={handleRecordPressIn}
-          onRecordRelease={handleRecordRelease}
-        />
+        {conversationEnded ? (
+          <View
+            style={{
+              paddingHorizontal: 16,
+              paddingTop: 12,
+              paddingBottom: Math.max(insets.bottom, 8),
+              backgroundColor: '#f8fafc',
+              borderTopWidth: 1,
+              borderTopColor: COLORS.border,
+            }}
+          >
+            <Text style={{ color: '#15803d', fontWeight: '800' }}>Conversación terminada</Text>
+            <Text style={{ color: COLORS.muted, marginTop: 4 }}>
+              El chat quedó cerrado después de tu despedida. Puedes empezar otra conversación cuando quieras.
+            </Text>
+            <Pressable
+              onPress={handleStartNewConversation}
+              style={({ pressed }) => ({
+                marginTop: 10,
+                paddingVertical: 11,
+                borderRadius: 999,
+                alignItems: 'center',
+                backgroundColor: pressed ? '#047857' : '#10b981',
+              })}
+            >
+              <Text style={{ color: 'white', fontWeight: '900' }}>Nueva conversación</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <StoryMessageComposer
+            flowState={flowState}
+            retryBlocked={false}
+            recordBlocked={false}
+            statusLabel={statusLabel}
+            onSendText={handleSendText}
+            onRecordPressIn={handleRecordPressIn}
+            onRecordRelease={handleRecordRelease}
+          />
+        )}
 
         <Modal
           visible={showAssistanceModal}
