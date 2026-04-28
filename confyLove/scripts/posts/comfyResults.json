@@ -1,0 +1,26 @@
+{
+  "date_arrogant_millionaire__day0": {
+    "completed": true,
+    "missionId": "date_arrogant_millionaire",
+    "day": 1,
+    "promptId": "353e8c9a-9cfe-47bd-b242-b77d0a05889b",
+    "enrichedPrompt": "Alexander Beaumont III leaning back in a plush velvet armchair at an exclusive rooftop bar during golden hour. He is impeccably dressed in a dark charcoal, custom-tailored wool suit with peak lapels, paired with a crisp white silk dress shirt and a deep burgundy silk tie. He is holding a crystal glass of champagne in his right hand, while his left hand rests casually on the armrest. His smirk is visible as he looks slightly off-camera, conveying effortless superiority. Soft rim lighting highlights his slicked-back hair and the gleam of his expensive gold watch. Cinematic, high-end fashion photography style, shallow depth of field.",
+    "generatedImages": [
+      "Qwen_Edit_2511_00011_.png"
+    ]
+  },
+  "date_arrogant_millionaire__day1": {
+    "completed": true,
+    "missionId": "date_arrogant_millionaire",
+    "day": 2,
+    "promptId": "61c1274b-3eb5-4678-b8fc-f640a24abc52",
+    "enrichedPrompt": "A candid shot taken from a slight low angle at an art gallery opening. Alexander Beaumont III is standing near a modern sculpture, looking critically at it while maintaining intense eye contact with someone just out of frame. He wears a midnight blue suit jacket made of fine wool, tailored to fit snugly over a crisp white poplin shirt, the sleeves are rolled up precisely to reveal a visible luxury silver cufflink on his wrists. His hands are empty and held naturally at his sides. The atmosphere is dimly lit with spotlights on the art pieces. Film grain effect, sophisticated social setting.",
+    "generatedImages": [
+      "Qwen_Edit_2511_00012_.png"
+    ]
+  },
+  "date_arrogant_millionaire__day2": {
+    "completed": false,
+    "error": "fetch failed"
+  }
+}

@@ -7,8 +7,8 @@ Scenario: [INSERT SCENARIO]
 Output strict JSON:
 {
   "id": "short_id",
-  "title": "hook max 6 words no emojis",
-  "caption": "social media teaser",
+  "title": "hook max 6 words in spanish",
+  "caption": "social media teaser in spanish using natutal hastags for english practicing",
   "promptImage": "cinematic scene with both characters",
   "width": 1664,
   "height": 928,
@@ -25,13 +25,15 @@ Output strict JSON:
 }
 
 Rules:
-- Title: story-related hook, max 6 words.
-- Caption: engaging teaser.
+- Title: story-related hook, max 6 words in spanish.
+- Caption: social media teaser in spanish using natutal hastags for english practicin.
 - Visual: Both characters visible, cinematic, no dialogue.
 - Characters: Two distinct, color clothing.
 - Dialogue: Name (action) and say: "..." or respond: "..."
+- Prompt: start describing the characters, then the narrative
 - Consistency: Same scene/actions across levels.
 - Hook: First line hooks viewer.
 - Levels: B1 70-90 words simple, B2 80-100 natural, Native 90-110 realistic.
+- B1: Add to the prompt the conversation should start in the first second 
 - Escape " as \\" in strings.
 - Output only valid JSON.
