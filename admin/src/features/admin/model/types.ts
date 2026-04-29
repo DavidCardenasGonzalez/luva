@@ -327,6 +327,8 @@ export type AdminQuizQuestion = {
   correctIndex: number
 }
 
+export type AdminLessonAudioStatus = 'pending' | 'processing' | 'ready' | 'failed'
+
 export type AdminLesson = {
   lessonId: string
   title: string
@@ -336,6 +338,12 @@ export type AdminLesson = {
   voiceId?: string
   audioKey?: string
   audioUrl?: string
+  audioStatus?: AdminLessonAudioStatus
+  audioError?: string
+  audioJobId?: string
+  audioRequestedAt?: string
+  audioStartedAt?: string
+  audioCompletedAt?: string
   subtitlesKey?: string
   subtitlesUrl?: string
   translatedSubtitlesKey?: string
@@ -355,6 +363,10 @@ export type AdminLessonsResponse = {
 export type AdminLessonMutationResponse = {
   lesson: AdminLesson
   updatedAt: string
+}
+
+export type AdminLessonAudioGenerationResponse = AdminLessonMutationResponse & {
+  audioJobId: string
 }
 
 export type AdminLessonDeleteResponse = {

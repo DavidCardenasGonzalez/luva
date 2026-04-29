@@ -90,6 +90,8 @@ export type QuizQuestion = {
   correctIndex: number;
 };
 
+export type LessonAudioStatus = 'pending' | 'processing' | 'ready' | 'failed';
+
 export type Lesson = {
   lessonId: string;
   title: string;
@@ -99,6 +101,12 @@ export type Lesson = {
   voiceId?: string;
   audioKey?: string;
   audioUrl?: string;
+  audioStatus?: LessonAudioStatus;
+  audioError?: string;
+  audioJobId?: string;
+  audioRequestedAt?: string;
+  audioStartedAt?: string;
+  audioCompletedAt?: string;
   subtitlesKey?: string;
   subtitlesUrl?: string;
   translatedSubtitlesKey?: string;
@@ -146,6 +154,10 @@ export type LessonHelpResponse = {
 export type LessonMutationResponse = {
   lesson: Lesson;
   updatedAt: string;
+};
+
+export type LessonAudioGenerationResponse = LessonMutationResponse & {
+  audioJobId: string;
 };
 
 export type LessonDeleteResponse = {
@@ -234,6 +246,24 @@ function toLesson(item: unknown): Lesson | undefined {
   const audioKey = asString(r.audioKey)?.trim();
   if (audioKey) { lesson.audioKey = audioKey; lesson.audioUrl = buildAssetUrl(audioKey); }
 
+  const audioStatus = toLessonAudioStatus(r.audioStatus) || (audioKey ? 'ready' : undefined);
+  if (audioStatus) lesson.audioStatus = audioStatus;
+
+  const audioError = asString(r.audioError)?.trim();
+  if (audioError) lesson.audioError = audioError;
+
+  const audioJobId = asString(r.audioJobId)?.trim();
+  if (audioJobId) lesson.audioJobId = audioJobId;
+
+  const audioRequestedAt = asString(r.audioRequestedAt)?.trim();
+  if (audioRequestedAt) lesson.audioRequestedAt = audioRequestedAt;
+
+  const audioStartedAt = asString(r.audioStartedAt)?.trim();
+  if (audioStartedAt) lesson.audioStartedAt = audioStartedAt;
+
+  const audioCompletedAt = asString(r.audioCompletedAt)?.trim();
+  if (audioCompletedAt) lesson.audioCompletedAt = audioCompletedAt;
+
   const subtitlesKey = asString(r.subtitlesKey)?.trim();
   if (subtitlesKey) { lesson.subtitlesKey = subtitlesKey; lesson.subtitlesUrl = buildAssetUrl(subtitlesKey); }
 
@@ -244,6 +274,19 @@ function toLesson(item: unknown): Lesson | undefined {
   if (videoKey) { lesson.videoKey = videoKey; lesson.videoUrl = buildAssetUrl(videoKey); }
 
   return lesson;
+}
+
+function toLessonAudioStatus(value: unknown): LessonAudioStatus | undefined {
+  if (
+    value === 'pending' ||
+    value === 'processing' ||
+    value === 'ready' ||
+    value === 'failed'
+  ) {
+    return value;
+  }
+
+  return undefined;
 }
 
 function toQuizQuestion(item: unknown): QuizQuestion | undefined {
@@ -789,15 +832,166 @@ export function listLessonVoices(): LessonVoicesResponse {
   return { voices: CURATED_VOICES };
 }
 
+export async function startLessonAudioGeneration(input: {
+  lessonId?: unknown;
+  voiceId?: unknown;
+}): Promise<LessonAudioGenerationResponse> {
+  const lessonId = asString(input.lessonId)?.trim();
+  if (!lessonId) throw new Error('INVALID_LESSON_ID');
+
+  const requestedVoiceId = asString(input.voiceId)?.trim();
+  if (!requestedVoiceId) throw new Error('INVALID_LESSON_VOICE');
+
+  const voiceId = resolveGeminiVoiceId(requestedVoiceId);
+  const validVoice = CURATED_VOICES.find((v) => v.id === voiceId);
+  if (!voiceId || !validVoice) throw new Error('INVALID_LESSON_VOICE');
+
+  const lesson = await getLessonRecord(lessonId);
+  if (!lesson) throw new Error('LESSON_NOT_FOUND');
+  if (!lesson.script) throw new Error('LESSON_SCRIPT_REQUIRED');
+
+  const now = new Date().toISOString();
+  const audioJobId = randomUUID();
+
+  await dynamo.send(
+    new UpdateCommand({
+      TableName: getLessonsTableName(),
+      Key: { lessonId },
+      UpdateExpression:
+        'SET audioStatus = :status, audioJobId = :audioJobId, audioRequestedAt = :now, voiceId = :voiceId, updatedAt = :now REMOVE audioError, audioStartedAt, audioCompletedAt',
+      ExpressionAttributeValues: {
+        ':status': 'pending',
+        ':audioJobId': audioJobId,
+        ':now': now,
+        ':voiceId': voiceId,
+      },
+    }),
+  );
+
+  const updated: Lesson = {
+    ...lesson,
+    voiceId,
+    audioStatus: 'pending',
+    audioJobId,
+    audioRequestedAt: now,
+    updatedAt: now,
+  };
+  delete updated.audioError;
+  delete updated.audioStartedAt;
+  delete updated.audioCompletedAt;
+
+  return { lesson: updated, updatedAt: now, audioJobId };
+}
+
+export async function runLessonAudioGenerationJob(input: {
+  lessonId?: unknown;
+  voiceId?: unknown;
+  audioJobId?: unknown;
+}): Promise<void> {
+  const lessonId = asString(input.lessonId)?.trim();
+  const voiceId = asString(input.voiceId)?.trim();
+  const audioJobId = asString(input.audioJobId)?.trim();
+  if (!lessonId || !voiceId || !audioJobId) {
+    console.error(JSON.stringify({
+      scope: 'admin.lessons.audioJob.invalidPayload',
+      lessonId,
+      voiceId,
+      audioJobId,
+    }));
+    return;
+  }
+
+  const startedAt = new Date().toISOString();
+  try {
+    await dynamo.send(
+      new UpdateCommand({
+        TableName: getLessonsTableName(),
+        Key: { lessonId },
+        UpdateExpression: 'SET audioStatus = :status, audioStartedAt = :now, updatedAt = :now',
+        ConditionExpression: 'audioJobId = :audioJobId',
+        ExpressionAttributeValues: {
+          ':status': 'processing',
+          ':now': startedAt,
+          ':audioJobId': audioJobId,
+        },
+      }),
+    );
+  } catch (error) {
+    console.warn(JSON.stringify({
+      scope: 'admin.lessons.audioJob.skipped',
+      lessonId,
+      audioJobId,
+      message: error instanceof Error ? error.message : String(error),
+    }));
+    return;
+  }
+
+  try {
+    await generateLessonAudio({ lessonId, voiceId, audioJobId });
+  } catch (error) {
+    if (error instanceof Error && error.message === 'LESSON_AUDIO_JOB_SUPERSEDED') {
+      console.warn(JSON.stringify({
+        scope: 'admin.lessons.audioJob.superseded',
+        lessonId,
+        audioJobId,
+      }));
+      return;
+    }
+
+    await markLessonAudioGenerationFailed(lessonId, audioJobId, error);
+  }
+}
+
+export async function markLessonAudioGenerationFailed(
+  lessonId: string,
+  audioJobId: string,
+  error: unknown,
+): Promise<void> {
+  const now = new Date().toISOString();
+  const message = error instanceof Error ? error.message : String(error);
+
+  try {
+    await dynamo.send(
+      new UpdateCommand({
+        TableName: getLessonsTableName(),
+        Key: { lessonId },
+        UpdateExpression: 'SET audioStatus = :status, audioError = :error, audioCompletedAt = :now, updatedAt = :now',
+        ConditionExpression: 'audioJobId = :audioJobId',
+        ExpressionAttributeValues: {
+          ':status': 'failed',
+          ':error': message.slice(0, 500),
+          ':now': now,
+          ':audioJobId': audioJobId,
+        },
+      }),
+    );
+  } catch (updateError) {
+    console.warn(JSON.stringify({
+      scope: 'admin.lessons.audioJob.failMarkSkipped',
+      lessonId,
+      audioJobId,
+      message: updateError instanceof Error ? updateError.message : String(updateError),
+    }));
+  }
+}
+
+async function isCurrentAudioJob(lessonId: string, audioJobId?: string): Promise<boolean> {
+  if (!audioJobId) return true;
+  const lesson = await getLessonRecord(lessonId);
+  return lesson?.audioJobId === audioJobId;
+}
+
 export async function generateLessonAudio(input: {
   lessonId?: unknown;
   voiceId?: unknown;
+  audioJobId?: unknown;
 }): Promise<LessonMutationResponse> {
   const lessonId = asString(input.lessonId)?.trim();
   if (!lessonId) throw new Error('INVALID_LESSON_ID');
 
   const requestedVoiceId = asString(input.voiceId)?.trim();
   if (!requestedVoiceId) throw new Error('INVALID_LESSON_VOICE');
+  const audioJobId = asString(input.audioJobId)?.trim();
 
   const voiceId = resolveGeminiVoiceId(requestedVoiceId);
   const validVoice = CURATED_VOICES.find((v) => v.id === voiceId);
@@ -926,6 +1120,10 @@ export async function generateLessonAudio(input: {
   const audioKey = `lessons/${lessonId}/audio.wav`;
   const bucket = getAssetsBucketName();
 
+  if (!(await isCurrentAudioJob(lessonId, audioJobId))) {
+    throw new Error('LESSON_AUDIO_JOB_SUPERSEDED');
+  }
+
   await s3.send(
     new PutObjectCommand({
       Bucket: bucket,
@@ -948,26 +1146,36 @@ export async function generateLessonAudio(input: {
   }));
 
   const now = new Date().toISOString();
-  await dynamo.send(
-    new UpdateCommand({
-      TableName: getLessonsTableName(),
-      Key: { lessonId },
-      UpdateExpression: 'SET audioKey = :audioKey, voiceId = :voiceId, updatedAt = :now',
-      ExpressionAttributeValues: {
-        ':audioKey': audioKey,
-        ':voiceId': voiceId,
-        ':now': now,
-      },
-    }),
-  );
+  const updateInput: any = {
+    TableName: getLessonsTableName(),
+    Key: { lessonId },
+    UpdateExpression:
+      'SET audioKey = :audioKey, voiceId = :voiceId, audioStatus = :status, audioCompletedAt = :now, updatedAt = :now REMOVE audioError',
+    ExpressionAttributeValues: {
+      ':audioKey': audioKey,
+      ':voiceId': voiceId,
+      ':status': 'ready',
+      ':now': now,
+    },
+  };
+  if (audioJobId) {
+    updateInput.ConditionExpression = 'audioJobId = :audioJobId';
+    updateInput.ExpressionAttributeValues[':audioJobId'] = audioJobId;
+  }
+
+  await dynamo.send(new UpdateCommand(updateInput));
 
   const updated: Lesson = {
     ...lesson,
     voiceId,
     audioKey,
     audioUrl: buildAssetUrl(audioKey),
+    audioStatus: 'ready',
+    ...(audioJobId ? { audioJobId } : {}),
+    audioCompletedAt: now,
     updatedAt: now,
   };
+  delete updated.audioError;
   return { lesson: updated, updatedAt: now };
 }
 

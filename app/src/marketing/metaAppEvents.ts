@@ -53,6 +53,12 @@ type MetaViewedContentEvent = {
   params?: Record<string, string | number | boolean | null | undefined>;
 };
 
+type MetaOnboardingStepEvent = {
+  stepNumber: number;
+  stepId: string;
+  title?: string;
+};
+
 type TrackingStatus =
   | "granted"
   | "denied"
@@ -261,6 +267,30 @@ export async function trackPaywallViewed({
     });
   } catch (err) {
     console.warn("[Meta] No se pudo registrar el paywall", err);
+  }
+}
+
+export async function trackMetaOnboardingStepViewed({
+  stepNumber,
+  stepId,
+  title,
+}: MetaOnboardingStepEvent) {
+  const initialized = await initializeMetaSdk();
+  if (!initialized) {
+    return;
+  }
+
+  try {
+    logViewedContent({
+      contentId: stepId,
+      contentType: "onboarding_step",
+      description: title,
+      params: {
+        step_number: stepNumber,
+      },
+    });
+  } catch (err) {
+    console.warn("[Meta] No se pudo registrar ViewContent de onboarding", err);
   }
 }
 

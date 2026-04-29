@@ -24,6 +24,7 @@ import type {
   AdminVideosResponse,
   AdminUsersResponse,
   AdminLessonsResponse,
+  AdminLessonAudioGenerationResponse,
   AdminLessonMutationResponse,
   AdminLessonDeleteResponse,
   AdminLessonVoicesResponse,
@@ -252,7 +253,7 @@ export function generateLessonQuiz(lessonId: string) {
 }
 
 export function generateLessonAudio(lessonId: string, voiceId: string) {
-  return adminApi.post<AdminLessonMutationResponse>(
+  return adminApi.post<AdminLessonAudioGenerationResponse>(
     `/lessons/${encodeURIComponent(lessonId)}/generate-audio`,
     { voiceId },
   )

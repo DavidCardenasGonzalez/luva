@@ -175,6 +175,9 @@ export function AdminLessonsPage() {
                   </div>
 
                   <div className="admin-lesson-row-assets">
+                    {(lesson.audioStatus === 'pending' || lesson.audioStatus === 'processing') && (
+                      <span className="tag">Audio generando</span>
+                    )}
                     {lesson.audioUrl && (
                       <span className="tag">Audio</span>
                     )}

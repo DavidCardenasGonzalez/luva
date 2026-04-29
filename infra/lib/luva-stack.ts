@@ -458,13 +458,26 @@ export class LuvaStack extends Stack {
     });
     usersTable.grantReadWriteData(usersFn);
 
+    const onboardingFnLogGroup = new LogGroup(this, 'OnboardingFnLogs', { retention: RetentionDays.ONE_WEEK });
+    const onboardingFn = new NodejsFunction(this, 'OnboardingFunction', {
+      entry: path.join(__dirname, '../../backend/src/handlers/onboarding.ts'),
+      handler: 'handler',
+      runtime: Runtime.NODEJS_18_X,
+      memorySize: 128,
+      timeout: Duration.seconds(10),
+      logGroup: onboardingFnLogGroup,
+      environment: {
+        STAGE: 'prod',
+      },
+    });
+
     const adminFnLogGroup = new LogGroup(this, 'AdminFnLogs', { retention: RetentionDays.ONE_WEEK });
     const adminFn = new NodejsFunction(this, 'AdminFunction', {
       entry: path.join(__dirname, '../../backend/src/handlers/admin.ts'),
       handler: 'handler',
       runtime: Runtime.NODEJS_18_X,
       memorySize: 256,
-      timeout: Duration.seconds(60),
+      timeout: Duration.minutes(15),
       logGroup: adminFnLogGroup,
       environment: {
         USERS_TABLE_NAME: usersTable.tableName,
@@ -511,6 +524,10 @@ export class LuvaStack extends Stack {
         geminiKeyParam.parameterArn,
         googleTranslateKeyParamArn,
       ],
+    }));
+    adminFn.addToRolePolicy(new PolicyStatement({
+      actions: ['lambda:InvokeFunction'],
+      resources: [`arn:aws:lambda:${this.region}:${this.account}:function:*`],
     }));
 
     const videoPublisherFnLogGroup = new LogGroup(this, 'VideoPublisherFnLogs', {
@@ -573,6 +590,7 @@ export class LuvaStack extends Stack {
     const users = v1.addResource('users');
     const usersMe = users.addResource('me');
     const usersMeProgress = usersMe.addResource('progress');
+    const onboarding = v1.addResource('onboarding');
     const friends = v1.addResource('friends');
     const friendById = friends.addResource('{friendId}');
     const friendProfile = friendById.addResource('profile');
@@ -582,6 +600,7 @@ export class LuvaStack extends Stack {
     const proxy = v1.addResource('{proxy+}');
     const lambdaIntegration = new LambdaIntegration(apiFn);
     const usersLambdaIntegration = new LambdaIntegration(usersFn);
+    const onboardingLambdaIntegration = new LambdaIntegration(onboardingFn);
     const adminLambdaIntegration = new LambdaIntegration(adminFn);
     usersMe.addMethod('GET', usersLambdaIntegration, {
       authorizer: usersAuthorizer,
@@ -599,6 +618,7 @@ export class LuvaStack extends Stack {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
     });
+    onboarding.addMethod('GET', onboardingLambdaIntegration);
     friends.addMethod('GET', lambdaIntegration, {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
@@ -628,7 +648,7 @@ export class LuvaStack extends Stack {
 
     const deployment = new Deployment(this, 'Deployment', { api });
     deployment.addToLogicalId({
-      routeManifestVersion: '2026-04-25-character-posts-v1',
+      routeManifestVersion: '2026-04-27-onboarding-v1',
       routes: {
         apiRoot: ['ANY /v1', 'ANY /v1/{proxy+}'],
         users: [
@@ -636,6 +656,9 @@ export class LuvaStack extends Stack {
           'POST /v1/users/me',
           'GET /v1/users/me/progress',
           'POST /v1/users/me/progress',
+        ],
+        onboarding: [
+          'GET /v1/onboarding',
         ],
         friends: [
           'GET /v1/friends',
@@ -672,6 +695,9 @@ export class LuvaStack extends Stack {
     });
     new CfnOutput(this, 'UsersTableName', {
       value: usersTable.tableName,
+    });
+    new CfnOutput(this, 'OnboardingFunctionName', {
+      value: onboardingFn.functionName,
     });
     new CfnOutput(this, 'GeneratedVideosTableName', {
       value: generatedVideosTable.tableName,

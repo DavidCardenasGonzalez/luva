@@ -34,7 +34,9 @@ import {
   updateLessonScript,
   generateLessonQuiz,
   listLessonVoices,
-  generateLessonAudio,
+  startLessonAudioGeneration,
+  runLessonAudioGenerationJob,
+  markLessonAudioGenerationFailed,
   generateLessonSubtitles,
   translateLessonSubtitles,
   createLessonVideoUpload,
@@ -51,8 +53,17 @@ import {
 import { STORIES_SEED } from '../data/stories-seed';
 
 const ROUTE_PREFIX = '/v1';
+const LESSON_AUDIO_WORKER_SOURCE = 'luva.admin.lessons.audio';
+const lambdaSdkModuleName = ['@aws-sdk', 'client-lambda'].join('/');
+const { InvokeCommand, LambdaClient } = require(lambdaSdkModuleName);
+const lambda = new LambdaClient({});
 
 export const handler = async (event: any): Promise<Result> => {
+  if (event?.source === LESSON_AUDIO_WORKER_SOURCE) {
+    await runLessonAudioGenerationJob(event.detail || event);
+    return json(202, { ok: true });
+  }
+
   const method: string =
     event.httpMethod || event.requestContext?.http?.method || 'GET';
   const rawPath: string =
@@ -576,12 +587,24 @@ export const handler = async (event: any): Promise<Result> => {
 
     const lessonAudioGenerate = path.match(/^\/v1\/admin\/lessons\/([^/]+)\/generate-audio$/);
     if (method === 'POST' && lessonAudioGenerate) {
+      let started: Awaited<ReturnType<typeof startLessonAudioGeneration>> | undefined;
       try {
-        return json(200, await generateLessonAudio({
+        started = await startLessonAudioGeneration({
           lessonId: decodeURIComponent(lessonAudioGenerate[1]),
           ...(parseBody(event.body) || {}),
-        }));
+        });
+
+        await enqueueLessonAudioGeneration({
+          lessonId: started.lesson.lessonId,
+          voiceId: started.lesson.voiceId,
+          audioJobId: started.audioJobId,
+        });
+
+        return json(202, started);
       } catch (error) {
+        if (started) {
+          await markLessonAudioGenerationFailed(started.lesson.lessonId, started.audioJobId, error);
+        }
         const handled = handleLessonError(error);
         if (handled) return handled;
         throw error;
@@ -663,6 +686,29 @@ function json(statusCode: number, body: unknown): Result {
     },
     body: JSON.stringify(body),
   };
+}
+
+async function enqueueLessonAudioGeneration(input: {
+  lessonId: string;
+  voiceId?: string;
+  audioJobId: string;
+}): Promise<void> {
+  const functionName =
+    process.env.ADMIN_FUNCTION_NAME?.trim() ||
+    process.env.AWS_LAMBDA_FUNCTION_NAME?.trim();
+  if (!functionName) throw new Error('ADMIN_FUNCTION_NAME not set');
+  if (!input.voiceId) throw new Error('INVALID_LESSON_VOICE');
+
+  await lambda.send(
+    new InvokeCommand({
+      FunctionName: functionName,
+      InvocationType: 'Event',
+      Payload: Buffer.from(JSON.stringify({
+        source: LESSON_AUDIO_WORKER_SOURCE,
+        detail: input,
+      })),
+    }),
+  );
 }
 
 function normalizeSearch(event: any): string | undefined {
@@ -787,6 +833,7 @@ function handleLessonError(error: unknown): Result | undefined {
     'GEMINI_API_KEY_PARAM not set': 'Configura la clave de Gemini en la lambda admin.',
     'GOOGLE_TTS_API_KEY_PARAM not set': 'Configura la clave de Google TTS en la lambda admin.',
     'GOOGLE_TRANSLATE_API_KEY_PARAM not set': 'Configura la clave de Google Translate en la lambda admin.',
+    'ADMIN_FUNCTION_NAME not set': 'Configura el nombre de la lambda admin para ejecutar trabajos asincronos.',
   };
 
   for (const [msg, hint] of Object.entries(notConfigured)) {

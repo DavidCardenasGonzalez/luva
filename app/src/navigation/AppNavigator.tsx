@@ -1,4 +1,8 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  View,
+} from 'react-native';
 import {
   NavigationContainer,
   DefaultTheme,
@@ -23,8 +27,10 @@ import AuthCallbackScreen from '../screens/AuthCallbackScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import PaywallScreen from '../screens/PaywallScreen';
 import EmailSignUpScreen from '../screens/EmailSignUpScreen';
+import OnboardingScreen from '../onboarding/OnboardingScreen';
 import * as Linking from 'expo-linking';
 import { trackScreenViewed } from '../marketing/mixpanelEvents';
+import { hasCompletedOnboarding } from '../onboarding/model/progress';
 
 export type PaywallSource =
   | 'coin_chip'
@@ -39,6 +45,7 @@ export type PaywallSource =
   | 'story_scene_recording';
 
 export type RootStackParamList = {
+  Onboarding: undefined;
   Home: undefined;
   Deck: undefined;
   Practice: {
@@ -84,6 +91,21 @@ const linking = {
 export default function AppNavigator() {
   const navigationRef = useNavigationContainerRef<RootStackParamList>();
   const routeNameRef = useRef<string | undefined>(undefined);
+  const [initialRouteName, setInitialRouteName] = useState<'Onboarding' | 'Feed'>();
+
+  useEffect(() => {
+    let mounted = true;
+
+    hasCompletedOnboarding().then((completed) => {
+      if (mounted) {
+        setInitialRouteName(completed ? 'Feed' : 'Onboarding');
+      }
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleReady = useCallback(() => {
     const currentRoute = navigationRef.getCurrentRoute();
@@ -110,6 +132,14 @@ export default function AppNavigator() {
     routeNameRef.current = currentRouteName;
   }, [navigationRef]);
 
+  if (!initialRouteName) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#07111f' }}>
+        <ActivityIndicator color="#22d3ee" />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer
       ref={navigationRef}
@@ -118,7 +148,8 @@ export default function AppNavigator() {
       onReady={handleReady}
       onStateChange={handleStateChange}
     >
-      <Stack.Navigator initialRouteName="Feed">
+      <Stack.Navigator initialRouteName={initialRouteName}>
+        <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Deck" component={DeckScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Practice" component={PracticeScreen} options={{ headerShown: false }} />

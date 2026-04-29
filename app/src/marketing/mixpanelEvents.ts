@@ -99,6 +99,12 @@ type MixpanelMissionEvent = {
   requirementsMetCount?: number;
 };
 
+type MixpanelOnboardingStepEvent = {
+  stepNumber: number;
+  stepId: string;
+  title?: string;
+};
+
 type CryptoWithRandomValues = {
   getRandomValues?: <T extends ArrayBufferView | null>(array: T) => T;
 };
@@ -618,6 +624,19 @@ export async function trackMixpanelMissionHelpRequested(
   event: MixpanelMissionEvent
 ) {
   await trackMixpanelEvent("mission_help_requested", getMissionProperties(event));
+}
+
+export async function trackMixpanelOnboardingStepViewed({
+  stepNumber,
+  stepId,
+  title,
+}: MixpanelOnboardingStepEvent) {
+  await trackMixpanelEvent(`onboarding-step-${stepNumber}`, {
+    event_category: "onboarding",
+    step_number: stepNumber,
+    step_id: stepId,
+    title: title?.trim() || undefined,
+  });
 }
 
 export async function flushMixpanelEvents() {

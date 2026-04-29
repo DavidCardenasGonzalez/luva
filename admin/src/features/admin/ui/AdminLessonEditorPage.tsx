@@ -43,6 +43,10 @@ function isDone(lesson: AdminLesson | null, step: Step): boolean {
   )
 }
 
+function isAudioGenerating(lesson: AdminLesson | null): boolean {
+  return lesson?.audioStatus === 'pending' || lesson?.audioStatus === 'processing'
+}
+
 export function AdminLessonEditorPage() {
   const { lessonId } = useParams<{ lessonId: string }>()
   const navigate = useNavigate()
@@ -64,6 +68,8 @@ export function AdminLessonEditorPage() {
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const [uploadingVideo, setUploadingVideo] = useState(false)
   const [videoProgress, setVideoProgress] = useState<number | null>(null)
+  const audioInProgress = isAudioGenerating(lesson)
+  const savedVoiceId = lesson?.voiceId
 
   useEffect(() => {
     if (!lessonId) return
@@ -79,17 +85,44 @@ export function AdminLessonEditorPage() {
   }, [lessonId])
 
   useEffect(() => {
+    if (!lessonId || !audioInProgress) return
+
+    let cancelled = false
+    const interval = window.setInterval(() => {
+      getAdminLessons()
+        .then((res) => {
+          if (cancelled) return
+          const found = res.lessons.find((l) => l.lessonId === lessonId)
+          if (!found) return
+          setLesson(found)
+          if (!scriptDirty) setScriptText(found.script || '')
+          if (found.audioStatus === 'failed') {
+            setStepError(found.audioError
+              ? `No se pudo generar el audio. ${found.audioError}`
+              : 'No se pudo generar el audio. Intenta de nuevo.')
+          }
+        })
+        .catch(() => {})
+    }, 5000)
+
+    return () => {
+      cancelled = true
+      window.clearInterval(interval)
+    }
+  }, [lessonId, audioInProgress, scriptDirty])
+
+  useEffect(() => {
     if (activeStep !== 'audio' || voices.length > 0) return
     getLessonVoices()
       .then((res) => {
         setVoices(res.voices)
         if (res.voices.length > 0) {
-          const savedValid = lesson?.voiceId && res.voices.some((v) => v.id === lesson.voiceId)
-          setSelectedVoice(savedValid ? lesson!.voiceId! : res.voices[0].id)
+          const savedValid = savedVoiceId && res.voices.some((v) => v.id === savedVoiceId)
+          setSelectedVoice(savedValid ? savedVoiceId : res.voices[0].id)
         }
       })
       .catch(() => {})
-  }, [activeStep, voices.length, lesson?.voiceId])
+  }, [activeStep, voices.length, savedVoiceId])
 
   async function run<T>(fn: () => Promise<T>): Promise<T | null> {
     setStepError(null)
@@ -346,7 +379,7 @@ export function AdminLessonEditorPage() {
                     className="admin-lesson-select"
                     value={selectedVoice}
                     onChange={(e) => setSelectedVoice(e.target.value)}
-                    disabled={working || voices.length === 0}
+                    disabled={working || audioInProgress || voices.length === 0}
                   >
                     {voices.length === 0
                       ? <option value="">Cargando voces…</option>
@@ -360,9 +393,26 @@ export function AdminLessonEditorPage() {
                 </div>
 
                 <button className="btn primary" type="button" style={{ marginTop: 16 }}
-                  onClick={handleGenerateAudio} disabled={working || !selectedVoice}>
-                  {working ? 'Generando audio...' : lesson.audioUrl ? 'Regenerar audio' : 'Generar audio'}
+                  onClick={handleGenerateAudio} disabled={working || audioInProgress || !selectedVoice}>
+                  {working
+                    ? 'Iniciando audio...'
+                    : audioInProgress
+                      ? 'Generando audio...'
+                      : lesson.audioUrl ? 'Regenerar audio' : 'Generar audio'}
                 </button>
+                {audioInProgress && (
+                  <p style={{ marginTop: 12, color: 'var(--muted)', lineHeight: 1.5 }}>
+                    El audio se está generando en segundo plano. Esta pantalla se actualizará automáticamente.
+                  </p>
+                )}
+                {lesson.audioStatus === 'failed' && (
+                  <div className="admin-inline-alert admin-inline-alert-compact" style={{ marginTop: 12 }}>
+                    <p>
+                      No se pudo generar el audio.
+                      {lesson.audioError ? ` ${lesson.audioError}` : ' Intenta de nuevo.'}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="admin-user-action-card">
@@ -377,7 +427,9 @@ export function AdminLessonEditorPage() {
                   </div>
                 ) : (
                   <p style={{ marginTop: 14, color: 'var(--muted)' }}>
-                    El audio aparecerá aquí listo para reproducir.
+                    {audioInProgress
+                      ? 'El audio aparecerá aquí cuando termine el proceso.'
+                      : 'El audio aparecerá aquí listo para reproducir.'}
                   </p>
                 )}
               </div>

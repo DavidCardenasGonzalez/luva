@@ -756,6 +756,80 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       }
     }
 
+    if (method === "POST" && path === `${ROUTE_PREFIX}/onboarding/chat`) {
+      const body = parseBody(event.body) as FriendChatRequest | undefined;
+      const transcript = typeof body?.transcript === "string" ? body.transcript.trim() : "";
+      if (!transcript) {
+        return badRequest("Missing transcript");
+      }
+
+      const history = sanitizeHistory(body?.history).slice(-FRIEND_HISTORY_LIMIT);
+      const historyWithUser = appendHistoryEntry(history, {
+        role: "user",
+        content: transcript,
+      }).slice(-FRIEND_HISTORY_LIMIT);
+
+      let correctness = 0;
+      let result: EvalResult = "incorrect";
+      let errors: string[] = [];
+      let reformulations: string[] = [];
+
+      const [englishEval] = await Promise.allSettled([
+        evaluateStoryEnglish(historyWithUser, transcript),
+      ]);
+      if (englishEval.status === "fulfilled") {
+        const v = englishEval.value;
+        correctness = Math.max(0, Math.min(100, Math.round(Number(v.score ?? v.correctness ?? 0))));
+        const rawResult = (v.result || v.status || "").toString().toLowerCase();
+        result =
+          rawResult === "correct" || rawResult === "partial" || rawResult === "incorrect"
+            ? (rawResult as EvalResult)
+            : correctness >= 85
+            ? "correct"
+            : correctness >= 60
+            ? "partial"
+            : "incorrect";
+        errors = v.errors.slice(0, 3).map(String);
+        reformulations = (v.alternatives ?? v.improvements ?? v.suggestions ?? []).slice(0, 2).map(String);
+      }
+
+      const lunaRecord: FriendRecord = {
+        userId: "__onboarding__",
+        friendId: "__onboarding__",
+        storyId: "__onboarding__",
+        missionId: "__onboarding__",
+        sceneIndex: 0,
+        storyTitle: "Onboarding",
+        missionTitle: "Tu primera misión",
+        characterName: "Luna",
+        aiRole:
+          "You are Luna, a warm and enthusiastic 25-year-old AI English companion meeting a new learner for the first time. Your goal is to encourage them to introduce themselves naturally in English.",
+        characterPrompt:
+          "Keep responses short and encouraging. Ask follow-up questions about what they shared. If they mentioned their name, greet them by name. Never correct grammar directly — a separate coach does that.",
+        sceneSummary: "First meeting during onboarding. The learner is introducing themselves in English.",
+        createdAt: "",
+        updatedAt: "",
+      };
+
+      let aiReply = "That's great! Tell me more.";
+      try {
+        aiReply = await generateFriendReply(lunaRecord, historyWithUser, { result, correctness });
+      } catch {
+        // keep fallback
+      }
+
+      return json(200, {
+        friendId: "__onboarding__",
+        aiReply,
+        correctness,
+        result,
+        errors,
+        reformulations,
+        conversationEnded: false,
+        conversationFeedback: null,
+      } satisfies FriendChatPayload);
+    }
+
     if (method === "POST" && path === `${ROUTE_PREFIX}/translate`) {
       const body = parseBody(event.body) as TranslationRequest | undefined;
       const text = typeof body?.text === "string" ? body.text.trim() : "";
