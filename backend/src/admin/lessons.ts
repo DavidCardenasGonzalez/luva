@@ -8,7 +8,7 @@ import {
   ScanCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
-import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
 
@@ -565,9 +565,10 @@ Create a clear, natural video script based on the given topic. The script must:
 - Be in English (the language being learned)
 - Have a warm introduction, clear main content with examples, and a brief conclusion
 - Use natural spoken language suitable for Text-to-Speech
-- Be approximately 300-500 words
+- Be approximately 600-1000 words
 - NOT include stage directions, speaker names, or markdown formatting
 - Be a single flowing narration ready to be read aloud
+- Start with a hook in the first sentence to grab attention
 
 Return ONLY the script text, nothing else.`;
 
@@ -723,13 +724,13 @@ function buildGeminiTtsPrompt(transcript: string): string {
 A clear and authoritative corporate trainer.
 
 # Director's note
-Style: Newscaster. Pace: Staccato. Accent: American (Gen).
+Style: Warm, understanding, soft tone with gentle inflections. Pace: Slow, liquid, zero urgency. Long pauses for breath. Accent: American (Gen).
 
 ## Scene:
-The Corporate Studio.
+Modern learning studio.
 
 ## Sample Context:
-Instructional E-learning. Measured pacing with clear pauses for clarity. Tone is authoritative, accessible, and articulate.
+English learning guidance. Clear pronunciation, moderate speed, natural pauses after examples, encouraging tone, highly understandable for non-native learners.
 
 ## Transcript:
 ${transcript}`;
@@ -1180,40 +1181,59 @@ export async function generateLessonAudio(input: {
 }
 
 // ── Subtitle (SRT) generation ─────────────────────────────────────────────────
-function scriptToSrt(script: string): string {
-  const sentences = script
-    .replace(/\n+/g, ' ')
-    .split(/(?<=[.!?])\s+/)
-    .map((s) => s.trim())
-    .filter(Boolean);
+async function getObjectBuffer(bucket: string, key: string): Promise<Buffer> {
+  const out = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+  const body = out.Body as any;
+  if (!body) return Buffer.alloc(0);
+  if (typeof body.transformToByteArray === 'function') {
+    return Buffer.from(await body.transformToByteArray());
+  }
 
-  const wordsPerSecond = 150 / 60;
-  let timeMs = 0;
-  const blocks: string[] = [];
-
-  sentences.forEach((sentence, index) => {
-    const wordCount = sentence.split(/\s+/).length;
-    const durationMs = Math.max(1500, Math.round((wordCount / wordsPerSecond) * 1000));
-    const startMs = timeMs;
-    const endMs = timeMs + durationMs;
-    blocks.push(`${index + 1}\n${msToSrtTime(startMs)} --> ${msToSrtTime(endMs)}\n${sentence}`);
-    timeMs = endMs + 200;
-  });
-
-  return blocks.join('\n\n');
+  const chunks: Buffer[] = [];
+  for await (const chunk of body) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
 }
 
-function msToSrtTime(ms: number): string {
-  const totalSeconds = Math.floor(ms / 1000);
-  const milliseconds = ms % 1000;
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  return `${pad2(hours)}:${pad2(minutes)}:${pad2(seconds)},${pad3(milliseconds)}`;
+async function getObjectText(bucket: string, key: string): Promise<string> {
+  return (await getObjectBuffer(bucket, key)).toString('utf-8');
 }
 
-function pad2(n: number) { return String(n).padStart(2, '0'); }
-function pad3(n: number) { return String(n).padStart(3, '0'); }
+async function transcribeLessonAudioToSrt(audio: Buffer, filename: string): Promise<string> {
+  const apiKey = await getOpenAiKey();
+  const form = new FormData();
+  const file = new Blob([audio], { type: 'audio/wav' });
+  form.append('file', file as any, filename);
+  form.append('model', 'whisper-1');
+  form.append('response_format', 'srt');
+
+  const t0 = Date.now();
+  const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: form as any,
+  } as any);
+
+  const text = await res.text();
+  if (!res.ok) {
+    console.error(JSON.stringify({
+      scope: 'admin.lessons.whisper.error',
+      status: res.status,
+      body: text.slice(0, 500),
+    }));
+    throw new Error(`OPENAI_TRANSCRIBE_HTTP_${res.status}`);
+  }
+
+  const srt = text.trim();
+  if (!srt) throw new Error('OPENAI_TRANSCRIBE_EMPTY_RESPONSE');
+  console.log(JSON.stringify({
+    scope: 'admin.lessons.whisper.success',
+    ms: Date.now() - t0,
+    srtBytes: Buffer.byteLength(srt, 'utf-8'),
+  }));
+  return srt;
+}
 
 export async function generateLessonSubtitles(input: {
   lessonId?: unknown;
@@ -1223,11 +1243,12 @@ export async function generateLessonSubtitles(input: {
 
   const lesson = await getLessonRecord(lessonId);
   if (!lesson) throw new Error('LESSON_NOT_FOUND');
-  if (!lesson.script) throw new Error('LESSON_SCRIPT_REQUIRED');
+  if (!lesson.audioKey) throw new Error('LESSON_AUDIO_REQUIRED');
 
-  const srtContent = scriptToSrt(lesson.script);
   const subtitlesKey = `lessons/${lessonId}/subtitles_en.srt`;
   const bucket = getAssetsBucketName();
+  const audio = await getObjectBuffer(bucket, lesson.audioKey);
+  const srtContent = await transcribeLessonAudioToSrt(audio, 'audio.wav');
 
   await s3.send(
     new PutObjectCommand({
@@ -1294,9 +1315,7 @@ export async function translateLessonSubtitles(input: {
   if (!lesson) throw new Error('LESSON_NOT_FOUND');
   if (!lesson.subtitlesKey) throw new Error('LESSON_SUBTITLES_REQUIRED');
 
-  // Re-generate SRT content from script (avoid fetching from S3 for simplicity)
-  if (!lesson.script) throw new Error('LESSON_SCRIPT_REQUIRED');
-  const srtContent = scriptToSrt(lesson.script);
+  const srtContent = await getObjectText(getAssetsBucketName(), lesson.subtitlesKey);
   const texts = extractSrtText(srtContent);
 
   const apiKey = await getGoogleTranslateKey();

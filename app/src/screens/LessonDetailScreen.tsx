@@ -318,7 +318,7 @@ export default function LessonDetailScreen({ navigation, route }: Props) {
                   backgroundColor: '#020617',
                   borderWidth: 1,
                   borderColor: COLORS.border,
-                  aspectRatio: 16 / 9,
+                  aspectRatio: 1,
                 }}
               >
                 <Video
