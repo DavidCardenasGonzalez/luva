@@ -1,6 +1,8 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Dimensions,
+  Modal,
   Pressable,
   ScrollView,
   Text,
@@ -9,10 +11,17 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
+import ConfettiCannon from 'react-native-confetti-cannon';
+import { Audio } from 'expo-av';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { LessonQuizQuestion, useLessonDetail } from '../hooks/useLessons';
+import { markLessonLearned } from '../progress/lessonProgress';
+
+const successSound = require('../sound/succes_req.mp3');
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LessonTest'>;
+
+const PASS_THRESHOLD = 3;
 
 const COLORS = {
   background: '#0b1224',
@@ -26,6 +35,21 @@ const COLORS = {
   success: '#22c55e',
   danger: '#ef4444',
 };
+
+function shuffleQuizOptions(questions: LessonQuizQuestion[]): LessonQuizQuestion[] {
+  return questions.map((question) => {
+    const shuffled = question.options
+      .map((option, index) => ({ option, isCorrect: index === question.correctIndex }))
+      .sort(() => Math.random() - 0.5);
+    const correctIndex = shuffled.findIndex((option) => option.isCorrect);
+
+    return {
+      ...question,
+      options: shuffled.map((option) => option.option),
+      correctIndex: correctIndex >= 0 ? correctIndex : question.correctIndex,
+    };
+  });
+}
 
 function QuestionCard({
   question,
@@ -141,8 +165,16 @@ export default function LessonTestScreen({ navigation, route }: Props) {
   const { lessonId } = route.params;
   const { lesson, loading, error } = useLessonDetail(lessonId);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
+  const [shuffleSeed, setShuffleSeed] = useState(0);
+  const [resultVisible, setResultVisible] = useState(false);
+  const confettiRef = useRef<ConfettiCannon>(null);
+  const resultConfettiRef = useRef<ConfettiCannon>(null);
+  const { width: screenWidth } = Dimensions.get('window');
 
-  const questions = lesson?.quiz || [];
+  const questions = useMemo(
+    () => shuffleQuizOptions(lesson?.quiz || []),
+    [lesson?.quiz, shuffleSeed]
+  );
   const answeredCount = Object.keys(selectedAnswers).length;
   const allAnswered = questions.length > 0 && answeredCount === questions.length;
   const score = useMemo(
@@ -152,20 +184,180 @@ export default function LessonTestScreen({ navigation, route }: Props) {
       }, 0),
     [questions, selectedAnswers]
   );
+  const passed = score >= PASS_THRESHOLD;
+
+  useEffect(() => {
+    if (!allAnswered) return;
+    setResultVisible(true);
+    if (passed) {
+      markLessonLearned(lessonId);
+      setTimeout(() => resultConfettiRef.current?.start(), 300);
+    }
+  }, [allAnswered]);
 
   const handleSelectAnswer = useCallback((questionIndex: number, optionIndex: number) => {
-    setSelectedAnswers((current) => ({
-      ...current,
-      [questionIndex]: optionIndex,
-    }));
+    setSelectedAnswers((current) => {
+      if (current[questionIndex] != null) return current;
+      return { ...current, [questionIndex]: optionIndex };
+    });
+    if (
+      questions[questionIndex]?.correctIndex === optionIndex &&
+      selectedAnswers[questionIndex] == null
+    ) {
+      confettiRef.current?.start();
+      Audio.Sound.createAsync(successSound).then(({ sound }) => {
+        sound.playAsync();
+        sound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded && status.didJustFinish) sound.unloadAsync();
+        });
+      });
+    }
+  }, [questions, selectedAnswers]);
+
+  const handleRetry = useCallback(() => {
+    setResultVisible(false);
+    setSelectedAnswers({});
+    setShuffleSeed((current) => current + 1);
   }, []);
 
-  const handleReset = useCallback(() => {
-    setSelectedAnswers({});
-  }, []);
+  const handleGoBack = useCallback(() => {
+    navigation.navigate('LessonDetail', { lessonId });
+  }, [lessonId, navigation]);
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: COLORS.background }}>
+      <ConfettiCannon
+        ref={confettiRef}
+        count={80}
+        origin={{ x: screenWidth / 2, y: -10 }}
+        autoStart={false}
+        fadeOut
+        explosionSpeed={350}
+        fallSpeed={2500}
+        colors={['#22d3ee', '#22c55e', '#a78bfa', '#f59e0b', '#f472b6', '#ffffff']}
+      />
+
+      <Modal
+        visible={resultVisible}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.75)',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 24,
+          }}
+        >
+          {passed && (
+            <ConfettiCannon
+              ref={resultConfettiRef}
+              count={160}
+              origin={{ x: screenWidth / 2, y: -10 }}
+              autoStart={false}
+              fadeOut
+              explosionSpeed={400}
+              fallSpeed={2800}
+              colors={['#22d3ee', '#22c55e', '#a78bfa', '#f59e0b', '#f472b6', '#ffffff']}
+            />
+          )}
+
+          <View
+            style={{
+              width: '100%',
+              backgroundColor: COLORS.surface,
+              borderRadius: 24,
+              borderWidth: 1,
+              borderColor: passed ? 'rgba(34,197,94,0.35)' : 'rgba(239,68,68,0.35)',
+              padding: 28,
+              alignItems: 'center',
+              gap: 16,
+            }}
+          >
+            <View
+              style={{
+                width: 68,
+                height: 68,
+                borderRadius: 999,
+                backgroundColor: passed ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <MaterialIcons
+                name={passed ? 'emoji-events' : 'sentiment-dissatisfied'}
+                size={36}
+                color={passed ? COLORS.success : COLORS.danger}
+              />
+            </View>
+
+            <Text style={{ color: COLORS.text, fontSize: 22, fontWeight: '900', textAlign: 'center' }}>
+              {passed ? 'Lección completada' : `Has obtenido ${score}/${questions.length} preguntas`}
+            </Text>
+
+            {passed ? (
+              <Text style={{ color: COLORS.muted, textAlign: 'center', lineHeight: 20 }}>
+                Has acertado {score} de {questions.length} preguntas. ¡La lección ha sido marcada como aprendida!
+              </Text>
+            ) : (
+              <Text style={{ color: COLORS.muted, textAlign: 'center', lineHeight: 20 }}>
+                ¿Deseas volver a intentar el quiz?
+              </Text>
+            )}
+
+            {passed ? (
+              <Pressable
+                onPress={handleGoBack}
+                style={({ pressed }) => ({
+                  width: '100%',
+                  minHeight: 50,
+                  borderRadius: 999,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: pressed ? '#16a34a' : COLORS.success,
+                })}
+              >
+                <Text style={{ color: 'white', fontWeight: '900', fontSize: 16 }}>Volver a la lección</Text>
+              </Pressable>
+            ) : (
+              <View style={{ width: '100%', gap: 10 }}>
+                <Pressable
+                  onPress={handleRetry}
+                  style={({ pressed }) => ({
+                    width: '100%',
+                    minHeight: 50,
+                    borderRadius: 999,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: pressed ? '#1d4ed8' : COLORS.action,
+                  })}
+                >
+                  <Text style={{ color: 'white', fontWeight: '900', fontSize: 16 }}>Sí, intentarlo de nuevo</Text>
+                </Pressable>
+                <Pressable
+                  onPress={handleGoBack}
+                  style={({ pressed }) => ({
+                    width: '100%',
+                    minHeight: 50,
+                    borderRadius: 999,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: pressed ? COLORS.surfaceAlt : 'transparent',
+                    borderWidth: 1,
+                    borderColor: COLORS.border,
+                  })}
+                >
+                  <Text style={{ color: COLORS.muted, fontWeight: '700', fontSize: 16 }}>No, volver a la lección</Text>
+                </Pressable>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
+
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 36, gap: 16 }} style={{ flex: 1 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <Pressable
@@ -250,30 +442,14 @@ export default function LessonTestScreen({ navigation, route }: Props) {
                   {answeredCount}/{questions.length} respondidas
                 </Text>
                 <Text style={{ color: COLORS.muted, marginTop: 4 }}>
-                  El resultado aparece cuando selecciones todas las respuestas.
+                  Necesitas acertar al menos {PASS_THRESHOLD} para completar la lección.
                 </Text>
               </View>
-              {allAnswered ? (
-                <View
-                  style={{
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
-                    borderRadius: 999,
-                    backgroundColor: 'rgba(34, 197, 94, 0.14)',
-                    borderWidth: 1,
-                    borderColor: 'rgba(34, 197, 94, 0.4)',
-                  }}
-                >
-                  <Text style={{ color: '#bbf7d0', fontWeight: '900' }}>
-                    {score}/{questions.length}
-                  </Text>
-                </View>
-              ) : null}
             </View>
 
             {questions.map((question, index) => (
               <QuestionCard
-                key={`${lesson.lessonId}-${index}`}
+                key={`${lesson.lessonId}-${index}-${shuffleSeed}`}
                 question={question}
                 questionIndex={index}
                 selectedIndex={selectedAnswers[index]}
@@ -283,7 +459,7 @@ export default function LessonTestScreen({ navigation, route }: Props) {
 
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <Pressable
-                onPress={() => navigation.navigate('LessonDetail', { lessonId })}
+                onPress={handleGoBack}
                 style={({ pressed }) => ({
                   flex: 1,
                   minHeight: 48,
@@ -296,7 +472,7 @@ export default function LessonTestScreen({ navigation, route }: Props) {
                 <Text style={{ color: 'white', fontWeight: '900' }}>Volver al video</Text>
               </Pressable>
               <Pressable
-                onPress={handleReset}
+                onPress={handleRetry}
                 style={({ pressed }) => ({
                   minHeight: 48,
                   paddingHorizontal: 16,

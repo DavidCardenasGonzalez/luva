@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ONBOARDING_COMPLETED_KEY = 'luva_onboarding_completed_v1';
-export const ALWAYS_SHOW_ONBOARDING_FOR_TESTS = true;
+export const ALWAYS_SHOW_ONBOARDING_FOR_TESTS = false;
 
 export async function hasCompletedOnboarding(): Promise<boolean> {
   if (ALWAYS_SHOW_ONBOARDING_FOR_TESTS) {

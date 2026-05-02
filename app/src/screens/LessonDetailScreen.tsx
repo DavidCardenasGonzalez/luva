@@ -124,6 +124,13 @@ export default function LessonDetailScreen({ navigation, route }: Props) {
   const { lesson, loading, error } = useLessonDetail(lessonId);
 
   const [positionSeconds, setPositionSeconds] = useState(0);
+  const [durationSeconds, setDurationSeconds] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const controlsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const progressBarWidthRef = useRef(0);
+
   const [subtitleMode, setSubtitleMode] = useState<'en' | 'en_es'>('en');
   const [cues, setCues] = useState<LessonSubtitleCue[]>([]);
   const [subtitlesLoading, setSubtitlesLoading] = useState(false);
@@ -202,7 +209,47 @@ export default function LessonDetailScreen({ navigation, route }: Props) {
   const handlePlaybackStatus = useCallback((status: AVPlaybackStatus) => {
     if (!status.isLoaded) return;
     setPositionSeconds(status.positionMillis / 1000);
+    setIsPlaying(status.isPlaying);
+    if (status.durationMillis != null) setDurationSeconds(status.durationMillis / 1000);
   }, []);
+
+  const scheduleHideControls = useCallback(() => {
+    if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current);
+    controlsTimerRef.current = setTimeout(() => setShowControls(false), 3000);
+  }, []);
+
+  useEffect(() => {
+    if (showControls && isPlaying) scheduleHideControls();
+    else if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current);
+  }, [showControls, isPlaying, scheduleHideControls]);
+
+  useEffect(() => () => { if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current); }, []);
+
+  const handleVideoPress = useCallback(() => {
+    setShowControls((prev) => {
+      if (!prev) scheduleHideControls();
+      return !prev;
+    });
+  }, [scheduleHideControls]);
+
+  const handlePlayPause = useCallback(async () => {
+    if (isPlaying) await videoRef.current?.pauseAsync();
+    else await videoRef.current?.playAsync();
+  }, [isPlaying]);
+
+  const handleSeek = useCallback((locationX: number) => {
+    const width = progressBarWidthRef.current;
+    if (!width || !durationSeconds) return;
+    const ratio = Math.max(0, Math.min(1, locationX / width));
+    videoRef.current?.setPositionAsync(ratio * durationSeconds * 1000);
+    scheduleHideControls();
+  }, [durationSeconds, scheduleHideControls]);
+
+  const handleSpeedChange = useCallback(async (rate: number) => {
+    setPlaybackRate(rate);
+    await videoRef.current?.setRateAsync(rate, true);
+    scheduleHideControls();
+  }, [scheduleHideControls]);
 
   const handleGoToTest = useCallback(() => {
     navigation.navigate('LessonTest', { lessonId });
@@ -325,11 +372,96 @@ export default function LessonDetailScreen({ navigation, route }: Props) {
                   ref={videoRef}
                   source={{ uri: lesson.videoUrl }}
                   style={{ width: '100%', height: '100%' }}
-                  useNativeControls
                   resizeMode={ResizeMode.CONTAIN}
                   progressUpdateIntervalMillis={250}
                   onPlaybackStatusUpdate={handlePlaybackStatus}
                 />
+                <Pressable
+                  onPress={handleVideoPress}
+                  style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                >
+                  {showControls ? (
+                    <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+                      {/* Play / Pause centrado */}
+                      <View
+                        style={{
+                          position: 'absolute',
+                          top: 0, left: 0, right: 0, bottom: 52,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Pressable
+                          onPress={handlePlayPause}
+                          style={{
+                            width: 56, height: 56, borderRadius: 28,
+                            backgroundColor: 'rgba(0,0,0,0.55)',
+                            alignItems: 'center', justifyContent: 'center',
+                          }}
+                        >
+                          <MaterialIcons name={isPlaying ? 'pause' : 'play-arrow'} size={34} color="white" />
+                        </Pressable>
+                      </View>
+
+                      {/* Barra inferior */}
+                      <View
+                        style={{
+                          backgroundColor: 'rgba(11,18,36,0.78)',
+                          paddingHorizontal: 12,
+                          paddingTop: 8,
+                          paddingBottom: 10,
+                          gap: 6,
+                        }}
+                      >
+                        {/* Barra de progreso */}
+                        <Pressable
+                          onLayout={(e) => { progressBarWidthRef.current = e.nativeEvent.layout.width; }}
+                          onPress={(e) => handleSeek(e.nativeEvent.locationX)}
+                          style={{ height: 18, justifyContent: 'center' }}
+                        >
+                          <View style={{ height: 3, backgroundColor: 'rgba(255,255,255,0.22)', borderRadius: 2 }}>
+                            <View
+                              style={{
+                                width: durationSeconds > 0 ? `${Math.min(100, (positionSeconds / durationSeconds) * 100)}%` : '0%',
+                                height: '100%',
+                                backgroundColor: COLORS.accent,
+                                borderRadius: 2,
+                              }}
+                            />
+                          </View>
+                        </Pressable>
+
+                        {/* Tiempo + velocidades */}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, fontVariant: ['tabular-nums'] }}>
+                            {formatVideoTime(positionSeconds)}{durationSeconds > 0 ? ` / ${formatVideoTime(durationSeconds)}` : ''}
+                          </Text>
+                          <View style={{ flexDirection: 'row', gap: 4 }}>
+                            {([0.6, 0.75, 0.9, 1, 1.5, 2] as const).map((rate) => {
+                              const selected = playbackRate === rate;
+                              return (
+                                <Pressable
+                                  key={rate}
+                                  onPress={() => handleSpeedChange(rate)}
+                                  style={{
+                                    paddingHorizontal: 7,
+                                    paddingVertical: 3,
+                                    borderRadius: 999,
+                                    backgroundColor: selected ? COLORS.accent : 'rgba(255,255,255,0.15)',
+                                  }}
+                                >
+                                  <Text style={{ color: selected ? '#06202a' : 'white', fontWeight: '900', fontSize: 11 }}>
+                                    {rate === 1 ? '1×' : `${rate}×`}
+                                  </Text>
+                                </Pressable>
+                              );
+                            })}
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  ) : null}
+                </Pressable>
               </View>
 
               <CaptionPanel cue={activeCue} subtitleMode={subtitleMode} />
@@ -397,22 +529,20 @@ export default function LessonDetailScreen({ navigation, route }: Props) {
                 </Pressable>
               </View>
 
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <MaterialIcons name="schedule" size={16} color={COLORS.muted} />
-                <Text style={{ color: COLORS.muted, fontVariant: ['tabular-nums'] }}>
-                  {formatVideoTime(positionSeconds)}
-                </Text>
-                {subtitlesLoading ? (
-                  <>
-                    <ActivityIndicator color={COLORS.accent} size="small" />
-                    <Text style={{ color: COLORS.muted }}>Cargando subtítulos...</Text>
-                  </>
-                ) : subtitlesError ? (
-                  <Text style={{ color: COLORS.danger, flex: 1 }} numberOfLines={2}>
-                    {subtitlesError}
-                  </Text>
-                ) : null}
-              </View>
+              {subtitlesLoading || subtitlesError ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  {subtitlesLoading ? (
+                    <>
+                      <ActivityIndicator color={COLORS.accent} size="small" />
+                      <Text style={{ color: COLORS.muted }}>Cargando subtítulos...</Text>
+                    </>
+                  ) : (
+                    <Text style={{ color: COLORS.danger, flex: 1 }} numberOfLines={2}>
+                      {subtitlesError}
+                    </Text>
+                  )}
+                </View>
+              ) : null}
 
               <View
                 style={{

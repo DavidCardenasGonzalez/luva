@@ -12,6 +12,7 @@ export type Lesson = {
   title: string;
   prompt?: string;
   videoUrl: string;
+  thumbnailUrl?: string;
   subtitlesUrl?: string;
   translatedSubtitlesUrl?: string;
   quiz?: LessonQuizQuestion[];
@@ -93,6 +94,7 @@ function sanitizeLesson(input: unknown): Lesson | null {
     title,
     prompt: asString(raw.prompt),
     videoUrl,
+    thumbnailUrl: normalizeUrl(raw.thumbnailUrl),
     subtitlesUrl: normalizeUrl(raw.subtitlesUrl),
     translatedSubtitlesUrl: normalizeUrl(raw.translatedSubtitlesUrl),
     quiz,
