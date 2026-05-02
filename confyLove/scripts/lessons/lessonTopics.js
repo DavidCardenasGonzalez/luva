@@ -1,0 +1,22 @@
+module.exports = [
+  "Small talk: arrancar y mantener conversaciones. Vocab: How's it going?, What have you been up to?, By the way…",
+  "Inglés para el trabajo: emails profesionales. Vocab: I'm reaching out to…, Please find attached, Looking forward to hearing from you",
+  "Inglés para reuniones y videollamadas. Vocab: Let's circle back, touch base, on the same page, action items",
+  "Negociar y dar tu opinión sin sonar grosero. Vocab: I see your point, but…, I'd push back on that, fair enough",
+  "Storytelling: cómo contar una anécdota en inglés. Tiempos narrativos y conectores",
+  "Inglés para viajar: aeropuerto, hotel, restaurante (nivel avanzado). Más allá del básico",
+  "Quejarse educadamente (complaints). Vocab: I'm afraid there's been a mix-up, I'd appreciate it if…",
+  "Disculparse y aceptar disculpas con matices. Vocab: My bad, I owe you an apology, no worries, don't sweat it",
+  "Discusiones y desacuerdos civilizados. Vocab: I beg to differ, with all due respect, I'm not so sure about that",
+  "Humor en inglés: sarcasmo, ironía y juegos de palabras",
+  "Inversion avanzada para énfasis. Vocab: Not only… but also, Under no circumstances, Only then did I realize",
+  "Cleft sentences: 'It was John who…', 'What I need is…'",
+  "Subjunctive en inglés (sí existe). Vocab: I suggest that he be…, If I were you…",
+  "Phrasal verbs avanzados (parte 4). Vocab: put up with, come down to, boil down to, run by, weigh in on",
+  "Idioms avanzados de negocios y vida. Vocab: cut corners, the ball is in your court, bite the bullet, pull strings",
+  "Register: formal vs. informal vs. académico. Misma idea en 3 niveles",
+  "Discourse markers para escritura y debate. Vocab: That said, having said that, by and large, all things considered",
+  "Latin & Greek roots para vocabulario académico. Vocab: bene-, mal-, -ology, -phobia, chrono-",
+  "Cómo entender películas y series sin subtítulos. Estrategias + slang regional",
+  "Pensar como nativo: matices, connotación y 'el inglés invisible'. Diferencia entre thin/slim/skinny, cheap/inexpensive, childish/childlike"
+]

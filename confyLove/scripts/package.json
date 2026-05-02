@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "lessons:create": "node lessons/createLessonsFlow.js",
+    "voicebox:test": "node lessons/testVoicebox.js"
+  },
   "dependencies": {
     "@aws-sdk/client-cloudformation": "3.888.0",
     "@aws-sdk/client-dynamodb": "3.888.0",
