@@ -1,6 +1,11 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { createAdminLesson, deleteAdminLesson } from '@/features/admin/api/admin-client'
+import {
+  createAdminLesson,
+  deleteAdminLesson,
+  createLessonVideoUpload,
+  completeLessonVideoUpload,
+} from '@/features/admin/api/admin-client'
 import type { AdminLesson } from '@/features/admin/model/types'
 import { AdminLayout } from '@/features/admin/ui/AdminLayout'
 import { appPaths } from '@/app/router/paths'
@@ -24,6 +29,53 @@ export function AdminLessonsPage() {
   const [creating, setCreating] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  const videoInputRefs = useRef<Map<string, HTMLInputElement>>(new Map())
+  const [uploadingLessonId, setUploadingLessonId] = useState<string | null>(null)
+  const [videoProgress, setVideoProgress] = useState<number | null>(null)
+  const [selectedVideos, setSelectedVideos] = useState<Record<string, File>>({})
+  const [videoUploadError, setVideoUploadError] = useState<Record<string, string>>({})
+
+  function handleVideoFileChange(lessonId: string, file: File | undefined) {
+    if (!file) return
+    setSelectedVideos((prev) => ({ ...prev, [lessonId]: file }))
+    setVideoUploadError((prev) => { const next = { ...prev }; delete next[lessonId]; return next })
+  }
+
+  async function handleVideoUpload(lessonId: string) {
+    const file = selectedVideos[lessonId]
+    if (!file) return
+    setUploadingLessonId(lessonId)
+    setVideoProgress(0)
+    setVideoUploadError((prev) => { const next = { ...prev }; delete next[lessonId]; return next })
+    try {
+      const { uploadUrl, key } = await createLessonVideoUpload(lessonId, file.type)
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('PUT', uploadUrl)
+        xhr.setRequestHeader('Content-Type', file.type)
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) setVideoProgress(Math.round((e.loaded / e.total) * 100))
+        }
+        xhr.onload = () => (xhr.status < 300 ? resolve() : reject(new Error(`Upload failed: ${xhr.status}`)))
+        xhr.onerror = () => reject(new Error('Error de red al subir el video.'))
+        xhr.send(file)
+      })
+      await completeLessonVideoUpload(lessonId, key)
+      setSelectedVideos((prev) => { const next = { ...prev }; delete next[lessonId]; return next })
+      const ref = videoInputRefs.current.get(lessonId)
+      if (ref) ref.value = ''
+      reload()
+    } catch (err) {
+      setVideoUploadError((prev) => ({
+        ...prev,
+        [lessonId]: err instanceof Error ? err.message : 'Error al subir el video.',
+      }))
+    } finally {
+      setUploadingLessonId(null)
+      setVideoProgress(null)
+    }
+  }
 
   async function handleCreate() {
     setCreateError(null)
@@ -53,7 +105,10 @@ export function AdminLessonsPage() {
     }
   }
 
-  const lessons = data?.lessons || []
+  const [onlyWithoutVideo, setOnlyWithoutVideo] = useState(false)
+
+  const allLessons = data?.lessons || []
+  const lessons = onlyWithoutVideo ? allLessons.filter((l) => !l.videoUrl) : allLessons
 
   return (
     <AdminLayout
@@ -69,9 +124,17 @@ export function AdminLessonsPage() {
       <section className="admin-panel">
         <div className="admin-panel-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16 }}>
           <div>
-            <p className="eyebrow">Todas las lecciones</p>
+            <p className="eyebrow">{onlyWithoutVideo ? 'Sin video' : 'Todas las lecciones'}</p>
             <h3>{isLoading ? '…' : `${lessons.length} ${lessons.length === 1 ? 'lección' : 'lecciones'}`}</h3>
           </div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, cursor: 'pointer', userSelect: 'none' }}>
+            <input
+              type="checkbox"
+              checked={onlyWithoutVideo}
+              onChange={(e) => setOnlyWithoutVideo(e.target.checked)}
+            />
+            Solo sin video
+          </label>
           {!showCreate && (
             <button
               type="button"
@@ -198,6 +261,76 @@ export function AdminLessonsPage() {
 
                 <div className="admin-lesson-row-meta">
                   <span className="admin-video-time-badge">{formatDateTime(lesson.createdAt)}</span>
+
+                  {/* Inline video upload */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <input
+                      ref={(el) => {
+                        if (el) videoInputRefs.current.set(lesson.lessonId, el)
+                        else videoInputRefs.current.delete(lesson.lessonId)
+                      }}
+                      type="file"
+                      accept="video/mp4,video/quicktime,video/webm,video/x-m4v,video/mpeg"
+                      style={{ display: 'none' }}
+                      disabled={uploadingLessonId === lesson.lessonId}
+                      onChange={(e) => handleVideoFileChange(lesson.lessonId, e.target.files?.[0])}
+                    />
+                    {selectedVideos[lesson.lessonId] ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+                          {selectedVideos[lesson.lessonId].name} · {(selectedVideos[lesson.lessonId].size / 1024 / 1024).toFixed(1)} MB
+                        </span>
+                        {uploadingLessonId === lesson.lessonId && videoProgress !== null && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div className="admin-lesson-progress-bar" style={{ flex: 1 }}>
+                              <div className="admin-lesson-progress-fill" style={{ width: `${videoProgress}%` }} />
+                            </div>
+                            <span style={{ fontSize: 12, color: 'var(--muted)', whiteSpace: 'nowrap' }}>{videoProgress}%</span>
+                          </div>
+                        )}
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <button
+                            type="button"
+                            className="btn primary"
+                            style={{ padding: '6px 12px', fontSize: 13 }}
+                            disabled={uploadingLessonId === lesson.lessonId}
+                            onClick={() => handleVideoUpload(lesson.lessonId)}
+                          >
+                            {uploadingLessonId === lesson.lessonId ? 'Subiendo...' : 'Subir'}
+                          </button>
+                          <button
+                            type="button"
+                            className="btn ghost"
+                            style={{ padding: '6px 12px', fontSize: 13 }}
+                            disabled={uploadingLessonId === lesson.lessonId}
+                            onClick={() => {
+                              setSelectedVideos((prev) => { const next = { ...prev }; delete next[lesson.lessonId]; return next })
+                              const ref = videoInputRefs.current.get(lesson.lessonId)
+                              if (ref) ref.value = ''
+                            }}
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn ghost"
+                        style={{ padding: '6px 12px', fontSize: 13 }}
+                        disabled={uploadingLessonId === lesson.lessonId}
+                        onClick={() => videoInputRefs.current.get(lesson.lessonId)?.click()}
+                      >
+                        {lesson.videoUrl ? 'Reemplazar video' : 'Subir video'}
+                      </button>
+                    )}
+                    {videoUploadError[lesson.lessonId] && (
+                      <span style={{ fontSize: 12, color: 'var(--danger, #e53e3e)' }}>
+                        {videoUploadError[lesson.lessonId]}
+                      </span>
+                    )}
+                  </div>
+
                   <div className="admin-topbar-actions">
                     <button
                       type="button"
