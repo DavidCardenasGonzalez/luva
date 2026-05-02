@@ -7,6 +7,7 @@ export const appPaths = {
   users: '/users',
   videos: '/videos',
   lessons: '/lessons',
+  shadowing: '/shadowing',
   integrationsTikTok: '/integrations/tiktok',
   storyCharacter: (characterId: string) => `/stories/${encodeURIComponent(characterId)}`,
   videoEdit: (storyId: string, videoId: string) => `/videos/${encodeURIComponent(storyId)}/${encodeURIComponent(videoId)}/edit`,

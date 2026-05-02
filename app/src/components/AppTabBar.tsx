@@ -4,13 +4,13 @@ import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-type AppTabKey = 'home' | 'practice' | 'missions' | 'lessons' | 'feed' | 'friends';
+type AppTabKey = 'home' | 'practice' | 'missions' | 'lessons' | 'shadowing' | 'feed' | 'friends';
 
 type TabConfig = {
   key: AppTabKey;
   label: string;
   icon: React.ComponentProps<typeof MaterialIcons>['name'];
-  route: 'Deck' | 'Stories' | 'Lessons' | 'Feed' | 'Friends';
+  route: 'Deck' | 'Stories' | 'Lessons' | 'Shadowing' | 'Feed' | 'Friends';
 };
 
 const TABS: TabConfig[] = [
@@ -18,6 +18,7 @@ const TABS: TabConfig[] = [
   { key: 'practice', label: 'Prácticas', icon: 'school', route: 'Deck' },
   { key: 'missions', label: 'Misiones', icon: 'flag', route: 'Stories' },
   { key: 'lessons', label: 'Lecciones', icon: 'ondemand-video', route: 'Lessons' },
+  { key: 'shadowing', label: 'Shadowing', icon: 'headphones', route: 'Shadowing' },
   { key: 'friends', label: 'Amigos', icon: 'people', route: 'Friends' },
 ];
 

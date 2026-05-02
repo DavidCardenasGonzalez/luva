@@ -1,0 +1,53 @@
+{
+  "characters": [
+    { "name": "Narrator", "voice": "narrator_1" },
+    { "name": "Noah", "voice": "male_1" },
+    { "name": "Allie", "voice": "female_1" }
+  ],
+  "dialogues": [
+    {
+      "character": "Narrator",
+      "text": "This practice is inspired by The Notebook. They meet again after many years apart. They still have feelings, but they start arguing.",
+      "repeat": false,
+      "pauseAfter": 0
+    },
+
+    {
+      "character": "Allie",
+      "text": "What are you doing with me?",
+      "repeat": true,
+      "pauseAfter": 2
+    },
+    {
+      "character": "Allie",
+      "text": "I don't understand what you want.",
+      "repeat": true,
+      "pauseAfter": 2
+    },
+
+    {
+      "character": "Noah",
+      "text": "We keep fighting every single time.",
+      "repeat": true,
+      "pauseAfter": 2
+    },
+    {
+      "character": "Allie",
+      "text": "Yeah, that's what we always do.",
+      "repeat": true,
+      "pauseAfter": 2
+    },
+    {
+      "character": "Noah",
+      "text": "We fight, and then we come back.",
+      "repeat": false,
+      "pauseAfter": 2
+    },
+    {
+      "character": "Narrator",
+      "text": "They look at each other, still unsure what will happen next.",
+      "repeat": false,
+      "pauseAfter": 0
+    }
+  ]
+}

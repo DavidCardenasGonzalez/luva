@@ -56,6 +56,7 @@ import {
   getPublicLesson,
   listPublicLessons,
 } from "../admin/lessons";
+import { listPublicShadowingCatalog } from "../shadowing";
 import { validatePromoCode } from "../promo-codes";
 
 const s3 = new S3Client({});
@@ -642,6 +643,10 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
 
     if (method === "GET" && path === `${ROUTE_PREFIX}/lessons`) {
       return json(200, await listPublicLessons());
+    }
+
+    if (method === "GET" && path === `${ROUTE_PREFIX}/shadowing`) {
+      return json(200, await listPublicShadowingCatalog());
     }
 
     const lessonDetail = path.match(/^\/v1\/lessons\/([^/]+)$/);

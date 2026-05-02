@@ -50,6 +50,17 @@ import {
   listStoryCharacters,
   updateAdminCharacterPost,
 } from '../character-posts';
+import {
+  completeShadowingAudioUpload,
+  createAdminShadowingChapter,
+  createAdminShadowingList,
+  createShadowingAudioUpload,
+  deleteAdminShadowingChapter,
+  deleteAdminShadowingList,
+  listAdminShadowing,
+  updateAdminShadowingChapter,
+  updateAdminShadowingList,
+} from '../shadowing';
 import { STORIES_SEED } from '../data/stories-seed';
 
 const ROUTE_PREFIX = '/v1';
@@ -213,6 +224,97 @@ export const handler = async (event: any): Promise<Result> => {
         return json(200, await deleteAdminFeedPost(parseBody(event.body) || {}));
       } catch (error) {
         const handled = handleFeedPostError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    // ── Shadowing ─────────────────────────────────────────────────────────────
+    if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/shadowing`) {
+      try {
+        return json(200, await listAdminShadowing());
+      } catch (error) {
+        const handled = handleShadowingError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/shadowing/lists`) {
+      try {
+        return json(200, await createAdminShadowingList(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleShadowingError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/shadowing/lists/update`) {
+      try {
+        return json(200, await updateAdminShadowingList(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleShadowingError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/shadowing/lists/delete`) {
+      try {
+        return json(200, await deleteAdminShadowingList(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleShadowingError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/shadowing/chapters`) {
+      try {
+        return json(200, await createAdminShadowingChapter(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleShadowingError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/shadowing/chapters/update`) {
+      try {
+        return json(200, await updateAdminShadowingChapter(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleShadowingError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/shadowing/chapters/delete`) {
+      try {
+        return json(200, await deleteAdminShadowingChapter(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleShadowingError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/shadowing/chapters/audio-upload`) {
+      try {
+        return json(200, await createShadowingAudioUpload(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleShadowingError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/shadowing/chapters/audio-complete`) {
+      try {
+        return json(200, await completeShadowingAudioUpload(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleShadowingError(error);
         if (handled) return handled;
         throw error;
       }
@@ -817,6 +919,47 @@ function handleCharacterPostError(error: unknown): Result | undefined {
       code: 'INVALID_CHARACTER_POST_ORDER',
       message: 'Usa un orden numerico mayor a cero.',
     });
+  }
+
+  return undefined;
+}
+
+function handleShadowingError(error: unknown): Result | undefined {
+  if (!(error instanceof Error)) {
+    return undefined;
+  }
+
+  const notConfigured: Record<string, string> = {
+    'SHADOWING_LISTS_TABLE_NAME not set': 'Configura la tabla de listas de Shadowing en la lambda admin.',
+    'SHADOWING_CHAPTERS_TABLE_NAME not set': 'Configura la tabla de capitulos de Shadowing en la lambda admin.',
+    'ASSETS_BUCKET_NAME not set': 'Configura el bucket de assets en la lambda admin.',
+    'ASSETS_CLOUDFRONT_DOMAIN_NAME not set': 'Configura el dominio CloudFront de assets en la lambda admin.',
+  };
+
+  if (notConfigured[error.message]) {
+    return json(503, {
+      code: 'SHADOWING_NOT_CONFIGURED',
+      message: notConfigured[error.message],
+    });
+  }
+
+  const validationMessages: Record<string, [number, string]> = {
+    INVALID_SHADOWING_LIST_ID: [400, 'Indica una lista valida de Shadowing.'],
+    INVALID_SHADOWING_LIST_NAME: [400, 'Escribe el nombre de la lista.'],
+    INVALID_SHADOWING_LIST_CATEGORY: [400, 'Escribe la categoria de la lista.'],
+    SHADOWING_LIST_NOT_FOUND: [404, 'No encontramos esa lista de Shadowing.'],
+    INVALID_SHADOWING_CHAPTER_ID: [400, 'Indica un capitulo valido de Shadowing.'],
+    INVALID_SHADOWING_CHAPTER_TITLE: [400, 'Escribe el titulo del capitulo.'],
+    SHADOWING_CHAPTER_NOT_FOUND: [404, 'No encontramos ese capitulo de Shadowing.'],
+    INVALID_SHADOWING_AUDIO_KIND: [400, 'Selecciona si el audio es en ingles o espanol.'],
+    INVALID_SHADOWING_AUDIO_CONTENT_TYPE: [400, 'Sube un audio MP3, M4A, AAC, WAV, OGG o WebM.'],
+    INVALID_SHADOWING_AUDIO_KEY: [400, 'La clave del audio no es valida para este capitulo.'],
+  };
+
+  const handled = validationMessages[error.message];
+  if (handled) {
+    const [statusCode, message] = handled;
+    return json(statusCode, { code: error.message, message });
   }
 
   return undefined;

@@ -18,6 +18,7 @@ const navigationItems = [
   { to: appPaths.posts, label: 'Posts' },
   { to: appPaths.videos, label: 'Videos' },
   { to: appPaths.lessons, label: 'Lecciones' },
+  { to: appPaths.shadowing, label: 'Shadowing' },
   { to: appPaths.integrationsTikTok, label: 'TikTok' },
 ]
 

@@ -68,6 +68,12 @@ const INITIAL_MODULES: AdminModuleSummary[] = [
     description: 'Administra perfiles tipo Instagram para personajes y sus posts con imagen y caption.',
     status: 'ready',
   },
+  {
+    id: 'shadowing',
+    label: 'Shadowing',
+    description: 'Administra listas y capitulos de practica con audio en ingles y espanol.',
+    status: 'ready',
+  },
 ];
 
 export function buildAdminOverview(

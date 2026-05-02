@@ -179,6 +179,19 @@ export class LuvaStack extends Stack {
       removalPolicy: RemovalPolicy.RETAIN,
     });
 
+    const shadowingListsTable = new Table(this, 'ShadowingListsTable', {
+      partitionKey: { name: 'listId', type: AttributeType.STRING },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.RETAIN,
+    });
+
+    const shadowingChaptersTable = new Table(this, 'ShadowingChaptersTable', {
+      partitionKey: { name: 'listId', type: AttributeType.STRING },
+      sortKey: { name: 'chapterId', type: AttributeType.STRING },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.RETAIN,
+    });
+
     // S3 Buckets
     const audioRawBucket = new Bucket(this, 'AudioRawBucket', {
       bucketName: undefined, // Let AWS name it; set if needed
@@ -420,6 +433,8 @@ export class LuvaStack extends Stack {
         FEED_POSTS_BY_ORDER_INDEX_NAME: 'FeedPostsByOrderIndex',
         CHARACTER_POSTS_TABLE_NAME: characterPostsTable.tableName,
         LESSONS_TABLE_NAME: lessonsTable.tableName,
+        SHADOWING_LISTS_TABLE_NAME: shadowingListsTable.tableName,
+        SHADOWING_CHAPTERS_TABLE_NAME: shadowingChaptersTable.tableName,
         AUDIO_BUCKET: audioRawBucket.bucketName,
         ASSETS_CLOUDFRONT_DOMAIN_NAME: assetsDistribution.domainName,
         ASSETS_CLOUDFRONT_URL: assetsCloudFrontUrl,
@@ -436,6 +451,8 @@ export class LuvaStack extends Stack {
     feedPostsTable.grantReadData(apiFn);
     characterPostsTable.grantReadData(apiFn);
     lessonsTable.grantReadData(apiFn);
+    shadowingListsTable.grantReadData(apiFn);
+    shadowingChaptersTable.grantReadData(apiFn);
     audioRawBucket.grantReadWrite(apiFn);
     publicBucket.grantReadWrite(apiFn);
     apiFn.addToRolePolicy(new PolicyStatement({
@@ -495,6 +512,8 @@ export class LuvaStack extends Stack {
         TIKTOK_REFRESH_TOKEN_PARAM: tiktokRefreshTokenParam.parameterName,
         TIKTOK_TOKEN_META_PARAM: tiktokTokenMetaParam.parameterName,
         LESSONS_TABLE_NAME: lessonsTable.tableName,
+        SHADOWING_LISTS_TABLE_NAME: shadowingListsTable.tableName,
+        SHADOWING_CHAPTERS_TABLE_NAME: shadowingChaptersTable.tableName,
         OPENAI_KEY_PARAM: openAiKeyParam.parameterName,
         GEMINI_API_KEY_PARAM: geminiKeyParam.parameterName,
         GEMINI_TTS_MODEL: 'gemini-3.1-flash-tts-preview',
@@ -512,6 +531,8 @@ export class LuvaStack extends Stack {
     feedPostsTable.grantReadWriteData(adminFn);
     characterPostsTable.grantReadWriteData(adminFn);
     lessonsTable.grantReadWriteData(adminFn);
+    shadowingListsTable.grantReadWriteData(adminFn);
+    shadowingChaptersTable.grantReadWriteData(adminFn);
     generatedVideosBucket.grantReadWrite(adminFn);
     assetsBucket.grantReadWrite(adminFn);
     adminFn.addToRolePolicy(new PolicyStatement({
@@ -710,6 +731,15 @@ export class LuvaStack extends Stack {
     });
     new CfnOutput(this, 'FriendshipsTableName', {
       value: friendshipsTable.tableName,
+    });
+    new CfnOutput(this, 'LessonsTableName', {
+      value: lessonsTable.tableName,
+    });
+    new CfnOutput(this, 'ShadowingListsTableName', {
+      value: shadowingListsTable.tableName,
+    });
+    new CfnOutput(this, 'ShadowingChaptersTableName', {
+      value: shadowingChaptersTable.tableName,
     });
     new CfnOutput(this, 'GeneratedVideosBucketName', {
       value: generatedVideosBucket.bucketName,

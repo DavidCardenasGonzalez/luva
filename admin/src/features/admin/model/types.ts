@@ -391,3 +391,66 @@ export type AdminLessonVideoUploadResponse = {
   key: string
   expiresAt: string
 }
+
+export type AdminShadowingStatus = 'draft' | 'published'
+export type AdminShadowingChapterStatus = 'draft' | 'ready'
+export type AdminShadowingAudioKind = 'audio' | 'spanishAudio'
+
+export type AdminShadowingChapter = {
+  listId: string
+  chapterId: string
+  title: string
+  description: string
+  order: number
+  status: AdminShadowingChapterStatus
+  audioKey?: string
+  audioUrl?: string
+  spanishAudioKey?: string
+  spanishAudioUrl?: string
+  assetsBucketName?: string
+  durationSeconds?: number
+  createdAt: string
+  updatedAt: string
+}
+
+export type AdminShadowingList = {
+  listId: string
+  name: string
+  category: string
+  order: number
+  status: AdminShadowingStatus
+  chapters: AdminShadowingChapter[]
+  createdAt: string
+  updatedAt: string
+}
+
+export type AdminShadowingResponse = {
+  lists: AdminShadowingList[]
+  generatedAt: string
+}
+
+export type AdminShadowingListMutationResponse = {
+  list: Omit<AdminShadowingList, 'chapters'>
+  updatedAt: string
+}
+
+export type AdminShadowingChapterMutationResponse = {
+  chapter: AdminShadowingChapter
+  updatedAt: string
+}
+
+export type AdminShadowingDeleteResponse = {
+  listId: string
+  chapterId?: string
+  deletedAt: string
+}
+
+export type AdminShadowingAudioUploadResponse = {
+  uploadUrl: string
+  key: string
+  bucketName: string
+  url: string
+  expiresAt: string
+  contentType: string
+  cacheControl: string
+}

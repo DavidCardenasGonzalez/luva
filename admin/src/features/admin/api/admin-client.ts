@@ -29,6 +29,14 @@ import type {
   AdminLessonDeleteResponse,
   AdminLessonVoicesResponse,
   AdminLessonVideoUploadResponse,
+  AdminShadowingAudioKind,
+  AdminShadowingAudioUploadResponse,
+  AdminShadowingChapterMutationResponse,
+  AdminShadowingChapterStatus,
+  AdminShadowingDeleteResponse,
+  AdminShadowingListMutationResponse,
+  AdminShadowingResponse,
+  AdminShadowingStatus,
 } from '@/features/admin/model/types'
 
 export type AdminFeedPostWritePayload = {
@@ -48,6 +56,24 @@ export type AdminCharacterPostWritePayload = {
   caption: string
   imageUrl: string
   order?: number
+}
+
+export type AdminShadowingListWritePayload = {
+  listId?: string
+  name: string
+  category: string
+  order: number
+  status: AdminShadowingStatus
+}
+
+export type AdminShadowingChapterWritePayload = {
+  listId: string
+  chapterId?: string
+  title: string
+  description: string
+  order: number
+  status: AdminShadowingChapterStatus
+  durationSeconds?: number
 }
 
 export function getAdminOverview() {
@@ -285,4 +311,68 @@ export function completeLessonVideoUpload(lessonId: string, videoKey: string) {
     `/lessons/${encodeURIComponent(lessonId)}/video-complete`,
     { videoKey },
   )
+}
+
+// ── Shadowing ─────────────────────────────────────────────────────────────────
+export function getAdminShadowing() {
+  return adminApi.get<AdminShadowingResponse>('/shadowing')
+}
+
+export function createAdminShadowingList(payload: AdminShadowingListWritePayload) {
+  return adminApi.post<AdminShadowingListMutationResponse>('/shadowing/lists', payload)
+}
+
+export function updateAdminShadowingList(payload: AdminShadowingListWritePayload & { listId: string }) {
+  return adminApi.post<AdminShadowingListMutationResponse>('/shadowing/lists/update', payload)
+}
+
+export function deleteAdminShadowingList(listId: string) {
+  return adminApi.post<AdminShadowingDeleteResponse>('/shadowing/lists/delete', { listId })
+}
+
+export function createAdminShadowingChapter(payload: AdminShadowingChapterWritePayload) {
+  return adminApi.post<AdminShadowingChapterMutationResponse>('/shadowing/chapters', payload)
+}
+
+export function updateAdminShadowingChapter(
+  payload: AdminShadowingChapterWritePayload & { chapterId: string },
+) {
+  return adminApi.post<AdminShadowingChapterMutationResponse>('/shadowing/chapters/update', payload)
+}
+
+export function deleteAdminShadowingChapter(listId: string, chapterId: string) {
+  return adminApi.post<AdminShadowingDeleteResponse>('/shadowing/chapters/delete', {
+    listId,
+    chapterId,
+  })
+}
+
+export function createShadowingAudioUpload(
+  listId: string,
+  chapterId: string,
+  kind: AdminShadowingAudioKind,
+  contentType: string,
+  fileName: string,
+) {
+  return adminApi.post<AdminShadowingAudioUploadResponse>('/shadowing/chapters/audio-upload', {
+    listId,
+    chapterId,
+    kind,
+    contentType,
+    fileName,
+  })
+}
+
+export function completeShadowingAudioUpload(
+  listId: string,
+  chapterId: string,
+  kind: AdminShadowingAudioKind,
+  key: string,
+) {
+  return adminApi.post<AdminShadowingChapterMutationResponse>('/shadowing/chapters/audio-complete', {
+    listId,
+    chapterId,
+    kind,
+    key,
+  })
 }
