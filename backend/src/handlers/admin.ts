@@ -52,11 +52,16 @@ import {
 } from '../character-posts';
 import {
   completeShadowingAudioUpload,
+  completeShadowingCoverImageUpload,
+  completeShadowingSubtitlesUpload,
   createAdminShadowingChapter,
   createAdminShadowingList,
   createShadowingAudioUpload,
+  createShadowingCoverImageUpload,
+  createShadowingSubtitlesUpload,
   deleteAdminShadowingChapter,
   deleteAdminShadowingList,
+  generateShadowingSubtitles,
   listAdminShadowing,
   updateAdminShadowingChapter,
   updateAdminShadowingList,
@@ -270,6 +275,26 @@ export const handler = async (event: any): Promise<Result> => {
       }
     }
 
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/shadowing/lists/cover-upload`) {
+      try {
+        return json(200, await createShadowingCoverImageUpload(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleShadowingError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/shadowing/lists/cover-complete`) {
+      try {
+        return json(200, await completeShadowingCoverImageUpload(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleShadowingError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
     if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/shadowing/chapters`) {
       try {
         return json(200, await createAdminShadowingChapter(parseBody(event.body) || {}));
@@ -313,6 +338,36 @@ export const handler = async (event: any): Promise<Result> => {
     if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/shadowing/chapters/audio-complete`) {
       try {
         return json(200, await completeShadowingAudioUpload(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleShadowingError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/shadowing/chapters/subtitles-upload`) {
+      try {
+        return json(200, await createShadowingSubtitlesUpload(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleShadowingError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/shadowing/chapters/subtitles-complete`) {
+      try {
+        return json(200, await completeShadowingSubtitlesUpload(parseBody(event.body) || {}));
+      } catch (error) {
+        const handled = handleShadowingError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/shadowing/chapters/generate-subtitles`) {
+      try {
+        return json(200, await generateShadowingSubtitles(parseBody(event.body) || {}));
       } catch (error) {
         const handled = handleShadowingError(error);
         if (handled) return handled;
@@ -934,6 +989,7 @@ function handleShadowingError(error: unknown): Result | undefined {
     'SHADOWING_CHAPTERS_TABLE_NAME not set': 'Configura la tabla de capitulos de Shadowing en la lambda admin.',
     'ASSETS_BUCKET_NAME not set': 'Configura el bucket de assets en la lambda admin.',
     'ASSETS_CLOUDFRONT_DOMAIN_NAME not set': 'Configura el dominio CloudFront de assets en la lambda admin.',
+    'OPENAI_KEY_PARAM not set': 'Configura la clave de OpenAI en la lambda admin.',
   };
 
   if (notConfigured[error.message]) {
@@ -951,15 +1007,30 @@ function handleShadowingError(error: unknown): Result | undefined {
     INVALID_SHADOWING_CHAPTER_ID: [400, 'Indica un capitulo valido de Shadowing.'],
     INVALID_SHADOWING_CHAPTER_TITLE: [400, 'Escribe el titulo del capitulo.'],
     SHADOWING_CHAPTER_NOT_FOUND: [404, 'No encontramos ese capitulo de Shadowing.'],
-    INVALID_SHADOWING_AUDIO_KIND: [400, 'Selecciona si el audio es en ingles o espanol.'],
+    INVALID_SHADOWING_AUDIO_KIND: [400, 'Selecciona un audio valido.'],
     INVALID_SHADOWING_AUDIO_CONTENT_TYPE: [400, 'Sube un audio MP3, M4A, AAC, WAV, OGG o WebM.'],
     INVALID_SHADOWING_AUDIO_KEY: [400, 'La clave del audio no es valida para este capitulo.'],
+    SHADOWING_AUDIO_REQUIRED: [400, 'Sube el audio antes de generar subtitulos.'],
+    INVALID_SHADOWING_SUBTITLES_CONTENT_TYPE: [400, 'Sube subtitulos en formato SRT o VTT.'],
+    INVALID_SHADOWING_SUBTITLES_KEY: [400, 'La clave de subtitulos no es valida para este capitulo.'],
+    INVALID_SHADOWING_COVER_IMAGE_CONTENT_TYPE: [400, 'Sube una imagen JPG, PNG, WebP, AVIF, GIF, HEIC o HEIF.'],
+    INVALID_SHADOWING_COVER_IMAGE_KEY: [400, 'La clave de la imagen no es valida para esta lista.'],
   };
 
   const handled = validationMessages[error.message];
   if (handled) {
     const [statusCode, message] = handled;
     return json(statusCode, { code: error.message, message });
+  }
+
+  if (
+    error.message.startsWith('OPENAI_TRANSCRIBE_HTTP_') ||
+    error.message === 'OPENAI_TRANSCRIBE_EMPTY_RESPONSE'
+  ) {
+    return json(502, {
+      code: 'OPENAI_TRANSCRIBE_ERROR',
+      message: 'No pudimos generar los subtitulos con Whisper. Intenta de nuevo.',
+    });
   }
 
   return undefined;

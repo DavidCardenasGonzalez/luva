@@ -1,16 +1,20 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
+  completeShadowingCoverImageUpload,
   completeShadowingAudioUpload,
+  completeShadowingSubtitlesUpload,
   createAdminShadowingChapter,
   createAdminShadowingList,
+  createShadowingCoverImageUpload,
   createShadowingAudioUpload,
+  createShadowingSubtitlesUpload,
   deleteAdminShadowingChapter,
   deleteAdminShadowingList,
+  generateShadowingSubtitles,
   updateAdminShadowingChapter,
   updateAdminShadowingList,
 } from '@/features/admin/api/admin-client'
 import type {
-  AdminShadowingAudioKind,
   AdminShadowingChapter,
   AdminShadowingChapterStatus,
   AdminShadowingList,
@@ -36,6 +40,8 @@ type ChapterFormState = {
 }
 
 const AUDIO_ACCEPT = 'audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/ogg,audio/webm,audio/x-m4a,audio/x-wav'
+const IMAGE_ACCEPT = 'image/avif,image/gif,image/heic,image/heif,image/jpeg,image/png,image/webp'
+const SUBTITLES_ACCEPT = '.srt,.vtt,application/x-subrip,text/srt,text/vtt,text/plain'
 
 function emptyListForm(nextOrder: number): ListFormState {
   return {
@@ -102,15 +108,36 @@ function chapterKey(chapter: AdminShadowingChapter) {
   return `${chapter.listId}:${chapter.chapterId}`
 }
 
+function listCoverKey(list: AdminShadowingList) {
+  return `${list.listId}:cover`
+}
+
+async function uploadCoverImageFile(list: AdminShadowingList, file: File) {
+  const upload = await createShadowingCoverImageUpload(list.listId, file.type, file.name)
+
+  const uploadResponse = await fetch(upload.uploadUrl, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': upload.contentType,
+      ...(upload.cacheControl ? { 'Cache-Control': upload.cacheControl } : {}),
+    },
+    body: file,
+  })
+
+  if (!uploadResponse.ok) {
+    throw new Error(`No pudimos subir ${file.name}. HTTP ${uploadResponse.status}`)
+  }
+
+  await completeShadowingCoverImageUpload(list.listId, upload.key)
+}
+
 async function uploadAudioFile(
   chapter: AdminShadowingChapter,
-  kind: AdminShadowingAudioKind,
   file: File,
 ) {
   const upload = await createShadowingAudioUpload(
     chapter.listId,
     chapter.chapterId,
-    kind,
     file.type,
     file.name,
   )
@@ -128,7 +155,34 @@ async function uploadAudioFile(
     throw new Error(`No pudimos subir ${file.name}. HTTP ${uploadResponse.status}`)
   }
 
-  await completeShadowingAudioUpload(chapter.listId, chapter.chapterId, kind, upload.key)
+  await completeShadowingAudioUpload(chapter.listId, chapter.chapterId, upload.key)
+}
+
+async function uploadSubtitlesFile(
+  chapter: AdminShadowingChapter,
+  file: File,
+) {
+  const upload = await createShadowingSubtitlesUpload(
+    chapter.listId,
+    chapter.chapterId,
+    file.type,
+    file.name,
+  )
+
+  const uploadResponse = await fetch(upload.uploadUrl, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': upload.contentType,
+      ...(upload.cacheControl ? { 'Cache-Control': upload.cacheControl } : {}),
+    },
+    body: file,
+  })
+
+  if (!uploadResponse.ok) {
+    throw new Error(`No pudimos subir ${file.name}. HTTP ${uploadResponse.status}`)
+  }
+
+  await completeShadowingSubtitlesUpload(chapter.listId, chapter.chapterId, upload.key)
 }
 
 export function AdminShadowingPage() {
@@ -153,6 +207,7 @@ export function AdminShadowingPage() {
 
   const [uploadingKey, setUploadingKey] = useState<string>()
   const [uploadError, setUploadError] = useState<string>()
+  const [generatingSubtitlesKey, setGeneratingSubtitlesKey] = useState<string>()
 
   useEffect(() => {
     if (!lists.length) {
@@ -299,17 +354,16 @@ export function AdminShadowingPage() {
 
   const handleAudioSelected = async (
     chapter: AdminShadowingChapter,
-    kind: AdminShadowingAudioKind,
     file?: File,
   ) => {
     if (!file) return
 
-    const key = `${chapterKey(chapter)}:${kind}`
+    const key = chapterKey(chapter)
     setUploadingKey(key)
     setUploadError(undefined)
 
     try {
-      await uploadAudioFile(chapter, kind, file)
+      await uploadAudioFile(chapter, file)
       reload()
     } catch (audioError) {
       setUploadError(audioError instanceof Error ? audioError.message : 'No pudimos subir el audio.')
@@ -318,10 +372,61 @@ export function AdminShadowingPage() {
     }
   }
 
+  const handleCoverSelected = async (list: AdminShadowingList, file?: File) => {
+    if (!file) return
+
+    setUploadingKey(listCoverKey(list))
+    setUploadError(undefined)
+
+    try {
+      await uploadCoverImageFile(list, file)
+      reload()
+    } catch (coverError) {
+      setUploadError(coverError instanceof Error ? coverError.message : 'No pudimos subir el cover.')
+    } finally {
+      setUploadingKey(undefined)
+    }
+  }
+
+  const handleSubtitlesSelected = async (
+    chapter: AdminShadowingChapter,
+    file?: File,
+  ) => {
+    if (!file) return
+
+    const key = `${chapterKey(chapter)}:subtitles`
+    setUploadingKey(key)
+    setUploadError(undefined)
+
+    try {
+      await uploadSubtitlesFile(chapter, file)
+      reload()
+    } catch (subtitlesError) {
+      setUploadError(subtitlesError instanceof Error ? subtitlesError.message : 'No pudimos subir los subtitulos.')
+    } finally {
+      setUploadingKey(undefined)
+    }
+  }
+
+  const handleGenerateSubtitles = async (chapter: AdminShadowingChapter) => {
+    const key = chapterKey(chapter)
+    setGeneratingSubtitlesKey(key)
+    setUploadError(undefined)
+
+    try {
+      await generateShadowingSubtitles(chapter.listId, chapter.chapterId)
+      reload()
+    } catch (subtitlesError) {
+      setUploadError(subtitlesError instanceof Error ? subtitlesError.message : 'No pudimos generar los subtitulos.')
+    } finally {
+      setGeneratingSubtitlesKey(undefined)
+    }
+  }
+
   return (
     <AdminLayout
       title="Shadowing"
-      description="Administra listas y capitulos de practica con audios en ingles y espanol."
+      description="Administra listas y capitulos de practica con audio en ingles."
       actions={
         <button type="button" className="btn secondary" onClick={reload} disabled={isLoading}>
           {isLoading ? 'Cargando...' : 'Recargar'}
@@ -349,7 +454,7 @@ export function AdminShadowingPage() {
         <article className="admin-stat-card">
           <span className="eyebrow">Capitulos</span>
           <strong>{lists.reduce((total, list) => total + list.chapters.length, 0)}</strong>
-          <p>Practicas de audio disponibles para cargar.</p>
+            <p>Practicas de audio disponibles para cargar.</p>
         </article>
         <article className="admin-stat-card">
           <span className="eyebrow">Publicadas</span>
@@ -357,9 +462,9 @@ export function AdminShadowingPage() {
           <p>Solo estas aparecen en la app.</p>
         </article>
         <article className="admin-stat-card">
-          <span className="eyebrow">Con audio EN</span>
+          <span className="eyebrow">Con audio</span>
           <strong>{lists.reduce((total, list) => total + list.chapters.filter((chapter) => chapter.audioUrl).length, 0)}</strong>
-          <p>El audio en ingles marca el capitulo como listo.</p>
+          <p>Subir audio marca el capitulo como listo.</p>
         </article>
       </section>
 
@@ -422,24 +527,62 @@ export function AdminShadowingPage() {
           </div>
 
           <div className="admin-session-list" style={{ marginTop: 18 }}>
-            {lists.map((list) => (
-              <div key={list.listId} className="admin-session-item">
-                <span>{list.category}</span>
-                <strong>{list.name}</strong>
-                <p>{list.chapters.length} capitulos · orden {list.order}</p>
-                <div className="admin-topbar-actions" style={{ marginTop: 10 }}>
-                  <button type="button" className="btn secondary" onClick={() => setSelectedListId(list.listId)}>
-                    Ver
-                  </button>
-                  <button type="button" className="btn ghost" onClick={() => handleEditList(list)}>
-                    Editar
-                  </button>
-                  <button type="button" className="btn ghost" onClick={() => { void handleDeleteList(list) }}>
-                    Eliminar
-                  </button>
+            {lists.map((list) => {
+              const coverUploading = uploadingKey === listCoverKey(list)
+
+              return (
+                <div key={list.listId} className="admin-session-item">
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                    {list.coverImageUrl ? (
+                      <img
+                        src={list.coverImageUrl}
+                        alt=""
+                        style={{ width: 76, height: 76, borderRadius: 12, objectFit: 'cover', border: '1px solid rgba(148, 163, 184, 0.24)' }}
+                      />
+                    ) : (
+                      <div
+                        aria-hidden="true"
+                        style={{ width: 76, height: 76, borderRadius: 12, background: 'rgba(15, 23, 42, 0.8)', border: '1px dashed rgba(148, 163, 184, 0.35)' }}
+                      />
+                    )}
+                    <div style={{ flex: 1 }}>
+                      <span>{list.category}</span>
+                      <strong>{list.name}</strong>
+                      <p>{list.chapters.length} capitulos · orden {list.order}</p>
+                    </div>
+                  </div>
+                  <div className="admin-topbar-actions" style={{ marginTop: 10 }}>
+                    <button type="button" className="btn secondary" onClick={() => setSelectedListId(list.listId)}>
+                      Ver
+                    </button>
+                    <label className="btn secondary" style={{ cursor: 'pointer' }}>
+                      {coverUploading ? 'Subiendo cover...' : list.coverImageUrl ? 'Reemplazar cover' : 'Subir cover'}
+                      <input
+                        type="file"
+                        accept={IMAGE_ACCEPT}
+                        style={{ display: 'none' }}
+                        disabled={Boolean(uploadingKey)}
+                        onChange={(event) => {
+                          void handleCoverSelected(list, event.target.files?.[0])
+                          event.currentTarget.value = ''
+                        }}
+                      />
+                    </label>
+                    {list.coverImageUrl && (
+                      <a className="btn ghost" href={list.coverImageUrl} target="_blank" rel="noreferrer">
+                        Ver cover
+                      </a>
+                    )}
+                    <button type="button" className="btn ghost" onClick={() => handleEditList(list)}>
+                      Editar
+                    </button>
+                    <button type="button" className="btn ghost" onClick={() => { void handleDeleteList(list) }}>
+                      Eliminar
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </article>
 
@@ -552,13 +695,14 @@ export function AdminShadowingPage() {
         ) : chapters.length === 0 ? (
           <div className="admin-empty-state admin-empty-state-compact">
             <strong>Sin capitulos en esta lista</strong>
-            <p>Crea un capitulo y despues sube sus audios.</p>
+            <p>Crea un capitulo y despues sube su audio.</p>
           </div>
         ) : (
           <div className="admin-lesson-list">
             {chapters.map((chapter) => {
-              const audioUploading = uploadingKey === `${chapterKey(chapter)}:audio`
-              const spanishUploading = uploadingKey === `${chapterKey(chapter)}:spanishAudio`
+              const audioUploading = uploadingKey === chapterKey(chapter)
+              const subtitlesUploading = uploadingKey === `${chapterKey(chapter)}:subtitles`
+              const subtitlesGenerating = generatingSubtitlesKey === chapterKey(chapter)
 
               return (
                 <div key={chapter.chapterId} className="admin-lesson-row">
@@ -578,47 +722,55 @@ export function AdminShadowingPage() {
                     </div>
 
                     <div className="admin-lesson-row-assets">
-                      {chapter.audioUrl && <span className="tag">Audio EN</span>}
-                      {chapter.spanishAudioUrl && <span className="tag">Audio ES</span>}
+                      {chapter.audioUrl && <span className="tag">Audio</span>}
+                      {chapter.subtitlesUrl && <span className="tag">Subtitulos</span>}
                       {chapter.durationSeconds && <span className="tag">{chapter.durationSeconds}s</span>}
                     </div>
                   </div>
 
                   <div className="admin-topbar-actions">
                     <label className="btn secondary" style={{ cursor: 'pointer' }}>
-                      {audioUploading ? 'Subiendo EN...' : chapter.audioUrl ? 'Reemplazar EN' : 'Subir EN'}
+                      {audioUploading ? 'Subiendo audio...' : chapter.audioUrl ? 'Reemplazar audio' : 'Subir audio'}
                       <input
                         type="file"
                         accept={AUDIO_ACCEPT}
                         style={{ display: 'none' }}
                         disabled={Boolean(uploadingKey)}
                         onChange={(event) => {
-                          void handleAudioSelected(chapter, 'audio', event.target.files?.[0])
-                          event.currentTarget.value = ''
-                        }}
-                      />
-                    </label>
-                    <label className="btn secondary" style={{ cursor: 'pointer' }}>
-                      {spanishUploading ? 'Subiendo ES...' : chapter.spanishAudioUrl ? 'Reemplazar ES' : 'Subir ES'}
-                      <input
-                        type="file"
-                        accept={AUDIO_ACCEPT}
-                        style={{ display: 'none' }}
-                        disabled={Boolean(uploadingKey)}
-                        onChange={(event) => {
-                          void handleAudioSelected(chapter, 'spanishAudio', event.target.files?.[0])
+                          void handleAudioSelected(chapter, event.target.files?.[0])
                           event.currentTarget.value = ''
                         }}
                       />
                     </label>
                     {chapter.audioUrl && (
                       <a className="btn ghost" href={chapter.audioUrl} target="_blank" rel="noreferrer">
-                        Escuchar EN
+                        Escuchar audio
                       </a>
                     )}
-                    {chapter.spanishAudioUrl && (
-                      <a className="btn ghost" href={chapter.spanishAudioUrl} target="_blank" rel="noreferrer">
-                        Escuchar ES
+                    <label className="btn secondary" style={{ cursor: 'pointer' }}>
+                      {subtitlesUploading ? 'Subiendo subtitulos...' : chapter.subtitlesUrl ? 'Reemplazar subtitulos' : 'Subir subtitulos'}
+                      <input
+                        type="file"
+                        accept={SUBTITLES_ACCEPT}
+                        style={{ display: 'none' }}
+                        disabled={Boolean(uploadingKey) || Boolean(generatingSubtitlesKey)}
+                        onChange={(event) => {
+                          void handleSubtitlesSelected(chapter, event.target.files?.[0])
+                          event.currentTarget.value = ''
+                        }}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      className="btn secondary"
+                      disabled={!chapter.audioUrl || Boolean(uploadingKey) || Boolean(generatingSubtitlesKey)}
+                      onClick={() => { void handleGenerateSubtitles(chapter) }}
+                    >
+                      {subtitlesGenerating ? 'Generando...' : 'Generar con Whisper'}
+                    </button>
+                    {chapter.subtitlesUrl && (
+                      <a className="btn ghost" href={chapter.subtitlesUrl} target="_blank" rel="noreferrer">
+                        Ver subtitulos
                       </a>
                     )}
                     <button type="button" className="btn ghost" onClick={() => handleEditChapter(chapter)}>

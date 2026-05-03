@@ -8,16 +8,20 @@ import {
   QueryCommand,
   ScanCommand,
 } from '@aws-sdk/lib-dynamodb';
-import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 
 const dynamo = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
   marshallOptions: { removeUndefinedValues: true },
 });
 const s3 = new S3Client({});
+const ssm = new SSMClient({});
 
 const MIN_TIMESTAMP = '1970-01-01T00:00:00.000Z';
 const AUDIO_CACHE_CONTROL = 'public, max-age=31536000, immutable';
+const IMAGE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
+const SUBTITLE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
 
 const AUDIO_CONTENT_TYPES: Record<string, string> = {
   'audio/aac': 'aac',
@@ -39,9 +43,44 @@ const AUDIO_CONTENT_TYPE_BY_EXTENSION: Record<string, string> = {
   webm: 'audio/webm',
 };
 
+const IMAGE_CONTENT_TYPES: Record<string, string> = {
+  'image/avif': 'avif',
+  'image/gif': 'gif',
+  'image/heic': 'heic',
+  'image/heif': 'heif',
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+};
+
+const IMAGE_CONTENT_TYPE_BY_EXTENSION: Record<string, string> = {
+  avif: 'image/avif',
+  gif: 'image/gif',
+  heic: 'image/heic',
+  heif: 'image/heif',
+  jpeg: 'image/jpeg',
+  jpg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+};
+
+const SUBTITLE_CONTENT_TYPES: Record<string, string> = {
+  'application/x-subrip': 'srt',
+  'text/plain': 'srt',
+  'text/srt': 'srt',
+  'text/vtt': 'vtt',
+};
+
+const SUBTITLE_CONTENT_TYPE_BY_EXTENSION: Record<string, string> = {
+  srt: 'application/x-subrip',
+  vtt: 'text/vtt',
+};
+
+let openAiKeyCache: string | undefined;
+
 export type ShadowingStatus = 'draft' | 'published';
 export type ShadowingChapterStatus = 'draft' | 'ready';
-export type ShadowingAudioKind = 'audio' | 'spanishAudio';
+export type ShadowingAudioKind = 'audio';
 
 export type ShadowingList = {
   listId: string;
@@ -49,6 +88,9 @@ export type ShadowingList = {
   category: string;
   order: number;
   status: ShadowingStatus;
+  coverImageKey?: string;
+  coverImageUrl?: string;
+  assetsBucketName?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -62,8 +104,8 @@ export type ShadowingChapter = {
   status: ShadowingChapterStatus;
   audioKey?: string;
   audioUrl?: string;
-  spanishAudioKey?: string;
-  spanishAudioUrl?: string;
+  subtitlesKey?: string;
+  subtitlesUrl?: string;
   assetsBucketName?: string;
   durationSeconds?: number;
   createdAt: string;
@@ -107,6 +149,16 @@ export type ShadowingAudioUploadResponse = {
   cacheControl: string;
 };
 
+export type ShadowingCoverImageUploadResponse = {
+  uploadUrl: string;
+  key: string;
+  bucketName: string;
+  url: string;
+  expiresAt: string;
+  contentType: string;
+  cacheControl: string;
+};
+
 type ShadowingListWriteInput = {
   listId?: unknown;
   name?: unknown;
@@ -138,6 +190,29 @@ type ShadowingAudioCompleteInput = ShadowingAudioUploadInput & {
   key?: unknown;
 };
 
+type ShadowingSubtitlesUploadInput = {
+  listId?: unknown;
+  chapterId?: unknown;
+  contentType?: unknown;
+  fileName?: unknown;
+};
+
+type ShadowingSubtitlesCompleteInput = ShadowingSubtitlesUploadInput & {
+  subtitlesKey?: unknown;
+  key?: unknown;
+};
+
+type ShadowingCoverImageUploadInput = {
+  listId?: unknown;
+  contentType?: unknown;
+  fileName?: unknown;
+};
+
+type ShadowingCoverImageCompleteInput = ShadowingCoverImageUploadInput & {
+  imageKey?: unknown;
+  key?: unknown;
+};
+
 function getShadowingListsTableName(): string {
   const name = process.env.SHADOWING_LISTS_TABLE_NAME?.trim();
   if (!name) throw new Error('SHADOWING_LISTS_TABLE_NAME not set');
@@ -162,6 +237,26 @@ function getAssetsBaseUrl(): string {
     process.env.ASSETS_CLOUDFRONT_DOMAIN_NAME?.trim();
   if (!url) throw new Error('ASSETS_CLOUDFRONT_DOMAIN_NAME not set');
   return url.startsWith('http') ? url.replace(/\/$/, '') : `https://${url.replace(/\/$/, '')}`;
+}
+
+async function getSsmParam(name: string): Promise<string> {
+  const res = await ssm.send(new GetParameterCommand({ Name: name, WithDecryption: true }));
+  const value = res.Parameter?.Value?.trim();
+  if (!value) throw new Error(`SSM param empty: ${name}`);
+  return value;
+}
+
+async function getOpenAiKey(): Promise<string> {
+  if (openAiKeyCache) return openAiKeyCache;
+  const direct = process.env.OPENAI_KEY || process.env.OPENAI_API_KEY;
+  if (direct) {
+    openAiKeyCache = direct;
+    return direct;
+  }
+  const param = process.env.OPENAI_KEY_PARAM;
+  if (!param) throw new Error('OPENAI_KEY_PARAM not set');
+  openAiKeyCache = await getSsmParam(param);
+  return openAiKeyCache;
 }
 
 function buildAssetUrl(key: string): string {
@@ -197,7 +292,7 @@ function normalizeChapterStatus(value: unknown): ShadowingChapterStatus {
 }
 
 function normalizeAudioKind(value: unknown): ShadowingAudioKind {
-  if (value === 'audio' || value === 'spanishAudio') return value;
+  if (value === 'audio') return value;
   throw new Error('INVALID_SHADOWING_AUDIO_KIND');
 }
 
@@ -222,6 +317,76 @@ function normalizeAudioContentType(contentType: unknown, fileName: unknown): str
   return extension ? AUDIO_CONTENT_TYPE_BY_EXTENSION[extension] : undefined;
 }
 
+function normalizeImageContentType(contentType: unknown, fileName: unknown): string | undefined {
+  const normalizedContentType = asString(contentType)
+    ?.split(';')[0]
+    ?.trim()
+    .toLowerCase();
+  if (normalizedContentType && IMAGE_CONTENT_TYPES[normalizedContentType]) {
+    return normalizedContentType;
+  }
+
+  const extension = getFileExtension(asString(fileName));
+  return extension ? IMAGE_CONTENT_TYPE_BY_EXTENSION[extension] : undefined;
+}
+
+function normalizeSubtitleContentType(contentType: unknown, fileName: unknown): string | undefined {
+  const normalizedContentType = asString(contentType)
+    ?.split(';')[0]
+    ?.trim()
+    .toLowerCase();
+  if (normalizedContentType && SUBTITLE_CONTENT_TYPES[normalizedContentType]) {
+    return normalizedContentType;
+  }
+
+  const extension = getFileExtension(asString(fileName));
+  return extension ? SUBTITLE_CONTENT_TYPE_BY_EXTENSION[extension] : undefined;
+}
+
+async function getObjectBuffer(bucket: string, key: string): Promise<Buffer> {
+  const out = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+  const body = out.Body as any;
+  if (!body) return Buffer.alloc(0);
+  if (typeof body.transformToByteArray === 'function') {
+    return Buffer.from(await body.transformToByteArray());
+  }
+
+  const chunks: Buffer[] = [];
+  for await (const chunk of body) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
+}
+
+async function transcribeShadowingAudioToSrt(audio: Buffer, filename: string): Promise<string> {
+  const apiKey = await getOpenAiKey();
+  const form = new FormData();
+  const file = new Blob([audio], { type: 'audio/mpeg' });
+  form.append('file', file as any, filename);
+  form.append('model', 'whisper-1');
+  form.append('response_format', 'srt');
+
+  const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: form as any,
+  } as any);
+
+  const text = await res.text();
+  if (!res.ok) {
+    console.error(JSON.stringify({
+      scope: 'admin.shadowing.whisper.error',
+      status: res.status,
+      body: text.slice(0, 500),
+    }));
+    throw new Error(`OPENAI_TRANSCRIBE_HTTP_${res.status}`);
+  }
+
+  const srt = text.trim();
+  if (!srt) throw new Error('OPENAI_TRANSCRIBE_EMPTY_RESPONSE');
+  return srt;
+}
+
 function toShadowingList(item: unknown): ShadowingList | undefined {
   if (!item || typeof item !== 'object') return undefined;
   const raw = item as Record<string, unknown>;
@@ -229,6 +394,7 @@ function toShadowingList(item: unknown): ShadowingList | undefined {
   const name = asString(raw.name)?.trim();
   const category = asString(raw.category)?.trim();
   if (!listId || !name || !category) return undefined;
+  const coverImageKey = asString(raw.coverImageKey)?.trim();
 
   return {
     listId,
@@ -236,6 +402,11 @@ function toShadowingList(item: unknown): ShadowingList | undefined {
     category,
     order: normalizeOrder(raw.order),
     status: normalizeListStatus(raw.status),
+    coverImageKey,
+    coverImageUrl:
+      asString(raw.coverImageUrl)?.trim() ||
+      (coverImageKey ? buildAssetUrl(coverImageKey) : undefined),
+    assetsBucketName: asString(raw.assetsBucketName)?.trim(),
     createdAt: asString(raw.createdAt)?.trim() || MIN_TIMESTAMP,
     updatedAt: asString(raw.updatedAt)?.trim() || MIN_TIMESTAMP,
   };
@@ -250,7 +421,7 @@ function toShadowingChapter(item: unknown): ShadowingChapter | undefined {
   if (!listId || !chapterId || !title) return undefined;
 
   const audioKey = asString(raw.audioKey)?.trim();
-  const spanishAudioKey = asString(raw.spanishAudioKey)?.trim();
+  const subtitlesKey = asString(raw.subtitlesKey)?.trim();
   const durationSeconds = normalizeNumber(raw.durationSeconds);
 
   return {
@@ -262,10 +433,10 @@ function toShadowingChapter(item: unknown): ShadowingChapter | undefined {
     status: normalizeChapterStatus(raw.status),
     audioKey,
     audioUrl: asString(raw.audioUrl)?.trim() || (audioKey ? buildAssetUrl(audioKey) : undefined),
-    spanishAudioKey,
-    spanishAudioUrl:
-      asString(raw.spanishAudioUrl)?.trim() ||
-      (spanishAudioKey ? buildAssetUrl(spanishAudioKey) : undefined),
+    subtitlesKey,
+    subtitlesUrl:
+      asString(raw.subtitlesUrl)?.trim() ||
+      (subtitlesKey ? buildAssetUrl(subtitlesKey) : undefined),
     assetsBucketName: asString(raw.assetsBucketName)?.trim(),
     durationSeconds: durationSeconds != null && durationSeconds > 0 ? durationSeconds : undefined,
     createdAt: asString(raw.createdAt)?.trim() || MIN_TIMESTAMP,
@@ -434,6 +605,7 @@ export async function createAdminShadowingList(
     category,
     order: normalizeOrder(input.order),
     status: normalizeListStatus(input.status),
+    assetsBucketName: getAssetsBucketName(),
     createdAt: now,
     updatedAt: now,
   };
@@ -471,6 +643,7 @@ export async function updateAdminShadowingList(
     category,
     order: normalizeOrder(input.order, existing.order),
     status: normalizeListStatus(input.status),
+    assetsBucketName: existing.assetsBucketName || getAssetsBucketName(),
     updatedAt: now,
   };
 
@@ -497,6 +670,15 @@ export async function deleteAdminShadowingList(input: {
   const chapters = await listChaptersForList(listId);
   await Promise.all(chapters.map((chapter) => deleteAdminShadowingChapter(chapter)));
 
+  if (existing.coverImageKey) {
+    await s3.send(
+      new DeleteObjectCommand({
+        Bucket: existing.assetsBucketName || getAssetsBucketName(),
+        Key: existing.coverImageKey,
+      }),
+    ).catch(() => undefined);
+  }
+
   await dynamo.send(
     new DeleteCommand({
       TableName: getShadowingListsTableName(),
@@ -506,6 +688,88 @@ export async function deleteAdminShadowingList(input: {
   );
 
   return { listId, deletedAt: new Date().toISOString() };
+}
+
+export async function createShadowingCoverImageUpload(
+  input: ShadowingCoverImageUploadInput,
+): Promise<ShadowingCoverImageUploadResponse> {
+  const listId = asString(input.listId)?.trim();
+  if (!listId) throw new Error('INVALID_SHADOWING_LIST_ID');
+
+  const list = await getListRecord(listId);
+  if (!list) throw new Error('SHADOWING_LIST_NOT_FOUND');
+
+  const contentType = normalizeImageContentType(input.contentType, input.fileName);
+  if (!contentType) throw new Error('INVALID_SHADOWING_COVER_IMAGE_CONTENT_TYPE');
+
+  const bucketName = getAssetsBucketName();
+  const extension = IMAGE_CONTENT_TYPES[contentType];
+  const key = `shadowing/${listId}/cover/${randomUUID()}.${extension}`;
+  const expiresInSeconds = 60 * 15;
+
+  const uploadUrl = await getSignedUrl(
+    s3,
+    new PutObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+      ContentType: contentType,
+      CacheControl: IMAGE_CACHE_CONTROL,
+    }),
+    { expiresIn: expiresInSeconds },
+  );
+
+  return {
+    uploadUrl,
+    key,
+    bucketName,
+    url: buildAssetUrl(key),
+    expiresAt: new Date(Date.now() + expiresInSeconds * 1000).toISOString(),
+    contentType,
+    cacheControl: IMAGE_CACHE_CONTROL,
+  };
+}
+
+export async function completeShadowingCoverImageUpload(
+  input: ShadowingCoverImageCompleteInput,
+): Promise<ShadowingListMutationResponse> {
+  const listId = asString(input.listId)?.trim();
+  if (!listId) throw new Error('INVALID_SHADOWING_LIST_ID');
+
+  const key = asString(input.imageKey ?? input.key)?.trim();
+  if (!key || !key.startsWith(`shadowing/${listId}/cover/`)) {
+    throw new Error('INVALID_SHADOWING_COVER_IMAGE_KEY');
+  }
+
+  const existing = await getListRecord(listId);
+  if (!existing) throw new Error('SHADOWING_LIST_NOT_FOUND');
+
+  const now = new Date().toISOString();
+  const nextList: ShadowingList = {
+    ...existing,
+    coverImageKey: key,
+    coverImageUrl: buildAssetUrl(key),
+    assetsBucketName: getAssetsBucketName(),
+    updatedAt: now,
+  };
+
+  await dynamo.send(
+    new PutCommand({
+      TableName: getShadowingListsTableName(),
+      Item: nextList,
+      ConditionExpression: 'attribute_exists(listId)',
+    }),
+  );
+
+  if (existing.coverImageKey && existing.coverImageKey !== key) {
+    await s3.send(
+      new DeleteObjectCommand({
+        Bucket: existing.assetsBucketName || getAssetsBucketName(),
+        Key: existing.coverImageKey,
+      }),
+    ).catch(() => undefined);
+  }
+
+  return { list: nextList, updatedAt: now };
 }
 
 export async function createAdminShadowingChapter(
@@ -609,7 +873,8 @@ export async function deleteAdminShadowingChapter(input: {
   );
 
   await Promise.all(
-    [existing.audioKey, existing.spanishAudioKey]
+    [existing.audioKey]
+      .concat(existing.subtitlesKey || [])
       .filter((key): key is string => !!key)
       .map((key) =>
         s3.send(
@@ -688,11 +953,10 @@ export async function completeShadowingAudioUpload(
   const now = new Date().toISOString();
   const nextChapter: ShadowingChapter = {
     ...existing,
-    ...(kind === 'audio'
-      ? { audioKey: key, audioUrl: buildAssetUrl(key) }
-      : { spanishAudioKey: key, spanishAudioUrl: buildAssetUrl(key) }),
+    audioKey: key,
+    audioUrl: buildAssetUrl(key),
     assetsBucketName: getAssetsBucketName(),
-    status: kind === 'audio' ? 'ready' : existing.status,
+    status: 'ready',
     updatedAt: now,
   };
 
@@ -705,4 +969,115 @@ export async function completeShadowingAudioUpload(
   );
 
   return { chapter: nextChapter, updatedAt: now };
+}
+
+export async function createShadowingSubtitlesUpload(
+  input: ShadowingSubtitlesUploadInput,
+): Promise<ShadowingAudioUploadResponse> {
+  const listId = asString(input.listId)?.trim();
+  if (!listId) throw new Error('INVALID_SHADOWING_LIST_ID');
+
+  const chapterId = asString(input.chapterId)?.trim();
+  if (!chapterId) throw new Error('INVALID_SHADOWING_CHAPTER_ID');
+
+  const chapter = await getChapterRecord(listId, chapterId);
+  if (!chapter) throw new Error('SHADOWING_CHAPTER_NOT_FOUND');
+
+  const contentType = normalizeSubtitleContentType(input.contentType, input.fileName);
+  if (!contentType) throw new Error('INVALID_SHADOWING_SUBTITLES_CONTENT_TYPE');
+
+  const bucketName = getAssetsBucketName();
+  const extension = SUBTITLE_CONTENT_TYPES[contentType];
+  const key = `shadowing/${listId}/${chapterId}/subtitles.${extension}`;
+  const expiresInSeconds = 60 * 15;
+
+  const uploadUrl = await getSignedUrl(
+    s3,
+    new PutObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+      ContentType: contentType,
+      CacheControl: SUBTITLE_CACHE_CONTROL,
+    }),
+    { expiresIn: expiresInSeconds },
+  );
+
+  return {
+    uploadUrl,
+    key,
+    bucketName,
+    url: buildAssetUrl(key),
+    expiresAt: new Date(Date.now() + expiresInSeconds * 1000).toISOString(),
+    contentType,
+    cacheControl: SUBTITLE_CACHE_CONTROL,
+  };
+}
+
+export async function completeShadowingSubtitlesUpload(
+  input: ShadowingSubtitlesCompleteInput,
+): Promise<ShadowingChapterMutationResponse> {
+  const listId = asString(input.listId)?.trim();
+  if (!listId) throw new Error('INVALID_SHADOWING_LIST_ID');
+
+  const chapterId = asString(input.chapterId)?.trim();
+  if (!chapterId) throw new Error('INVALID_SHADOWING_CHAPTER_ID');
+
+  const key = asString(input.subtitlesKey ?? input.key)?.trim();
+  if (!key || !key.startsWith(`shadowing/${listId}/${chapterId}/subtitles.`)) {
+    throw new Error('INVALID_SHADOWING_SUBTITLES_KEY');
+  }
+
+  const existing = await getChapterRecord(listId, chapterId);
+  if (!existing) throw new Error('SHADOWING_CHAPTER_NOT_FOUND');
+
+  const now = new Date().toISOString();
+  const nextChapter: ShadowingChapter = {
+    ...existing,
+    subtitlesKey: key,
+    subtitlesUrl: buildAssetUrl(key),
+    assetsBucketName: getAssetsBucketName(),
+    updatedAt: now,
+  };
+
+  await dynamo.send(
+    new PutCommand({
+      TableName: getShadowingChaptersTableName(),
+      Item: nextChapter,
+      ConditionExpression: 'attribute_exists(listId) AND attribute_exists(chapterId)',
+    }),
+  );
+
+  return { chapter: nextChapter, updatedAt: now };
+}
+
+export async function generateShadowingSubtitles(input: {
+  listId?: unknown;
+  chapterId?: unknown;
+}): Promise<ShadowingChapterMutationResponse> {
+  const listId = asString(input.listId)?.trim();
+  if (!listId) throw new Error('INVALID_SHADOWING_LIST_ID');
+
+  const chapterId = asString(input.chapterId)?.trim();
+  if (!chapterId) throw new Error('INVALID_SHADOWING_CHAPTER_ID');
+
+  const existing = await getChapterRecord(listId, chapterId);
+  if (!existing) throw new Error('SHADOWING_CHAPTER_NOT_FOUND');
+  if (!existing.audioKey) throw new Error('SHADOWING_AUDIO_REQUIRED');
+
+  const bucket = existing.assetsBucketName || getAssetsBucketName();
+  const audio = await getObjectBuffer(bucket, existing.audioKey);
+  const srtContent = await transcribeShadowingAudioToSrt(audio, 'shadowing-audio.mp3');
+  const subtitlesKey = `shadowing/${listId}/${chapterId}/subtitles.srt`;
+
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: getAssetsBucketName(),
+      Key: subtitlesKey,
+      Body: Buffer.from(srtContent, 'utf-8'),
+      ContentType: 'application/x-subrip; charset=utf-8',
+      CacheControl: SUBTITLE_CACHE_CONTROL,
+    }),
+  );
+
+  return completeShadowingSubtitlesUpload({ listId, chapterId, key: subtitlesKey });
 }

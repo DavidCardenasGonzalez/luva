@@ -8,6 +8,7 @@ import { CoinBalanceProvider } from './purchases/CoinBalanceProvider';
 import { AppVersionGateProvider } from './version/AppVersionGateProvider';
 import { MetaAdsProvider } from './marketing/MetaAdsProvider';
 import { MixpanelProvider } from './marketing/MixpanelProvider';
+import { ShadowingPlayerProvider } from './shadowing/ShadowingPlayerProvider';
 
 export default function App() {
   return (
@@ -19,7 +20,9 @@ export default function App() {
               <CardProgressProvider>
                 <StoryProgressProvider>
                   <AppVersionGateProvider>
-                    <AppNavigator />
+                    <ShadowingPlayerProvider>
+                      <AppNavigator />
+                    </ShadowingPlayerProvider>
                   </AppVersionGateProvider>
                 </StoryProgressProvider>
               </CardProgressProvider>

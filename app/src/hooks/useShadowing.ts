@@ -8,7 +8,7 @@ export type ShadowingChapter = {
   description: string;
   order: number;
   audioUrl: string;
-  spanishAudioUrl?: string;
+  subtitlesUrl?: string;
   durationSeconds?: number;
   updatedAt: string;
 };
@@ -18,6 +18,7 @@ export type ShadowingList = {
   name: string;
   category: string;
   order: number;
+  coverImageUrl?: string;
   chapters: ShadowingChapter[];
   updatedAt: string;
 };
@@ -67,7 +68,7 @@ function sanitizeChapter(input: unknown, fallbackListId: string): ShadowingChapt
     description: asString(raw.description) || '',
     order: normalizeOrder(raw.order),
     audioUrl,
-    spanishAudioUrl: normalizeUrl(raw.spanishAudioUrl),
+    subtitlesUrl: normalizeUrl(raw.subtitlesUrl),
     durationSeconds: durationSeconds != null && durationSeconds > 0 ? durationSeconds : undefined,
     updatedAt: asString(raw.updatedAt) || new Date(0).toISOString(),
   };
@@ -94,6 +95,7 @@ function sanitizeList(input: unknown): ShadowingList | null {
     name,
     category,
     order: normalizeOrder(raw.order),
+    coverImageUrl: normalizeUrl(raw.coverImageUrl),
     chapters,
     updatedAt: asString(raw.updatedAt) || new Date(0).toISOString(),
   };

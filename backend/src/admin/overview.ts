@@ -71,7 +71,7 @@ const INITIAL_MODULES: AdminModuleSummary[] = [
   {
     id: 'shadowing',
     label: 'Shadowing',
-    description: 'Administra listas y capitulos de practica con audio en ingles y espanol.',
+    description: 'Administra listas y capitulos de practica con audio en ingles.',
     status: 'ready',
   },
 ];

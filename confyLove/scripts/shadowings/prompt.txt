@@ -1,0 +1,48 @@
+Generate a complete JSON array of shadowing dialogues for a movie, covering the entire story from beginning to end, and save it as a .json file inside the folder confyLove/scripts/shadowings/movies/. Name the file using the movie title in lowercase with hyphens, for example: the-notebook.json
+
+The top-level structure must be:
+
+{
+  "listName": "[Movie Title]",
+  "category": "B1",
+  "order": 1,
+  "chapters": [...]
+}
+
+Each chapter inside "chapters" follows this structure:
+
+{
+  "chapter": 1,
+  "title": "[Chapter Title]",
+  "level": "B1",
+  "characters": [
+    { "name": "Narrator", "voice": "Elearning" },
+    { "name": "[Character 1]", "voice": "male-1" },
+    { "name": "[Character 2]", "voice": "female-1" }
+  ],
+  "dialogues": [...]
+}
+
+Rules:
+
+LINES:
+- Every dialogue line (excluding Narrator) must be between 3 and 8 words maximum. No exceptions.
+- Narrator lines have no word limit — write them as naturally flowing sentences.
+- Lines must be natural and conversational, not literary or formal.
+
+REPEAT & PAUSE:
+- Assign "repeat": true to lines that have real learning value: natural expressions,
+  useful structures, or common conversational patterns. Typically 4 to 8 words.
+- Assign "repeat": false to very short filler responses (under 4 words),
+  transitional lines, or lines with low pedagogical value.
+- All dialogue lines have "pauseAfter": 3.
+- Narrator lines always have "repeat": false and "pauseAfter": 0.
+
+CHAPTERS:
+- Each chapter should take 3 to 6 minutes when read aloud with TTS.
+- Target 25 to 35 dialogue lines per chapter.
+- Include 2 to 3 Narrator blocks per chapter.
+- Level progression: B1 for early chapters, B2 for the middle, C1 for the climax and ending.
+- Determine the number of chapters based on the story's dramatic arc and key turning points.
+
+Once the JSON is complete, write it directly to the file. Do not print it to the console.

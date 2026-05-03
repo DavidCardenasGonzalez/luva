@@ -394,7 +394,6 @@ export type AdminLessonVideoUploadResponse = {
 
 export type AdminShadowingStatus = 'draft' | 'published'
 export type AdminShadowingChapterStatus = 'draft' | 'ready'
-export type AdminShadowingAudioKind = 'audio' | 'spanishAudio'
 
 export type AdminShadowingChapter = {
   listId: string
@@ -405,8 +404,8 @@ export type AdminShadowingChapter = {
   status: AdminShadowingChapterStatus
   audioKey?: string
   audioUrl?: string
-  spanishAudioKey?: string
-  spanishAudioUrl?: string
+  subtitlesKey?: string
+  subtitlesUrl?: string
   assetsBucketName?: string
   durationSeconds?: number
   createdAt: string
@@ -419,6 +418,9 @@ export type AdminShadowingList = {
   category: string
   order: number
   status: AdminShadowingStatus
+  coverImageKey?: string
+  coverImageUrl?: string
+  assetsBucketName?: string
   chapters: AdminShadowingChapter[]
   createdAt: string
   updatedAt: string
@@ -454,3 +456,6 @@ export type AdminShadowingAudioUploadResponse = {
   contentType: string
   cacheControl: string
 }
+
+export type AdminShadowingCoverImageUploadResponse = AdminShadowingAudioUploadResponse
+export type AdminShadowingSubtitlesUploadResponse = AdminShadowingAudioUploadResponse

@@ -71,7 +71,20 @@ function runFfmpeg(ffmpegPath, args) {
   }
 }
 
+function getAudioDurationSeconds(ffmpegPath, filePath) {
+  const result = spawnSync(ffmpegPath, ["-hide_banner", "-i", filePath, "-f", "null", "-"], {
+    encoding: "utf8",
+    stdio: "pipe",
+    windowsHide: true,
+  });
+  const match = (result.stderr || "").match(/Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)/);
+  if (!match) return undefined;
+  const [, h, m, s] = match;
+  return Math.round(Number(h) * 3600 + Number(m) * 60 + Number(s));
+}
+
 module.exports = {
   findFfmpegPath,
   runFfmpeg,
+  getAudioDurationSeconds,
 };

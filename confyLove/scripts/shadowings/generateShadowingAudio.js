@@ -6,10 +6,11 @@ const dotenv = require("dotenv");
 
 const { writeGeneratedSpeech } = require("../lessons/voiceboxClient");
 const { findFfmpegPath, runFfmpeg } = require("../b1c1movie/ffmpegUtils");
+const { publishShadowingCatalog } = require("./shadowingPublishClient");
 
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
-const DEFAULT_INPUT_PATH = path.join(__dirname, "dialogue.json");
+const DEFAULT_INPUT_PATH = path.join(__dirname, "movies");
 const DEFAULT_BEEP_PATH = path.join(__dirname, "beep.wav");
 const DEFAULT_OUTPUT_PATH = path.join(__dirname, "shadowing-dialogue.wav");
 const DEFAULT_WORK_DIR = path.join(__dirname, ".generated");
@@ -20,9 +21,11 @@ function parseArgs(argv) {
     inputPath: DEFAULT_INPUT_PATH,
     beepPath: DEFAULT_BEEP_PATH,
     outputPath: DEFAULT_OUTPUT_PATH,
+    outputPathIsDefault: true,
     workDir: DEFAULT_WORK_DIR,
     force: false,
     dryRun: false,
+    publish: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -35,10 +38,13 @@ function parseArgs(argv) {
 
     if (arg === "--input") options.inputPath = path.resolve(next());
     else if (arg === "--beep") options.beepPath = path.resolve(next());
-    else if (arg === "--output") options.outputPath = path.resolve(next());
-    else if (arg === "--work-dir") options.workDir = path.resolve(next());
+    else if (arg === "--output") {
+      options.outputPath = path.resolve(next());
+      options.outputPathIsDefault = false;
+    } else if (arg === "--work-dir") options.workDir = path.resolve(next());
     else if (arg === "--force") options.force = true;
     else if (arg === "--dry-run") options.dryRun = true;
+    else if (arg === "--publish") options.publish = true;
     else if (arg === "--help" || arg === "-h") options.help = true;
     else throw new Error(`Unknown option: ${arg}`);
   }
@@ -51,23 +57,32 @@ function printHelp() {
   node shadowings/generateShadowingAudio.js [options]
 
 Options:
-  --input <path>      dialogue.json path. Default: shadowings/dialogue.json
+  --input <path>      dialogue.json file OR a directory of .json files.
+                      Default: shadowings/movies/
   --beep <path>       Beep wav path. Default: shadowings/beep.wav
-  --output <path>     Final audio path, or output naming base for array inputs.
+  --output <path>     Final audio path, output naming base for array inputs,
+                      or output directory when --input is a directory.
                       Default: shadowings/shadowing-dialogue.wav
   --work-dir <path>   Cache/temp directory. Default: shadowings/.generated
   --force             Regenerate cached TTS and silence files
   --dry-run           Validate and print the planned segment sequence only
+  --publish           After generating, publish list and chapters to the admin API
+                      Requires LUVA_ADMIN_API_URL and LUVA_ADMIN_JWT_TOKEN in .env
 
 Input formats:
-  Single dialogue:
+  Single file — single dialogue:
     { "title": "optional", "characters": [...], "dialogues": [...] }
 
-  Multiple dialogues:
+  Single file — multiple dialogues:
     [
       { "id": "scene-1", "characters": [...], "dialogues": [...] },
       { "id": "scene-2", "outputPath": "shadowings/scene-2.wav", ... }
     ]
+
+  Directory:
+    All .json files in the directory are processed in alphabetical order.
+    Each file produces a .wav next to it (same base name) unless --output
+    points to a directory, in which case outputs go there.
 
 Voice mapping:
   characters[].voice is used as the Voicebox profile name by default.
@@ -78,6 +93,19 @@ Voice mapping:
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, ""));
+}
+
+function extractListData(inputData) {
+  if (Array.isArray(inputData)) {
+    return { listMeta: null, dialogues: inputData };
+  }
+
+  if (inputData && typeof inputData === "object" && Array.isArray(inputData.chapters)) {
+    const { chapters, ...meta } = inputData;
+    return { listMeta: meta, dialogues: chapters };
+  }
+
+  return { listMeta: null, dialogues: inputData };
 }
 
 function pathLooksLikeDirectory(filePath) {
@@ -426,6 +454,38 @@ async function generateDialogueAudio(job, options, voiceMap, ffmpegPath) {
   console.log(`Done: ${job.outputPath}`);
 }
 
+function resolveInputFiles(inputPath) {
+  const resolved = path.resolve(inputPath);
+  if (!fs.existsSync(resolved)) throw new Error(`Input not found: ${resolved}`);
+
+  if (fs.statSync(resolved).isDirectory()) {
+    const files = fs
+      .readdirSync(resolved)
+      .filter((name) => name.toLowerCase().endsWith(".json"))
+      .sort()
+      .map((name) => path.join(resolved, name));
+    if (files.length === 0) throw new Error(`No JSON files found in directory: ${resolved}`);
+    return files;
+  }
+
+  return [resolved];
+}
+
+function resolveFileOutputPath(inputFile, options) {
+  const ext = options.publish ? ".mp3" : ".wav";
+
+  if (!options.outputPathIsDefault) {
+    if (pathLooksLikeDirectory(options.outputPath)) {
+      const baseName = path.parse(inputFile).name;
+      return path.join(options.outputPath, `${baseName}${ext}`);
+    }
+    return options.outputPath;
+  }
+
+  const parsed = path.parse(inputFile);
+  return path.join(parsed.dir, `${parsed.name}${ext}`);
+}
+
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   if (options.help) {
@@ -433,34 +493,70 @@ async function main() {
     return;
   }
 
-  const inputData = readJson(options.inputPath);
-  const jobs = buildJobs(inputData, options);
+  const inputFiles = resolveInputFiles(options.inputPath);
+  const directoryMode = inputFiles.length > 1;
+
+  if (directoryMode) {
+    console.log(`Processing ${inputFiles.length} JSON file(s) from ${options.inputPath}`);
+  }
+
+  // When publishing single-file with default output path, switch extension to .mp3
+  if (options.publish && options.outputPathIsDefault && !directoryMode) {
+    options.outputPath = DEFAULT_OUTPUT_PATH.replace(/\.wav$/, ".mp3");
+  }
+
   const voiceMap = parseVoiceMap();
   const ffmpegPath = findFfmpegPath();
   const failures = [];
+  const allJobs = [];
+  const fileGroups = [];
 
-  for (const job of jobs) {
-    try {
-      await generateDialogueAudio(job, options, voiceMap, ffmpegPath);
-    } catch (error) {
-      if (jobs.length === 1) throw error;
+  for (const inputFile of inputFiles) {
+    const fileOptions = {
+      ...options,
+      inputPath: inputFile,
+      outputPath: directoryMode ? resolveFileOutputPath(inputFile, options) : options.outputPath,
+    };
+    const rawInput = readJson(inputFile);
+    const { listMeta, dialogues } = extractListData(rawInput);
+    const jobs = buildJobs(dialogues, fileOptions);
+    allJobs.push(...jobs);
+    fileGroups.push({ listMeta, jobs, inputFile });
 
-      const detail = error.response?.data ?? error.message;
-      const message = typeof detail === "object" ? JSON.stringify(detail) : detail;
-      failures.push({ job, message });
-      console.error(`Failed ${job.slug}: ${message}`);
+    for (const job of jobs) {
+      try {
+        await generateDialogueAudio(job, fileOptions, voiceMap, ffmpegPath);
+      } catch (error) {
+        const detail = error.response?.data ?? error.message;
+        const message = typeof detail === "object" ? JSON.stringify(detail) : detail;
+        failures.push({ job, message });
+        console.error(`Failed ${job.slug}: ${message}`);
+      }
     }
   }
 
-  if (jobs.length > 1) {
+  if (allJobs.length > 1) {
     console.log("\nGenerated outputs:");
-    jobs.forEach((job) => console.log(`- ${job.outputPath}`));
+    allJobs.forEach((job) => console.log(`- ${job.outputPath}`));
   }
 
   if (failures.length > 0) {
     console.error("\nFailed jobs:");
     failures.forEach(({ job, message }) => console.error(`- ${job.slug}: ${message}`));
     process.exitCode = 1;
+  }
+
+  if (options.publish && !options.dryRun) {
+    const failedJobSet = new Set(failures.map((f) => f.job));
+
+    for (const { listMeta, jobs, inputFile } of fileGroups) {
+      if (!listMeta?.listName) {
+        console.warn(`Skip publish for ${path.basename(inputFile)}: no listName in JSON`);
+        continue;
+      }
+      const successfulJobs = jobs.filter((job) => !failedJobSet.has(job));
+      await publishShadowingCatalog(listMeta, successfulJobs, { ffmpegPath });
+    }
   }
 }
 

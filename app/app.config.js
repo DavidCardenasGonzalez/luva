@@ -71,6 +71,7 @@ module.exports = {
       buildNumber: "1.1.7",
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
+        UIBackgroundModes: ["audio"],
         NSMicrophoneUsageDescription:
           "Luva usa el micrófono para que puedas grabar tu voz mientras practicas ejercicios de habla inglesa y recibir comentarios sobre tu pronunciación.",
         ...(metaConfigured
