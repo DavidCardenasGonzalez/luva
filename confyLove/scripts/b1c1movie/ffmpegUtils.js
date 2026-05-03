@@ -49,13 +49,25 @@ function findFfmpegPath() {
 }
 
 function runFfmpeg(ffmpegPath, args) {
-  const result = spawnSync(ffmpegPath, args, {
+  const result = spawnSync(ffmpegPath, ["-hide_banner", "-loglevel", "error", ...args], {
     encoding: "utf8",
+    maxBuffer: 64 * 1024 * 1024,
     stdio: "pipe",
+    windowsHide: true,
   });
 
+  if (result.error) {
+    const details = [result.error.message, result.stderr, result.stdout].filter(Boolean).join("\n");
+    throw new Error(details || "ffmpeg fallo");
+  }
+
   if (result.status !== 0) {
-    throw new Error(result.stderr || result.stdout || "ffmpeg fallo");
+    const details = [result.stderr, result.stdout]
+      .filter(Boolean)
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .join("\n");
+    throw new Error(details || `ffmpeg fallo con codigo ${result.status}`);
   }
 }
 

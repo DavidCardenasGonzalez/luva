@@ -1,53 +1,2243 @@
-{
-  "characters": [
-    { "name": "Narrator", "voice": "narrator_1" },
-    { "name": "Noah", "voice": "male_1" },
-    { "name": "Allie", "voice": "female_1" }
-  ],
-  "dialogues": [
-    {
-      "character": "Narrator",
-      "text": "This practice is inspired by The Notebook. They meet again after many years apart. They still have feelings, but they start arguing.",
-      "repeat": false,
-      "pauseAfter": 0
-    },
-
-    {
-      "character": "Allie",
-      "text": "What are you doing with me?",
-      "repeat": true,
-      "pauseAfter": 2
-    },
-    {
-      "character": "Allie",
-      "text": "I don't understand what you want.",
-      "repeat": true,
-      "pauseAfter": 2
-    },
-
-    {
-      "character": "Noah",
-      "text": "We keep fighting every single time.",
-      "repeat": true,
-      "pauseAfter": 2
-    },
-    {
-      "character": "Allie",
-      "text": "Yeah, that's what we always do.",
-      "repeat": true,
-      "pauseAfter": 2
-    },
-    {
-      "character": "Noah",
-      "text": "We fight, and then we come back.",
-      "repeat": false,
-      "pauseAfter": 2
-    },
-    {
-      "character": "Narrator",
-      "text": "They look at each other, still unsure what will happen next.",
-      "repeat": false,
-      "pauseAfter": 0
-    }
-  ]
-}
+[
+  {
+    "chapter": 1,
+    "title": "A Summer Night",
+    "level": "B1",
+    "characters": [
+      { "name": "Narrator", "voice": "Elearning" },
+      { "name": "Noah", "voice": "male-1" },
+      { "name": "Allie", "voice": "female-1" }
+    ],
+    "dialogues": [
+      {
+        "character": "Narrator",
+        "text": "It is the summer of 1940 in Seabrook, South Carolina. A young man named Noah Calhoun is at the town fair with his friend. Across the crowd, he sees a girl he has never seen before. She is laughing, and she looks like she belongs in another world. Noah knows right away that he has to talk to her.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Noah",
+        "text": "Hey, do you want to dance with me?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I don't even know you.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "That's why we should dance.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "You're a little crazy, you know that?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Maybe. But I really want to meet you.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "My name is Allie.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I'm Noah. It's really nice to meet you, Allie.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Are you always like this with girls?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "No. Just with you.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "That's a terrible line.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I know. Did it work?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Maybe a little.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Narrator",
+        "text": "They dance together and Noah keeps talking. Allie thinks he is funny and a little strange, but she is having a better time than she expected. When the music stops, neither of them wants the night to end.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Noah",
+        "text": "So where are you from?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I'm just here for the summer.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Just the summer? That's not very long.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Long enough for a fair, I think.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "What do you love doing?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I love to paint. And read. What about you?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I work at the lumber yard right now.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "That sounds like hard work.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "It is. But I'm saving up to build something.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Build what?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "A house. A real one. With big windows and a porch.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "That's a beautiful dream.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "It's not just a dream. I'm going to make it happen.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Can I see you again tomorrow?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "You move fast, don't you?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I don't want to waste the summer.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Okay. Tomorrow. But just as friends.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Of course. Just as friends.",
+        "repeat": true,
+        "pauseAfter": 3
+      }
+    ]
+  },
+  {
+    "chapter": 2,
+    "title": "The Ferris Wheel",
+    "level": "B1",
+    "characters": [
+      { "name": "Narrator", "voice": "Elearning" },
+      { "name": "Noah", "voice": "male-1" },
+      { "name": "Allie", "voice": "female-1" },
+      { "name": "Fin", "voice": "male-2" }
+    ],
+    "dialogues": [
+      {
+        "character": "Narrator",
+        "text": "The next evening, Noah meets Allie again at the fair. He wants to take her on the Ferris wheel, but Allie refuses. Noah is determined. He does something that surprises everyone around them and gets Allie's attention for good.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Noah",
+        "text": "Come on, just one ride on the Ferris wheel.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "No, I told you. I don't like heights.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I'll be right next to you the whole time.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "That doesn't help.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "What if I make it worth your while?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "What does that mean?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Narrator",
+        "text": "Noah grabs the bar of the moving Ferris wheel and pulls himself up onto it. He hangs on with one hand, looking down at Allie with a grin. The crowd gasps. Allie stares up at him, not sure if she should be angry or impressed.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Noah",
+        "text": "Go out with me, Allie. Just one real date.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Get down from there! You're going to get hurt!",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Say yes and I will.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "This is insane! You're completely insane!",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Yes or no, Allie?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Fine! Yes! Now please come down!",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Was that so hard?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I can't believe I just said yes to you.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Fin",
+        "text": "She said yes! She actually said yes!",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I told you she would.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Don't act like that wasn't completely ridiculous.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Maybe. But it worked.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "You could have fallen.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I wasn't going to fall. I had something to hold on to.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "What did you have to hold on to?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "The thought of you saying yes.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "You are too much, you know that?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I'll pick you up Friday at seven.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Don't be late.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I won't.",
+        "repeat": true,
+        "pauseAfter": 3
+      }
+    ]
+  },
+  {
+    "chapter": 3,
+    "title": "The First Real Date",
+    "level": "B1",
+    "characters": [
+      { "name": "Narrator", "voice": "Elearning" },
+      { "name": "Noah", "voice": "male-1" },
+      { "name": "Allie", "voice": "female-1" }
+    ],
+    "dialogues": [
+      {
+        "character": "Narrator",
+        "text": "Noah takes Allie to a quiet dinner and then for a walk through town. As the night goes on, they talk about everything — their dreams, their families, and the way they see the world. At one point, they lie down in the middle of an empty street and look up at the stars.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Noah",
+        "text": "What are you thinking about?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "How strange this night is. Good strange.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "You're not scared of lying in the street?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "A little. But you'd move me if a car came.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Of course I would.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "What do you think about when you look at the stars?",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I think about how big everything is. And how small I am.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "That sounds lonely.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Not tonight.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Do you believe in something bigger? Like God?",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I believe in something. I'm just not sure what to call it.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "My parents want me to believe exactly what they believe.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "And what do you believe?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I'm still figuring that out.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Narrator",
+        "text": "They stay in the street for a long time, talking about life and dreams. A car comes eventually and they run out of the way laughing. For the first time in her life, Allie feels completely free.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Noah",
+        "text": "What would you do if you could do anything?",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Paint. Just paint every day without anyone telling me to stop.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Why does someone tell you to stop?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "My mother thinks it's a waste of time. She wants me to be proper.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "You don't seem very proper to me right now.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I know. And I love it.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "You should paint as much as you want.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "You really mean that.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Of course I do. Your art is part of who you are.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "No one has ever said that to me before.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Then they weren't paying attention.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I think I want to see you again.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Good. Because I'm not done yet.",
+        "repeat": true,
+        "pauseAfter": 3
+      }
+    ]
+  },
+  {
+    "chapter": 4,
+    "title": "All Summer Long",
+    "level": "B1",
+    "characters": [
+      { "name": "Narrator", "voice": "Elearning" },
+      { "name": "Noah", "voice": "male-1" },
+      { "name": "Allie", "voice": "female-1" }
+    ],
+    "dialogues": [
+      {
+        "character": "Narrator",
+        "text": "All through July and into August, Noah and Allie spend every free moment together. They take long walks, sit on the dock, and read to each other. One evening, Noah shows Allie a house he has been dreaming about for years — an old, broken-down plantation home.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Noah",
+        "text": "That's the house I want to buy someday.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "That old place? It's falling apart.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I know. That's what makes it interesting.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "What would you do with it?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Fix it up. Make it exactly right. Every room.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "That would take forever.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Good things take time.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "What kind of house would it be?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Big windows on every side. A porch for sitting. A room with good light for painting.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "A room for painting?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Every house needs a space like that.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "You're thinking about me when you imagine this house.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Maybe.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Narrator",
+        "text": "Allie smiles and takes his hand. They sit on the old steps together and watch the birds fly over the marsh. That night, under a sky full of stars, Noah finally kisses her. It is the first real kiss of her life.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Allie",
+        "text": "Do you ever feel like time moves too fast?",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "All the time. Especially this summer.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I don't want it to end.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Then let's not think about that yet.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "What should we think about?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Right now. Just this.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "When I first met you, I thought you were just showing off.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I was a little.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "But you're not like that at all. Not really.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Who am I, then?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Someone I wasn't expecting.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Is that a good thing?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "It's the best thing.",
+        "repeat": true,
+        "pauseAfter": 3
+      }
+    ]
+  },
+  {
+    "chapter": 5,
+    "title": "The Wrong Family",
+    "level": "B2",
+    "characters": [
+      { "name": "Narrator", "voice": "Elearning" },
+      { "name": "Noah", "voice": "male-1" },
+      { "name": "Allie", "voice": "female-1" },
+      { "name": "Anne", "voice": "female-2" }
+    ],
+    "dialogues": [
+      {
+        "character": "Narrator",
+        "text": "Allie's mother, Anne Hamilton, has noticed her daughter spending all her time with a boy from the wrong side of town. Anne is from one of the wealthiest families in the area and she does not approve. One afternoon, she arrives to pick up Allie and confronts Noah directly.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Anne",
+        "text": "You must be the boy my daughter has been spending time with.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Yes, ma'am. I'm Noah Calhoun.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "I know who you are. Your father works at the mill.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Yes, ma'am, he does.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "Allie has a very specific future ahead of her. A life that requires the right connections.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Mother, please. Don't do this.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "I'm doing what's best for you. This boy is not from our world.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "With respect, ma'am, that's not really for you to decide.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "Excuse me? I beg your pardon.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I care about your daughter. I'm not going to pretend otherwise.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "You are a very bold young man. I'll give you that.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Narrator",
+        "text": "Allie gets into the car, furious at her mother. She looks back at Noah through the rear window. He stands in the road watching her go, and she can see on his face that something has shifted — something more serious than summer fun.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Allie",
+        "text": "How could you do that? You embarrassed me.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "I protected you. There is a difference.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "He's the most genuine person I've ever met.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "Genuine doesn't pay for the life you deserve.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Maybe I don't want that life.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "You say that now. You'll understand when you're older.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "You don't know him at all.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "I know enough. Summer is almost over, Allie. Be sensible.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "This isn't just summer to me.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "You are going home next week, and that will be the end of it.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "You can't control who I love.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "That is not love, Allie. That is infatuation. There is a difference.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Then you don't know what love is.",
+        "repeat": true,
+        "pauseAfter": 3
+      }
+    ]
+  },
+  {
+    "chapter": 6,
+    "title": "The Last Night",
+    "level": "B2",
+    "characters": [
+      { "name": "Narrator", "voice": "Elearning" },
+      { "name": "Noah", "voice": "male-1" },
+      { "name": "Allie", "voice": "female-1" }
+    ],
+    "dialogues": [
+      {
+        "character": "Narrator",
+        "text": "It is Allie's last night in Seabrook. She and Noah meet one more time, but the joy of the summer has been replaced by something heavier. Allie's parents have made their feelings clear. Both of them know that tomorrow, everything changes.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Allie",
+        "text": "I don't want to leave.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Then don't.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "You know I don't have a choice.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "There's always a choice.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Noah, I'm seventeen. I live with my parents.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I know. I know. I'm sorry.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "What happens to us now?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "We write. We call. We figure it out.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "My mother will never allow it.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I'm not asking your mother. I'm asking you.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I love you. I want you to know that.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I love you too. More than I know how to say.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Narrator",
+        "text": "They hold each other for a long time without speaking. The next morning, Allie's family packs up and drives away. Noah stands on the road and watches until the car disappears. The summer is over. Something essential in him is gone with it.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Allie",
+        "text": "Promise me you won't forget me.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "That's the one thing I could never do.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Even if we never see each other again?",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "We will see each other again.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "You can't know that.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I know it the way I know everything I'm sure about.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I'm going to miss you every single day.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Me too. But this isn't the end.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "How can you be so sure?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Because what we have isn't the kind of thing that just stops.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Goodbye, Noah.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Not goodbye. I'll see you soon.",
+        "repeat": true,
+        "pauseAfter": 3
+      }
+    ]
+  },
+  {
+    "chapter": 7,
+    "title": "Three Hundred and Sixty-Five Letters",
+    "level": "B2",
+    "characters": [
+      { "name": "Narrator", "voice": "Elearning" },
+      { "name": "Noah", "voice": "male-1" },
+      { "name": "Allie", "voice": "female-1" }
+    ],
+    "dialogues": [
+      {
+        "character": "Narrator",
+        "text": "Noah writes to Allie every day for a year — three hundred and sixty-five letters. Not one is ever answered. He doesn't know that Allie's mother has been hiding every letter, keeping them from her daughter. Allie, believing Noah has moved on, eventually tries to do the same.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Noah",
+        "text": "Dear Allie. It has been two months since you left. I think about you every morning.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I finished the porch on the old house. It looks just like I always said it would.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I don't understand why you haven't written back. Did I do something wrong?",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I keep telling myself you're just busy. That you'll write when you can.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "It's been six months now. I'm still here. I haven't stopped thinking about you.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Narrator",
+        "text": "Across the country, Allie goes to college. She throws herself into her studies and a new social world. She tells herself she has moved on. But some nights, she still thinks about a boy from Seabrook who made her feel more alive than anyone since.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Allie",
+        "text": "He never wrote. Not once.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I thought we had something real. I guess I was wrong.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Maybe my mother was right. Maybe it was just the summer.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I need to stop thinking about him.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Dear Allie. A year has passed. I'm joining the Army. I leave next week.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I don't know if I'll come back. But I want you to know I never stopped caring.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I'll think of you every day I'm over there. Stay safe, Allie.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Yours, Noah.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Narrator",
+        "text": "The war comes, and Noah goes with it. He fights in Europe, carrying memories of a girl and a summer that feel more distant with every passing month. When it is over, the first thing he does is buy the old plantation house. He starts fixing it alone.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Noah",
+        "text": "I survived the war. I don't know what for yet.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I've been fixing the house up. It's slow work alone.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "But I think of you when I work on it.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Maybe I'm foolish. Maybe you've forgotten me completely.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "But I can't forget you. I've tried and I can't.",
+        "repeat": false,
+        "pauseAfter": 3
+      }
+    ]
+  },
+  {
+    "chapter": 8,
+    "title": "Lon Hammond",
+    "level": "B2",
+    "characters": [
+      { "name": "Narrator", "voice": "Elearning" },
+      { "name": "Allie", "voice": "female-1" },
+      { "name": "Lon", "voice": "male-2" }
+    ],
+    "dialogues": [
+      {
+        "character": "Narrator",
+        "text": "While working as a volunteer nurse during the war, Allie meets Lon Hammond — handsome, educated, and from exactly the kind of family her parents always wanted for her. He is kind and dependable. He loves her. And when the war ends and Lon proposes, Allie says yes.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Lon",
+        "text": "You've been quiet all evening. Is everything alright?",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I'm fine. Just tired, I think.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Lon",
+        "text": "You work too hard. You know that?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Someone has to.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Lon",
+        "text": "That's one of the things I love about you. You never stop caring.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Lon, you don't have to flatter me.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Lon",
+        "text": "I'm not flattering you. I'm telling you the truth.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Narrator",
+        "text": "One evening, at a quiet dinner, Lon gets down on one knee. He looks up at Allie with a ring in his hand. She looks at him — steady, reliable, safe — and thinks of everything her mother told her a good life should look like.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Lon",
+        "text": "Allie, I've never been more sure of anything in my life.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Lon",
+        "text": "You make me want to be a better person every single day.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Lon",
+        "text": "Will you marry me?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Lon...",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Lon",
+        "text": "You don't have to answer right now.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "No. I... yes. Yes, I will.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Lon",
+        "text": "You've made me the happiest man alive.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I'm happy too.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Narrator",
+        "text": "The engagement is announced and the wedding planning begins. Allie throws herself into it. She tells herself this is what she wants. But late at night, when it is quiet, a name still finds its way into her thoughts.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Lon",
+        "text": "Your mother loves me, by the way. She told me so herself.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Of course she does.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Lon",
+        "text": "Is that a problem?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "No. No problem at all.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Lon",
+        "text": "Are you sure you're alright? You seem far away.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I'm right here. I'm with you.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Lon",
+        "text": "Good. That's all I need.",
+        "repeat": true,
+        "pauseAfter": 3
+      }
+    ]
+  },
+  {
+    "chapter": 9,
+    "title": "The Old House in the Paper",
+    "level": "B2",
+    "characters": [
+      { "name": "Narrator", "voice": "Elearning" },
+      { "name": "Allie", "voice": "female-1" },
+      { "name": "Anne", "voice": "female-2" }
+    ],
+    "dialogues": [
+      {
+        "character": "Narrator",
+        "text": "One morning, while flipping through a local newspaper, Allie sees a photograph that stops her cold. It is a picture of a restored plantation house in Seabrook — the same broken-down house a boy once told her he was going to fix. The article says it took him seven years. His name is Noah Calhoun.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Allie",
+        "text": "He did it. He actually did it.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Seven years. He spent seven years on that house.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Why didn't he ever write to me? Why did he just stop?",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Narrator",
+        "text": "Something in Allie shifts. She can't explain it, but she knows she has to go back to Seabrook. She has to understand what really happened before she can move forward with Lon.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Anne",
+        "text": "Allie, the wedding invitations need to be approved today.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I need to make a trip. Before the wedding.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "What kind of trip? Where?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I need to go back to Seabrook.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "Seabrook? Allie, why on earth would you—",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "You know why.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "This is not a good idea. You have a fiancé. You have a wedding in weeks.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I just need to see him. I need to close that chapter.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "Seeing that boy again is not closing a chapter. It's opening one.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Why didn't he write to me, Mother?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "What?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I never got a single letter from him. Why?",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "Allie...",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Did you take his letters?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "I did what I thought was right for you.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "How many letters were there?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "Three hundred and sixty-five.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "He wrote every day.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Anne",
+        "text": "I was trying to protect you.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "You had no right. No right at all.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I'm going to Seabrook.",
+        "repeat": true,
+        "pauseAfter": 3
+      }
+    ]
+  },
+  {
+    "chapter": 10,
+    "title": "The Reunion",
+    "level": "C1",
+    "characters": [
+      { "name": "Narrator", "voice": "Elearning" },
+      { "name": "Noah", "voice": "male-1" },
+      { "name": "Allie", "voice": "female-1" }
+    ],
+    "dialogues": [
+      {
+        "character": "Narrator",
+        "text": "Allie drives to Seabrook and finds the house exactly as she imagined — beautifully restored, with wide porches and windows that catch the afternoon light. Noah is outside when she pulls up. He recognizes her immediately. They stand apart for a moment, seven years of silence between them, not knowing where to begin.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Noah",
+        "text": "Allie.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Hi, Noah.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "You came.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I saw the picture in the paper. You finished the house.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I told you I would.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "It's beautiful, Noah. It really is.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Do you want to come inside?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I don't know if that's a good idea.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Probably not. But come in anyway.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Narrator",
+        "text": "Inside, the house is everything Noah promised — warm wood floors, wide windows, light streaming through every room. There is one room with good northern light and a blank wall, clearly intended for someone who paints. Allie sees it and cannot speak.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Allie",
+        "text": "This room. You built this for me.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I built it for whoever was going to live here.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I wrote to you. Every day for a year.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I know. I just found out. My mother never gave me your letters.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "All this time I thought you just chose not to answer.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I thought you stopped caring. I thought you forgot about me.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I never forgot. Not for a single day.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I'm engaged, Noah.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I know.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Then why does being here feel like this?",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I don't know. But it does.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I shouldn't have come.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "But you did.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I did.",
+        "repeat": true,
+        "pauseAfter": 3
+      }
+    ]
+  },
+  {
+    "chapter": 11,
+    "title": "In the Rain",
+    "level": "C1",
+    "characters": [
+      { "name": "Narrator", "voice": "Elearning" },
+      { "name": "Noah", "voice": "male-1" },
+      { "name": "Allie", "voice": "female-1" }
+    ],
+    "dialogues": [
+      {
+        "character": "Narrator",
+        "text": "Over the next few days, Allie and Noah fall back into each other easily — too easily. They spend long afternoons talking and rowing on the water. But Lon is calling, the wedding is approaching, and Allie is running out of ways to pretend she is not torn apart.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Noah",
+        "text": "You've been quiet all morning. What are you thinking?",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I'm thinking that I don't know who I am when I'm with you.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "What does that mean?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "It means everything I planned falls apart when I'm near you.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Maybe those plans were never really yours.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "That's not fair. Lon is a good man.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I know he is. I'm not saying he isn't.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Then what are you saying?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I'm saying I still love you. I never stopped.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Noah, don't.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "It's the truth. I'm not going to pretend otherwise.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Narrator",
+        "text": "The rain starts without warning — sudden and heavy. They are out on the dock and there is nowhere to go. They stand in it together, soaked through, and something breaks open between them that was always waiting to break.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Allie",
+        "text": "Why didn't you come find me? Why did you just let it end?",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I wrote every day. What else was I supposed to do?",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Come after me! Fight for me!",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I'm fighting right now. This is me fighting.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "It's not enough! It was never enough!",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "What do you want from me?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I want you to tell me what I'm supposed to do!",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I can't tell you that. It has to be your choice.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I hate you for making me feel this way.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I know.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "And I love you.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I know that too.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "What are we going to do?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I don't know. But I'm not going anywhere.",
+        "repeat": false,
+        "pauseAfter": 3
+      }
+    ]
+  },
+  {
+    "chapter": 12,
+    "title": "The Choice",
+    "level": "C1",
+    "characters": [
+      { "name": "Narrator", "voice": "Elearning" },
+      { "name": "Noah", "voice": "male-1" },
+      { "name": "Allie", "voice": "female-1" },
+      { "name": "Lon", "voice": "male-2" }
+    ],
+    "dialogues": [
+      {
+        "character": "Narrator",
+        "text": "Lon arrives in Seabrook looking for Allie. He is not angry — just heartbroken and honest. He tells her he knows she is struggling and that he loves her enough to let her decide. Allie sits alone for a long time afterward, turning two lives over in her hands, trying to understand which one is truly hers.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Lon",
+        "text": "I know something's been going on. I'm not blind.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Lon, I'm so sorry.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Lon",
+        "text": "Do you love him?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I don't know what I feel.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Lon",
+        "text": "That's an answer in itself.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I do love you, Lon. That's real too.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Lon",
+        "text": "I know. But maybe loving someone isn't always enough.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "You deserve someone who has no doubts.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Lon",
+        "text": "And you deserve to be with whoever makes you feel most like yourself.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Narrator",
+        "text": "Lon leaves with quiet dignity. Allie watches him go and feels the weight of the loss. But underneath the grief is something else — a clarity she has not felt in years. She walks back to Noah's house in the early morning light.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Noah",
+        "text": "You're here early.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I made a choice.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Are you sure?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I've never been more sure of anything.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "What about everything you had with him?",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "He was a good man. But I was living someone else's version of my life.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I need to know this is real. That you're not going to leave again.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I'm not leaving. This is where I'm supposed to be.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "How do you know?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Because I spent seven years trying to forget you and I couldn't.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Neither could I.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Then I think that means something.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "It means everything.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I love you, Noah.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I love you, Allie. I always have.",
+        "repeat": false,
+        "pauseAfter": 3
+      }
+    ]
+  },
+  {
+    "chapter": 13,
+    "title": "A Love That Never Ends",
+    "level": "C1",
+    "characters": [
+      { "name": "Narrator", "voice": "Elearning" },
+      { "name": "Noah", "voice": "male-1" },
+      { "name": "Allie", "voice": "female-1" }
+    ],
+    "dialogues": [
+      {
+        "character": "Narrator",
+        "text": "Decades pass. Noah and Allie build a life together in the house by the water. They have children and grandchildren and a love that deepens with every year. But in her later years, Allie develops dementia. She loses her memories — including Noah. He moves into the nursing home with her and reads to her every day from a notebook she wrote years ago, telling the story of their life together.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Noah",
+        "text": "Good morning. How are you feeling today?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Who are you?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I'm someone who loves you very much.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I don't remember you.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "That's alright. I remember enough for both of us.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "What are you going to read to me?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "A love story. You wrote it yourself, a long time ago.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I wrote a story?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "You wrote our story. So I could read it back to you when you forgot.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Narrator",
+        "text": "Noah reads from the old notebook slowly, with great care. He describes a summer fair and a girl in a crowd. He reads about a Ferris wheel, a first date, and a house with big windows. And as he reads, something stirs in Allie's eyes.",
+        "repeat": false,
+        "pauseAfter": 0
+      },
+      {
+        "character": "Allie",
+        "text": "That girl sounds like she was something.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "She was. She really was.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "And the boy... he loved her very much.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "He never stopped.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Do you think she loved him back?",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I know she did. With everything she had.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "Noah.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "Yes. It's me.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I remember. I remember everything.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "I knew you would. You always do.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "How long does it last?",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "A little while. Long enough.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "I don't want to lose you again.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "You never lost me. I've been here every day.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Allie",
+        "text": "That's what love is, isn't it? Staying.",
+        "repeat": false,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Noah",
+        "text": "That's exactly what it is.",
+        "repeat": true,
+        "pauseAfter": 3
+      },
+      {
+        "character": "Narrator",
+        "text": "That night, they hold each other in the quiet of the room. In the morning, the nurses find them together — both gone, peacefully, in their sleep. Noah and Allie. Side by side. As if even at the very end, neither one could leave before the other.",
+        "repeat": false,
+        "pauseAfter": 0
+      }
+    ]
+  }
+]

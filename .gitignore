@@ -33,6 +33,7 @@ coverage/
 # Local sandbox secrets
 scripts/environment.local.json
 confyLove/scripts/manifests/
+confyLove/scripts/shadowings/.generated/
 
 # CDK
 infra/cdk.out/
