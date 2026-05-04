@@ -526,36 +526,36 @@ export function AdminShadowingPage() {
             )}
           </div>
 
-          <div className="admin-session-list" style={{ marginTop: 18 }}>
+          <div className="admin-session-list admin-shadowing-list">
             {lists.map((list) => {
               const coverUploading = uploadingKey === listCoverKey(list)
 
               return (
-                <div key={list.listId} className="admin-session-item">
-                  <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                <div key={list.listId} className={`admin-session-item admin-shadowing-list-card${selectedListId === list.listId ? ' admin-session-item-highlight' : ''}`}>
+                  <div className="admin-shadowing-list-card-main">
                     {list.coverImageUrl ? (
                       <img
                         src={list.coverImageUrl}
                         alt=""
-                        style={{ width: 76, height: 76, borderRadius: 12, objectFit: 'cover', border: '1px solid rgba(148, 163, 184, 0.24)' }}
+                        className="admin-shadowing-cover"
                       />
                     ) : (
                       <div
                         aria-hidden="true"
-                        style={{ width: 76, height: 76, borderRadius: 12, background: 'rgba(15, 23, 42, 0.8)', border: '1px dashed rgba(148, 163, 184, 0.35)' }}
+                        className="admin-shadowing-cover admin-shadowing-cover-empty"
                       />
                     )}
-                    <div style={{ flex: 1 }}>
+                    <div className="admin-shadowing-list-card-copy">
                       <span>{list.category}</span>
                       <strong>{list.name}</strong>
                       <p>{list.chapters.length} capitulos · orden {list.order}</p>
                     </div>
                   </div>
-                  <div className="admin-topbar-actions" style={{ marginTop: 10 }}>
+                  <div className="admin-shadowing-card-actions">
                     <button type="button" className="btn secondary" onClick={() => setSelectedListId(list.listId)}>
                       Ver
                     </button>
-                    <label className="btn secondary" style={{ cursor: 'pointer' }}>
+                    <label className="btn secondary admin-file-button">
                       {coverUploading ? 'Subiendo cover...' : list.coverImageUrl ? 'Reemplazar cover' : 'Subir cover'}
                       <input
                         type="file"
@@ -698,38 +698,40 @@ export function AdminShadowingPage() {
             <p>Crea un capitulo y despues sube su audio.</p>
           </div>
         ) : (
-          <div className="admin-lesson-list">
+          <div className="admin-shadowing-chapter-list">
             {chapters.map((chapter) => {
               const audioUploading = uploadingKey === chapterKey(chapter)
               const subtitlesUploading = uploadingKey === `${chapterKey(chapter)}:subtitles`
               const subtitlesGenerating = generatingSubtitlesKey === chapterKey(chapter)
 
               return (
-                <div key={chapter.chapterId} className="admin-lesson-row">
-                  <div className="admin-lesson-row-main">
-                    <div className="admin-lesson-row-copy">
-                      <div className="admin-lesson-row-headline">
+                <div key={chapter.chapterId} className="admin-shadowing-chapter-card">
+                  <div className="admin-shadowing-chapter-main">
+                    <div className="admin-shadowing-chapter-title">
+                      <div>
                         <strong>{chapter.title}</strong>
-                        <span className={`admin-lesson-status-badge admin-lesson-status-${chapter.status === 'ready' ? 'ready' : 'draft'}`}>
-                          {chapter.status === 'ready' ? 'Listo' : 'Borrador'}
-                        </span>
+                        <p>{chapter.description || 'Sin descripcion'}</p>
                       </div>
-                      <p>{chapter.description || 'Sin descripcion'}</p>
-                      <p>
-                        Orden {chapter.order} · actualizado {formatDateTime(chapter.updatedAt)}
-                        {chapter.assetsBucketName ? ` · bucket ${chapter.assetsBucketName}` : ''}
-                      </p>
+                      <span className={`admin-lesson-status-badge admin-lesson-status-${chapter.status === 'ready' ? 'ready' : 'draft'}`}>
+                        {chapter.status === 'ready' ? 'Listo' : 'Borrador'}
+                      </span>
                     </div>
 
-                    <div className="admin-lesson-row-assets">
+                    <div className="admin-shadowing-chapter-meta">
+                      <span>Orden {chapter.order}</span>
+                      <span>Actualizado {formatDateTime(chapter.updatedAt)}</span>
+                      {chapter.assetsBucketName && <span>Bucket {chapter.assetsBucketName}</span>}
+                    </div>
+
+                    <div className="admin-shadowing-assets">
                       {chapter.audioUrl && <span className="tag">Audio</span>}
                       {chapter.subtitlesUrl && <span className="tag">Subtitulos</span>}
                       {chapter.durationSeconds && <span className="tag">{chapter.durationSeconds}s</span>}
                     </div>
                   </div>
 
-                  <div className="admin-topbar-actions">
-                    <label className="btn secondary" style={{ cursor: 'pointer' }}>
+                  <div className="admin-shadowing-card-actions">
+                    <label className="btn secondary admin-file-button">
                       {audioUploading ? 'Subiendo audio...' : chapter.audioUrl ? 'Reemplazar audio' : 'Subir audio'}
                       <input
                         type="file"
@@ -747,7 +749,7 @@ export function AdminShadowingPage() {
                         Escuchar audio
                       </a>
                     )}
-                    <label className="btn secondary" style={{ cursor: 'pointer' }}>
+                    <label className="btn secondary admin-file-button">
                       {subtitlesUploading ? 'Subiendo subtitulos...' : chapter.subtitlesUrl ? 'Reemplazar subtitulos' : 'Subir subtitulos'}
                       <input
                         type="file"
