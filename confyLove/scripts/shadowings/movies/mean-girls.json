@@ -1,0 +1,1353 @@
+{
+  "listName": "Mean Girls",
+  "category": "B1",
+  "order": 2,
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "New Girl in Town",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Cady", "voice": "female-1" },
+        { "name": "Mom", "voice": "female-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Cady Heron has spent her entire childhood in Africa, homeschooled by her zoologist parents. Now sixteen, she is moving to the suburbs of Chicago and starting a real American high school for the very first time. She knows the rules of the jungle — but this is a completely different kind of wild.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Cady",
+          "text": "I'm actually excited about this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mom",
+          "text": "You're going to love it, honey.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "What if nobody talks to me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mom",
+          "text": "Just smile and be yourself.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Right. Be myself. Got it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "North Shore High School is nothing like the savanna. There are no predators Cady can name, no rules she already knows. She walks through the hallways feeling completely invisible, holding a map she cannot read.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Cady",
+          "text": "Excuse me, is this room 215?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Sorry. Wrong door. Never mind.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I have no idea where I am.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "At lunch, Cady stands alone in the cafeteria with her tray. Every table seems to belong to a different group, a different species. She is about to sit on the floor when two strangers wave her over.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Cady",
+          "text": "Can I sit here with you?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I just moved here from Africa.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I don't know anyone yet.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Africa. Kenya, specifically.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Yes, I've seen real lions.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "It's actually very beautiful there.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I was homeschooled my whole life.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "This is my first real school.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "So far it's... a lot to take in.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 2,
+      "title": "The Plastics",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Cady", "voice": "female-1" },
+        { "name": "Janis", "voice": "female-3" },
+        { "name": "Damian", "voice": "male-1" },
+        { "name": "Regina", "voice": "female-2" },
+        { "name": "Gretchen", "voice": "female-4" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Janis Ian and Damian — the school's most theatrical duo — take Cady under their wing. Over lunch, they give her the most important orientation of her life: a guided tour of North Shore's social hierarchy. Nothing is more dangerous than the group at the center table.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Damian",
+          "text": "That's Regina George. She's fabulous.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "She's the queen bee. Watch out.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Damian",
+          "text": "And she knows she's gorgeous.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "She seems... really confident.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "She's mean, Cady. Really mean.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Damian",
+          "text": "They call themselves the Plastics.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Before the day is over, Regina George approaches Cady in the hallway. She is warm, complimentary, and completely disarming. Cady doesn't know yet that this is exactly how Regina operates.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Regina",
+          "text": "Oh my God, I love your bracelet.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Oh, thanks. My mom got it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "Where did she get that?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "A market. In South Africa.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "That is so fetch. I love it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gretchen",
+          "text": "Do you want to eat with us?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "You should sit with us tomorrow.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Yeah. Sure. That sounds great.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Janis sees the whole thing from across the hall. She already has a plan forming in her mind — and Cady, without knowing it, has just become her inside source.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Janis",
+          "text": "She wants you in the group.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Is that a bad thing?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "For Regina? Definitely not.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Damian",
+          "text": "For you? We'll see about that.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 3,
+      "title": "Plastic Rules",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Cady", "voice": "female-1" },
+        { "name": "Regina", "voice": "female-2" },
+        { "name": "Gretchen", "voice": "female-4" },
+        { "name": "Karen", "voice": "female-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Cady begins sitting with the Plastics every day. She learns quickly that there is an entire rulebook — unwritten but absolute. On Wednesdays they wear pink. You cannot wear a ponytail two days in a row. And above all, you do not talk about Regina behind her back.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Gretchen",
+          "text": "On Wednesdays, we wear pink.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I don't own anything pink.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gretchen",
+          "text": "We'll fix that. No worries.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Karen",
+          "text": "I can totally lend you something.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Sure. Whatever you think works.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gretchen",
+          "text": "Also, no sweatpants on Mondays.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "There are a lot of rules here.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Karen",
+          "text": "They're not that hard, actually.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gretchen",
+          "text": "Regina makes them. We follow them.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Meanwhile, Cady is reporting everything back to Janis. The two of them sit in Janis's room every evening, mapping out Regina's weaknesses like a military operation. Cady thinks it's harmless. Janis thinks it's justice.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Janis",
+          "text": "What does she talk about most?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Herself. And her ex, Aaron.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "Aaron Samuels. Of course she does.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Why? Do you know him?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "He's cute. Regina knows that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "She talks about him constantly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "Good. That's something we can use.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I don't want to hurt anyone.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "We're just evening the score, okay?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Right. The score. Got it.",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 4,
+      "title": "The Burn Book",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Cady", "voice": "female-1" },
+        { "name": "Regina", "voice": "female-2" },
+        { "name": "Gretchen", "voice": "female-4" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Regina shows Cady the Burn Book — a pink scrapbook filled with photos and cruel comments about nearly every girl at school. It is devastating and hilarious to Regina. To Cady, it is a window into something she has never seen before: organized cruelty.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Regina",
+          "text": "This is our most sacred possession.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "What is it exactly?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "It's everything we know about everyone.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gretchen",
+          "text": "Nobody outside us has seen this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "These are pretty harsh comments.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "That's the whole point, Cady.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Is there a page about me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "Not yet. You're still new.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Later, Cady tells Janis about the Burn Book. Janis's eyes light up with the kind of energy that has been waiting years to be released. She adds it to her plan immediately.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Janis",
+          "text": "A Burn Book. Wow. That's perfect.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Perfect for what, exactly?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "For taking Regina down. Obviously.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "She trusts me with that thing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "She shouldn't. That's her problem.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I don't feel great about this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "She's been ruining lives, Cady.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "She ruined mine. Remember that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Okay. Then what do we do?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "We hit her where it hurts.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "Aaron. Her looks. Her power.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 5,
+      "title": "Kalteen Bars",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Cady", "voice": "female-1" },
+        { "name": "Regina", "voice": "female-2" },
+        { "name": "Gretchen", "voice": "female-4" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The plan begins. Cady convinces Regina that Kalteen Bars — high-calorie Swedish weight-gain supplements — are actually a miracle weight-loss snack. Regina, obsessed with her body, starts eating them every day. Meanwhile, Cady begins pushing small wedges between Regina and her friends.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Cady",
+          "text": "My mom brought these from Sweden.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "What are they? They look amazing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "They're supposed to burn carbs.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "Oh my God. Give me one.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Take the whole box. Please.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "You're literally the best. Seriously.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "At the same time, Cady starts feeding Gretchen small doubts about Regina — quietly, carefully, the way a virus spreads. Gretchen is desperate for attention and easy to influence when she feels overlooked.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Cady",
+          "text": "Did Regina seem off with you today?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gretchen",
+          "text": "What do you mean? Did she say something?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Nothing. Maybe I imagined it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gretchen",
+          "text": "She's been a little cold lately.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "She probably doesn't mean it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gretchen",
+          "text": "Sometimes I feel so invisible around her.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "You're too good for that treatment.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gretchen",
+          "text": "She doesn't even listen to me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Then maybe you should speak up.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gretchen",
+          "text": "I'm scared of what she'd say.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "That fear is exactly her power.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Cady is getting better at this. Too good, perhaps. She doesn't notice yet that she is becoming the very thing she was supposed to be fighting against.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    },
+    {
+      "chapter": 6,
+      "title": "Falling for Aaron",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Cady", "voice": "female-1" },
+        { "name": "Aaron", "voice": "male-1" },
+        { "name": "Regina", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "What Cady didn't plan was falling in love. Aaron Samuels — Regina's ex-boyfriend — sits next to her in math class. He is sweet, a little oblivious, and completely out of reach while Regina is still in the picture. Cady starts pretending to be bad at math just to talk to him.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Aaron",
+          "text": "Hey, are you okay with this stuff?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Uh... not really. It's hard.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Aaron",
+          "text": "I could help you study sometime.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "That would actually be really helpful.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Aaron",
+          "text": "Cool. I'll give you my number.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Yeah. That's great. Thank you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "But Regina finds out. She doesn't get angry in the obvious way — she gets strategic. She tells Cady sweetly that she and Aaron are thinking of getting back together, just so Cady backs off before anything can start.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Regina",
+          "text": "Aaron and I talked last night.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Oh yeah? How did that go?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "Good. I think we're getting back together.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "That's... great. For you both.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "I knew you'd be happy for me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Of course. Totally happy for you.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Cady is furious. But she keeps it behind her smile. And somewhere in that moment, the line between playing a role and becoming it starts to blur.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Cady",
+          "text": "She's doing this on purpose.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "Obviously. That's what she does.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "So we speed things up then.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "Now you're starting to think clearly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I want her out of the picture.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "That's the spirit. Let's go.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 7,
+      "title": "Regina Falls",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Cady", "voice": "female-1" },
+        { "name": "Regina", "voice": "female-2" },
+        { "name": "Gretchen", "voice": "female-4" },
+        { "name": "Aaron", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The Kalteen Bars are working. Regina has gained weight and her clothes no longer fit right. Gretchen is pulling away. Aaron is paying more attention to Cady. Regina's empire is cracking — but Regina herself is still dangerous, and she hasn't figured out what's happening yet.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Regina",
+          "text": "Do these jeans look tight to you?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gretchen",
+          "text": "They look totally fine. Really.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "You're not being honest with me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gretchen",
+          "text": "They're just... maybe a bit snug.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "Oh my God. It's those stupid bars.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "What? The Swedish ones? No way.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "They made me gain weight. Cady.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "They're supposed to do the opposite.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Aaron finally asks Cady to a party. They talk for the first time without any agenda, without any games — just two people who actually like each other. It is the most honest moment Cady has had since she arrived in Illinois.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Aaron",
+          "text": "You're actually really good at math.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I may have been faking a little.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Aaron",
+          "text": "I knew it. You were so obvious.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Was it that bad? Seriously?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Aaron",
+          "text": "Kind of, yeah. But it was cute.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Please don't tell anyone. Please.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Aaron",
+          "text": "Your secret is completely safe.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Thank you. I owe you one.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Aaron",
+          "text": "Buy me a drink. We're even.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Deal. That I can absolutely do.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 8,
+      "title": "Everything Falls Apart",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Cady", "voice": "female-1" },
+        { "name": "Janis", "voice": "female-3" },
+        { "name": "Regina", "voice": "female-2" },
+        { "name": "Aaron", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Regina discovers the truth — the Kalteen Bars, the manipulation, the plot that Cady and Janis have been running all along. Her revenge is immediate and complete. She takes the Burn Book to the principal's office and submits it as evidence of bullying — adding a fake page about herself to avoid suspicion. The school implodes.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Regina",
+          "text": "You were using me the whole time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "It's not what you think, Regina.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "You came in with a whole plan.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I was trying to protect myself.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "You made me gain fifteen pounds, Cady.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I know. That was wrong. I'm sorry.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "Sorry doesn't cover any of this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The Burn Book goes viral inside North Shore. Girls are screaming in the halls. Teachers are struggling to restore order. And in the middle of it all, Janis publicly calls Cady out — not for what she did to Regina, but for what she became in the process.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Janis",
+          "text": "You became exactly like her, Cady.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "That's not fair. I was helping you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "You helped yourself. That's different.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Everything I did was for our plan.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "No. Somewhere it stopped being ours.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I don't know when that happened.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Aaron",
+          "text": "Is any part of you even real?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I don't know anymore. I'm lost.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Aaron",
+          "text": "You lied to me about everything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I was scared of being nobody here.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Aaron",
+          "text": "Being nobody is better than this.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 9,
+      "title": "The Spring Fling",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Cady", "voice": "female-1" },
+        { "name": "Regina", "voice": "female-2" },
+        { "name": "Gretchen", "voice": "female-4" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Cady is assigned community service and is required to attend remedial math tutoring as a consequence of the Burn Book fallout. She stops pretending to struggle with math and starts competing in the Academic Decathlon with genuine effort. For the first time in months, she feels like herself again.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Cady",
+          "text": "I actually want to win this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Not for strategy. Just for me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Math was always my real thing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "At the Spring Fling, Cady is unexpectedly crowned queen. Instead of keeping the plastic tiara as a trophy, she breaks it and distributes the pieces to the crowd — a symbolic act that surprises everyone, including herself.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Cady",
+          "text": "Everyone deserves a piece of this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "There shouldn't be just one queen.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I was terrible this year. Honestly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I hurt people who didn't deserve it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I'm sorry. That's all I have.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gretchen",
+          "text": "She actually just broke the crown.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "Typical. Even her apology is dramatic.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Regina, for her part, has found an unexpected outlet — lacrosse. Channeling her aggression into a sport turns out to suit her perfectly. She's still intense. She's still Regina. But somehow she's found somewhere to put all that fire.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Regina",
+          "text": "I actually feel better hitting things.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gretchen",
+          "text": "It really suits you. Honestly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "Don't tell me what suits me, Gretchen.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gretchen",
+          "text": "Right. Sorry. Old habit.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Regina",
+          "text": "At least it's honest. I'll take it.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 10,
+      "title": "After the Jungle",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Cady", "voice": "female-1" },
+        { "name": "Janis", "voice": "female-3" },
+        { "name": "Aaron", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Senior year begins. The cliques have softened at the edges — not dissolved, but less absolute. Cady walks the halls differently now: not as a spy, not as a Plastic, not as an outsider trying to decode everything. Just as herself. She's learned that surviving high school isn't about becoming someone else. It's about not losing who you were to begin with.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Cady",
+          "text": "I feel like a completely different person.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "In a good way or a bad way?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Both. Honestly, it's complicated.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "That means you actually grew up.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I should have trusted you more.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "I used you too. To be fair.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "We're even then. Clean slate.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Janis",
+          "text": "Clean slate. I can live with that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Aaron and Cady find their way back to each other — slowly, carefully, without any games this time. There's nothing to perform and nobody to report back to. It's just two people starting over with honesty as the only rule.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Aaron",
+          "text": "Can we start over? For real?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "I'd really like that. Yes.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Aaron",
+          "text": "No more math performances, though.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "No. The real me is better anyway.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Aaron",
+          "text": "The real you is a lot more interesting.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "Give me a chance to prove it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Aaron",
+          "text": "That's exactly what I'm doing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The jungle, it turns out, was never Africa. It was the hallways of North Shore High. And Cady Heron, who grew up studying how animals survive, finally learned the most important lesson: the cruelest predators are the ones who don't even know they've become one.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Cady",
+          "text": "I almost lost myself in there.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cady",
+          "text": "But I found my way back out.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    }
+  ]
+}

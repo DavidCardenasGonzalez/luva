@@ -66,8 +66,11 @@ Options:
   --work-dir <path>   Cache/temp directory. Default: shadowings/.generated
   --force             Regenerate cached TTS and silence files
   --dry-run           Validate and print the planned segment sequence only
-  --publish           After generating, publish list and chapters to the admin API
-                      Requires LUVA_ADMIN_API_URL and LUVA_ADMIN_JWT_TOKEN in .env
+  --publish           Generate MP3 outputs, transcribe them with Whisper through
+                      OpenAI, then publish list and chapters directly to AWS.
+                      Requires OPENAI_API_KEY and AWS credentials. Shadowing
+                      table/bucket names are resolved from CloudFormation unless
+                      they are set in .env.
 
 Input formats:
   Single file — single dialogue:
@@ -89,6 +92,17 @@ Voice mapping:
   If your JSON uses aliases like male_1/female_1, set:
   VOICEBOX_SHADOWING_VOICE_MAP='{"male_1":"Real Voicebox Profile","female_1":"Other Profile"}'
 `);
+}
+
+function assertPublishEnv() {
+  const missing = [process.env.OPENAI_API_KEY || process.env.OPENAI_KEY ? undefined : "OPENAI_API_KEY"].filter(Boolean);
+
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required .env value(s) for --publish: ${missing.join(", ")}. ` +
+        "Publishing writes directly to AWS and resolves table/bucket names from CloudFormation."
+    );
+  }
 }
 
 function readJson(filePath) {
@@ -248,8 +262,8 @@ function validateDialogue(data, inputPath, beepPath) {
     if (!characterByName.has(dialogue?.character)) {
       throw new Error(`dialogues[${index}] references unknown character: ${dialogue?.character}`);
     }
-    if (!dialogue?.text || typeof dialogue.text !== "string") {
-      throw new Error(`dialogues[${index}] must include text.`);
+    if (typeof getDialogueText(dialogue) !== "string" || !getDialogueText(dialogue).trim()) {
+      throw new Error(`dialogues[${index}] must include text or line.`);
     }
     const pauseAfter = Number(dialogue.pauseAfter || 0);
     if (!Number.isFinite(pauseAfter) || pauseAfter < 0) {
@@ -260,6 +274,10 @@ function validateDialogue(data, inputPath, beepPath) {
   return characterByName;
 }
 
+function getDialogueText(dialogue) {
+  return dialogue?.text ?? dialogue?.line;
+}
+
 function getProfileOverride(character, voiceMap) {
   const mappedVoice = voiceMap[character.voice] || character.voice;
   if (isUuidish(mappedVoice)) return { profileId: mappedVoice };
@@ -268,7 +286,7 @@ function getProfileOverride(character, voiceMap) {
 
 function getSpeechPath(workDir, dialogue, dialogueIndex, character) {
   const name = sanitizeName(`${dialogueIndex + 1}-${character.name}-${character.voice}`);
-  const hash = hashText(`${character.name}\n${character.voice}\n${dialogue.text}`);
+  const hash = hashText(`${character.name}\n${character.voice}\n${getDialogueText(dialogue)}`);
   return path.join(workDir, "speech", `${name}-${hash}.wav`);
 }
 
@@ -313,7 +331,7 @@ async function ensureSpeech(outputPath, dialogue, character, voiceMap, force) {
     process.env.VOICEBOX_SHADOWING_INSTRUCT ||
     `Act as ${character.name} in a short English shadowing dialogue. Speak naturally, clearly, and emotionally, without adding extra words.`;
 
-  const result = await writeGeneratedSpeech(outputPath, dialogue.text, {
+  const result = await writeGeneratedSpeech(outputPath, getDialogueText(dialogue), {
     ...voiceOverride,
     instruct,
   });
@@ -421,7 +439,7 @@ async function generateDialogueAudio(job, options, voiceMap, ffmpegPath) {
 
     const mappedVoice = voiceMap[character.voice] || character.voice;
     console.log(
-      `[${index + 1}/${dialogueData.dialogues.length}] ${character.name} (${mappedVoice}): ${dialogue.text}`
+      `[${index + 1}/${dialogueData.dialogues.length}] ${character.name} (${mappedVoice}): ${getDialogueText(dialogue)}`
     );
 
     if (!options.dryRun) {
@@ -491,6 +509,10 @@ async function main() {
   if (options.help) {
     printHelp();
     return;
+  }
+
+  if (options.publish && !options.dryRun) {
+    assertPublishEnv();
   }
 
   const inputFiles = resolveInputFiles(options.inputPath);

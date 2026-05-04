@@ -1,0 +1,213 @@
+{
+  "listName": "Frozen",
+  "category": "B1",
+  "order": 3,
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "Do You Want to Build a Snowman?",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Anna", "voice": "female-1" },
+        { "name": "Elsa", "voice": "female-2" },
+        { "name": "Kristoff", "voice": "male-1" },
+        { "name": "Hans", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "In the kingdom of Arendelle, two sisters grow up together in a castle full of magic and secrets. Elsa has a gift — she can create ice and snow with her bare hands. But after an accident injures young Anna, Elsa is terrified of her own power. The gates close. The sisters grow apart.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Anna",
+          "text": "Elsa, do you want to play?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Elsa",
+          "text": "Not now, Anna. Go back to sleep.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Anna",
+          "text": "But I'm bored and I miss you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Elsa",
+          "text": "Please. Just leave me alone.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Anna",
+          "text": "Do you want to build a snowman?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Elsa",
+          "text": "I can't come out right now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Anna",
+          "text": "Okay. Bye. I love you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Years pass behind closed doors. Their parents are lost at sea. Elsa turns eighteen and must be crowned queen. The gates of Arendelle open for one day only — and Anna, starved for connection, rushes out to meet the world.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Anna",
+          "text": "The gates are finally open today!",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Anna",
+          "text": "There will be actual people here.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Anna",
+          "text": "Maybe even someone to talk to.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Hans",
+          "text": "Are you okay? I'm so sorry.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Anna",
+          "text": "No, no. That was my fault.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Hans",
+          "text": "Prince Hans of the Southern Isles.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Anna",
+          "text": "Princess Anna of Arendelle. Hi.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Hans",
+          "text": "This is a really beautiful kingdom.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Anna",
+          "text": "It really is. I love it here.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Anna and Hans spend the entire day together and feel completely certain they are meant to be. By evening, Hans proposes — and Anna says yes without a second thought. She has been alone for so long that she mistakes excitement for love.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Hans",
+          "text": "Will you marry me, Princess Anna?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Anna",
+          "text": "Yes. Oh my gosh. Yes, yes.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Elsa",
+          "text": "You can't marry someone you just met.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Anna",
+          "text": "But we finish each other's sentences.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Elsa",
+          "text": "I said no. That is final.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Anna",
+          "text": "You don't get to control me, Elsa.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Elsa",
+          "text": "Anna, please. Just let it go.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Anna",
+          "text": "Why do you always shut me out?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Anna grabs Elsa's glove. Elsa panics — and her power explodes in front of everyone. Ice shoots from her hands. The hall goes silent. Elsa flees into the night, and winter swallows Arendelle whole.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Elsa",
+          "text": "I'm sorry. I have to go.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Anna",
+          "text": "Elsa, wait! You can fix this!",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Elsa",
+          "text": "No. I'll only make it worse.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Anna",
+          "text": "Then I'm coming after you. Now.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    }
+  ]
+}

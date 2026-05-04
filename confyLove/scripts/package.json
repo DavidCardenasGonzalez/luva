@@ -2,6 +2,7 @@
   "scripts": {
     "lessons:create": "node lessons/createLessonsFlow.js",
     "shadowing:audio": "node shadowings/generateShadowingAudio.js",
+    "shadowing:publish": "node shadowings/generateShadowingAudio.js --publish",
     "shadowing:mp3": "node shadowings/convertShadowingAudioToMp3.js",
     "voicebox:test": "node lessons/testVoicebox.js"
   },

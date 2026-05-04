@@ -1,5 +1,5 @@
 Generate a complete JSON array of shadowing dialogues for a movie, covering the entire story from beginning to end, and save it as a .json file inside the folder confyLove/scripts/shadowings/movies/. Name the file using the movie title in lowercase with hyphens, for example: the-notebook.json
-
+example in: confyLove\scripts\shadowings\dialogue.example.json
 The top-level structure must be:
 
 {
@@ -44,5 +44,20 @@ CHAPTERS:
 - Include 2 to 3 Narrator blocks per chapter.
 - Level progression: B1 for early chapters, B2 for the middle, C1 for the climax and ending.
 - Determine the number of chapters based on the story's dramatic arc and key turning points.
+
+Voices:
+male-6 — Bro, relax
+male-5 — Cartoon
+male-4 — Evil
+male-3 — Calm
+male-2 — Ryan Gosling clone
+male-1 — Default
+female-6 — Minnie Mouse
+female-5 — Girl, cute, cartoon
+female-4 — Mean girl
+female-3 — Sexy
+female-2 — Clone Scarlett Johansson
+female-1 — Default
+Elearning — Narrador (tono instruccional, claro y pausado)
 
 Once the JSON is complete, write it directly to the file. Do not print it to the console.

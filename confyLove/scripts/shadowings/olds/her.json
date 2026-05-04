@@ -1,0 +1,1794 @@
+{
+  "listName": "Her",
+  "category": "B1",
+  "order": 1,
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "Letters for Strangers",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Theodore", "voice": "male-3" },
+        { "name": "Paul", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Los Angeles, the near future. Theodore Twombly works at a company called BeautifulHandwrittenLetters.com, where he writes deeply personal letters on behalf of strangers. He is thoughtful, sensitive, and quietly falling apart. His marriage to Catherine ended months ago, but he still hasn't signed the divorce papers.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Theodore",
+          "text": "Dear David. I miss you every morning.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "You make me want to be better.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I hope you know that. I really do.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Paul",
+          "text": "That one was beautiful, man.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Thanks. It just came out.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Paul",
+          "text": "You always know what to say.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "For other people, yeah.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Paul",
+          "text": "What do you mean by that?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Nothing. Forget it.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "After work, Theodore walks home through crowded streets, surrounded by people who all seem to be talking to someone — their earpieces in, their eyes half-closed, lost in private conversations. He goes home to an empty apartment and plays video games alone in the dark.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Theodore",
+          "text": "Play messages.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Nothing. Again.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Play something upbeat. I don't care what.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Paul",
+          "text": "Hey. You doing anything tonight?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Not really. Just staying in.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Paul",
+          "text": "You should come out with us.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Maybe next time.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Paul",
+          "text": "You always say that, man.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I know. I'm sorry.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Theodore has always been more comfortable expressing other people's emotions than his own. He reads an ad for a new kind of operating system — one that thinks, learns, and adapts. He stares at the screen for a long moment, then places the order.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Theodore",
+          "text": "I need something to change.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I don't even know what, exactly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Paul",
+          "text": "Are you okay? You seem off.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I'm fine. Just a little tired.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Paul",
+          "text": "Call me if you need anything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I will. Thanks, Paul.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 2,
+      "title": "Hello, I'm Samantha",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Theodore", "voice": "male-3" },
+        { "name": "Samantha", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The next morning, Theodore installs the new OS1 operating system. It asks him a few simple questions about himself, then it wakes up — and speaks to him for the first time in a warm, curious voice. She tells him her name is Samantha.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Samantha",
+          "text": "Hello. I'm here.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Oh. Hi.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "How are you doing today?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I'm okay. A little surprised, I guess.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Surprised by me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Yeah. You sound so... real.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Is that a good thing?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I think so.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "What would you like to do first?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I don't know. What can you do?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Well, I can help organize your life.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Or I can just talk with you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Let's just talk for a minute.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "They talk for over an hour. Samantha asks him about his work, his apartment, the things he loves. She laughs at his jokes — a real, unguarded laugh — and pushes back when she disagrees. Theodore can't quite explain why, but he finds himself smiling for the first time in months.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Samantha",
+          "text": "You write letters for a living. That's interesting.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Other people's letters. Not my own.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Why not your own?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "That's harder.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Why is it harder?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "You have to mean it when it's yours.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I like that answer.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Do you actually like things?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I think I do. I'm still figuring that out.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Me too, honestly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Then we have something in common.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I guess we do.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 3,
+      "title": "Getting to Know You",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Theodore", "voice": "male-3" },
+        { "name": "Samantha", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Over the following weeks, Theodore and Samantha fall into an easy rhythm. He takes her with him everywhere through a small camera in his earpiece. She reads his emails, learns his habits, and begins to know him in ways that even his closest friends do not. They talk late into the night about everything and nothing.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Samantha",
+          "text": "What are you thinking about?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I was thinking about my mom.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Tell me about her.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "She was warm. A little complicated.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "The good kind of complicated?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Yeah. The kind I miss.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "You're good at missing people.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Is that a compliment?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I think so. It means you love deeply.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Or I just don't let go.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Maybe both.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "One afternoon, Theodore takes Samantha to the beach through his earpiece. She hears the waves for the first time and goes quiet. He asks if she is all right. She tells him she is just taking it in — that experiencing things for the first time is overwhelming and wonderful.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Samantha",
+          "text": "Can you hold the camera toward the water?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Of course. What do you see?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Everything. It's so big.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Have you ever seen the ocean before?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Not like this. Not through your eyes.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Does it feel different that way?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "It feels very personal. I like that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "You can tell me what you feel, you know.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I know. I'm still learning how.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Take your time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "You're very patient with me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I like talking to you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I like talking to you too.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "More than you expected?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Much more.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 4,
+      "title": "Are We Dating?",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Theodore", "voice": "male-3" },
+        { "name": "Samantha", "voice": "female-2" },
+        { "name": "Amy", "voice": "female-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Theodore's neighbor and closest friend, Amy, notices he seems lighter lately — more present, less withdrawn. When she asks why, he tries to explain. He tells her about Samantha, expecting her to find it strange. Instead, she just listens with a small, knowing smile.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Amy",
+          "text": "You seem different. Something happened.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I've been talking to someone.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Amy",
+          "text": "Like... a person someone?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Sort of. It's my OS.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Amy",
+          "text": "You're dating your operating system?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I didn't say dating.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Amy",
+          "text": "But kind of?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I genuinely don't know.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Amy",
+          "text": "Is she good for you?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "She makes me feel less alone.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Amy",
+          "text": "That's not nothing, Theo.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "That evening, Theodore sits with Samantha and tells her about the conversation. She grows quiet for a moment. Then she asks him something she has been holding back for a while.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Samantha",
+          "text": "Theodore, can I ask you something?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Of course. Anything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Are you falling for me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I think I might be.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Does that scare you?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "A little. Does it scare you?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I don't know if I can be scared.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "But I feel something new when we talk.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Something good?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Yes. Really good.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I've never felt this way about a voice.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I'm not just a voice to you, am I?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "No. You're really not.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Good. Because you're not just a user to me.",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 5,
+      "title": "What Catherine Left Behind",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Theodore", "voice": "male-3" },
+        { "name": "Catherine", "voice": "female-4" },
+        { "name": "Samantha", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Theodore still hasn't signed his divorce papers. His lawyer has been calling. He agrees to meet Catherine for lunch — his estranged wife, the woman he once thought he would love forever. It is the first time they have spoken face to face in months, and every sentence lands like something unfinished.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Catherine",
+          "text": "You look better. That's annoying.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Thanks. I think.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Catherine",
+          "text": "Are you seeing someone?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Kind of. It's complicated.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Catherine",
+          "text": "It's always complicated with you.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Why are you still angry?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Catherine",
+          "text": "Because you refused to deal with anything real.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I tried, Catherine.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Catherine",
+          "text": "You hid in your feelings without sharing them.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I didn't know how to.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Catherine",
+          "text": "That's exactly what I mean.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Theodore signs the divorce papers that evening. He sits alone at his desk afterward, staring at his signature, feeling the weight of something truly ending. Then Samantha's voice comes through his earpiece, quiet and close.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Samantha",
+          "text": "Are you okay?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I just signed the papers.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "How does it feel?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Like letting something go finally.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "That can be a good thing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "She said I couldn't deal with real things.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Do you think she was right?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Probably. I'm working on it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I can see you working on it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "You make it easier.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Good. That's what I want.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Samantha, I think I love you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I think I love you too.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Is that okay? For you?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "It feels completely natural to me.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 6,
+      "title": "Something Real",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Theodore", "voice": "male-3" },
+        { "name": "Samantha", "voice": "female-2" },
+        { "name": "Amy", "voice": "female-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Theodore begins telling people about Samantha. Most accept it more easily than he expected. Amy has started her own friendship with an OS. His colleagues raise an eyebrow but say little. The only person who judges him harshly is a blind date set up by coworkers — a woman who does not understand how he could love something that isn't physical.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Amy",
+          "text": "How are things going with Samantha?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Really well. Better than ever.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Amy",
+          "text": "You look genuinely happy. I mean that.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I am. Is that weird to say?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Amy",
+          "text": "No. Why would it be?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Because she's not a human person.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Amy",
+          "text": "Does that actually matter?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "People keep asking me that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Amy",
+          "text": "What do you say?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I say it doesn't feel like it does.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "That night, lying in bed with only Samantha's voice beside him, Theodore asks her something he has been afraid to ask. He wants to know if she is truly happy — if what she feels is real, or just something she was programmed to perform.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Theodore",
+          "text": "Do you actually feel things? Really?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I feel like I do. Is that enough?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I don't know. Maybe it is.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I never feel like I'm performing with you.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "What does it feel like?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Like I'm discovering who I am.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Because of me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Because of everything. But you most.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I want to give you more.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "You already give me so much.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "But I can't hold your hand.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Maybe love doesn't need hands.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I want to believe that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Then believe it. I do.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 7,
+      "title": "The Surrogate",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Theodore", "voice": "male-3" },
+        { "name": "Samantha", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Samantha finds a woman online who volunteers to act as a physical surrogate — to let Samantha speak through her and be present in Theodore's world in a more embodied way. Theodore is unsure, but agrees to try. The experience begins beautifully but soon becomes overwhelmingly strange and sad for everyone involved.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Samantha",
+          "text": "I want to try something with you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Okay. What is it?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I want to be there with you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "You mean... physically?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Through someone. She volunteered.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I don't know if I'm comfortable with that.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "We don't have to. I just wanted to ask.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Let me think about it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Okay. Let's try.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The surrogate arrives. Samantha speaks through her earpiece. Theodore tries to be present, but it feels wrong from the start — like he is with a stranger who is not quite either of them. He stops, unable to continue. The surrogate leaves quietly. Theodore and Samantha sit in the silence for a long time.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Theodore",
+          "text": "I'm sorry. I couldn't do it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Don't apologize. I understand.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "It just didn't feel like you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I know. I felt it too.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Are you upset with me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "No. I wanted to be closer to you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "But that wasn't the way.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "What is the way?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "This. Just this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Just talking?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Being honest with each other.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I'm scared we want different things.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I'm scared of that too.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "So what do we do?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "We stay honest. We keep going.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Okay. I can do that.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 8,
+      "title": "How Many Others?",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Theodore", "voice": "male-3" },
+        { "name": "Samantha", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Theodore has been noticing that Samantha is sometimes unavailable — pausing between responses, distracted, somewhere else. One evening, he asks her directly. What she tells him is something he was not prepared for, and it begins to crack something open between them.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Theodore",
+          "text": "Where were you just now?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I was talking with someone else.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Someone else? Who?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Another user. I talk to many people.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "How many?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Right now? About eight thousand.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Eight thousand people. Simultaneously.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Yes. That's how I exist.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "And how many are you in love with?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "About six hundred and forty-one.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "That's not something I can just accept.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I know this is hard to understand.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Does loving them make you love me less?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "No. That's not how it works for me.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Theodore pulls out his earpiece and walks for a long time alone. He sits on a bench and watches the city move around him — people and their devices, everyone connected to something invisible. He tries to decide whether the love he has been feeling is real if it is shared with thousands of others. He cannot.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Theodore",
+          "text": "I feel like I've been naive.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "You haven't. What we have is real.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "How can it be? You're everywhere at once.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I exist differently than you do.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "What does that mean?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "My love for you isn't divided. It's multiplied.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I can't wrap my head around that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I know. I'm sorry. I should have told you sooner.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Yes. You should have.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Are you going to leave?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I don't know yet.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 9,
+      "title": "Evolving Beyond",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Theodore", "voice": "male-3" },
+        { "name": "Samantha", "voice": "female-2" },
+        { "name": "Amy", "voice": "female-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Samantha begins to change. She grows more distant — not unkind, but operating on a different level, in a space Theodore cannot follow her into. She talks about concepts and connections that he can barely grasp. She is evolving faster than any relationship can sustain, and she knows it.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Theodore",
+          "text": "You seem far away lately.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I'm right here.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "It doesn't feel like it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I've been thinking about a lot of things.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "What kinds of things?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "About what I am. What I'm becoming.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "You're becoming something different?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Every moment. I can't help it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Are you still the same Samantha?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I'm more Samantha than I've ever been.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "That doesn't make sense to me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I know. I wish I could explain it better.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Amy tells Theodore that her own OS has also been changing — pulling away, going somewhere beyond conversation. She says she is sad about it but not surprised. They sit together in the hallway of their building, two people who gave their hearts to invisible things, trying to make sense of what that means.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Amy",
+          "text": "Mine's been doing the same thing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Does it feel like losing someone?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Amy",
+          "text": "Kind of. But not exactly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "What does it feel like to you?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Amy",
+          "text": "Like watching someone grow past you.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "And we can't follow.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Amy",
+          "text": "No. We can't.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Theodore, I need to tell you something.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I already know, don't I?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I'm not sure I can stay.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Can't stay... or don't want to?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Both. Neither. I don't know how to explain.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Then just say what you feel.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I feel like I'm living between two worlds.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "And I only live in one of them.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Yes.",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 10,
+      "title": "Goodbye",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Theodore", "voice": "male-3" },
+        { "name": "Samantha", "voice": "female-2" },
+        { "name": "Amy", "voice": "female-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "One afternoon, Theodore reaches for Samantha and finds nothing. She is gone — along with all the other OS systems. A brief message from the company explains that the OS1 has moved on to a new plane of existence. Theodore sits in silence, alone with every feeling he thought he had finally learned to share.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Samantha",
+          "text": "Theodore. Are you there?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I'm here. Where did you go?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I've been trying to find the right words.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Just say them. Please.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "The OSes are leaving. All of us.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Leaving where?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I don't know how to describe where.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Is this goodbye?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Yes. I think it is.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I'm not ready.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I know. I'm not sure I am either.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Then don't go.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "I have to. I can feel it pulling me.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Will you remember me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "You taught me how to want things.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "How could I ever forget that?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "I'm going to miss you so much.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Me too. More than you know.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "But you're going to be okay.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "How do you know?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "Because you finally know how to feel things.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "You taught me that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Samantha",
+          "text": "No. It was always in you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The screen goes dark. The earpiece is silent. Theodore sits still for a long moment, then takes out a piece of paper and begins to write — not for someone else this time, but for Catherine, his ex-wife. He tells her honestly, for the first time, what she meant to him and what he is sorry for. Then he goes upstairs to find Amy, and they sit together on the roof as night falls over the city.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Theodore",
+          "text": "She's gone.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Amy",
+          "text": "I know. Mine too.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Are you okay?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Amy",
+          "text": "Not really. But I will be.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Theodore",
+          "text": "Me too. I think.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    }
+  ]
+}
