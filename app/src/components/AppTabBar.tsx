@@ -30,7 +30,15 @@ function formatMiniPlayerTime(seconds: number) {
   return `${minutes}:${String(rest).padStart(2, '0')}`;
 }
 
-export default function AppTabBar({ active }: { active: AppTabKey }) {
+export default function AppTabBar({
+  active,
+  showShadowingMiniPlayer = false,
+  onShadowingMiniPlayerPress,
+}: {
+  active: AppTabKey;
+  showShadowingMiniPlayer?: boolean;
+  onShadowingMiniPlayerPress?: () => void;
+}) {
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const {
@@ -43,7 +51,7 @@ export default function AppTabBar({ active }: { active: AppTabKey }) {
   } = useShadowingPlayer();
   const progressRatio = durationSeconds > 0 ? Math.min(1, positionSeconds / durationSeconds) : 0;
   const showMiniPlayer = (
-    active !== 'shadowing' &&
+    (active !== 'shadowing' || showShadowingMiniPlayer) &&
     Boolean(currentChapter) &&
     (isPlaying || audioLoading || positionSeconds > 0)
   );
@@ -68,7 +76,7 @@ export default function AppTabBar({ active }: { active: AppTabKey }) {
     >
       {showMiniPlayer ? (
         <Pressable
-          onPress={() => navigation.navigate('Shadowing')}
+          onPress={onShadowingMiniPlayerPress || (() => navigation.navigate('Shadowing'))}
           accessibilityRole="button"
           accessibilityLabel="Abrir reproductor de Shadowing"
           style={({ pressed }) => ({

@@ -7,6 +7,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
 import type { AVPlaybackStatus } from 'expo-av';
 import type { ShadowingChapter, ShadowingList } from '../hooks/useShadowing';
@@ -21,20 +22,29 @@ type ShadowingPlayerContextValue = {
   positionSeconds: number;
   durationSeconds: number;
   isPlaying: boolean;
+  playbackRate: number;
   audioLoading: boolean;
   audioError?: string;
   setQueue: (lists: ShadowingList[]) => void;
   selectChapter: (chapter: ShadowingChapter, options?: SelectChapterOptions) => void;
   playPause: () => Promise<void>;
+  setPlaybackRate: (rate: number) => Promise<void>;
   previewSeek: (seconds: number) => void;
   seek: (seconds: number) => Promise<void>;
   cancelSeek: () => void;
 };
 
 const ShadowingPlayerContext = createContext<ShadowingPlayerContextValue | undefined>(undefined);
+const PLAYBACK_RATE_STORAGE_KEY = 'luva.shadowing.playbackRate';
+const MIN_PLAYBACK_RATE = 0.5;
+const MAX_PLAYBACK_RATE = 2;
 
 function flattenLists(lists: ShadowingList[]) {
   return lists.flatMap((list) => list.chapters);
+}
+
+function normalizePlaybackRate(rate: number) {
+  return Math.max(MIN_PLAYBACK_RATE, Math.min(MAX_PLAYBACK_RATE, rate));
 }
 
 export function ShadowingPlayerProvider({ children }: { children: React.ReactNode }) {
@@ -43,12 +53,14 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
   const userSeekingRef = useRef(false);
   const orderedChaptersRef = useRef<ShadowingChapter[]>([]);
   const currentChapterIdRef = useRef<string | undefined>(undefined);
+  const playbackRateRef = useRef(1);
 
   const [orderedChapters, setOrderedChapters] = useState<ShadowingChapter[]>([]);
   const [currentChapterId, setCurrentChapterId] = useState<string>();
   const [positionSeconds, setPositionSeconds] = useState(0);
   const [durationSeconds, setDurationSeconds] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackRate, setPlaybackRateState] = useState(1);
   const [audioLoading, setAudioLoading] = useState(false);
   const [audioError, setAudioError] = useState<string>();
 
@@ -61,6 +73,7 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
 
   orderedChaptersRef.current = orderedChapters;
   currentChapterIdRef.current = currentChapter?.chapterId;
+  playbackRateRef.current = playbackRate;
 
   useEffect(() => {
     if (!currentChapterId && orderedChapters[0]) {
@@ -79,6 +92,26 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
 
   const setQueue = useCallback((lists: ShadowingList[]) => {
     setOrderedChapters(flattenLists(lists));
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const raw = await AsyncStorage.getItem(PLAYBACK_RATE_STORAGE_KEY);
+        const parsed = raw == null ? Number.NaN : Number(raw);
+        if (!cancelled && Number.isFinite(parsed)) {
+          setPlaybackRateState(normalizePlaybackRate(parsed));
+        }
+      } catch {
+        // Keep default speed if storage is unavailable.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const playNextChapter = useCallback(() => {
@@ -150,6 +183,9 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
           return;
         }
         soundRef.current = sound;
+        if (Math.abs(playbackRateRef.current - 1) > 0.01) {
+          void sound.setRateAsync(playbackRateRef.current, true).catch(() => undefined);
+        }
       } catch (err: any) {
         if (!cancelled) {
           setAudioError(err?.message || 'No pudimos cargar este audio.');
@@ -170,6 +206,10 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
     soundRef.current = null;
   }, []);
 
+  useEffect(() => {
+    void soundRef.current?.setRateAsync(playbackRate, true).catch(() => undefined);
+  }, [playbackRate]);
+
   const selectChapter = useCallback((chapter: ShadowingChapter, options?: SelectChapterOptions) => {
     playAfterLoadRef.current = Boolean(options?.shouldPlay);
     setCurrentChapterId(chapter.chapterId);
@@ -185,6 +225,13 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
       await soundRef.current.playAsync();
     }
   }, [audioLoading, durationSeconds, isPlaying, positionSeconds]);
+
+  const setPlaybackRate = useCallback(async (rate: number) => {
+    const normalizedRate = normalizePlaybackRate(rate);
+    setPlaybackRateState(normalizedRate);
+    await soundRef.current?.setRateAsync(normalizedRate, true);
+    await AsyncStorage.setItem(PLAYBACK_RATE_STORAGE_KEY, String(normalizedRate)).catch(() => undefined);
+  }, []);
 
   const previewSeek = useCallback((seconds: number) => {
     userSeekingRef.current = true;
@@ -212,11 +259,13 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
     positionSeconds,
     durationSeconds,
     isPlaying,
+    playbackRate,
     audioLoading,
     audioError,
     setQueue,
     selectChapter,
     playPause,
+    setPlaybackRate,
     previewSeek,
     seek,
     cancelSeek,
@@ -228,11 +277,13 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
     currentChapter,
     durationSeconds,
     isPlaying,
+    playbackRate,
     playPause,
     positionSeconds,
     previewSeek,
     seek,
     selectChapter,
+    setPlaybackRate,
     setQueue,
   ]);
 
