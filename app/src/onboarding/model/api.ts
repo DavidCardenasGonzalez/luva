@@ -1,7 +1,8 @@
 import { api } from '../../api/api';
-import type { FriendChatPayload } from '../../hooks/useFriends';
 import {
+  OnboardingChatPayload,
   DEFAULT_ONBOARDING_STEPS,
+  OnboardingCharacterId,
   OnboardingContentResponse,
   OnboardingConversationMessage,
   OnboardingStepContent,
@@ -97,8 +98,10 @@ export async function fetchOnboardingContent(): Promise<OnboardingStepContent[]>
 }
 
 export async function sendOnboardingChatMessage(payload: {
+  sessionId?: string;
   transcript: string;
+  characterId?: OnboardingCharacterId;
   history?: Array<{ role: 'user' | 'assistant'; content: string }>;
-}): Promise<FriendChatPayload> {
-  return api.post<FriendChatPayload>('/onboarding/chat', payload);
+}): Promise<OnboardingChatPayload> {
+  return api.post<OnboardingChatPayload>('/onboarding/chat', payload);
 }

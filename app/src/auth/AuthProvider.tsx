@@ -34,6 +34,8 @@ type AuthUser = {
   email: string;
   cognitoSub?: string;
   displayName?: string;
+  bio?: string;
+  goal?: string;
   givenName?: string;
   familyName?: string;
   pictureUrl?: string;
@@ -54,6 +56,8 @@ type PromoCodeRedemptionResult = {
 
 type CurrentUserUpdatePayload = {
   displayName?: string;
+  bio?: string;
+  goal?: string;
   pictureUrl?: string;
   authProvider?: AuthProviderName;
   promoCode?: string;

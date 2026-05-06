@@ -1,17 +1,20 @@
 import { useRef, useState } from 'react';
 import {
+  Image,
   Pressable,
   ScrollView,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { Video, ResizeMode } from 'expo-av';
 import { MaterialIcons } from '@expo/vector-icons';
-import { OnboardingStepContent } from '../model/types';
+import { OnboardingCharacterId, OnboardingStepContent } from '../model/types';
 import { GradientText } from '../components/GradientText';
 
 // Replace with actual CloudFront URL when assets are ready
-const CHARACTERS_VIDEO_URL = 'https://d1example.cloudfront.net/luva/characters-intro.mp4';
+// const CHARACTERS_VIDEO_URL = 'https://d2ozl81tz5pxlo.cloudfront.net/feedPostVideos/20260505001422-6018cb09-1e65-4c11-814c-3192637e8558.mp4';
+const CHARACTERS_VIDEO_URL = 'https://d2ozl81tz5pxlo.cloudfront.net/feedPostVideos/20260506005036-c0d8c3bf-d4a8-4829-8f9d-fc2c1bab65b5.mp4';
 
 const COLORS = {
   text: '#f8fafc',
@@ -21,32 +24,32 @@ const COLORS = {
   cardBorder: 'rgba(148, 163, 184, 0.18)',
 };
 
-type CharacterId = 'luna' | 'mateo';
-
 const CHARACTERS = [
   {
-    id: 'luna' as CharacterId,
-    name: 'Luna',
+    id: 'zoe' as OnboardingCharacterId,
+    name: 'Zoe',
     age: '25 años',
-    traits: 'Creativa • Amante de los viajes',
+    traits: 'Creativa • Lifestyle • Emociones',
     description: 'Amigable, positiva y divertida.',
-    catchphrase: 'Te ayuda a ganar confianza y hablar sin miedo.',
+    catchphrase: 'Puedes hablarme de tus emociones y me encantará escuchar.',
     color: '#a855f7',
     avatarBg: 'rgba(109, 40, 217, 0.45)',
     cardBg: 'rgba(109, 40, 217, 0.08)',
+    image: require('./Zoe.png'),
     speechHeadline: '¡Elígeme!',
     speechBody: 'Haré que hablar\ninglés sea\ndivertido 😎',
   },
   {
-    id: 'mateo' as CharacterId,
+    id: 'mateo' as OnboardingCharacterId,
     name: 'Mateo',
     age: '32 años',
-    traits: 'Coach • Fan del fitness',
+    traits: 'Música • Viajes • Fitness',
     description: 'Motivador, paciente y claro.',
-    catchphrase: 'Te reta a mejorar y alcanzar tus metas en inglés.',
+    catchphrase: 'Tengo miles de historias para contarte, cuéntame las tuyas.',
     color: '#22d3ee',
-    avatarBg: 'rgba(6, 78, 105, 0.55)',
-    cardBg: 'rgba(6, 78, 105, 0.08)',
+    avatarBg: 'rgba(6, 79, 105, 0.42)',
+    cardBg: 'rgba(25, 85, 106, 0.23)',
+    image: require('./Mateo.png'),
     speechHeadline: '¡Elígeme a mí!',
     speechBody: 'Juntos llevaremos\ntu inglés al\nsiguiente nivel. 💪',
   },
@@ -54,12 +57,21 @@ const CHARACTERS = [
 
 const FILL: object = { position: 'absolute' as const, top: 0, left: 0, right: 0, bottom: 0 };
 
-export default function Step3({ content: _content }: { content: OnboardingStepContent }) {
+type Props = {
+  content: OnboardingStepContent;
+  selectedCharacter: OnboardingCharacterId | null;
+  onSelectCharacter: (characterId: OnboardingCharacterId) => void;
+};
+
+export default function Step3({ content: _content, selectedCharacter, onSelectCharacter }: Props) {
+  const { width } = useWindowDimensions();
   const videoRef = useRef<Video>(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  const [selectedCharacter, setSelectedCharacter] = useState<CharacterId | null>(null);
+  const [hasVideoStarted, setHasVideoStarted] = useState(false);
+  const isCompactPhone = width < 400;
 
   async function handlePlayVideo() {
+    setHasVideoStarted(true);
     setIsVideoPlaying(true);
     await videoRef.current?.playAsync();
   }
@@ -84,7 +96,7 @@ export default function Step3({ content: _content }: { content: OnboardingStepCo
         <GradientText style={{ fontSize: 34, fontWeight: '900', lineHeight: 40 }}>
           compañero
         </GradientText>
-        {' de inglés'}
+        {isCompactPhone ? '' : ' de inglés'}
       </Text>
 
       {/* Subtitle */}
@@ -107,117 +119,71 @@ export default function Step3({ content: _content }: { content: OnboardingStepCo
           overflow: 'hidden',
           height: 240,
           marginBottom: 18,
+          backgroundColor: 'rgba(255, 255, 255, 0.06)',
         }}
       >
-        {/* Placeholder: two halves (left = Luna purple, right = Mateo teal) */}
-        <View style={{ flex: 1, flexDirection: 'row' }}>
-          <View style={{ flex: 1, backgroundColor: 'rgba(109, 40, 217, 0.55)' }} />
-          <View style={{ flex: 1, backgroundColor: 'rgba(6, 78, 105, 0.65)' }} />
-        </View>
+        <Video
+          ref={videoRef}
+          style={FILL}
+          source={{ uri: CHARACTERS_VIDEO_URL }}
+          resizeMode={ResizeMode.COVER}
+          useNativeControls={hasVideoStarted}
+          onPlaybackStatusUpdate={(status) => {
+            if (!status.isLoaded) return;
 
-        {/* Video (covers placeholder while playing) */}
-        {isVideoPlaying && (
-          <Video
-            ref={videoRef}
-            style={FILL}
-            source={{ uri: CHARACTERS_VIDEO_URL }}
-            resizeMode={ResizeMode.COVER}
-            useNativeControls
-            onPlaybackStatusUpdate={(status) => {
-              if (status.isLoaded && status.didJustFinish) {
-                setIsVideoPlaying(false);
-              }
+            if (status.didJustFinish) {
+              setIsVideoPlaying(false);
+              setHasVideoStarted(false);
+              void videoRef.current?.setPositionAsync(0);
+              return;
+            }
+
+            setIsVideoPlaying(status.isPlaying);
+          }}
+        />
+
+        {/* Play button */}
+        {!hasVideoStarted && (
+          <View
+            style={{
+              ...(FILL as any),
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(7, 17, 31, 0.16)',
             }}
-          />
-        )}
-
-        {/* Overlays: speech bubbles + play button */}
-        {!isVideoPlaying && (
-          <>
-            {/* Speech bubbles row */}
-            <View
-              style={{
-                ...(FILL as any),
-                flexDirection: 'row',
-                alignItems: 'flex-start',
-                padding: 10,
-                gap: 8,
-              }}
-            >
-              {CHARACTERS.map((char) => (
-                <View
-                  key={char.id}
-                  style={{
-                    flex: 1,
-                    backgroundColor: 'rgba(10, 16, 36, 0.88)',
-                    borderRadius: 12,
-                    padding: 10,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: '#facc15',
-                      fontSize: 12,
-                      fontWeight: '900',
-                    }}
-                  >
-                    {char.speechHeadline}
-                  </Text>
-                  <Text
-                    style={{
-                      color: COLORS.text,
-                      fontSize: 12,
-                      lineHeight: 17,
-                      marginTop: 2,
-                    }}
-                  >
-                    {char.speechBody}
-                  </Text>
-                </View>
-              ))}
-            </View>
-
-            {/* Play button centered */}
-            <View
-              style={{
-                ...(FILL as any),
+          >
+            <Pressable
+              onPress={handlePlayVideo}
+              accessibilityRole="button"
+              accessibilityLabel="Ver video de personajes"
+              style={({ pressed }) => ({
+                width: 62,
+                height: 62,
+                borderRadius: 31,
+                backgroundColor: 'rgba(34, 211, 238, 0.88)',
                 alignItems: 'center',
                 justifyContent: 'center',
+                opacity: pressed ? 0.78 : 1,
+              })}
+            >
+              <MaterialIcons
+                name="play-arrow"
+                size={36}
+                color="#07111f"
+                style={{ marginLeft: 4 }}
+              />
+            </Pressable>
+            <Text
+              style={{
+                color: COLORS.text,
+                fontSize: 13,
+                fontWeight: '700',
+                marginTop: 8,
               }}
             >
-              <Pressable
-                onPress={handlePlayVideo}
-                accessibilityRole="button"
-                accessibilityLabel="Ver video de personajes"
-                style={({ pressed }) => ({
-                  width: 62,
-                  height: 62,
-                  borderRadius: 31,
-                  backgroundColor: 'rgba(34, 211, 238, 0.88)',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  opacity: pressed ? 0.78 : 1,
-                })}
-              >
-                <MaterialIcons
-                  name="play-arrow"
-                  size={36}
-                  color="#07111f"
-                  style={{ marginLeft: 4 }}
-                />
-              </Pressable>
-              <Text
-                style={{
-                  color: COLORS.text,
-                  fontSize: 13,
-                  fontWeight: '700',
-                  marginTop: 8,
-                }}
-              >
-                Ver video
-              </Text>
-            </View>
-          </>
+              Ver video
+            </Text>
+          </View>
         )}
       </View>
 
@@ -245,12 +211,15 @@ export default function Step3({ content: _content }: { content: OnboardingStepCo
           return (
             <Pressable
               key={character.id}
-              onPress={() => setSelectedCharacter(character.id)}
-              accessibilityRole="radio"
+              onPress={() => {
+                onSelectCharacter(character.id);
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={`Elegir a ${character.name}`}
               accessibilityState={{ selected: isSelected }}
               style={({ pressed }) => ({
                 flex: 1,
-                backgroundColor: isSelected ? character.cardBg : COLORS.card,
+                backgroundColor: character.cardBg,
                 borderRadius: 20,
                 borderWidth: 1.5,
                 borderColor: isSelected ? character.color : COLORS.cardBorder,
@@ -259,7 +228,7 @@ export default function Step3({ content: _content }: { content: OnboardingStepCo
                 opacity: pressed ? 0.85 : 1,
               })}
             >
-              {/* Avatar placeholder */}
+              {/* Avatar */}
               <View style={{ marginBottom: 10 }}>
                 <View
                   style={{
@@ -271,31 +240,16 @@ export default function Step3({ content: _content }: { content: OnboardingStepCo
                     borderColor: character.color,
                     alignItems: 'center',
                     justifyContent: 'center',
+                    overflow: 'hidden',
                   }}
                 >
-                  <MaterialIcons name="person" size={44} color={character.color} />
-                </View>
-                {/* Play badge */}
-                <View
-                  style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    right: 0,
-                    width: 26,
-                    height: 26,
-                    borderRadius: 13,
-                    backgroundColor: character.color,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderWidth: 2,
-                    borderColor: '#07111f',
-                  }}
-                >
-                  <MaterialIcons
-                    name="play-arrow"
-                    size={14}
-                    color="#07111f"
-                    style={{ marginLeft: 1 }}
+                  <Image
+                    source={character.image}
+                    resizeMode="cover"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                    }}
                   />
                 </View>
               </View>
@@ -330,21 +284,10 @@ export default function Step3({ content: _content }: { content: OnboardingStepCo
                   height: 1,
                   backgroundColor: 'rgba(148, 163, 184, 0.18)',
                   alignSelf: 'stretch',
-                  marginVertical: 12,
+                  marginVertical: 6,
                 }}
               />
 
-              {/* Description */}
-              <Text
-                style={{
-                  color: COLORS.text,
-                  fontSize: 13,
-                  textAlign: 'center',
-                  lineHeight: 18,
-                }}
-              >
-                {character.description}
-              </Text>
               <Text
                 style={{
                   color: character.color,

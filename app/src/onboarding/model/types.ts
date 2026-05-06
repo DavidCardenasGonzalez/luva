@@ -1,5 +1,7 @@
 export type OnboardingStepNumber = 1 | 2 | 3 | 4;
 
+export type OnboardingCharacterId = "zoe" | "mateo";
+
 export type OnboardingConversationMessage = {
   id: string;
   role: "learner" | "luvi" | "feedback";
@@ -17,6 +19,31 @@ export type OnboardingStepContent = {
   placeholderLabel?: string;
   bullets?: string[];
   conversation?: OnboardingConversationMessage[];
+};
+
+export type OnboardingChatPayload = {
+  friendId: string;
+  aiReply: string;
+  correctness: number;
+  result: "correct" | "partial" | "incorrect";
+  errors: string[];
+  reformulations: string[];
+  requirements?: Array<{
+    id: "name" | "why" | "about";
+    met: boolean;
+    evidence?: string;
+  }>;
+  profile?: {
+    name?: string;
+    bio?: string;
+    goal?: string;
+  };
+  objectiveComplete?: boolean;
+  conversationEnded: boolean;
+  conversationFeedback?: {
+    summary: string;
+    improvements: string[];
+  } | null;
 };
 
 export type OnboardingContentResponse = {

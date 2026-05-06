@@ -145,6 +145,32 @@ export default function Step1({ content }: { content: OnboardingStepContent }) {
           style={{ position: 'absolute', right: 58, top: 110 }}
         />
         <Animated.View style={{ transform: [{ translateY: mascotTranslateY }] }}>
+          <View
+            style={{
+              position: 'absolute',
+              top: 2,
+              right: -24,
+              backgroundColor: 'rgba(15, 28, 52, 0.96)',
+              borderRadius: 14,
+              borderWidth: 1,
+              borderColor: 'rgba(148, 163, 184, 0.22)',
+              paddingHorizontal: 10,
+              paddingVertical: 8,
+              zIndex: 1,
+            }}
+          >
+            <Text
+              style={{
+                color: COLORS.text,
+                fontSize: 12,
+                fontWeight: '700',
+                lineHeight: 17,
+                textAlign: 'center',
+              }}
+            >
+              {'Soy Luvi,\ntu asistente virtual'}
+            </Text>
+          </View>
           <Image
             source={luviSayingHi}
             resizeMode="contain"
@@ -168,15 +194,15 @@ export default function Step1({ content }: { content: OnboardingStepContent }) {
       >
         {messages.map((message) => {
           const isVisible = visibleMessageIds.includes(message.id);
-          if (!isVisible) {
-            return <View key={message.id} style={{ minHeight: message.role === 'feedback' ? 82 : 62 }} />;
-          }
 
           if (message.role === 'feedback') {
             const [headline, ...details] = message.text.split('\n');
             return (
               <View
                 key={message.id}
+                pointerEvents={isVisible ? 'auto' : 'none'}
+                accessibilityElementsHidden={!isVisible}
+                importantForAccessibility={isVisible ? 'auto' : 'no-hide-descendants'}
                 style={{
                   borderRadius: 18,
                   borderWidth: 1,
@@ -184,6 +210,7 @@ export default function Step1({ content }: { content: OnboardingStepContent }) {
                   padding: 14,
                   marginTop: 12,
                   backgroundColor: '#ffffff',
+                  opacity: isVisible ? 1 : 0,
                 }}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -228,6 +255,9 @@ export default function Step1({ content }: { content: OnboardingStepContent }) {
           return (
             <View
               key={message.id}
+              pointerEvents={isVisible ? 'auto' : 'none'}
+              accessibilityElementsHidden={!isVisible}
+              importantForAccessibility={isVisible ? 'auto' : 'no-hide-descendants'}
               style={{
                 alignSelf: isLearner ? 'flex-end' : 'flex-start',
                 width: isLearner ? undefined : '100%',
@@ -239,6 +269,7 @@ export default function Step1({ content }: { content: OnboardingStepContent }) {
                 backgroundColor: isLearner ? COLORS.learnerBubble : COLORS.luviBubble,
                 borderWidth: isLearner ? 0 : 1,
                 borderColor: '#e2e8f0',
+                opacity: isVisible ? 1 : 0,
               }}
             >
               {isLearner ? (

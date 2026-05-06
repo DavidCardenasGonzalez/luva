@@ -480,13 +480,19 @@ export class LuvaStack extends Stack {
       entry: path.join(__dirname, '../../backend/src/handlers/onboarding.ts'),
       handler: 'handler',
       runtime: Runtime.NODEJS_18_X,
-      memorySize: 128,
-      timeout: Duration.seconds(10),
+      memorySize: 256,
+      timeout: Duration.seconds(20),
       logGroup: onboardingFnLogGroup,
       environment: {
+        OPENAI_KEY_PARAM: openAiKeyParam.parameterName,
+        OPENAI_CHAT_MODEL: 'gpt-5.4-nano',
         STAGE: 'prod',
       },
     });
+    onboardingFn.addToRolePolicy(new PolicyStatement({
+      actions: ['ssm:GetParameter', 'ssm:GetParameters', 'ssm:GetParameterHistory'],
+      resources: [openAiKeyParam.parameterArn],
+    }));
 
     const adminFnLogGroup = new LogGroup(this, 'AdminFnLogs', { retention: RetentionDays.ONE_WEEK });
     const adminFn = new NodejsFunction(this, 'AdminFunction', {
@@ -519,7 +525,7 @@ export class LuvaStack extends Stack {
         GEMINI_TTS_MODEL: 'gemini-3.1-flash-tts-preview',
         GOOGLE_TRANSLATE_API_KEY_PARAM: googleTranslateKeyParamName,
         GOOGLE_TTS_API_KEY_PARAM: googleTranslateKeyParamName,
-        OPENAI_CHAT_MODEL: 'gpt-5.5',
+        OPENAI_CHAT_MODEL: 'gpt-5.4-nano',
         ASSETS_BUCKET_NAME: assetsBucket.bucketName,
         ASSETS_CLOUDFRONT_DOMAIN_NAME: assetsDistribution.domainName,
         ASSETS_CLOUDFRONT_URL: assetsCloudFrontUrl,
@@ -612,6 +618,7 @@ export class LuvaStack extends Stack {
     const usersMe = users.addResource('me');
     const usersMeProgress = usersMe.addResource('progress');
     const onboarding = v1.addResource('onboarding');
+    const onboardingChat = onboarding.addResource('chat');
     const friends = v1.addResource('friends');
     const friendById = friends.addResource('{friendId}');
     const friendProfile = friendById.addResource('profile');
@@ -640,6 +647,7 @@ export class LuvaStack extends Stack {
       authorizationType: AuthorizationType.COGNITO,
     });
     onboarding.addMethod('GET', onboardingLambdaIntegration);
+    onboardingChat.addMethod('POST', onboardingLambdaIntegration);
     friends.addMethod('GET', lambdaIntegration, {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
@@ -680,6 +688,7 @@ export class LuvaStack extends Stack {
         ],
         onboarding: [
           'GET /v1/onboarding',
+          'POST /v1/onboarding/chat',
         ],
         friends: [
           'GET /v1/friends',

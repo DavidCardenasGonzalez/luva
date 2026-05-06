@@ -15,6 +15,7 @@ import { markOnboardingCompleted } from './model/progress';
 import { trackOnboardingStepViewed } from './model/tracking';
 import {
   DEFAULT_ONBOARDING_STEPS,
+  OnboardingCharacterId,
   OnboardingStepContent,
 } from './model/types';
 import Step1 from './step-1/Step1';
@@ -32,11 +33,26 @@ const COLORS = {
   action: '#2563eb',
 };
 
-function renderStep(step: OnboardingStepContent, onNext: () => void) {
+function renderStep(
+  step: OnboardingStepContent,
+  onNext: () => void,
+  selectedCharacter: OnboardingCharacterId | null,
+  onSelectCharacter: (characterId: OnboardingCharacterId) => void,
+) {
   if (step.stepNumber === 1) return <Step1 content={step} />;
-  if (step.stepNumber === 2) return <Step2 content={step} />;
-  if (step.stepNumber === 3) return <Step3 content={step} />;
-  if (step.stepNumber === 4) return <Step4 content={step} onNext={onNext} />;
+  if (step.stepNumber === 2) return <Step2 content={step} onNext={onNext} />;
+  if (step.stepNumber === 3) {
+    return (
+      <Step3
+        content={step}
+        selectedCharacter={selectedCharacter}
+        onSelectCharacter={onSelectCharacter}
+      />
+    );
+  }
+  if (step.stepNumber === 4) {
+    return <Step4 content={step} selectedCharacter={selectedCharacter} onNext={onNext} />;
+  }
   return null;
 }
 
@@ -44,6 +60,7 @@ export default function OnboardingScreen({ navigation }: Props) {
   const [steps, setSteps] = useState(DEFAULT_ONBOARDING_STEPS);
   const [stepIndex, setStepIndex] = useState(0);
   const [loadingContent, setLoadingContent] = useState(true);
+  const [selectedCharacter, setSelectedCharacter] = useState<OnboardingCharacterId | null>(null);
   const trackedStepsRef = useRef<Set<number>>(new Set());
   const activeStep = steps[stepIndex] || DEFAULT_ONBOARDING_STEPS[0];
   const isLastStep = stepIndex >= steps.length - 1;
@@ -91,12 +108,17 @@ export default function OnboardingScreen({ navigation }: Props) {
     setStepIndex((current) => Math.max(0, current - 1));
   }, []);
 
+  const selectCharacter = useCallback((characterId: OnboardingCharacterId) => {
+    setSelectedCharacter(characterId);
+    setStepIndex((current) => Math.min(current + 1, steps.length - 1));
+  }, [steps.length]);
+
   const showProgress = !loadingContent && steps.length > 1;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
       <StatusBar barStyle="light-content" />
-      <View style={{ flex: 1, paddingBottom: 18 }}>
+      <View style={{ flex: 1, paddingBottom: activeStep.stepNumber === 4 ? 0 : 18 }}>
 
         {/* ── Header bar ── */}
         <View
@@ -189,10 +211,12 @@ export default function OnboardingScreen({ navigation }: Props) {
         </View>
 
         {/* ── Step content ── */}
-        <View style={{ flex: 1 }}>{renderStep(activeStep, goNext)}</View>
+        <View style={{ flex: 1 }}>
+          {renderStep(activeStep, goNext, selectedCharacter, selectCharacter)}
+        </View>
 
-        {/* ── CTA button (hidden for steps that provide their own, e.g. Step4) ── */}
-        {activeStep.primaryCta ? (
+        {/* ── CTA button (hidden for steps that provide their own controls) ── */}
+        {activeStep.primaryCta && activeStep.stepNumber !== 3 && activeStep.stepNumber !== 4 ? (
           <View style={{ paddingHorizontal: 24, marginTop: 22 }}>
             <Pressable
               onPress={goNext}

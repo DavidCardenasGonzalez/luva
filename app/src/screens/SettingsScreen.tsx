@@ -13,6 +13,7 @@ import { resetSeenTours } from '../tour/tourProgress';
 import { getRuntimeAppVersion } from '../version/appVersion';
 import { trackMixpanelPremiumActivated } from '../marketing/mixpanelEvents';
 import AccountProgressCard from '../components/AccountProgressCard';
+import { useAuth } from '../auth/AuthProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
@@ -31,9 +32,15 @@ export default function SettingsScreen({ navigation }: Props) {
   const { resetCoins } = useCoins();
   const { resetAll: resetCardProgress } = useCardProgress();
   const { resetAll: resetStoryProgress } = useStoryProgress();
+  const { isSignedIn, user, updateCurrentUser } = useAuth();
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [confirmText, setConfirmText] = useState('');
   const [resetting, setResetting] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileName, setProfileName] = useState('');
+  const [profileBio, setProfileBio] = useState('');
+  const [profileGoal, setProfileGoal] = useState('');
   const [codeInput, setCodeInput] = useState('');
   const [redeemingCode, setRedeemingCode] = useState(false);
   const [codeFeedback, setCodeFeedback] = useState<{ message: string; tone: 'success' | 'error' } | null>(null);
@@ -86,6 +93,35 @@ export default function SettingsScreen({ navigation }: Props) {
       prefillEmail,
     });
   }, [navigation]);
+
+  const openProfileEditor = useCallback(() => {
+    setProfileName(user?.displayName || '');
+    setProfileBio(user?.bio || '');
+    setProfileGoal(user?.goal || '');
+    setShowProfileModal(true);
+  }, [user?.bio, user?.displayName, user?.goal]);
+
+  const handleSaveProfile = useCallback(async () => {
+    if (savingProfile) return;
+    try {
+      setSavingProfile(true);
+      const result = await updateCurrentUser({
+        displayName: profileName.trim() || undefined,
+        bio: profileBio.trim(),
+        goal: profileGoal.trim(),
+      });
+      if (!result.user) {
+        throw new Error('PROFILE_UPDATE_FAILED');
+      }
+      setShowProfileModal(false);
+      Alert.alert('Listo', 'Tu información de cuenta fue actualizada.');
+    } catch (err) {
+      console.warn('[Settings] Error al guardar perfil', err);
+      Alert.alert('Error', 'No pudimos guardar tu información. Inténtalo de nuevo.');
+    } finally {
+      setSavingProfile(false);
+    }
+  }, [profileBio, profileGoal, profileName, savingProfile, updateCurrentUser]);
 
   const formatDate = (iso?: string | null) => {
     if (!iso) return 'Sin fecha de expiración';
@@ -193,6 +229,53 @@ export default function SettingsScreen({ navigation }: Props) {
           onCreateAccount={handleOpenEmailSignUp}
           style={{ marginBottom: 16 }}
         />
+
+        {isSignedIn ? (
+          <View
+            style={{
+              marginBottom: 16,
+              borderRadius: 20,
+              padding: 18,
+              backgroundColor: '#0b172a',
+              borderWidth: 1,
+              borderColor: '#1f2937',
+            }}
+          >
+            <Text style={{ color: '#a5f3fc', fontSize: 12, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' }}>
+              Información de cuenta
+            </Text>
+            <Text style={{ color: '#e2e8f0', fontSize: 18, fontWeight: '800', marginTop: 6 }}>
+              Tu perfil de aprendizaje
+            </Text>
+            <View style={{ marginTop: 12, gap: 10 }}>
+              <View style={{ padding: 12, borderRadius: 12, backgroundColor: '#0b172b', borderWidth: 1, borderColor: '#1e293b' }}>
+                <Text style={{ color: '#94a3b8', fontSize: 12, fontWeight: '800' }}>Nombre</Text>
+                <Text style={{ color: '#e2e8f0', marginTop: 4 }}>{user?.displayName || 'Sin nombre'}</Text>
+              </View>
+              <View style={{ padding: 12, borderRadius: 12, backgroundColor: '#0b172b', borderWidth: 1, borderColor: '#1e293b' }}>
+                <Text style={{ color: '#94a3b8', fontSize: 12, fontWeight: '800' }}>Bio</Text>
+                <Text style={{ color: '#e2e8f0', marginTop: 4 }}>{user?.bio || 'Cuéntanos un poco sobre ti.'}</Text>
+              </View>
+              <View style={{ padding: 12, borderRadius: 12, backgroundColor: '#0b172b', borderWidth: 1, borderColor: '#1e293b' }}>
+                <Text style={{ color: '#94a3b8', fontSize: 12, fontWeight: '800' }}>Meta</Text>
+                <Text style={{ color: '#e2e8f0', marginTop: 4 }}>{user?.goal || 'Define por qué quieres aprender inglés.'}</Text>
+              </View>
+            </View>
+            <Pressable
+              onPress={openProfileEditor}
+              style={({ pressed }) => ({
+                marginTop: 12,
+                padding: 14,
+                borderRadius: 14,
+                backgroundColor: pressed ? '#0e7490' : '#0891b2',
+                borderWidth: 1,
+                borderColor: '#155e75',
+              })}
+            >
+              <Text style={{ color: 'white', fontWeight: '800', textAlign: 'center' }}>Editar información</Text>
+            </Pressable>
+          </View>
+        ) : null}
 
         <View
           style={{
@@ -472,6 +555,129 @@ export default function SettingsScreen({ navigation }: Props) {
           </View>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={showProfileModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          if (!savingProfile) setShowProfileModal(false);
+        }}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <View
+            style={{
+              width: '100%',
+              borderRadius: 16,
+              backgroundColor: '#0f172a',
+              padding: 18,
+              borderWidth: 1,
+              borderColor: '#1e293b',
+              shadowColor: '#000',
+              shadowOpacity: 0.35,
+              shadowRadius: 16,
+            }}
+          >
+            <Text style={{ color: '#e2e8f0', fontWeight: '800', fontSize: 18 }}>Editar información</Text>
+            <Text style={{ color: '#94a3b8', marginTop: 8, lineHeight: 20 }}>
+              Estos datos vienen del onboarding y se usan como información de tu cuenta.
+            </Text>
+            <TextInput
+              value={profileName}
+              onChangeText={setProfileName}
+              placeholder="Nombre"
+              placeholderTextColor="#64748b"
+              editable={!savingProfile}
+              style={{
+                marginTop: 12,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: '#1e293b',
+                backgroundColor: '#0b1224',
+                color: '#e2e8f0',
+              }}
+            />
+            <TextInput
+              value={profileBio}
+              onChangeText={setProfileBio}
+              placeholder="Bio"
+              placeholderTextColor="#64748b"
+              editable={!savingProfile}
+              multiline
+              style={{
+                marginTop: 10,
+                minHeight: 82,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: '#1e293b',
+                backgroundColor: '#0b1224',
+                color: '#e2e8f0',
+                textAlignVertical: 'top',
+              }}
+            />
+            <TextInput
+              value={profileGoal}
+              onChangeText={setProfileGoal}
+              placeholder="Meta"
+              placeholderTextColor="#64748b"
+              editable={!savingProfile}
+              multiline
+              style={{
+                marginTop: 10,
+                minHeight: 70,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: '#1e293b',
+                backgroundColor: '#0b1224',
+                color: '#e2e8f0',
+                textAlignVertical: 'top',
+              }}
+            />
+            <View style={{ flexDirection: 'row', marginTop: 14, gap: 10 }}>
+              <Pressable
+                onPress={() => {
+                  if (!savingProfile) setShowProfileModal(false);
+                }}
+                disabled={savingProfile}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  paddingVertical: 12,
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: '#1e293b',
+                  backgroundColor: pressed ? '#0b1224' : '#0f172a',
+                  opacity: savingProfile ? 0.6 : 1,
+                })}
+              >
+                <Text style={{ color: '#e2e8f0', textAlign: 'center', fontWeight: '700' }}>Cancelar</Text>
+              </Pressable>
+              <Pressable
+                onPress={handleSaveProfile}
+                disabled={savingProfile}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  paddingVertical: 12,
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: '#155e75',
+                  backgroundColor: savingProfile ? '#164e63' : pressed ? '#0e7490' : '#0891b2',
+                  opacity: savingProfile ? 0.7 : 1,
+                })}
+              >
+                <Text style={{ color: 'white', textAlign: 'center', fontWeight: '800' }}>
+                  {savingProfile ? 'Guardando...' : 'Guardar'}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <Modal
         visible={showResetModal}
