@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Image,
   Pressable,
@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { Video, ResizeMode } from 'expo-av';
+import type { AVPlaybackStatus } from 'expo-av';
 import { MaterialIcons } from '@expo/vector-icons';
 import { OnboardingCharacterId, OnboardingStepContent } from '../model/types';
 import { GradientText } from '../components/GradientText';
@@ -15,6 +16,7 @@ import { GradientText } from '../components/GradientText';
 // Replace with actual CloudFront URL when assets are ready
 // const CHARACTERS_VIDEO_URL = 'https://d2ozl81tz5pxlo.cloudfront.net/feedPostVideos/20260505001422-6018cb09-1e65-4c11-814c-3192637e8558.mp4';
 const CHARACTERS_VIDEO_URL = 'https://d2ozl81tz5pxlo.cloudfront.net/feedPostVideos/20260506005036-c0d8c3bf-d4a8-4829-8f9d-fc2c1bab65b5.mp4';
+const CHARACTERS_VIDEO_SOURCE = { uri: CHARACTERS_VIDEO_URL };
 
 const COLORS = {
   text: '#f8fafc',
@@ -66,15 +68,30 @@ type Props = {
 export default function Step3({ content: _content, selectedCharacter, onSelectCharacter }: Props) {
   const { width } = useWindowDimensions();
   const videoRef = useRef<Video>(null);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [hasVideoStarted, setHasVideoStarted] = useState(false);
   const isCompactPhone = width < 400;
 
   async function handlePlayVideo() {
     setHasVideoStarted(true);
-    setIsVideoPlaying(true);
     await videoRef.current?.playAsync();
   }
+
+  const handlePlaybackStatusUpdate = useCallback((status: AVPlaybackStatus) => {
+    if (!status.isLoaded) return;
+
+    if (status.didJustFinish) {
+      setHasVideoStarted(false);
+      void videoRef.current?.setPositionAsync(0);
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      void videoRef.current?.unloadAsync().catch(() => {
+        // Best effort cleanup on unmount.
+      });
+    };
+  }, []);
 
   return (
     <ScrollView
@@ -125,21 +142,11 @@ export default function Step3({ content: _content, selectedCharacter, onSelectCh
         <Video
           ref={videoRef}
           style={FILL}
-          source={{ uri: CHARACTERS_VIDEO_URL }}
+          source={CHARACTERS_VIDEO_SOURCE}
           resizeMode={ResizeMode.COVER}
           useNativeControls={hasVideoStarted}
-          onPlaybackStatusUpdate={(status) => {
-            if (!status.isLoaded) return;
-
-            if (status.didJustFinish) {
-              setIsVideoPlaying(false);
-              setHasVideoStarted(false);
-              void videoRef.current?.setPositionAsync(0);
-              return;
-            }
-
-            setIsVideoPlaying(status.isPlaying);
-          }}
+          progressUpdateIntervalMillis={500}
+          onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
         />
 
         {/* Play button */}

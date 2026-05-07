@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   ScrollView,
   Text,
@@ -10,7 +11,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { ResizeMode, Video } from 'expo-av';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import AppTabBar from '../components/AppTabBar';
 import { Lesson, useLessons } from '../hooks/useLessons';
@@ -57,13 +57,13 @@ function LessonCard({
     >
       {/* Video preview */}
       <View style={{ width: '100%', aspectRatio: 16 / 9, backgroundColor: '#07111f' }}>
-        <Video
-          source={{ uri: lesson.videoUrl }}
-          style={{ width: '100%', height: '100%' }}
-          resizeMode={ResizeMode.COVER}
-          shouldPlay={false}
-          isMuted
-        />
+        {lesson.thumbnailUrl ? (
+          <Image source={{ uri: lesson.thumbnailUrl }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+        ) : (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <MaterialIcons name="play-circle-outline" size={42} color={COLORS.accent} />
+          </View>
+        )}
 
         {/* Completed badge */}
         {learned ? (

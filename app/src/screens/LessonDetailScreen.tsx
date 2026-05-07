@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useIsFocused } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ResizeMode, Video } from 'expo-av';
 import type { AVPlaybackStatus } from 'expo-av';
@@ -119,6 +120,7 @@ function CaptionPanel({
 export default function LessonDetailScreen({ navigation, route }: Props) {
   const { lessonId } = route.params;
   const insets = useSafeAreaInsets();
+  const isScreenFocused = useIsFocused();
   const scrollRef = useRef<ScrollView | null>(null);
   const videoRef = useRef<Video | null>(null);
   const { lesson, loading, error } = useLessonDetail(lessonId);
@@ -140,6 +142,9 @@ export default function LessonDetailScreen({ navigation, route }: Props) {
   const [question, setQuestion] = useState('');
   const [helpLoading, setHelpLoading] = useState(false);
   const [helpError, setHelpError] = useState<string | undefined>();
+  const lessonVideoSource = useMemo(() => {
+    return lesson?.videoUrl ? { uri: lesson.videoUrl } : undefined;
+  }, [lesson?.videoUrl]);
 
   useEffect(() => {
     if (!lesson?.translatedSubtitlesUrl && subtitleMode === 'en_es') {
@@ -200,6 +205,12 @@ export default function LessonDetailScreen({ navigation, route }: Props) {
       });
     }
   }, [messages.length]);
+
+  useEffect(() => {
+    if (isScreenFocused) return;
+    setIsPlaying(false);
+    setShowControls(true);
+  }, [isScreenFocused]);
 
   const activeCue = useMemo(
     () => findActiveSubtitle(cues, positionSeconds),
@@ -368,14 +379,18 @@ export default function LessonDetailScreen({ navigation, route }: Props) {
                   aspectRatio: 1,
                 }}
               >
-                <Video
-                  ref={videoRef}
-                  source={{ uri: lesson.videoUrl }}
-                  style={{ width: '100%', height: '100%' }}
-                  resizeMode={ResizeMode.CONTAIN}
-                  progressUpdateIntervalMillis={250}
-                  onPlaybackStatusUpdate={handlePlaybackStatus}
-                />
+                {isScreenFocused && lessonVideoSource ? (
+                  <Video
+                    key={lesson.videoUrl}
+                    ref={videoRef}
+                    source={lessonVideoSource}
+                    style={{ width: '100%', height: '100%' }}
+                    resizeMode={ResizeMode.CONTAIN}
+                    shouldPlay={false}
+                    progressUpdateIntervalMillis={500}
+                    onPlaybackStatusUpdate={handlePlaybackStatus}
+                  />
+                ) : null}
                 <Pressable
                   onPress={handleVideoPress}
                   style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}

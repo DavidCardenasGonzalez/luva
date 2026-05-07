@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { StackActions, useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useShadowingPlayer } from '../shadowing/ShadowingPlayerProvider';
@@ -55,6 +55,13 @@ export default function AppTabBar({
     Boolean(currentChapter) &&
     (isPlaying || audioLoading || positionSeconds > 0)
   );
+
+  const navigateToTab = (route: TabConfig['route']) => {
+    const state = navigation.getState?.();
+    const currentRouteName = state?.routes?.[state.index]?.name;
+    if (currentRouteName === route) return;
+    navigation.dispatch(StackActions.replace(route));
+  };
 
   return (
     <View
@@ -139,7 +146,7 @@ export default function AppTabBar({
           return (
             <Pressable
               key={tab.key}
-              onPress={() => navigation.navigate(tab.route)}
+              onPress={() => navigateToTab(tab.route)}
               accessibilityRole="button"
               accessibilityLabel={tab.label}
               style={({ pressed }) => ({

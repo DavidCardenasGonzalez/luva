@@ -8,6 +8,7 @@ import {
   Pressable,
   Text,
   View,
+  type ViewToken,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -158,6 +159,16 @@ function buildFeedItems(missions: PendingMission[], vocabulary: PendingVocab[], 
   return feed;
 }
 
+function getFeedMediaId(item: FeedItem) {
+  if (item.kind === 'mission' && item.mission.videoIntro?.trim()) {
+    return item.id;
+  }
+  if (item.kind === 'post' && item.videoUrl?.trim()) {
+    return item.feedId;
+  }
+  return undefined;
+}
+
 function MissionCard({
   item,
   onStart,
@@ -173,6 +184,9 @@ function MissionCard({
   const [hasVideoError, setHasVideoError] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [hasVideoEnded, setHasVideoEnded] = useState(false);
+  const introVideoSource = useMemo(() => {
+    return introVideoUrl ? { uri: introVideoUrl } : undefined;
+  }, [introVideoUrl]);
 
   useEffect(() => {
     setHasVideoError(false);
@@ -194,7 +208,7 @@ function MissionCard({
       return;
     }
 
-    setIsVideoPlaying(status.isPlaying);
+    setIsVideoPlaying((current) => (current === status.isPlaying ? current : status.isPlaying));
     if (status.didJustFinish) {
       setHasVideoEnded(true);
       setIsVideoPlaying(false);
@@ -228,18 +242,20 @@ function MissionCard({
     }
 
     setIsVideoPlaying(false);
-    void introVideoRef.current?.pauseAsync().catch((pauseErr) => {
-      console.warn('[Feed] No se pudo pausar el intro al salir de la pantalla', pauseErr);
+    void introVideoRef.current?.unloadAsync().catch((unloadErr) => {
+      console.warn('[Feed] No se pudo descargar el intro al salir de la pantalla', unloadErr);
     });
   }, [playbackEnabled]);
 
   useEffect(() => {
     return () => {
-      void introVideoRef.current?.pauseAsync().catch(() => {
+      void introVideoRef.current?.unloadAsync().catch(() => {
         // Best effort cleanup on unmount.
       });
     };
   }, []);
+
+  const shouldMountVideo = playbackEnabled && !!introVideoSource && !hasVideoError;
 
   const visualContent = (
     <View style={{ flex: 1, justifyContent: 'space-between', padding: 16 }}>
@@ -303,16 +319,18 @@ function MissionCard({
       }}
     >
       <View style={{ aspectRatio: 0.9, backgroundColor: COLORS.surfaceAlt }}>
-        {introVideoUrl && !hasVideoError ? (
+        {shouldMountVideo ? (
           <View style={{ flex: 1 }}>
             <Video
+              key={introVideoUrl}
               ref={introVideoRef}
-              source={{ uri: introVideoUrl }}
+              source={introVideoSource}
               style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
               resizeMode={ResizeMode.COVER}
               shouldPlay={false}
               isLooping={false}
               useNativeControls={false}
+              progressUpdateIntervalMillis={500}
               onPlaybackStatusUpdate={handleIntroVideoStatus}
               onError={() => {
                 setHasVideoError(true);
@@ -665,24 +683,29 @@ function FeedPostCard({
   const videoRef = useRef<Video | null>(null);
   const hasMedia = !!imageUrl || !!videoUrl;
   const canClaimExtra = item.postType === 'extra' && !!item.coinAmount && !item.claimed;
+  const videoSource = useMemo(() => {
+    return videoUrl ? { uri: videoUrl } : undefined;
+  }, [videoUrl]);
 
   useEffect(() => {
     if (playbackEnabled || !videoUrl) {
       return;
     }
 
-    void videoRef.current?.pauseAsync().catch((pauseErr) => {
-      console.warn('[Feed] No se pudo pausar el video del post al salir de la pantalla', pauseErr);
+    void videoRef.current?.unloadAsync().catch((unloadErr) => {
+      console.warn('[Feed] No se pudo descargar el video del post al salir de la pantalla', unloadErr);
     });
   }, [playbackEnabled, videoUrl]);
 
   useEffect(() => {
     return () => {
-      void videoRef.current?.pauseAsync().catch(() => {
+      void videoRef.current?.unloadAsync().catch(() => {
         // Best effort cleanup on unmount.
       });
     };
   }, []);
+
+  const shouldMountVideo = playbackEnabled && !!videoSource;
 
   const action =
     item.postType === 'practice_guide'
@@ -724,14 +747,16 @@ function FeedPostCard({
     >
       {hasMedia ? (
         <View style={{ aspectRatio: videoUrl ? 9 / 11 : 1, backgroundColor: COLORS.surfaceAlt }}>
-          {videoUrl ? (
+          {shouldMountVideo ? (
             <Video
+              key={videoUrl}
               ref={videoRef}
-              source={{ uri: videoUrl }}
+              source={videoSource}
               style={{ width: '100%', height: '100%' }}
               resizeMode={ResizeMode.COVER}
               useNativeControls
               shouldPlay={false}
+              progressUpdateIntervalMillis={1000}
             />
           ) : imageUrl ? (
             <Image source={{ uri: imageUrl }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
@@ -925,9 +950,23 @@ export default function FeedScreen({ navigation }: Props) {
   const [isInterstitialLoading, setIsInterstitialLoading] = useState(false);
   const [postActionMessage, setPostActionMessage] = useState<string>();
   const [suspendFeedVideoPlayback, setSuspendFeedVideoPlayback] = useState(false);
+  const [activeFeedMediaId, setActiveFeedMediaId] = useState<string>();
   const [litePromoExpiresAt, setLitePromoExpiresAt] = useState<number | null>(null);
   const [timerNow, setTimerNow] = useState(Date.now());
   const isOpeningMissionRef = useRef(false);
+  const viewabilityConfigRef = useRef({
+    itemVisiblePercentThreshold: 65,
+    minimumViewTime: 120,
+  });
+  const handleViewableItemsChangedRef = useRef(
+    ({ viewableItems }: { viewableItems: ViewToken<FeedItem>[] }) => {
+      const nextMediaId = viewableItems
+        .filter((entry) => entry.isViewable)
+        .map((entry) => getFeedMediaId(entry.item))
+        .find((mediaId): mediaId is string => !!mediaId);
+      setActiveFeedMediaId((current) => (current === nextMediaId ? current : nextMediaId));
+    }
+  );
 
   const videoPlaybackEnabled = isFeedFocused && !suspendFeedVideoPlayback;
   const litePromoRemainingSeconds = litePromoExpiresAt
@@ -1426,6 +1465,8 @@ export default function FeedScreen({ navigation }: Props) {
         initialNumToRender={6}
         maxToRenderPerBatch={6}
         windowSize={7}
+        viewabilityConfig={viewabilityConfigRef.current}
+        onViewableItemsChanged={handleViewableItemsChangedRef.current}
         onEndReached={loadMoreFeedItems}
         onEndReachedThreshold={0.45}
         contentContainerStyle={{
@@ -1529,7 +1570,7 @@ export default function FeedScreen({ navigation }: Props) {
             <MissionCard
               item={item}
               onStart={handleStartMission}
-              playbackEnabled={videoPlaybackEnabled}
+              playbackEnabled={videoPlaybackEnabled && activeFeedMediaId === item.id}
             />
           ) : item.kind === 'vocab' ? (
             <VocabularyCard
@@ -1545,7 +1586,7 @@ export default function FeedScreen({ navigation }: Props) {
               onMission={handleMissionPost}
               onClaimExtra={handleClaimExtraPost}
               claiming={claimingPostId === item.postId}
-              playbackEnabled={videoPlaybackEnabled}
+              playbackEnabled={videoPlaybackEnabled && activeFeedMediaId === item.feedId}
             />
           )
         }

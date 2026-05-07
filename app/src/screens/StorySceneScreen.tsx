@@ -545,6 +545,9 @@ export default function StorySceneScreen() {
   const mission = story?.missions?.[sceneIndex];
   const avatarImageUrl = mission?.avatarImageUrl?.trim();
   const introVideoUri = mission?.videoIntro?.trim();
+  const introVideoSource = useMemo(() => {
+    return introVideoUri ? { uri: introVideoUri } : undefined;
+  }, [introVideoUri]);
 
   const missionAvatar = useMemo(() => {
     if (!mission) return undefined;
@@ -1700,8 +1703,8 @@ export default function StorySceneScreen() {
 
   const closeIntroVideoModal = useCallback(() => {
     hasDismissedIntroVideo.current = true;
-    void introVideoRef.current?.stopAsync().catch((pauseErr) => {
-      console.warn('Mission intro video stop failed', pauseErr);
+    void introVideoRef.current?.unloadAsync().catch((unloadErr) => {
+      console.warn('Mission intro video unload failed', unloadErr);
     });
     setShowIntroVideoModal(false);
     setIntroVideoLoading(false);
@@ -2321,16 +2324,17 @@ export default function StorySceneScreen() {
         onRequestClose={closeIntroVideoModal}
       >
         <View style={{ flex: 1, backgroundColor: 'black' }}>
-          {showIntroVideoModal && introVideoUri ? (
+          {showIntroVideoModal && introVideoSource ? (
             <Video
+              key={introVideoUri}
               ref={introVideoRef}
-              source={{ uri: introVideoUri }}
+              source={introVideoSource}
               style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
               resizeMode={ResizeMode.COVER}
               shouldPlay
               useNativeControls={false}
               isLooping={false}
-              progressUpdateIntervalMillis={250}
+              progressUpdateIntervalMillis={500}
               onLoadStart={() => {
                 setIntroVideoLoading(true);
                 setIntroVideoError(null);
