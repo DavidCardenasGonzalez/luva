@@ -16,12 +16,17 @@ import { trackOnboardingStepViewed } from './model/tracking';
 import {
   DEFAULT_ONBOARDING_STEPS,
   OnboardingCharacterId,
+  OnboardingPhraseSelection,
+  OnboardingPlanResponse,
+  OnboardingSpeakingSummary,
   OnboardingStepContent,
 } from './model/types';
 import Step1 from './step-1/Step1';
 import Step2 from './step-2/Step2';
 import Step3 from './step-3/Step3';
 import Step4 from './step-4/Step4';
+import Step5 from './step-5/Step5';
+import Step6 from './step-6/Step6';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
 
@@ -38,9 +43,23 @@ function renderStep(
   onNext: () => void,
   selectedCharacter: OnboardingCharacterId | null,
   onSelectCharacter: (characterId: OnboardingCharacterId) => void,
+  phraseSelections: OnboardingPhraseSelection[],
+  onPhraseSelectionsChange: (selections: OnboardingPhraseSelection[]) => void,
+  speakingSummary: OnboardingSpeakingSummary,
+  onSpeakingSummaryChange: (summary: OnboardingSpeakingSummary) => void,
+  onboardingPlan: OnboardingPlanResponse | null,
+  onPlanReady: (plan: OnboardingPlanResponse) => void,
 ) {
   if (step.stepNumber === 1) return <Step1 content={step} />;
-  if (step.stepNumber === 2) return <Step2 content={step} onNext={onNext} />;
+  if (step.stepNumber === 2) {
+    return (
+      <Step2
+        content={step}
+        onNext={onNext}
+        onSelectionChange={onPhraseSelectionsChange}
+      />
+    );
+  }
   if (step.stepNumber === 3) {
     return (
       <Step3
@@ -51,7 +70,30 @@ function renderStep(
     );
   }
   if (step.stepNumber === 4) {
-    return <Step4 content={step} selectedCharacter={selectedCharacter} onNext={onNext} />;
+    return (
+      <Step4
+        content={step}
+        selectedCharacter={selectedCharacter}
+        onNext={onNext}
+        onComplete={onSpeakingSummaryChange}
+      />
+    );
+  }
+  if (step.stepNumber === 5) {
+    return (
+      <Step5
+        content={step}
+        characterId={selectedCharacter ?? 'zoe'}
+        phraseSelections={phraseSelections}
+        speakingSummary={speakingSummary}
+        existingPlan={onboardingPlan}
+        onPlanReady={onPlanReady}
+        onNext={onNext}
+      />
+    );
+  }
+  if (step.stepNumber === 6) {
+    return <Step6 content={step} plan={onboardingPlan} onNext={onNext} />;
   }
   return null;
 }
@@ -61,6 +103,12 @@ export default function OnboardingScreen({ navigation }: Props) {
   const [stepIndex, setStepIndex] = useState(0);
   const [loadingContent, setLoadingContent] = useState(true);
   const [selectedCharacter, setSelectedCharacter] = useState<OnboardingCharacterId | null>(null);
+  const [phraseSelections, setPhraseSelections] = useState<OnboardingPhraseSelection[]>([]);
+  const [speakingSummary, setSpeakingSummary] = useState<OnboardingSpeakingSummary>({
+    messages: [],
+    completedRequirementIds: [],
+  });
+  const [onboardingPlan, setOnboardingPlan] = useState<OnboardingPlanResponse | null>(null);
   const trackedStepsRef = useRef<Set<number>>(new Set());
   const activeStep = steps[stepIndex] || DEFAULT_ONBOARDING_STEPS[0];
   const isLastStep = stepIndex >= steps.length - 1;
@@ -87,8 +135,25 @@ export default function OnboardingScreen({ navigation }: Props) {
     void trackOnboardingStepViewed(activeStep);
   }, [activeStep]);
 
-  const finishOnboarding = useCallback(async () => {
+  const finishOnboarding = useCallback(async (showLiteOffer = false) => {
     await markOnboardingCompleted();
+    if (showLiteOffer) {
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Paywall',
+            params: {
+              source: 'onboarding_lite_offer',
+              variant: 'lite',
+              closeTarget: 'Feed',
+            },
+          },
+        ],
+      });
+      return;
+    }
+
     navigation.reset({
       index: 0,
       routes: [{ name: 'Feed' }],
@@ -97,12 +162,12 @@ export default function OnboardingScreen({ navigation }: Props) {
 
   const goNext = useCallback(() => {
     if (isLastStep) {
-      void finishOnboarding();
+      void finishOnboarding(activeStep.stepNumber === 6);
       return;
     }
 
     setStepIndex((current) => Math.min(current + 1, steps.length - 1));
-  }, [finishOnboarding, isLastStep, steps.length]);
+  }, [activeStep.stepNumber, finishOnboarding, isLastStep, steps.length]);
 
   const goBack = useCallback(() => {
     setStepIndex((current) => Math.max(0, current - 1));
@@ -212,11 +277,25 @@ export default function OnboardingScreen({ navigation }: Props) {
 
         {/* ── Step content ── */}
         <View style={{ flex: 1 }}>
-          {renderStep(activeStep, goNext, selectedCharacter, selectCharacter)}
+          {renderStep(
+            activeStep,
+            goNext,
+            selectedCharacter,
+            selectCharacter,
+            phraseSelections,
+            setPhraseSelections,
+            speakingSummary,
+            setSpeakingSummary,
+            onboardingPlan,
+            setOnboardingPlan,
+          )}
         </View>
 
         {/* ── CTA button (hidden for steps that provide their own controls) ── */}
-        {activeStep.primaryCta && activeStep.stepNumber !== 3 && activeStep.stepNumber !== 4 ? (
+        {activeStep.primaryCta &&
+        activeStep.stepNumber !== 3 &&
+        activeStep.stepNumber !== 4 &&
+        activeStep.stepNumber !== 6 ? (
           <View style={{ paddingHorizontal: 24, marginTop: 22 }}>
             <Pressable
               onPress={goNext}

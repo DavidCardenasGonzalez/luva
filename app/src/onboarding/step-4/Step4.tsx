@@ -24,7 +24,12 @@ import { useAuth } from '../../auth/AuthProvider';
 import useAudioRecorder from '../../shared/useAudioRecorder';
 import useUploadToS3 from '../../shared/useUploadToS3';
 import { sendOnboardingChatMessage } from '../model/api';
-import { OnboardingCharacterId, OnboardingChatPayload, OnboardingStepContent } from '../model/types';
+import {
+  OnboardingCharacterId,
+  OnboardingChatPayload,
+  OnboardingSpeakingSummary,
+  OnboardingStepContent,
+} from '../model/types';
 import { GradientText } from '../components/GradientText';
 
 const successSound = require('../../sound/succes_req.mp3');
@@ -119,9 +124,10 @@ type Props = {
   content: OnboardingStepContent;
   selectedCharacter: OnboardingCharacterId | null;
   onNext: () => void;
+  onComplete: (summary: OnboardingSpeakingSummary) => void;
 };
 
-export default function Step4({ content: _content, selectedCharacter, onNext }: Props) {
+export default function Step4({ content: _content, selectedCharacter, onNext, onComplete }: Props) {
   const { width: windowWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView>(null);
@@ -420,6 +426,17 @@ export default function Step4({ content: _content, selectedCharacter, onNext }: 
   }, [handleRecordRelease, recorder]);
 
   const handleFinishMission = useCallback(async () => {
+    onComplete({
+      messages: messages.map(({ role, text }) => ({
+        role: role as 'user' | 'assistant',
+        content: text,
+      })),
+      ...(extractedProfile.name || extractedProfile.bio || extractedProfile.goal
+        ? { profile: extractedProfile }
+        : {}),
+      completedRequirementIds: Array.from(metRequirements),
+    });
+
     if (isSignedIn && (extractedProfile.name || extractedProfile.bio || extractedProfile.goal)) {
       await updateCurrentUser({
         displayName: extractedProfile.name,
@@ -428,7 +445,7 @@ export default function Step4({ content: _content, selectedCharacter, onNext }: 
       });
     }
     onNext();
-  }, [extractedProfile, isSignedIn, onNext, updateCurrentUser]);
+  }, [extractedProfile, isSignedIn, messages, metRequirements, onComplete, onNext, updateCurrentUser]);
 
   const sendDisabled = flowState !== 'idle' || !inputText.trim();
   const micDisabled = flowState === 'recording' ? false : flowState !== 'idle';

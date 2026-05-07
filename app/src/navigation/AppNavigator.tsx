@@ -37,8 +37,10 @@ export type PaywallSource =
   | 'coin_chip'
   | 'deck_card_unlock'
   | 'home_banner'
+  | 'onboarding_lite_offer'
   | 'practice_card_unlock'
   | 'practice_recording'
+  | 'promo_lite_offer'
   | 'settings_lite'
   | 'settings_subscription'
   | 'story_mission_unlock'
@@ -75,7 +77,12 @@ export type RootStackParamList = {
   AuthCallback: undefined;
   Settings: undefined;
   EmailSignUp: { prefillEmail?: string } | undefined;
-  Paywall: { asModal?: boolean; source?: PaywallSource; variant?: 'pro' | 'lite' } | undefined;
+  Paywall: {
+    asModal?: boolean;
+    source?: PaywallSource;
+    variant?: 'pro' | 'lite';
+    closeTarget?: 'Feed';
+  } | undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

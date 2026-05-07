@@ -5,6 +5,8 @@ import {
   OnboardingCharacterId,
   OnboardingContentResponse,
   OnboardingConversationMessage,
+  OnboardingPlanRequest,
+  OnboardingPlanResponse,
   OnboardingStepContent,
   OnboardingStepNumber,
 } from './types';
@@ -21,7 +23,12 @@ function asStepNumber(value: unknown): OnboardingStepNumber | undefined {
         ? Number(value.trim())
         : Number.NaN;
 
-  return numberValue === 1 || numberValue === 2 || numberValue === 3 || numberValue === 4
+  return numberValue === 1 ||
+    numberValue === 2 ||
+    numberValue === 3 ||
+    numberValue === 4 ||
+    numberValue === 5 ||
+    numberValue === 6
     ? numberValue
     : undefined;
 }
@@ -69,7 +76,8 @@ function sanitizeStep(input: unknown): OnboardingStepContent | null {
     eyebrow: asString(raw.eyebrow) || `Paso ${stepNumber}`,
     title,
     subtitle,
-    primaryCta: asString(raw.primaryCta) || (stepNumber === 3 ? 'Comenzar' : 'Continuar'),
+    primaryCta: asString(raw.primaryCta) ||
+      (stepNumber === 3 ? 'Comenzar' : stepNumber === 4 || stepNumber === 5 ? '' : 'Continuar'),
     secondaryCta: asString(raw.secondaryCta),
     placeholderLabel: asString(raw.placeholderLabel),
     bullets,
@@ -104,4 +112,10 @@ export async function sendOnboardingChatMessage(payload: {
   history?: Array<{ role: 'user' | 'assistant'; content: string }>;
 }): Promise<OnboardingChatPayload> {
   return api.post<OnboardingChatPayload>('/onboarding/chat', payload);
+}
+
+export async function createOnboardingPlan(
+  payload: OnboardingPlanRequest,
+): Promise<OnboardingPlanResponse> {
+  return api.post<OnboardingPlanResponse>('/onboarding/plan', payload);
 }

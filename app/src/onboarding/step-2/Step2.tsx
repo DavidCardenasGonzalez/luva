@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Image,
@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { OnboardingStepContent } from '../model/types';
+import { OnboardingPhraseSelection, OnboardingStepContent } from '../model/types';
 import { GradientText } from '../components/GradientText';
 
 const luviSayingHi = require('../../image/luvi-science.gif');
@@ -96,9 +96,10 @@ const PHRASE_OPTIONS: PhraseOption[] = [
 type Props = {
   content: OnboardingStepContent;
   onNext: () => void;
+  onSelectionChange: (selections: OnboardingPhraseSelection[]) => void;
 };
 
-export default function Step2({ content, onNext }: Props) {
+export default function Step2({ content, onNext, onSelectionChange }: Props) {
   const { width } = useWindowDimensions();
   const position = useRef(new Animated.ValueXY()).current;
   const isAnimating = useRef(false);
@@ -110,6 +111,14 @@ export default function Step2({ content, onNext }: Props) {
   const nextOptions = PHRASE_OPTIONS.slice(currentIndex + 1, currentIndex + 3);
   const selectedOptions = PHRASE_OPTIONS.filter((option) => selectedIds.has(option.id));
   const exitDistance = Math.max(width, 360);
+
+  useEffect(() => {
+    onSelectionChange(
+      PHRASE_OPTIONS
+        .filter((option) => selectedIds.has(option.id))
+        .map((option) => ({ id: option.id, text: option.text })),
+    );
+  }, [onSelectionChange, selectedIds]);
 
   const cardRotation = position.x.interpolate({
     inputRange: [-160, 0, 160],

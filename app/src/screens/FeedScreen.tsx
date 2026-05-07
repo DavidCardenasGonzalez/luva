@@ -38,6 +38,7 @@ import {
   shouldShowMissionInterstitialForMission,
   showMissionInterstitialBeforeNavigation,
 } from '../shared/missionInterstitial';
+import { LITE_PROMO_EXPIRES_AT_KEY } from '../purchases/litePromo';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Feed'>;
 
@@ -90,6 +91,23 @@ const COLORS = {
 const MISSION_BATCH_SIZE = 4;
 const VOCABULARY_BATCH_SIZE = 8;
 const CLAIMED_EXTRA_POSTS_STORAGE_KEY = '@luva/feed/claimed-extra-posts';
+
+function padTimerUnit(value: number) {
+  return String(value).padStart(2, '0');
+}
+
+function getPromoTimerParts(totalSeconds: number) {
+  const safeSeconds = Math.max(0, totalSeconds);
+  const hours = Math.floor(safeSeconds / 3600);
+  const minutes = Math.floor((safeSeconds % 3600) / 60);
+  const seconds = safeSeconds % 60;
+
+  return {
+    hours: padTimerUnit(hours),
+    minutes: padTimerUnit(minutes),
+    seconds: padTimerUnit(seconds),
+  };
+}
 
 function hashString(input: string) {
   let hash = 2166136261;
@@ -756,6 +774,125 @@ function FeedPostCard({
   );
 }
 
+function PromoTimerCard({
+  remainingSeconds,
+  onPress,
+}: {
+  remainingSeconds: number;
+  onPress: () => void;
+}) {
+  const timer = getPromoTimerParts(remainingSeconds);
+
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel="Abrir oferta de bienvenida"
+      style={({ pressed }) => ({
+        marginTop: 14,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: '#c026d3',
+        backgroundColor: pressed ? 'rgba(33, 12, 61, 0.96)' : 'rgba(7, 11, 31, 0.98)',
+        padding: 16,
+        opacity: pressed ? 0.92 : 1,
+        shadowColor: '#fb3d8b',
+        shadowOpacity: 0.38,
+        shadowRadius: 15,
+        overflow: 'hidden',
+      })}
+    >
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 26,
+          right: 26,
+          height: 2,
+          backgroundColor: '#ff4fb3',
+          shadowColor: '#ff4fb3',
+          shadowOpacity: 1,
+          shadowRadius: 10,
+        }}
+      />
+      <View
+        style={{
+          position: 'absolute',
+          top: -1,
+          right: -20,
+          width: 78,
+          height: 28,
+          backgroundColor: '#ff3f8f',
+          transform: [{ rotate: '40deg' }],
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Text style={{ color: '#ffffff', fontSize: 10, fontWeight: '900' }}>-50%</Text>
+      </View>
+
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{ flex: 1, paddingRight: 14 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <MaterialIcons name="local-offer" size={14} color="#f9a8d4" />
+            <Text style={{ color: '#f9a8d4', fontSize: 10, fontWeight: '900', letterSpacing: 0.5 }}>
+              OFERTA ACTIVA
+            </Text>
+          </View>
+          <Text style={{ color: COLORS.text, fontSize: 18, fontWeight: '900', lineHeight: 22, marginTop: 7 }}>
+            {'50% de descuento\npor tiempo limitado'}
+          </Text>
+          <Text style={{ color: '#a6b0c5', fontSize: 11, lineHeight: 16, marginTop: 9 }}>
+            {'Tu promoción de bienvenida\nsigue disponible.'}
+          </Text>
+        </View>
+
+        <View style={{ width: 1, height: 66, backgroundColor: 'rgba(148, 163, 184, 0.18)' }} />
+
+        <View style={{ width: 126, alignItems: 'center', paddingLeft: 14 }}>
+          <Text style={{ color: '#94a3b8', fontSize: 8, fontWeight: '900', letterSpacing: 0.6 }}>
+            TERMINA EN
+          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TimerText value={timer.hours} />
+            <Text style={{ color: '#fb4f92', fontSize: 18, fontWeight: '900' }}>:</Text>
+            <TimerText value={timer.minutes} />
+            <Text style={{ color: '#fb4f92', fontSize: 18, fontWeight: '900' }}>:</Text>
+            <TimerText value={timer.seconds} />
+          </View>
+          <Text style={{ color: '#94a3b8', fontSize: 8, fontWeight: '900', letterSpacing: 1, marginTop: -1 }}>
+            HRS MIN SEG
+          </Text>
+          <View
+            style={{
+              minWidth: 108,
+              minHeight: 32,
+              borderRadius: 999,
+              backgroundColor: '#ff3f8f',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'row',
+              marginTop: 8,
+              gap: 4,
+            }}
+          >
+            <Text style={{ color: '#ffffff', fontSize: 12, fontWeight: '900' }}>Ver oferta</Text>
+            <MaterialIcons name="arrow-forward" size={15} color="#ffffff" />
+          </View>
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
+function TimerText({ value }: { value: string }) {
+  return (
+    <Text style={{ color: '#fb4f92', fontSize: 21, fontWeight: '900', minWidth: 27, textAlign: 'center' }}>
+      {value}
+    </Text>
+  );
+}
+
 export default function FeedScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const isFeedFocused = useIsFocused();
@@ -788,9 +925,15 @@ export default function FeedScreen({ navigation }: Props) {
   const [isInterstitialLoading, setIsInterstitialLoading] = useState(false);
   const [postActionMessage, setPostActionMessage] = useState<string>();
   const [suspendFeedVideoPlayback, setSuspendFeedVideoPlayback] = useState(false);
+  const [litePromoExpiresAt, setLitePromoExpiresAt] = useState<number | null>(null);
+  const [timerNow, setTimerNow] = useState(Date.now());
   const isOpeningMissionRef = useRef(false);
 
   const videoPlaybackEnabled = isFeedFocused && !suspendFeedVideoPlayback;
+  const litePromoRemainingSeconds = litePromoExpiresAt
+    ? Math.max(0, Math.ceil((litePromoExpiresAt - timerNow) / 1000))
+    : 0;
+  const showLitePromoTimer = Boolean(litePromoExpiresAt && litePromoRemainingSeconds > 0);
 
   useEffect(() => {
     if (isFeedFocused) {
@@ -825,6 +968,65 @@ export default function FeedScreen({ navigation }: Props) {
       reloadFeedPosts();
     }, [reloadFeedPosts])
   );
+
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+
+      const loadLitePromo = async () => {
+        try {
+          const raw = await AsyncStorage.getItem(LITE_PROMO_EXPIRES_AT_KEY);
+          const expiresAt = raw ? Number(raw) : Number.NaN;
+          const now = Date.now();
+
+          if (!Number.isFinite(expiresAt) || expiresAt <= now) {
+            if (raw) {
+              await AsyncStorage.removeItem(LITE_PROMO_EXPIRES_AT_KEY);
+            }
+            if (active) {
+              setLitePromoExpiresAt(null);
+              setTimerNow(now);
+            }
+            return;
+          }
+
+          if (active) {
+            setLitePromoExpiresAt(expiresAt);
+            setTimerNow(now);
+          }
+        } catch (err) {
+          console.warn('[Feed] No se pudo cargar el temporizador de la promo', err);
+        }
+      };
+
+      void loadLitePromo();
+      return () => {
+        active = false;
+      };
+    }, [])
+  );
+
+  useEffect(() => {
+    if (!litePromoExpiresAt) {
+      return;
+    }
+
+    const updateNow = () => setTimerNow(Date.now());
+    updateNow();
+    const interval = setInterval(updateNow, 1000);
+    return () => clearInterval(interval);
+  }, [litePromoExpiresAt]);
+
+  useEffect(() => {
+    if (!litePromoExpiresAt || litePromoRemainingSeconds > 0) {
+      return;
+    }
+
+    setLitePromoExpiresAt(null);
+    void AsyncStorage.removeItem(LITE_PROMO_EXPIRES_AT_KEY).catch((err) => {
+      console.warn('[Feed] No se pudo limpiar el temporizador de la promo', err);
+    });
+  }, [litePromoExpiresAt, litePromoRemainingSeconds]);
 
   useEffect(() => {
     let mounted = true;
@@ -1263,6 +1465,16 @@ export default function FeedScreen({ navigation }: Props) {
                 <MaterialIcons name="settings" size={26} color="#cbd5e1" />
               </Pressable>
             </View>
+
+            {showLitePromoTimer ? (
+              <PromoTimerCard
+                remainingSeconds={litePromoRemainingSeconds}
+                onPress={() => {
+                  stopFeedVideos();
+                  navigation.navigate('Paywall', { source: 'promo_lite_offer', variant: 'lite' });
+                }}
+              />
+            ) : null}
 
             {storiesError ? (
               <View

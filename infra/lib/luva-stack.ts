@@ -619,6 +619,7 @@ export class LuvaStack extends Stack {
     const usersMeProgress = usersMe.addResource('progress');
     const onboarding = v1.addResource('onboarding');
     const onboardingChat = onboarding.addResource('chat');
+    const onboardingPlan = onboarding.addResource('plan');
     const friends = v1.addResource('friends');
     const friendById = friends.addResource('{friendId}');
     const friendProfile = friendById.addResource('profile');
@@ -648,6 +649,7 @@ export class LuvaStack extends Stack {
     });
     onboarding.addMethod('GET', onboardingLambdaIntegration);
     onboardingChat.addMethod('POST', onboardingLambdaIntegration);
+    onboardingPlan.addMethod('POST', onboardingLambdaIntegration);
     friends.addMethod('GET', lambdaIntegration, {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
@@ -677,7 +679,7 @@ export class LuvaStack extends Stack {
 
     const deployment = new Deployment(this, 'Deployment', { api });
     deployment.addToLogicalId({
-      routeManifestVersion: '2026-04-27-onboarding-v1',
+      routeManifestVersion: '2026-05-06-onboarding-plan-v1',
       routes: {
         apiRoot: ['ANY /v1', 'ANY /v1/{proxy+}'],
         users: [
@@ -689,6 +691,7 @@ export class LuvaStack extends Stack {
         onboarding: [
           'GET /v1/onboarding',
           'POST /v1/onboarding/chat',
+          'POST /v1/onboarding/plan',
         ],
         friends: [
           'GET /v1/friends',
