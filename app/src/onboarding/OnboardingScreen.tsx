@@ -13,6 +13,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { fetchOnboardingContent } from './model/api';
 import { markOnboardingCompleted } from './model/progress';
 import { trackOnboardingStepViewed } from './model/tracking';
+import { saveJourneyPlan } from '../progress/journeyProgress';
 import {
   DEFAULT_ONBOARDING_STEPS,
   OnboardingCharacterId,
@@ -136,6 +137,10 @@ export default function OnboardingScreen({ navigation }: Props) {
   }, [activeStep]);
 
   const finishOnboarding = useCallback(async (showLiteOffer = false) => {
+    if (onboardingPlan) {
+      await saveJourneyPlan(onboardingPlan);
+    }
+
     await markOnboardingCompleted();
     if (showLiteOffer) {
       navigation.reset({
@@ -158,7 +163,12 @@ export default function OnboardingScreen({ navigation }: Props) {
       index: 0,
       routes: [{ name: 'Feed' }],
     });
-  }, [navigation]);
+  }, [navigation, onboardingPlan]);
+
+  const handlePlanReady = useCallback((plan: OnboardingPlanResponse) => {
+    setOnboardingPlan(plan);
+    void saveJourneyPlan(plan);
+  }, []);
 
   const goNext = useCallback(() => {
     if (isLastStep) {
@@ -287,7 +297,7 @@ export default function OnboardingScreen({ navigation }: Props) {
             speakingSummary,
             setSpeakingSummary,
             onboardingPlan,
-            setOnboardingPlan,
+            handlePlanReady,
           )}
         </View>
 

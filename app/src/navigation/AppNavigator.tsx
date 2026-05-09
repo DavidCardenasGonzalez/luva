@@ -18,6 +18,7 @@ import LessonDetailScreen from '../screens/LessonDetailScreen';
 import LessonTestScreen from '../screens/LessonTestScreen';
 import ShadowingScreen from '../screens/ShadowingScreen';
 import FeedScreen from '../screens/FeedScreen';
+import MyJourneyScreen from '../screens/MyJourneyScreen';
 import FriendsScreen from '../screens/FriendsScreen';
 import FriendChatScreen from '../screens/FriendChatScreen';
 import FriendProfileScreen from '../screens/FriendProfileScreen';
@@ -68,6 +69,7 @@ export type RootStackParamList = {
   LessonTest: { lessonId: string };
   Shadowing: undefined;
   Feed: undefined;
+  MyJourney: undefined;
   Friends: undefined;
   FriendChat: { friendId: string };
   FriendProfile: { friendId: string };
@@ -168,6 +170,7 @@ export default function AppNavigator() {
         <Stack.Screen name="LessonTest" component={LessonTestScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Shadowing" component={ShadowingScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Feed" component={FeedScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="MyJourney" component={MyJourneyScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Friends" component={FriendsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FriendChat" component={FriendChatScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FriendProfile" component={FriendProfileScreen} options={{ headerShown: false }} />

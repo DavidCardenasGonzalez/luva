@@ -350,6 +350,8 @@ export type AdminLesson = {
   translatedSubtitlesUrl?: string
   videoKey?: string
   videoUrl?: string
+  thumbnailKey?: string
+  thumbnailUrl?: string
   status: 'draft' | 'ready'
   createdAt: string
   updatedAt: string

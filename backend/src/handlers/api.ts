@@ -135,6 +135,7 @@ function computeStoriesVersion(stories: StoryDefinition[]): string {
   if (!stories || !stories.length) return 'empty';
   const normalized = stories.map((story) => ({
     storyId: story.storyId,
+    isInitial: !!story.isInitial,
     title: story.title,
     summary: story.summary,
     level: story.level || '',
@@ -171,9 +172,14 @@ function getStoriesVersion(stories?: StoryDefinition[]): string {
   return STORIES_VERSION_CACHE;
 }
 
+function sortInitialStoriesFirst(stories: StoryDefinition[]): StoryDefinition[] {
+  return [...stories].sort((left, right) => Number(!!right.isInitial) - Number(!!left.isInitial));
+}
+
 function listStorySummaries(stories: StoryDefinition[] = loadStories()): StorySummaryItem[] {
-  return stories.map((story) => ({
+  return sortInitialStoriesFirst(stories).map((story) => ({
     storyId: story.storyId,
+    isInitial: story.isInitial,
     title: story.title,
     summary: story.summary,
     level: story.level,
@@ -389,6 +395,7 @@ function sanitizeStoryDefinition(input: any, fallbackId?: string): StoryDefiniti
   if (!missions.length) return undefined;
   return {
     storyId,
+    isInitial: input.isInitial === true,
     title,
     summary,
     level: typeof input.level === 'string' ? input.level : undefined,
@@ -634,7 +641,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
     if (method === "GET" && path === `${ROUTE_PREFIX}/stories/full`) {
       const stories = loadStories();
       const version = getStoriesVersion(stories);
-      return json(200, { version, items: stories });
+      return json(200, { version, items: sortInitialStoriesFirst(stories) });
     }
 
     if (method === "GET" && path === `${ROUTE_PREFIX}/feed/posts`) {

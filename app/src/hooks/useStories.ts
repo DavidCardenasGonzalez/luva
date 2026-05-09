@@ -22,6 +22,7 @@ export type StoryMissionDefinition = {
 
 export type StoryDefinition = {
   storyId: string;
+  isInitial?: boolean;
   title: string;
   summary: string;
   level?: string;
@@ -32,6 +33,7 @@ export type StoryDefinition = {
 
 export type StorySummary = {
   storyId: string;
+  isInitial?: boolean;
   title: string;
   summary: string;
   level?: string;
@@ -62,6 +64,7 @@ export type StoryMission = {
 
 export type StoryDetail = {
   storyId: string;
+  isInitial?: boolean;
   title: string;
   summary: string;
   level?: string;
@@ -139,6 +142,7 @@ function sanitizeStory(input: any): StoryDefinition | null {
   if (!missions.length) return null;
   return {
     storyId,
+    isInitial: input.isInitial === true,
     title,
     summary,
     level: typeof input.level === 'string' ? input.level : undefined,
@@ -152,13 +156,15 @@ function sanitizeStories(list: any): StoryDefinition[] {
   if (!Array.isArray(list)) return [];
   return list
     .map((story: any) => sanitizeStory(story))
-    .filter((story): story is StoryDefinition => !!story);
+    .filter((story): story is StoryDefinition => !!story)
+    .sort((left, right) => Number(!!right.isInitial) - Number(!!left.isInitial));
 }
 
 function makeLocalVersion(stories: StoryDefinition[]): string {
   const payload = JSON.stringify(
     stories.map((story) => ({
       id: story.storyId,
+      isInitial: !!story.isInitial,
       missions: (story.missions || []).map((mission) => ({
         id: mission.missionId,
         videoIntro: mission.videoIntro || '',
@@ -257,6 +263,7 @@ async function syncStories(): Promise<StoriesCache | null> {
 function storySummaryFromDefinition(story: StoryDefinition): StorySummary {
   return {
     storyId: story.storyId,
+    isInitial: story.isInitial,
     title: story.title,
     summary: story.summary,
     level: story.level,
@@ -270,6 +277,7 @@ function storySummaryFromDefinition(story: StoryDefinition): StorySummary {
 function storyDetailFromDefinition(story: StoryDefinition): StoryDetail {
   return {
     storyId: story.storyId,
+    isInitial: story.isInitial,
     title: story.title,
     summary: story.summary,
     level: story.level,

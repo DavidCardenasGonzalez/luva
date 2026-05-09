@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../api/api';
 
 export type LessonQuizQuestion = {
@@ -48,6 +49,23 @@ type LessonDetailResponse = {
 type LessonHelpResponse = {
   answer?: string;
 };
+
+type LessonListCache = {
+  lessons: Lesson[];
+  cachedAt: string;
+};
+
+type LessonDetailCache = {
+  lesson: Lesson;
+  cachedAt: string;
+};
+
+const LESSONS_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const LESSONS_LIST_CACHE_KEY = '@luva/lessons/list-cache';
+const LESSON_DETAIL_CACHE_PREFIX = '@luva/lessons/detail-cache/';
+
+let memoryLessonsCache: LessonListCache | null = null;
+const memoryLessonDetailCache = new Map<string, LessonDetailCache>();
 
 function asString(value: unknown): string | undefined {
   return typeof value === 'string' ? value.trim() || undefined : undefined;
@@ -111,6 +129,85 @@ function sanitizeLessons(input: unknown): Lesson[] {
     .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
 }
 
+function isFreshCachedAt(cachedAt?: string): boolean {
+  if (!cachedAt) return false;
+  const timestamp = Date.parse(cachedAt);
+  return Number.isFinite(timestamp) && Date.now() - timestamp < LESSONS_CACHE_TTL_MS;
+}
+
+function lessonDetailCacheKey(lessonId: string): string {
+  return `${LESSON_DETAIL_CACHE_PREFIX}${encodeURIComponent(lessonId)}`;
+}
+
+async function readCachedLessons(allowExpired = false): Promise<LessonListCache | null> {
+  if (memoryLessonsCache && (allowExpired || isFreshCachedAt(memoryLessonsCache.cachedAt))) {
+    return memoryLessonsCache;
+  }
+
+  try {
+    const raw = await AsyncStorage.getItem(LESSONS_LIST_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const lessons = sanitizeLessons(parsed?.lessons);
+    const cachedAt = asString(parsed?.cachedAt);
+    if (!lessons.length || !cachedAt || (!allowExpired && !isFreshCachedAt(cachedAt))) return null;
+    memoryLessonsCache = { lessons, cachedAt };
+    return memoryLessonsCache;
+  } catch {
+    return null;
+  }
+}
+
+async function writeCachedLessons(lessons: Lesson[]): Promise<void> {
+  const cache = { lessons, cachedAt: new Date().toISOString() };
+  memoryLessonsCache = cache;
+  try {
+    await AsyncStorage.setItem(LESSONS_LIST_CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // Cache is an optimization; API data is still the source of truth.
+  }
+}
+
+async function readCachedLessonDetail(lessonId: string, allowExpired = false): Promise<LessonDetailCache | null> {
+  const memoryCache = memoryLessonDetailCache.get(lessonId);
+  if (memoryCache && (allowExpired || isFreshCachedAt(memoryCache.cachedAt))) {
+    return memoryCache;
+  }
+
+  try {
+    const raw = await AsyncStorage.getItem(lessonDetailCacheKey(lessonId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const lesson = sanitizeLesson(parsed?.lesson);
+    const cachedAt = asString(parsed?.cachedAt);
+    if (!lesson || !cachedAt || (!allowExpired && !isFreshCachedAt(cachedAt))) return null;
+    const cache = { lesson, cachedAt };
+    memoryLessonDetailCache.set(lessonId, cache);
+    return cache;
+  } catch {
+    return null;
+  }
+}
+
+async function writeCachedLessonDetail(lesson: Lesson): Promise<void> {
+  const cache = { lesson, cachedAt: new Date().toISOString() };
+  memoryLessonDetailCache.set(lesson.lessonId, cache);
+  try {
+    await AsyncStorage.setItem(lessonDetailCacheKey(lesson.lessonId), JSON.stringify(cache));
+  } catch {
+    // Cache is an optimization; API data is still the source of truth.
+  }
+}
+
+async function findCachedLessonDetailFromList(lessonId: string): Promise<LessonDetailCache | null> {
+  const listCache = await readCachedLessons(false);
+  const lesson = listCache?.lessons.find((item) => item.lessonId === lessonId);
+  if (!lesson || !listCache) return null;
+  const cache = { lesson, cachedAt: listCache.cachedAt };
+  memoryLessonDetailCache.set(lessonId, cache);
+  return cache;
+}
+
 export function useLessons() {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,14 +220,33 @@ export function useLessons() {
     setError(undefined);
 
     (async () => {
+      let expiredCache: LessonListCache | null = null;
       try {
+        const cached = await readCachedLessons(false);
+        if (cancelled) return;
+
+        if (cached && requestId === 0) {
+          setLessons(cached.lessons);
+          setLoading(false);
+          return;
+        }
+
+        expiredCache = await readCachedLessons(true);
+        if (expiredCache?.lessons.length) {
+          setLessons(expiredCache.lessons);
+        }
+
         const response = await api.get<LessonsResponse>('/lessons');
         if (cancelled) return;
-        setLessons(sanitizeLessons(response?.lessons));
+        const nextLessons = sanitizeLessons(response?.lessons);
+        setLessons(nextLessons);
+        void writeCachedLessons(nextLessons);
       } catch (err: any) {
         if (cancelled) return;
-        setLessons([]);
-        setError(err?.message || 'No pudimos cargar las lecciones.');
+        if (!expiredCache?.lessons.length) {
+          setLessons([]);
+          setError(err?.message || 'No pudimos cargar las lecciones.');
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -166,7 +282,22 @@ export function useLessonDetail(lessonId?: string) {
     setError(undefined);
 
     (async () => {
+      let expiredCache: LessonDetailCache | null = null;
       try {
+        const cached = (await readCachedLessonDetail(lessonId, false)) || (await findCachedLessonDetailFromList(lessonId));
+        if (cancelled) return;
+
+        if (cached) {
+          setLesson(cached.lesson);
+          setLoading(false);
+          return;
+        }
+
+        expiredCache = await readCachedLessonDetail(lessonId, true);
+        if (expiredCache?.lesson) {
+          setLesson(expiredCache.lesson);
+        }
+
         const response = await api.get<LessonDetailResponse>(`/lessons/${encodeURIComponent(lessonId)}`);
         if (cancelled) return;
         const normalized = sanitizeLesson(response?.lesson);
@@ -174,10 +305,13 @@ export function useLessonDetail(lessonId?: string) {
           throw new Error('Lección no encontrada.');
         }
         setLesson(normalized);
+        void writeCachedLessonDetail(normalized);
       } catch (err: any) {
         if (cancelled) return;
-        setLesson(undefined);
-        setError(err?.message || 'No pudimos cargar la lección.');
+        if (!expiredCache?.lesson) {
+          setLesson(undefined);
+          setError(err?.message || 'No pudimos cargar la lección.');
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }

@@ -6,6 +6,7 @@ import {
   ImageBackground,
   ImageSourcePropType,
   Pressable,
+  ScrollView,
   Text,
   View,
   type ViewToken,
@@ -19,8 +20,9 @@ import { Audio, ResizeMode, Video } from 'expo-av';
 import type { AVPlaybackStatus } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { LearningItem, useLearningItems } from '../hooks/useLearningItems';
+import { LearningItem, LearningItemOptionKey, useLearningItems } from '../hooks/useLearningItems';
 import { FeedPost, useFeedPosts } from '../hooks/useFeedPosts';
+import { FriendCharacter, useFriends } from '../hooks/useFriends';
 import { StoryMission, useStoryCatalog } from '../hooks/useStories';
 import {
   CARD_STATUS_LABELS,
@@ -40,6 +42,7 @@ import {
   showMissionInterstitialBeforeNavigation,
 } from '../shared/missionInterstitial';
 import { LITE_PROMO_EXPIRES_AT_KEY } from '../purchases/litePromo';
+import { recordJourneyVocabularyQuickGuessCorrect } from '../progress/journeyProgress';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Feed'>;
 
@@ -47,6 +50,7 @@ type PendingMission = {
   kind: 'mission';
   id: string;
   storyId: string;
+  isInitialStory?: boolean;
   storyTitle: string;
   sceneIndex: number;
   mission: StoryMission;
@@ -126,11 +130,15 @@ function pickRandom<T>(list: T[], count: number, seed: string, keyFor: (item: T)
 }
 
 function buildFeedItems(missions: PendingMission[], vocabulary: PendingVocab[], posts: FeedPostItem[]) {
+  const initialMissions = missions.filter((mission) => mission.isInitialStory);
+  const regularMissions = missions.filter((mission) => !mission.isInitialStory);
   const baseFeed: Array<PendingMission | PendingVocab> = [];
-  const blocks = Math.max(missions.length, Math.ceil(vocabulary.length / 2));
+  const blocks = Math.max(regularMissions.length, Math.ceil(vocabulary.length / 2));
+
+  baseFeed.push(...initialMissions);
 
   for (let index = 0; index < blocks; index += 1) {
-    const mission = missions[index];
+    const mission = regularMissions[index];
     if (mission) {
       baseFeed.push(mission);
     }
@@ -152,7 +160,7 @@ function buildFeedItems(missions: PendingMission[], vocabulary: PendingVocab[], 
     .forEach((post) => {
       const offset = orderOffsets.get(post.order) || 0;
       orderOffsets.set(post.order, offset + 1);
-      const targetIndex = Math.max(0, Math.min(feed.length, post.order - 1 + offset));
+      const targetIndex = Math.max(initialMissions.length, Math.min(feed.length, post.order - 1 + offset));
       feed.splice(targetIndex, 0, post);
     });
 
@@ -546,13 +554,26 @@ function VocabularyCard({
   onListen,
   onMarkLearned,
   onPractice,
+  onGuessCorrect,
 }: {
   item: PendingVocab;
   onListen: (item: PendingVocab) => void;
   onMarkLearned: (item: PendingVocab) => void;
   onPractice: (item: PendingVocab) => void;
+  onGuessCorrect: (item: PendingVocab) => void;
 }) {
   const example = item.examples?.[0] || item.prompt || 'Úsala en una oración natural.';
+  const [selectedOption, setSelectedOption] = useState<LearningItemOptionKey | null>(null);
+
+  const handleOptionPress = useCallback((key: LearningItemOptionKey) => {
+    if (selectedOption !== null) return;
+    setSelectedOption(key);
+    if (key === item.answer) {
+      onGuessCorrect(item);
+    }
+  }, [selectedOption, item, onGuessCorrect]);
+
+  const optionKeys: LearningItemOptionKey[] = ['a', 'b', 'c'];
 
   return (
     <View
@@ -614,6 +635,79 @@ function VocabularyCard({
         </Text>
       </View>
 
+      <View style={{ marginTop: 14 }}>
+        <Text style={{ color: '#cbd5e1', fontSize: 12, fontWeight: '800', textTransform: 'uppercase', marginBottom: 8 }}>
+          ¿Qué significa?
+        </Text>
+        {optionKeys.map((key) => {
+          const isCorrect = key === item.answer;
+          const isSelected = key === selectedOption;
+          const answered = selectedOption !== null;
+
+          let bgColor = '#0b172b';
+          let borderColor = COLORS.border;
+          let textColor = COLORS.text;
+
+          if (answered) {
+            if (isCorrect) {
+              bgColor = '#052e16';
+              borderColor = '#22c55e';
+              textColor = '#86efac';
+            } else if (isSelected) {
+              bgColor = '#2d0a0a';
+              borderColor = '#ef4444';
+              textColor = '#fca5a5';
+            }
+          }
+
+          return (
+            <Pressable
+              key={key}
+              onPress={() => handleOptionPress(key)}
+              disabled={answered}
+              style={({ pressed }) => ({
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                padding: 10,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor,
+                backgroundColor: !answered && pressed ? '#1e293b' : bgColor,
+                marginBottom: 6,
+              })}
+            >
+              <Text style={{ color: answered && isCorrect ? '#22c55e' : COLORS.muted, fontWeight: '800', marginRight: 8, minWidth: 16 }}>
+                {key.toUpperCase()}.
+              </Text>
+              <Text style={{ color: textColor, flex: 1, lineHeight: 19, fontSize: 13 }}>
+                {(item.options as Record<LearningItemOptionKey, string>)[key]}
+              </Text>
+              {answered && isSelected && (
+                <MaterialIcons
+                  name={isCorrect ? 'check-circle' : 'cancel'}
+                  size={18}
+                  color={isCorrect ? '#22c55e' : '#ef4444'}
+                  style={{ marginLeft: 6 }}
+                />
+              )}
+              {answered && !isSelected && isCorrect && (
+                <MaterialIcons name="check-circle" size={18} color="#22c55e" style={{ marginLeft: 6 }} />
+              )}
+            </Pressable>
+          );
+        })}
+        {selectedOption !== null && (
+          <Text style={{
+            color: selectedOption === item.answer ? '#22c55e' : COLORS.muted,
+            fontSize: 12,
+            marginTop: 4,
+            fontWeight: '700',
+          }}>
+            {selectedOption === item.answer ? '+0.5 pts en Mi Viaje ✓' : `Correcto: opción ${item.answer.toUpperCase()}`}
+          </Text>
+        )}
+      </View>
+
       <View style={{ flexDirection: 'row', marginTop: 14 }}>
         <Pressable
           onPress={() => onMarkLearned(item)}
@@ -643,9 +737,6 @@ function VocabularyCard({
         </Pressable>
       </View>
 
-      <Text style={{ color: COLORS.muted, fontSize: 12, marginTop: 10 }}>
-        Estado: {CARD_STATUS_LABELS[item.status]}
-      </Text>
     </View>
   );
 }
@@ -910,6 +1001,134 @@ function PromoTimerCard({
   );
 }
 
+function FriendStoryAvatar({
+  friend,
+  onPress,
+}: {
+  friend: FriendCharacter;
+  onPress: (friend: FriendCharacter) => void;
+}) {
+  const avatarSource = useMemo<ImageSourcePropType | undefined>(() => {
+    return friend.avatarImageUrl?.trim()
+      ? { uri: friend.avatarImageUrl }
+      : getChatAvatar(friend.missionId);
+  }, [friend.avatarImageUrl, friend.missionId]);
+  const initial = (friend.characterName.trim().charAt(0) || '?').toUpperCase();
+
+  return (
+    <Pressable
+      onPress={() => onPress(friend)}
+      accessibilityRole="button"
+      accessibilityLabel={`Ver perfil de ${friend.characterName}`}
+      style={({ pressed }) => ({
+        width: 74,
+        alignItems: 'center',
+        opacity: pressed ? 0.78 : 1,
+      })}
+    >
+      <View
+        style={{
+          width: 66,
+          height: 66,
+          borderRadius: 999,
+          padding: 3,
+          backgroundColor: '#22d3ee',
+          borderWidth: 1,
+          borderColor: 'rgba(165, 243, 252, 0.7)',
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            borderRadius: 999,
+            overflow: 'hidden',
+            backgroundColor: '#0b172b',
+            borderWidth: 3,
+            borderColor: COLORS.background,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {avatarSource ? (
+            <Image source={avatarSource} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+          ) : (
+            <Text style={{ color: COLORS.text, fontSize: 20, fontWeight: '900' }}>{initial}</Text>
+          )}
+        </View>
+      </View>
+      <Text
+        style={{
+          color: COLORS.text,
+          fontSize: 12,
+          fontWeight: '800',
+          marginTop: 7,
+          textAlign: 'center',
+          width: '100%',
+        }}
+        numberOfLines={1}
+      >
+        {friend.characterName}
+      </Text>
+    </Pressable>
+  );
+}
+
+function FriendStoriesStrip({
+  friends,
+  loading,
+  error,
+  onOpenFriend,
+}: {
+  friends: FriendCharacter[];
+  loading: boolean;
+  error?: string;
+  onOpenFriend: (friend: FriendCharacter) => void;
+}) {
+  if (error || (!loading && friends.length === 0)) {
+    return null;
+  }
+
+  const visibleFriends = friends.slice(0, 12);
+
+  return (
+    <View style={{ marginTop: 14 }}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingRight: 4, gap: 12 }}
+      >
+        {loading && visibleFriends.length === 0
+          ? [0, 1, 2, 3].map((item) => (
+              <View key={item} style={{ width: 74, alignItems: 'center' }}>
+                <View
+                  style={{
+                    width: 66,
+                    height: 66,
+                    borderRadius: 999,
+                    backgroundColor: '#111827',
+                    borderWidth: 1,
+                    borderColor: COLORS.border,
+                  }}
+                />
+                <View
+                  style={{
+                    width: 48,
+                    height: 10,
+                    borderRadius: 999,
+                    backgroundColor: '#111827',
+                    marginTop: 8,
+                  }}
+                />
+              </View>
+            ))
+          : visibleFriends.map((friend) => (
+              <FriendStoryAvatar key={friend.friendId} friend={friend} onPress={onOpenFriend} />
+            ))}
+      </ScrollView>
+    </View>
+  );
+}
+
 function TimerText({ value }: { value: string }) {
   return (
     <Text style={{ color: '#fb4f92', fontSize: 21, fontWeight: '900', minWidth: 27, textAlign: 'center' }}>
@@ -929,6 +1148,12 @@ export default function FeedScreen({ navigation }: Props) {
     error: feedPostsError,
     reload: reloadFeedPosts,
   } = useFeedPosts();
+  const {
+    friends,
+    loading: friendsLoading,
+    error: friendsError,
+    reload: reloadFriends,
+  } = useFriends();
   const {
     loading: cardProgressLoading,
     statusFor,
@@ -1005,7 +1230,8 @@ export default function FeedScreen({ navigation }: Props) {
       setVisibleMissionsCount(MISSION_BATCH_SIZE);
       setVisibleVocabularyCount(VOCABULARY_BATCH_SIZE);
       reloadFeedPosts();
-    }, [reloadFeedPosts])
+      void reloadFriends();
+    }, [reloadFeedPosts, reloadFriends])
   );
 
   useFocusEffect(
@@ -1144,6 +1370,7 @@ export default function FeedScreen({ navigation }: Props) {
           kind: 'mission' as const,
           id: `${story.storyId}:${mission.missionId}`,
           storyId: story.storyId,
+          isInitialStory: story.isInitial,
           storyTitle: story.title,
           sceneIndex,
           mission,
@@ -1304,6 +1531,10 @@ export default function FeedScreen({ navigation }: Props) {
     [setStatus]
   );
 
+  const handleGuessCorrect = useCallback((item: PendingVocab) => {
+    void recordJourneyVocabularyQuickGuessCorrect(String(item.id));
+  }, []);
+
   const openPractice = useCallback(
     async (item: LearningItem) => {
       stopFeedVideos();
@@ -1381,6 +1612,14 @@ export default function FeedScreen({ navigation }: Props) {
       await openMission(item.storyId, item.sceneIndex);
     },
     [openMission]
+  );
+
+  const handleOpenFriendProfile = useCallback(
+    (friend: FriendCharacter) => {
+      stopFeedVideos();
+      navigation.navigate('FriendProfile', { friendId: friend.friendId });
+    },
+    [navigation, stopFeedVideos]
   );
 
   const handlePracticePost = useCallback(
@@ -1517,6 +1756,13 @@ export default function FeedScreen({ navigation }: Props) {
               />
             ) : null}
 
+            <FriendStoriesStrip
+              friends={friends}
+              loading={friendsLoading}
+              error={friendsError}
+              onOpenFriend={handleOpenFriendProfile}
+            />
+
             {storiesError ? (
               <View
                 style={{
@@ -1578,6 +1824,7 @@ export default function FeedScreen({ navigation }: Props) {
               onListen={speakVocabulary}
               onMarkLearned={handleMarkLearned}
               onPractice={handlePractice}
+              onGuessCorrect={handleGuessCorrect}
             />
           ) : (
             <FeedPostCard

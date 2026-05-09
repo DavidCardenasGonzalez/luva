@@ -177,8 +177,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
     ? avatarSource.uri
     : undefined;
   const tileGap = 3;
-  const horizontalPadding = 20;
-  const tileSize = Math.floor((width - horizontalPadding * 2 - tileGap * 2) / 3);
+  const tileSize = Math.floor((width - tileGap * 2) / 3);
 
   const handleCreateAccount = useCallback((prefillEmail?: string) => {
     navigation.navigate('EmailSignUp', { prefillEmail });

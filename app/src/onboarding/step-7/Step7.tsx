@@ -26,23 +26,37 @@ const COLORS = {
 };
 
 export type PromoPaywallProduct = {
+  id?: string;
   title: string;
   price: string;
   currencyCode?: string;
   originalPrice?: string;
   monthlyEquivalent?: string;
+  billingDetails?: string;
+  priceSuffix?: string;
+  optionLabel?: string;
+  badgeLabel?: string;
+  description?: string;
 };
 
 type Props = {
+  mode?: 'promo' | 'pro';
   remainingSeconds: number;
   product?: PromoPaywallProduct;
+  products?: PromoPaywallProduct[];
+  selectedProductId?: string;
   loading: boolean;
   processing: boolean;
   restoring: boolean;
   expired: boolean;
   error: string | null;
+  title?: string;
+  subtitle?: string;
+  ctaLabel?: string;
+  helperText?: string;
   onClose: () => void;
   onPurchase: () => void;
+  onSelectProduct?: (productId: string) => void;
   onRestore: () => void;
   onOpenPrivacy: () => void;
   onOpenTerms: () => void;
@@ -69,23 +83,41 @@ const BENEFITS = [
 ];
 
 export default function Step7({
+  mode = 'promo',
   remainingSeconds,
   product,
+  products = [],
+  selectedProductId,
   loading,
   processing,
   restoring,
   expired,
   error,
+  title,
+  subtitle,
+  ctaLabel,
+  helperText,
   onClose,
   onPurchase,
+  onSelectProduct,
   onRestore,
   onOpenPrivacy,
   onOpenTerms,
 }: Props) {
   const { width } = useWindowDimensions();
+  const isPromo = mode === 'promo';
   const timer = getTimerParts(remainingSeconds);
   const bannerHeight = width * 0.67;
   const disabled = loading || processing || expired || !product;
+  const productDetails = product?.billingDetails || product?.monthlyEquivalent;
+  const titleText = title || (isPromo ? '50% de descuento' : 'Obtén acceso ilimitado con el plan Pro');
+  const subtitleText = subtitle || (isPromo ? 'por tiempo limitado' : 'Elige cómo quieres pagar');
+  const buttonText = ctaLabel || (isPromo ? 'Comenzar oferta' : 'Continuar con Pro');
+  const loadingText = isPromo ? 'Cargando oferta...' : 'Cargando planes...';
+  const footerText =
+    helperText ||
+    (isPromo ? '7 días de garantía · Cancela cuando quieras' : 'Suscripción autorrenovable · Cancela cuando quieras');
+  const showProductSwitch = !isPromo && products.length > 1 && Boolean(selectedProductId && onSelectProduct);
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.background }}>
@@ -98,7 +130,7 @@ export default function Step7({
           <Pressable
             onPress={onClose}
             accessibilityRole="button"
-            accessibilityLabel="Cerrar promoción"
+            accessibilityLabel={isPromo ? 'Cerrar promoción' : 'Cerrar paywall'}
             style={({ pressed }) => ({
               width: 38,
               height: 38,
@@ -149,50 +181,52 @@ export default function Step7({
           <Text
             style={{
               color: '#c4b5fd',
-              fontSize: 39,
+              fontSize: isPromo ? 39 : 32,
               fontWeight: '900',
-              lineHeight: 44,
+              lineHeight: isPromo ? 44 : 37,
               marginTop: 10,
               textAlign: 'center',
             }}
           >
-            50% de descuento
+            {titleText}
           </Text>
           <Text style={{ color: COLORS.text, fontSize: 24, fontWeight: '900', textAlign: 'center' }}>
-            por tiempo limitado
+            {subtitleText}
           </Text>
         </View>
 
-        <View
-          style={{
-            marginTop: 18,
-            borderRadius: 22,
-            padding: 13,
-            borderWidth: 1,
-            borderColor: expired ? 'rgba(148, 163, 184, 0.24)' : 'rgba(251, 61, 139, 0.54)',
-            backgroundColor: 'rgba(15, 23, 42, 0.70)',
-            shadowColor: COLORS.pink,
-            shadowOpacity: expired ? 0 : 0.32,
-            shadowRadius: 18,
-          }}
-        >
-          <Text style={{ color: expired ? COLORS.soft : '#fb7185', fontSize: 10, fontWeight: '900' }}>
-            {expired ? 'Esta oferta expiró' : 'Esta oferta expira en:'}
-          </Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            <TimerUnit value={timer.hours} label="HORAS" />
-            <TimerSeparator />
-            <TimerUnit value={timer.minutes} label="MINUTOS" />
-            <TimerSeparator />
-            <TimerUnit value={timer.seconds} label="SEGUNDOS" />
+        {isPromo ? (
+          <View
+            style={{
+              marginTop: 18,
+              borderRadius: 22,
+              padding: 13,
+              borderWidth: 1,
+              borderColor: expired ? 'rgba(148, 163, 184, 0.24)' : 'rgba(251, 61, 139, 0.54)',
+              backgroundColor: 'rgba(15, 23, 42, 0.70)',
+              shadowColor: COLORS.pink,
+              shadowOpacity: expired ? 0 : 0.32,
+              shadowRadius: 18,
+            }}
+          >
+            <Text style={{ color: expired ? COLORS.soft : '#fb7185', fontSize: 10, fontWeight: '900' }}>
+              {expired ? 'Esta oferta expiró' : 'Esta oferta expira en:'}
+            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <TimerUnit value={timer.hours} label="HORAS" />
+              <TimerSeparator />
+              <TimerUnit value={timer.minutes} label="MINUTOS" />
+              <TimerSeparator />
+              <TimerUnit value={timer.seconds} label="SEGUNDOS" />
+            </View>
           </View>
-        </View>
+        ) : null}
 
         <View
           style={{
             height: bannerHeight,
             marginHorizontal: -20,
-            marginTop: 8,
+            marginTop: isPromo ? 8 : 12,
           }}
         >
           <Image
@@ -224,7 +258,9 @@ export default function Step7({
                 backgroundColor: 'rgba(124, 58, 237, 0.9)',
               }}
             >
-              <Text style={{ color: '#ffffff', fontSize: 11, fontWeight: '900' }}>MEJOR VALOR</Text>
+              <Text style={{ color: '#ffffff', fontSize: 11, fontWeight: '900' }}>
+                {product?.badgeLabel || (isPromo ? 'MEJOR VALOR' : 'PLAN PRO')}
+              </Text>
             </View>
             {product?.originalPrice ? (
               <Text
@@ -239,6 +275,52 @@ export default function Step7({
               </Text>
             ) : null}
           </View>
+
+          {showProductSwitch ? (
+            <View
+              style={{
+                flexDirection: 'row',
+                backgroundColor: 'rgba(3, 7, 18, 0.72)',
+                borderRadius: 16,
+                padding: 4,
+                marginTop: 14,
+                borderWidth: 1,
+                borderColor: 'rgba(168, 85, 247, 0.28)',
+              }}
+            >
+              {products.map((option) => {
+                const optionId = option.id || option.title;
+                const selected = optionId === selectedProductId;
+                return (
+                  <Pressable
+                    key={optionId}
+                    onPress={() => onSelectProduct?.(optionId)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected }}
+                    style={({ pressed }) => ({
+                      flex: 1,
+                      minHeight: 42,
+                      borderRadius: 12,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: selected ? 'rgba(124, 58, 237, 0.96)' : 'transparent',
+                      opacity: pressed ? 0.78 : 1,
+                    })}
+                  >
+                    <Text
+                      style={{
+                        color: selected ? '#ffffff' : COLORS.muted,
+                        fontSize: 13,
+                        fontWeight: '900',
+                      }}
+                    >
+                      {option.optionLabel || option.title}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ) : null}
 
           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15 }}>
             <View
@@ -259,7 +341,7 @@ export default function Step7({
                 {product?.title || 'Plan Anual'}
               </Text>
               <Text style={{ color: COLORS.muted, fontSize: 12, marginTop: 2 }}>
-                Acceso completo a todo Luva
+                {product?.description || 'Acceso completo a todo Luva'}
               </Text>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
@@ -272,8 +354,13 @@ export default function Step7({
                     {product.currencyCode}
                   </Text>
                 ) : null}
+                {product?.priceSuffix ? (
+                  <Text style={{ color: COLORS.muted, fontSize: 12, fontWeight: '900', marginLeft: 3, marginBottom: 3 }}>
+                    /{product.priceSuffix}
+                  </Text>
+                ) : null}
               </View>
-              {product?.monthlyEquivalent ? (
+              {productDetails ? (
                 <Text
                   style={{
                     color: '#ddd6fe',
@@ -286,7 +373,7 @@ export default function Step7({
                     marginTop: 5,
                   }}
                 >
-                  {product.monthlyEquivalent}
+                  {productDetails}
                 </Text>
               ) : null}
             </View>
@@ -313,7 +400,7 @@ export default function Step7({
             onPress={onPurchase}
             disabled={disabled}
             accessibilityRole="button"
-            accessibilityLabel="Comenzar oferta"
+            accessibilityLabel={buttonText}
             style={({ pressed }) => ({
               minHeight: 58,
               borderRadius: 17,
@@ -335,10 +422,10 @@ export default function Step7({
               {expired
                 ? 'Oferta expirada'
                 : loading
-                  ? 'Cargando oferta...'
+                  ? loadingText
                   : processing
                     ? 'Procesando...'
-                    : 'Comenzar oferta'}
+                    : buttonText}
             </Text>
             {!processing && !loading && !expired ? (
               <MaterialIcons name="arrow-forward" size={24} color="#ffffff" />
@@ -346,7 +433,7 @@ export default function Step7({
           </Pressable>
 
           <Text style={{ color: COLORS.soft, fontSize: 11, lineHeight: 16, marginTop: 10, textAlign: 'center' }}>
-            7 días de garantía · Cancela cuando quieras
+            {footerText}
           </Text>
         </View>
 

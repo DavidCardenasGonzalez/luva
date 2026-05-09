@@ -55,6 +55,8 @@ const COLORS = {
 const SCREEN_HORIZONTAL_PADDING = 40;
 const COVER_GRID_GAP = 12;
 const PLAYBACK_RATES = [0.6, 0.75, 0.9, 1];
+const SUBTITLE_BOX_MIN_HEIGHT = 96;
+const SUBTITLE_TEXT_MIN_HEIGHT = 72;
 
 function formatAudioTime(seconds: number) {
   const totalSeconds = Math.max(0, Math.floor(seconds || 0));
@@ -75,10 +77,12 @@ function getSubtitleKey(cue?: ShadowingSubtitleCue) {
 function ChapterPill({
   chapter,
   active,
+  listened,
   onPress,
 }: {
   chapter: ShadowingChapter;
   active: boolean;
+  listened: boolean;
   onPress: () => void;
 }) {
   return (
@@ -90,8 +94,16 @@ function ChapterPill({
         padding: 14,
         borderRadius: 18,
         borderWidth: 1,
-        borderColor: active ? 'rgba(34, 211, 238, 0.65)' : COLORS.border,
-        backgroundColor: active ? 'rgba(34, 211, 238, 0.14)' : COLORS.surface,
+        borderColor: active
+          ? 'rgba(34, 211, 238, 0.65)'
+          : listened
+            ? 'rgba(34, 197, 94, 0.5)'
+            : COLORS.border,
+        backgroundColor: active
+          ? 'rgba(34, 211, 238, 0.14)'
+          : listened
+            ? 'rgba(34, 197, 94, 0.1)'
+            : COLORS.surface,
         opacity: pressed ? 0.78 : 1,
         gap: 8,
       })}
@@ -104,10 +116,14 @@ function ChapterPill({
             borderRadius: 18,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: active ? COLORS.accent : COLORS.surfaceAlt,
+            backgroundColor: active ? COLORS.accent : listened ? 'rgba(34, 197, 94, 0.22)' : COLORS.surfaceAlt,
           }}
         >
-          <MaterialIcons name="graphic-eq" size={18} color={active ? '#07111f' : COLORS.accent} />
+          <MaterialIcons
+            name={listened ? 'check-circle' : 'graphic-eq'}
+            size={18}
+            color={active ? '#07111f' : listened ? COLORS.success : COLORS.accent}
+          />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={{ color: COLORS.text, fontSize: 16, fontWeight: '900' }} numberOfLines={1}>
@@ -119,7 +135,9 @@ function ChapterPill({
         </View>
       </View>
       <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-        <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '800' }}>Audio</Text>
+        <Text style={{ color: listened ? '#bbf7d0' : '#a5f3fc', fontSize: 12, fontWeight: '800' }}>
+          {listened ? 'Escuchado' : 'Audio'}
+        </Text>
         {chapter.durationSeconds ? (
           <Text style={{ color: COLORS.muted, fontSize: 12, fontWeight: '800' }}>
             {formatAudioTime(chapter.durationSeconds)}
@@ -132,22 +150,44 @@ function ChapterPill({
 
 function ShadowingListCoverCard({
   list,
+  listenedCount,
   onPress,
 }: {
   list: ShadowingList;
+  listenedCount: number;
   onPress: () => void;
 }) {
+  const totalChapters = list.chapters.length;
+  const completed = totalChapters > 0 && listenedCount >= totalChapters;
+  const started = listenedCount > 0;
+  const progressRatio = totalChapters > 0 ? Math.min(1, listenedCount / totalChapters) : 0;
+  const progressColor = completed ? COLORS.success : COLORS.accent;
+  const statusText = completed
+    ? 'Completada'
+    : started
+      ? `${listenedCount}/${totalChapters} escuchados`
+      : `${totalChapters} capitulos`;
+  const accessibilityStatus = completed
+    ? 'completada'
+    : started
+      ? `${listenedCount} de ${totalChapters} capitulos escuchados`
+      : `${totalChapters} capitulos`;
+
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`Abrir lista ${list.name}`}
+      accessibilityLabel={`Abrir lista ${list.name}, ${accessibilityStatus}`}
       style={({ pressed }) => ({
         borderRadius: 18,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: COLORS.border,
-        backgroundColor: COLORS.surface,
+        borderColor: completed
+          ? 'rgba(34, 197, 94, 0.62)'
+          : started
+            ? 'rgba(34, 211, 238, 0.45)'
+            : COLORS.border,
+        backgroundColor: completed ? 'rgba(20, 83, 45, 0.16)' : COLORS.surface,
         opacity: pressed ? 0.82 : 1,
       })}
     >
@@ -163,16 +203,75 @@ function ShadowingListCoverCard({
             <MaterialIcons name="headphones" size={42} color={COLORS.accent} />
           </View>
         )}
+        {started ? (
+          <View
+            style={{
+              position: 'absolute',
+              top: 10,
+              right: 10,
+              minHeight: 28,
+              paddingHorizontal: 9,
+              borderRadius: 999,
+              borderWidth: 1,
+              borderColor: completed ? 'rgba(187, 247, 208, 0.72)' : 'rgba(165, 243, 252, 0.72)',
+              backgroundColor: completed ? 'rgba(20, 83, 45, 0.9)' : 'rgba(8, 47, 73, 0.88)',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 5,
+            }}
+          >
+            <MaterialIcons
+              name={completed ? 'check-circle' : 'headphones'}
+              size={14}
+              color={completed ? '#bbf7d0' : '#a5f3fc'}
+            />
+            <Text
+              style={{
+                color: completed ? '#dcfce7' : '#cffafe',
+                fontSize: 11,
+                fontWeight: '900',
+              }}
+              numberOfLines={1}
+            >
+              {completed ? 'Completa' : `${listenedCount}/${totalChapters}`}
+            </Text>
+          </View>
+        ) : null}
       </View>
-      <View style={{ padding: 12, gap: 5 }}>
+      <View style={{ padding: 12, gap: 7 }}>
         <Text style={{ color: '#a5f3fc', fontSize: 10, fontWeight: '900', textTransform: 'uppercase' }} numberOfLines={1}>
           {list.category}
         </Text>
         <Text style={{ color: COLORS.text, fontSize: 16, lineHeight: 20, fontWeight: '900' }} numberOfLines={2}>
           {list.name}
         </Text>
-        <Text style={{ color: COLORS.muted, fontSize: 12, fontWeight: '800' }}>
-          {list.chapters.length} capitulos
+        <View
+          style={{
+            height: 5,
+            borderRadius: 999,
+            overflow: 'hidden',
+            backgroundColor: 'rgba(148, 163, 184, 0.18)',
+          }}
+        >
+          <View
+            style={{
+              width: `${progressRatio * 100}%`,
+              height: '100%',
+              borderRadius: 999,
+              backgroundColor: progressColor,
+            }}
+          />
+        </View>
+        <Text
+          style={{
+            color: started ? (completed ? '#bbf7d0' : '#a5f3fc') : COLORS.muted,
+            fontSize: 12,
+            fontWeight: '800',
+          }}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+        >
+          {statusText}
         </Text>
       </View>
     </Pressable>
@@ -201,6 +300,7 @@ export default function ShadowingScreen({ navigation: _navigation }: Props) {
     playbackRate,
     audioLoading,
     audioError,
+    listenedChapterIds,
     setQueue,
     selectChapter,
     playPause,
@@ -433,7 +533,9 @@ export default function ShadowingScreen({ navigation: _navigation }: Props) {
               </Text>
               <Text style={{ color: COLORS.text, fontSize: 32, fontWeight: '900' }}>Shadowing</Text>
               <Text style={{ color: COLORS.muted, lineHeight: 21 }}>
-                Elige una lista y practica sus capitulos con audio continuo.
+                El shadowing es una practica donde intentas imitar a la persona que habla.
+                Te ayuda a acostumbrar tu voz y tu oido al ingles. No te preocupes mucho si
+                no conoces una palabra: repite cada vez que escuches un beep.
               </Text>
             </View>
 
@@ -460,14 +562,21 @@ export default function ShadowingScreen({ navigation: _navigation }: Props) {
               </View>
             ) : (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: COVER_GRID_GAP }}>
-                {lists.map((list) => (
-                  <View key={list.listId} style={{ width: coverCardWidth }}>
-                    <ShadowingListCoverCard
-                      list={list}
-                      onPress={() => openList(list)}
-                    />
-                  </View>
-                ))}
+                {lists.map((list) => {
+                  const listenedCount = list.chapters.filter((chapter) => (
+                    listenedChapterIds.has(chapter.chapterId)
+                  )).length;
+
+                  return (
+                    <View key={list.listId} style={{ width: coverCardWidth }}>
+                      <ShadowingListCoverCard
+                        list={list}
+                        listenedCount={listenedCount}
+                        onPress={() => openList(list)}
+                      />
+                    </View>
+                  );
+                })}
               </View>
             )}
           </>
@@ -521,7 +630,7 @@ export default function ShadowingScreen({ navigation: _navigation }: Props) {
                   </Text>
                   <View
                     style={{
-                      minHeight: 74,
+                      minHeight: SUBTITLE_BOX_MIN_HEIGHT,
                       paddingHorizontal: 12,
                       paddingVertical: 12,
                       borderRadius: 16,
@@ -534,21 +643,28 @@ export default function ShadowingScreen({ navigation: _navigation }: Props) {
                     }}
                   >
                     <View style={{ width: '100%', flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                      <Text
+                      <View
                         style={{
                           flex: 1,
+                          minHeight: SUBTITLE_TEXT_MIN_HEIGHT,
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Text
+                          style={{
                           color: activeSubtitle?.text ? COLORS.text : COLORS.muted,
                           fontSize: activeSubtitle?.text ? 18 : 14,
                           fontWeight: activeSubtitle?.text ? '900' : '800',
                           lineHeight: activeSubtitle?.text ? 24 : 20,
                           textAlign: 'center',
-                        }}
-                      >
-                        {activeSubtitle?.text ||
-                          (subtitlesLoading
-                            ? 'Cargando subtítulos...'
-                            : '')}
-                      </Text>
+                          }}
+                        >
+                          {activeSubtitle?.text ||
+                            (subtitlesLoading
+                              ? 'Cargando subtítulos...'
+                              : '')}
+                        </Text>
+                      </View>
                       {activeSubtitle?.text ? (
                         <Pressable
                           accessibilityRole="button"
@@ -742,6 +858,7 @@ export default function ShadowingScreen({ navigation: _navigation }: Props) {
                   key={chapter.chapterId}
                   chapter={chapter}
                   active={selectedChapter?.chapterId === chapter.chapterId}
+                  listened={listenedChapterIds.has(chapter.chapterId)}
                   onPress={() => handleSelectChapter(chapter)}
                 />
               ))}

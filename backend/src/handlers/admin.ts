@@ -41,6 +41,7 @@ import {
   translateLessonSubtitles,
   createLessonVideoUpload,
   completeLessonVideoUpload,
+  generateLessonThumbnail,
 } from '../admin/lessons';
 import {
   createAdminCharacterPost,
@@ -821,6 +822,17 @@ export const handler = async (event: any): Promise<Result> => {
       }
     }
 
+    const lessonThumbnailGenerate = path.match(/^\/v1\/admin\/lessons\/([^/]+)\/generate-thumbnail$/);
+    if (method === 'POST' && lessonThumbnailGenerate) {
+      try {
+        return json(200, await generateLessonThumbnail({ lessonId: decodeURIComponent(lessonThumbnailGenerate[1]) }));
+      } catch (error) {
+        const handled = handleLessonError(error);
+        if (handled) return handled;
+        throw error;
+      }
+    }
+
     return json(404, { code: 'NOT_FOUND', message: 'Not found' });
   } catch (err: any) {
     console.error(
@@ -1066,6 +1078,8 @@ function handleLessonError(error: unknown): Result | undefined {
     INVALID_VIDEO_KEY: [400, 'La clave del video no es válida.'],
     LESSON_NOT_FOUND: [404, 'No encontramos esa lección.'],
     LESSON_SCRIPT_REQUIRED: [400, 'Genera o escribe el guion antes de continuar con este paso.'],
+    LESSON_AUDIO_REQUIRED: [400, 'Genera el audio antes de continuar con este paso.'],
+    LESSON_VIDEO_REQUIRED: [400, 'Sube el video antes de generar el thumbnail.'],
     LESSON_SUBTITLES_REQUIRED: [400, 'Genera los subtítulos antes de traducirlos.'],
     QUIZ_PARSE_FAILED: [502, 'No pudimos procesar el quiz generado. Intenta de nuevo.'],
     QUIZ_TOO_SHORT: [502, 'El quiz generado tiene menos de 3 preguntas. Intenta de nuevo.'],

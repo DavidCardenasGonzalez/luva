@@ -314,6 +314,13 @@ export function completeLessonVideoUpload(lessonId: string, videoKey: string) {
   )
 }
 
+export function generateLessonThumbnail(lessonId: string) {
+  return adminApi.post<AdminLessonMutationResponse>(
+    `/lessons/${encodeURIComponent(lessonId)}/generate-thumbnail`,
+    {},
+  )
+}
+
 // ── Shadowing ─────────────────────────────────────────────────────────────────
 export function getAdminShadowing() {
   return adminApi.get<AdminShadowingResponse>('/shadowing')

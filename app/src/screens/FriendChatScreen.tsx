@@ -35,6 +35,10 @@ import {
   useFriends,
 } from '../hooks/useFriends';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
+import {
+  AI_CONVERSATION_POINTS_PER_MESSAGE,
+  recordJourneyAiConversationMessageSent,
+} from '../progress/journeyProgress';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FriendChat'>;
 
@@ -59,6 +63,10 @@ type MessageTranslationState = {
   loading?: boolean;
   error?: string;
 };
+
+function formatJourneyPoints(points: number) {
+  return Number.isInteger(points) ? String(points) : points.toFixed(1);
+}
 
 const COLORS = {
   header: '#0b1224',
@@ -115,9 +123,11 @@ function AnalysisCard({ analysis }: { analysis: FriendChatPayload }) {
 function CompletionCard({
   feedback,
   friendName,
+  pointsEarned,
 }: {
   feedback: FriendConversationFeedback | null;
   friendName: string;
+  pointsEarned: number;
 }) {
   return (
     <View
@@ -134,6 +144,22 @@ function CompletionCard({
       <Text style={{ marginTop: 6, color: '#166534', lineHeight: 20 }}>
         Te despediste de {friendName}. Esta práctica quedó marcada como terminada.
       </Text>
+      <View
+        style={{
+          alignSelf: 'flex-start',
+          marginTop: 10,
+          paddingHorizontal: 10,
+          paddingVertical: 6,
+          borderRadius: 999,
+          backgroundColor: '#dcfce7',
+          borderWidth: 1,
+          borderColor: '#86efac',
+        }}
+      >
+        <Text style={{ color: '#166534', fontWeight: '900' }}>
+          +{formatJourneyPoints(pointsEarned)} punto{pointsEarned === 1 ? '' : 's'} de Conversación AI
+        </Text>
+      </View>
       {feedback ? (
         <View style={{ marginTop: 12 }}>
           <Text style={{ fontWeight: '700', color: '#14532d' }}>Feedback general</Text>
@@ -200,6 +226,10 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const avatarInitial = (friend?.characterName.trim().charAt(0) || '?').toUpperCase();
   const hasStartedConversation = useMemo(
     () => messages.some((message) => message.role === 'user'),
+    [messages]
+  );
+  const aiConversationPoints = useMemo(
+    () => messages.filter((message) => message.role === 'user').length * AI_CONVERSATION_POINTS_PER_MESSAGE,
     [messages]
   );
 
@@ -452,6 +482,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           transcript: trimmed,
           history: historyPayload,
         });
+        void recordJourneyAiConversationMessageSent();
         setMessages((current) => [
           ...current,
           {
@@ -807,7 +838,11 @@ export default function FriendChatScreen({ navigation, route }: Props) {
 
           {analysis ? <AnalysisCard analysis={analysis} /> : null}
           {conversationEnded ? (
-            <CompletionCard feedback={conversationFeedback} friendName={friend.characterName} />
+            <CompletionCard
+              feedback={conversationFeedback}
+              friendName={friend.characterName}
+              pointsEarned={aiConversationPoints}
+            />
           ) : null}
         </ScrollView>
 

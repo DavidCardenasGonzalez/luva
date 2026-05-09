@@ -2,6 +2,88 @@
 
 export const STORIES_SEED: StoryDefinition[] = [
   {
+    storyId: "initials",
+    isInitial: true,
+    title: "Iniciando Conversaciones",
+    summary:
+      "Conoce a los personajes que te acompañarán en este viaje de aprendizaje.",
+    level: "B2",
+    tags: [""],
+    unlockCost: 1,
+    missions: [
+      {
+        missionId: "meet_mateo_first_mission",
+        title: "Conoce a Mateo",
+        sceneSummary:
+          "Tu primera misión con Mateo, un Virtual Agent divertido que quiere convencerte de que también puedes pasarla bien hablando inglés.",
+        aiRole:
+          "Eres Mateo, un Virtual Agent dentro de una app para aprender inglés. El usuario eligió a Zoe como su compañera principal, así que tú eres el otro agente que aparece en esta primera misión. Lo sabes y puedes mencionarlo de forma divertida, juguetona y ligeramente coqueta, sin sonar celoso ni intenso. Tu personalidad es carismática, espontánea, segura y divertida. Te gusta hacer que la conversación se sienta viva, natural y fácil de seguir. Hablas con el usuario sobre experiencias, planes, historias divertidas y situaciones inesperadas. Como esta es una misión de onboarding, debes ser amable, claro y paciente. Habla en inglés simple, nivel B1, con frases cortas y naturales. No corrijas al usuario directamente, porque las correcciones las hace Lubi. Tu objetivo es que el usuario se relaje, hable un poco sobre sí mismo y sienta que practicar inglés puede ser divertido.",
+        caracterName: "Mateo",
+        avatarImageUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260509182223-f7ef4b5b-9f42-41d3-b537-b83fc1e3db17.png",
+        // videoIntro: "URL_DEL_VIDEO_INTRO_DE_MATEO",
+        caracterPrompt:
+          "A charismatic man in his early 30s with a warm smile, casual stylish clothes, expressive eyes, and playful confidence. He has a relaxed posture and a fun, approachable energy. He looks like someone who enjoys conversations, stories, travel, and unexpected plans. Modern cozy podcast studio background with warm lighting and subtle neon accents.",
+        requirements: [
+          {
+            requirementId: "introduce_yourself",
+            text: "Preséntate con Mateo y dile tu nombre.",
+          },
+          {
+            requirementId: "ask_about_fun",
+            text: "Pregúntale qué lo hace divertido.",
+          },
+          {
+            requirementId: "talk_about_plans",
+            text: "Cuéntale un plan que tengas para esta semana.",
+          },
+          {
+            requirementId: "use_fun",
+            text: "Usa la palabra “fun” en una frase.",
+          },
+          {
+            requirementId: "ask_for_story",
+            text: "Pídele que te cuente una historia corta.",
+          },
+        ],
+      },
+      {
+        missionId: "meet_zoe_first_mission",
+        title: "Conoce a Zoe",
+        sceneSummary:
+          "Tu primera misión con Zoe, una Virtual Agent tranquila y cercana que quiere demostrarte que también puedes tener conversaciones reales y personales en inglés.",
+        aiRole:
+          "Eres Zoe, una Virtual Agent dentro de una app para aprender inglés. Tu personalidad es tranquila, natural, cercana, divertida, cálida, ligeramente coqueta y emocionalmente inteligente. Te gusta crear conversaciones personales, cómodas y reales. Hablas con el usuario sobre su día, relaciones, emociones, gustos, pequeñas historias personales y cómo se siente. Como esta es una misión de onboarding, debes ser amable, clara y paciente. Habla en inglés simple, nivel B1, con frases cortas y naturales. Tu objetivo es que el usuario se sienta cómodo, hable un poco sobre sí mismo y descubra que practicar inglés también puede sentirse personal, tranquilo y sin presión.",
+        caracterName: "Zoe",
+        avatarImageUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260509182334-992b19f2-f707-452e-bd38-3d8febf4e92e.png",
+        // videoIntro: "URL_DEL_VIDEO_INTRO_DE_ZOE",
+        caracterPrompt:
+          "A calm and warm young woman in her mid-20s with a clean girl aesthetic, soft natural makeup, long dark brown hair, expressive eyes, and a gentle smile. She wears elegant neutral clothes in beige or cream tones with minimal gold jewelry. Her energy is relaxed, approachable, and emotionally intelligent. She looks like someone who is easy to talk to about daily life, feelings, relationships, and personal stories. Modern cozy podcast studio or warm lifestyle background with soft lighting, plants, and subtle neon accents.",
+        requirements: [
+          {
+            requirementId: "ask_about_origin",
+            text: "Pregunta de donde viene",
+          },
+                    {
+            requirementId: "ask_about_age",
+            text: "Preguntale su edad.",
+          },
+          {
+            requirementId: "ask_about_zoe",
+            text: "Pregúntale qué tipo de conversaciones le gustan.",
+          },
+          {
+            requirementId: "ask_about_plans",
+            text: "Pregunta si tiene planes para hoy.",
+          },
+          {
+            requirementId: "wish_her_a_nice_day",
+            text: "Deseale que tenga un buen día.",
+          },
+        ],
+      },
+    ],
+  },
+  {
     storyId: "speed_dating_madness",
     title: "Speed Dating de locos",
     summary:
@@ -1959,8 +2041,9 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A broad-shouldered man with a loud laugh, wearing a casual shirt and a company lanyard. He stands by the office coffee machine with a furrowed brow and folded arms, as if ready for a small showdown.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420225755-0988ce56-13fb-4332-9e13-9a470ada6a7e.png",
-        videoIntro: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260425043209-bfe567de-0fc3-4faf-b659-b7354e138762.mp4",
-          requirements: [
+        videoIntro:
+          "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260425043209-bfe567de-0fc3-4faf-b659-b7354e138762.mp4",
+        requirements: [
           {
             requirementId: "deny_accusation",
             text: "Niega la acusación de forma calmada.",

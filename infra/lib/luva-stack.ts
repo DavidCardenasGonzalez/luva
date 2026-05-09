@@ -4,6 +4,7 @@ import { AttributeType, BillingMode, GlobalSecondaryIndexProps, ProjectionType, 
 import { Bucket, BlockPublicAccess, HttpMethods } from 'aws-cdk-lib/aws-s3';
 import {
   UserPool,
+  UserPoolOperation,
   CfnUserPoolGroup,
   AccountRecovery,
   OAuthScope,
@@ -499,9 +500,19 @@ export class LuvaStack extends Stack {
       entry: path.join(__dirname, '../../backend/src/handlers/admin.ts'),
       handler: 'handler',
       runtime: Runtime.NODEJS_18_X,
-      memorySize: 256,
+      memorySize: 1024,
       timeout: Duration.minutes(15),
       logGroup: adminFnLogGroup,
+      bundling: {
+        externalModules: ['@aws-sdk/*', 'ffmpeg-static'],
+        commandHooks: {
+          beforeBundling: () => [],
+          beforeInstall: () => [],
+          afterBundling: (_inputDir: string, outputDir: string) => [
+            `cd "${outputDir}" && npm install ffmpeg-static --no-package-lock --no-save`,
+          ],
+        },
+      },
       environment: {
         USERS_TABLE_NAME: usersTable.tableName,
         GENERATED_VIDEOS_TABLE_NAME: generatedVideosTable.tableName,
@@ -599,6 +610,16 @@ export class LuvaStack extends Stack {
       schedule: Schedule.rate(Duration.minutes(7)),
       targets: [new LambdaFunction(videoPublisherFn)],
     });
+
+    // Lambda: Cognito Custom Message (email verification / password reset)
+    const customMessageFn = new NodejsFunction(this, 'CustomMessageFunction', {
+      entry: path.join(__dirname, '../../backend/src/handlers/custom-message.ts'),
+      handler: 'handler',
+      runtime: Runtime.NODEJS_22_X,
+      memorySize: 128,
+      timeout: Duration.seconds(5),
+    });
+    userPool.addTrigger(UserPoolOperation.CUSTOM_MESSAGE, customMessageFn);
 
     // API Gateway REST
     const api = new RestApi(this, 'LuvaApi', {

@@ -56,6 +56,7 @@ export interface StoryMission {
 
 export interface StoryDefinition {
   storyId: string;
+  isInitial?: boolean;
   title: string;
   summary: string;
   level?: string;
@@ -66,6 +67,7 @@ export interface StoryDefinition {
 
 export interface StorySummaryItem {
   storyId: string;
+  isInitial?: boolean;
   title: string;
   summary: string;
   level?: string;

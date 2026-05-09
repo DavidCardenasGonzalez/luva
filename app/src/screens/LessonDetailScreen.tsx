@@ -60,7 +60,9 @@ function CaptionPanel({
   cue?: LessonSubtitleCue;
   subtitleMode: 'en' | 'en_es';
 }) {
-  if (!cue?.english && !cue?.spanish) return null;
+  const showSpanish = subtitleMode === 'en_es';
+  const englishText = cue?.english || '';
+  const spanishText = cue?.spanish || '';
 
   return (
     <View
@@ -69,33 +71,34 @@ function CaptionPanel({
         marginTop: -6,
         paddingHorizontal: 12,
         paddingVertical: 10,
+        minHeight: showSpanish ? 102 : 58,
         borderRadius: 16,
         backgroundColor: COLORS.surface,
         borderWidth: 1,
         borderColor: COLORS.border,
         alignItems: 'center',
+        justifyContent: 'center',
         gap: 6,
       }}
     >
-      {cue.english ? (
-        <Text
-          style={{
-            color: 'white',
-            fontSize: 17,
-            fontWeight: '900',
-            lineHeight: 22,
-            textAlign: 'center',
-            backgroundColor: 'rgba(2, 6, 23, 0.78)',
-            paddingHorizontal: 10,
-            paddingVertical: 6,
-            borderRadius: 8,
-            overflow: 'hidden',
-          }}
-        >
-          {cue.english}
-        </Text>
-      ) : null}
-      {subtitleMode === 'en_es' && cue.spanish ? (
+      <Text
+        style={{
+          color: 'white',
+          fontSize: 17,
+          fontWeight: '900',
+          lineHeight: 22,
+          textAlign: 'center',
+          backgroundColor: englishText ? 'rgba(2, 6, 23, 0.78)' : 'transparent',
+          paddingHorizontal: 10,
+          paddingVertical: 6,
+          borderRadius: 8,
+          overflow: 'hidden',
+          opacity: englishText ? 1 : 0,
+        }}
+      >
+        {englishText || ' '}
+      </Text>
+      {showSpanish ? (
         <Text
           style={{
             color: '#dbeafe',
@@ -103,14 +106,15 @@ function CaptionPanel({
             fontWeight: '800',
             lineHeight: 19,
             textAlign: 'center',
-            backgroundColor: 'rgba(15, 23, 42, 0.82)',
+            backgroundColor: spanishText ? 'rgba(15, 23, 42, 0.82)' : 'transparent',
             paddingHorizontal: 10,
             paddingVertical: 5,
             borderRadius: 8,
             overflow: 'hidden',
+            opacity: spanishText ? 1 : 0,
           }}
         >
-          {cue.spanish}
+          {spanishText || ' '}
         </Text>
       ) : null}
     </View>

@@ -11,6 +11,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
 import type { AVPlaybackStatus } from 'expo-av';
 import type { ShadowingChapter, ShadowingList } from '../hooks/useShadowing';
+import {
+  getListenedShadowingChapterIds,
+  recordJourneyShadowingChapterListened,
+} from '../progress/journeyProgress';
 
 type SelectChapterOptions = {
   shouldPlay?: boolean;
@@ -25,6 +29,7 @@ type ShadowingPlayerContextValue = {
   playbackRate: number;
   audioLoading: boolean;
   audioError?: string;
+  listenedChapterIds: Set<string>;
   setQueue: (lists: ShadowingList[]) => void;
   selectChapter: (chapter: ShadowingChapter, options?: SelectChapterOptions) => void;
   playPause: () => Promise<void>;
@@ -63,6 +68,7 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
   const [playbackRate, setPlaybackRateState] = useState(1);
   const [audioLoading, setAudioLoading] = useState(false);
   const [audioError, setAudioError] = useState<string>();
+  const [listenedChapterIds, setListenedChapterIds] = useState<Set<string>>(() => new Set());
 
   const currentChapter = useMemo(
     () => orderedChapters.find((chapter) => chapter.chapterId === currentChapterId) || orderedChapters[0],
@@ -114,6 +120,21 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      const ids = await getListenedShadowingChapterIds();
+      if (!cancelled) {
+        setListenedChapterIds(ids);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const playNextChapter = useCallback(() => {
     const chapters = orderedChaptersRef.current;
     const currentId = currentChapterIdRef.current;
@@ -140,8 +161,20 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
       setDurationSeconds(status.durationMillis / 1000);
     }
 
-    if (status.didJustFinish && !playNextChapter()) {
-      setIsPlaying(false);
+    if (status.didJustFinish) {
+      const finishedChapterId = currentChapterIdRef.current;
+      void recordJourneyShadowingChapterListened(finishedChapterId);
+      if (finishedChapterId) {
+        setListenedChapterIds((current) => {
+          if (current.has(finishedChapterId)) return current;
+          const next = new Set(current);
+          next.add(finishedChapterId);
+          return next;
+        });
+      }
+      if (!playNextChapter()) {
+        setIsPlaying(false);
+      }
     }
   }, [playNextChapter]);
 
@@ -262,6 +295,7 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
     playbackRate,
     audioLoading,
     audioError,
+    listenedChapterIds,
     setQueue,
     selectChapter,
     playPause,
@@ -277,6 +311,7 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
     currentChapter,
     durationSeconds,
     isPlaying,
+    listenedChapterIds,
     playbackRate,
     playPause,
     positionSeconds,

@@ -42,6 +42,10 @@ import type {
   StoryRequirementProgress,
   StoryRetryState,
 } from '../progress/types';
+import {
+  AI_CONVERSATION_POINTS_PER_MESSAGE,
+  recordJourneyAiConversationMessageSent,
+} from '../progress/journeyProgress';
 import StoryMessageComposer from '../components/StoryMessageComposer';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
 import { useCoins, CHAT_MISSION_COST, RECORDING_COST } from '../purchases/CoinBalanceProvider';
@@ -130,6 +134,10 @@ const REQUIREMENT_BURST_COLORS = [
   '#a78bfa',
   '#facc15',
 ];
+
+function formatJourneyPoints(points: number) {
+  return Number.isInteger(points) ? String(points) : points.toFixed(1);
+}
 
 function hashString(value: string): number {
   let hash = 0;
@@ -632,6 +640,10 @@ export default function StorySceneScreen() {
   const [requirements, setRequirements] = useState<StoryRequirementState[]>([]);
   const [messages, setMessages] = useState<StoryMessage[]>([]);
   const [messageTranslations, setMessageTranslations] = useState<Record<string, MessageTranslationState>>({});
+  const aiConversationPoints = useMemo(
+    () => messages.filter((message) => message.role === 'user').length * AI_CONVERSATION_POINTS_PER_MESSAGE,
+    [messages]
+  );
   const [analysis, setAnalysis] = useState<StoryAnalysis | null>(null);
   const [missionCompleted, setMissionCompleted] = useState<boolean>(false);
   const [storyCompleted, setStoryCompleted] = useState<boolean>(false);
@@ -1156,6 +1168,7 @@ export default function StorySceneScreen() {
           persistedRequirements: persistedRequirementPayload,
           persistedMissionCompleted: wasPreviouslyCompleted ? false : missionCompleted,
         });
+        void recordJourneyAiConversationMessageSent();
         console.log('Advance payload', payload);
         const previousRequirementsById = new Map(
           requirements.map((item) => [item.requirementId, item])
@@ -2181,6 +2194,22 @@ export default function StorySceneScreen() {
         {missionCompleted ? (
           <View style={{ marginTop: 16, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: '#bbf7d0', backgroundColor: '#f0fdf4' }}>
             <Text style={{ fontWeight: '700', color: '#15803d' }}>¡Misión completada!</Text>
+            <View
+              style={{
+                alignSelf: 'flex-start',
+                marginTop: 10,
+                paddingHorizontal: 10,
+                paddingVertical: 6,
+                borderRadius: 999,
+                backgroundColor: '#dcfce7',
+                borderWidth: 1,
+                borderColor: '#86efac',
+              }}
+            >
+              <Text style={{ color: '#166534', fontWeight: '900' }}>
+                +{formatJourneyPoints(aiConversationPoints)} punto{aiConversationPoints === 1 ? '' : 's'} de Conversación AI
+              </Text>
+            </View>
             {conversationFeedback ? (
               <View style={{ marginTop: 10 }}>
                 <Text style={{ fontWeight: '600', color: '#14532d' }}>Feedback general</Text>
