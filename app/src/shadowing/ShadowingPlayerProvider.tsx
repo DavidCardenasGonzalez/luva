@@ -12,7 +12,7 @@ import { Audio } from 'expo-av';
 import type { AVPlaybackStatus } from 'expo-av';
 import type { ShadowingChapter, ShadowingList } from '../hooks/useShadowing';
 import {
-  getListenedShadowingChapterIds,
+  getListenedShadowingChapterRecords,
   recordJourneyShadowingChapterListened,
 } from '../progress/journeyProgress';
 
@@ -30,6 +30,7 @@ type ShadowingPlayerContextValue = {
   audioLoading: boolean;
   audioError?: string;
   listenedChapterIds: Set<string>;
+  listenedChapterDates: Map<string, string>;
   setQueue: (lists: ShadowingList[]) => void;
   selectChapter: (chapter: ShadowingChapter, options?: SelectChapterOptions) => void;
   playPause: () => Promise<void>;
@@ -69,6 +70,7 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
   const [audioLoading, setAudioLoading] = useState(false);
   const [audioError, setAudioError] = useState<string>();
   const [listenedChapterIds, setListenedChapterIds] = useState<Set<string>>(() => new Set());
+  const [listenedChapterDates, setListenedChapterDates] = useState<Map<string, string>>(() => new Map());
 
   const currentChapter = useMemo(
     () => orderedChapters.find((chapter) => chapter.chapterId === currentChapterId) || orderedChapters[0],
@@ -124,9 +126,12 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
     let cancelled = false;
 
     (async () => {
-      const ids = await getListenedShadowingChapterIds();
+      const records = await getListenedShadowingChapterRecords();
+      const ids = new Set(records.map((record) => record.chapterId));
+      const dates = new Map(records.map((record) => [record.chapterId, record.listenedAt]));
       if (!cancelled) {
         setListenedChapterIds(ids);
+        setListenedChapterDates(dates);
       }
     })();
 
@@ -163,12 +168,18 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
 
     if (status.didJustFinish) {
       const finishedChapterId = currentChapterIdRef.current;
-      void recordJourneyShadowingChapterListened(finishedChapterId);
+      const listenedAt = new Date().toISOString();
+      void recordJourneyShadowingChapterListened(finishedChapterId, listenedAt);
       if (finishedChapterId) {
         setListenedChapterIds((current) => {
           if (current.has(finishedChapterId)) return current;
           const next = new Set(current);
           next.add(finishedChapterId);
+          return next;
+        });
+        setListenedChapterDates((current) => {
+          const next = new Map(current);
+          next.set(finishedChapterId, listenedAt);
           return next;
         });
       }
@@ -296,6 +307,7 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
     audioLoading,
     audioError,
     listenedChapterIds,
+    listenedChapterDates,
     setQueue,
     selectChapter,
     playPause,
@@ -312,6 +324,7 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
     durationSeconds,
     isPlaying,
     listenedChapterIds,
+    listenedChapterDates,
     playbackRate,
     playPause,
     positionSeconds,

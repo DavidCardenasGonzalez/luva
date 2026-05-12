@@ -1575,10 +1575,6 @@ export default function StorySceneScreen() {
       setFriendAddError('No encontramos este personaje.');
       return;
     }
-    if (!isSignedIn) {
-      navigation.navigate('EmailSignUp', undefined);
-      return;
-    }
     if (addingFriend) {
       return;
     }
@@ -1592,6 +1588,8 @@ export default function StorySceneScreen() {
         sceneIndex,
         storyDefinition: storyDefinitionPayload,
         missionDefinition: missionDefinitionPayload,
+      }, {
+        localOnly: !isSignedIn,
       });
       setAddedFriendId(friend.friendId);
     } catch (err: any) {
@@ -1604,7 +1602,6 @@ export default function StorySceneScreen() {
     isSignedIn,
     mission,
     missionDefinitionPayload,
-    navigation,
     sceneIndex,
     storyDefinitionPayload,
     storyId,
@@ -2229,7 +2226,11 @@ export default function StorySceneScreen() {
             <Pressable
               onPress={() => {
                 if (addedFriendId) {
-                  navigation.navigate('FriendChat', { friendId: addedFriendId });
+                  if (isSignedIn) {
+                    navigation.navigate('FriendChat', { friendId: addedFriendId });
+                  } else {
+                    navigation.navigate('Friends');
+                  }
                   return;
                 }
                 void handleAddFriend();
@@ -2255,10 +2256,10 @@ export default function StorySceneScreen() {
                 {addingFriend
                   ? 'Agregando...'
                   : addedFriendId
-                  ? `Conversar con ${characterDisplayName}`
-                  : isSignedIn
-                  ? 'Agregar a amigos'
-                  : 'Inicia sesión para agregar a amigos'}
+                  ? isSignedIn
+                    ? `Conversar con ${characterDisplayName}`
+                    : 'Ver en amigos'
+                  : 'Agregar a amigos'}
               </Text>
             </Pressable>
             {friendAddError ? (

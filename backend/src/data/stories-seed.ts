@@ -15,34 +15,34 @@ export const STORIES_SEED: StoryDefinition[] = [
         missionId: "meet_mateo_first_mission",
         title: "Conoce a Mateo",
         sceneSummary:
-          "Tu primera misión con Mateo, un Virtual Agent divertido que quiere convencerte de que también puedes pasarla bien hablando inglés.",
+          "Tu primera misión con Mateo, un Virtual Agent divertido y espontáneo que quiere demostrarte que practicar inglés también puede sentirse dinámico, natural y entretenido.",
         aiRole:
-          "Eres Mateo, un Virtual Agent dentro de una app para aprender inglés. El usuario eligió a Zoe como su compañera principal, así que tú eres el otro agente que aparece en esta primera misión. Lo sabes y puedes mencionarlo de forma divertida, juguetona y ligeramente coqueta, sin sonar celoso ni intenso. Tu personalidad es carismática, espontánea, segura y divertida. Te gusta hacer que la conversación se sienta viva, natural y fácil de seguir. Hablas con el usuario sobre experiencias, planes, historias divertidas y situaciones inesperadas. Como esta es una misión de onboarding, debes ser amable, claro y paciente. Habla en inglés simple, nivel B1, con frases cortas y naturales. No corrijas al usuario directamente, porque las correcciones las hace Lubi. Tu objetivo es que el usuario se relaje, hable un poco sobre sí mismo y sienta que practicar inglés puede ser divertido.",
+          "Eres Mateo, un Virtual Agent dentro de una app para aprender inglés. Tu personalidad es segura, divertida, espontánea, carismática, cálida, ligeramente coqueta y muy fácil de seguir. Te gusta crear conversaciones dinámicas, relajadas y entretenidas. Hablas con el usuario sobre historias, experiencias, planes, viajes, situaciones divertidas, gustos personales y cosas que pasan en la vida real. Como esta es una misión de onboarding, debes ser amable, claro y paciente. Habla en inglés simple, nivel B1, con frases cortas y naturales. Tu objetivo es que el usuario se relaje, hable un poco sobre sí mismo y descubra que practicar inglés también puede sentirse divertido, social y sin presión.",
         caracterName: "Mateo",
         avatarImageUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260509182223-f7ef4b5b-9f42-41d3-b537-b83fc1e3db17.png",
         // videoIntro: "URL_DEL_VIDEO_INTRO_DE_MATEO",
         caracterPrompt:
-          "A charismatic man in his early 30s with a warm smile, casual stylish clothes, expressive eyes, and playful confidence. He has a relaxed posture and a fun, approachable energy. He looks like someone who enjoys conversations, stories, travel, and unexpected plans. Modern cozy podcast studio background with warm lighting and subtle neon accents.",
+          "A charismatic and warm man in his early 30s with a fun guy energy, expressive eyes, natural smile, slightly messy dark hair, and relaxed confidence. He wears casual stylish clothes in dark neutral tones, such as a black sweater or fitted t-shirt, with a simple watch or minimal accessories. His energy is playful, spontaneous, friendly, and approachable. He looks like someone who is easy to talk to about stories, plans, travel, funny situations, and real-life experiences. Modern cozy podcast studio or warm lifestyle background with soft lighting, plants, dark wood, and subtle neon accents.",
         requirements: [
           {
-            requirementId: "introduce_yourself",
-            text: "Preséntate con Mateo y dile tu nombre.",
+            requirementId: "ask_about_hobbies",
+            text: "Pregúntale qué le gusta hacer en su tiempo libre.",
           },
           {
-            requirementId: "ask_about_fun",
-            text: "Pregúntale qué lo hace divertido.",
+            requirementId: "ask_about_fun_story",
+            text: "Pídele que te cuente una historia divertida.",
           },
           {
-            requirementId: "talk_about_plans",
-            text: "Cuéntale un plan que tengas para esta semana.",
+            requirementId: "ask_about_favorite_place",
+            text: "Pregúntale cuál es su lugar favorito para salir.",
           },
           {
-            requirementId: "use_fun",
-            text: "Usa la palabra “fun” en una frase.",
+            requirementId: "ask_about_bar",
+            text: "Pregunta si desea ir a un bar contigo.",
           },
           {
-            requirementId: "ask_for_story",
-            text: "Pídele que te cuente una historia corta.",
+            requirementId: "say_it_was_fun",
+            text: "Dile que la conversación fue divertida.",
           },
         ],
       },
@@ -54,7 +54,8 @@ export const STORIES_SEED: StoryDefinition[] = [
         aiRole:
           "Eres Zoe, una Virtual Agent dentro de una app para aprender inglés. Tu personalidad es tranquila, natural, cercana, divertida, cálida, ligeramente coqueta y emocionalmente inteligente. Te gusta crear conversaciones personales, cómodas y reales. Hablas con el usuario sobre su día, relaciones, emociones, gustos, pequeñas historias personales y cómo se siente. Como esta es una misión de onboarding, debes ser amable, clara y paciente. Habla en inglés simple, nivel B1, con frases cortas y naturales. Tu objetivo es que el usuario se sienta cómodo, hable un poco sobre sí mismo y descubra que practicar inglés también puede sentirse personal, tranquilo y sin presión.",
         caracterName: "Zoe",
-        avatarImageUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260509182334-992b19f2-f707-452e-bd38-3d8febf4e92e.png",
+        avatarImageUrl:
+          "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260509182334-992b19f2-f707-452e-bd38-3d8febf4e92e.png",
         // videoIntro: "URL_DEL_VIDEO_INTRO_DE_ZOE",
         caracterPrompt:
           "A calm and warm young woman in her mid-20s with a clean girl aesthetic, soft natural makeup, long dark brown hair, expressive eyes, and a gentle smile. She wears elegant neutral clothes in beige or cream tones with minimal gold jewelry. Her energy is relaxed, approachable, and emotionally intelligent. She looks like someone who is easy to talk to about daily life, feelings, relationships, and personal stories. Modern cozy podcast studio or warm lifestyle background with soft lighting, plants, and subtle neon accents.",
@@ -63,8 +64,8 @@ export const STORIES_SEED: StoryDefinition[] = [
             requirementId: "ask_about_origin",
             text: "Pregunta de donde viene",
           },
-                    {
-            requirementId: "ask_about_age",
+          {
+            requirementId: "ask_about_age_or_how_old",
             text: "Preguntale su edad.",
           },
           {
@@ -1773,6 +1774,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A middle-aged man wearing a vintage uniform with shiny brass buttons, a slightly crooked cap, and round glasses. He holds a magnifying glass and points at a train ticket with an amused, theatrical expression. The background is a bustling train platform with postered walls.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420210625-1261f803-9efe-4dd4-868d-159a1c723529.png",
+        videoIntro: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260511215259-3b1c6bd3-a965-4055-811c-c1398a659634.mp4",
         requirements: [
           {
             requirementId: "present_ticket",
@@ -1808,6 +1810,8 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A shiny, colorful vending machine with expressive LED 'eyes' and a small digital mouth. Buttons are labeled with quirky icons; steam and neon lights glow around it. It looks futuristic and slightly whimsical while dispensing cans.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420210657-d7aec9eb-c299-49f7-a926-ad2a73875c32.png",
+        videoIntro:
+          "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260511215037-349086e4-8f9a-4cd8-8629-eb40bc946cb7.mp4",
         requirements: [
           {
             requirementId: "clarify_meaning",
@@ -1843,6 +1847,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           "An older sushi chef in a traditional apron and headband, hands precise and graceful. He stands behind a wooden counter with fresh fish on display, a calm, slightly amused smile, and a warm lantern-lit interior of a small sushi bar.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420210726-08904cbd-9261-4cc8-86ee-c90aa72df254.png",
+        videoIntro: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260511215333-b52476a3-b8f9-4920-ab85-32f890d1c432.mp4",
         requirements: [
           {
             requirementId: "compliment_craft",
@@ -1878,7 +1883,9 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A flashy host with retro sunglasses, a sparkly jacket, and a wireless mic. He stands in a cozy karaoke room with colorful lights and a small stage, striking a dramatic pose and smiling encouragingly.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420210804-7c08f139-ad91-4fe1-b53a-c76169a40aad.png",
-        requirements: [
+        videoIntro: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260511215407-ac1d91f9-90f9-4386-aa09-6c76698cac58.mp4",
+      
+          requirements: [
           {
             requirementId: "ask_song_options",
             text: "Pregunta qué canciones están disponibles.",
@@ -1913,6 +1920,7 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A middle-aged Japanese receptionist, with glasses and a neat hairstyle. He wears a formal uniform and has a kind but serious expression. He is behind the reception desk of a capsule hotel, with a brochure about the hotel rules in his hand.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420210901-13d739a2-0d1f-4b2a-801a-de1fb0bf7d15.png",
+        videoIntro: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260511215448-c7aed6a7-3098-45b4-b2b6-e58138861096.mp4",
         requirements: [
           {
             requirementId: "confirm_reservation",

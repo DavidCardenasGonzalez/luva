@@ -4,18 +4,26 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
 import Purchases from 'react-native-purchases';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useRevenueCat } from '../purchases/RevenueCatProvider';
 import { useCoins } from '../purchases/CoinBalanceProvider';
 import { useCardProgress } from '../progress/CardProgressProvider';
 import { useStoryProgress } from '../progress/StoryProgressProvider';
-import { resetSeenTours } from '../tour/tourProgress';
 import { getRuntimeAppVersion } from '../version/appVersion';
 import { trackMixpanelPremiumActivated } from '../marketing/mixpanelEvents';
 import AccountProgressCard from '../components/AccountProgressCard';
 import { useAuth } from '../auth/AuthProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
+
+async function clearLocalLuvaStorage(): Promise<void> {
+  const keys = await AsyncStorage.getAllKeys();
+  const luvaKeys = keys.filter((key) => key.startsWith('@luva') || key.startsWith('luva'));
+  if (luvaKeys.length) {
+    await AsyncStorage.multiRemove(luvaKeys);
+  }
+}
 
 export default function SettingsScreen({ navigation }: Props) {
   const appVersion = getRuntimeAppVersion();
@@ -32,7 +40,7 @@ export default function SettingsScreen({ navigation }: Props) {
   const { resetCoins } = useCoins();
   const { resetAll: resetCardProgress } = useCardProgress();
   const { resetAll: resetStoryProgress } = useStoryProgress();
-  const { isSignedIn, user, updateCurrentUser } = useAuth();
+  const { isSignedIn, user, updateCurrentUser, resetLocalSession } = useAuth();
   const [showResetModal, setShowResetModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [confirmText, setConfirmText] = useState('');
@@ -136,22 +144,29 @@ export default function SettingsScreen({ navigation }: Props) {
     try {
       setResetting(true);
       await Promise.all([
-        resetCoins(),
         resetCardProgress(),
         resetStoryProgress(),
-        clearManualProAccess(),
-        resetSeenTours(),
       ]);
+      await Promise.all([
+        resetCoins(),
+        clearManualProAccess(),
+        resetLocalSession(),
+      ]);
+      await clearLocalLuvaStorage();
       setConfirmText('');
       setShowResetModal(false);
-      Alert.alert('Restaurado', 'Se borró tu progreso, tus tours y se reiniciaron tus monedas.');
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Onboarding' }],
+      });
+      Alert.alert('Restaurado', 'La app quedó como recién instalada.');
     } catch (err) {
       console.warn('[Settings] Error al restaurar', err);
       Alert.alert('Error', 'No se pudo restaurar la app. Inténtalo de nuevo.');
     } finally {
       setResetting(false);
     }
-  }, [canConfirmReset, clearManualProAccess, resetCoins, resetCardProgress, resetStoryProgress, resetting]);
+  }, [canConfirmReset, clearManualProAccess, navigation, resetCoins, resetCardProgress, resetLocalSession, resetStoryProgress, resetting]);
 
   const handleRedeemCode = useCallback(async () => {
     const trimmed = codeInput.trim();
@@ -387,7 +402,7 @@ export default function SettingsScreen({ navigation }: Props) {
                 </Text>
               </Pressable>
             )}
-            <Pressable
+            {/* <Pressable
               onPress={() => navigation.navigate('Paywall', { source: 'settings_lite', variant: 'lite' })}
               style={({ pressed }) => ({
                 marginTop: 10,
@@ -402,7 +417,7 @@ export default function SettingsScreen({ navigation }: Props) {
               <Text style={{ color: 'white', fontWeight: '800', textAlign: 'center' }}>
                 Ver Versión Lite
               </Text>
-            </Pressable>
+            </Pressable> */}
           </View>
 
           {__DEV__ || Platform.OS === 'android' ? (
@@ -536,7 +551,7 @@ export default function SettingsScreen({ navigation }: Props) {
               Restaurar app
             </Text>
             <Text style={{ color: '#fca5a5', marginTop: 6, lineHeight: 20 }}>
-              Esto borrará todo tu progreso y monedas. No hay vuelta atrás.
+              Esto borrará tu sesión, onboarding, progreso, tours, monedas, promociones y cache local. No hay vuelta atrás.
             </Text>
             <Pressable
               onPress={() => setShowResetModal(true)}
@@ -706,7 +721,7 @@ export default function SettingsScreen({ navigation }: Props) {
           >
             <Text style={{ color: '#f87171', fontWeight: '800', fontSize: 18 }}>¿Estás seguro?</Text>
             <Text style={{ color: '#cbd5e1', marginTop: 8, lineHeight: 20 }}>
-              Esta acción borrará tu progreso, tours y reiniciará tus monedas. También quitará el Pro por código guardado en este dispositivo.
+              Esta acción dejará Luva como recién descargada en este dispositivo: se borrará tu sesión, onboarding, progreso, tours, monedas, promociones y cache local.
             </Text>
             <Text style={{ color: '#cbd5e1', marginTop: 12, fontSize: 12 }}>
               Escribe <Text style={{ fontWeight: '800', color: '#f87171' }}>borrar</Text> para confirmar.

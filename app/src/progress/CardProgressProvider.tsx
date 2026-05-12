@@ -78,6 +78,7 @@ export function CardProgressProvider({ children }: { children: React.ReactNode }
             console.warn('[CardProgress] No se pudo sincronizar el progreso:', err?.message || err);
           }
         });
+      return syncQueueRef.current;
     },
     [isSignedIn, mergeRemoteCardsIntoLocal, user?.email]
   );
@@ -189,7 +190,7 @@ export function CardProgressProvider({ children }: { children: React.ReactNode }
     await persist(next);
 
     if (isSignedIn && user?.email) {
-      enqueueRemoteMerge({ cards: next });
+      await enqueueRemoteMerge({ cards: next });
     }
   }, [applyDocument, enqueueRemoteMerge, isSignedIn, persist, user?.email]);
 

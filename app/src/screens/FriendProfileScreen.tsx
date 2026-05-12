@@ -17,8 +17,6 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import AccountProgressCard from '../components/AccountProgressCard';
-import { useAuth } from '../auth/AuthProvider';
 import { CharacterProfilePost, useFriendProfile } from '../hooks/useFriendProfile';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
 
@@ -155,7 +153,6 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
   const friendId = route.params?.friendId;
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const { isSignedIn } = useAuth();
   const { friend, posts, loading, loaded, error, reload } = useFriendProfile(friendId);
   const [selectedPost, setSelectedPost] = useState<CharacterProfilePost | null>(null);
   const [avatarModalVisible, setAvatarModalVisible] = useState(false);
@@ -178,35 +175,6 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
     : undefined;
   const tileGap = 3;
   const tileSize = Math.floor((width - tileGap * 2) / 3);
-
-  const handleCreateAccount = useCallback((prefillEmail?: string) => {
-    navigation.navigate('EmailSignUp', { prefillEmail });
-  }, [navigation]);
-
-  if (!isSignedIn) {
-    return (
-      <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: COLORS.background, padding: 20 }}>
-        <Pressable
-          onPress={() => navigation.goBack()}
-          style={({ pressed }) => ({
-            width: 42,
-            height: 42,
-            borderRadius: 12,
-            backgroundColor: COLORS.surface,
-            borderWidth: 1,
-            borderColor: COLORS.border,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.8 : 1,
-            marginBottom: 16,
-          })}
-        >
-          <MaterialIcons name="arrow-back" size={20} color={COLORS.text} />
-        </Pressable>
-        <AccountProgressCard mode="signed-out" onCreateAccount={handleCreateAccount} />
-      </SafeAreaView>
-    );
-  }
 
   if ((!loaded || loading) && !friend) {
     return (
@@ -405,9 +373,9 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
           <View style={{ padding: 24, alignItems: 'center' }}>
             <MaterialIcons name="photo-library" size={34} color={COLORS.muted} />
             <Text style={{ color: COLORS.text, fontWeight: '900', marginTop: 12 }}>Sin posts todavía</Text>
-            <Text style={{ color: COLORS.muted, textAlign: 'center', marginTop: 6, lineHeight: 20 }}>
+            {/* <Text style={{ color: COLORS.muted, textAlign: 'center', marginTop: 6, lineHeight: 20 }}>
               Cuando subas imagenes desde el admin, apareceran aqui como un perfil.
-            </Text>
+            </Text> */}
           </View>
         }
       />

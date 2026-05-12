@@ -9,16 +9,20 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import AppTabBar from '../components/AppTabBar';
+import CoinCountChip from '../components/CoinCountChip';
 import { api } from '../api/api';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { ShadowingChapter, ShadowingList, useShadowing } from '../hooks/useShadowing';
 import { fetchSrtCaptions } from '../hooks/useLessons';
 import { useShadowingPlayer } from '../shadowing/ShadowingPlayerProvider';
+import { SHADOWING_CHAPTER_COST, useCoins } from '../purchases/CoinBalanceProvider';
+import { LITE_PROMO_EXPIRES_AT_KEY } from '../purchases/litePromo';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Shadowing'>;
 
@@ -38,6 +42,13 @@ type SubtitleTranslationState = {
   text?: string;
   loading?: boolean;
   error?: string;
+};
+
+type ContinueShadowingListItem = {
+  list: ShadowingList;
+  listenedCount: number;
+  latestListenedAt: string;
+  latestChapter: ShadowingChapter | undefined;
 };
 
 const COLORS = {
@@ -189,9 +200,11 @@ function ShadowingListCoverCard({
             : COLORS.border,
         backgroundColor: completed ? 'rgba(20, 83, 45, 0.16)' : COLORS.surface,
         opacity: pressed ? 0.82 : 1,
+        height: 230,
+        flexDirection: 'column',
       })}
     >
-      <View style={{ width: '100%', aspectRatio: 1, backgroundColor: COLORS.surfaceAlt }}>
+      <View style={{ flex: 1, width: '100%', backgroundColor: COLORS.surfaceAlt }}>
         {list.coverImageUrl ? (
           <Image
             source={{ uri: list.coverImageUrl }}
@@ -278,10 +291,88 @@ function ShadowingListCoverCard({
   );
 }
 
-export default function ShadowingScreen({ navigation: _navigation }: Props) {
+function ContinueListeningCard({
+  item,
+  width,
+  onPress,
+}: {
+  item: ContinueShadowingListItem;
+  width: number;
+  onPress: () => void;
+}) {
+  const { list, listenedCount, latestChapter } = item;
+  const totalChapters = list.chapters.length;
+  const completed = totalChapters > 0 && listenedCount >= totalChapters;
+  const nextText = completed
+    ? 'Lista completada'
+    : `${listenedCount}/${totalChapters} escuchados`;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`Continuar lista ${list.name}`}
+      style={({ pressed }) => ({
+        width,
+        minHeight: 124,
+        borderRadius: 18,
+        borderWidth: 1,
+        borderColor: completed ? 'rgba(34, 197, 94, 0.52)' : 'rgba(34, 211, 238, 0.42)',
+        backgroundColor: COLORS.surface,
+        opacity: pressed ? 0.82 : 1,
+        overflow: 'hidden',
+        flexDirection: 'row',
+      })}
+    >
+      <View style={{ width: 106, backgroundColor: COLORS.surfaceAlt }}>
+        {list.coverImageUrl ? (
+          <Image
+            source={{ uri: list.coverImageUrl }}
+            resizeMode="cover"
+            style={{ width: '100%', height: '100%' }}
+          />
+        ) : (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <MaterialIcons name="headphones" size={34} color={COLORS.accent} />
+          </View>
+        )}
+      </View>
+      <View style={{ flex: 1, padding: 12, gap: 7, justifyContent: 'center' }}>
+        <Text style={{ color: '#a5f3fc', fontSize: 10, fontWeight: '900', textTransform: 'uppercase' }} numberOfLines={1}>
+          {list.category}
+        </Text>
+        <Text style={{ color: COLORS.text, fontSize: 17, lineHeight: 21, fontWeight: '900' }} numberOfLines={2}>
+          {list.name}
+        </Text>
+        {latestChapter ? (
+          <Text style={{ color: COLORS.muted, fontSize: 12, lineHeight: 16, fontWeight: '700' }} numberOfLines={2}>
+            Ultimo: {latestChapter.title}
+          </Text>
+        ) : null}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <MaterialIcons
+            name={completed ? 'check-circle' : 'play-circle'}
+            size={16}
+            color={completed ? COLORS.success : COLORS.accent}
+          />
+          <Text
+            style={{ color: completed ? '#bbf7d0' : '#a5f3fc', fontSize: 12, fontWeight: '900', flex: 1 }}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+          >
+            {nextText}
+          </Text>
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
+export default function ShadowingScreen({ navigation, route }: Props) {
   const { lists, loading, error, reload } = useShadowing();
   const { width: windowWidth } = useWindowDimensions();
   const [selectedListId, setSelectedListId] = useState<string>();
+  const handledInitialOpenKeyRef = useRef<string | undefined>(undefined);
   const progressBarRef = useRef<View | null>(null);
   const progressBarMeasuredRef = useRef(false);
   const progressBarPageXRef = useRef(0);
@@ -301,6 +392,7 @@ export default function ShadowingScreen({ navigation: _navigation }: Props) {
     audioLoading,
     audioError,
     listenedChapterIds,
+    listenedChapterDates,
     setQueue,
     selectChapter,
     playPause,
@@ -309,6 +401,40 @@ export default function ShadowingScreen({ navigation: _navigation }: Props) {
     seek: seekPlayer,
     cancelSeek,
   } = useShadowingPlayer();
+  const { canSpend, spendCoins, loading: coinsLoading, isUnlimited } = useCoins();
+  const chargedChapterIdsRef = useRef(new Set<string>());
+
+  const openShadowingPaywall = useCallback(async () => {
+    try {
+      const raw = await AsyncStorage.getItem(LITE_PROMO_EXPIRES_AT_KEY);
+      const expiresAt = raw ? Number(raw) : Number.NaN;
+      if (Number.isFinite(expiresAt) && expiresAt > Date.now()) {
+        navigation.navigate('Paywall', { source: 'shadowing_chapter_unlock', variant: 'lite' });
+        return;
+      }
+      if (raw) {
+        await AsyncStorage.removeItem(LITE_PROMO_EXPIRES_AT_KEY);
+      }
+    } catch (err) {
+      console.warn('[Shadowing] No se pudo revisar la promo Lite', err);
+    }
+    navigation.navigate('Paywall', { source: 'shadowing_chapter_unlock' });
+  }, [navigation]);
+
+  // Charge coins when a chapter starts playing (covers auto-advance too)
+  useEffect(() => {
+    if (!isPlaying || !selectedChapter || isUnlimited) return;
+    const chapterId = selectedChapter.chapterId;
+    if (chargedChapterIdsRef.current.has(chapterId)) return;
+    chargedChapterIdsRef.current.add(chapterId);
+    spendCoins(SHADOWING_CHAPTER_COST, `shadowing:${chapterId}`).then((ok) => {
+      if (!ok) {
+        chargedChapterIdsRef.current.delete(chapterId);
+        void playPause();
+        void openShadowingPaywall();
+      }
+    });
+  }, [isPlaying, isUnlimited, openShadowingPaywall, playPause, selectedChapter, spendCoins]);
 
   useFocusEffect(
     useCallback(() => {
@@ -331,6 +457,28 @@ export default function ShadowingScreen({ navigation: _navigation }: Props) {
     setQueue(selectedList ? [selectedList] : lists);
   }, [lists, selectedList, setQueue]);
 
+  useEffect(() => {
+    const requestedListId = route.params?.listId;
+    if (!requestedListId) return;
+
+    const requestedChapterId = route.params?.chapterId;
+    const shouldPlay = Boolean(route.params?.autoplay);
+    const openKey = `${requestedListId}:${requestedChapterId || ''}:${shouldPlay ? 'play' : 'open'}`;
+    if (handledInitialOpenKeyRef.current === openKey) return;
+
+    const requestedList = lists.find((list) => list.listId === requestedListId);
+    if (!requestedList) return;
+
+    const requestedChapter =
+      requestedList.chapters.find((chapter) => chapter.chapterId === requestedChapterId) ||
+      requestedList.chapters[0];
+    if (!requestedChapter) return;
+
+    setSelectedListId(requestedList.listId);
+    selectChapter(requestedChapter, { shouldPlay });
+    handledInitialOpenKeyRef.current = openKey;
+  }, [lists, route.params?.autoplay, route.params?.chapterId, route.params?.listId, selectChapter]);
+
   const openList = useCallback((list: ShadowingList) => {
     setSelectedListId(list.listId);
     const firstChapter = list.chapters[0];
@@ -338,6 +486,17 @@ export default function ShadowingScreen({ navigation: _navigation }: Props) {
       selectChapter(firstChapter);
     }
   }, [selectChapter, selectedChapter?.chapterId]);
+
+  const openContinueList = useCallback((item: ContinueShadowingListItem) => {
+    setSelectedListId(item.list.listId);
+    const nextChapter =
+      item.list.chapters.find((chapter) => !listenedChapterIds.has(chapter.chapterId)) ||
+      item.latestChapter ||
+      item.list.chapters[0];
+    if (nextChapter) {
+      selectChapter(nextChapter);
+    }
+  }, [listenedChapterIds, selectChapter]);
 
   const handleSelectChapter = useCallback((chapter: ShadowingChapter) => {
     selectChapter(chapter);
@@ -352,6 +511,20 @@ export default function ShadowingScreen({ navigation: _navigation }: Props) {
       setSelectedListId(activeList.listId);
     }
   }, [lists, selectedChapter]);
+
+  const handleBackFromSelectedList = useCallback(() => {
+    if (route.params?.origin === 'feed') {
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+        return;
+      }
+
+      navigation.navigate('Feed');
+      return;
+    }
+
+    setSelectedListId(undefined);
+  }, [navigation, route.params?.origin]);
 
   useEffect(() => {
     let cancelled = false;
@@ -393,8 +566,16 @@ export default function ShadowingScreen({ navigation: _navigation }: Props) {
   const activeTranslation = activeSubtitleKey ? subtitleTranslations[activeSubtitleKey] : undefined;
 
   const handlePlayPause = useCallback(async () => {
+    if (!isPlaying && !isUnlimited) {
+      if (coinsLoading) return;
+      const enough = await canSpend(SHADOWING_CHAPTER_COST);
+      if (!enough) {
+        await openShadowingPaywall();
+        return;
+      }
+    }
     await playPause();
-  }, [playPause]);
+  }, [canSpend, coinsLoading, isPlaying, isUnlimited, openShadowingPaywall, playPause]);
 
   const handlePlaybackRate = useCallback(async (rate: number) => {
     await setPlaybackRate(rate);
@@ -512,6 +693,36 @@ export default function ShadowingScreen({ navigation: _navigation }: Props) {
 
   const progressRatio = durationSeconds > 0 ? Math.min(1, positionSeconds / durationSeconds) : 0;
   const coverCardWidth = Math.floor((windowWidth - SCREEN_HORIZONTAL_PADDING - COVER_GRID_GAP) / 2);
+  const continueCardWidth = Math.min(314, Math.max(270, windowWidth - 64));
+  const continueLists = useMemo<ContinueShadowingListItem[]>(() => lists
+    .map((list) => {
+      let listenedCount = 0;
+      let latestTimestamp = Number.NEGATIVE_INFINITY;
+      let latestListenedAt = '';
+      let latestChapter: ShadowingChapter | undefined;
+
+      list.chapters.forEach((chapter) => {
+        if (!listenedChapterIds.has(chapter.chapterId)) return;
+        listenedCount += 1;
+
+        const listenedAt = listenedChapterDates.get(chapter.chapterId);
+        const timestamp = listenedAt ? Date.parse(listenedAt) : 0;
+        if (Number.isFinite(timestamp) && timestamp > latestTimestamp) {
+          latestTimestamp = timestamp;
+          latestListenedAt = listenedAt || new Date(0).toISOString();
+          latestChapter = chapter;
+        }
+      });
+
+      if (!listenedCount) return undefined;
+      return { list, listenedCount, latestListenedAt, latestChapter };
+    })
+    .filter((item): item is ContinueShadowingListItem => !!item)
+    .sort((left, right) => (
+      right.latestListenedAt.localeCompare(left.latestListenedAt) ||
+      left.list.order - right.list.order ||
+      left.list.name.localeCompare(right.list.name)
+    )), [listenedChapterDates, listenedChapterIds, lists]);
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: COLORS.background }}>
@@ -527,17 +738,49 @@ export default function ShadowingScreen({ navigation: _navigation }: Props) {
 
         {!selectedList ? (
           <>
-            <View style={{ gap: 6 }}>
-              <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '900', textTransform: 'uppercase' }}>
-                Audio practice
-              </Text>
-              <Text style={{ color: COLORS.text, fontSize: 32, fontWeight: '900' }}>Shadowing</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}>
+              <View style={{ flex: 1, gap: 6 }}>
+                <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '900', textTransform: 'uppercase' }}>
+                  Audio practice
+                </Text>
+                <Text style={{ color: COLORS.text, fontSize: 32, fontWeight: '900' }}>Shadowing</Text>
+              </View>
+              <CoinCountChip />
+            </View>
+            <View>
               <Text style={{ color: COLORS.muted, lineHeight: 21 }}>
                 El shadowing es una practica donde intentas imitar a la persona que habla.
                 Te ayuda a acostumbrar tu voz y tu oido al ingles. No te preocupes mucho si
                 no conoces una palabra: repite cada vez que escuches un beep.
               </Text>
             </View>
+
+            {continueLists.length > 0 ? (
+              <View style={{ gap: 10 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                  <Text style={{ color: COLORS.text, fontSize: 20, fontWeight: '900' }}>
+                    Seguir escuchando
+                  </Text>
+                  <Text style={{ color: COLORS.muted, fontSize: 12, fontWeight: '800' }}>
+                    Recientes
+                  </Text>
+                </View>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingRight: 4, gap: 12 }}
+                >
+                  {continueLists.map((item) => (
+                    <ContinueListeningCard
+                      key={item.list.listId}
+                      item={item}
+                      width={continueCardWidth}
+                      onPress={() => openContinueList(item)}
+                    />
+                  ))}
+                </ScrollView>
+              </View>
+            ) : null}
 
             {loading && !lists.length ? (
               <View style={{ paddingVertical: 40, alignItems: 'center', gap: 10 }}>
@@ -561,22 +804,27 @@ export default function ShadowingScreen({ navigation: _navigation }: Props) {
                 </Text>
               </View>
             ) : (
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: COVER_GRID_GAP }}>
-                {lists.map((list) => {
-                  const listenedCount = list.chapters.filter((chapter) => (
-                    listenedChapterIds.has(chapter.chapterId)
-                  )).length;
+              <View style={{ gap: 10 }}>
+                <Text style={{ color: COLORS.text, fontSize: 20, fontWeight: '900' }}>
+                  Tu proxima historia
+                </Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: COVER_GRID_GAP }}>
+                  {lists.map((list) => {
+                    const listenedCount = list.chapters.filter((chapter) => (
+                      listenedChapterIds.has(chapter.chapterId)
+                    )).length;
 
-                  return (
-                    <View key={list.listId} style={{ width: coverCardWidth }}>
-                      <ShadowingListCoverCard
-                        list={list}
-                        listenedCount={listenedCount}
-                        onPress={() => openList(list)}
-                      />
-                    </View>
-                  );
-                })}
+                    return (
+                      <View key={list.listId} style={{ width: coverCardWidth }}>
+                        <ShadowingListCoverCard
+                          list={list}
+                          listenedCount={listenedCount}
+                          onPress={() => openList(list)}
+                        />
+                      </View>
+                    );
+                  })}
+                </View>
               </View>
             )}
           </>
@@ -584,9 +832,9 @@ export default function ShadowingScreen({ navigation: _navigation }: Props) {
           <>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <Pressable
-                onPress={() => setSelectedListId(undefined)}
+                onPress={handleBackFromSelectedList}
                 accessibilityRole="button"
-                accessibilityLabel="Volver a listas"
+                accessibilityLabel={route.params?.origin === 'feed' ? 'Volver al feed' : 'Volver a listas'}
                 style={({ pressed }) => ({
                   width: 42,
                   height: 42,
@@ -608,6 +856,7 @@ export default function ShadowingScreen({ navigation: _navigation }: Props) {
                   {selectedList.name}
                 </Text>
               </View>
+              <CoinCountChip />
             </View>
 
             {selectedChapter ? (

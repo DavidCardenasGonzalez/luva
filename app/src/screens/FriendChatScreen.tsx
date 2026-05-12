@@ -22,10 +22,12 @@ import * as Speech from 'expo-speech';
 import { Audio } from 'expo-av';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import CoinCountChip from '../components/CoinCountChip';
 import StoryMessageComposer, { StoryFlowState } from '../components/StoryMessageComposer';
 import AccountProgressCard from '../components/AccountProgressCard';
 import { useAuth } from '../auth/AuthProvider';
 import { api } from '../api/api';
+import { RECORDING_COST, useCoins } from '../purchases/CoinBalanceProvider';
 import useAudioRecorder from '../shared/useAudioRecorder';
 import useUploadToS3 from '../shared/useUploadToS3';
 import {
@@ -63,6 +65,9 @@ type MessageTranslationState = {
   loading?: boolean;
   error?: string;
 };
+
+const FRIEND_CHAT_MESSAGE_COST = 1;
+const FRIEND_CHAT_VOICE_TOTAL_COST = FRIEND_CHAT_MESSAGE_COST + RECORDING_COST;
 
 function formatJourneyPoints(points: number) {
   return Number.isInteger(points) ? String(points) : points.toFixed(1);
@@ -192,6 +197,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
   const { isSignedIn } = useAuth();
   const { friends, loading, loaded, error, reload } = useFriends();
+  const { canSpend, spendCoins, loading: coinsLoading, isUnlimited, balance } = useCoins();
   const friend = useMemo(
     () => friends.find((item) => item.friendId === friendId),
     [friendId, friends]
@@ -445,7 +451,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   }, [messageTranslations]);
 
   const handleAdvance = useCallback(
-    async (transcript: string, sessionId?: string) => {
+    async (transcript: string, sessionId?: string, inputMethod: 'text' | 'audio' = 'text') => {
       const trimmed = transcript.trim();
       if (!trimmed) {
         setErrorMessage('La transcripción llegó vacía. Intenta de nuevo.');
@@ -461,6 +467,23 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         setErrorMessage('Esta conversación ya terminó.');
         setFlowState('idle');
         return;
+      }
+      if (coinsLoading) {
+        setErrorMessage('Cargando tus monedas...');
+        setFlowState('idle');
+        return;
+      }
+      if (!isUnlimited) {
+        const ok = await spendCoins(
+          FRIEND_CHAT_MESSAGE_COST,
+          `friend-message:${friendId}:${inputMethod}:${Date.now()}`
+        );
+        if (!ok) {
+          setErrorMessage('Necesitas 1 moneda para enviar este mensaje.');
+          navigation.navigate('Paywall', { source: 'friend_chat_message' });
+          setFlowState('idle');
+          return;
+        }
       }
 
       setErrorMessage(null);
@@ -504,7 +527,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         setFlowState('idle');
       }
     },
-    [conversationEnded, friendId, messages, reload]
+    [coinsLoading, conversationEnded, friendId, isUnlimited, messages, navigation, reload, spendCoins]
   );
 
   const handleSendText = useCallback(
@@ -542,7 +565,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       const transcription = await api.post<{ transcript: string }>(
         `/sessions/${session.sessionId}/transcribe`
       );
-      await handleAdvance(transcription.transcript || '', session.sessionId);
+      await handleAdvance(transcription.transcript || '', session.sessionId, 'audio');
     } catch (err: any) {
       setErrorMessage(err?.message || 'No pudimos procesar tu audio.');
       setFlowState('idle');
@@ -551,10 +574,32 @@ export default function FriendChatScreen({ navigation, route }: Props) {
 
   const handleRecordPressIn = useCallback(async () => {
     try {
+      if (conversationEnded) {
+        setErrorMessage('Esta conversación ya terminó.');
+        return;
+      }
+      if (coinsLoading) {
+        setErrorMessage('Cargando tus monedas...');
+        return;
+      }
       const hasMicPermission = await recorder.ensurePermission();
       if (!hasMicPermission) {
         setErrorMessage('Activa el permiso de micrófono para grabar.');
         return;
+      }
+      if (!isUnlimited) {
+        const voiceAffordable = await canSpend(FRIEND_CHAT_VOICE_TOTAL_COST);
+        if (!voiceAffordable) {
+          setErrorMessage('Necesitas 2 monedas para enviar un mensaje con voz.');
+          navigation.navigate('Paywall', { source: 'friend_chat_recording' });
+          return;
+        }
+        const ok = await spendCoins(RECORDING_COST, `friend-recording:${friendId}:${Date.now()}`);
+        if (!ok) {
+          setErrorMessage('Necesitas 1 moneda para grabar.');
+          navigation.navigate('Paywall', { source: 'friend_chat_recording' });
+          return;
+        }
       }
       setErrorMessage(null);
       setFlowState('recording');
@@ -573,7 +618,10 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       stopRequestedWhileStarting.current = false;
       isStartingRecording.current = false;
     }
-  }, [handleRecordRelease, recorder]);
+  }, [canSpend, coinsLoading, conversationEnded, friendId, handleRecordRelease, isUnlimited, navigation, recorder, spendCoins]);
+
+  const textCoinLocked = !isUnlimited && balance < FRIEND_CHAT_MESSAGE_COST;
+  const voiceCoinLocked = !isUnlimited && balance < FRIEND_CHAT_VOICE_TOTAL_COST;
 
   const statusLabel = useMemo(() => {
     switch (flowState) {
@@ -586,9 +634,18 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       case 'evaluating':
         return 'Analizando tu inglés...';
       default:
-        return '';
+        if (coinsLoading) {
+          return 'Cargando tus monedas...';
+        }
+        if (textCoinLocked) {
+          return 'Necesitas 1 moneda para enviar.';
+        }
+        if (voiceCoinLocked) {
+          return 'Enviar cuesta 1 moneda · Voz cuesta 2 monedas';
+        }
+        return 'Enviar cuesta 1 moneda · Voz cuesta 2 monedas';
     }
-  }, [flowState]);
+  }, [coinsLoading, flowState, textCoinLocked, voiceCoinLocked]);
 
   if (!isSignedIn) {
     return (
@@ -704,6 +761,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                 {conversationEnded ? 'Conversación terminada' : 'Conversación libre'}
               </Text>
             </View>
+            <CoinCountChip />
             <Pressable
               hitSlop={12}
               onPress={handleOpenAssistance}
@@ -716,7 +774,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: pressed ? 'rgba(34, 211, 238, 0.1)' : 'transparent',
-                marginLeft: 10,
+                marginLeft: 8,
                 opacity: pressed ? 0.75 : 1,
               })}
             >
@@ -884,7 +942,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           <StoryMessageComposer
             flowState={flowState}
             retryBlocked={false}
-            recordBlocked={false}
+            recordBlocked={coinsLoading || voiceCoinLocked}
             statusLabel={statusLabel}
             onSendText={handleSendText}
             onRecordPressIn={handleRecordPressIn}

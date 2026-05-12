@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   View,
   Alert,
   Linking,
@@ -126,9 +127,8 @@ export default function PaywallScreen() {
   const insets = useSafeAreaInsets();
   const isModal = !!route.params?.asModal;
   const paywallSource = route.params?.source || "unknown";
-  const paywallVariant = route.params?.variant || "pro";
+  const requestedPaywallVariant = route.params?.variant || "pro";
   const closeTarget = route.params?.closeTarget;
-  const isLitePaywall = paywallVariant === "lite";
   const { isPro, refreshCustomerInfo, loading: rcLoading } = useRevenueCat();
   const {
     balance: coinBalance,
@@ -142,9 +142,12 @@ export default function PaywallScreen() {
   const [restoring, setRestoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [litePromoExpiresAt, setLitePromoExpiresAt] = useState<number | null>(null);
+  const [litePromoCheckComplete, setLitePromoCheckComplete] = useState(requestedPaywallVariant === "lite");
+  const [useLitePromoOverride, setUseLitePromoOverride] = useState(false);
   const [timerNow, setTimerNow] = useState(Date.now());
   const [selectedBillingPeriod, setSelectedBillingPeriod] = useState<"annual" | "monthly">("annual");
   const trackedPaywallRef = useRef(false);
+  const isLitePaywall = requestedPaywallVariant === "lite" || useLitePromoOverride;
 
   const dismissPaywall = useCallback(() => {
     if (closeTarget === "Feed") {
@@ -200,6 +203,62 @@ export default function PaywallScreen() {
   }, [dismissPaywall, isPro, rcLoading]);
 
   useEffect(() => {
+    let mounted = true;
+
+    if (requestedPaywallVariant === "lite") {
+      setUseLitePromoOverride(false);
+      setLitePromoCheckComplete(true);
+      return () => {
+        mounted = false;
+      };
+    }
+
+    setLitePromoCheckComplete(false);
+
+    const resolveLitePromoOverride = async () => {
+      const now = Date.now();
+      try {
+        const storedValue = await AsyncStorage.getItem(LITE_PROMO_EXPIRES_AT_KEY);
+        const storedExpiresAt = storedValue ? Number(storedValue) : Number.NaN;
+
+        if (Number.isFinite(storedExpiresAt) && storedExpiresAt > now) {
+          if (mounted) {
+            setUseLitePromoOverride(true);
+            setLitePromoExpiresAt(storedExpiresAt);
+            setTimerNow(now);
+          }
+          return;
+        }
+
+        if (storedValue) {
+          await AsyncStorage.removeItem(LITE_PROMO_EXPIRES_AT_KEY);
+        }
+        if (mounted) {
+          setUseLitePromoOverride(false);
+          setLitePromoExpiresAt(null);
+          setTimerNow(now);
+        }
+      } catch (err) {
+        console.warn("[Paywall] No se pudo revisar la promo Lite", err);
+        if (mounted) {
+          setUseLitePromoOverride(false);
+          setLitePromoExpiresAt(null);
+          setTimerNow(now);
+        }
+      } finally {
+        if (mounted) {
+          setLitePromoCheckComplete(true);
+        }
+      }
+    };
+
+    void resolveLitePromoOverride();
+    return () => {
+      mounted = false;
+    };
+  }, [requestedPaywallVariant]);
+
+  useEffect(() => {
     if (!isLitePaywall) {
       return;
     }
@@ -245,7 +304,7 @@ export default function PaywallScreen() {
   }, [isLitePaywall, litePromoExpiresAt]);
 
   useEffect(() => {
-    if (trackedPaywallRef.current || (!isLitePaywall && isPro) || coinsLoading) {
+    if (trackedPaywallRef.current || !litePromoCheckComplete || (!isLitePaywall && isPro) || coinsLoading) {
       return;
     }
     trackedPaywallRef.current = true;
@@ -265,6 +324,7 @@ export default function PaywallScreen() {
     isLitePaywall,
     isPro,
     isUnlimited,
+    litePromoCheckComplete,
     maxCoins,
     paywallSource,
   ]);
@@ -484,7 +544,11 @@ export default function PaywallScreen() {
     }
   };
 
-  const content = isLitePaywall ? (
+  const content = !litePromoCheckComplete ? (
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.bg }}>
+      <ActivityIndicator color="#22d3ee" />
+    </View>
+  ) : isLitePaywall ? (
     <Step7
       remainingSeconds={litePromoRemainingSeconds}
       product={litePromoProduct}

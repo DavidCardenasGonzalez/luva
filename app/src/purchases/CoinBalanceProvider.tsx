@@ -19,6 +19,7 @@ const REGEN_INTERVAL_MS = 60 * 60 * 1000;
 export const CHAT_MISSION_COST = 5;
 export const CARD_OPEN_COST = 1;
 export const RECORDING_COST = 1;
+export const SHADOWING_CHAPTER_COST = 3;
 
 type CoinsState = {
   balance: number;
@@ -155,7 +156,7 @@ export function CoinBalanceProvider({ children }: { children: React.ReactNode })
 
   const resetCoins = useCallback(async () => {
     const now = Date.now();
-    const fresh: CoinsState = { balance: MAX_FREE_COINS, lastUpdated: now };
+    const fresh: CoinsState = { balance: INITIAL_COIN_BALANCE, lastUpdated: now };
     setState(fresh);
     stateRef.current = fresh;
     await persist(fresh);

@@ -23,6 +23,8 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { LearningItem, LearningItemOptionKey, useLearningItems } from '../hooks/useLearningItems';
 import { FeedPost, useFeedPosts } from '../hooks/useFeedPosts';
 import { FriendCharacter, useFriends } from '../hooks/useFriends';
+import { Lesson, useLessons } from '../hooks/useLessons';
+import { ShadowingChapter, ShadowingList, useShadowing } from '../hooks/useShadowing';
 import { StoryMission, useStoryCatalog } from '../hooks/useStories';
 import {
   CARD_STATUS_LABELS,
@@ -42,7 +44,9 @@ import {
   showMissionInterstitialBeforeNavigation,
 } from '../shared/missionInterstitial';
 import { LITE_PROMO_EXPIRES_AT_KEY } from '../purchases/litePromo';
+import { getLearnedLessonIds } from '../progress/lessonProgress';
 import { recordJourneyVocabularyQuickGuessCorrect } from '../progress/journeyProgress';
+import { useShadowingPlayer } from '../shadowing/ShadowingPlayerProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Feed'>;
 
@@ -78,7 +82,32 @@ type FeedPostItem = FeedPost & {
   claimed?: boolean;
 };
 
-type FeedItem = ResumeMission | PendingMission | PendingVocab | FeedPostItem;
+type PendingShadowing = ShadowingList & {
+  kind: 'shadowing';
+  feedId: string;
+  nextChapter: ShadowingChapter;
+  listenedCount: number;
+};
+
+type PendingLesson = Lesson & {
+  kind: 'lesson';
+  feedId: string;
+};
+
+type PromoFeedItem = {
+  kind: 'promo';
+  feedId: string;
+  remainingSeconds: number;
+};
+
+type FeedItem =
+  | PromoFeedItem
+  | ResumeMission
+  | PendingMission
+  | PendingVocab
+  | PendingShadowing
+  | PendingLesson
+  | FeedPostItem;
 
 const COLORS = {
   background: '#0b1224',
@@ -93,8 +122,10 @@ const COLORS = {
   warning: '#f59e0b',
 };
 
-const MISSION_BATCH_SIZE = 4;
-const VOCABULARY_BATCH_SIZE = 8;
+const MISSION_BATCH_SIZE = 1;
+const VOCABULARY_BATCH_SIZE = 3;
+const SHADOWING_BATCH_SIZE = 1;
+const LESSON_BATCH_SIZE = 1;
 const CLAIMED_EXTRA_POSTS_STORAGE_KEY = '@luva/feed/claimed-extra-posts';
 
 function padTimerUnit(value: number) {
@@ -114,6 +145,16 @@ function getPromoTimerParts(totalSeconds: number) {
   };
 }
 
+function formatFeedDuration(seconds?: number) {
+  if (!seconds || seconds <= 0) {
+    return undefined;
+  }
+  const totalSeconds = Math.floor(seconds);
+  const minutes = Math.floor(totalSeconds / 60);
+  const rest = totalSeconds % 60;
+  return `${minutes}:${String(rest).padStart(2, '0')}`;
+}
+
 function hashString(input: string) {
   let hash = 2166136261;
   for (let i = 0; i < input.length; i += 1) {
@@ -129,38 +170,85 @@ function pickRandom<T>(list: T[], count: number, seed: string, keyFor: (item: T)
     .slice(0, count);
 }
 
-function buildFeedItems(missions: PendingMission[], vocabulary: PendingVocab[], posts: FeedPostItem[]) {
+function buildFeedItems({
+  promo,
+  missions,
+  vocabulary,
+  shadowing,
+  lessons,
+  posts,
+}: {
+  promo?: PromoFeedItem;
+  missions: PendingMission[];
+  vocabulary: PendingVocab[];
+  shadowing: PendingShadowing[];
+  lessons: PendingLesson[];
+  posts: FeedPostItem[];
+}) {
   const initialMissions = missions.filter((mission) => mission.isInitialStory);
   const regularMissions = missions.filter((mission) => !mission.isInitialStory);
-  const baseFeed: Array<PendingMission | PendingVocab> = [];
-  const blocks = Math.max(regularMissions.length, Math.ceil(vocabulary.length / 2));
-
+  const baseFeed: FeedItem[] = [];
+  if (promo) {
+    baseFeed.push(promo);
+  }
   baseFeed.push(...initialMissions);
+  let missionIndex = 0;
+  let vocabularyIndex = 0;
+  let shadowingIndex = 0;
+  let lessonIndex = 0;
 
-  for (let index = 0; index < blocks; index += 1) {
-    const mission = regularMissions[index];
+  while (
+    missionIndex < regularMissions.length ||
+    vocabularyIndex < vocabulary.length ||
+    shadowingIndex < shadowing.length ||
+    lessonIndex < lessons.length
+  ) {
+    const mission = regularMissions[missionIndex];
     if (mission) {
       baseFeed.push(mission);
+      missionIndex += 1;
     }
 
-    const firstVocab = vocabulary[index * 2];
-    const secondVocab = vocabulary[index * 2 + 1];
+    const firstVocab = vocabulary[vocabularyIndex];
     if (firstVocab) {
       baseFeed.push(firstVocab);
+      vocabularyIndex += 1;
     }
+
+    const shadowingItem = shadowing[shadowingIndex];
+    if (shadowingItem) {
+      baseFeed.push(shadowingItem);
+      shadowingIndex += 1;
+    }
+
+    const secondVocab = vocabulary[vocabularyIndex];
     if (secondVocab) {
       baseFeed.push(secondVocab);
+      vocabularyIndex += 1;
+    }
+
+    const lesson = lessons[lessonIndex];
+    if (lesson) {
+      baseFeed.push(lesson);
+      lessonIndex += 1;
+    }
+
+    const thirdVocab = vocabulary[vocabularyIndex];
+    if (thirdVocab) {
+      baseFeed.push(thirdVocab);
+      vocabularyIndex += 1;
     }
   }
 
   const feed: FeedItem[] = [...baseFeed];
+  const pinnedItemsCount = initialMissions.length + (promo ? 1 : 0);
   const orderOffsets = new Map<number, number>();
   [...posts]
     .sort((left, right) => left.order - right.order || left.postId.localeCompare(right.postId))
     .forEach((post) => {
       const offset = orderOffsets.get(post.order) || 0;
       orderOffsets.set(post.order, offset + 1);
-      const targetIndex = Math.max(initialMissions.length, Math.min(feed.length, post.order - 1 + offset));
+      const targetIndex = Math.max(pinnedItemsCount, Math.min(feed.length, post.order - 1 + offset));
       feed.splice(targetIndex, 0, post);
     });
 
@@ -180,10 +268,12 @@ function getFeedMediaId(item: FeedItem) {
 function MissionCard({
   item,
   onStart,
+  onViewAll,
   playbackEnabled,
 }: {
   item: PendingMission;
   onStart: (item: PendingMission) => void;
+  onViewAll: () => void;
   playbackEnabled: boolean;
 }) {
   const avatarImageUrl = item.mission.avatarImageUrl?.trim();
@@ -415,31 +505,45 @@ function MissionCard({
             )}
           </View>
         ) : missionAvatar ? (
-          <ImageBackground source={missionAvatar} style={{ flex: 1 }} imageStyle={{ resizeMode: 'cover' }}>
-            <View
-              style={{
-                position: 'absolute',
-                left: 0,
-                right: 0,
-                top: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(11, 18, 36, 0.38)',
-              }}
-            />
-            <View
-              style={{
-                position: 'absolute',
-                left: 0,
-                right: 0,
-                bottom: 0,
-                height: 100,
-                backgroundColor: 'rgba(11, 18, 36, 0.66)',
-              }}
-            />
-            {visualContent}
-          </ImageBackground>
+          <Pressable
+            onPress={() => onStart(item)}
+            accessibilityRole="button"
+            accessibilityLabel={`Empezar misión ${item.mission.title}`}
+            style={{ flex: 1 }}
+          >
+            <ImageBackground source={missionAvatar} style={{ flex: 1 }} imageStyle={{ resizeMode: 'cover' }}>
+              <View
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  backgroundColor: 'rgba(11, 18, 36, 0.38)',
+                }}
+              />
+              <View
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 100,
+                  backgroundColor: 'rgba(11, 18, 36, 0.66)',
+                }}
+              />
+              {visualContent}
+            </ImageBackground>
+          </Pressable>
         ) : (
-          <View style={{ flex: 1, backgroundColor: '#0b172b' }}>{visualContent}</View>
+          <Pressable
+            onPress={() => onStart(item)}
+            accessibilityRole="button"
+            accessibilityLabel={`Empezar misión ${item.mission.title}`}
+            style={{ flex: 1, backgroundColor: '#0b172b' }}
+          >
+            {visualContent}
+          </Pressable>
         )}
       </View>
 
@@ -447,21 +551,37 @@ function MissionCard({
         <Text style={{ color: COLORS.muted, lineHeight: 20 }} numberOfLines={3}>
           {description}
         </Text>
-        <Pressable
-          onPress={() => onStart(item)}
-          style={({ pressed }) => ({
-            marginTop: 14,
-            paddingVertical: 13,
-            borderRadius: 12,
-            alignItems: 'center',
-            backgroundColor: pressed ? '#1d4ed8' : COLORS.accentStrong,
-            shadowColor: COLORS.accentStrong,
-            shadowOpacity: 0.25,
-            shadowRadius: 10,
-          })}
-        >
-          <Text style={{ color: 'white', fontWeight: '900' }}>Empezar misión</Text>
-        </Pressable>
+        <View style={{ flexDirection: 'row', marginTop: 14, gap: 8 }}>
+          <Pressable
+            onPress={() => onStart(item)}
+            style={({ pressed }) => ({
+              flex: 2,
+              paddingVertical: 13,
+              borderRadius: 12,
+              alignItems: 'center',
+              backgroundColor: pressed ? '#1d4ed8' : COLORS.accentStrong,
+              shadowColor: COLORS.accentStrong,
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+            })}
+          >
+            <Text style={{ color: 'white', fontWeight: '900' }}>Empezar misión</Text>
+          </Pressable>
+          <Pressable
+            onPress={onViewAll}
+            style={({ pressed }) => ({
+              flex: 1,
+              paddingVertical: 13,
+              borderRadius: 12,
+              alignItems: 'center',
+              backgroundColor: pressed ? '#1e293b' : '#0f172a',
+              borderWidth: 1,
+              borderColor: COLORS.border,
+            })}
+          >
+            <Text style={{ color: COLORS.muted, fontWeight: '800' }}>Ver más</Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -737,6 +857,233 @@ function VocabularyCard({
         </Pressable>
       </View>
 
+    </View>
+  );
+}
+
+function ShadowingFeedCard({
+  item,
+  onPlay,
+  onViewAll,
+}: {
+  item: PendingShadowing;
+  onPlay: (item: PendingShadowing) => void;
+  onViewAll: () => void;
+}) {
+  const totalChapters = item.chapters.length;
+  const progressRatio = totalChapters > 0 ? Math.min(1, item.listenedCount / totalChapters) : 0;
+  const duration = formatFeedDuration(item.nextChapter.durationSeconds);
+
+  return (
+    <View
+      style={{
+        borderRadius: 18,
+        overflow: 'hidden',
+        backgroundColor: COLORS.surface,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        shadowColor: '#000',
+        shadowOpacity: 0.12,
+        shadowRadius: 10,
+      }}
+    >
+      <Pressable
+        onPress={() => onPlay(item)}
+        accessibilityRole="button"
+        accessibilityLabel={`Reproducir shadowing ${item.name}`}
+        style={({ pressed }) => ({ width: '100%', aspectRatio: 16 / 9, backgroundColor: COLORS.surfaceAlt, opacity: pressed ? 0.88 : 1 })}
+      >
+        {item.coverImageUrl ? (
+          <Image source={{ uri: item.coverImageUrl }} resizeMode="cover" style={{ width: '100%', height: '100%' }} />
+        ) : (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <MaterialIcons name="headphones" size={48} color={COLORS.accent} />
+          </View>
+        )}
+        <View
+          style={{
+            position: 'absolute',
+            left: 14,
+            bottom: 14,
+            right: 14,
+            padding: 12,
+            borderRadius: 16,
+            backgroundColor: 'rgba(2, 6, 23, 0.82)',
+            borderWidth: 1,
+            borderColor: 'rgba(148, 163, 184, 0.24)',
+          }}
+        >
+          <Text style={{ color: '#a5f3fc', fontSize: 11, fontWeight: '900', textTransform: 'uppercase' }}>
+            Shadowing
+          </Text>
+          <Text style={{ color: 'white', fontSize: 21, fontWeight: '900', marginTop: 4 }} numberOfLines={2}>
+            {item.name}
+          </Text>
+        </View>
+      </Pressable>
+
+      <View style={{ padding: 16 }}>
+        <Text style={{ color: COLORS.muted, fontWeight: '800' }} numberOfLines={1}>
+          {item.category}
+        </Text>
+        <Text style={{ color: COLORS.text, marginTop: 8, fontSize: 17, fontWeight: '900' }} numberOfLines={2}>
+          {item.nextChapter.title}
+        </Text>
+        <Text style={{ color: COLORS.muted, marginTop: 4, lineHeight: 20 }} numberOfLines={2}>
+          {item.nextChapter.description || 'Escucha y repite el capitulo en voz alta.'}
+        </Text>
+
+        <View style={{ marginTop: 14 }}>
+          <View
+            style={{
+              height: 7,
+              borderRadius: 999,
+              overflow: 'hidden',
+              backgroundColor: 'rgba(148, 163, 184, 0.18)',
+            }}
+          >
+            <View style={{ width: `${progressRatio * 100}%`, height: '100%', backgroundColor: COLORS.accent }} />
+          </View>
+          <Text style={{ color: COLORS.muted, marginTop: 7, fontSize: 12, fontWeight: '800' }}>
+            {item.listenedCount}/{totalChapters} capitulos{duration ? ` - ${duration}` : ''}
+          </Text>
+        </View>
+
+        <View style={{ flexDirection: 'row', marginTop: 14, gap: 8 }}>
+          <Pressable
+            onPress={() => onPlay(item)}
+            accessibilityRole="button"
+            accessibilityLabel={`Reproducir shadowing ${item.nextChapter.title}`}
+            style={({ pressed }) => ({
+              flex: 2,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingVertical: 13,
+              borderRadius: 12,
+              backgroundColor: pressed ? '#1d4ed8' : COLORS.accentStrong,
+            })}
+          >
+            <MaterialIcons name="play-arrow" size={21} color="white" />
+            <Text style={{ color: 'white', fontWeight: '900', marginLeft: 6 }}>Play capitulo</Text>
+          </Pressable>
+          <Pressable
+            onPress={onViewAll}
+            style={({ pressed }) => ({
+              flex: 1,
+              paddingVertical: 13,
+              borderRadius: 12,
+              alignItems: 'center',
+              backgroundColor: pressed ? '#1e293b' : '#0f172a',
+              borderWidth: 1,
+              borderColor: COLORS.border,
+            })}
+          >
+            <Text style={{ color: COLORS.muted, fontWeight: '800' }}>Ver más</Text>
+          </Pressable>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function LessonFeedCard({
+  item,
+  onPlay,
+  onViewAll,
+}: {
+  item: PendingLesson;
+  onPlay: (item: PendingLesson) => void;
+  onViewAll: () => void;
+}) {
+  return (
+    <View
+      style={{
+        borderRadius: 18,
+        overflow: 'hidden',
+        backgroundColor: COLORS.surface,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        shadowColor: '#000',
+        shadowOpacity: 0.12,
+        shadowRadius: 10,
+      }}
+    >
+      <Pressable
+        onPress={() => onPlay(item)}
+        accessibilityRole="button"
+        accessibilityLabel={`Abrir leccion ${item.title}`}
+        style={({ pressed }) => ({ width: '100%', aspectRatio: 16 / 9, backgroundColor: '#07111f', opacity: pressed ? 0.88 : 1 })}
+      >
+        {item.thumbnailUrl ? (
+          <Image source={{ uri: item.thumbnailUrl }} resizeMode="cover" style={{ width: '100%', height: '100%' }} />
+        ) : (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <MaterialIcons name="play-circle-outline" size={54} color={COLORS.accent} />
+          </View>
+        )}
+        <View
+          style={{
+            position: 'absolute',
+            left: 14,
+            bottom: 14,
+            right: 14,
+            padding: 12,
+            borderRadius: 16,
+            backgroundColor: 'rgba(2, 6, 23, 0.82)',
+            borderWidth: 1,
+            borderColor: 'rgba(148, 163, 184, 0.24)',
+          }}
+        >
+          <Text style={{ color: '#a5f3fc', fontSize: 11, fontWeight: '900', textTransform: 'uppercase' }}>
+            Leccion
+          </Text>
+          <Text style={{ color: 'white', fontSize: 21, fontWeight: '900', marginTop: 4 }} numberOfLines={2}>
+            {item.title}
+          </Text>
+        </View>
+      </Pressable>
+
+      <View style={{ padding: 16 }}>
+        {item.prompt ? (
+          <Text style={{ color: COLORS.muted, lineHeight: 20 }} numberOfLines={2}>
+            {item.prompt}
+          </Text>
+        ) : null}
+        <View style={{ flexDirection: 'row', marginTop: item.prompt ? 14 : 0, gap: 8 }}>
+          <Pressable
+            onPress={() => onPlay(item)}
+            accessibilityRole="button"
+            accessibilityLabel={`Abrir leccion ${item.title}`}
+            style={({ pressed }) => ({
+              flex: 2,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingVertical: 13,
+              borderRadius: 12,
+              backgroundColor: pressed ? '#1d4ed8' : COLORS.accentStrong,
+            })}
+          >
+            <MaterialIcons name="play-arrow" size={21} color="white" />
+            <Text style={{ color: 'white', fontWeight: '900', marginLeft: 6 }}>Ver leccion</Text>
+          </Pressable>
+          <Pressable
+            onPress={onViewAll}
+            style={({ pressed }) => ({
+              flex: 1,
+              paddingVertical: 13,
+              borderRadius: 12,
+              alignItems: 'center',
+              backgroundColor: pressed ? '#1e293b' : '#0f172a',
+              borderWidth: 1,
+              borderColor: COLORS.border,
+            })}
+          >
+            <Text style={{ color: COLORS.muted, fontWeight: '800' }}>Ver más</Text>
+          </Pressable>
+        </View>
+      </View>
     </View>
   );
 }
@@ -1078,11 +1425,13 @@ function FriendStoriesStrip({
   loading,
   error,
   onOpenFriend,
+  onAddMore,
 }: {
   friends: FriendCharacter[];
   loading: boolean;
   error?: string;
   onOpenFriend: (friend: FriendCharacter) => void;
+  onAddMore: () => void;
 }) {
   if (error || (!loading && friends.length === 0)) {
     return null;
@@ -1124,6 +1473,46 @@ function FriendStoriesStrip({
           : visibleFriends.map((friend) => (
               <FriendStoryAvatar key={friend.friendId} friend={friend} onPress={onOpenFriend} />
             ))}
+        {!loading ? (
+          <Pressable
+            onPress={onAddMore}
+            accessibilityRole="button"
+            accessibilityLabel="Hacer más misiones para desbloquear amigos"
+            style={({ pressed }) => ({
+              width: 74,
+              alignItems: 'center',
+              opacity: pressed ? 0.7 : 1,
+            })}
+          >
+            <View
+              style={{
+                width: 66,
+                height: 66,
+                borderRadius: 999,
+                backgroundColor: '#111827',
+                borderWidth: 1,
+                borderColor: COLORS.border,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <MaterialIcons name="add" size={28} color={COLORS.accent} />
+            </View>
+            <Text
+              style={{
+                color: COLORS.muted,
+                fontSize: 12,
+                fontWeight: '800',
+                marginTop: 7,
+                textAlign: 'center',
+                width: '100%',
+              }}
+              numberOfLines={1}
+            >
+              Discover
+            </Text>
+          </Pressable>
+        ) : null}
       </ScrollView>
     </View>
   );
@@ -1142,6 +1531,18 @@ export default function FeedScreen({ navigation }: Props) {
   const isFeedFocused = useIsFocused();
   const { items: learningItems } = useLearningItems();
   const { stories, loading: storiesLoading, error: storiesError } = useStoryCatalog();
+  const { lessons, loading: lessonsLoading, error: lessonsError, reload: reloadLessons } = useLessons();
+  const {
+    lists: shadowingLists,
+    loading: shadowingLoading,
+    error: shadowingError,
+    reload: reloadShadowing,
+  } = useShadowing();
+  const {
+    listenedChapterIds,
+    setQueue: setShadowingQueue,
+    selectChapter: selectShadowingChapter,
+  } = useShadowingPlayer();
   const {
     posts: configuredPosts,
     loading: feedPostsLoading,
@@ -1170,6 +1571,9 @@ export default function FeedScreen({ navigation }: Props) {
   const [feedSeed, setFeedSeed] = useState(() => `${Date.now()}:${Math.random()}`);
   const [visibleMissionsCount, setVisibleMissionsCount] = useState(MISSION_BATCH_SIZE);
   const [visibleVocabularyCount, setVisibleVocabularyCount] = useState(VOCABULARY_BATCH_SIZE);
+  const [visibleShadowingCount, setVisibleShadowingCount] = useState(SHADOWING_BATCH_SIZE);
+  const [visibleLessonsCount, setVisibleLessonsCount] = useState(LESSON_BATCH_SIZE);
+  const [learnedLessonIds, setLearnedLessonIds] = useState<Set<string>>(() => new Set());
   const [claimedExtraPostIds, setClaimedExtraPostIds] = useState<Set<string>>(() => new Set());
   const [claimingPostId, setClaimingPostId] = useState<string>();
   const [isInterstitialLoading, setIsInterstitialLoading] = useState(false);
@@ -1226,12 +1630,25 @@ export default function FeedScreen({ navigation }: Props) {
 
   useFocusEffect(
     useCallback(() => {
+      let active = true;
       setFeedSeed(`${Date.now()}:${Math.random()}`);
       setVisibleMissionsCount(MISSION_BATCH_SIZE);
       setVisibleVocabularyCount(VOCABULARY_BATCH_SIZE);
+      setVisibleShadowingCount(SHADOWING_BATCH_SIZE);
+      setVisibleLessonsCount(LESSON_BATCH_SIZE);
       reloadFeedPosts();
+      reloadLessons();
+      reloadShadowing();
       void reloadFriends();
-    }, [reloadFeedPosts, reloadFriends])
+      void getLearnedLessonIds().then((ids) => {
+        if (active) {
+          setLearnedLessonIds(ids);
+        }
+      });
+      return () => {
+        active = false;
+      };
+    }, [reloadFeedPosts, reloadFriends, reloadLessons, reloadShadowing])
   );
 
   useFocusEffect(
@@ -1389,6 +1806,35 @@ export default function FeedScreen({ navigation }: Props) {
       .filter((item) => item.status !== 'learned');
   }, [learningItems, statusFor, statuses]);
 
+  const pendingShadowing = useMemo<PendingShadowing[]>(() => {
+    return shadowingLists
+      .map((list) => {
+        const nextChapter =
+          list.chapters.find((chapter) => !listenedChapterIds.has(chapter.chapterId)) || list.chapters[0];
+        if (!nextChapter) {
+          return undefined;
+        }
+        return {
+          ...list,
+          kind: 'shadowing' as const,
+          feedId: `shadowing:${list.listId}`,
+          nextChapter,
+          listenedCount: list.chapters.filter((chapter) => listenedChapterIds.has(chapter.chapterId)).length,
+        };
+      })
+      .filter((item): item is PendingShadowing => !!item);
+  }, [listenedChapterIds, shadowingLists]);
+
+  const pendingLessons = useMemo<PendingLesson[]>(() => {
+    return lessons
+      .filter((lesson) => !learnedLessonIds.has(lesson.lessonId))
+      .map((lesson) => ({
+        ...lesson,
+        kind: 'lesson' as const,
+        feedId: `lesson:${lesson.lessonId}`,
+      }));
+  }, [learnedLessonIds, lessons]);
+
   const feedPostItems = useMemo<FeedPostItem[]>(() => {
     return configuredPosts.map((post) => ({
       ...post,
@@ -1398,9 +1844,25 @@ export default function FeedScreen({ navigation }: Props) {
     }));
   }, [claimedExtraPostIds, configuredPosts]);
 
-  const shuffledMissions = useMemo(
-    () => pickRandom(pendingMissions, pendingMissions.length, `${feedSeed}:missions`, (item) => item.id),
-    [feedSeed, pendingMissions]
+  const initialMissions = useMemo(
+    () => pendingMissions.filter((mission) => mission.isInitialStory),
+    [pendingMissions]
+  );
+
+  const regularMissions = useMemo(
+    () => pendingMissions.filter((mission) => !mission.isInitialStory),
+    [pendingMissions]
+  );
+
+  const shuffledRegularMissions = useMemo(
+    () =>
+      pickRandom(
+        regularMissions,
+        regularMissions.length,
+        `${feedSeed}:missions`,
+        (item) => item.id
+      ),
+    [feedSeed, regularMissions]
   );
 
   const shuffledVocabulary = useMemo(
@@ -1408,9 +1870,22 @@ export default function FeedScreen({ navigation }: Props) {
     [feedSeed, pendingVocabulary]
   );
 
+  const shuffledShadowing = useMemo(
+    () => pickRandom(pendingShadowing, pendingShadowing.length, `${feedSeed}:shadowing`, (item) => item.feedId),
+    [feedSeed, pendingShadowing]
+  );
+
+  const shuffledLessons = useMemo(
+    () => pickRandom(pendingLessons, pendingLessons.length, `${feedSeed}:lessons`, (item) => item.feedId),
+    [feedSeed, pendingLessons]
+  );
+
   const visibleMissions = useMemo(
-    () => shuffledMissions.slice(0, visibleMissionsCount),
-    [shuffledMissions, visibleMissionsCount]
+    () => [
+      ...initialMissions,
+      ...shuffledRegularMissions.slice(0, visibleMissionsCount),
+    ],
+    [initialMissions, shuffledRegularMissions, visibleMissionsCount]
   );
 
   const visibleVocabulary = useMemo(
@@ -1418,51 +1893,127 @@ export default function FeedScreen({ navigation }: Props) {
     [shuffledVocabulary, visibleVocabularyCount]
   );
 
+  const visibleShadowing = useMemo(
+    () => shuffledShadowing.slice(0, visibleShadowingCount),
+    [shuffledShadowing, visibleShadowingCount]
+  );
+
+  const visibleLessons = useMemo(
+    () => shuffledLessons.slice(0, visibleLessonsCount),
+    [shuffledLessons, visibleLessonsCount]
+  );
+
   const feedItems = useMemo(
     () => {
-      const next = buildFeedItems(visibleMissions, visibleVocabulary, feedPostItems);
+      const promo = showLitePromoTimer
+        ? {
+            kind: 'promo' as const,
+            feedId: 'promo:lite',
+            remainingSeconds: litePromoRemainingSeconds,
+          }
+        : undefined;
+      const next = buildFeedItems({
+        promo,
+        missions: visibleMissions,
+        vocabulary: visibleVocabulary,
+        shadowing: visibleShadowing,
+        lessons: visibleLessons,
+        posts: feedPostItems,
+      });
       return resumeMission ? [resumeMission, ...next] : next;
     },
-    [feedPostItems, resumeMission, visibleMissions, visibleVocabulary]
+    [
+      feedPostItems,
+      litePromoRemainingSeconds,
+      resumeMission,
+      showLitePromoTimer,
+      visibleLessons,
+      visibleMissions,
+      visibleShadowing,
+      visibleVocabulary,
+    ]
   );
 
   const imageUrlsToPrefetch = useMemo(() => {
-    const upcomingMissions = shuffledMissions.slice(
-      0,
-      Math.min(shuffledMissions.length, visibleMissionsCount + MISSION_BATCH_SIZE)
-    );
+    const upcomingMissions = [
+      ...initialMissions,
+      ...shuffledRegularMissions.slice(
+        0,
+        Math.min(shuffledRegularMissions.length, visibleMissionsCount + MISSION_BATCH_SIZE)
+      ),
+    ];
     const missionUrls = upcomingMissions.map((item) => item.mission.avatarImageUrl);
     const resumeMissionUrls = resumeMission ? [resumeMission.mission.avatarImageUrl] : [];
     const postUrls = feedPostItems.map((item) => item.imageUrl);
-    return [...resumeMissionUrls, ...missionUrls, ...postUrls];
-  }, [feedPostItems, resumeMission, shuffledMissions, visibleMissionsCount]);
+    const shadowingUrls = shuffledShadowing
+      .slice(0, Math.min(shuffledShadowing.length, visibleShadowingCount + SHADOWING_BATCH_SIZE))
+      .map((item) => item.coverImageUrl);
+    const lessonUrls = shuffledLessons
+      .slice(0, Math.min(shuffledLessons.length, visibleLessonsCount + LESSON_BATCH_SIZE))
+      .map((item) => item.thumbnailUrl);
+    return [...resumeMissionUrls, ...missionUrls, ...shadowingUrls, ...lessonUrls, ...postUrls];
+  }, [
+    feedPostItems,
+    initialMissions,
+    resumeMission,
+    shuffledLessons,
+    shuffledRegularMissions,
+    shuffledShadowing,
+    visibleLessonsCount,
+    visibleMissionsCount,
+    visibleShadowingCount,
+  ]);
 
   useEffect(() => {
     prefetchImageUrls(imageUrlsToPrefetch, 16);
   }, [imageUrlsToPrefetch]);
 
-  const loading = storiesLoading || cardProgressLoading || storyProgressLoading || feedPostsLoading;
+  const loading =
+    storiesLoading ||
+    cardProgressLoading ||
+    storyProgressLoading ||
+    feedPostsLoading ||
+    lessonsLoading ||
+    shadowingLoading;
   const hasMoreFeedItems =
-    visibleMissionsCount < shuffledMissions.length || visibleVocabularyCount < shuffledVocabulary.length;
+    visibleMissionsCount < shuffledRegularMissions.length ||
+    visibleVocabularyCount < shuffledVocabulary.length ||
+    visibleShadowingCount < shuffledShadowing.length ||
+    visibleLessonsCount < shuffledLessons.length;
 
   const loadMoreFeedItems = useCallback(() => {
     if (loading || !hasMoreFeedItems) return;
 
-    const previousMissionsCount = Math.min(
-      visibleMissionsCount,
-      shuffledMissions.length
-    );
+    const previousRegularMissionsCount = Math.min(visibleMissionsCount, shuffledRegularMissions.length);
+    const previousMissionsCount = initialMissions.length + previousRegularMissionsCount;
     const previousVocabularyCount = Math.min(
       visibleVocabularyCount,
       shuffledVocabulary.length
     );
-    const nextMissionsCount = Math.min(
-      visibleMissionsCount + MISSION_BATCH_SIZE,
-      shuffledMissions.length
+    const previousShadowingCount = Math.min(
+      visibleShadowingCount,
+      shuffledShadowing.length
     );
+    const previousLessonsCount = Math.min(
+      visibleLessonsCount,
+      shuffledLessons.length
+    );
+    const nextRegularMissionsCount = Math.min(
+      visibleMissionsCount + MISSION_BATCH_SIZE,
+      shuffledRegularMissions.length
+    );
+    const nextMissionsCount = initialMissions.length + nextRegularMissionsCount;
     const nextVocabularyCount = Math.min(
       visibleVocabularyCount + VOCABULARY_BATCH_SIZE,
       shuffledVocabulary.length
+    );
+    const nextShadowingCount = Math.min(
+      visibleShadowingCount + SHADOWING_BATCH_SIZE,
+      shuffledShadowing.length
+    );
+    const nextLessonsCount = Math.min(
+      visibleLessonsCount + LESSON_BATCH_SIZE,
+      shuffledLessons.length
     );
     const missionsLoadedCount = Math.max(
       nextMissionsCount - previousMissionsCount,
@@ -1472,17 +2023,30 @@ export default function FeedScreen({ navigation }: Props) {
       nextVocabularyCount - previousVocabularyCount,
       0
     );
-    const itemsLoadedCount = missionsLoadedCount + vocabularyLoadedCount;
+    const shadowingLoadedCount = Math.max(
+      nextShadowingCount - previousShadowingCount,
+      0
+    );
+    const lessonsLoadedCount = Math.max(
+      nextLessonsCount - previousLessonsCount,
+      0
+    );
+    const itemsLoadedCount =
+      missionsLoadedCount + vocabularyLoadedCount + shadowingLoadedCount + lessonsLoadedCount;
 
     if (itemsLoadedCount <= 0) {
       return;
     }
 
-    setVisibleMissionsCount(nextMissionsCount);
+    setVisibleMissionsCount(nextRegularMissionsCount);
     setVisibleVocabularyCount(nextVocabularyCount);
+    setVisibleShadowingCount(nextShadowingCount);
+    setVisibleLessonsCount(nextLessonsCount);
     void trackMixpanelFeedLoadMore({
-      previousItemsCount: previousMissionsCount + previousVocabularyCount,
-      nextItemsCount: nextMissionsCount + nextVocabularyCount,
+      previousItemsCount:
+        previousMissionsCount + previousVocabularyCount + previousShadowingCount + previousLessonsCount,
+      nextItemsCount:
+        nextMissionsCount + nextVocabularyCount + nextShadowingCount + nextLessonsCount,
       itemsLoadedCount,
       previousMissionsCount,
       nextMissionsCount,
@@ -1490,18 +2054,25 @@ export default function FeedScreen({ navigation }: Props) {
       previousVocabularyCount,
       nextVocabularyCount,
       vocabularyLoadedCount,
-      totalMissionsAvailable: shuffledMissions.length,
+      totalMissionsAvailable: initialMissions.length + shuffledRegularMissions.length,
       totalVocabularyAvailable: shuffledVocabulary.length,
       hasMoreAfter:
-        nextMissionsCount < shuffledMissions.length ||
-        nextVocabularyCount < shuffledVocabulary.length,
+        nextRegularMissionsCount < shuffledRegularMissions.length ||
+        nextVocabularyCount < shuffledVocabulary.length ||
+        nextShadowingCount < shuffledShadowing.length ||
+        nextLessonsCount < shuffledLessons.length,
     });
   }, [
     hasMoreFeedItems,
+    initialMissions.length,
     loading,
-    shuffledMissions.length,
+    shuffledLessons.length,
+    shuffledRegularMissions.length,
+    shuffledShadowing.length,
     shuffledVocabulary.length,
+    visibleLessonsCount,
     visibleMissionsCount,
+    visibleShadowingCount,
     visibleVocabularyCount,
   ]);
 
@@ -1612,6 +2183,31 @@ export default function FeedScreen({ navigation }: Props) {
       await openMission(item.storyId, item.sceneIndex);
     },
     [openMission]
+  );
+
+  const handlePlayShadowing = useCallback(
+    (item: PendingShadowing) => {
+      stopFeedVideos();
+      setPostActionMessage(undefined);
+      setShadowingQueue([item]);
+      selectShadowingChapter(item.nextChapter, { shouldPlay: true });
+      navigation.navigate('Shadowing', {
+        listId: item.listId,
+        chapterId: item.nextChapter.chapterId,
+        autoplay: true,
+        origin: 'feed',
+      });
+    },
+    [navigation, selectShadowingChapter, setShadowingQueue, stopFeedVideos]
+  );
+
+  const handlePlayLesson = useCallback(
+    (item: PendingLesson) => {
+      stopFeedVideos();
+      setPostActionMessage(undefined);
+      navigation.navigate('LessonDetail', { lessonId: item.lessonId });
+    },
+    [navigation, stopFeedVideos]
   );
 
   const handleOpenFriendProfile = useCallback(
@@ -1746,21 +2342,12 @@ export default function FeedScreen({ navigation }: Props) {
               </Pressable>
             </View>
 
-            {showLitePromoTimer ? (
-              <PromoTimerCard
-                remainingSeconds={litePromoRemainingSeconds}
-                onPress={() => {
-                  stopFeedVideos();
-                  navigation.navigate('Paywall', { source: 'promo_lite_offer', variant: 'lite' });
-                }}
-              />
-            ) : null}
-
             <FriendStoriesStrip
               friends={friends}
               loading={friendsLoading}
               error={friendsError}
               onOpenFriend={handleOpenFriendProfile}
+              onAddMore={() => navigation.navigate('Stories')}
             />
 
             {storiesError ? (
@@ -1793,6 +2380,36 @@ export default function FeedScreen({ navigation }: Props) {
               </View>
             ) : null}
 
+            {shadowingError ? (
+              <View
+                style={{
+                  marginTop: 12,
+                  padding: 12,
+                  borderRadius: 14,
+                  backgroundColor: '#3f1d2e',
+                  borderWidth: 1,
+                  borderColor: '#7f1d1d',
+                }}
+              >
+                <Text style={{ color: '#fecdd3', fontWeight: '700' }}>{shadowingError}</Text>
+              </View>
+            ) : null}
+
+            {lessonsError ? (
+              <View
+                style={{
+                  marginTop: 12,
+                  padding: 12,
+                  borderRadius: 14,
+                  backgroundColor: '#3f1d2e',
+                  borderWidth: 1,
+                  borderColor: '#7f1d1d',
+                }}
+              >
+                <Text style={{ color: '#fecdd3', fontWeight: '700' }}>{lessonsError}</Text>
+              </View>
+            ) : null}
+
             {postActionMessage ? (
               <View
                 style={{
@@ -1810,12 +2427,21 @@ export default function FeedScreen({ navigation }: Props) {
           </View>
         }
         renderItem={({ item }) =>
-          item.kind === 'resumeMission' ? (
+          item.kind === 'promo' ? (
+            <PromoTimerCard
+              remainingSeconds={item.remainingSeconds}
+              onPress={() => {
+                stopFeedVideos();
+                navigation.navigate('Paywall', { source: 'promo_lite_offer', variant: 'lite' });
+              }}
+            />
+          ) : item.kind === 'resumeMission' ? (
             <ResumeMissionCard item={item} onContinue={handleContinueMission} />
           ) : item.kind === 'mission' ? (
             <MissionCard
               item={item}
               onStart={handleStartMission}
+              onViewAll={() => navigation.navigate('Stories')}
               playbackEnabled={videoPlaybackEnabled && activeFeedMediaId === item.id}
             />
           ) : item.kind === 'vocab' ? (
@@ -1825,6 +2451,18 @@ export default function FeedScreen({ navigation }: Props) {
               onMarkLearned={handleMarkLearned}
               onPractice={handlePractice}
               onGuessCorrect={handleGuessCorrect}
+            />
+          ) : item.kind === 'shadowing' ? (
+            <ShadowingFeedCard
+              item={item}
+              onPlay={handlePlayShadowing}
+              onViewAll={() => navigation.navigate('Shadowing')}
+            />
+          ) : item.kind === 'lesson' ? (
+            <LessonFeedCard
+              item={item}
+              onPlay={handlePlayLesson}
+              onViewAll={() => navigation.navigate('Lessons')}
             />
           ) : (
             <FeedPostCard

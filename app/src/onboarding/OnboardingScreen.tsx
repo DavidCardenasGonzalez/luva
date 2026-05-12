@@ -50,6 +50,7 @@ function renderStep(
   onSpeakingSummaryChange: (summary: OnboardingSpeakingSummary) => void,
   onboardingPlan: OnboardingPlanResponse | null,
   onPlanReady: (plan: OnboardingPlanResponse) => void,
+  onSkipPractice: () => void,
 ) {
   if (step.stepNumber === 1) return <Step1 content={step} />;
   if (step.stepNumber === 2) {
@@ -67,6 +68,7 @@ function renderStep(
         content={step}
         selectedCharacter={selectedCharacter}
         onSelectCharacter={onSelectCharacter}
+        onSkipPractice={onSkipPractice}
       />
     );
   }
@@ -99,7 +101,7 @@ function renderStep(
   return null;
 }
 
-export default function OnboardingScreen({ navigation }: Props) {
+export default function OnboardingScreen({ navigation, route }: Props) {
   const [steps, setSteps] = useState(DEFAULT_ONBOARDING_STEPS);
   const [stepIndex, setStepIndex] = useState(0);
   const [loadingContent, setLoadingContent] = useState(true);
@@ -135,6 +137,15 @@ export default function OnboardingScreen({ navigation }: Props) {
     trackedStepsRef.current.add(activeStep.stepNumber);
     void trackOnboardingStepViewed(activeStep);
   }, [activeStep]);
+
+  useEffect(() => {
+    const requestedStep = route.params?.startAtStep;
+    if (!requestedStep) return;
+
+    const nextIndex = Math.max(0, Math.min(requestedStep - 1, steps.length - 1));
+    setStepIndex(nextIndex);
+    navigation.setParams({ startAtStep: undefined });
+  }, [navigation, route.params?.startAtStep, steps.length]);
 
   const finishOnboarding = useCallback(async (showLiteOffer = false) => {
     if (onboardingPlan) {
@@ -183,10 +194,23 @@ export default function OnboardingScreen({ navigation }: Props) {
     setStepIndex((current) => Math.max(0, current - 1));
   }, []);
 
+  const openAccountAccess = useCallback(() => {
+    navigation.navigate('AccountAccess', { fromOnboarding: true });
+  }, [navigation]);
+
   const selectCharacter = useCallback((characterId: OnboardingCharacterId) => {
     setSelectedCharacter(characterId);
     setStepIndex((current) => Math.min(current + 1, steps.length - 1));
   }, [steps.length]);
+
+  const skipPracticeAndCreatePlan = useCallback(() => {
+    setSelectedCharacter((current) => current ?? 'zoe');
+    setStepIndex((current) => {
+      const planStepIndex = steps.findIndex((step) => step.stepNumber === 5);
+      if (planStepIndex >= 0) return planStepIndex;
+      return Math.min(current + 2, steps.length - 1);
+    });
+  }, [steps]);
 
   const showProgress = !loadingContent && steps.length > 1;
 
@@ -298,6 +322,7 @@ export default function OnboardingScreen({ navigation }: Props) {
             setSpeakingSummary,
             onboardingPlan,
             handlePlanReady,
+            skipPracticeAndCreatePlan,
           )}
         </View>
 
@@ -345,6 +370,30 @@ export default function OnboardingScreen({ navigation }: Props) {
                   }}
                 >
                   {activeStep.secondaryCta}
+                </Text>
+              </Pressable>
+            ) : null}
+
+            {activeStep.stepNumber === 1 ? (
+              <Pressable
+                onPress={openAccountAccess}
+                accessibilityRole="button"
+                accessibilityLabel="Ya tengo una cuenta"
+                style={({ pressed }) => ({
+                  minHeight: 38,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: pressed ? 0.7 : 1,
+                })}
+              >
+                <Text
+                  style={{
+                    color: COLORS.cyan,
+                    fontSize: 14,
+                    fontWeight: '800',
+                  }}
+                >
+                  Ya tengo una cuenta
                 </Text>
               </Pressable>
             ) : null}

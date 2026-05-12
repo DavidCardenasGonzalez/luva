@@ -29,6 +29,7 @@ import AuthCallbackScreen from '../screens/AuthCallbackScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import PaywallScreen from '../screens/PaywallScreen';
 import EmailSignUpScreen from '../screens/EmailSignUpScreen';
+import AccountAccessScreen from '../screens/AccountAccessScreen';
 import OnboardingScreen from '../onboarding/OnboardingScreen';
 import * as Linking from 'expo-linking';
 import { trackScreenViewed } from '../marketing/mixpanelEvents';
@@ -37,6 +38,8 @@ import { hasCompletedOnboarding } from '../onboarding/model/progress';
 export type PaywallSource =
   | 'coin_chip'
   | 'deck_card_unlock'
+  | 'friend_chat_message'
+  | 'friend_chat_recording'
   | 'home_banner'
   | 'onboarding_lite_offer'
   | 'practice_card_unlock'
@@ -44,12 +47,13 @@ export type PaywallSource =
   | 'promo_lite_offer'
   | 'settings_lite'
   | 'settings_subscription'
+  | 'shadowing_chapter_unlock'
   | 'story_mission_unlock'
   | 'story_scene_mission_unlock'
   | 'story_scene_recording';
 
 export type RootStackParamList = {
-  Onboarding: undefined;
+  Onboarding: { startAtStep?: number } | undefined;
   Home: undefined;
   Deck: undefined;
   Practice: {
@@ -67,7 +71,7 @@ export type RootStackParamList = {
   Lessons: undefined;
   LessonDetail: { lessonId: string };
   LessonTest: { lessonId: string };
-  Shadowing: undefined;
+  Shadowing: { listId?: string; chapterId?: string; autoplay?: boolean; origin?: 'feed' } | undefined;
   Feed: undefined;
   MyJourney: undefined;
   Friends: undefined;
@@ -79,6 +83,7 @@ export type RootStackParamList = {
   AuthCallback: undefined;
   Settings: undefined;
   EmailSignUp: { prefillEmail?: string } | undefined;
+  AccountAccess: { fromOnboarding?: boolean } | undefined;
   Paywall: {
     asModal?: boolean;
     source?: PaywallSource;
@@ -180,6 +185,7 @@ export default function AppNavigator() {
         <Stack.Screen name="AuthCallback" component={AuthCallbackScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="EmailSignUp" component={EmailSignUpScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="AccountAccess" component={AccountAccessScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Paywall" component={PaywallScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>

@@ -38,6 +38,11 @@ type VocabularyPracticeCompletion = {
   points?: number;
 };
 
+export type ListenedShadowingChapterRecord = {
+  chapterId: string;
+  listenedAt: string;
+};
+
 export type JourneySnapshot = {
   plan: OnboardingPlanResponse | null;
   progress: JourneyProgressState;
@@ -213,14 +218,57 @@ async function getVocabularyPracticeCompletions(): Promise<VocabularyPracticeCom
   }
 }
 
-export async function getListenedShadowingChapterIds(): Promise<Set<string>> {
+function normalizeListenedShadowingRecord(input: unknown): ListenedShadowingChapterRecord | null {
+  if (typeof input === 'string') {
+    const chapterId = input.trim();
+    return chapterId ? { chapterId, listenedAt: new Date(0).toISOString() } : null;
+  }
+
+  if (!input || typeof input !== 'object') return null;
+  const raw = input as Record<string, unknown>;
+  const chapterId = typeof raw.chapterId === 'string'
+    ? raw.chapterId.trim()
+    : typeof raw.id === 'string'
+      ? raw.id.trim()
+      : '';
+  const listenedAt = typeof raw.listenedAt === 'string'
+    ? raw.listenedAt
+    : typeof raw.completedAt === 'string'
+      ? raw.completedAt
+      : '';
+  const timestamp = Date.parse(listenedAt);
+  if (!chapterId || !Number.isFinite(timestamp)) return null;
+
+  return { chapterId, listenedAt: new Date(timestamp).toISOString() };
+}
+
+export async function getListenedShadowingChapterRecords(): Promise<ListenedShadowingChapterRecord[]> {
   try {
     const raw = await AsyncStorage.getItem(SHADOWING_LISTENED_STORAGE_KEY);
-    const ids = raw ? JSON.parse(raw) : undefined;
-    return new Set(Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : []);
+    const parsed = raw ? JSON.parse(raw) : undefined;
+    const records = Array.isArray(parsed)
+      ? parsed
+          .map(normalizeListenedShadowingRecord)
+          .filter((record): record is ListenedShadowingChapterRecord => !!record)
+      : [];
+    const latestByChapterId = new Map<string, ListenedShadowingChapterRecord>();
+
+    records.forEach((record) => {
+      const existing = latestByChapterId.get(record.chapterId);
+      if (!existing || record.listenedAt.localeCompare(existing.listenedAt) > 0) {
+        latestByChapterId.set(record.chapterId, record);
+      }
+    });
+
+    return [...latestByChapterId.values()].sort((left, right) => right.listenedAt.localeCompare(left.listenedAt));
   } catch {
-    return new Set();
+    return [];
   }
+}
+
+export async function getListenedShadowingChapterIds(): Promise<Set<string>> {
+  const records = await getListenedShadowingChapterRecords();
+  return new Set(records.map((record) => record.chapterId));
 }
 
 export function buildJourneyObjectives(
@@ -407,15 +455,25 @@ export async function recordJourneyAiConversationMessageSent(): Promise<void> {
   }
 }
 
-export async function recordJourneyShadowingChapterListened(chapterId?: string): Promise<void> {
+export async function recordJourneyShadowingChapterListened(chapterId?: string, listenedAt = new Date().toISOString()): Promise<void> {
   const key = String(chapterId || '').trim();
   if (!key) return;
 
   try {
-    const listenedIds = await getListenedShadowingChapterIds();
-    if (listenedIds.has(key)) return;
-    listenedIds.add(key);
-    await AsyncStorage.setItem(SHADOWING_LISTENED_STORAGE_KEY, JSON.stringify([...listenedIds]));
+    const records = await getListenedShadowingChapterRecords();
+    const nextRecord = normalizeListenedShadowingRecord({ chapterId: key, listenedAt });
+    if (!nextRecord) return;
+
+    const nextByChapterId = new Map(records.map((record) => [record.chapterId, record]));
+    const existing = nextByChapterId.get(key);
+    if (!existing || nextRecord.listenedAt.localeCompare(existing.listenedAt) >= 0) {
+      nextByChapterId.set(key, nextRecord);
+    }
+
+    const nextRecords = [...nextByChapterId.values()].sort((left, right) => (
+      right.listenedAt.localeCompare(left.listenedAt)
+    ));
+    await AsyncStorage.setItem(SHADOWING_LISTENED_STORAGE_KEY, JSON.stringify(nextRecords));
   } catch (err: any) {
     console.warn('[JourneyProgress] No se pudo registrar shadowing escuchado:', err?.message || err);
   }

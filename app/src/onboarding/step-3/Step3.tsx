@@ -63,9 +63,15 @@ type Props = {
   content: OnboardingStepContent;
   selectedCharacter: OnboardingCharacterId | null;
   onSelectCharacter: (characterId: OnboardingCharacterId) => void;
+  onSkipPractice: () => void;
 };
 
-export default function Step3({ content: _content, selectedCharacter, onSelectCharacter }: Props) {
+export default function Step3({
+  content: _content,
+  selectedCharacter,
+  onSelectCharacter,
+  onSkipPractice,
+}: Props) {
   const { width } = useWindowDimensions();
   const videoRef = useRef<Video>(null);
   const [hasVideoStarted, setHasVideoStarted] = useState(false);
@@ -312,33 +318,113 @@ export default function Step3({ content: _content, selectedCharacter, onSelectCh
         })}
       </View>
 
-      {/* Bottom notice */}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 10,
-        }}
+      {/* Skip practice CTA */}
+      <Pressable
+        onPress={onSkipPractice}
+        accessibilityRole="button"
+        accessibilityLabel="Saltar práctica por ahora y crear mi plan personalizado"
+        style={({ pressed }) => ({
+          borderRadius: 20,
+          borderWidth: 1,
+          borderColor: pressed ? 'rgba(34, 211, 238, 0.54)' : 'rgba(34, 211, 238, 0.28)',
+          backgroundColor: pressed ? 'rgba(15, 118, 110, 0.20)' : 'rgba(15, 23, 42, 0.72)',
+          overflow: 'hidden',
+          opacity: pressed ? 0.92 : 1,
+        })}
       >
         <View
           style={{
-            width: 36,
-            height: 36,
-            borderRadius: 18,
-            backgroundColor: 'rgba(255, 255, 255, 0.07)',
-            borderWidth: 1,
-            borderColor: 'rgba(148, 163, 184, 0.18)',
+            position: 'absolute',
+            top: -40,
+            right: -24,
+            width: 120,
+            height: 120,
+            borderRadius: 60,
+            backgroundColor: 'rgba(168, 85, 247, 0.16)',
+          }}
+        />
+        <View
+          style={{
+            position: 'absolute',
+            bottom: -34,
+            left: -22,
+            width: 96,
+            height: 96,
+            borderRadius: 48,
+            backgroundColor: 'rgba(34, 211, 238, 0.13)',
+          }}
+        />
+        <View
+          style={{
+            flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
+            gap: 12,
+            padding: 14,
           }}
         >
-          <MaterialIcons name="lock" size={18} color={COLORS.muted} />
+          <View
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 21,
+              backgroundColor: 'rgba(34, 211, 238, 0.16)',
+              borderWidth: 1,
+              borderColor: 'rgba(34, 211, 238, 0.34)',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <MaterialIcons name="auto-awesome" size={22} color={COLORS.cyan} />
+          </View>
+
+          <View style={{ flex: 1, gap: 3 }}>
+            <Text
+              style={{
+                color: COLORS.cyan,
+                fontSize: 11,
+                fontWeight: '900',
+                textTransform: 'uppercase',
+              }}
+            >
+              Plan primero
+            </Text>
+            <Text
+              style={{
+                color: COLORS.text,
+                fontSize: 15,
+                fontWeight: '900',
+                lineHeight: 20,
+              }}
+            >
+              Saltar práctica por ahora
+            </Text>
+            <Text
+              style={{
+                color: '#cbd5e1',
+                fontSize: 12,
+                lineHeight: 17,
+              }}
+            >
+              Recibe tu ruta personalizada y vuelve a practicar cuando te sientas listo.
+            </Text>
+          </View>
+
+          <View
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 17,
+              backgroundColor: 'rgba(255, 255, 255, 0.10)',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <MaterialIcons name="arrow-forward" size={18} color="#ffffff" />
+          </View>
         </View>
-        <Text style={{ color: COLORS.muted, fontSize: 13, lineHeight: 18, flex: 1 }}>
-          Podrás cambiar de compañero más adelante o desbloquear nuevos personajes.
-        </Text>
-      </View>
+      </Pressable>
     </ScrollView>
   );
 }

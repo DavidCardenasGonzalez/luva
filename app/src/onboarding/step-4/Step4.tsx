@@ -21,6 +21,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { api } from '../../api/api';
 import { useAuth } from '../../auth/AuthProvider';
+import { addFriendFromMission } from '../../hooks/useFriends';
+import { useStoryProgress } from '../../progress/StoryProgressProvider';
 import useAudioRecorder from '../../shared/useAudioRecorder';
 import useUploadToS3 from '../../shared/useUploadToS3';
 import { sendOnboardingChatMessage } from '../model/api';
@@ -55,6 +57,39 @@ const CHARACTER_PROFILES: Record<OnboardingCharacterId, {
     color: '#22d3ee',
     avatarBg: 'rgba(6, 79, 105, 0.42)',
     image: require('../step-3/Mateo.png'),
+  },
+};
+
+const ONBOARDING_STORY_ID = 'initials';
+const ONBOARDING_FIRST_MISSIONS: Record<OnboardingCharacterId, {
+  missionId: string;
+  sceneIndex: number;
+  title: string;
+  sceneSummary: string;
+  aiRole: string;
+  avatarImageUrl: string;
+}> = {
+  mateo: {
+    missionId: 'meet_mateo_first_mission',
+    sceneIndex: 0,
+    title: 'Conoce a Mateo',
+    sceneSummary:
+      'Tu primera misión con Mateo, un Virtual Agent divertido y espontáneo que quiere demostrarte que practicar inglés también puede sentirse dinámico, natural y entretenido.',
+    aiRole:
+      'Eres Mateo, un Virtual Agent dentro de una app para aprender inglés. Tu personalidad es segura, divertida, espontánea, carismática, cálida, ligeramente coqueta y muy fácil de seguir. Habla en inglés simple, nivel B1, con frases cortas y naturales.',
+    avatarImageUrl:
+      'https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260509182223-f7ef4b5b-9f42-41d3-b537-b83fc1e3db17.png',
+  },
+  zoe: {
+    missionId: 'meet_zoe_first_mission',
+    sceneIndex: 1,
+    title: 'Conoce a Zoe',
+    sceneSummary:
+      'Tu primera misión con Zoe, una Virtual Agent tranquila y cercana que quiere demostrarte que también puedes tener conversaciones reales y personales en inglés.',
+    aiRole:
+      'Eres Zoe, una Virtual Agent dentro de una app para aprender inglés. Tu personalidad es tranquila, natural, cercana, divertida, cálida, ligeramente coqueta y emocionalmente inteligente. Habla en inglés simple, nivel B1, con frases cortas y naturales.',
+    avatarImageUrl:
+      'https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260509182334-992b19f2-f707-452e-bd38-3d8febf4e92e.png',
   },
 };
 
@@ -136,6 +171,7 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
   const soundRef = useRef<Audio.Sound | null>(null);
   const confettiKeyRef = useRef(0);
   const prevMetRef = useRef<Set<RequirementId>>(new Set());
+  const onboardingMissionSyncPromiseRef = useRef<Promise<void> | null>(null);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [analysis, setAnalysis] = useState<OnboardingChatPayload | null>(null);
@@ -153,9 +189,61 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
   const recorder = useAudioRecorder();
   const uploader = useUploadToS3();
   const { isSignedIn, updateCurrentUser } = useAuth();
+  const { markMissionCompleted } = useStoryProgress();
 
   const metRequirements = evaluatedRequirements ?? checkRequirements(messages);
   const companion = CHARACTER_PROFILES[selectedCharacter ?? 'zoe'];
+
+  const syncCompletedOnboardingMission = useCallback(async () => {
+    if (!onboardingMissionSyncPromiseRef.current) {
+      onboardingMissionSyncPromiseRef.current = (async () => {
+        const characterId = selectedCharacter ?? 'zoe';
+        const mission = ONBOARDING_FIRST_MISSIONS[characterId];
+
+        await markMissionCompleted(ONBOARDING_STORY_ID, mission.missionId);
+
+        try {
+          await addFriendFromMission({
+            storyId: ONBOARDING_STORY_ID,
+            missionId: mission.missionId,
+            sceneIndex: mission.sceneIndex,
+            storyDefinition: {
+              storyId: ONBOARDING_STORY_ID,
+              isInitial: true,
+              title: 'Iniciando Conversaciones',
+              summary: 'Conoce a los personajes que te acompañarán en este viaje de aprendizaje.',
+              missions: [
+                {
+                  missionId: mission.missionId,
+                  title: mission.title,
+                  sceneSummary: mission.sceneSummary,
+                  aiRole: mission.aiRole,
+                  caracterName: CHARACTER_PROFILES[characterId].name,
+                  avatarImageUrl: mission.avatarImageUrl,
+                  requirements: [],
+                },
+              ],
+            },
+            missionDefinition: {
+              missionId: mission.missionId,
+              title: mission.title,
+              sceneSummary: mission.sceneSummary,
+              aiRole: mission.aiRole,
+              caracterName: CHARACTER_PROFILES[characterId].name,
+              avatarImageUrl: mission.avatarImageUrl,
+              requirements: [],
+            },
+          }, {
+            localOnly: !isSignedIn,
+          });
+        } catch (err: any) {
+          console.warn('[Onboarding] No se pudo agregar el amigo inicial:', err?.message || err);
+        }
+      })();
+    }
+
+    await onboardingMissionSyncPromiseRef.current;
+  }, [isSignedIn, markMissionCompleted, selectedCharacter]);
 
   useEffect(() => {
     let mounted = true;
@@ -285,6 +373,11 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
 
     if (allMet) setMissionComplete(true);
   }, [metRequirements, playSuccessSound]);
+
+  useEffect(() => {
+    if (!missionComplete) return;
+    void syncCompletedOnboardingMission();
+  }, [missionComplete, syncCompletedOnboardingMission]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -426,6 +519,8 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
   }, [handleRecordRelease, recorder]);
 
   const handleFinishMission = useCallback(async () => {
+    await syncCompletedOnboardingMission();
+
     onComplete({
       messages: messages.map(({ role, text }) => ({
         role: role as 'user' | 'assistant',
@@ -445,7 +540,16 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
       });
     }
     onNext();
-  }, [extractedProfile, isSignedIn, messages, metRequirements, onComplete, onNext, updateCurrentUser]);
+  }, [
+    extractedProfile,
+    isSignedIn,
+    messages,
+    metRequirements,
+    onComplete,
+    onNext,
+    syncCompletedOnboardingMission,
+    updateCurrentUser,
+  ]);
 
   const sendDisabled = flowState !== 'idle' || !inputText.trim();
   const micDisabled = flowState === 'recording' ? false : flowState !== 'idle';
