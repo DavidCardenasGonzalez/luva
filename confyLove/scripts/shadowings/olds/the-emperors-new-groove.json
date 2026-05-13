@@ -1,0 +1,1164 @@
+{
+  "listName": "The Emperor's New Groove",
+  "category": "B1",
+  "order": 1,
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "Kuzco's World",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Kuzco", "voice": "male-5" },
+        { "name": "Pacha", "voice": "male-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The Inca Empire. A young emperor named Kuzco rules everything. He is spoiled, self-centered, and absolutely certain that the world exists for his personal entertainment.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kuzco",
+          "text": "It's all about me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Everything you see? Mine.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "That mountain? Mine.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "That village? Also mine.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "A local farmer named Pacha has been summoned to the palace. He's a kind, humble man who loves his village and his family. He has no idea what's coming.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kuzco",
+          "text": "I'm building my summer home.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "That's great. Where?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Right here. On this hill.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "This is where my village is.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "I know. Weird coincidence.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "You can't destroy our village.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "I'm the emperor. I can do anything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "People live there.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Yeah. That's kind of the problem.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Pacha is dismissed. He walks home, heavy with dread. He has no idea how to save his village.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    },
+    {
+      "chapter": 2,
+      "title": "Yzma's Plan",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Kuzco", "voice": "male-5" },
+        { "name": "Yzma", "voice": "female-4" },
+        { "name": "Kronk", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Yzma has been Kuzco's royal advisor for decades. She is ancient, dramatic, and furiously ambitious. Today, Kuzco fires her.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kuzco",
+          "text": "Yzma, you're fired.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yzma",
+          "text": "What?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "You've been running things without me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yzma",
+          "text": "I was doing your job!",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Exactly. That's my job.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yzma",
+          "text": "You'll regret this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "I doubt it. Bye.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Yzma goes to her secret lab with her loyal but dim assistant Kronk. She has a plan. She will poison the emperor.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Yzma",
+          "text": "Kronk, the poison for Kuzco.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kronk",
+          "text": "Right. The poison.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yzma",
+          "text": "The one that kills him.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kronk",
+          "text": "Got it.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Kronk accidentally grabs the wrong vial. Instead of poison, he uses a transformation potion. Kuzco drinks it at dinner and passes out.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Yzma",
+          "text": "Get rid of him. Take him to the jungle.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kronk",
+          "text": "The jungle. Right. On it.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 3,
+      "title": "A Llama",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Kuzco", "voice": "male-5" },
+        { "name": "Pacha", "voice": "male-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Kuzco wakes up in the jungle. He feels strange. He looks down at his hands. They are hooves. He is a llama.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kuzco",
+          "text": "No. No no no no.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "I'm a llama!",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Why am I a llama?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Pacha is passing through the jungle on his way home. He finds a llama tied in a sack. He frees it. The llama speaks.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kuzco",
+          "text": "It's me, Kuzco.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "The emperor?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Obviously. Help me get back.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "Why would I help you?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Because I'm the emperor.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "You're a llama.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "I'm an emperor who is temporarily a llama.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "And when you get back, you'll destroy my village?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "That is the plan, yes.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "Then you're on your own.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Kuzco tries to find his way alone. He immediately gets chased by animals and falls off a cliff.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kuzco",
+          "text": "Okay. I need your help.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "And the village?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "We'll talk about the village.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 4,
+      "title": "The Deal",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Kuzco", "voice": "male-5" },
+        { "name": "Pacha", "voice": "male-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "They make a deal. Pacha will guide Kuzco back to the palace. In return, Kuzco will find a different hill for his summer home. Kuzco agrees because he has no choice. He does not plan to keep his word.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kuzco",
+          "text": "Fine. Deal. Let's shake on it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "You're going to honor this, right?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Of course. I'm a man of my word.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "You're a llama right now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "A llama of my word.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "They start walking. It becomes clear immediately that they have absolutely nothing in common.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kuzco",
+          "text": "How far is the palace?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "Three days through the jungle.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Three days?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "If we move fast.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "I don't do jungles.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "You're a llama. You were born for this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "I was born for a palace.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "Then let's get you back to one.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Finally. Something sensible.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 5,
+      "title": "Kronk's Shoulder",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Yzma", "voice": "female-4" },
+        { "name": "Kronk", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Back at the palace, Yzma discovers that Kuzco is not dead — just transformed. She and Kronk set off to finish the job. Along the way, Kronk's conscience begins to bother him.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Yzma",
+          "text": "He's alive. We have to find him.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kronk",
+          "text": "And then what?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yzma",
+          "text": "And then he stops being alive.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kronk",
+          "text": "That feels a little harsh.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yzma",
+          "text": "Kronk.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kronk",
+          "text": "Right. Sorry.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Kronk has a tiny angel on one shoulder and a tiny devil on the other. They have opinions.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kronk",
+          "text": "What do you two think I should do?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kronk",
+          "text": "Both of you are making good points.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yzma",
+          "text": "Who are you talking to?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kronk",
+          "text": "Nobody. Thinking out loud.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yzma",
+          "text": "Stop thinking. Just follow.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kronk",
+          "text": "Got it. Following.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Kronk is an excellent cook, a gifted linguist in squirrel languages, and a deeply confused man. He follows Yzma anyway.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kronk",
+          "text": "Do you think Kuzco is okay out there?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yzma",
+          "text": "That is not our concern.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kronk",
+          "text": "Right. Not our concern.",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 6,
+      "title": "Jungle Troubles",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Kuzco", "voice": "male-5" },
+        { "name": "Pacha", "voice": "male-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Kuzco and Pacha survive a rainstorm, a cliff, a nest of jaguars, and Kuzco's complete inability to do anything for himself. Slowly, against his will, Kuzco is starting to like Pacha.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kuzco",
+          "text": "You saved my life back there.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "Twice, actually.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "I only counted once.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "The jaguars. And the cliff.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "I had the cliff under control.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "You were dangling.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Controlled dangling.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "They stop to eat. Pacha shares his food. Kuzco is surprised that it tastes good.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kuzco",
+          "text": "This is actually really good.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "My wife made it.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "You have a wife?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "And kids. And a home. On that hill.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Right. The hill.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "We've lived there for three generations.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "I didn't know that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "You didn't ask.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "No. I didn't.",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 7,
+      "title": "The Restaurant",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Kuzco", "voice": "male-5" },
+        { "name": "Pacha", "voice": "male-3" },
+        { "name": "Yzma", "voice": "female-4" },
+        { "name": "Kronk", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "They reach a roadside restaurant. Unknown to them, Yzma and Kronk are at the next table.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kuzco",
+          "text": "This place is not up to my standards.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "It's the only place for miles.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Fine. But I'm not happy about it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kronk",
+          "text": "Yzma. That llama looks familiar.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yzma",
+          "text": "All llamas look the same, Kronk.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kronk",
+          "text": "I don't think that's true.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yzma",
+          "text": "Eat your food.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Pacha overhears Yzma and Kronk talking about killing Kuzco. He panics and runs back to warn him.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Pacha",
+          "text": "Yzma is here. She wants to kill you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Sure she does.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "I'm serious. I heard her.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Yzma would never betray me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "She had you turned into a llama!",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "I don't have proof of that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "You ARE the proof.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "... okay. That's fair.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 8,
+      "title": "Kuzco's Confession",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Kuzco", "voice": "male-5" },
+        { "name": "Pacha", "voice": "male-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "They escape the restaurant but get separated in the chaos. Pacha falls into a river. Kuzco has a choice: keep running, or go back.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kuzco",
+          "text": "He'll be fine. He's a farmer.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Kuzco runs. Then stops. Then runs back.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kuzco",
+          "text": "I can't believe I'm doing this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "You came back.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Don't read into it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "Thank you.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "I need you to get me home.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "That's the only reason?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Yes.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "Okay.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Maybe also because you're my friend.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "I know.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "It is the first honest thing Kuzco has ever said to another person.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kuzco",
+          "text": "Don't make it weird.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "Too late.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Let's just keep walking.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 9,
+      "title": "The Palace",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Kuzco", "voice": "male-5" },
+        { "name": "Pacha", "voice": "male-3" },
+        { "name": "Yzma", "voice": "female-4" },
+        { "name": "Kronk", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "They reach the palace and break in through the kitchen. They need to find Yzma's lab, get the antidote, and turn Kuzco human again before Yzma gets there first.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kuzco",
+          "text": "I know a secret entrance.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "Of course you do. It's your palace.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "I never appreciated this place before.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "You were too busy owning it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "In the lab, they find rows of transformation potions. One of them will turn Kuzco human. Most of them will not.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kuzco",
+          "text": "How do we know which one?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "We try them.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "That could go very wrong.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "You're already a llama.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yzma",
+          "text": "Looking for something?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Yzma.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yzma",
+          "text": "Hand over the vial.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "Run!",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "A chase erupts through the palace. Potions break and spill. Kronk is accidentally turned into a bird, a frog, and a turtle. Yzma is turned into a tiny cat.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kronk",
+          "text": "Yzma, you're a cat.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yzma",
+          "text": "I know I'm a cat!",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 10,
+      "title": "Kuzco's New Groove",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Kuzco", "voice": "male-5" },
+        { "name": "Pacha", "voice": "male-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "In the chaos, Kuzco gets the last vial. He drinks it. He is human again. He stands in the palace he has always owned and, for the first time, has no idea what he wants.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kuzco",
+          "text": "I'm back.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "How do you feel?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Weird. Good weird.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "So. What about the hill?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "I've been thinking about that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "And?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "There's another hill. Smaller. It'll do.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "Are you serious?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Don't make it weird.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "Kuzco. Thank you.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Kuzco builds his summer home on a modest hill nearby. It is much smaller than he planned. He invites Pacha's family to dinner on the first night.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Kuzco",
+          "text": "This is a very small house.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "It's cozy.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "I was going to say pathetic. But cozy works.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Pacha",
+          "text": "You're getting better at this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Kuzco",
+          "text": "Don't push it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "For the first time in his life, Kuzco has a friend. It turns out that was the one thing his palace never had.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    }
+  ]
+}

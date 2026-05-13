@@ -1,0 +1,1955 @@
+{
+  "listName": "Wedding Crashers",
+  "category": "B1",
+  "order": 1,
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "The Rules of the Game",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "John", "voice": "male-1" },
+        { "name": "Jeremy", "voice": "male-6" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "John Beckwith and Jeremy Grey are best friends and business partners in Washington D.C. By day they work as divorce mediators. But every wedding season, they have a secret hobby — crashing weddings. They have rules, they have style, and they have never been caught.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jeremy",
+          "text": "Wedding season is officially open, baby.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Let's go over the rules again.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "John, we know the rules by heart.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Rule one: never use your real name.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Obviously.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Rule two: always have a backstory ready.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "I'm going with Navy pilot this time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "You don't know anything about flying.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Women don't ask follow-up questions.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Rule three: never fall for the bride.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "That one's easy. I love everyone equally.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "They have crashed weddings from Virginia to Maryland — Irish weddings, Jewish weddings, Hindu weddings. They learn the customs, memorize a few words in the right language, and walk in like they belong. No one ever questions a man in a nice suit holding a gift.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jeremy",
+          "text": "This one's huge. The Nguyen wedding.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Did you learn any Vietnamese?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "I learned how to say cheers.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "That's it?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "That's all you need, trust me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "One day we're going to get caught.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Never happened. Never will.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "You sound very confident about that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Confidence is everything, John.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Season after season, they refine their technique. Jeremy is the charmer — loud, funny, always the life of the party. John is the closer — quieter, more sincere, the one who makes women feel truly seen. Together they are unstoppable. But this summer, everything is about to change.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "John",
+          "text": "The Cleary wedding is next weekend.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Secretary Cleary's daughter is getting married?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "The biggest wedding of the year.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Oh, we are absolutely crashing that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "It's going to be complicated.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Complicated is our specialty.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 2,
+      "title": "The Cleary Wedding",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "John", "voice": "male-1" },
+        { "name": "Jeremy", "voice": "male-6" },
+        { "name": "Claire", "voice": "female-1" },
+        { "name": "Gloria", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The wedding of Christina Cleary is the most prestigious event of the Washington season. Secretary of the Treasury William Cleary is hosting, and the guest list reads like a political who's who. John and Jeremy arrive looking perfect. But the moment John sees Claire Cleary — the other daughter — something shifts inside him.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jeremy",
+          "text": "This place is unbelievable.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Stay focused. We're just here to have fun.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Look at this crowd. We hit the jackpot.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Jeremy. Don't make a scene.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gloria",
+          "text": "Hi! Are you friends of the groom?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "We go way back with Todd.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gloria",
+          "text": "The groom's name is not Todd.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "I meant... Craig. Sorry, I'm nervous.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gloria",
+          "text": "That's so sweet! I'm Gloria.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "While Jeremy works his charm on Gloria, John spots Claire across the room. She is laughing at something someone said, completely unaware of him. She is not trying to impress anyone. She is just completely, naturally herself. John cannot stop looking.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "John",
+          "text": "Who is that woman over there?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "That's Claire. The other Cleary daughter.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "She's incredible.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "She has a boyfriend. Bad news.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I just want to talk to her.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "That's always how it starts.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "Hi. I don't think we've met.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I'm John. I know your sister from... around.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "Around? That's a little vague.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Sorry. Bad with introductions.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "You're funny. I like that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "They talk through the cocktail hour and into the reception. John uses none of his usual tricks. He is just himself — genuinely curious about her, making her laugh without trying. For the first time at a wedding, he forgets completely why he came.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Claire",
+          "text": "Do you always talk this much?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Only when someone's worth talking to.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "That's a very good answer.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I try.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "Are you going to the after-party weekend?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I wasn't planning on it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "You should come. It's at our family home.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 3,
+      "title": "The Cleary Estate",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "John", "voice": "male-1" },
+        { "name": "Jeremy", "voice": "male-6" },
+        { "name": "Claire", "voice": "female-1" },
+        { "name": "Secretary Cleary", "voice": "male-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Somehow, impossibly, John and Jeremy end up invited to spend the weekend at the Cleary family estate on the Chesapeake Bay. It is enormous, beautiful, and full of people who all seem to know each other. Jeremy immediately panics, but John is focused entirely on spending more time with Claire.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jeremy",
+          "text": "What are we doing? This is insane.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Relax. We've handled harder rooms.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "This is a congressman's house, John.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Secretary of the Treasury. And yes.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Same thing! We should not be here.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "We were invited. Technically.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Secretary Cleary",
+          "text": "You boys look a little lost.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Just taking it all in, sir.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Secretary Cleary",
+          "text": "Good. Make yourselves at home.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Secretary Cleary",
+          "text": "Any friend of my daughters is welcome.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Thank you, sir. Very generous.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The estate is a world unto itself — sailboats on the bay, lawn games, enormous meals. Claire shows John around, and with every hour they spend together, the easy warmth between them grows. But Zack, Claire's boyfriend, is watching with narrowed eyes.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Claire",
+          "text": "So what do you actually do for work?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I help people through difficult transitions.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "That sounds meaningful.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "It can be. You meet real people.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "Do you like it?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Some days more than others.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "Honest answer. I respect that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "What about you? What do you love?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "I want to work in the arts.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Does your family support that?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "My dad does. My boyfriend, not really.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Then maybe he doesn't know you well enough.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "That's a bold thing to say.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Later that night, Jeremy finds John sitting alone on the dock. For the first time in years, John looks like a man who is genuinely confused about what he wants. Jeremy knows that look, and he does not like what it means.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jeremy",
+          "text": "You've got that look on your face.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "What look?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "The look that gets us in trouble.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "She's different, Jeremy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "You always say that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "This time I mean it.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 4,
+      "title": "Midnight Complications",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "John", "voice": "male-1" },
+        { "name": "Jeremy", "voice": "male-6" },
+        { "name": "Gloria", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "That first night at the estate takes a dramatic turn. Jeremy, who flirted shamelessly with Gloria at the wedding, discovers that she has decided he is the love of her life. She is intense, passionate, and completely unstoppable. Jeremy is terrified. John finds all of this hilarious until morning.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jeremy",
+          "text": "She tied me to the bed, John.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I'm sorry, she did what?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "She's completely out of her mind.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "You encouraged her all night.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "I was being friendly! There's a difference!",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "We need to leave. Before this gets worse.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "We can't leave. We're trapped.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "We're not trapped. We can just walk out.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "She will find me. She will always find me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Gloria appears in the doorway. She is beaming, holding two coffees and a map of the estate grounds she has drawn for the two of them to walk together. Jeremy looks like a man facing his doom. John looks like a man trying very hard not to laugh.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Gloria",
+          "text": "Good morning! I made you coffee.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Gloria. Hi. Good morning.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gloria",
+          "text": "I planned our whole day together.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Oh wow. You didn't have to do that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gloria",
+          "text": "I wanted to. You're so special to me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "We just met yesterday.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gloria",
+          "text": "When you know, you know.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "She has a point, Jer.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Don't you dare.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gloria",
+          "text": "John, you should bring Claire along.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "That's actually not a bad idea.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Don't leave me alone with her.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The morning walk becomes an afternoon together, and gradually Jeremy begins to notice something beneath Gloria's overwhelming enthusiasm — a genuine warmth, a real laugh, a person who means exactly what she says. It is the last thing he expected to find.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Gloria",
+          "text": "Do you ever feel like people don't see you?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Yeah, actually. All the time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gloria",
+          "text": "I see you. I think you're wonderful.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "You barely know me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gloria",
+          "text": "I know enough.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 5,
+      "title": "Sailing and Lies",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "John", "voice": "male-1" },
+        { "name": "Claire", "voice": "female-1" },
+        { "name": "Zack", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The weekend continues, and John finds more and more moments alone with Claire. They sail together on the bay, talk for hours on the porch, and share a quiet kind of understanding that surprises them both. But Zack — rich, athletic, and insecure — is watching every moment. He does not like what he sees.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Claire",
+          "text": "You're actually good at sailing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I took one lesson in college.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "You're lying.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Half lying. I watched a lot of videos.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "You're ridiculous. And somehow charming.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I'll take ridiculously charming.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Zack",
+          "text": "Hey, John. Can we talk privately?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Sure. What's on your mind?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Zack",
+          "text": "Claire is my girlfriend. Back off.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "We're just talking. Relax.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Zack",
+          "text": "I see the way she looks at you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Maybe ask yourself why that worries you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Zack's hostility only sharpens the contrast. Claire notices how Zack treats people — dismissive, entitled, always keeping score. Then she notices how John treats people — genuinely curious, kind, never performing. The difference is impossible to ignore.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Claire",
+          "text": "Zack gets weird around you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Maybe he feels threatened.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "That shouldn't make me feel good.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "But does it?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "A little. Don't tell him that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Your secret is safe.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "Why are you so easy to talk to?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I ask better questions than most people.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "That's probably true.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Tell me something real about yourself.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "I'm not sure I'm happy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "With Zack?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "With the version of myself I've become.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "That night, under the stars on the back porch, something almost happens between them. It is just a moment — a look that lasts a second too long. Then Zack appears in the doorway, and both of them look away.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "John",
+          "text": "You deserve to be really happy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "You barely know me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I know enough.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 6,
+      "title": "The Truth Comes Out",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "John", "voice": "male-1" },
+        { "name": "Jeremy", "voice": "male-6" },
+        { "name": "Claire", "voice": "female-1" },
+        { "name": "Secretary Cleary", "voice": "male-3" },
+        { "name": "Zack", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "It is their last morning at the estate. Zack has been quietly investigating. He found out that John and Jeremy do not actually know anyone in the family. They were not invited. They crashed the wedding. He makes sure everyone finds out at breakfast.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Zack",
+          "text": "Nobody here actually knows these two.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Secretary Cleary",
+          "text": "Excuse me? What are you saying?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Zack",
+          "text": "They crashed your daughter's wedding.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "That is... not entirely inaccurate.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Secretary Cleary",
+          "text": "You weren't invited? Either of you?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "In our defense, we had a great time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Secretary Cleary",
+          "text": "Get off my property. Now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "You lied. This whole time you lied.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Claire, please. Let me explain.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "What is there to explain?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "What I felt talking to you was real.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "How would I know what's real with you?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "There is nothing John can say that will fix the moment. They are escorted out. Jeremy is actually relieved — except that he keeps thinking about Gloria. John says nothing the entire drive home. He just stares at the road.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jeremy",
+          "text": "Well. That could have been worse.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "It couldn't have been worse.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "We'll find another wedding next weekend.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I don't want another wedding.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Don't do this to yourself.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "She thinks I'm a liar.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "You kind of are a liar, John.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Not with her. That was different.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "You fell for someone at a wedding we crashed.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I know. I know how that sounds.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "It sounds like the plot of a bad movie.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Back in Washington, John goes through the motions. He works. He eats. He sleeps. But nothing feels right. For the first time in years, he is not interested in playing any kind of game. He just wants one real thing — and he walked away from it.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    },
+    {
+      "chapter": 7,
+      "title": "Falling Apart",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "John", "voice": "male-1" },
+        { "name": "Jeremy", "voice": "male-6" },
+        { "name": "Chazz", "voice": "male-5" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Weeks pass. John is miserable and barely functioning. Jeremy, on the other hand, has done something completely out of character — he went back to see Gloria, and they have quietly been seeing each other. In desperation, John visits Chazz Reinhold, the legendary wedding crasher who invented their whole rulebook. He is not what John expected.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "John",
+          "text": "Chazz, I need your advice.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Chazz",
+          "text": "Come in! I was just making lunch.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Are you still living with your mother?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Chazz",
+          "text": "She makes great sandwiches. Don't judge.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "You wrote the whole rulebook.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Chazz",
+          "text": "I also crash funerals now. More options.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "That's actually depressing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Chazz",
+          "text": "Grief makes people very open. Just saying.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I fell in love with someone at a wedding.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Chazz",
+          "text": "That's against the rules.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I know. What do I do?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Chazz",
+          "text": "Forget her. Move on. Crash another wedding.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I don't want to do that anymore.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Chazz is no help at all. John drives home slowly, thinking about everything. Meanwhile, Jeremy arrives at his door with news that changes the conversation completely.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jeremy",
+          "text": "I have something to tell you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "You look weird. What happened?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "I've been seeing Gloria.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "You've been what?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "I know how it sounds.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "You were terrified of her.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "She's actually incredible, John.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "The girl who tied you to the bed?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "That was a misunderstanding. Mostly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Does she know who we really are?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "I told her everything. She forgave me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "John sits with that for a moment. Jeremy, the one who always ran, found something real and chose to be honest. John had the same chance and let it fall apart. The path forward is suddenly very clear — and very uncomfortable.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "John",
+          "text": "You told her the truth.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "It was the only way forward.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I need to do the same with Claire.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "She might not forgive you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I know. But I have to try.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 8,
+      "title": "The Grand Gesture",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "John", "voice": "male-1" },
+        { "name": "Jeremy", "voice": "male-6" },
+        { "name": "Claire", "voice": "female-1" },
+        { "name": "Gloria", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "John learns that Claire is attending yet another wedding — a family friend's event. He knows it is reckless and probably insane. He is going to crash one more wedding. Not for a game, not for fun, but to tell the truth to the one person who deserves to hear it. Jeremy decides to come along. This time, for Gloria.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "John",
+          "text": "One last wedding. I mean it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "You know this is completely crazy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Probably. Are you in?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Of course I'm in. I'm always in.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "No fake names this time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "No fake names. Just us.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "And no running if it goes badly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Agreed. We stand our ground.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "They walk into the reception and spot Claire immediately. She sees them at the same moment. Her expression shifts from surprise to something more complicated. John moves toward her before his nerves can stop him.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Claire",
+          "text": "What are you doing here?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I came to tell you the truth.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "You crashed another wedding for me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I know. I know how that sounds.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "It sounds like something a liar would do.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "You're right. I have been a liar.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I lied about who I was at the beginning.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "But I never lied about how I felt.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "How am I supposed to trust that?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "You're not. Not yet. I'd have to earn it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "And crashing weddings is how you start?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I thought a grand gesture might help.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Across the room, Jeremy finds Gloria. She is surprised to see him, and something in her eyes softens. He takes a breath. No jokes. No charm. Just the truth.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jeremy",
+          "text": "Gloria. I owe you an apology.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gloria",
+          "text": "You already told me everything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "I know. I wanted to say it again, here.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gloria",
+          "text": "Why does it matter where you say it?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Because I'm done hiding. From everything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gloria",
+          "text": "Including me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Especially you.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 9,
+      "title": "What Matters Now",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "John", "voice": "male-1" },
+        { "name": "Claire", "voice": "female-1" },
+        { "name": "Secretary Cleary", "voice": "male-3" },
+        { "name": "Zack", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The moment stretches. Everyone around them seems to disappear. Zack is somewhere in the room, watching, jaw tight. Secretary Cleary has spotted John and is walking over. John does not look away from Claire. He is not running. For the first time in a long time, neither is she.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Claire",
+          "text": "Zack and I broke up last week.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I didn't know that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "It had been coming for a long time.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I'm sorry. Or not. I'm not sure.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "Honest. I appreciate that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I want to be honest with you from now on.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "You really crashed another wedding for me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Last one. I promise.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Secretary Cleary",
+          "text": "You have some nerve showing up here.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Yes sir. I'm aware.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Secretary Cleary",
+          "text": "What do you have to say for yourself?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I love your daughter. That's all I have.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "A long silence. The Secretary looks at his daughter. Claire is trying not to smile and failing. Zack crosses the room to intercept, but the Secretary holds up one hand and stops him. Something passes across the older man's face — something that looks like recognition.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Secretary Cleary",
+          "text": "Claire. What do you want?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "I want to hear what he has to say.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Secretary Cleary",
+          "text": "Then I'll give you two some space.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Zack",
+          "text": "You're really okay with this?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Secretary Cleary",
+          "text": "It's not my decision to make.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "Tell me the truth, John. All of it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "We crash weddings. We've done it for years.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I'm not proud of it. Not anymore.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Meeting you changed that. You changed that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "Because you fell for someone you lied to.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Yes. And I'm asking for a chance to fix it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Zack steps forward one last time, his voice hard. But Claire turns to face him with a clarity she has not had in months. She says what she has needed to say for a long time.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Zack",
+          "text": "Claire, come on. This guy is a fraud.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "And you've never been honest with me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Zack",
+          "text": "That's not fair.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "It's completely fair. We're done, Zack.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 10,
+      "title": "Love, Actually Declared",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "John", "voice": "male-1" },
+        { "name": "Jeremy", "voice": "male-6" },
+        { "name": "Claire", "voice": "female-1" },
+        { "name": "Gloria", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Zack walks away, and the room exhales. Claire turns back to John, and this time there is nothing between them — no pretense, no games, no one else's version of who they're supposed to be. Across the room, Jeremy is already holding Gloria's hand. For two men who built their lives on running from real things, this is the most terrifying moment of either of their lives.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Claire",
+          "text": "You're completely ridiculous, you know that?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I've been told that once or twice.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "Why should I give you a chance?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Because I'm standing here. No tricks.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "That's a low bar.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "I know. I'll raise it. I promise.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "I thought about you every day.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Even when you were angry?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "Especially when I was angry.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "What does that mean?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "It means you matter to me. Unfortunately.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "John laughs — a real, relieved laugh that he has not let out in weeks. Claire shakes her head but she is smiling too. It is the same easy rhythm they found the first night they met. It never actually went away.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "John",
+          "text": "Can we start over? Properly this time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "No more fake names?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "No more fake anything. Ever.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "Then yes. We can start over.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Gloria, I think I'm in love with you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gloria",
+          "text": "I know. I've known since the beginning.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Was I that obvious?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gloria",
+          "text": "You were terrified. That was the obvious part.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Being terrified is new for me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gloria",
+          "text": "That's how you know it's real.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Later, outside the venue, the four of them stand together in the cool evening air. John and Claire, Jeremy and Gloria. Two men who spent years turning love into a game have finally lost — and won — at something they didn't know they were really playing for.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "John",
+          "text": "I think we're officially retired.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "From crashing, yes. From weddings, no.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Gloria",
+          "text": "Is that a proposal, Jeremy Grey?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jeremy",
+          "text": "Maybe. Eventually. Don't rush me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "You'd better not crash your own wedding.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "Would that be so bad?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Claire",
+          "text": "Absolutely. But I'd show up anyway.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "John",
+          "text": "That's all I needed to hear.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1242 @@
+{
+  "listName": "The Wolf of Wall Street",
+  "category": "B1",
+  "order": 8,
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "First Day on Wall Street",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Jordan", "voice": "male-1" },
+        { "name": "Mark", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Jordan Belfort is twenty-two years old and brand new to Wall Street. He gets a job at a firm in Manhattan, where a senior broker named Mark Hanna takes him under his wing. Mark has strong opinions about success, money, and what this business really is.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jordan",
+          "text": "I want to make a lot of money.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Good. That's the right answer.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "How do you do it?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Move money. Keep the client moving.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "What does the client get?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Doesn't matter. You get the commission.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "That sounds wrong.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "It sounds like Wall Street.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Jordan is shocked but fascinated. Mark orders two martinis at lunch, talks fast, laughs loud, and seems completely at home in a world Jordan barely understands. This is the first lesson: confidence sells.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Mark",
+          "text": "Do you like money, Jordan?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Yes. Very much.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Then you'll love this job.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "How long until I make real money?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Depends how fast you learn.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I learn fast.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Then you'll be rich in no time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The firm crashes on Black Monday. Jordan loses his job on his very first day as a licensed broker. He ends up in a strip-mall boiler room on Long Island, selling penny stocks to working-class people. But he is very, very good at it.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jordan",
+          "text": "Hi, I'm calling about an opportunity.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "This stock is about to move.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Can you afford to miss it?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I'll only need five minutes.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Trust me. This one is different.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "His first sale earns him a fifty-percent commission. He looks at the check in his hand and feels something he has never felt before. He wants more of it. Much more.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jordan",
+          "text": "I'm going to be rich.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I can feel it. I just know.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 2,
+      "title": "Stratton Oakmont",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Jordan", "voice": "male-1" },
+        { "name": "Donnie", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Jordan meets Donnie Azoff at a diner. Donnie sells furniture but wants out. He hears Jordan talking about money and immediately quits his job. Together, they start their own firm. Jordan names it Stratton Oakmont — it sounds old, it sounds trustworthy, it sounds like money.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Donnie",
+          "text": "How much did you make last month?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Seventy-two thousand dollars.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "In one month?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "In one month.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "I want in. Right now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "You'd quit your job today?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "I already quit. What's next?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Jordan recruits his old neighborhood friends — guys with no experience, no licenses, and no fear. He trains them himself, drilling the script into their heads until they can sell anything to anyone. The office looks like a circus, but the money is absolutely real.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jordan",
+          "text": "Repeat after me. Every word.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "Okay. I'm ready.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Hi, my name is Jordan Belfort.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I'm calling from Stratton Oakmont.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I have a stock that will double.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "What if they say no?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Nobody says no to this pitch.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "Are you serious right now?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Dead serious. Pick up the phone.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The firm grows fast. They move out of the small office and into a real building. Jordan gives motivational speeches every morning. The brokers go wild. Sales numbers go through the roof. Donnie becomes Jordan's closest partner and his most loyal follower.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jordan",
+          "text": "Are you guys ready to get rich?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "Yes! Let's go! Right now!",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Then pick up the phone!",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "This is the best job ever.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "It's not a job. It's a lifestyle.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 3,
+      "title": "The Good Life",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Jordan", "voice": "male-1" },
+        { "name": "Naomi", "voice": "female-1" },
+        { "name": "Donnie", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Jordan is now one of the richest people on Wall Street. He lives in a mansion, drives expensive cars, throws wild parties, and spends money faster than he makes it. He also meets Naomi Lapaglia — a beautiful woman who becomes his girlfriend and then his second wife.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Naomi",
+          "text": "Is all of this really yours?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Every single bit of it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Naomi",
+          "text": "You're not normal, are you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Normal people are not this happy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Naomi",
+          "text": "You think money buys happiness?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I think poverty buys nothing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Jordan buys a yacht named after Naomi. He orders a helicopter for the commute. He buys a second house just for parties. The excess is almost impossible to describe — it is a world where money has no meaning because there is always more of it.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Donnie",
+          "text": "You bought a helicopter?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Traffic is terrible. It makes sense.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "A helicopter makes sense to you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Don't you have a helicopter?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "I will by tomorrow.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "That's the spirit.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Naomi",
+          "text": "Jordan, you need to slow down.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Slow down? We're just starting.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Naomi",
+          "text": "You're taking too many risks.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Risks? This is all calculated.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "But not everything is under control. Jordan starts using drugs heavily — quaaludes, cocaine, anything available. He tells himself he can stop whenever he wants. He cannot.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Naomi",
+          "text": "I'm worried about you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I'm fine. Better than fine.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Naomi",
+          "text": "You don't look fine to me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Trust me. Everything is great.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 4,
+      "title": "The FBI Knocks",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Jordan", "voice": "male-1" },
+        { "name": "Agent Denham", "voice": "male-3" },
+        { "name": "Donnie", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "FBI agent Patrick Denham has been watching Stratton Oakmont for years. He boards Jordan's yacht one morning — not with a warrant, but just to introduce himself, to make his presence known, to let Jordan feel the pressure starting to build.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Agent Denham",
+          "text": "Nice boat you've got here.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "It's a yacht, actually.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Agent Denham",
+          "text": "Right. A yacht. My mistake.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Can I help you with something?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Agent Denham",
+          "text": "Just wanted to say hello.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "You could have called.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Agent Denham",
+          "text": "I prefer to meet people in person.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "What exactly do you want?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Agent Denham",
+          "text": "Nothing today. Just watching.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Jordan keeps his composure but feels the ground shift beneath him. He has always known this moment would come — a man in a government suit showing up and smiling too politely. He just believed he would be untouchable by then.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Donnie",
+          "text": "Who was that guy?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "FBI. He knows everything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "Should we be worried right now?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Not yet. But soon.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "What do we do about the money?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "We move it. Tonight.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "Move it where exactly?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Switzerland. I know a banker.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Jordan uses Naomi's aunt to open Swiss bank accounts under a fake name. He smuggles cash in suitcases, wires money through shell companies, and builds a wall of deception between himself and the federal government. It is elaborate. It is illegal. And it works — for a while.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Agent Denham",
+          "text": "We're going to find everything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "You're welcome to try.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Agent Denham",
+          "text": "I'm a patient man, Mr. Belfort.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "So am I. Believe me.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 5,
+      "title": "The Quaalude Crawl",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Jordan", "voice": "male-1" },
+        { "name": "Donnie", "voice": "male-2" },
+        { "name": "Naomi", "voice": "female-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Jordan's drug use is completely out of control. One night he takes a batch of quaaludes that hit later than expected — while he is driving. What follows is a blackout journey home that he cannot remember, a destroyed car in the driveway, and a phone call he should never have made.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Donnie",
+          "text": "Jordan, you drove home like that?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I made it, didn't I?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "Your car is completely destroyed.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I'll buy another one today.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "You could have killed somebody.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "But I didn't. So it's fine.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Naomi has finally had enough. She files for divorce and threatens to take their daughter. Jordan, high and desperate, tries to leave on the yacht during a storm to stop her. The yacht nearly sinks in the Mediterranean Sea.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Naomi",
+          "text": "I'm done. I want a divorce.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "You're not taking my daughter.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Naomi",
+          "text": "Then get sober. Right now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I can stop whenever I want.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Naomi",
+          "text": "Prove it. Stop right now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "It's not that simple.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Naomi",
+          "text": "That's exactly what I thought.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "Jordan, the storm is getting bad.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Keep going. Full speed ahead.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "We're going to sink, man.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "This boat doesn't sink. Trust me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "A rescue helicopter finds them. They survive, but everything feels different afterward. Jordan is starting to understand — slowly, reluctantly — that he is not in control of anything.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jordan",
+          "text": "We almost died out there.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "Yeah. We actually almost died.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Maybe I need to slow down.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "That's the first smart thing.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 6,
+      "title": "The Deal with the FBI",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Jordan", "voice": "male-1" },
+        { "name": "Agent Denham", "voice": "male-3" },
+        { "name": "Donnie", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The FBI's case is airtight. Jordan's Swiss banker has been arrested. His money laundering operation is fully exposed. His lawyer tells him the government is offering a deal — cooperate, wear a wire on his friends, and walk away with a reduced sentence.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Agent Denham",
+          "text": "We have everything we need.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "So why are you offering a deal?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Agent Denham",
+          "text": "We want the bigger fish.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "You want me to betray my friends.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Agent Denham",
+          "text": "I want you to save yourself.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "What's in it for me exactly?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Agent Denham",
+          "text": "Freedom. A real life after this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Jordan agonizes over the decision. He has always believed in loyalty — it is the one value he held onto even as everything else fell away. But he is looking at decades in prison, and he has a daughter.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jordan",
+          "text": "I don't know if I can do this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "Do what? What's happening?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "The FBI wants me to cooperate.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "You're not going to, right?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I have a daughter, Donnie.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "We're brothers. You can't do this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I haven't decided anything yet.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "At the office, Jordan gives one last extraordinary speech. He tells his brokers he is staying — that he will fight this and win. The room goes insane with cheering. Then he walks back to his desk, picks up the phone, and calls the FBI.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jordan",
+          "text": "I told them I was staying.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "And then you called them anyway.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I had to protect my family.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "You could have protected us too.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I'm sorry. I really am.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donnie",
+          "text": "Sorry doesn't fix anything now.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 7,
+      "title": "Arrest and Consequences",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Jordan", "voice": "male-1" },
+        { "name": "Agent Denham", "voice": "male-3" },
+        { "name": "Naomi", "voice": "female-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Jordan is formally arrested. The charges are extensive — securities fraud, money laundering, conspiracy. He pleads guilty and cooperates with investigators, naming colleagues, partners, and associates. His world collapses with remarkable speed, as if it were always built on sand.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Agent Denham",
+          "text": "Jordan Belfort, you are under arrest.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I know. I've been expecting this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Agent Denham",
+          "text": "You have the right to remain silent.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I waive that right. I'll cooperate.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Agent Denham",
+          "text": "Smart choice. Took you long enough.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I'm not proud of any of this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Naomi goes through with the divorce. Jordan loses the mansion, the yacht, and the helicopter. He is sentenced to thirty-six months in a minimum-security prison — a sentence his cooperation helped reduce significantly. His brokers receive longer sentences.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Naomi",
+          "text": "I can't stay with you, Jordan.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I understand. I ruined everything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Naomi",
+          "text": "Our daughter still needs her father.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I know. I'll be there for her.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Naomi",
+          "text": "You need to actually mean that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I mean it. Things are different now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Agent Denham",
+          "text": "You're going to prison for this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I earned it. That's fair enough.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Agent Denham",
+          "text": "Don't try to charm your way out.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I'm done with the charming.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Jordan serves his time at a minimum-security facility in California, playing tennis and attending classes. It is nothing like the prison in the movies. But coming out the other side, he is genuinely a different version of himself — stripped of everything that defined him.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jordan",
+          "text": "I had everything. I lost it all.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "And somehow I still have myself.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 8,
+      "title": "The Salesman Always Sells",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Jordan", "voice": "male-1" },
+        { "name": "Audience", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "After prison, Jordan reinvents himself as a motivational speaker and sales trainer. He tours the world teaching the same techniques he used at Stratton Oakmont — now marketed as legitimate business skills. Audiences pay hundreds of dollars to sit in conference rooms and hear him talk about selling.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jordan",
+          "text": "Sell me this pen.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Audience",
+          "text": "It's a really nice pen.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "That's not how you sell it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Audience",
+          "text": "Then how do you sell it?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Create the need. Create the feeling.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Audience",
+          "text": "What feeling does a pen create?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "The feeling that you need to write.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "He is magnetic on stage. Crowds lean forward, take notes, laugh at his stories. He admits to everything — the drugs, the fraud, the sinking yacht — and frames it all as a cautionary tale with practical lessons attached. Whether this constitutes redemption is a question the film leaves open.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jordan",
+          "text": "I made every mistake you can imagine.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Audience",
+          "text": "And you're proud of that?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "I'm not proud. I'm honest.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Audience",
+          "text": "Is there a difference anymore?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "That's a very good question.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Yes. There is a difference.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The last scene of the film shows Jordan walking onto a stage in New Zealand. He looks at a crowd of eager faces — people who want to learn, who want to succeed, who believe in the power of the right sales pitch. He looks back at them and sees himself, twenty years ago, sitting in the strip-mall office, ready to pick up the phone.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jordan",
+          "text": "Who are you? Tell me right now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Audience",
+          "text": "I'm a closer. I sell anything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Then sell me that pen. Now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Audience",
+          "text": "Can I have your autograph first?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "You'd need a pen for that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Audience",
+          "text": "Exactly. Buy this pen.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jordan",
+          "text": "Now that's how you sell.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The hunger in the room is identical to the hunger Jordan once carried. Whether that is inspiring or deeply unsettling depends entirely on where you are sitting.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    }
+  ]
+}

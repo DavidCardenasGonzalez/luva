@@ -274,6 +274,62 @@ function validateDialogue(data, inputPath, beepPath) {
   return characterByName;
 }
 
+function collectDialogueValidationErrors(data, inputPath, beepPath) {
+  const errors = [];
+  if (!Array.isArray(data?.characters)) {
+    errors.push(`${inputPath} must contain a characters array.`);
+    return errors;
+  }
+  if (!Array.isArray(data?.dialogues)) {
+    errors.push(`${inputPath} must contain a dialogues array.`);
+    return errors;
+  }
+  if (!fs.existsSync(beepPath)) {
+    errors.push(`Beep file not found: ${beepPath}`);
+  }
+
+  const characterByName = new Map();
+  data.characters.forEach((character, index) => {
+    if (!character?.name || !character?.voice) {
+      errors.push(`characters[${index}] must include name and voice.`);
+      return;
+    }
+    characterByName.set(character.name, character);
+  });
+
+  data.dialogues.forEach((dialogue, index) => {
+    if (!characterByName.has(dialogue?.character)) {
+      errors.push(`dialogues[${index}] references unknown character: ${dialogue?.character}`);
+    }
+    if (typeof getDialogueText(dialogue) !== "string" || !getDialogueText(dialogue).trim()) {
+      errors.push(`dialogues[${index}] must include text or line.`);
+    }
+    const pauseAfter = Number(dialogue.pauseAfter || 0);
+    if (!Number.isFinite(pauseAfter) || pauseAfter < 0) {
+      errors.push(`dialogues[${index}].pauseAfter must be a number >= 0.`);
+    }
+  });
+
+  return errors;
+}
+
+function validateJobsBeforeRun(fileGroups) {
+  const errors = [];
+  for (const { jobs, inputFile } of fileGroups) {
+    for (const job of jobs) {
+      const jobErrors = collectDialogueValidationErrors(job.dialogueData, inputFile, job.fileOptions.beepPath);
+      jobErrors.forEach((message) => {
+        const label = job.total > 1 ? `${path.basename(inputFile)} / ${job.slug}` : path.basename(inputFile);
+        errors.push(`${label}: ${message}`);
+      });
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(`Shadowing input validation failed:\n${errors.map((message) => `- ${message}`).join("\n")}`);
+  }
+}
+
 function getDialogueText(dialogue) {
   return dialogue?.text ?? dialogue?.line;
 }
@@ -543,11 +599,18 @@ async function main() {
     const { listMeta, dialogues } = extractListData(rawInput);
     const jobs = buildJobs(dialogues, fileOptions);
     allJobs.push(...jobs);
+    jobs.forEach((job) => {
+      job.fileOptions = fileOptions;
+    });
     fileGroups.push({ listMeta, jobs, inputFile });
+  }
 
+  validateJobsBeforeRun(fileGroups);
+
+  for (const { jobs } of fileGroups) {
     for (const job of jobs) {
       try {
-        await generateDialogueAudio(job, fileOptions, voiceMap, ffmpegPath);
+        await generateDialogueAudio(job, job.fileOptions, voiceMap, ffmpegPath);
       } catch (error) {
         const detail = error.response?.data ?? error.message;
         const message = typeof detail === "object" ? JSON.stringify(detail) : detail;

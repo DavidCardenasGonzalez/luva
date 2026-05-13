@@ -1,0 +1,1386 @@
+{
+  "listName": "The Devil Wears Prada",
+  "category": "B1",
+  "order": 4,
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "A Job in Fashion",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Andy", "voice": "female-1" },
+        { "name": "Emily", "voice": "female-3" },
+        { "name": "Miranda", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Andrea Sachs — Andy — has just graduated from Northwestern with a journalism degree and a dream of working for a serious newspaper. She moves to New York City and applies everywhere. The only interview she gets is at Runway magazine, the most powerful fashion publication in the world. She has no idea what she is walking into.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Andy",
+          "text": "Hi. I have an interview today.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Emily",
+          "text": "Andrea Sachs? Follow me, please.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Wow. This place is incredible.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Emily",
+          "text": "Don't touch anything. Keep moving.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "What exactly is this job?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Emily",
+          "text": "Second assistant to Miranda Priestly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "And who is Miranda Priestly?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Emily",
+          "text": "You're joking. Please be joking.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Miranda Priestly enters the room without announcing herself. The entire office freezes. She is elegant, terrifying, and completely unimpressed. She looks Andy up and down the way a surgeon examines a patient she didn't ask to treat.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Miranda",
+          "text": "Who are you? Why are you here?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I'm Andrea Sachs. I'm interviewing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "For what position exactly?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Your second assistant. I think.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "You think. How reassuring.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I'm a hard worker. I learn fast.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "Everyone here learns fast or leaves.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I understand. I won't disappoint you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "That's all.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Miranda walks out. Emily stares at Andy like she just survived a car crash. Somehow, against all logic, Andy gets the job.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Emily",
+          "text": "You got it. I genuinely don't understand.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Is that a good thing or bad?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Emily",
+          "text": "Honestly? I have no idea.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 2,
+      "title": "First Day Disaster",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Andy", "voice": "female-1" },
+        { "name": "Emily", "voice": "female-3" },
+        { "name": "Miranda", "voice": "female-2" },
+        { "name": "Nigel", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Andy's first day at Runway is a masterclass in humiliation. She doesn't know the designers, the codes, the unspoken rules. She wears the wrong clothes. She says the wrong things. Miranda demands the impossible before Andy has even found the bathroom.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Miranda",
+          "text": "I need the Harry Potter manuscript. Now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "It hasn't been published yet, though.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "And yet I want it by morning.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I'll... I'll figure something out.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "That's what assistants do. Figure things out.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Emily",
+          "text": "Also, never call her by her first name.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "What do I call her then?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Emily",
+          "text": "Nothing. You just don't.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Nigel, Runway's creative director, is the only person in the building who speaks to Andy like a human being. He doesn't sugarcoat — he delivers hard truths with a kind of brutal affection that actually helps.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Nigel",
+          "text": "You have no idea who you work for.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I know she's powerful. I get it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nigel",
+          "text": "No. You really don't yet.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Then help me understand. Please.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nigel",
+          "text": "Miranda doesn't just run a magazine.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nigel",
+          "text": "She decides what the world wears.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "That seems like a lot of pressure.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nigel",
+          "text": "It is. And she carries it perfectly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I just want to survive the week.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nigel",
+          "text": "Start with surviving today. Trust me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Andy calls her boyfriend Nate and her friends from home. They laugh at the absurdity of her job. She laughs too — but the laugh is covering something that feels uncomfortably close to wanting to prove herself.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Andy",
+          "text": "She asked me for an unpublished book.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "And I actually went and found it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I don't know who I am anymore.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 3,
+      "title": "The Cerulean Sweater",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Andy", "voice": "female-1" },
+        { "name": "Miranda", "voice": "female-2" },
+        { "name": "Nigel", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Andy still doesn't take fashion seriously. She thinks it's shallow. She thinks the people around her are shallow. Then one day, during a meeting about two nearly identical blue belts, she makes the mistake of smiling at what she considers a trivial debate.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Miranda",
+          "text": "Something funny, Andrea?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "No. I just... they look similar.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "I see. You think this is trivial.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I didn't mean it like that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "That sweater. The blue one you're wearing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "This? I got it from a sale bin.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "That color is cerulean. Oscar de la Renta.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "Two collections before it reached you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "You believe fashion has nothing to do with you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "But it filtered all the way down to you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "That is all.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Andy stands in silence. The room empties. She looks down at her sweater as if seeing it for the first time. Miranda didn't just lecture her about fashion — she exposed a blind spot Andy didn't know she had.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Andy",
+          "text": "She completely dismantled me just now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nigel",
+          "text": "Welcome to the real fashion world.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Was she right? About all of it?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nigel",
+          "text": "She's always right. That's the problem.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I've been arrogant, haven't I.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nigel",
+          "text": "A little bit. Yeah.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "So what do I do now?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nigel",
+          "text": "You could start by dressing the part.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "You mean actually try for once.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nigel",
+          "text": "That would be revolutionary. Yes.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 4,
+      "title": "The Transformation",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Andy", "voice": "female-1" },
+        { "name": "Nate", "voice": "male-2" },
+        { "name": "Nigel", "voice": "male-1" },
+        { "name": "Emily", "voice": "female-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Andy commits. Nigel pulls pieces from the Runway closet — Chanel, Valentino, Prada — and remakes her completely. She walks into the office the next day looking like someone who belongs there. Miranda glances up for exactly half a second, which is, apparently, the highest form of approval.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Nigel",
+          "text": "There she is. Now you look right.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I feel like a completely different person.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nigel",
+          "text": "Good. That was the whole point.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Emily",
+          "text": "Is that a Valentino? Where did you get that?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Nigel helped me. From the closet.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Emily",
+          "text": "That is deeply unfair. Honestly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "At home, the transformation is not celebrated. Nate sees Andy coming home late, dressed in designer clothes, talking about runway shows with an energy she never had for anything else. He feels like he is losing her to a world that would have laughed at both of them six months ago.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Nate",
+          "text": "You missed my birthday dinner, Andy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I know. Miranda needed me. I'm sorry.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nate",
+          "text": "She always needs you. Every time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "This is important for my career.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nate",
+          "text": "This isn't even what you wanted.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Plans change. I'm good at this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nate",
+          "text": "You're good at being her assistant.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "That's not a small thing, Nate.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nate",
+          "text": "I just want my girlfriend back.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I'm right here. I haven't changed.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nate",
+          "text": "That is exactly the problem, Andy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Andy doesn't have an answer for that. She gets another call from Miranda before she can think of one.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    },
+    {
+      "chapter": 5,
+      "title": "Paris Is Calling",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Andy", "voice": "female-1" },
+        { "name": "Emily", "voice": "female-3" },
+        { "name": "Miranda", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Every year, Miranda takes one assistant to Paris Fashion Week — the most prestigious event in the industry. Emily has been preparing for this trip for months. She's bought the outfits. She's learned the guest lists. The trip is hers. Until it isn't.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Emily",
+          "text": "Paris is in three weeks. I'm so ready.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "You've been preparing forever for this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Emily",
+          "text": "It's literally my life's dream, Andy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "You'll be amazing. You deserve it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "I need you to go to Paris, Andrea.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Me? But Emily... Emily was going.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "Emily is no longer going. You are.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Miranda, she's been planning this for months.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "That is not my concern.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Andy has to tell Emily. There is no good way to do it. Emily takes it the only way anyone could — as a betrayal, even though Andy didn't choose it.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Andy",
+          "text": "Emily, I need to tell you something.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Emily",
+          "text": "Whatever it is, just say it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Miranda wants me to go to Paris.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Emily",
+          "text": "I'm sorry. Can you repeat that?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I didn't ask for this. I swear.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Emily",
+          "text": "You could have said no, Andy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Nobody says no to Miranda. You know that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Emily",
+          "text": "I hate you right now. I really do.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I know. I'm so sorry, Emily.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Emily walks away. Andy stands alone in the hallway holding a Paris itinerary she doesn't feel good about holding.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    },
+    {
+      "chapter": 6,
+      "title": "Behind the Armor",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Andy", "voice": "female-1" },
+        { "name": "Miranda", "voice": "female-2" },
+        { "name": "Nigel", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "In Paris, Andy sees Miranda without the armor for the first time. The divorce from her third husband is being announced in the press. Miranda, alone in her hotel room with her reading glasses on and her hair undone, looks like someone who is exhausted and quietly devastated — and completely aware that she cannot afford to show it.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Miranda",
+          "text": "Sit down, Andrea.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Of course. Is everything okay?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "My husband and I are separating.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I'm sorry. That's very hard.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "It is what it is. Move on.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Do you need anything from me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "Just make sure tomorrow runs perfectly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Then Miranda reveals something else: she knows Nigel is about to be given the opportunity of his career — and she is going to pull it away from him, strategically, to protect her own position. Andy is stunned.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Miranda",
+          "text": "Nigel won't be getting his new role.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "But you promised him that opportunity.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "I need leverage. He is leverage.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "He's been loyal to you for years.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "Loyalty doesn't protect my position.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "That's really cold. Even for you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "You think I'm a monster. I know.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "One day you'll understand, Andrea.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "Everyone in power makes these choices.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I don't want to make those choices.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "You already have. Many times.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Andy goes quiet. She thinks about Emily. She thinks about Nate. She wonders when exactly she started becoming someone who trades people for opportunity.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    },
+    {
+      "chapter": 7,
+      "title": "You're Just Like Me",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Andy", "voice": "female-1" },
+        { "name": "Miranda", "voice": "female-2" },
+        { "name": "Christian", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "In Paris, Andy meets Christian Thompson — a charming writer who tells her she's too smart for this job. He is attentive and magnetic, and for a moment Andy lets herself get swept up in the version of herself that exists in Paris. Meanwhile, Christian knows things about Runway that she doesn't yet.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Christian",
+          "text": "What are you doing at that magazine?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Building my career. I think.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Christian",
+          "text": "You could write for anyone you wanted.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Miranda will get me there. Eventually.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Christian",
+          "text": "Or she'll use you up and disappear.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "That sounds a bit dramatic.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Christian",
+          "text": "I've seen it happen before.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Christian warns Andy that Miranda is about to be replaced as editor — and that Miranda knows it. Everything she is doing in Paris is a calculated move to hold onto her power. Andy suddenly understands the stakes Miranda has been playing under all along.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Andy",
+          "text": "They're trying to replace her? Now?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Christian",
+          "text": "They've been trying for a while.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "And she's fighting back how?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Christian",
+          "text": "By being irreplaceable. Always.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "She's been surviving this whole time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Christian",
+          "text": "Every single day for thirty years.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "I see a great deal of myself in you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I'm not sure that's a compliment.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "It is the highest one I give.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Then why does it scare me so much?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "Because you already know I'm right.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Andy stares at her reflection in the hotel window. Paris is beautiful outside. She is beautifully dressed. And she is terrified of who she is becoming.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    },
+    {
+      "chapter": 8,
+      "title": "The Walk Away",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Andy", "voice": "female-1" },
+        { "name": "Miranda", "voice": "female-2" },
+        { "name": "Nigel", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Andy reaches her breaking point during a car ride through Paris. Miranda is outlining the next move — cold, calculated, inevitable. Andy is watching and realizes with sudden clarity that if she stays, this is what she will become. Not someday. Now. She makes a decision.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Miranda",
+          "text": "Nigel will understand. He always does.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "He trusted you completely, Miranda.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "Trust is a liability in this industry.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I don't think I can do this anymore.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "You're very good at it. That's the irony.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Being good at it is the problem.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "You would have everything. Don't be foolish.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I already lost everything I actually care about.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The car stops at a red light. Andy opens the door and gets out. She leaves her phone on the seat. She walks away through the crowded Paris street and does not look back.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Nigel",
+          "text": "Did you really just quit? In Paris?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I got out of the car. Yes.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nigel",
+          "text": "That is either very brave or very stupid.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Probably both. I'm okay with that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nigel",
+          "text": "She won't give you a good reference.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I know. I'm prepared for that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nigel",
+          "text": "Do you know what you're going back to?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I'm going back to being myself.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nigel",
+          "text": "I'll miss working with you, Andrea.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Me too, Nigel. More than you know.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 9,
+      "title": "Back to Herself",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Andy", "voice": "female-1" },
+        { "name": "Nate", "voice": "male-2" },
+        { "name": "Emily", "voice": "female-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Andy returns to New York. The apartment is quieter than she left it. Nate has taken a job in Boston. Her friends from before Runway are still there, but something between them has shifted in ways that a single conversation cannot fully repair. She starts sending out journalism applications.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Andy",
+          "text": "I know I wasn't present. I'm sorry.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nate",
+          "text": "I'm glad you got out, honestly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Does that mean we're okay?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nate",
+          "text": "It means I still care about you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "That's not exactly an answer, Nate.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nate",
+          "text": "I know. I'm sorry too.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Andy calls Emily — not to apologize again, but to check in. Emily is now first assistant. She has earned the thing she always wanted. She is brusque on the phone, but she is not unkind. That is the closest thing to forgiveness Emily knows how to offer.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Andy",
+          "text": "I heard you're first assistant now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Emily",
+          "text": "Obviously. Someone had to do it right.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "You're going to be brilliant at it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Emily",
+          "text": "I'm already brilliant at it. Clearly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I really am sorry. About Paris.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Emily",
+          "text": "Don't. We're past it. Mostly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Mostly. I'll take mostly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Emily",
+          "text": "Go write something good, Andrea.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "That's the plan. I'll try.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Andy hangs up and opens her laptop. She has three interview requests from newspapers. One of them is exactly the kind of publication she moved to New York to work for in the first place.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Andy",
+          "text": "Okay. Back to the real thing.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 10,
+      "title": "What Miranda Knew",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Andy", "voice": "female-1" },
+        { "name": "Miranda", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Weeks later, Andy spots Miranda across the street in New York. Their eyes meet for a moment. Miranda is in a town car, impeccable, already looking elsewhere. Then — just before the car moves — a trace of something crosses Miranda's face. Almost a smile. Gone before it can be named.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Andy",
+          "text": "She actually smiled. I think.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Or maybe I imagined the whole thing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Andy interviews for the newspaper job and gets it. When the editor calls Miranda for a reference — fully expecting the worst — Miranda says only three words: 'She was exceptional.' Then hangs up. She will never explain why.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Andy",
+          "text": "She gave me a good reference.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "After everything. She actually did.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I still don't fully understand her.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Maybe I'm not supposed to.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Miranda",
+          "text": "She was exceptional.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Miranda Priestly hangs up the phone and returns to the issue on her desk. There are a hundred decisions to make before noon. She makes them — efficient, brilliant, relentless. She does not think about Andrea Sachs again. Or perhaps she does, and that is precisely why she doesn't show it.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Andy",
+          "text": "I think she saw something in me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "Something she recognized from herself.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "The part that chose to walk away.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "The part she couldn't let herself have.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "I'm glad I did it. No regrets.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Andy",
+          "text": "This is exactly where I belong.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    }
+  ]
+}

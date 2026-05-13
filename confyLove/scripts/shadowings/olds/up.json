@@ -1,0 +1,753 @@
+{
+  "listName": "Up",
+  "category": "B1",
+  "order": 5,
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "A Life Together",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Carl", "voice": "male-1" },
+        { "name": "Ellie", "voice": "female-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Young Carl Fredricksen is a quiet boy who loves adventure. He meets Ellie — loud, fearless, full of plans — in an abandoned house one afternoon. She shows him her adventure book and tells him about Paradise Falls, a place in South America she is absolutely going to live beside one day. Carl has never met anyone like her.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Ellie",
+          "text": "You like adventures too, right?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "Sure. I guess I do.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ellie",
+          "text": "This is my adventure book. Look.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "Wow. You drew all of this?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ellie",
+          "text": "I'm going to live by Paradise Falls.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "That place is real?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ellie",
+          "text": "Of course it's real. Cross your heart.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "Cross my heart.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "They grow up. They fall in love. They get married in the same little church where they first became friends. They fix up the old house together, paint it, plant a mailbox, and build a life inside it — ordinary and extraordinary at the same time.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Ellie",
+          "text": "We should start saving for the trip.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "Paradise Falls. Right. Let's do it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ellie",
+          "text": "We'll get there. I just know it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "Together. That's the whole point.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Life keeps interrupting. The car breaks down. The roof leaks. The jar fills up and empties again and again for other things. They never make it to South America. Then one autumn morning, Ellie gets sick. And then Carl is alone in the house they built together, sitting in a chair she used to sit in, surrounded by her colors and her handwriting and her everything.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Carl",
+          "text": "I kept meaning to take you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "We just... ran out of time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "I'm sorry, Ellie. I'm so sorry.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 2,
+      "title": "The House Flies",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Carl", "voice": "male-1" },
+        { "name": "Russell", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Years later, Carl is old, grumpy, and being forced out of his home by a development company. He has one plan left: get the house to Paradise Falls before they take it. He ties thousands of balloons to the chimney. The house rises into the sky. It works — until he discovers a small stowaway on his porch.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Russell",
+          "text": "Hi! My name is Russell.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "What are you doing up here?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "I was looking under your porch.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "We're thousands of feet in the air.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "Yeah. This is kind of scary, actually.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "Hold on to something. Don't fall.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "Are we going somewhere far away?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "I am. You are going home.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "But we're already in the air!",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "Yes. I noticed that. Thank you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Carl has no choice but to bring Russell along. The boy talks constantly — about his badges, his mother, a father who is usually busy. Carl offers only the minimum number of words required to keep the child from falling off the porch.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Russell",
+          "text": "I need one more badge. Assisting the elderly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "I don't need any assistance.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "Everybody needs assistance sometimes.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "Not me. I'm fine on my own.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "My dad says that too. He's wrong.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "Hmm.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "Where exactly are we going?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "Paradise Falls. South America.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "That sounds like a real adventure.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 3,
+      "title": "Kevin and Dug",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Carl", "voice": "male-1" },
+        { "name": "Russell", "voice": "male-2" },
+        { "name": "Dug", "voice": "male-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The house lands in South America, not far from Paradise Falls. Carl just needs to walk it there. Russell spots a large colorful bird and immediately adopts it, naming it Kevin. Then a golden retriever with a translation collar trots out of the jungle and announces himself.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dug",
+          "text": "Hi there! My name is Dug.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "Did that dog just talk?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dug",
+          "text": "My collar lets me talk. Pretty cool.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "This is the best day ever.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dug",
+          "text": "I have just met you. I love you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "We don't need a dog. Keep moving.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dug",
+          "text": "I will walk with you anyway.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "Can we keep him? Please, Mr. Fredricksen?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "No. Absolutely not.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dug",
+          "text": "He said no but his face said maybe.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Kevin, the giant bird, bonds with Russell immediately. Carl tolerates the chaos because there is no other option. The three of them — plus an uninvited dog — drag the floating house across the plateau toward the falls.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Russell",
+          "text": "Kevin likes chocolate. I already checked.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "We are not feeding the wild bird.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "She's not wild. She's my friend.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "You named a giant bird Kevin.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "It seemed like a Kevin kind of bird.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dug",
+          "text": "SQUIRREL.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "Focus, dog. Keep walking.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dug",
+          "text": "I am focused. I was just briefly not.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 4,
+      "title": "Charles Muntz",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Carl", "voice": "male-1" },
+        { "name": "Russell", "voice": "male-2" },
+        { "name": "Muntz", "voice": "male-4" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Charles Muntz was Carl's childhood hero — a famous explorer who disappeared into South America decades ago, disgraced after bringing back a bird skeleton that scientists called a fake. Now, deep in the jungle beside Paradise Falls, Carl discovers that Muntz is still alive — still searching for the bird, still obsessed, and not entirely sane anymore.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Muntz",
+          "text": "Welcome to my home. Please, sit down.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "You're Charles Muntz. You're actually real.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Muntz",
+          "text": "I've been here a very long time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "I had your picture on my wall as a kid.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Muntz",
+          "text": "Adventure is out there. I still believe that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "What are you still looking for?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Muntz",
+          "text": "The bird. I will find it and prove myself.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "When Muntz realizes Carl and Russell have Kevin — the very bird he has been hunting — his warmth disappears instantly. The hero becomes a threat. Carl grabs Russell and runs. The house is left behind.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Muntz",
+          "text": "You have my bird. Hand her over.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "She doesn't belong to anyone.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Muntz",
+          "text": "She belongs to me. I found her first.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "She has babies. You can't take her.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Muntz",
+          "text": "I've waited sixty years for this moment.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "Russell, grab Dug. We're leaving now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "But what about Kevin? We can't leave her.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "We have to go. Right now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "You always say that. You just give up.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "I'm trying to keep us safe.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 5,
+      "title": "The Adventure Book",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Carl", "voice": "male-1" },
+        { "name": "Russell", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Carl opens Ellie's adventure book — the one she kept all her life, the one he never looked past the blank pages. And there, beyond the page that said 'Things I'm Going to Do,' he finds something he never knew was there: photos. Their life together. The picnic. The house. Every ordinary day she considered an adventure. And on the last page, in her handwriting: 'Thanks for the adventure. Now go have a new one.'",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Carl",
+          "text": "She filled the rest of the book.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "She didn't need Paradise Falls after all.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "She had her adventure. It was us.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Carl looks out the window. Russell is gone — he has flown off on some balloons to rescue Kevin by himself. Carl makes a decision. He throws everything out of the house to make it lighter, straps himself in, and goes after the boy.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Carl",
+          "text": "Russell! What are you doing up there?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "Saving Kevin. Someone had to.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "You could have been killed, kid.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "Kevin needed me. I couldn't just leave.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "I know. I'm sorry I walked away.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "Are you going to help me now?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "That's why I'm here, isn't it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "Okay. Then let's go get her back.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "Right behind you. Let's do this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Carl and Russell face Muntz together. The old explorer falls. Kevin is freed. The house lands — finally, softly — right beside Paradise Falls, exactly where Ellie always wanted it.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Carl",
+          "text": "We made it, Ellie. We finally made it.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 6,
+      "title": "The Wilderness Explorer Badge",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Carl", "voice": "male-1" },
+        { "name": "Russell", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Back in the city, Russell's Wilderness Explorer ceremony is about to begin. His mother is there. His father is not. Russell sits on the stage with an empty chair beside him, holding the badge Carl earned him — the last one, 'Assisting the Elderly.' Carl watches from below and understands exactly what he has to do.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Russell",
+          "text": "My dad was supposed to be here.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "I know. I see that chair.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "He said he'd come this time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "I'm here, Russell. That counts.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "You're not my dad though.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "No. But I showed up.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Carl pins the final badge onto Russell's sash — not one from the Wilderness Explorer manual, but a bottle cap. Ellie's bottle cap, from the day they met. Russell looks down at it and understands that this is the most important one.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Carl",
+          "text": "This one belonged to my wife.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "The Ellie badge. I'll keep it forever.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "She would have loved you, Russell.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "Do you miss her a lot?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "Every single day. But it's okay.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "How is it okay?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "Because the adventure isn't over yet.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Russell",
+          "text": "Can we get ice cream now? Please?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Carl",
+          "text": "Yeah. Let's go get some ice cream.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "They walk down the street together — the old man and the boy — counting red and blue cars, just the way Russell always does. It is completely ordinary. It is the best kind of adventure there is.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    }
+  ]
+}

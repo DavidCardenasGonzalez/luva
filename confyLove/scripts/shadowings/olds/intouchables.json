@@ -1,0 +1,1232 @@
+{
+  "listName": "Intouchables",
+  "category": "B1",
+  "order": 1,
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "The Interview",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Philippe", "voice": "male-3" },
+        { "name": "Driss", "voice": "male-6" },
+        { "name": "Yvonne", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Philippe is a wealthy French aristocrat who was paralyzed from the neck down after a paragliding accident. He lives in a grand Parisian mansion and needs a full-time caregiver. Dozens of qualified candidates have applied.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Yvonne",
+          "text": "Next candidate. Driss Bassari.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Hey. Nice place.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Thank you. Sit down.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "I just need you to sign this form.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "You don't want the job?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "I need proof I applied. For benefits.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yvonne",
+          "text": "This is an insult.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Let him speak.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "I have no experience with this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "No pity either.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "None at all.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "You're hired. One month trial.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Wait — what?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Everyone else looked at me with pity.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "I didn't know I was supposed to.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Exactly.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Driss, twenty-three years old, from a housing project in the Paris suburbs, has just accidentally gotten a job.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    },
+    {
+      "chapter": 2,
+      "title": "Learning the Job",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Philippe", "voice": "male-3" },
+        { "name": "Driss", "voice": "male-6" },
+        { "name": "Yvonne", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The first days are an adjustment. Driss has never worked in a formal household. He doesn't know the protocols. He doesn't follow them either.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Yvonne",
+          "text": "You have to wake him at seven sharp.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "What if he's sleeping?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yvonne",
+          "text": "Then you wake him.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "That seems rude.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Wake me at eight. I prefer eight.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yvonne",
+          "text": "The doctor says seven.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Driss, what time will you wake me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Eight. Obviously.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yvonne",
+          "text": "This is going to be a problem.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Driss has to learn to dress Philippe, bathe him, move him from wheelchair to bed and back. He approaches it with total practicality — no embarrassment, no ceremony.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Driss",
+          "text": "You have to tell me what you need.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "I need everything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Then we'll start at the beginning.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Most people find this uncomfortable.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "I grew up with six brothers.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Nothing shocks you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Almost nothing.",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 3,
+      "title": "Two Worlds",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Philippe", "voice": "male-3" },
+        { "name": "Driss", "voice": "male-6" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Philippe's world is opera, classical painting, fine cuisine, and literature. Driss's world is Earth, Wind and Fire, street food, and his family in the suburbs. Neither apologizes for what he is.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Driss",
+          "text": "What is that noise?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "That's Vivaldi.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "It's very sad.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "It's not sad. It's complex.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Sounds sad to me.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "What do you listen to?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Earth, Wind and Fire. Real music.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "I don't know them.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "I'll fix that.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Driss puts on 'September'. Philippe listens for a moment. Then his foot — the only part of his body he can slightly move — begins tapping.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Driss",
+          "text": "Is that your foot moving?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "It does that sometimes.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "You're dancing.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "I am not dancing.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Philippe. You are dancing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Turn it up.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "That's what I thought.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 4,
+      "title": "Elisa",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Philippe", "voice": "male-3" },
+        { "name": "Driss", "voice": "male-6" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Philippe has been exchanging letters with a woman named Elisa for months. They've never met. Driss discovers the letters and wants to know everything.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Driss",
+          "text": "Who is Elisa?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "A woman I write to.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Write? Like actual letters?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "She doesn't know about my condition.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "You haven't told her?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "I didn't want to change things.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "She's going to find out eventually.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "I know.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Call her.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "It's not that simple.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Yes it is. Pick up the phone.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "What if she stops writing?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "What if she doesn't?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Philippe is quiet for a long time. For a man who faces every physical challenge without complaint, the idea of rejection terrifies him.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Philippe",
+          "text": "I'm afraid.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "I know. That means it's real.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "When did you get wise?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "I've always been wise.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 5,
+      "title": "Speeding and Painting",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Philippe", "voice": "male-3" },
+        { "name": "Driss", "voice": "male-6" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Driss takes Philippe for drives in his specially equipped Maserati. What should be a calm outing becomes something else entirely.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Driss",
+          "text": "How fast does this go?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Fast enough to get us killed.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Let's find out.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Driss, there's a speed limit.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "For other people.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Police pull them over. Driss tells them Philippe is having a medical emergency and needs to get to a hospital. The officers escort them — lights and sirens — across Paris.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Philippe",
+          "text": "I can't believe that worked.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Everything works if you commit.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "I haven't laughed like that in years.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "That's because you had boring helpers.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Philippe decides to teach Driss about modern art. He gives him expensive paints and a canvas. Driss creates something impulsive and raw. Philippe sells it at auction for eleven thousand euros.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Driss",
+          "text": "Someone paid that for my painting?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "They didn't know who painted it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Does that matter?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Not at all.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "I might be a genius.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Don't push it.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 6,
+      "title": "Family",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Philippe", "voice": "male-3" },
+        { "name": "Driss", "voice": "male-6" },
+        { "name": "Yvonne", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Driss's family is in trouble. His younger brother is getting involved with the wrong people. His aunt, who raised him, throws him out of the house. Driss shows up at work the next morning and says nothing.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Philippe",
+          "text": "You slept here last night.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "The couch is comfortable.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "What happened?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Nothing. Family stuff.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "You can stay here. As long as you need.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "I don't need charity.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "It's not charity. You work here.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Okay.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Yvonne sets up a real room for Driss. He goes back to the suburbs to talk to his brother. He uses money Philippe quietly gave him.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Driss",
+          "text": "Did you give me money without telling me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Your salary included a bonus.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "That's not how bonuses work.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "It is in this house.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Thank you.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Don't mention it.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "I mean it. Thank you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "I know you mean it.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 7,
+      "title": "The Opera",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Philippe", "voice": "male-3" },
+        { "name": "Driss", "voice": "male-6" },
+        { "name": "Magalie", "voice": "female-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Philippe's birthday arrives. He has tickets to the opera. Driss does not want to go. He goes.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Driss",
+          "text": "I'm not wearing a tuxedo.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "You look good in a tuxedo.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "That's not the point.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Happy birthday to me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Fine. One opera.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "At the opera, Driss meets Magalie, one of Philippe's administrative assistants, who he has been flirting with unsuccessfully for weeks.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Magalie",
+          "text": "You clean up well.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "I always look like this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Magalie",
+          "text": "You do not always look like this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "How about dinner after?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Magalie",
+          "text": "Maybe.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "She said maybe. That's progress.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Did you plan this?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "It's my birthday. I'm allowed.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "During the performance, Driss watches the singer on stage. His face, usually guarded, opens completely. He doesn't notice Philippe watching him.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Philippe",
+          "text": "You're moved.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "It's very loud.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "That's not what that face means.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Shut up and enjoy your birthday.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 8,
+      "title": "Cracks",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Philippe", "voice": "male-3" },
+        { "name": "Driss", "voice": "male-6" },
+        { "name": "Yvonne", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Philippe has a bad night. Phantom pain — nerve signals that his paralyzed body still sends, impossible and constant. Driss stays awake with him until morning.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Philippe",
+          "text": "You don't have to stay.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "I know.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Go sleep.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "I'm not tired.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "You're lying.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Tell me about your accident.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Why?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "To pass the time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "I fell. It was my choice. I took the risk.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Do you regret it?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "The fall? Or the life before the fall?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Either. Both.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "I miss my wife more than my legs.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Philippe's wife died years before the accident. He has never spoken about this to anyone. Driss says nothing. He just stays.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Driss",
+          "text": "You've been alone a long time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Yes.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Not anymore.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 9,
+      "title": "Goodbye",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Philippe", "voice": "male-3" },
+        { "name": "Driss", "voice": "male-6" },
+        { "name": "Yvonne", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Driss's family needs him back. His brother is in real danger and he's the only one who can handle it. He goes to Philippe to resign.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Driss",
+          "text": "I have to go back to my family.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "I understand.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "I don't want to leave.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Then why are you?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Because he's my brother.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "That's a good reason.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Will you be okay?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "I have Yvonne.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yvonne",
+          "text": "Don't drag me into this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Philippe's condition deteriorates in the weeks after Driss leaves. He refuses three new assistants. He stops eating well. Yvonne calls Driss.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Yvonne",
+          "text": "He won't let anyone near him.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Why are you calling me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Yvonne",
+          "text": "Because you're the only one he trusts.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "I'll come.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "I told them not to call you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "And yet here I am.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 10,
+      "title": "The Beach",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Philippe", "voice": "male-3" },
+        { "name": "Driss", "voice": "male-6" },
+        { "name": "Elisa", "voice": "female-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Driss has one final task. He drives Philippe to Honfleur, a coastal town in Normandy, where he has arranged a meeting with Elisa — the woman who has been writing letters for months, without ever knowing the truth.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Philippe",
+          "text": "She's going to see me and leave.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Maybe. But you'll know.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "I don't want to know.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Yes you do. That's why we drove three hours.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Elisa arrives. She sees the wheelchair. She pauses for just a moment. Then she walks over and sits down across from him.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Elisa",
+          "text": "You should have told me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "I know. I was a coward.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Elisa",
+          "text": "Your letters were the most honest thing I've read.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Writing is easier than speaking.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Elisa",
+          "text": "Then keep writing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Driss watches from a distance, leaning against the car, eating a sandwich. His work here is done.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Driss",
+          "text": "I told you.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Don't say I told you so.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "I told you so.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Thank you, Driss. For everything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Driss",
+          "text": "Don't get emotional on me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Philippe",
+          "text": "Too late.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The real Philippe and Driss — the men the film is based on — remain close friends to this day.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    }
+  ]
+}

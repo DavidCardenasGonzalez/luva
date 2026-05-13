@@ -1,0 +1,1525 @@
+{
+  "listName": "Anger Management",
+  "category": "B1",
+  "order": 1,
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "The Plane Incident",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Dave", "voice": "male-3" },
+        { "name": "Flight Attendant", "voice": "female-1" },
+        { "name": "Air Marshal", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Dave Buznik is a quiet, mild-mannered man who works at a pet clothing company in New York. He never raises his voice, never causes trouble, and never stands up for himself.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "Excuse me, can I get headphones?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Flight Attendant",
+          "text": "I'll be right with you.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I just need some headphones, please.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Flight Attendant",
+          "text": "Sir, please return to your seat.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I'm in my seat. I didn't move.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Flight Attendant",
+          "text": "Sir, you need to calm down.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I am calm. I am very calm.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The situation escalates quickly. An air marshal appears. Dave barely touched anyone, but somehow things have gotten out of hand.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Air Marshal",
+          "text": "Sir, don't touch me.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I didn't touch you!",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Air Marshal",
+          "text": "You're coming with us.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "This is a misunderstanding.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Air Marshal",
+          "text": "Save it for the judge.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I want a lawyer.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Dave is arrested, charged with assaulting a federal officer, and taken to court. He has no prior record and did almost nothing wrong.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "Your Honor, I did nothing wrong.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I just asked for headphones.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "This is completely unfair.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The judge sentences Dave to a court-ordered anger management program with a specialist named Dr. Buddy Rydell.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "Anger management? Are you serious?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I'm not an angry person.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 2,
+      "title": "Meet Dr. Buddy Rydell",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Dave", "voice": "male-3" },
+        { "name": "Buddy", "voice": "male-6" },
+        { "name": "Chuck", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Dave arrives at his first anger management session. The room is full of people who look genuinely dangerous. Then the therapist walks in.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Buddy",
+          "text": "Hey everybody! Good to see you!",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "You're the therapist?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Dr. Buddy Rydell. And you are?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Dave. Dave Buznik.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Dave! Tell us your story.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I got arrested on a plane.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Why were you angry on the plane?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I wasn't angry. I was frustrated.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "What's the difference?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Frustrated is when you can't get headphones.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Buddy explains that there are two types of angry people: those who explode like a volcano, and those who simmer quietly until they overflow. He says Dave is the second type — the most dangerous.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Buddy",
+          "text": "You're a simmerer, Dave.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I don't simmer.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "You're simmering right now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I'm perfectly fine.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Chuck",
+          "text": "He's totally simmering.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Who asked you?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "See? There it is.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "After class, Dave's boss calls. He saw Dave on the news and is not pleased.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "It wasn't what it looked like.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Chuck",
+          "text": "It looked pretty bad, Dave.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I'll explain everything, I promise.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 3,
+      "title": "Buddy Moves In",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Dave", "voice": "male-3" },
+        { "name": "Buddy", "voice": "male-6" },
+        { "name": "Linda", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The judge upgrades Dave's sentence. Dr. Buddy Rydell must now provide intensive therapy — which means moving into Dave's apartment and monitoring him around the clock.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "You're moving into my apartment?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Just for a few weeks, buddy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "This can't be legal.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "It is. Judge's orders. Let's go.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Dave's girlfriend Linda tries to be supportive, but the situation is getting out of control.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Linda",
+          "text": "Dave, just try to stay calm.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "There's a stranger in our apartment.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Linda",
+          "text": "It's only temporary.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Nice place, Linda. Very cozy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Linda",
+          "text": "Thank you, Buddy.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Why are you being nice to him?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Dave, what are you feeling right now?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I feel invaded.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Good! Name the emotion. Very healthy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Stop analyzing everything I say.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "I'm here to help you, Dave.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "That night, Buddy insists on sleeping in Dave's bed. He says it builds trust. Dave sleeps on the couch.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "I'm not sharing my bed with you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "It's a king. There's room.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "This is not happening.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Goodnight, Dave.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "This is not happening.",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 4,
+      "title": "Group Therapy Gets Wild",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Dave", "voice": "male-3" },
+        { "name": "Buddy", "voice": "male-6" },
+        { "name": "Chuck", "voice": "male-1" },
+        { "name": "Lou", "voice": "male-4" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Group therapy sessions are chaotic. Dave's fellow patients include Chuck, a cheerful man with rage issues, and Lou, an aggressive former hockey player who likes to intimidate newcomers.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Buddy",
+          "text": "Today we talk about triggers.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Lou",
+          "text": "My trigger is people breathing near me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "That's... very specific.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Lou",
+          "text": "You got a problem with that, Dave?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "No problem at all.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Dave, what's your trigger?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I don't really have triggers.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Chuck",
+          "text": "Everyone has triggers, man.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Maybe when people are unfair.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Good. And when do you feel helpless?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Right now, actually.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Buddy assigns a homework exercise. Dave and Lou must sing 'I Feel Pretty' together in a public park. This does not go smoothly.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "I'm not singing in the park.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "It's part of your treatment.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "People will stare at us.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Lou",
+          "text": "Let them stare. I don't care.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "You're enjoying this, aren't you?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Lou",
+          "text": "Little bit.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "They sing. A crowd gathers. Dave turns bright red but finishes the song.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Buddy",
+          "text": "Excellent! How do you feel, Dave?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I feel like dying.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "That's progress!",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 5,
+      "title": "Buddy Interferes",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Dave", "voice": "male-3" },
+        { "name": "Buddy", "voice": "male-6" },
+        { "name": "Linda", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Buddy begins inserting himself into Dave and Linda's relationship. He takes her to lunch, calls her to check in, and always seems to know things about her that Dave never mentioned.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "Did you go to lunch with Buddy?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Linda",
+          "text": "He invited me. I didn't want to be rude.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "He's my therapist, not your friend.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Linda",
+          "text": "He's actually really interesting.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "You think he's interesting?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Linda",
+          "text": "Dave, are you jealous?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "No. I'm concerned.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Dave, talk to us. Use your words.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I don't want to use my words.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Buddy pushes Dave to be more assertive — to ask his boss for a promotion, to stand up for himself, to stop swallowing his emotions. But every time Dave tries, something goes terribly wrong.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "I asked my boss for a raise.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Good! What did he say?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "He said I was being aggressive.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Were you aggressive?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I just asked! Nicely!",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Nicely doesn't always work.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Then what does?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Confidence. Not aggression. Confidence.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Linda",
+          "text": "He has a point, Dave.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "You're taking his side now?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Dave starts to wonder if Buddy is actually trying to help him — or if something more complicated is going on.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "I don't trust this guy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Linda",
+          "text": "Dave, he's trying to help you.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 6,
+      "title": "Dave Snaps",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Dave", "voice": "male-3" },
+        { "name": "Buddy", "voice": "male-6" },
+        { "name": "Chuck", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Week after week of constant provocation finally begins to wear Dave down. He loses his temper at work, at a restaurant, and eventually — in public — he gets into a fight.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "I've had it. I'm done.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Say that again, with feeling.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I am done being pushed around!",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "There you go. Now we're getting somewhere.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Don't coach me right now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Chuck",
+          "text": "Buddy, maybe back off a little.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Chuck, stay out of this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Why do you keep pushing me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Because you need to be pushed.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Dave shoves Buddy. Just a little. But it's enough. The court is notified. Dave's sentence is extended, and now he faces possible jail time.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "I can't go to jail.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Chuck",
+          "text": "Buddy, tell the judge it was an accident.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "I'll talk to the judge.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Why would you do that for me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Because I believe in you, Dave.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "That's the first normal thing you've said.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "But the reprieve comes with conditions. Dave must now accompany Buddy to a cabin in the mountains for a weekend retreat.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "A weekend in the woods with you?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Fresh air, Dave. It'll be great.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Nothing about this will be great.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 7,
+      "title": "The Mountain Retreat",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Dave", "voice": "male-3" },
+        { "name": "Buddy", "voice": "male-6" },
+        { "name": "Linda", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "At the mountain cabin, Buddy keeps Dave awake, forces him to meditate at dawn, and reveals that Linda and Buddy have been talking on the phone every day. Dave begins to suspect something is going on between them.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "You've been calling Linda every day?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "She worries about you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "She should call me, not you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "She says you don't open up.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "She told you that?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Dave, why can't you be vulnerable?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I'm vulnerable right now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "No, you're defensive. That's different.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "During a bonfire, Buddy says something that stops Dave cold.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Buddy",
+          "text": "Do you love her, Dave?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Of course I love Linda.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Have you told her lately?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I... she knows.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Saying it matters, Dave.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Why does this feel like a trap?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Because you don't trust anyone.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I trust Linda.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Then tell her. Before it's too late.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Dave calls Linda from the cabin. She sounds warm but distant. Dave starts to wonder if he's been taking her for granted all along.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "Linda, I miss you.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Linda",
+          "text": "I miss you too, Dave.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "When I get back, let's talk.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Linda",
+          "text": "I'd really like that.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 8,
+      "title": "Everything Falls Apart",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Dave", "voice": "male-3" },
+        { "name": "Buddy", "voice": "male-6" },
+        { "name": "Linda", "voice": "female-2" },
+        { "name": "Chuck", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Back in the city, Dave comes home to find Buddy and Linda eating dinner together, laughing like old friends. He sees them and loses it.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "What is going on here?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Linda",
+          "text": "We were just having dinner.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "In our apartment. Without me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "She invited me. I couldn't say no.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Are you serious right now?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Linda",
+          "text": "Dave, calm down.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Don't tell me to calm down.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Name what you're feeling, Dave.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I'm feeling betrayed!",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Dave walks out. He goes to a bar, orders a drink, and sits alone. For the first time, he admits to himself that he's been angry — not just lately, but his whole life.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "Maybe I do have a problem.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Chuck",
+          "text": "Hey, I saw you sit down alone.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Chuck? What are you doing here?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Chuck",
+          "text": "I eat here. You okay, man?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I think I've been a coward.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Chuck",
+          "text": "What do you mean?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I never say what I really feel.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Chuck",
+          "text": "Yeah. I noticed that.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Chuck tells Dave something he didn't expect.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Chuck",
+          "text": "Buddy's not what he seems.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "What do you mean?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Chuck",
+          "text": "Linda came to Buddy first.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "She... what?",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 9,
+      "title": "The Truth About Buddy",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Dave", "voice": "male-3" },
+        { "name": "Buddy", "voice": "male-6" },
+        { "name": "Linda", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The truth finally comes out. Linda had contacted Buddy months earlier because she was worried about Dave — not about his anger, but about his passivity. His inability to express love, to commit, to fight for anything. She and Buddy designed the entire program together to force Dave to finally open up.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Linda",
+          "text": "I needed you to wake up, Dave.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "You set this whole thing up?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Linda",
+          "text": "I was scared of losing you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "So you put me through all of this?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "You were disappearing, Dave.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "What are you talking about?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "You stopped showing up for your own life.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "That's not true.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "When did you last stand up for yourself?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I... I don't know.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Buddy recounts a memory. Years ago, a bully at school humiliated Dave in front of the girl he liked. Dave did nothing. That girl was Linda.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Linda",
+          "text": "I've been waiting for you, Dave.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Waiting for what, exactly?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Linda",
+          "text": "For you to fight for me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I didn't think I had to.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Linda",
+          "text": "Everyone has to. That's love.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "You're not an angry man, Dave.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Then what am I?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "You're a man who's afraid to feel.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Dave sits with that for a long moment. Then, slowly, something shifts.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "I need to fix this.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Then go get her.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 10,
+      "title": "The Yankee Stadium Proposal",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Dave", "voice": "male-3" },
+        { "name": "Linda", "voice": "female-2" },
+        { "name": "Buddy", "voice": "male-6" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Dave discovers that Linda is at a New York Yankees game. He races to the stadium — alone, without a plan — determined to do the one thing he has spent his whole life avoiding: make a public declaration.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "I need to get into the stadium.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "It's an emergency. A personal emergency.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "He gets in. He runs through the stands. And somehow — impossibly — they hand him a microphone.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dave",
+          "text": "Linda! Can you hear me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I am sorry. I have been afraid.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I've been afraid my whole life.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "But I'm not afraid of this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I love you. Will you marry me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Fifty thousand people hold their breath.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Linda",
+          "text": "Are you really doing this right now?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Yes. Right now. In front of everyone.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Linda",
+          "text": "You're insane.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Maybe Buddy was right.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Linda",
+          "text": "Yes. The answer is yes.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The crowd erupts. Dave and Linda embrace on the field. Buddy watches from the upper deck, grinning like a man who knew exactly what he was doing the whole time.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Buddy",
+          "text": "That's my patient.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I can't believe that actually worked.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Linda",
+          "text": "It worked because you meant it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "I did mean it.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "For the first time in his life, Dave Buznik said exactly what he felt — in front of fifty thousand strangers. And it turned out that wasn't anger he had been holding back all these years. It was love.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Buddy",
+          "text": "Session complete. You're discharged, Dave.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dave",
+          "text": "Thank you, Buddy. Genuinely.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Buddy",
+          "text": "Don't thank me. Stay open.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    }
+  ]
+}

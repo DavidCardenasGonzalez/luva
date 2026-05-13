@@ -1,0 +1,1263 @@
+{
+  "listName": "Thelma and Louise",
+  "category": "B1",
+  "order": 1,
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "The Road Trip Plan",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Thelma", "voice": "female-1" },
+        { "name": "Louise", "voice": "female-3" },
+        { "name": "Darryl", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "It's a sunny morning in Arkansas. Thelma is a housewife married to a controlling man named Darryl. Her best friend Louise is a waitress who lives life on her own terms. They've planned a weekend trip to a mountain cabin.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Thelma",
+          "text": "Louise, I am so excited.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "You packed the whole house, didn't you?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "I didn't know what to bring.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Two days, Thelma. Two days.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "Did you ask Darryl for me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "You're a grown woman. Ask him yourself.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darryl",
+          "text": "Where are you going?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "Just a weekend trip with Louise.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darryl",
+          "text": "I didn't say you could go.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "I'm going anyway.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Thelma leaves without permission — something she has never done before. Louise drives a classic green convertible. The windows go down. The music goes up.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Thelma",
+          "text": "I feel free. Is this what free feels like?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Honey, you have no idea.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "Can we stop for a drink first?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "We just left.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "I know. But I want to celebrate.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Fine. One drink.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "This is already the best day.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 2,
+      "title": "The Bar",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Thelma", "voice": "female-1" },
+        { "name": "Louise", "voice": "female-3" },
+        { "name": "Harlan", "voice": "male-4" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "They stop at a roadside bar. Thelma orders drinks and dances with a stranger named Harlan. He seems charming at first. Louise watches with growing unease.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Thelma",
+          "text": "He's just being friendly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "I've seen friendly. That's not it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "You worry too much.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "And you trust too much.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Harlan",
+          "text": "Come outside with me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "I need some air. Just a minute.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "In the parking lot, Harlan turns violent. Louise runs out just in time. She pulls out a gun she keeps for protection and stops him.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Louise",
+          "text": "Let her go. Right now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Harlan",
+          "text": "Relax. We were just having fun.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "She said no. That means no.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Harlan",
+          "text": "You should teach your friend better.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Louise shoots him. He falls. The parking lot goes silent. Thelma stares. Louise stares at the gun.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Thelma",
+          "text": "Louise... what did you do?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "We have to go. Get in the car.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "We should call the police.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "No one will believe us, Thelma.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "We didn't do anything wrong.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "It doesn't matter. We have to run.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 3,
+      "title": "On the Run",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Thelma", "voice": "female-1" },
+        { "name": "Louise", "voice": "female-3" },
+        { "name": "Jimmy", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "They drive through the night. Louise has a plan: get to Mexico. She calls her boyfriend Jimmy and asks him to wire her life savings. She doesn't say why.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Louise",
+          "text": "Jimmy, I need you to wire me money.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jimmy",
+          "text": "Louise, what's going on?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "I can't explain. Please just do it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jimmy",
+          "text": "Are you in trouble?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Just send the money, Jimmy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Thelma is shaken but starting to process what happened. She's never been in trouble before. She's never done anything at all.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Thelma",
+          "text": "Do you think they'll look for us?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Yes. That's why we drive fast.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "I've never been to Mexico.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "You'll love it.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "Louise, I'm scared.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "I know. So am I.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "What if we get caught?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "We won't. Keep your eyes on the road.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "You're the one driving.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Then keep your eyes on me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Back home, Detective Hal Slocumb is assigned to the case. He's a decent man — not the kind who jumps to conclusions. He studies both women carefully and suspects there's more to the story.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    },
+    {
+      "chapter": 4,
+      "title": "J.D.",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Thelma", "voice": "female-1" },
+        { "name": "Louise", "voice": "female-3" },
+        { "name": "J.D.", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "They stop at a motel. A charming young drifter named J.D. is also staying there. He asks Thelma for a ride. Louise says no. Thelma says yes.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "J.D.",
+          "text": "I just need a ride to the next town.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "We're not going your direction.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "J.D.",
+          "text": "I'm flexible.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "Louise, come on. Look at him.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "That's exactly why.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "He can ride in the back seat.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "J.D. joins them. He's funny and easy and makes Thelma laugh for the first time in years. That night at the motel, they spend the night together.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "J.D.",
+          "text": "You seem like you needed that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "I really did.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "J.D.",
+          "text": "What are you running from?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "Everything. Absolutely everything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "J.D.",
+          "text": "I get that.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "Do you really?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "J.D.",
+          "text": "I've been running my whole life.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "In the morning, Louise discovers that J.D. has stolen all the money she had wired from Jimmy. Every dollar. Gone.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Louise",
+          "text": "He took it. He took everything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "Louise, I'm so sorry.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "I trusted you to be careful.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "I didn't know he would do that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "We have no money. We have nothing.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 5,
+      "title": "Thelma Takes Over",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Thelma", "voice": "female-1" },
+        { "name": "Louise", "voice": "female-3" },
+        { "name": "Clerk", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "With no money and no plan, Thelma makes a decision. She walks into a convenience store, pulls out the gun, and robs it. Louise watches from the car, stunned.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Thelma",
+          "text": "Open the register. Now, please.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Clerk",
+          "text": "Take it easy, lady.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "I am taking it easy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Clerk",
+          "text": "Don't do anything stupid.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "This is not stupid. This is survival.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "She runs back to the car. Louise drives away fast.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Louise",
+          "text": "You robbed a store?!",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "We needed money.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "You just made everything worse.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "How could it get worse?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "They're going to add charges, Thelma.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "We were already wanted for murder.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "It was self-defense.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "So was this.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Something has changed in Thelma. The woman who needed permission to take a weekend trip is gone. In her place is someone sharp, direct, and surprisingly calm.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Louise",
+          "text": "Who are you right now?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "I'm not sure. But I like her.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "God help us both.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 6,
+      "title": "The Trucker and the Cop",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Thelma", "voice": "female-1" },
+        { "name": "Louise", "voice": "female-3" },
+        { "name": "Trooper", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "A highway state trooper pulls them over for speeding. He has no idea who they are. But he's condescending, and today is not the day.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Trooper",
+          "text": "Do you know how fast you were going?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "I have a rough idea.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Trooper",
+          "text": "License and registration, please.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Louise hands them over. The trooper starts running the plates. If he calls it in, it's over.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Thelma",
+          "text": "Louise, we can't let him radio in.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "I know.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "Do something.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Sir, I need you to step back.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Trooper",
+          "text": "Ma'am, I'm going to need you to—",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "Please don't make this difficult.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "They lock the trooper in the trunk of his own car. They're apologetic about it.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Louise",
+          "text": "We're sorry. We really are.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "There's plenty of air in there.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Someone will find you soon.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Later, a trucker who has been leering at them from his cab gets his tires shot out after one too many crude gestures. The women drive away through the smoke without a word.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Thelma",
+          "text": "That felt incredible.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Don't get addicted to this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "Too late.",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 7,
+      "title": "Hal Closes In",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Louise", "voice": "female-3" },
+        { "name": "Hal", "voice": "male-3" },
+        { "name": "Thelma", "voice": "female-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Detective Hal Slocumb has been building a picture of both women. He's spoken to Darryl, to Jimmy, to witnesses at the bar. He believes the shooting was provoked. He wants to bring them in safely.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Hal",
+          "text": "I know what happened at the bar.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Then you know we had no choice.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Hal",
+          "text": "Tell me your side. Let me help you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "No one helped me when it mattered.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Hal",
+          "text": "What happened to you in Texas, Louise?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "That's not your business.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Hal",
+          "text": "It might explain everything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Nothing explains anything. Not anymore.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The FBI takes over the case. Hal argues for a careful approach. The agents want roadblocks, helicopters, and a hard arrest.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Hal",
+          "text": "They're not dangerous. They're cornered.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Hal",
+          "text": "Cornered people do desperate things.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Meanwhile, Thelma calls Darryl from a payphone. He's been coached by the FBI to keep her on the line.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Thelma",
+          "text": "Darryl, I just wanted to say goodbye.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "I'm not coming home.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "I'm sorry I was such a bad wife.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "She hangs up. She doesn't sound sad. She sounds free.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Louise",
+          "text": "You okay?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "Yeah. I really am.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 8,
+      "title": "The Desert",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Thelma", "voice": "female-1" },
+        { "name": "Louise", "voice": "female-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "They drive into the desert Southwest. The landscape is vast and red and silent. For a moment, the chase feels far away.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Thelma",
+          "text": "I've never seen anything so beautiful.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "It's like the edge of the world.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "Do you think we'll actually make it?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Honestly? I don't know.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "Would you go back if you could?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Back to what?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "Your job. Jimmy. Your regular life.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "No. Not for anything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "Me neither.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Louise thinks about Texas — something that happened years ago that she has never spoken about. The same thing that happened to Thelma last night. She understands exactly what it means to not be believed.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Louise",
+          "text": "I should have shot him sooner.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "You saved me.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "I know.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "I would do the same for you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "I know that too.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "Whatever happens, I don't regret this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Neither do I.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "They drive on into the red afternoon, two women who have never felt more themselves.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    },
+    {
+      "chapter": 9,
+      "title": "Surrounded",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Thelma", "voice": "female-1" },
+        { "name": "Louise", "voice": "female-3" },
+        { "name": "Hal", "voice": "male-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "At the edge of a canyon in Arizona, police cars appear from every direction. Helicopters. Agents with guns drawn. Hal is there too, behind the line, watching.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Thelma",
+          "text": "There's no way through, is there.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "No. There isn't.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "What do we do?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "We could give up.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "And then what?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Trial. Prison. Years of explaining ourselves.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Hal",
+          "text": "Louise! Come in. Let me talk to you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "He's one of the good ones.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "It won't matter.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "No. It won't.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Hal runs toward the car. He's waving, calling their names. He knows what they're about to decide.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Hal",
+          "text": "Don't do this. Please.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "You've been kind to us.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Hal",
+          "text": "Then let me help you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "It's too late for help.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "We appreciate everything, Detective.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Take care of yourself.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The canyon drops away in front of them. Behind them, the whole weight of the world.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    },
+    {
+      "chapter": 10,
+      "title": "The Leap",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Thelma", "voice": "female-1" },
+        { "name": "Louise", "voice": "female-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Thelma",
+          "text": "I don't want to get caught.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Neither do I.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "I feel awake. For the first time ever.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Me too.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "We're not going back, are we.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "No. We're not.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "Then let's keep going.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "You sure?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thelma",
+          "text": "I've never been more sure of anything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Louise reaches over and takes Thelma's hand. They look at each other — not with fear, but with something that looks like peace.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Louise",
+          "text": "Hit it.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The green convertible accelerates toward the edge. The wheels leave the ground. The car hangs for one impossible moment against the blue Arizona sky — suspended, free, together.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Narrator",
+          "text": "Hal reaches the edge and looks down. The canyon is wide and deep and empty. He stands there a long time.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Narrator",
+          "text": "The last image is a memory: the two of them laughing in the car at the very beginning of the trip, the windows down, the road ahead, everything still possible.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Thelma",
+          "text": "I feel free. Is this what free feels like?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Louise",
+          "text": "Honey, you have no idea.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    }
+  ]
+}

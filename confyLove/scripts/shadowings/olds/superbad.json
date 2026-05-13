@@ -1,0 +1,1249 @@
+{
+  "listName": "Superbad",
+  "category": "B1",
+  "order": 1,
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "The Plan",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Seth", "voice": "male-6" },
+        { "name": "Evan", "voice": "male-3" },
+        { "name": "Jules", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Seth and Evan are best friends in their last weeks of high school. They've been inseparable since childhood. In a few months, they'll be going to different colleges. But right now, their only concern is getting alcohol for a party.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Seth",
+          "text": "Jules invited us to her party.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "She invited the whole class.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "She asked me specifically.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "She did not ask you specifically.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "I'm going to bring the alcohol.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "We're seventeen. How?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "Fogell is getting a fake ID.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "Fogell can barely tie his shoes.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Jules approaches them in the hallway. She's confident and warm and Seth immediately loses the ability to speak.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jules",
+          "text": "Hey, you guys coming tonight?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "Yes. Absolutely. For sure.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jules",
+          "text": "Can you bring some drinks?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "That's literally what we were just planning.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jules",
+          "text": "Perfect. See you tonight.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "You said literally.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "I know. It was perfect.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "We still don't have any alcohol.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "That's what Fogell is for.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 2,
+      "title": "McLovin",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Seth", "voice": "male-6" },
+        { "name": "Evan", "voice": "male-3" },
+        { "name": "Fogell", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Fogell arrives at school with big news. He got his fake ID.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Fogell",
+          "text": "Guys. I got the ID.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "Let me see it.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "It's very convincing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "What state is it from?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "Hawaii.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "What's your name on it?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "McLovin.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "McLovin? One name? Like Seal?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "I thought it sounded cool.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "No one is named McLovin.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "That's why it's memorable.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "This is a disaster.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Despite all doubts, the plan moves forward. Fogell will go into the liquor store alone. Seth and Evan will wait outside. What could go wrong.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Seth",
+          "text": "Walk in confident. You're McLovin.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "I am McLovin.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "Don't say that out loud.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "I've got this.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "We're all going to die.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 3,
+      "title": "The Liquor Store",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Seth", "voice": "male-6" },
+        { "name": "Evan", "voice": "male-3" },
+        { "name": "Fogell", "voice": "male-1" },
+        { "name": "Officer Slater", "voice": "male-5" },
+        { "name": "Officer Michaels", "voice": "male-4" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Fogell goes inside. He finds the alcohol. He approaches the counter. A stranger in line randomly punches him in the face. At the exact same moment, two police officers walk in.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Officer Slater",
+          "text": "What's going on here?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "I'm fine. Everything is fine.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Officer Michaels",
+          "text": "Can I see some ID, son?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "Of course. It's right here.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Officer Slater",
+          "text": "McLovin?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "That's me.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Officer Michaels",
+          "text": "Interesting name.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Outside, Seth and Evan watch in horror as Fogell gets put in the back of a police car. They run.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Seth",
+          "text": "He's in the cop car!",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "Run. Just run.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "What about the alcohol?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "Forget the alcohol!",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "But Fogell is not being arrested. Officers Slater and Michaels are possibly the least professional cops in America. They think McLovin is hilarious.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Officer Slater",
+          "text": "McLovin, you want to ride with us?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "In the police car?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Officer Michaels",
+          "text": "We'll show you how the job works.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "This is the best night of my life.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 4,
+      "title": "The Long Way There",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Seth", "voice": "male-6" },
+        { "name": "Evan", "voice": "male-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Seth and Evan need a new plan. They end up at a stranger's house party, then at another store, then walking down the highway carrying cases of alcohol they somehow got from a man named Francis.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Seth",
+          "text": "We're going to make it.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "We are literally covered in blood.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "It's not our blood.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "That's somehow worse.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "Jules is going to love me after tonight.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "You're delusional.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "I show up with alcohol. I'm a hero.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "You show up with a bloody shirt.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "The alcohol cancels out the shirt.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Meanwhile, Fogell is cruising in the police car with Slater and Michaels. They let him fire the siren. They buy him fast food. They are having a genuinely great time.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Evan",
+          "text": "Do you ever think about next year?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "What about next year?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "We're going to different schools.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "We'll visit each other all the time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "You really think so?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "Obviously. You're my best friend.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "Let's just get to the party.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "Yeah. Let's go.",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 5,
+      "title": "McLovin's Night",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Fogell", "voice": "male-1" },
+        { "name": "Officer Slater", "voice": "male-5" },
+        { "name": "Officer Michaels", "voice": "male-4" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The two officers decide that the best thing for a young man's development is to experience real police work firsthand. They show Fogell a crime scene. They let him handle the radio. They crash their own car.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Officer Michaels",
+          "text": "McLovin, you ever been in a chase?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "Only in video games.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Officer Slater",
+          "text": "This is way better.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "Are we doing something illegal right now?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Officer Michaels",
+          "text": "We're the police. We make the rules.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "That doesn't sound right.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Officer Slater",
+          "text": "You'll understand when you're older.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "They drive Fogell to Jules' party — lights on, siren blaring. Fogell steps out like a celebrity.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Fogell",
+          "text": "I arrived in a police car.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Officer Michaels",
+          "text": "Go enjoy the party, McLovin.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Officer Slater",
+          "text": "You're a legend.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "Thank you. Genuinely.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Officer Michaels",
+          "text": "Stay in school.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "I'll never forget you guys.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Officer Slater",
+          "text": "We'll forget you by morning.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "That's fair.",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 6,
+      "title": "Finally at the Party",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Seth", "voice": "male-6" },
+        { "name": "Evan", "voice": "male-3" },
+        { "name": "Jules", "voice": "female-2" },
+        { "name": "Becca", "voice": "female-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Seth and Evan arrive late, sweaty, and stained. But they have the alcohol. The party welcomes them like heroes.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jules",
+          "text": "You actually came. And you brought drinks.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "I said I would.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jules",
+          "text": "What happened to your shirt?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "Long story. Very long story.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jules",
+          "text": "I want to hear it.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Evan finds Becca. She's the girl he's liked all year. She's had a few drinks. She's surprisingly direct.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Becca",
+          "text": "Evan, I've always liked you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "You have?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Becca",
+          "text": "Why didn't you ever say anything?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "I didn't think you knew I existed.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Becca",
+          "text": "I've sat next to you for two years.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "I know. I was very aware of that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The party is loud and warm and everything these two boys needed. For one night, it feels like nothing has to end.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Seth",
+          "text": "This is the best night of my life.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "You say that every weekend.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "This time I mean it.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 7,
+      "title": "Things Get Complicated",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Seth", "voice": "male-6" },
+        { "name": "Evan", "voice": "male-3" },
+        { "name": "Jules", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "As the night goes on, both boys realize that their plans are not working the way they imagined. Becca is too drunk for Evan to feel good about anything. And Jules surprises Seth completely.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jules",
+          "text": "Seth, I need to tell you something.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "Okay. Tell me.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jules",
+          "text": "I didn't invite you to get alcohol.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "You asked me to bring drinks.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jules",
+          "text": "I invited you because I like you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "Oh.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jules",
+          "text": "You always seemed nervous around me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "I'm always nervous.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jules",
+          "text": "I know. It's kind of sweet.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Evan finds Seth and pulls him aside.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Evan",
+          "text": "Becca is really drunk, Seth.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "So?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "So I don't want to take advantage.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "That's... actually really decent of you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "Don't sound so surprised.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "I'm a little surprised.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "I actually like her.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "Then tell her that tomorrow. Sober.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 8,
+      "title": "The Sleeping Bag",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Seth", "voice": "male-6" },
+        { "name": "Evan", "voice": "male-3" },
+        { "name": "Fogell", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The party winds down. Seth, Evan, and Fogell end up sleeping on the floor of Jules' living room. The house is quiet. The three of them are awake.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Seth",
+          "text": "Fogell. You arrived in a cop car.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "Best night of my life.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "How are you not in jail?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "They liked me. People like me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "No one likes you, Fogell.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "Two cops liked me tonight.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "He has a point.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Seth gets quiet. Evan recognizes the silence. It's the kind they have when something real is about to be said.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Seth",
+          "text": "I don't want things to change.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "What do you mean?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "Next year. College. All of it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "Things are going to change, Seth.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "I know.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "That doesn't mean we stop being friends.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "You promise?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "Yeah. I promise.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Fogell",
+          "text": "I'm still awake. This is very touching.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "Shut up, Fogell.",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 9,
+      "title": "Morning After",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Seth", "voice": "male-6" },
+        { "name": "Evan", "voice": "male-3" },
+        { "name": "Jules", "voice": "female-2" },
+        { "name": "Becca", "voice": "female-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Morning light fills the living room. Seth wakes up and finds Jules already in the kitchen making coffee. She's calm. She remembers everything from the night before.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jules",
+          "text": "Good morning.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "Hi. Morning. Hey.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jules",
+          "text": "Relax. You don't have to be nervous.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "I'm not nervous.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jules",
+          "text": "You are extremely nervous.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "Okay. A little.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jules",
+          "text": "Do you want to hang out this weekend?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "Yeah. Definitely. For sure.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Evan finds Becca. She's embarrassed but she's also smiling.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Becca",
+          "text": "I said a lot of things last night.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "You don't have to explain anything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Becca",
+          "text": "I meant most of it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "Which parts?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Becca",
+          "text": "The part about liking you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "I really like you too.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Becca",
+          "text": "Good. This is less awkward now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "It's still a little awkward.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Becca",
+          "text": "Yeah. But the good kind.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 10,
+      "title": "The Mall",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Seth", "voice": "male-6" },
+        { "name": "Evan", "voice": "male-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "A few days later, Seth and Evan meet at the mall — no agenda, just walking around the way they've done since they were kids. But something is different now. The summer is almost over.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Seth",
+          "text": "I've been thinking about what you said.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "Which part?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "That things change but we don't have to.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "I believe that.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "I've depended on you too much.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "What are you talking about?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "You're my whole social life, Evan.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "You're mine too.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "That's kind of sad.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "Or kind of great. Depending how you look at it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "They stop walking. They're in front of their usual spot — the food court where they've eaten lunch every Saturday since sixth grade.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Seth",
+          "text": "You think we'll be this close at thirty?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "Honestly? I hope so.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "That was almost a nice thing I said.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "Don't ruin it.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Seth",
+          "text": "I love you, man. In a normal way.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Evan",
+          "text": "I know. Me too.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "They go their separate ways in the mall — toward different stores, different escalators, different futures. But they both glance back at the same moment. And they both smile.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    }
+  ]
+}

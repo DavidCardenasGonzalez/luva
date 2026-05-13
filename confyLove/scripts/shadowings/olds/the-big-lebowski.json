@@ -1,0 +1,1180 @@
+{
+  "listName": "The Big Lebowski",
+  "category": "B1",
+  "order": 1,
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "The Wrong Lebowski",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "The Dude", "voice": "male-3" },
+        { "name": "Thug 1", "voice": "male-4" },
+        { "name": "Walter", "voice": "male-6" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Los Angeles. The early 1990s. Jeffrey Lebowski — who prefers to be called The Dude — is perhaps the laziest man in the city. He bowls. He drinks White Russians. He does very little else. One evening, two men break into his apartment.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Thug 1",
+          "text": "Are you Jeffrey Lebowski?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Yeah. What's this about?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thug 1",
+          "text": "Your wife owes money.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "I don't have a wife.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Thug 1",
+          "text": "The other Jeffrey Lebowski.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "There's another Jeffrey Lebowski?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "They ruin his rug and leave. The Dude reports the whole thing to his bowling teammates.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Walter",
+          "text": "This is an outrage, Dude.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "It really tied the room together.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "The rug?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "The rug.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "You need to go see the other Lebowski.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "And say what exactly?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "Ask for compensation. For the rug.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "That's actually not a bad idea.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "Of course it's not. I'm not an idiot.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 2,
+      "title": "The Big Lebowski",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "The Dude", "voice": "male-3" },
+        { "name": "Big Lebowski", "voice": "male-4" },
+        { "name": "Brandt", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The other Jeffrey Lebowski is a wealthy, self-important philanthropist in a massive Pasadena mansion. He is not pleased to meet The Dude.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Brandt",
+          "text": "Mr. Lebowski will see you now.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Hey. How's it going?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Big Lebowski",
+          "text": "What do you want?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Your wife's debt got my rug ruined.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Big Lebowski",
+          "text": "That is not my concern.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "It tied the room together.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Big Lebowski",
+          "text": "Are you employed, sir?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Occasionally.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Big Lebowski",
+          "text": "Then I can offer you nothing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The Dude leaves empty-handed, but not before taking one of the rugs on his way out. Then Brandt calls him back.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Brandt",
+          "text": "Mr. Lebowski has a proposition for you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "What kind of proposition?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Brandt",
+          "text": "His wife has been kidnapped.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Why would they come to me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Brandt",
+          "text": "You share the same name.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "That seems like a bad reason.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 3,
+      "title": "Bowling and Plans",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "The Dude", "voice": "male-3" },
+        { "name": "Walter", "voice": "male-6" },
+        { "name": "Donny", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The bowling alley is The Dude's church. He and his teammates Walter and Donny are preparing for a tournament. Walter is a Vietnam veteran who relates everything back to the war.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "The Dude",
+          "text": "They want me to deliver the ransom.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "A million dollars?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "That's the number.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "Dude. We keep the money.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "That's not what they said to do.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "We put in a ringer. Fake briefcase.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donny",
+          "text": "What's a ringer?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "Donny, you're out of your element.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "This is a bad plan, Walter.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "It's a great plan.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Donny",
+          "text": "What are we doing exactly?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "Donny. Please.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Walter is very confident. Walter is also almost always wrong.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "The Dude",
+          "text": "I have a bad feeling about this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "You always have a bad feeling.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "And I'm usually right.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "Trust the plan, Dude.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 4,
+      "title": "Maude",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "The Dude", "voice": "male-3" },
+        { "name": "Maude", "voice": "female-3" },
+        { "name": "Walter", "voice": "male-6" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The plan goes immediately wrong. The briefcase is thrown from the car. Someone steals the car. The rug is also stolen. Then a woman named Maude Lebowski has The Dude brought to her studio.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Maude",
+          "text": "Do you know who I am?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "You're Lebowski's daughter?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Maude",
+          "text": "The rug you took — it was mine.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "I thought it was his.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Maude",
+          "text": "My father takes things that aren't his.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "There's a lot of that going around.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Maude",
+          "text": "I want you to find the missing money.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "I'm not a detective.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Maude",
+          "text": "No. But you're involved whether you like it or not.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Maude is an avant-garde artist — intense, direct, and fascinating. The Dude is confused but intrigued.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "The Dude",
+          "text": "What do I get out of this?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Maude",
+          "text": "Money. And the satisfaction of the truth.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "I mostly care about the money.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Maude",
+          "text": "I know.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "I need to talk to Walter.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Maude",
+          "text": "Your friend with the opinions?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "He has a lot of opinions.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 5,
+      "title": "Jackie Treehorn",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "The Dude", "voice": "male-3" },
+        { "name": "Jackie Treehorn", "voice": "male-4" },
+        { "name": "Walter", "voice": "male-6" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "It turns out the kidnapping may not be real. Bunny Lebowski, the wife, likely staged it herself to get money from her husband. And she owes money to a man named Jackie Treehorn — a powerful and dangerous figure in Malibu.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Jackie Treehorn",
+          "text": "Sit down, Mr. Lebowski.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Nice house.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jackie Treehorn",
+          "text": "Where is Bunny?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "I have no idea.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jackie Treehorn",
+          "text": "And the money?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "What money? There are several moneys.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Jackie Treehorn",
+          "text": "You're either very dumb or very clever.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Honestly? Neither.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Jackie drugs The Dude's drink. The Dude has a long, strange dream involving bowling, Maude, and Vikings. He wakes up in a Malibu police car.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Walter",
+          "text": "Dude, what happened to you?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Jackie Treehorn drugged me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "That is not legal.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "A lot of things today were not legal.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "This is what happens when you deal with amateurs.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Walter, you started this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "Vietnam was worse.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 6,
+      "title": "The Nihilists",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "The Dude", "voice": "male-3" },
+        { "name": "Walter", "voice": "male-6" },
+        { "name": "Nihilist", "voice": "male-4" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The real kidnappers turn out to be nihilists — a group of German men who believe in nothing. They staged the whole kidnapping. Bunny was in Arizona. There was never any real danger.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Nihilist",
+          "text": "We want the money.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "There is no money.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nihilist",
+          "text": "Then we will hurt you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "You're nihilists. You believe in nothing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nihilist",
+          "text": "So?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "So you have nothing to threaten us with.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Walter, they have weapons.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "Donny, get behind me.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nihilist",
+          "text": "You are not brave. You are stupid.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "At least we believe in something.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "A brawl breaks out in the parking lot. The nihilists are defeated. But the night takes an unexpected turn.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "The Dude",
+          "text": "Is Donny okay?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "He's not okay, Dude.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "What happened?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "His heart. It was too much for him.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Donny.",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 7,
+      "title": "Donny",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "The Dude", "voice": "male-3" },
+        { "name": "Walter", "voice": "male-6" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Donny Kerabatsos dies of a heart attack. Walter and The Dude go to collect his ashes from the funeral home. Walter has very specific ideas about how to honor him.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Walter",
+          "text": "He should be scattered at sea.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Did Donny like the sea?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "He liked to bowl. Bowling is near the sea.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "That's not really connected.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "He would have wanted this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "We should get a proper urn first.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "The coffee can is dignified.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "It's a Folger's can, Walter.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "Donny didn't care about material things.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "They drive to the Malibu cliffs. Walter gives a eulogy that begins with Vietnam. The wind picks up at exactly the wrong moment.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Walter",
+          "text": "Donny was a good bowler and a good man.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Walter, check the wind direction.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "He is not forgotten—",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Walter! The wind!",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The ashes blow directly back into The Dude's face and sweater. Walter looks at him for a long moment.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Walter",
+          "text": "I'm sorry, Dude.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "You threw him on me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "I didn't account for the wind.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 8,
+      "title": "What Actually Happened",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "The Dude", "voice": "male-3" },
+        { "name": "Maude", "voice": "female-3" },
+        { "name": "Walter", "voice": "male-6" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Maude explains the truth to The Dude. Her father, the Big Lebowski, never had the ransom money to begin with. He embezzled money from his own foundation. The kidnapping gave him an excuse for why the money disappeared.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Maude",
+          "text": "My father is not rich.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "He has a mansion.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Maude",
+          "text": "The mansion is from my mother's estate.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "So he used me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Maude",
+          "text": "He needed someone to blame.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "That's pretty bad.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Maude",
+          "text": "Yes. It is.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "Dude. This is a crime.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "A lot of crimes happened this week.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "We should confront him.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Or we could just go bowling.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "No. We confront him.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "They confront the Big Lebowski. Walter tips him out of his wheelchair. The confrontation accomplishes almost nothing.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "The Dude",
+          "text": "Feel better?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "A little.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Let's go bowling.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 9,
+      "title": "The Stranger",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "The Dude", "voice": "male-3" },
+        { "name": "Stranger", "voice": "male-2" },
+        { "name": "Walter", "voice": "male-6" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "A stranger in a cowboy hat — who has been narrating fragments of this story from the beginning — sits down next to The Dude at the bowling alley bar.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Stranger",
+          "text": "How you holding up, friend?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Pretty good. Taking it easy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Stranger",
+          "text": "Lot happened to you this week.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Yeah. It got complicated.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Stranger",
+          "text": "You lost a friend.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Donny. Yeah.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Stranger",
+          "text": "That's hard.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "He was always a little out of his element.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Stranger",
+          "text": "But he was there.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "He was always there.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Walter is already at the lanes, warming up. He looks over and nods at The Dude. It's the closest thing to tenderness Walter is capable of.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Stranger",
+          "text": "You going to be all right?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Oh yeah. I'm fine.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Stranger",
+          "text": "Take care of yourself, Dude.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "The Dude abides.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Stranger",
+          "text": "That he does.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 10,
+      "title": "The Dude Abides",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "The Dude", "voice": "male-3" },
+        { "name": "Walter", "voice": "male-6" },
+        { "name": "Stranger", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The case is closed. No one was arrested. No one recovered the money. Bunny Lebowski came back from vacation. Maude got what she wanted from The Dude for her own reasons. And the tournament is still on.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Walter",
+          "text": "We're still in the tournament, Dude.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Good. When do we play?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "Saturday. It's going to be different this time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "You say that every time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "This time I mean it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Donny would've liked to play.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "Yeah. He would've.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The stranger tips his hat to no one in particular and walks back out into the California night.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Stranger",
+          "text": "I don't know about you, but I take comfort in knowing the Dude is out there.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Stranger",
+          "text": "Taking it easy for all of us sinners.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Another White Russian, please.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "Are you listening to anything I'm saying?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "Sure, man.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Walter",
+          "text": "Saturday. Ten o'clock. Don't be late.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "The Dude",
+          "text": "The Dude abides.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "And he does.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1988 @@
+{
+  "listName": "The Social Network",
+  "category": "B1",
+  "order": 1,
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "You're Going to Go Far",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Mark", "voice": "male-3" },
+        { "name": "Erica", "voice": "female-1" },
+        { "name": "Eduardo", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "It is the fall of 2003 at Harvard University. Mark Zuckerberg, a second-year computer science student, is on a date with his girlfriend Erica Albright at a bar near campus. What starts as a casual conversation quickly turns into something much more tense.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Mark",
+          "text": "I want to join a final club.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Erica",
+          "text": "Why does that matter so much?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "It opens every door in the world.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Erica",
+          "text": "That sounds exhausting.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Everything worth having is.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Erica",
+          "text": "You make everything a competition.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I just know how things work.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Erica",
+          "text": "You don't always have to be right.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I'm trying to be honest with you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Erica",
+          "text": "Being honest isn't always being kind.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I never said it was.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Erica",
+          "text": "Mark, I'm breaking up with you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Mark is stunned. He asks if this is about something he said. Erica shakes her head slowly. She tells him the truth as clearly as she can, and the truth is not kind.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Mark",
+          "text": "Is this because I was being honest?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Erica",
+          "text": "It's because you're exhausting, Mark.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I don't mean to be.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Erica",
+          "text": "Yes, you do.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I'm going to be very successful someday.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Erica",
+          "text": "I know you will.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "And I'll find someone who gets that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Erica",
+          "text": "I hope so. I really do.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "You're being mean right now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Erica",
+          "text": "I'm being real. It's different.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Mark walks back to his dorm room alone. His best friend and roommate Eduardo Saverin is still awake. Mark sits down at his computer, quiet and angry, and begins to type.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Eduardo",
+          "text": "What happened? You look terrible.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "She dumped me. Open your laptop.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Right now? What for?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I have an idea.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "What kind of idea?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Something that makes the whole campus talk.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "That sounds dangerous.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "That's exactly the point.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 2,
+      "title": "Facemash",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Mark", "voice": "male-3" },
+        { "name": "Eduardo", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Late that same night, Mark starts building a website called Facemash. The site pulls photos of Harvard students from university servers and asks visitors to compare and rank them. He blogs about every step as he codes, completely absorbed.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Mark",
+          "text": "I need access to the photo databases.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Mark, it's two in the morning.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "So? You're not sleeping either.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "What exactly are you building?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "A site that ranks girls on campus.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "That sounds like a terrible idea.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "It's just a website. Help me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "I'm not sure I should.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Fine. I'll do it myself.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Okay. What do you need?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Eduardo helps with the algorithm while trying to talk Mark out of it. By midnight the site is live. Within two hours, Facemash has crashed the entire Harvard network.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Mark",
+          "text": "The algorithm compares two photos at once.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "You're using real students' photos?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "They're on the university servers already.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "That doesn't make it okay, Mark.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "It's not okay. It's interesting.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "This is going to get you expelled.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Only if they catch me in time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The site goes viral almost instantly. Thousands of students visit within the first two hours. The university's servers slow to a stop. Mark watches the numbers climb with complete focus, not moving from his chair.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Mark",
+          "text": "Twenty-two thousand visits in two hours.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Twenty-two thousand people? Tonight?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "More than the dining hall gets.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "You're going to be in real trouble.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I already know that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Then why are you smiling?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Because it worked.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "You're a strange guy, Mark.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I know. That's the point.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 3,
+      "title": "The Winklevoss Proposal",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Mark", "voice": "male-3" },
+        { "name": "Cameron", "voice": "male-2" },
+        { "name": "Eduardo", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "A few weeks later, Mark is approached by Cameron and Tyler Winklevoss — two of the most prominent students at Harvard. They are tall, athletic rowers from a wealthy family. They have a business idea and they want Mark to build it for them.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Cameron",
+          "text": "You're Mark Zuckerberg. The Facemash guy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "That's one way to put it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cameron",
+          "text": "We have a business idea for you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "What kind of business idea?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cameron",
+          "text": "A social network just for Harvard students.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "How is that different from email?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cameron",
+          "text": "It's exclusive. Harvard only. Very elegant.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "And you need me to build it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cameron",
+          "text": "You're the best programmer on campus.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I know.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Mark listens carefully, asks a few questions, and tells them he will think about it. He seems interested. But that night, back in his dorm room, he tells Eduardo something very different.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Cameron",
+          "text": "Will you help us build it?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I'll think about it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cameron",
+          "text": "We need someone who codes really fast.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I code fast. That's not the issue.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cameron",
+          "text": "Then what is the issue?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I'll let you know soon.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "That same night, Mark tells Eduardo the truth. He is not going to build a site for the Winklevosses. He is going to build his own — something far bigger than a Harvard-only network.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Eduardo",
+          "text": "So you're building their social network?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "No. I'm building our own.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Explain it to me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Their idea is small and limited.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "And yours isn't?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Not just Harvard. Everyone. The whole world.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "The whole world? Be serious, Mark.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I am serious.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "You need money. You need a plan.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "That's why I need you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "I can put in a thousand dollars.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Make it nineteen thousand.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Why nineteen thousand exactly?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Because that's what we need to launch.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Okay. I'm in. Let's build it.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 4,
+      "title": "The Launch",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Mark", "voice": "male-3" },
+        { "name": "Eduardo", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Mark codes for weeks without stopping. He barely sleeps. He barely eats. Eduardo handles the legal paperwork and the company structure. In February 2004, thefacebook.com goes live — starting with Harvard students only.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Mark",
+          "text": "It's live. We're actually live.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Already? I thought you needed more time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I finished early.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "How many people have signed up?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Four hundred in the first hour.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Four hundred? In one hour?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Wait until tomorrow morning.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "By the next day, over a thousand Harvard students have signed up. The news spreads through every dorm and lecture hall. Everyone wants to be on the Facebook. Mark watches the numbers grow in real time.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Eduardo",
+          "text": "Over a thousand members already.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I've been watching every minute.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "We need to expand to other schools.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Yale. Columbia. Stanford. One by one.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "This is actually working.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Of course it's working.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "I didn't doubt you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Yes you did. A little.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Okay. Maybe a little.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The Winklevoss twins see the Facebook launch and immediately feel betrayed. They believe Mark used their idea without permission. They contact a lawyer and begin preparing a lawsuit.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Eduardo",
+          "text": "The Winklevoss twins are threatening to sue you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Let them try.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "They think you stole their idea.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I turned their concept into a product.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "That's not how they see it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I know. That's their problem.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "We should focus on growing, not fighting.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "We can do both.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "I need you to trust me on this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "You're my best friend. Of course I do.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 5,
+      "title": "Sean Parker",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Mark", "voice": "male-3" },
+        { "name": "Sean", "voice": "male-6" },
+        { "name": "Eduardo", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "The Facebook spreads fast. Within months it has reached dozens of universities. Mark and Eduardo are now known across the country. Then, at a party in New York, Mark meets someone who will change everything — Sean Parker, the co-founder of Napster.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Sean",
+          "text": "You're the Facebook guy. I'm Sean Parker.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Just Facebook. Drop the 'the'.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Sean",
+          "text": "Right. Cleaner. I like that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I know who you are.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Sean",
+          "text": "One million members. How does it feel?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "We're not there yet.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Sean",
+          "text": "You will be. Very soon.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "What do you know about it?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Sean",
+          "text": "I built Napster. I know a few things.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Sean Parker talks fast and thinks even faster. He tells Mark that Facebook is not just a college website — it is the future of human connection. Mark has never met anyone who sees the world quite like he does.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Sean",
+          "text": "You know what's cooler than a million dollars?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "What?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Sean",
+          "text": "A billion dollars.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I'm not doing this for the money.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Sean",
+          "text": "I know. That's what I like about you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "What do you actually want from us?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Sean",
+          "text": "I want to help you get bigger.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "You think we're bigger than we know.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Sean",
+          "text": "I think you could change the world.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Eduardo is not impressed by Sean Parker. He has done some research and does not like what he found. He pulls Mark aside to warn him.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Eduardo",
+          "text": "I don't trust Sean Parker at all.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "He founded Napster. He has real vision.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "He also destroyed Napster. Don't forget that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "He made mistakes. He learned from them.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "He's going to use you, Mark.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Or he's helping us think much bigger.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "We need to be more careful now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Careful is how you stay small.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "And reckless is how you lose everything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Sean",
+          "text": "Come to California with me this summer.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I'm in.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Mark, we should talk about this first.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I've already decided.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 6,
+      "title": "Silicon Valley",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Mark", "voice": "male-3" },
+        { "name": "Sean", "voice": "male-6" },
+        { "name": "Eduardo", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Mark moves to Palo Alto for the summer with a small team of programmers. They rent a house and turn it into an office. Eduardo stays in New York for an internship but wires money to keep things running. The Facebook keeps growing.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Mark",
+          "text": "We're getting bigger every single day.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Sean",
+          "text": "This is where it all happens, Mark.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "It does feel different out here.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Sean",
+          "text": "New York is banks. California is ideas.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Eduardo thinks we're moving too fast.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Sean",
+          "text": "Eduardo doesn't understand this business at all.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "He's my best friend and my CFO.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Sean",
+          "text": "Right now those might be two different things.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Eduardo visits California and immediately senses that something has changed. Mark seems different — more confident, more distant. Sean Parker has become very influential. Eduardo feels like an outsider in his own company.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Eduardo",
+          "text": "You seem different out here, Mark.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I'm focused. That's not different.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Is Sean making decisions for you now?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Sean is advising me. It's not the same.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "I should be the one advising you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "You're handling the finances from New York.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "I want to be more involved, Mark.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Then move to California.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "I have commitments in New York.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I know. That's the problem.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Eduardo discovers that the Facebook bank account has been frozen. He confronts Mark directly. The answer he gets is vague and unsatisfying. Sean watches from across the room and says nothing.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Eduardo",
+          "text": "You froze the bank account. Why?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "That was a mistake. I'm sorry.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Was it really a mistake?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "We're restructuring. There were legal reasons.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "What legal reasons? Tell me right now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Talk to the lawyers. They'll explain it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "I'm the CFO. I should already know.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "You will. Just give it some time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "You're changing, Mark. Not for the better.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I'm doing what needs to be done.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 7,
+      "title": "The Dilution",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Mark", "voice": "male-3" },
+        { "name": "Sean", "voice": "male-6" },
+        { "name": "Eduardo", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Behind Eduardo's back, Sean and Mark have been planning a major restructuring of the company. New investors are coming in. The legal documents are designed to dramatically reduce Eduardo's ownership stake — from thirty percent down to almost nothing.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Eduardo",
+          "text": "You want me to sign more documents?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "It's just standard investment paperwork.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "What does it actually change?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "We're bringing in investors. Everyone dilutes.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "My percentage goes from thirty to nothing?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "It's more complicated than that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Then explain it to me clearly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "The lawyers will explain every detail.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "I want you to explain it to me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Eduardo begins to realize what is actually happening. Sean watches with a slight smile. Mark keeps his eyes on the papers in front of him and does not look up.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Sean",
+          "text": "Eduardo, this is how deals work out here.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "I didn't ask for your opinion.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Sean",
+          "text": "That's not what the numbers say.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Mark. Look at me. What is happening?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Sign the papers, Eduardo.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "You're my best friend. Tell me the truth.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "This is what's best for the company.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Eduardo signs. Days later, he understands the full extent of what happened. He is furious. He flies back to California to confront Mark directly.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Eduardo",
+          "text": "My shares went down to almost nothing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "It's not as simple as one number.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "You set me up deliberately, Mark.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I made a decision for the company.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Without telling me. Without warning me at all.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "You weren't here when I needed you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "I trusted you with everything I had.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I know.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Was any of it real, Mark?",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 8,
+      "title": "The Confrontation",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Mark", "voice": "male-3" },
+        { "name": "Eduardo", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Eduardo Saverin hires a lawyer and files a lawsuit against Mark and Facebook. He also flies to the Facebook offices in Palo Alto and confronts Mark in front of the entire team. It is one of the most painful moments in the company's short history.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Eduardo",
+          "text": "I am suing you and this company.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "That's your right.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "You took everything from me, Mark.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "You chose to stay in New York.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "I was handling the business side!",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "While Sean and I were actually building it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Sean Parker is going to destroy you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Sean helped us reach a billion users.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Eduardo looks around the room. Junior programmers are watching from their desks. No one says a word. He looks back at Mark, who still will not meet his eyes.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Eduardo",
+          "text": "You can't even look at me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I'm looking at you right now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "I believed in you before anyone else.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I know that.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Then why? Just tell me why.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Because the company had to grow.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "At my expense. Without my knowledge.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Business decisions are sometimes like that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Not between partners. Not between friends.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Eduardo turns to walk out. Mark stands still. The room is completely silent. For a moment, Mark looks like the person he was before all of this — just a student in a dorm room, trying to figure out how to connect with people.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Eduardo",
+          "text": "You were my best friend.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I know.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "That should have meant everything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "It did mean something.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Not enough. It was never enough.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I'm sorry, Eduardo. I really am.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Are you? Or is this just strategy?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Can't it be both?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "No. It cannot.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "I'm done, Mark. I'm really done.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 9,
+      "title": "The Depositions",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Mark", "voice": "male-3" },
+        { "name": "Marilyn", "voice": "female-1" },
+        { "name": "Eduardo", "voice": "male-1" },
+        { "name": "Cameron", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "By 2004, Facebook has hundreds of millions of users. Mark is one of the youngest billionaires in history. But he is being sued on two fronts — by the Winklevoss twins, who claim he stole their idea, and by Eduardo Saverin, who claims he was deliberately cheated.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Marilyn",
+          "text": "Mr. Zuckerberg, did you steal their idea?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I didn't steal anything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cameron",
+          "text": "You promised to build our site.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I said I would think about it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cameron",
+          "text": "You took our concept and used it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "A social network is not a patent.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Marilyn",
+          "text": "Did you intentionally delay helping them?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I was building my own project.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cameron",
+          "text": "While stringing us along for months.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "That's not how I remember it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "In a separate room, Eduardo is being deposed about the share structure. He is calm but visibly devastated. The lawyers on both sides are taking careful notes.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Eduardo",
+          "text": "He diluted my shares without telling me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Marilyn",
+          "text": "Were you aware of the new structure?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "I signed documents I didn't fully understand.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "The documents were perfectly clear and legal.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "I trusted Mark. That was my mistake.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Marilyn",
+          "text": "Mr. Zuckerberg, was Eduardo your friend?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "He was my best friend.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Marilyn",
+          "text": "And you still did this to him?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I made decisions that were right for Facebook.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The depositions reveal a painful portrait of a friendship destroyed by ambition and money. Mark answers every question with precision. But underneath the precision, there is something that looks very much like regret.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Cameron",
+          "text": "We had a gentleman's agreement, Mr. Zuckerberg.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I don't remember it that way.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Cameron",
+          "text": "Of course you don't.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Marilyn",
+          "text": "Do you feel any remorse, Mr. Zuckerberg?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I feel that we built something great.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Marilyn",
+          "text": "That wasn't what I asked you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I know what you asked me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Five hundred million users, Mark.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Yes.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Eduardo",
+          "text": "Was it worth it?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I'm still figuring that out.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 10,
+      "title": "Alone at the Top",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Mark", "voice": "male-3" },
+        { "name": "Marilyn", "voice": "female-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Both lawsuits are eventually settled out of court. The Winklevoss twins receive sixty-five million dollars. Eduardo receives an undisclosed sum and is reinstated as a co-founder in the official history. Mark Zuckerberg, at twenty-three years old, is the CEO of the most important social network in the world.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Marilyn",
+          "text": "Both settlements have been signed. It's over.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I know.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Marilyn",
+          "text": "How do you feel?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Like I built something real.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Marilyn",
+          "text": "You did. But you also lost something.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Everyone loses something when they build something.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Marilyn",
+          "text": "Even your best friend?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "That's not a fair question.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The lawyers pack up and leave one by one. Marilyn is the last to go. She lingers for a moment, watching Mark sit alone at his desk, staring at his screen in the empty office.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Marilyn",
+          "text": "You know, you're not a bad person.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "You don't have to say that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Marilyn",
+          "text": "I'm saying it because I believe it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Most people think the opposite.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Marilyn",
+          "text": "Most people don't know the full story.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Neither do you.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Marilyn",
+          "text": "Get some rest, Mark. Go home.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I'll go home in a bit.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Marilyn",
+          "text": "You always say that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "And I always mean it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Mark sits alone in the empty office. The screen glows in the darkness. He opens Facebook and types a name he has never forgotten — Erica Albright. He looks at her profile for a long moment. Then he clicks. Friend request sent. He leans back and begins to refresh the page. The boy who connected five hundred million strangers has no one left to call.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Mark",
+          "text": "Come on. Just accept it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I'm not a bad person.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "I just wanted to build something.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Something that lasts. Something that matters.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Maybe I'm just not good at people.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "But I'm good at this.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mark",
+          "text": "Still pending.",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    }
+  ]
+}

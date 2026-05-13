@@ -285,7 +285,8 @@
         { "name": "Cady", "voice": "female-1" },
         { "name": "Regina", "voice": "female-2" },
         { "name": "Gretchen", "voice": "female-4" },
-        { "name": "Karen", "voice": "female-3" }
+        { "name": "Karen", "voice": "female-3" },
+        { "name": "Janis", "voice": "female-3" }
       ],
       "dialogues": [
         {
@@ -424,7 +425,8 @@
         { "name": "Narrator", "voice": "Elearning" },
         { "name": "Cady", "voice": "female-1" },
         { "name": "Regina", "voice": "female-2" },
-        { "name": "Gretchen", "voice": "female-4" }
+        { "name": "Gretchen", "voice": "female-4" },
+        { "name": "Janis", "voice": "female-3" }
       ],
       "dialogues": [
         {
@@ -696,7 +698,8 @@
         { "name": "Narrator", "voice": "Elearning" },
         { "name": "Cady", "voice": "female-1" },
         { "name": "Aaron", "voice": "male-1" },
-        { "name": "Regina", "voice": "female-2" }
+        { "name": "Regina", "voice": "female-2" },
+        { "name": "Janis", "voice": "female-3" }
       ],
       "dialogues": [
         {

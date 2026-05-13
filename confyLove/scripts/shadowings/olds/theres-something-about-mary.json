@@ -1,0 +1,638 @@
+{
+  "listName": "There's Something About Mary",
+  "category": "B1",
+  "order": 6,
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "The Prom That Wasn't",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Ted", "voice": "male-1" },
+        { "name": "Mary", "voice": "female-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "High school, 1985. Ted Stroehmann is awkward, nervous, and completely in love with Mary Jensen — the most popular girl in school. Against all odds, she asks him to prom. Ted is on top of the world — until the night ends in a bathroom accident so catastrophic it derails everything, and Mary disappears from his life entirely.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Mary",
+          "text": "Are you going to prom with anyone?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "Me? No. Not really. I mean... no.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "Do you want to go with me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "With you? Are you serious right now?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "Yeah. If you want to.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "I absolutely want to. Yes.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Prom night. Ted arrives at Mary's house early and nervous. He goes to use the bathroom and manages to zip himself into the window screen. The police arrive. An ambulance arrives. The entire neighborhood gathers outside. Mary watches the whole thing from the doorway. The prom never happens.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Ted",
+          "text": "I'm fine. Everything is totally fine.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "Are you sure you're okay?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "Completely. Absolutely. Don't worry.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Thirteen years later, Ted has never stopped thinking about Mary. His therapist suggests closure. His friend Pat suggests a private investigator. Ted makes the worse choice.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Ted",
+          "text": "I still think about her. All the time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "Thirteen years and I can't move on.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "I just need to know she's okay.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "That's all. Then I'll let it go.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "I promise. I'll let it go.",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 2,
+      "title": "Private Investigator",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Ted", "voice": "male-1" },
+        { "name": "Healy", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Ted hires Pat Healy, a private investigator, to find Mary. Healy is supposed to find her, confirm she is happy, and report back. Instead, Healy finds Mary in Miami — beautiful, warm, a doctor who works with people with disabilities — and immediately falls for her himself. He lies to Ted about everything.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Ted",
+          "text": "Just find out if she's doing okay.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Healy",
+          "text": "Simple job. I'll call you by Friday.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "I don't want you to bother her.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Healy",
+          "text": "I'll be completely invisible. Professional.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "Good. And don't tell her about me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Healy",
+          "text": "Of course not. That's not my job.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Healy calls Ted from Miami with a fabricated report. He describes Mary as overweight, unemployed, and engaged to a man with seven kids. Ted is devastated — and relieved — and lets it go for exactly three days.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Healy",
+          "text": "She's not doing great, honestly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "What do you mean? Is she okay?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Healy",
+          "text": "She's engaged. Seven stepkids. Heavy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "Oh. That's... that's too bad.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Healy",
+          "text": "You're better off moving on, buddy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "Right. Yeah. Thanks for your help.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Ted goes to Miami anyway. He can't explain it. He just goes.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Ted",
+          "text": "I just need to see her one time.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "One time and then I'm done.",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 3,
+      "title": "Miami",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Ted", "voice": "male-1" },
+        { "name": "Mary", "voice": "female-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Ted arrives in Miami and, by a combination of terrible planning and miraculous luck, runs into Mary on the street. She is exactly as he remembered — warm, funny, completely at ease with the world. She is also genuinely happy to see him. They begin spending time together, and Ted realizes within forty-eight hours that he is just as gone as he was at seventeen.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Ted",
+          "text": "Mary? Is that actually you?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "Ted Stroehmann! Oh my gosh!",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "I can't believe you're right here.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "What are you doing in Miami?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "Just... passing through. Vacation.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "Do you want to get coffee sometime?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "Yes. Absolutely. When works for you?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "Tomorrow morning? I know a good place.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "Perfect. I'll be there. Definitely.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Over coffee, Ted learns who Mary really is — a surgeon who volunteers with special needs athletes, genuinely kind, and surrounded by people who adore her. He also learns she has a boyfriend named Tucker. Everything Ted feels becomes more complicated by the hour.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Mary",
+          "text": "I work with a lot of great people.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "You always seemed like that type.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "What type is that?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "The type who makes everything better.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "That is a very nice thing to say.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "I mean it. I really do.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "You haven't changed much, Ted.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "Is that a compliment or a warning?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "Definitely a compliment. Relax.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 4,
+      "title": "Too Many Suiters",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Ted", "voice": "male-1" },
+        { "name": "Mary", "voice": "female-1" },
+        { "name": "Healy", "voice": "male-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Ted is not the only one lying to Mary. Healy has been posing as a road worker, pretending to share her interests, fabricating an entire personality to win her over. Tucker, her boyfriend, turns out to be a fraud too — he faked his disability to get close to her. Mary is surrounded by men performing versions of themselves she never asked for.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Ted",
+          "text": "I need to tell you something, Mary.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "Okay. That sounds serious. Go ahead.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "I didn't just run into you here.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "What do you mean by that?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "I hired someone to find you first.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "You hired a private investigator? Really?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "I just needed to know you were okay.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "And then you came here yourself.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "I know how that sounds. I'm sorry.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "It sounds like you never moved on.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Healy's lies unravel shortly after. Tucker's lies unravel too. Mary is furious — not just at the deception, but at the pattern. Every man in her life has been telling her what she wants to hear instead of who they actually are.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Mary",
+          "text": "Was any of it real? Any of it?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Healy",
+          "text": "My feelings for you were real.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "You lied about everything else, though.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Healy",
+          "text": "I thought you wouldn't like the real me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "You never even gave me the chance.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "I'm the only one who came clean.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "You came clean after getting caught, Ted.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "Fair. That's completely fair.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 5,
+      "title": "Something About Her",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Ted", "voice": "male-1" },
+        { "name": "Mary", "voice": "female-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Ted makes one last attempt — not to win Mary, but to be honest with her completely, without any agenda. He tells her about Brett Favre, the thing she once said about him in high school that he has remembered for thirteen years. He tells her he came to Miami just to see her face. He tells her he knows she might choose someone else and he will be okay.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Ted",
+          "text": "I don't want to pressure you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "Then what do you want?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "I just want you to be happy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "Even if that's not with you?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "Even then. I mean it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "That's a strange thing to say.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "Strange is kind of my whole thing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "Yeah. I remember that about you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "Is that good or bad?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "Honestly? It might be good.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Mary chooses Ted. Not because he is the most impressive or the smoothest — but because he is the only one who told her the truth when it would have cost him something. That, it turns out, is the thing about her: she always knew the difference.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Mary",
+          "text": "You know what I kept thinking about?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "The prom disaster? Because same.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "No. I kept thinking about how kind you were.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "I was a disaster that whole night.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "You were kind anyway. That's rare.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "So what does that mean for us?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Mary",
+          "text": "It means give me your number.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Ted",
+          "text": "Gladly. One hundred percent gladly.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Ted gives her his number. His hands are shaking. She notices. She smiles. Thirteen years later — it turns out — is the perfect time.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    }
+  ]
+}

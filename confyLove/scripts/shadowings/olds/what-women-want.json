@@ -1,0 +1,1142 @@
+{
+  "listName": "What Women Want",
+  "category": "B1",
+  "order": 1,
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "Nick's World",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Nick", "voice": "male-2" },
+        { "name": "Colleague", "voice": "male-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Nick Marshall is a charming, confident advertising executive in Chicago. He's been successful his whole career by marketing to men. Women, in his view, are a mystery he has never needed to solve.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Nick",
+          "text": "I know what men want.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "Beer, cars, and sports. Simple.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Colleague",
+          "text": "The new client markets to women.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "Women? That's a different department.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Colleague",
+          "text": "There is no different department.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "How hard can it be?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "It turns out Nick expected to be promoted to creative director. Instead, the company hires a woman named Darcy Maguire from New York. She will be his new boss.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Nick",
+          "text": "She's my boss?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Colleague",
+          "text": "She's very good.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I was supposed to get that job.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Colleague",
+          "text": "Nick, the market is seventy percent women.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I can learn about women.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Colleague",
+          "text": "You've been married three times.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "And I learned something each time.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 2,
+      "title": "The Accident",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Nick", "voice": "male-2" },
+        { "name": "Darcy", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Darcy gives the whole team a box of women's products to try at home — nail polish, pantyhose, face cream — to better understand the female consumer. Nick takes the box home reluctantly.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Nick",
+          "text": "She wants me to try nail polish.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "Fine. I'll try nail polish.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "In his bathroom, wearing pantyhose and holding a hair dryer, Nick slips on a wet bath mat and falls into the tub. The hair dryer falls in with him. He is electrocuted.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Nick",
+          "text": "What is happening to me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "He wakes up on the bathroom floor. He feels strange. Then he hears something — a voice in his head. His neighbor's thought, passing through the wall.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Nick",
+          "text": "Is someone talking?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "That's... inside my head.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The next morning, Nick goes to a coffee shop. Every woman within range fills his mind with thoughts. It is overwhelming.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Nick",
+          "text": "I can hear what you're thinking.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "Excuse me?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "You think I'm attractive.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "I was thinking about my coffee.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "Before that.",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 3,
+      "title": "The Therapist",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Nick", "voice": "male-2" },
+        { "name": "Dr. Perkins", "voice": "female-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Nick goes to his therapist. He has been seeing her for years and has never really listened. Today, for the first time, he can hear exactly what she thinks of him.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Nick",
+          "text": "I can hear women's thoughts.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dr. Perkins",
+          "text": "Nick, that's not possible.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "You think I'm exhausting.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dr. Perkins",
+          "text": "I think you're— how did you know that?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "You were thinking it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dr. Perkins",
+          "text": "I was not.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "You also think I have commitment issues.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dr. Perkins",
+          "text": "That one I say out loud.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "The therapist concludes that Nick has somehow developed the ability. She tells him to use it well. He immediately thinks of how to use it at work.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Dr. Perkins",
+          "text": "This could change how you see the world.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "Or how I win at work.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dr. Perkins",
+          "text": "Nick.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I'm listening.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dr. Perkins",
+          "text": "For the first time, maybe.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "That's also fair.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 4,
+      "title": "Stealing Ideas",
+      "level": "B1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Nick", "voice": "male-2" },
+        { "name": "Darcy", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Nick discovers that he can hear Darcy's thoughts during meetings. She is brilliant — constantly generating ideas she hasn't shared yet. Nick starts using her unspoken ideas as his own.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Darcy",
+          "text": "I'm thinking about the Nike campaign.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "What if we made it about empowerment?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "That's exactly what I was going to say.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "Great minds.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "You keep finishing my thoughts.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "We're just on the same wavelength.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "Is that what this is?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I think we make a great team.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Darcy is suspicious but impressed. The campaign ideas are brilliant. She begins to trust Nick more than she planned.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Darcy",
+          "text": "I have to admit, you're surprising me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I'm full of surprises.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "That might be what worries me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "You worry too much.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "Someone has to.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 5,
+      "title": "Lola",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Nick", "voice": "male-2" },
+        { "name": "Lola", "voice": "female-1" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Nick's teenage daughter Lola is staying with him for the first time in years. He has always been a distant father — more focused on himself than on her. Now he can hear what she actually feels.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Lola",
+          "text": "You don't really know me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I know you. You're my daughter.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Lola",
+          "text": "Name one thing I care about.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "You want to go to the prom.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Lola",
+          "text": "With Danny from school.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "He doesn't know you like him.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Lola",
+          "text": "How do you know that?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "Lucky guess.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Nick coaches Lola on what to say to Danny. For the first time, he is actually present as a father. Lola notices the change.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Lola",
+          "text": "Why are you being nice to me?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I'm always nice to you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Lola",
+          "text": "No. You're usually distracted.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I'm paying attention now.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Lola",
+          "text": "What changed?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I got a new perspective.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Lola",
+          "text": "Well. Keep it.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 6,
+      "title": "Falling for Darcy",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Nick", "voice": "male-2" },
+        { "name": "Darcy", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "As the weeks pass, Nick hears not just Darcy's professional thoughts but her private ones — her loneliness, her self-doubt, the armor she wears to survive in a room full of men who don't take her seriously. He starts to fall for her.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Nick",
+          "text": "You work too late every night.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "Someone has to earn this position.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "You've already earned it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "That's easy for you to say.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I mean it.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "You hated me when I arrived.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I was wrong about you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "Nick Marshall admitting he was wrong.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "Don't make it a big deal.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "It's a little bit of a big deal.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "They have dinner together. Not as colleagues. Nick listens — really listens — and Darcy talks more openly than she has in years.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Darcy",
+          "text": "I moved to every city my job sent me to.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "Did you ever want to stay somewhere?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "I'm starting to think about it.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "Chicago's not a bad place to stay.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "No. It's not.",
+          "repeat": false,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 7,
+      "title": "The Guilt",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Nick", "voice": "male-2" },
+        { "name": "Dr. Perkins", "voice": "female-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Nick goes back to his therapist. He's been using the ability to charm women, win at work, and impress Darcy. But he knows what he's been doing is wrong.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Nick",
+          "text": "I've been using it to get ahead.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dr. Perkins",
+          "text": "Using what?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "Reading their thoughts. Taking their ideas.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dr. Perkins",
+          "text": "That's not using a gift. That's stealing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I know.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dr. Perkins",
+          "text": "Especially with Darcy.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "She doesn't know where the ideas came from.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dr. Perkins",
+          "text": "She would not be pleased.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "No. She would not.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "He also admits something harder to say.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Nick",
+          "text": "I think I'm in love with her.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dr. Perkins",
+          "text": "Based on reading her private thoughts?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "Based on who she actually is.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dr. Perkins",
+          "text": "She doesn't know that you know her that way.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I know. It's complicated.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dr. Perkins",
+          "text": "Nick. Tell her the truth.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 8,
+      "title": "The Betrayal",
+      "level": "B2",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Nick", "voice": "male-2" },
+        { "name": "Darcy", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Nick presents the Nike campaign to the client. It's a triumph. But Darcy realizes something is wrong. The ideas that Nick presented were hers — ideas she never finished developing out loud.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Darcy",
+          "text": "How did you know about the tagline?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "We talked about it.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "I never said it out loud.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "You must have.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "Nick. I wrote it in my notebook. Alone.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "Darcy, I can explain.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "Explain what? That you went through my things?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I didn't go through anything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "Then how?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I can hear what you're thinking.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "What?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "Since the accident. I can hear women's thoughts.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Darcy stares at him for a long time. Then she picks up her coat.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Darcy",
+          "text": "Everything between us was based on that.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "No. My feelings are real.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "Get out of my office.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 9,
+      "title": "Losing the Gift",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Nick", "voice": "male-2" },
+        { "name": "Lola", "voice": "female-1" },
+        { "name": "Dr. Perkins", "voice": "female-3" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Nick loses everything at once. Darcy has him reassigned. The ability has also begun to fade — a second electrical shock during a storm takes it away entirely. He is left with only what he actually learned.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Nick",
+          "text": "It's gone. I can't hear anything.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dr. Perkins",
+          "text": "How do you feel?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "Quieter. Also worse.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dr. Perkins",
+          "text": "Because of Darcy?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I had a real chance with her.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dr. Perkins",
+          "text": "Did you need the ability to love her?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "No. The ability just showed me who she was.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Dr. Perkins",
+          "text": "Then you already know her.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Nick calls Lola. She notices he sounds different.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Lola",
+          "text": "Dad. Are you okay?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I messed something up.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Lola",
+          "text": "With Darcy?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "How do you know about Darcy?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Lola",
+          "text": "You talk about her without realizing.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I do?",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Lola",
+          "text": "Go fix it, Dad.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "What if she won't listen?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Lola",
+          "text": "You don't need to read her mind.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Lola",
+          "text": "Just say what you actually feel.",
+          "repeat": true,
+          "pauseAfter": 3
+        }
+      ]
+    },
+    {
+      "chapter": 10,
+      "title": "What He Finally Learned",
+      "level": "C1",
+      "characters": [
+        { "name": "Narrator", "voice": "Elearning" },
+        { "name": "Nick", "voice": "male-2" },
+        { "name": "Darcy", "voice": "female-2" }
+      ],
+      "dialogues": [
+        {
+          "character": "Narrator",
+          "text": "Nick goes to Darcy's apartment. He has no script, no advantage, and no ability to know what she's thinking. He is entirely on his own.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Darcy",
+          "text": "I have nothing to say to you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "Then just listen.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "You used me.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "At first. Yes.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "At first.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "Then I got to know you. The real you.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "Through my private thoughts.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I know. That part was wrong.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "And the ideas? The campaign?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I'll tell them all it was yours.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "That's not the point.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "I know what the point is.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "He tells her what he actually knows about her — not from her thoughts, but from paying attention. The loneliness. The courage. The reason she works late.",
+          "repeat": false,
+          "pauseAfter": 0
+        },
+        {
+          "character": "Nick",
+          "text": "You never thought you'd be enough.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "Stop.",
+          "repeat": false,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "You are, Darcy. You always were.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "The ability is gone?",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Nick",
+          "text": "Gone. This is just me.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Darcy",
+          "text": "Just you is enough.",
+          "repeat": true,
+          "pauseAfter": 3
+        },
+        {
+          "character": "Narrator",
+          "text": "Nick Marshall spent his whole life certain he understood the world. It took hearing what he wasn't supposed to hear to finally learn how to listen.",
+          "repeat": false,
+          "pauseAfter": 0
+        }
+      ]
+    }
+  ]
+}

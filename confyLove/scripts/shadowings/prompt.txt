@@ -1,4 +1,4 @@
-Generate a complete JSON array of shadowing dialogues for a movie, covering the entire story from beginning to end, and save it as a .json file inside the folder confyLove/scripts/shadowings/movies/. Name the file using the movie title in lowercase with hyphens, for example: the-notebook.json
+Generate a complete JSON array of shadowing dialogues for the movie "Title", covering the entire story from beginning to end, and save it as a .json file inside the folder confyLove/scripts/shadowings/movies/. Name the file using the movie title in lowercase with hyphens, for example: the-notebook.json
 example in: confyLove\scripts\shadowings\dialogue.example.json
 The top-level structure must be:
 
