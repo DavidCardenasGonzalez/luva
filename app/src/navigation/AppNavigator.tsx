@@ -78,7 +78,7 @@ export type RootStackParamList = {
   FriendChat: { friendId: string };
   FriendProfile: { friendId: string };
   StoryMissions: { storyId: string };
-  StoryScene: { storyId: string; sceneIndex: number };
+  StoryScene: { storyId: string; sceneIndex: number; from?: 'feed' | 'missions' };
   Profile: undefined;
   AuthCallback: undefined;
   Settings: undefined;

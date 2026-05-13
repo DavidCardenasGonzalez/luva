@@ -335,23 +335,21 @@ export default function Step3({
         <View
           style={{
             position: 'absolute',
-            top: -40,
-            right: -24,
-            width: 120,
-            height: 120,
-            borderRadius: 60,
-            backgroundColor: 'rgba(168, 85, 247, 0.16)',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 2,
+            backgroundColor: 'rgba(34, 211, 238, 0.58)',
           }}
         />
         <View
           style={{
             position: 'absolute',
-            bottom: -34,
-            left: -22,
-            width: 96,
-            height: 96,
-            borderRadius: 48,
-            backgroundColor: 'rgba(34, 211, 238, 0.13)',
+            top: 2,
+            bottom: 0,
+            left: 0,
+            width: 3,
+            backgroundColor: 'rgba(168, 85, 247, 0.46)',
           }}
         />
         <View

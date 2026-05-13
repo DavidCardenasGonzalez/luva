@@ -66,6 +66,7 @@ import {
 import { prefetchImageUrls } from '../shared/imagePrefetch';
 
 const luviImage = require('../image/luvi.png');
+const luviLoadingGif = require('../image/luvi-loading.gif');
 const successRequirementSoundAsset = require('../sound/succes_req.mp3');
 
 type StoryMessage = {
@@ -520,6 +521,7 @@ export default function StorySceneScreen() {
   const navigation = useNavigation<any>();
   const storyId: string | undefined = route.params?.storyId;
   const initialSceneIndex: number = route.params?.sceneIndex ?? 0;
+  const fromScreen: 'feed' | 'missions' | undefined = route.params?.from;
   const { isSignedIn } = useAuth();
   const { story, loading, error } = useStoryDetail(storyId);
   const {
@@ -1102,6 +1104,7 @@ export default function StorySceneScreen() {
         pendingNext,
         conversationFeedback: cloneConversationFeedback(conversationFeedback),
       };
+      setAnalysis(null);
       setRetryState('none');
       setFlowState('evaluating');
       const wasPreviouslyCompleted = missionCompleted || storyCompleted || conversationFeedback || pendingNext !== null;
@@ -1606,6 +1609,13 @@ export default function StorySceneScreen() {
     storyDefinitionPayload,
     storyId,
   ]);
+
+  useEffect(() => {
+    if (missionCompleted && !addedFriendId && !addingFriend) {
+      void handleAddFriend();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [missionCompleted]);
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (nextState) => {
@@ -2130,6 +2140,29 @@ export default function StorySceneScreen() {
           )}
         </View>
 
+        {flowState === 'evaluating' ? (
+          <View
+            style={{
+              marginTop: 16,
+              padding: 16,
+              backgroundColor: 'white',
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: '#e2e8f0',
+              alignItems: 'center',
+            }}
+          >
+            <Image
+              source={luviLoadingGif}
+              style={{ width: 96, height: 96 }}
+              resizeMode="contain"
+            />
+            <Text style={{ marginTop: 8, fontWeight: '700', color: '#1e293b' }}>
+              Analizando tu respuesta...
+            </Text>
+          </View>
+        ) : null}
+
         {analysis ? (
           <View
             style={{
@@ -2223,100 +2256,63 @@ export default function StorySceneScreen() {
                 ) : null}
               </View>
             ) : null}
-            <Pressable
-              onPress={() => {
-                if (addedFriendId) {
-                  if (isSignedIn) {
-                    navigation.navigate('FriendChat', { friendId: addedFriendId });
-                  } else {
-                    navigation.navigate('Friends');
-                  }
-                  return;
-                }
-                void handleAddFriend();
-              }}
-              disabled={addingFriend}
-              style={({ pressed }) => ({
-                marginTop: 12,
-                paddingVertical: 10,
-                borderRadius: 999,
-                alignItems: 'center',
-                backgroundColor: addingFriend
-                  ? '#bbf7d0'
-                  : addedFriendId
-                  ? pressed
-                    ? '#0f766e'
-                    : '#14b8a6'
-                  : pressed
-                  ? '#15803d'
-                  : '#16a34a',
-              })}
-            >
-              <Text style={{ color: addedFriendId ? '#032a2a' : 'white', fontWeight: '800' }}>
-                {addingFriend
-                  ? 'Agregando...'
-                  : addedFriendId
-                  ? isSignedIn
-                    ? `Conversar con ${characterDisplayName}`
-                    : 'Ver en amigos'
-                  : 'Agregar a amigos'}
-              </Text>
-            </Pressable>
+            <View style={{ marginTop: 16, borderRadius: 12, borderWidth: 1, borderColor: '#bbf7d0', backgroundColor: 'white', overflow: 'hidden' }}>
+              <View style={{ padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                {missionAvatar ? (
+                  <Image source={missionAvatar} style={{ width: 56, height: 56, borderRadius: 28 }} />
+                ) : (
+                  <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 22, fontWeight: '700', color: '#166534' }}>{avatarInitial}</Text>
+                  </View>
+                )}
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontWeight: '700', fontSize: 16, color: '#15803d' }}>{characterDisplayName}</Text>
+                  <Text style={{ fontSize: 13, color: '#166534', marginTop: 2 }}>
+                    {addingFriend ? 'Agregando a amigos...' : addedFriendId ? 'Agregado a tus amigos' : friendAddError ? 'No se pudo agregar' : ''}
+                  </Text>
+                </View>
+              </View>
+              <View style={{ flexDirection: 'row', borderTopWidth: 1, borderTopColor: '#dcfce7' }}>
+                <Pressable
+                  onPress={() => {
+                    if (addedFriendId) {
+                      navigation.navigate('FriendProfile', { friendId: addedFriendId });
+                    }
+                  }}
+                  disabled={!addedFriendId}
+                  style={({ pressed }) => ({
+                    flex: 1,
+                    paddingVertical: 14,
+                    alignItems: 'center',
+                    backgroundColor: pressed ? '#f0fdf4' : 'white',
+                    borderRightWidth: 1,
+                    borderRightColor: '#dcfce7',
+                    opacity: addedFriendId ? 1 : 0.4,
+                  })}
+                >
+                  <Text style={{ fontWeight: '700', color: '#166534' }}>Ver perfil</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    if (fromScreen === 'feed') {
+                      navigation.navigate('Feed');
+                    } else {
+                      navigation.navigate('StoryMissions', { storyId: storyId! });
+                    }
+                  }}
+                  style={({ pressed }) => ({
+                    flex: 1,
+                    paddingVertical: 14,
+                    alignItems: 'center',
+                    backgroundColor: pressed ? '#f0fdf4' : 'white',
+                  })}
+                >
+                  <Text style={{ fontWeight: '700', color: '#166534' }}>Continuar</Text>
+                </Pressable>
+              </View>
+            </View>
             {friendAddError ? (
               <Text style={{ color: '#b91c1c', marginTop: 8 }}>{friendAddError}</Text>
-            ) : null}
-            {storyCompleted ? (
-              <Text style={{ marginTop: 6, color: '#166534' }}>
-                Terminaste toda la historia. Puedes regresar al listado cuando quieras.
-              </Text>
-            ) : (
-              <Text style={{ marginTop: 6, color: '#166534' }}>
-                Avanza para seguir con la siguiente misión.
-              </Text>
-            )}
-            {!storyCompleted && pendingNext !== null ? (
-              <Pressable
-                onPress={() => {
-                  setSceneIndex(pendingNext);
-                }}
-                style={({ pressed }) => ({
-                  marginTop: 12,
-                  paddingVertical: 10,
-                  borderRadius: 999,
-                  alignItems: 'center',
-                  backgroundColor: pressed ? '#22c55e' : '#16a34a',
-                })}
-              >
-                <Text style={{ color: 'white', fontWeight: '700' }}>Ir a la siguiente misión</Text>
-              </Pressable>
-            ) : null}
-            {storyId ? (
-              <Pressable
-                onPress={() => navigation.navigate('StoryMissions', { storyId })}
-                style={({ pressed }) => ({
-                  marginTop: 12,
-                  paddingVertical: 10,
-                  borderRadius: 999,
-                  alignItems: 'center',
-                  backgroundColor: pressed ? '#e2e8f0' : '#f1f5f9',
-                })}
-              >
-                <Text style={{ color: '#1e293b', fontWeight: '700' }}>Ver listado de misiones</Text>
-              </Pressable>
-            ) : null}
-            {storyCompleted ? (
-              <Pressable
-                onPress={() => navigation.navigate('Stories')}
-                style={({ pressed }) => ({
-                  marginTop: 12,
-                  paddingVertical: 10,
-                  borderRadius: 999,
-                  alignItems: 'center',
-                  backgroundColor: pressed ? '#cbd5f5' : '#e0e7ff',
-                })}
-              >
-                <Text style={{ color: '#312e81', fontWeight: '700' }}>Volver a historias</Text>
-              </Pressable>
             ) : null}
           </View>
         ) : null}

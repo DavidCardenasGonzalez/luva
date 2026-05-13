@@ -71,3 +71,36 @@ test('POST /v1/app/version-check returns required update for unsupported version
   assert.equal(body.force, true);
   assert.equal(body.storeUrl, 'https://apps.apple.com/us/search?term=luva');
 });
+
+test('GET /v1/friends/{friendId}/profile returns public catalog profile without auth', async () => {
+  const storiesRes = await handler({
+    httpMethod: 'GET',
+    path: '/v1/stories/full',
+    requestContext: { http: { method: 'GET', path: '/v1/stories/full' } },
+  });
+  assert.equal(storiesRes.statusCode, 200);
+  const storiesBody = JSON.parse(storiesRes.body);
+  const story = storiesBody.items.find((item) => item.missions && item.missions.length);
+  assert.ok(story);
+  const mission = story.missions[0];
+  const friendId = `${story.storyId}:${mission.missionId}`;
+  const encodedFriendId = encodeURIComponent(friendId);
+
+  const res = await handler({
+    httpMethod: 'GET',
+    path: `/v1/friends/${encodedFriendId}/profile`,
+    requestContext: {
+      http: {
+        method: 'GET',
+        path: `/v1/friends/${encodedFriendId}/profile`,
+      },
+    },
+  });
+
+  assert.equal(res.statusCode, 200);
+  const body = JSON.parse(res.body);
+  assert.equal(body.friend.friendId, friendId);
+  assert.equal(body.friend.storyId, story.storyId);
+  assert.equal(body.friend.missionId, mission.missionId);
+  assert.ok(Array.isArray(body.posts));
+});

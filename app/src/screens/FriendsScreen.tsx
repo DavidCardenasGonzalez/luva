@@ -268,15 +268,6 @@ export default function FriendsScreen({ navigation }: Props) {
           </Text>
         </View>
 
-        {!isSignedIn ? (
-          <View style={{ marginBottom: 16 }}>
-            <AccountProgressCard
-              mode="signed-out"
-              onCreateAccount={handleCreateAccount}
-            />
-          </View>
-        ) : null}
-
         {loading ? (
           <View style={{ paddingVertical: 40, alignItems: 'center' }}>
             <ActivityIndicator size="large" color={COLORS.accent} />
@@ -384,6 +375,15 @@ export default function FriendsScreen({ navigation }: Props) {
             </Pressable>
           </View>
         )}
+
+        {!isSignedIn ? (
+          <View style={{ marginTop: 16 }}>
+            <AccountProgressCard
+              mode="signed-out"
+              onCreateAccount={handleCreateAccount}
+            />
+          </View>
+        ) : null}
       </ScrollView>
       <AppTabBar active="friends" />
     </SafeAreaView>

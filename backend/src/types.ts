@@ -47,6 +47,7 @@ export interface StoryMission {
   title: string;
   sceneSummary?: string;
   aiRole: string;
+  aiRoleFriends?: string;
   caracterName?: string;
   caracterPrompt?: string;
   avatarImageUrl?: string;
@@ -138,6 +139,7 @@ export interface FriendCharacter {
   missionTitle: string;
   characterName: string;
   aiRole: string;
+  aiRoleFriends?: string;
   characterPrompt?: string;
   avatarImageUrl?: string;
   videoIntro?: string;

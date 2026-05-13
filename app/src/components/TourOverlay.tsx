@@ -20,11 +20,23 @@ export default function TourOverlay({
   onNext,
   isLast = false,
 }: Props) {
-  const { height: screenHeight } = useWindowDimensions();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
   if (!visible || !highlight) return null;
 
   const tooltipTop = Math.max(24, Math.min(highlight.y + highlight.height + 18, screenHeight - 240));
+  const highlightPadding = 12;
+  const highlightTop = Math.max(highlight.y - highlightPadding, 12);
+  const highlightLeft = Math.max(highlight.x - highlightPadding, 12);
+  const highlightWidth = Math.min(
+    highlight.width + highlightPadding * 2,
+    screenWidth - highlightLeft - 12
+  );
+  const highlightHeight = Math.min(
+    highlight.height + highlightPadding * 2,
+    screenHeight - highlightTop - 12
+  );
+  const dimColor = 'rgba(3, 7, 18, 0.78)';
 
   return (
     <View
@@ -32,21 +44,24 @@ export default function TourOverlay({
       style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 20, elevation: 20 }}
     >
       <Pressable
-        style={{ flex: 1, backgroundColor: 'rgba(3, 7, 18, 0.78)' }}
+        style={{ flex: 1 }}
         onPress={onNext}
       >
+        <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: highlightTop, backgroundColor: dimColor }} />
+        <View pointerEvents="none" style={{ position: 'absolute', top: highlightTop + highlightHeight, left: 0, right: 0, bottom: 0, backgroundColor: dimColor }} />
+        <View pointerEvents="none" style={{ position: 'absolute', top: highlightTop, left: 0, width: highlightLeft, height: highlightHeight, backgroundColor: dimColor }} />
+        <View pointerEvents="none" style={{ position: 'absolute', top: highlightTop, left: highlightLeft + highlightWidth, right: 0, height: highlightHeight, backgroundColor: dimColor }} />
         <View
           pointerEvents="none"
           style={{
             position: 'absolute',
-            top: Math.max(highlight.y - 12, 12),
-            left: Math.max(highlight.x - 12, 12),
-            width: highlight.width + 24,
-            height: highlight.height + 24,
+            top: highlightTop,
+            left: highlightLeft,
+            width: highlightWidth,
+            height: highlightHeight,
             borderRadius: 14,
             borderWidth: 2,
             borderColor: '#22d3ee',
-            backgroundColor: 'rgba(15, 23, 42, 0.55)',
             shadowColor: '#22d3ee',
             shadowOpacity: 0.4,
             shadowRadius: 12,

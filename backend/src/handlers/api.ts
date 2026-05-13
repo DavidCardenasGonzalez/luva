@@ -221,6 +221,9 @@ type UserIdentity = {
   userId: string;
   email?: string;
   sub?: string;
+  displayName?: string;
+  givenName?: string;
+  familyName?: string;
 };
 
 type FriendConversationFeedback = {
@@ -335,6 +338,12 @@ function sanitizeStoryMission(input: any): StoryMission | undefined {
       ? input.ai_role
       : undefined;
   if (!missionId || !title || !aiRole) return undefined;
+  const aiRoleFriends =
+    typeof input.aiRoleFriends === 'string'
+      ? input.aiRoleFriends
+      : typeof input.ai_role_friends === 'string'
+      ? input.ai_role_friends
+      : undefined;
   const sceneSummary =
     typeof input.sceneSummary === 'string'
       ? input.sceneSummary
@@ -374,6 +383,7 @@ function sanitizeStoryMission(input: any): StoryMission | undefined {
     title,
     sceneSummary,
     aiRole,
+    ...(aiRoleFriends ? { aiRoleFriends } : {}),
     caracterName,
     caracterPrompt,
     avatarImageUrl,
@@ -532,13 +542,71 @@ function normalizeIdentityValue(value?: string): string | undefined {
   return normalized || undefined;
 }
 
+function normalizeLearnerName(value?: string): string | undefined {
+  const normalized = (value || "").replace(/\s+/g, " ").trim();
+  if (!normalized || normalized.includes("@")) return undefined;
+  return normalized.slice(0, 80);
+}
+
 function getUserIdentity(event: any): UserIdentity | undefined {
   const claims = getClaims(event);
   const email = normalizeIdentityValue(claims.email || claims["cognito:username"]);
   const sub = normalizeIdentityValue(claims.sub);
   const userId = email || sub;
   if (!userId) return undefined;
-  return { userId, email, sub };
+  return {
+    userId,
+    email,
+    sub,
+    displayName: normalizeLearnerName(claims.name),
+    givenName: normalizeLearnerName(claims.given_name),
+    familyName: normalizeLearnerName(claims.family_name),
+  };
+}
+
+function getUsersTableNameOptional(): string | undefined {
+  return process.env.USERS_TABLE_NAME || undefined;
+}
+
+async function resolveLearnerName(identity: UserIdentity): Promise<string | undefined> {
+  const fallbackName =
+    normalizeLearnerName(identity.displayName) ||
+    normalizeLearnerName([identity.givenName, identity.familyName].filter(Boolean).join(" "));
+
+  const tableName = getUsersTableNameOptional();
+  if (!tableName || !identity.email) {
+    return fallbackName;
+  }
+
+  try {
+    const out = await dynamo.send(
+      new GetCommand({
+        TableName: tableName,
+        Key: { email: identity.email },
+        ProjectionExpression: "displayName, givenName, familyName",
+      })
+    );
+    const item = out.Item as
+      | {
+          displayName?: string;
+          givenName?: string;
+          familyName?: string;
+        }
+      | undefined;
+    return (
+      normalizeLearnerName(item?.displayName) ||
+      normalizeLearnerName([item?.givenName, item?.familyName].filter(Boolean).join(" ")) ||
+      fallbackName
+    );
+  } catch (err) {
+    console.warn(
+      JSON.stringify({
+        scope: "friends.chat.learner_name_error",
+        message: (err as Error)?.message || "unknown",
+      })
+    );
+    return fallbackName;
+  }
 }
 
 export const handler = async (event: any, context?: any): Promise<Result> => {
@@ -726,18 +794,15 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
     const friendProfile = path.match(/^\/v1\/friends\/([^/]+)\/profile$/);
     if (method === "GET" && friendProfile) {
       const identity = getUserIdentity(event);
-      if (!identity) {
-        return unauthorized("Missing user identity");
-      }
-
       const friendId = decodeURIComponent(friendProfile[1]);
-      const friend = await getFriendRecord(identity.userId, friendId);
+      const storedFriend = identity ? await getFriendRecord(identity.userId, friendId) : undefined;
+      const friend = storedFriend ? publicFriend(storedFriend) : publicCatalogFriend(friendId);
       if (!friend) {
         return notFound();
       }
 
       return json(200, {
-        friend: publicFriend(friend),
+        friend,
         posts: await listPublicCharacterPosts(friend.friendId),
       });
     }
@@ -755,10 +820,16 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
         return badRequest("Missing transcript");
       }
       try {
-        const payload = await advanceFriendChat(identity.userId, friendId, {
-          ...(body || {}),
-          transcript,
-        });
+        const learnerName = await resolveLearnerName(identity);
+        const payload = await advanceFriendChat(
+          identity.userId,
+          friendId,
+          {
+            ...(body || {}),
+            transcript,
+          },
+          learnerName
+        );
         return json(200, payload);
       } catch (err: any) {
         if (err?.message === "FRIEND_NOT_FOUND") {
@@ -1016,6 +1087,7 @@ function publicFriend(record: FriendRecord): FriendCharacter {
     missionTitle: record.missionTitle,
     characterName: record.characterName,
     aiRole: record.aiRole,
+    ...(record.aiRoleFriends ? { aiRoleFriends: record.aiRoleFriends } : {}),
     ...(record.characterPrompt ? { characterPrompt: record.characterPrompt } : {}),
     ...(record.avatarImageUrl ? { avatarImageUrl: record.avatarImageUrl } : {}),
     ...(record.videoIntro ? { videoIntro: record.videoIntro } : {}),
@@ -1026,6 +1098,43 @@ function publicFriend(record: FriendRecord): FriendCharacter {
     ...(typeof record.messageCount === "number" ? { messageCount: record.messageCount } : {}),
     ...(typeof record.conversationCount === "number" ? { conversationCount: record.conversationCount } : {}),
   };
+}
+
+function publicCatalogFriend(friendIdInput: string): FriendCharacter | undefined {
+  const friendId = typeof friendIdInput === "string" ? friendIdInput.trim() : "";
+  if (!friendId) {
+    return undefined;
+  }
+
+  for (const story of loadStories()) {
+    const missions = story.missions || [];
+    for (let sceneIndex = 0; sceneIndex < missions.length; sceneIndex += 1) {
+      const mission = missions[sceneIndex];
+      if (buildFriendId(story.storyId, mission.missionId) !== friendId) {
+        continue;
+      }
+
+      return {
+        friendId,
+        storyId: story.storyId,
+        missionId: mission.missionId,
+        sceneIndex,
+        storyTitle: story.title,
+        missionTitle: mission.title,
+        characterName: mission.caracterName || mission.title || "Personaje",
+        aiRole: mission.aiRole,
+        ...(mission.aiRoleFriends ? { aiRoleFriends: mission.aiRoleFriends } : {}),
+        ...(mission.caracterPrompt ? { characterPrompt: mission.caracterPrompt } : {}),
+        ...(mission.avatarImageUrl ? { avatarImageUrl: mission.avatarImageUrl } : {}),
+        ...(mission.videoIntro ? { videoIntro: mission.videoIntro } : {}),
+        ...(mission.sceneSummary ? { sceneSummary: mission.sceneSummary } : {}),
+        createdAt: "1970-01-01T00:00:00.000Z",
+        updatedAt: "1970-01-01T00:00:00.000Z",
+      };
+    }
+  }
+
+  return undefined;
 }
 
 function sanitizeFriendRecord(input: any): FriendRecord | undefined {
@@ -1073,6 +1182,7 @@ function sanitizeFriendRecord(input: any): FriendRecord | undefined {
     missionTitle,
     characterName,
     aiRole,
+    ...(typeof input.aiRoleFriends === "string" ? { aiRoleFriends: input.aiRoleFriends } : {}),
     ...(typeof input.characterPrompt === "string" ? { characterPrompt: input.characterPrompt } : {}),
     ...(typeof input.avatarImageUrl === "string" ? { avatarImageUrl: input.avatarImageUrl } : {}),
     ...(typeof input.videoIntro === "string" ? { videoIntro: input.videoIntro } : {}),
@@ -1177,6 +1287,7 @@ async function createFriendFromMission(
     missionTitle: mission.title,
     characterName: mission.caracterName || mission.title || "Personaje",
     aiRole: mission.aiRole,
+    ...(mission.aiRoleFriends ? { aiRoleFriends: mission.aiRoleFriends } : {}),
     ...(mission.caracterPrompt ? { characterPrompt: mission.caracterPrompt } : {}),
     ...(mission.avatarImageUrl ? { avatarImageUrl: mission.avatarImageUrl } : {}),
     ...(mission.videoIntro ? { videoIntro: mission.videoIntro } : {}),
@@ -1306,7 +1417,8 @@ function buildFriendConversationFeedbackFallback(args: {
 async function advanceFriendChat(
   userId: string,
   friendId: string,
-  body: FriendChatRequest
+  body: FriendChatRequest,
+  learnerName?: string
 ): Promise<FriendChatPayload> {
   const friend = await getFriendRecord(userId, friendId);
   if (!friend) {
@@ -1356,11 +1468,16 @@ async function advanceFriendChat(
 
   let aiReply = "Tell me more about that.";
   try {
-    aiReply = await generateFriendReply(friend, conversationHistory, {
-      result,
-      correctness,
-      conversationEnding: conversationEnded,
-    });
+    aiReply = await generateFriendReply(
+      friend,
+      conversationHistory,
+      {
+        result,
+        correctness,
+        conversationEnding: conversationEnded,
+      },
+      learnerName
+    );
   } catch (err) {
     console.error(
       JSON.stringify({
@@ -2689,7 +2806,8 @@ Use B2 English.
 async function generateFriendReply(
   friend: FriendRecord,
   history: StoryMessage[],
-  evaluation: { result: EvalResult; correctness: number; conversationEnding?: boolean }
+  evaluation: { result: EvalResult; correctness: number; conversationEnding?: boolean },
+  learnerName?: string
 ): Promise<string> {
   const apiKey = await getOpenAIKey();
   const model =
@@ -2707,20 +2825,24 @@ async function generateFriendReply(
     .trim();
   const characterNotes = [
     `Character name: ${friend.characterName}`,
-    `Original role: ${friend.aiRole}`,
+    `Original role: ${friend.aiRoleFriends ?? friend.aiRole}`,
     friend.characterPrompt ? `Character notes: ${friend.characterPrompt}` : "",
     friend.sceneSummary ? `How you met: ${friend.sceneSummary}` : "",
   ]
     .filter(Boolean)
     .join("\n");
+  const normalizedLearnerName = normalizeLearnerName(learnerName);
+  const learnerNotes = normalizedLearnerName ? `Learner name: ${normalizedLearnerName}` : "";
   const systemPrompt = `
 You are continuing a free conversation in English with a Spanish-speaking learner.
 
 Persona:
 ${characterNotes}
+${learnerNotes ? `\nLearner:\n${learnerNotes}` : ""}
 
 Rules:
 - Stay in character, but keep the conversation natural and casual.
+- If the learner name is provided, you may use it naturally when it feels human; do not overuse it.
 - There are no mission objectives anymore; this is open-ended practice.
 - ${
     evaluation.conversationEnding

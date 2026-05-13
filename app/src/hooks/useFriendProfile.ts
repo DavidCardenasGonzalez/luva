@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api/api';
-import { useAuth } from '../auth/AuthProvider';
 import { getLocalFriend } from '../friends/localFriends';
 import type { FriendCharacter } from './useFriends';
 
@@ -117,7 +116,6 @@ function sanitizeProfilePosts(input: unknown): CharacterProfilePost[] {
 }
 
 export function useFriendProfile(friendId?: string) {
-  const { isSignedIn, isLoading: authLoading } = useAuth();
   const [friend, setFriend] = useState<FriendCharacter>();
   const [posts, setPosts] = useState<CharacterProfilePost[]>([]);
   const [loading, setLoading] = useState(false);
@@ -137,21 +135,6 @@ export function useFriendProfile(friendId?: string) {
     setLoading(true);
     setError(undefined);
 
-    if (!isSignedIn) {
-      try {
-        setFriend(await getLocalFriend(friendId));
-        setPosts([]);
-      } catch (err: any) {
-        setFriend(undefined);
-        setPosts([]);
-        setError(err?.message || 'No pudimos cargar el perfil local.');
-      } finally {
-        setLoading(false);
-        setLoaded(true);
-      }
-      return;
-    }
-
     try {
       const response = await api.get<FriendProfileResponse>(
         `/friends/${encodeURIComponent(friendId)}/profile`
@@ -167,19 +150,16 @@ export function useFriendProfile(friendId?: string) {
       setLoading(false);
       setLoaded(true);
     }
-  }, [friendId, isSignedIn]);
+  }, [friendId]);
 
   useEffect(() => {
-    if (authLoading) {
-      return;
-    }
     void reload();
-  }, [authLoading, reload]);
+  }, [reload]);
 
   return {
     friend,
     posts,
-    loading: loading || authLoading,
+    loading,
     loaded,
     error,
     reload,

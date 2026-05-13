@@ -2162,6 +2162,7 @@ export default function FeedScreen({ navigation }: Props) {
         navigation.navigate('StoryScene', {
           storyId,
           sceneIndex,
+          from: 'feed',
         });
       } finally {
         setIsInterstitialLoading(false);

@@ -430,6 +430,7 @@ export class LuvaStack extends Stack {
       environment: {
         TABLE_NAME: table.tableName,
         FRIENDSHIPS_TABLE_NAME: friendshipsTable.tableName,
+        USERS_TABLE_NAME: usersTable.tableName,
         FEED_POSTS_TABLE_NAME: feedPostsTable.tableName,
         FEED_POSTS_BY_ORDER_INDEX_NAME: 'FeedPostsByOrderIndex',
         CHARACTER_POSTS_TABLE_NAME: characterPostsTable.tableName,
@@ -449,6 +450,7 @@ export class LuvaStack extends Stack {
 
     table.grantReadWriteData(apiFn);
     friendshipsTable.grantReadWriteData(apiFn);
+    usersTable.grantReadData(apiFn);
     feedPostsTable.grantReadData(apiFn);
     characterPostsTable.grantReadData(apiFn);
     lessonsTable.grantReadData(apiFn);
@@ -679,10 +681,7 @@ export class LuvaStack extends Stack {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
     });
-    friendProfile.addMethod('GET', lambdaIntegration, {
-      authorizer: usersAuthorizer,
-      authorizationType: AuthorizationType.COGNITO,
-    });
+    friendProfile.addMethod('GET', lambdaIntegration);
     friendChat.addMethod('POST', lambdaIntegration, {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
