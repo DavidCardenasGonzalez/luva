@@ -4,6 +4,7 @@ import * as Linking from 'expo-linking';
 import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 import { api } from '../api/api';
+import { syncLocalFriendsToRemote } from '../friends/localFriends';
 import {
   resetMixpanelUserIdentity,
   setMixpanelUserIdentity,
@@ -34,6 +35,8 @@ type AuthUser = {
   email: string;
   cognitoSub?: string;
   displayName?: string;
+  bio?: string;
+  goal?: string;
   givenName?: string;
   familyName?: string;
   pictureUrl?: string;
@@ -54,6 +57,8 @@ type PromoCodeRedemptionResult = {
 
 type CurrentUserUpdatePayload = {
   displayName?: string;
+  bio?: string;
+  goal?: string;
   pictureUrl?: string;
   authProvider?: AuthProviderName;
   promoCode?: string;
@@ -89,6 +94,7 @@ type AuthContextValue = {
   confirmEmailSignUp: (email: string, code: string, password: string) => Promise<void>;
   resendEmailSignUpCode: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetLocalSession: () => Promise<void>;
   updateCurrentUser: (payload?: CurrentUserUpdatePayload) => Promise<CurrentUserSyncResult>;
 };
 
@@ -409,6 +415,14 @@ async function trackCompletedAuthEvent(
   });
 }
 
+async function syncLocalDataAfterAuth() {
+  try {
+    await syncLocalFriendsToRemote();
+  } catch (err: any) {
+    console.warn('auth.local_friends_sync.failed', err?.message || err);
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | undefined>();
   const [idToken, setIdToken] = useState<string | undefined>();
@@ -599,6 +613,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         expiresAt: sessionExpiresAtRef.current,
         user: syncResult.user,
       });
+      await syncLocalDataAfterAuth();
     },
     [applySession]
   );
@@ -681,6 +696,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 user: syncResult.user,
               }
             );
+            await syncLocalDataAfterAuth();
           }
         }
       } finally {
@@ -985,6 +1001,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [clearSession]);
 
+  const resetLocalSession = useCallback(async () => {
+    await clearSession();
+    await resetMixpanelUserIdentity();
+  }, [clearSession]);
+
   const value = useMemo(
     () => ({
       isConfigured,
@@ -1003,6 +1024,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       confirmEmailSignUp,
       resendEmailSignUpCode,
       signOut,
+      resetLocalSession,
       updateCurrentUser,
     }),
     [
@@ -1022,6 +1044,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signInWithGoogle,
       signUpWithEmail,
       signOut,
+      resetLocalSession,
       updateCurrentUser,
       user,
     ]

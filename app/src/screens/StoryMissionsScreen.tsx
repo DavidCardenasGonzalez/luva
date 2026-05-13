@@ -116,6 +116,7 @@ export default function StoryMissionsScreen() {
       navigation.navigate("StoryScene", {
         storyId: story.storyId,
         sceneIndex: index,
+        from: 'missions',
       });
     } finally {
       setIsInterstitialLoading(false);

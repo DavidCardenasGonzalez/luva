@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useIsFocused } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ResizeMode, Video } from 'expo-av';
 import type { AVPlaybackStatus } from 'expo-av';
@@ -59,7 +60,9 @@ function CaptionPanel({
   cue?: LessonSubtitleCue;
   subtitleMode: 'en' | 'en_es';
 }) {
-  if (!cue?.english && !cue?.spanish) return null;
+  const showSpanish = subtitleMode === 'en_es';
+  const englishText = cue?.english || '';
+  const spanishText = cue?.spanish || '';
 
   return (
     <View
@@ -68,33 +71,34 @@ function CaptionPanel({
         marginTop: -6,
         paddingHorizontal: 12,
         paddingVertical: 10,
+        minHeight: showSpanish ? 102 : 58,
         borderRadius: 16,
         backgroundColor: COLORS.surface,
         borderWidth: 1,
         borderColor: COLORS.border,
         alignItems: 'center',
+        justifyContent: 'center',
         gap: 6,
       }}
     >
-      {cue.english ? (
-        <Text
-          style={{
-            color: 'white',
-            fontSize: 17,
-            fontWeight: '900',
-            lineHeight: 22,
-            textAlign: 'center',
-            backgroundColor: 'rgba(2, 6, 23, 0.78)',
-            paddingHorizontal: 10,
-            paddingVertical: 6,
-            borderRadius: 8,
-            overflow: 'hidden',
-          }}
-        >
-          {cue.english}
-        </Text>
-      ) : null}
-      {subtitleMode === 'en_es' && cue.spanish ? (
+      <Text
+        style={{
+          color: 'white',
+          fontSize: 17,
+          fontWeight: '900',
+          lineHeight: 22,
+          textAlign: 'center',
+          backgroundColor: englishText ? 'rgba(2, 6, 23, 0.78)' : 'transparent',
+          paddingHorizontal: 10,
+          paddingVertical: 6,
+          borderRadius: 8,
+          overflow: 'hidden',
+          opacity: englishText ? 1 : 0,
+        }}
+      >
+        {englishText || ' '}
+      </Text>
+      {showSpanish ? (
         <Text
           style={{
             color: '#dbeafe',
@@ -102,14 +106,15 @@ function CaptionPanel({
             fontWeight: '800',
             lineHeight: 19,
             textAlign: 'center',
-            backgroundColor: 'rgba(15, 23, 42, 0.82)',
+            backgroundColor: spanishText ? 'rgba(15, 23, 42, 0.82)' : 'transparent',
             paddingHorizontal: 10,
             paddingVertical: 5,
             borderRadius: 8,
             overflow: 'hidden',
+            opacity: spanishText ? 1 : 0,
           }}
         >
-          {cue.spanish}
+          {spanishText || ' '}
         </Text>
       ) : null}
     </View>
@@ -119,6 +124,7 @@ function CaptionPanel({
 export default function LessonDetailScreen({ navigation, route }: Props) {
   const { lessonId } = route.params;
   const insets = useSafeAreaInsets();
+  const isScreenFocused = useIsFocused();
   const scrollRef = useRef<ScrollView | null>(null);
   const videoRef = useRef<Video | null>(null);
   const { lesson, loading, error } = useLessonDetail(lessonId);
@@ -140,6 +146,9 @@ export default function LessonDetailScreen({ navigation, route }: Props) {
   const [question, setQuestion] = useState('');
   const [helpLoading, setHelpLoading] = useState(false);
   const [helpError, setHelpError] = useState<string | undefined>();
+  const lessonVideoSource = useMemo(() => {
+    return lesson?.videoUrl ? { uri: lesson.videoUrl } : undefined;
+  }, [lesson?.videoUrl]);
 
   useEffect(() => {
     if (!lesson?.translatedSubtitlesUrl && subtitleMode === 'en_es') {
@@ -200,6 +209,12 @@ export default function LessonDetailScreen({ navigation, route }: Props) {
       });
     }
   }, [messages.length]);
+
+  useEffect(() => {
+    if (isScreenFocused) return;
+    setIsPlaying(false);
+    setShowControls(true);
+  }, [isScreenFocused]);
 
   const activeCue = useMemo(
     () => findActiveSubtitle(cues, positionSeconds),
@@ -368,14 +383,18 @@ export default function LessonDetailScreen({ navigation, route }: Props) {
                   aspectRatio: 1,
                 }}
               >
-                <Video
-                  ref={videoRef}
-                  source={{ uri: lesson.videoUrl }}
-                  style={{ width: '100%', height: '100%' }}
-                  resizeMode={ResizeMode.CONTAIN}
-                  progressUpdateIntervalMillis={250}
-                  onPlaybackStatusUpdate={handlePlaybackStatus}
-                />
+                {isScreenFocused && lessonVideoSource ? (
+                  <Video
+                    key={lesson.videoUrl}
+                    ref={videoRef}
+                    source={lessonVideoSource}
+                    style={{ width: '100%', height: '100%' }}
+                    resizeMode={ResizeMode.CONTAIN}
+                    shouldPlay={false}
+                    progressUpdateIntervalMillis={500}
+                    onPlaybackStatusUpdate={handlePlaybackStatus}
+                  />
+                ) : null}
                 <Pressable
                   onPress={handleVideoPress}
                   style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}

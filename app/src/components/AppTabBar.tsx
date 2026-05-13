@@ -1,24 +1,22 @@
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { StackActions, useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useShadowingPlayer } from '../shadowing/ShadowingPlayerProvider';
 
-type AppTabKey = 'home' | 'practice' | 'missions' | 'lessons' | 'shadowing' | 'feed' | 'friends';
+type AppTabKey = 'home' | 'practice' | 'missions' | 'lessons' | 'journey' | 'shadowing' | 'feed' | 'friends';
 
 type TabConfig = {
   key: AppTabKey;
   label: string;
   icon: React.ComponentProps<typeof MaterialIcons>['name'];
-  route: 'Deck' | 'Stories' | 'Lessons' | 'Shadowing' | 'Feed' | 'Friends';
+  route: 'Deck' | 'Stories' | 'Lessons' | 'MyJourney' | 'Shadowing' | 'Feed' | 'Friends';
 };
 
 const TABS: TabConfig[] = [
   { key: 'feed', label: 'Feed', icon: 'rss-feed', route: 'Feed' },
-  { key: 'practice', label: 'Prácticas', icon: 'school', route: 'Deck' },
-  { key: 'missions', label: 'Misiones', icon: 'flag', route: 'Stories' },
-  { key: 'lessons', label: 'Lecciones', icon: 'ondemand-video', route: 'Lessons' },
+  { key: 'journey', label: 'My Journey', icon: 'timeline', route: 'MyJourney' },
   { key: 'shadowing', label: 'Shadowing', icon: 'headphones', route: 'Shadowing' },
   { key: 'friends', label: 'Amigos', icon: 'people', route: 'Friends' },
 ];
@@ -30,7 +28,15 @@ function formatMiniPlayerTime(seconds: number) {
   return `${minutes}:${String(rest).padStart(2, '0')}`;
 }
 
-export default function AppTabBar({ active }: { active: AppTabKey }) {
+export default function AppTabBar({
+  active,
+  showShadowingMiniPlayer = false,
+  onShadowingMiniPlayerPress,
+}: {
+  active: AppTabKey;
+  showShadowingMiniPlayer?: boolean;
+  onShadowingMiniPlayerPress?: () => void;
+}) {
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const {
@@ -43,10 +49,17 @@ export default function AppTabBar({ active }: { active: AppTabKey }) {
   } = useShadowingPlayer();
   const progressRatio = durationSeconds > 0 ? Math.min(1, positionSeconds / durationSeconds) : 0;
   const showMiniPlayer = (
-    active !== 'shadowing' &&
+    (active !== 'shadowing' || showShadowingMiniPlayer) &&
     Boolean(currentChapter) &&
     (isPlaying || audioLoading || positionSeconds > 0)
   );
+
+  const navigateToTab = (route: TabConfig['route']) => {
+    const state = navigation.getState?.();
+    const currentRouteName = state?.routes?.[state.index]?.name;
+    if (currentRouteName === route) return;
+    navigation.dispatch(StackActions.replace(route));
+  };
 
   return (
     <View
@@ -68,7 +81,7 @@ export default function AppTabBar({ active }: { active: AppTabKey }) {
     >
       {showMiniPlayer ? (
         <Pressable
-          onPress={() => navigation.navigate('Shadowing')}
+          onPress={onShadowingMiniPlayerPress || (() => navigation.navigate('Shadowing'))}
           accessibilityRole="button"
           accessibilityLabel="Abrir reproductor de Shadowing"
           style={({ pressed }) => ({
@@ -131,7 +144,7 @@ export default function AppTabBar({ active }: { active: AppTabKey }) {
           return (
             <Pressable
               key={tab.key}
-              onPress={() => navigation.navigate(tab.route)}
+              onPress={() => navigateToTab(tab.route)}
               accessibilityRole="button"
               accessibilityLabel={tab.label}
               style={({ pressed }) => ({

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../api/api';
 
 export type ShadowingChapter = {
@@ -26,6 +27,8 @@ export type ShadowingList = {
 type ShadowingResponse = {
   lists?: unknown[];
 };
+
+const SHADOWING_CACHE_STORAGE_KEY = '@luva/shadowing/lists-cache';
 
 function asString(value: unknown): string | undefined {
   return typeof value === 'string' ? value.trim() || undefined : undefined;
@@ -112,6 +115,28 @@ function sanitizeLists(input: unknown): ShadowingList[] {
     });
 }
 
+async function readCachedShadowingLists(): Promise<ShadowingList[]> {
+  try {
+    const raw = await AsyncStorage.getItem(SHADOWING_CACHE_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return sanitizeLists(Array.isArray(parsed) ? parsed : parsed?.lists);
+  } catch {
+    return [];
+  }
+}
+
+async function writeCachedShadowingLists(lists: ShadowingList[]): Promise<void> {
+  try {
+    await AsyncStorage.setItem(SHADOWING_CACHE_STORAGE_KEY, JSON.stringify({
+      lists,
+      cachedAt: new Date().toISOString(),
+    }));
+  } catch {
+    // Cache is an optimization; API data is still the source of truth.
+  }
+}
+
 export function useShadowing() {
   const [lists, setLists] = useState<ShadowingList[]>([]);
   const [loading, setLoading] = useState(true);
@@ -124,14 +149,27 @@ export function useShadowing() {
     setError(undefined);
 
     (async () => {
+      let hasCachedLists = false;
       try {
+        const cachedLists = await readCachedShadowingLists();
+        if (cancelled) return;
+
+        if (cachedLists.length) {
+          hasCachedLists = true;
+          setLists(cachedLists);
+        }
+
         const response = await api.get<ShadowingResponse>('/shadowing');
         if (cancelled) return;
-        setLists(sanitizeLists(response?.lists));
+        const nextLists = sanitizeLists(response?.lists);
+        setLists(nextLists);
+        void writeCachedShadowingLists(nextLists);
       } catch (err: any) {
         if (cancelled) return;
-        setLists([]);
-        setError(err?.message || 'No pudimos cargar Shadowing.');
+        if (!hasCachedLists) {
+          setLists([]);
+          setError(err?.message || 'No pudimos cargar Shadowing.');
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }

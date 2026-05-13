@@ -1,4 +1,7 @@
-export type OnboardingStepNumber = 1 | 2 | 3 | 4;
+export type OnboardingStepNumber = 1 | 2 | 3 | 4 | 5 | 6;
+
+export type OnboardingCharacterId = "zoe" | "mateo";
+export type OnboardingRequirementId = "name" | "why" | "about";
 
 export type OnboardingConversationMessage = {
   id: string;
@@ -17,6 +20,86 @@ export type OnboardingStepContent = {
   placeholderLabel?: string;
   bullets?: string[];
   conversation?: OnboardingConversationMessage[];
+};
+
+export type OnboardingChatPayload = {
+  friendId: string;
+  aiReply: string;
+  correctness: number;
+  result: "correct" | "partial" | "incorrect";
+  errors: string[];
+  reformulations: string[];
+  requirements?: Array<{
+    id: "name" | "why" | "about";
+    met: boolean;
+    evidence?: string;
+  }>;
+  profile?: {
+    name?: string;
+    bio?: string;
+    goal?: string;
+  };
+  objectiveComplete?: boolean;
+  conversationEnded: boolean;
+  conversationFeedback?: {
+    summary: string;
+    improvements: string[];
+  } | null;
+};
+
+export type OnboardingPhraseSelection = {
+  id: string;
+  text: string;
+};
+
+export type OnboardingSpeakingSummary = {
+  messages: Array<{ role: "user" | "assistant"; content: string }>;
+  profile?: {
+    name?: string;
+    bio?: string;
+    goal?: string;
+  };
+  completedRequirementIds: OnboardingRequirementId[];
+};
+
+export type OnboardingPlanRequest = {
+  characterId?: OnboardingCharacterId;
+  phraseSelections: OnboardingPhraseSelection[];
+  speaking: OnboardingSpeakingSummary;
+};
+
+export type OnboardingProgressActivity = {
+  id: "mission" | "vocabularyWord" | "freeTextMessage" | "lesson" | "shadowingChapter";
+  label: string;
+  points: number;
+  unit: string;
+  description: string;
+};
+
+export type OnboardingTrainingFocusId = "aiConversation" | "shadowing" | "vocabulary" | "structures";
+
+export type OnboardingTrainingFocus = {
+  id: OnboardingTrainingFocusId;
+  title: string;
+  percentage: number;
+  description: string;
+  badge: string;
+};
+
+export type OnboardingPlanResponse = {
+  title: string;
+  summary: string;
+  learnerName?: string;
+  heroGoal: string;
+  recommendedStartingPoint: string;
+  focusAreas: string[];
+  trainingDistribution: OnboardingTrainingFocus[];
+  progressModel: {
+    pointsPerLevel: number;
+    currentLevel: number;
+    pointsInCurrentLevel: number;
+    activities: OnboardingProgressActivity[];
+  };
 };
 
 export type OnboardingContentResponse = {
@@ -71,5 +154,19 @@ export const DEFAULT_ONBOARDING_STEPS: OnboardingStepContent[] = [
     title: "Preséntate en inglés",
     subtitle: "Cuéntanos quién eres y por qué quieres aprender inglés.",
     primaryCta: "",
+  },
+  {
+    stepNumber: 5,
+    eyebrow: "Analizando respuestas",
+    title: "Creando tu plan personalizado",
+    subtitle: "Estamos analizando tus respuestas para diseñar la mejor ruta para ti.",
+    primaryCta: "",
+  },
+  {
+    stepNumber: 6,
+    eyebrow: "Plan listo",
+    title: "Tu ruta de progreso está lista",
+    subtitle: "Sube de nivel acumulando puntos con misiones, vocabulario, mensajes, lecciones y shadowing.",
+    primaryCta: "Entrar a Luva",
   },
 ];

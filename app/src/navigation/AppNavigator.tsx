@@ -18,6 +18,7 @@ import LessonDetailScreen from '../screens/LessonDetailScreen';
 import LessonTestScreen from '../screens/LessonTestScreen';
 import ShadowingScreen from '../screens/ShadowingScreen';
 import FeedScreen from '../screens/FeedScreen';
+import MyJourneyScreen from '../screens/MyJourneyScreen';
 import FriendsScreen from '../screens/FriendsScreen';
 import FriendChatScreen from '../screens/FriendChatScreen';
 import FriendProfileScreen from '../screens/FriendProfileScreen';
@@ -28,6 +29,7 @@ import AuthCallbackScreen from '../screens/AuthCallbackScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import PaywallScreen from '../screens/PaywallScreen';
 import EmailSignUpScreen from '../screens/EmailSignUpScreen';
+import AccountAccessScreen from '../screens/AccountAccessScreen';
 import OnboardingScreen from '../onboarding/OnboardingScreen';
 import * as Linking from 'expo-linking';
 import { trackScreenViewed } from '../marketing/mixpanelEvents';
@@ -36,17 +38,22 @@ import { hasCompletedOnboarding } from '../onboarding/model/progress';
 export type PaywallSource =
   | 'coin_chip'
   | 'deck_card_unlock'
+  | 'friend_chat_message'
+  | 'friend_chat_recording'
   | 'home_banner'
+  | 'onboarding_lite_offer'
   | 'practice_card_unlock'
   | 'practice_recording'
+  | 'promo_lite_offer'
   | 'settings_lite'
   | 'settings_subscription'
+  | 'shadowing_chapter_unlock'
   | 'story_mission_unlock'
   | 'story_scene_mission_unlock'
   | 'story_scene_recording';
 
 export type RootStackParamList = {
-  Onboarding: undefined;
+  Onboarding: { startAtStep?: number } | undefined;
   Home: undefined;
   Deck: undefined;
   Practice: {
@@ -64,18 +71,25 @@ export type RootStackParamList = {
   Lessons: undefined;
   LessonDetail: { lessonId: string };
   LessonTest: { lessonId: string };
-  Shadowing: undefined;
+  Shadowing: { listId?: string; chapterId?: string; autoplay?: boolean; origin?: 'feed' } | undefined;
   Feed: undefined;
+  MyJourney: undefined;
   Friends: undefined;
   FriendChat: { friendId: string };
   FriendProfile: { friendId: string };
   StoryMissions: { storyId: string };
-  StoryScene: { storyId: string; sceneIndex: number };
+  StoryScene: { storyId: string; sceneIndex: number; from?: 'feed' | 'missions' };
   Profile: undefined;
   AuthCallback: undefined;
   Settings: undefined;
   EmailSignUp: { prefillEmail?: string } | undefined;
-  Paywall: { asModal?: boolean; source?: PaywallSource; variant?: 'pro' | 'lite' } | undefined;
+  AccountAccess: { fromOnboarding?: boolean } | undefined;
+  Paywall: {
+    asModal?: boolean;
+    source?: PaywallSource;
+    variant?: 'pro' | 'lite';
+    closeTarget?: 'Feed';
+  } | undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -161,6 +175,7 @@ export default function AppNavigator() {
         <Stack.Screen name="LessonTest" component={LessonTestScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Shadowing" component={ShadowingScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Feed" component={FeedScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="MyJourney" component={MyJourneyScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Friends" component={FriendsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FriendChat" component={FriendChatScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FriendProfile" component={FriendProfileScreen} options={{ headerShown: false }} />
@@ -170,6 +185,7 @@ export default function AppNavigator() {
         <Stack.Screen name="AuthCallback" component={AuthCallbackScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="EmailSignUp" component={EmailSignUpScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="AccountAccess" component={AccountAccessScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Paywall" component={PaywallScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>

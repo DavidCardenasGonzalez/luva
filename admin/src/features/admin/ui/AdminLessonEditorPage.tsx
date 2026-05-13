@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import {
   completeLessonVideoUpload,
   createLessonVideoUpload,
+  generateLessonThumbnail,
   generateLessonAudio,
   generateLessonQuiz,
   generateLessonScript,
@@ -68,6 +69,7 @@ export function AdminLessonEditorPage() {
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const [uploadingVideo, setUploadingVideo] = useState(false)
   const [videoProgress, setVideoProgress] = useState<number | null>(null)
+  const [generatingThumbnail, setGeneratingThumbnail] = useState(false)
   const audioInProgress = isAudioGenerating(lesson)
   const savedVoiceId = lesson?.voiceId
 
@@ -195,6 +197,17 @@ export function AdminLessonEditorPage() {
     } catch (err) {
       setStepError(err instanceof Error ? err.message : 'Error al subir el video.')
     } finally { setUploadingVideo(false) }
+  }
+
+  async function handleGenerateThumbnail() {
+    if (!lessonId) return
+    setGeneratingThumbnail(true); setStepError(null)
+    try {
+      const res = await generateLessonThumbnail(lessonId)
+      setLesson(res.lesson)
+    } catch (err) {
+      setStepError(err instanceof Error ? err.message : 'Error al generar el thumbnail.')
+    } finally { setGeneratingThumbnail(false) }
   }
 
   if (loadingLesson) {
@@ -587,6 +600,30 @@ export function AdminLessonEditorPage() {
               )}
             </div>
           </div>
+
+          {lesson.videoUrl && (
+            <div className="admin-user-action-card" style={{ marginTop: 22 }}>
+              <p className="eyebrow">Thumbnail</p>
+              <p style={{ marginTop: 6, marginBottom: 14, color: 'var(--muted)', fontSize: 14 }}>
+                Extrae el frame del segundo 2 del video y lo guarda como WebP 512×512.
+              </p>
+              {lesson.thumbnailUrl && (
+                <img
+                  src={lesson.thumbnailUrl}
+                  alt="Thumbnail"
+                  style={{ width: 128, height: 128, objectFit: 'cover', borderRadius: 8, marginBottom: 12, display: 'block' }}
+                />
+              )}
+              <button
+                className="btn primary"
+                type="button"
+                onClick={handleGenerateThumbnail}
+                disabled={generatingThumbnail}
+              >
+                {generatingThumbnail ? 'Generando...' : lesson.thumbnailUrl ? 'Regenerar thumbnail' : 'Generar thumbnail'}
+              </button>
+            </div>
+          )}
 
           {lesson.videoUrl && (
             <div className="admin-inline-note admin-inline-note-success" style={{ marginTop: 22 }}>

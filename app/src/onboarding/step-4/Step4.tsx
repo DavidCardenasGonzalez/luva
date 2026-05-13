@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   AppState,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -10,21 +15,83 @@ import {
   View,
 } from 'react-native';
 import { Audio } from 'expo-av';
+import * as Speech from 'expo-speech';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ConfettiCannon from 'react-native-confetti-cannon';
-import type { FriendChatPayload } from '../../hooks/useFriends';
 import { api } from '../../api/api';
-import { sendOnboardingChatMessage } from '../model/api';
+import { useAuth } from '../../auth/AuthProvider';
+import { addFriendFromMission } from '../../hooks/useFriends';
+import { useStoryProgress } from '../../progress/StoryProgressProvider';
 import useAudioRecorder from '../../shared/useAudioRecorder';
 import useUploadToS3 from '../../shared/useUploadToS3';
-import type { StoryFlowState } from '../../components/StoryMessageComposer';
-import { OnboardingStepContent } from '../model/types';
+import { sendOnboardingChatMessage } from '../model/api';
+import {
+  OnboardingCharacterId,
+  OnboardingChatPayload,
+  OnboardingSpeakingSummary,
+  OnboardingStepContent,
+} from '../model/types';
 import { GradientText } from '../components/GradientText';
 
 const successSound = require('../../sound/succes_req.mp3');
+const luviLoading = require('../../image/luvi-loading.gif');
 
 const LUNA_COLOR = '#a855f7';
 const LUNA_GRADIENT: [string, string] = ['#a855f7', '#c084fc'];
+
+const CHARACTER_PROFILES: Record<OnboardingCharacterId, {
+  name: string;
+  color: string;
+  avatarBg: string;
+  image: any;
+}> = {
+  zoe: {
+    name: 'Zoe',
+    color: '#a855f7',
+    avatarBg: 'rgba(109, 40, 217, 0.42)',
+    image: require('../step-3/Zoe.png'),
+  },
+  mateo: {
+    name: 'Mateo',
+    color: '#22d3ee',
+    avatarBg: 'rgba(6, 79, 105, 0.42)',
+    image: require('../step-3/Mateo.png'),
+  },
+};
+
+const ONBOARDING_STORY_ID = 'initials';
+const ONBOARDING_FIRST_MISSIONS: Record<OnboardingCharacterId, {
+  missionId: string;
+  sceneIndex: number;
+  title: string;
+  sceneSummary: string;
+  aiRole: string;
+  avatarImageUrl: string;
+}> = {
+  mateo: {
+    missionId: 'meet_mateo_first_mission',
+    sceneIndex: 0,
+    title: 'Conoce a Mateo',
+    sceneSummary:
+      'Tu primera misión con Mateo, un Virtual Agent divertido y espontáneo que quiere demostrarte que practicar inglés también puede sentirse dinámico, natural y entretenido.',
+    aiRole:
+      'Eres Mateo, un Virtual Agent dentro de una app para aprender inglés. Tu personalidad es segura, divertida, espontánea, carismática, cálida, ligeramente coqueta y muy fácil de seguir. Habla en inglés simple, nivel B1, con frases cortas y naturales.',
+    avatarImageUrl:
+      'https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260509182223-f7ef4b5b-9f42-41d3-b537-b83fc1e3db17.png',
+  },
+  zoe: {
+    missionId: 'meet_zoe_first_mission',
+    sceneIndex: 1,
+    title: 'Conoce a Zoe',
+    sceneSummary:
+      'Tu primera misión con Zoe, una Virtual Agent tranquila y cercana que quiere demostrarte que también puedes tener conversaciones reales y personales en inglés.',
+    aiRole:
+      'Eres Zoe, una Virtual Agent dentro de una app para aprender inglés. Tu personalidad es tranquila, natural, cercana, divertida, cálida, ligeramente coqueta y emocionalmente inteligente. Habla en inglés simple, nivel B1, con frases cortas y naturales.',
+    avatarImageUrl:
+      'https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260509182334-992b19f2-f707-452e-bd38-3d8febf4e92e.png',
+  },
+};
 
 const COLORS = {
   background: '#07111f',
@@ -45,6 +112,26 @@ const REQUIREMENTS = [
 type RequirementId = typeof REQUIREMENTS[number]['id'];
 
 type ChatMessage = { id: string; role: 'user' | 'assistant'; text: string };
+type FlowState = 'idle' | 'recording' | 'uploading' | 'transcribing' | 'evaluating';
+type MessageTranslation = { text?: string; loading?: boolean; error?: string };
+type ExtractedProfile = NonNullable<OnboardingChatPayload['profile']>;
+type TranslationResponse = {
+  translatedText: string;
+  sourceLanguage?: string;
+  targetLanguage: string;
+};
+
+function getPayloadRequirements(payload: OnboardingChatPayload): Set<RequirementId> | null {
+  if (!Array.isArray(payload.requirements)) return null;
+
+  const ids = new Set<RequirementId>();
+  payload.requirements.forEach((requirement) => {
+    if (requirement.met && REQUIREMENTS.some((item) => item.id === requirement.id)) {
+      ids.add(requirement.id);
+    }
+  });
+  return ids;
+}
 
 function checkRequirements(messages: ChatMessage[]): Set<RequirementId> {
   const userText = messages
@@ -58,39 +145,122 @@ function checkRequirements(messages: ChatMessage[]): Set<RequirementId> {
   return met;
 }
 
-function statusLabel(flowState: StoryFlowState): string {
-  switch (flowState) {
-    case 'recording': return 'Grabando...';
-    case 'uploading': return 'Subiendo audio...';
-    case 'transcribing': return 'Transcribiendo...';
-    case 'evaluating': return 'Analizando tu inglés...';
-    default: return '';
-  }
+function mergeProfile(current: ExtractedProfile, next?: ExtractedProfile): ExtractedProfile {
+  if (!next) return current;
+  return {
+    ...current,
+    ...(next.name?.trim() ? { name: next.name.trim() } : {}),
+    ...(next.bio?.trim() ? { bio: next.bio.trim() } : {}),
+    ...(next.goal?.trim() ? { goal: next.goal.trim() } : {}),
+  };
 }
 
-type Props = { content: OnboardingStepContent; onNext: () => void };
+type Props = {
+  content: OnboardingStepContent;
+  selectedCharacter: OnboardingCharacterId | null;
+  onNext: () => void;
+  onComplete: (summary: OnboardingSpeakingSummary) => void;
+};
 
-export default function Step4({ content: _content, onNext }: Props) {
+export default function Step4({ content: _content, selectedCharacter, onNext, onComplete }: Props) {
   const { width: windowWidth } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView>(null);
   const isStartingRecording = useRef(false);
   const stopRequestedWhileStarting = useRef(false);
   const soundRef = useRef<Audio.Sound | null>(null);
   const confettiKeyRef = useRef(0);
   const prevMetRef = useRef<Set<RequirementId>>(new Set());
+  const onboardingMissionSyncPromiseRef = useRef<Promise<void> | null>(null);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [analysis, setAnalysis] = useState<FriendChatPayload | null>(null);
-  const [flowState, setFlowState] = useState<StoryFlowState>('idle');
+  const [analysis, setAnalysis] = useState<OnboardingChatPayload | null>(null);
+  const [flowState, setFlowState] = useState<FlowState>('idle');
   const [error, setError] = useState<string | null>(null);
   const [inputText, setInputText] = useState('');
   const [confetti, setConfetti] = useState<{ key: number; count: number } | null>(null);
   const [missionComplete, setMissionComplete] = useState(false);
+  const [evaluatedRequirements, setEvaluatedRequirements] = useState<Set<RequirementId> | null>(null);
+  const [keyboardAvoiderKey, setKeyboardAvoiderKey] = useState(0);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [messageTranslations, setMessageTranslations] = useState<Record<string, MessageTranslation>>({});
+  const [extractedProfile, setExtractedProfile] = useState<ExtractedProfile>({});
 
   const recorder = useAudioRecorder();
   const uploader = useUploadToS3();
+  const { isSignedIn, updateCurrentUser } = useAuth();
+  const { markMissionCompleted } = useStoryProgress();
 
-  const metRequirements = checkRequirements(messages);
+  const metRequirements = evaluatedRequirements ?? checkRequirements(messages);
+  const companion = CHARACTER_PROFILES[selectedCharacter ?? 'zoe'];
+
+  const syncCompletedOnboardingMission = useCallback(async () => {
+    if (!onboardingMissionSyncPromiseRef.current) {
+      onboardingMissionSyncPromiseRef.current = (async () => {
+        const characterId = selectedCharacter ?? 'zoe';
+        const mission = ONBOARDING_FIRST_MISSIONS[characterId];
+
+        await markMissionCompleted(ONBOARDING_STORY_ID, mission.missionId);
+
+        try {
+          await addFriendFromMission({
+            storyId: ONBOARDING_STORY_ID,
+            missionId: mission.missionId,
+            sceneIndex: mission.sceneIndex,
+            storyDefinition: {
+              storyId: ONBOARDING_STORY_ID,
+              isInitial: true,
+              title: 'Iniciando Conversaciones',
+              summary: 'Conoce a los personajes que te acompañarán en este viaje de aprendizaje.',
+              missions: [
+                {
+                  missionId: mission.missionId,
+                  title: mission.title,
+                  sceneSummary: mission.sceneSummary,
+                  aiRole: mission.aiRole,
+                  caracterName: CHARACTER_PROFILES[characterId].name,
+                  avatarImageUrl: mission.avatarImageUrl,
+                  requirements: [],
+                },
+              ],
+            },
+            missionDefinition: {
+              missionId: mission.missionId,
+              title: mission.title,
+              sceneSummary: mission.sceneSummary,
+              aiRole: mission.aiRole,
+              caracterName: CHARACTER_PROFILES[characterId].name,
+              avatarImageUrl: mission.avatarImageUrl,
+              requirements: [],
+            },
+          }, {
+            localOnly: !isSignedIn,
+          });
+        } catch (err: any) {
+          console.warn('[Onboarding] No se pudo agregar el amigo inicial:', err?.message || err);
+        }
+      })();
+    }
+
+    await onboardingMissionSyncPromiseRef.current;
+  }, [isSignedIn, markMissionCompleted, selectedCharacter]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    recorder.ensurePermission()
+      .then((granted) => {
+        if (!mounted || granted) return;
+        setError('Activa el permiso de micrófono para grabar.');
+      })
+      .catch(() => {
+        if (mounted) setError('No pudimos solicitar el permiso de micrófono.');
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [recorder]);
 
   // Unload sound on unmount
   useEffect(() => {
@@ -133,6 +303,59 @@ export default function Step4({ content: _content, onNext }: Props) {
     } catch { /* ignore */ }
   }, []);
 
+  const speakAssistantMessage = useCallback(async (text: string) => {
+    const speechText = text.trim();
+    if (!speechText) return;
+
+    try {
+      try {
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: false,
+          shouldDuckAndroid: true,
+          playThroughEarpieceAndroid: false,
+        });
+      } catch { /* ignore */ }
+
+      Speech.stop();
+      Speech.speak(speechText, { language: 'en-US', pitch: 1.05 });
+    } catch { /* ignore */ }
+  }, []);
+
+  const translateAssistantMessage = useCallback(async (messageId: string, text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+
+    const existing = messageTranslations[messageId];
+    if (existing?.loading || existing?.text) return;
+
+    setMessageTranslations((current) => ({
+      ...current,
+      [messageId]: { ...current[messageId], loading: true, error: undefined },
+    }));
+
+    try {
+      const payload = await api.post<TranslationResponse>('/translate', {
+        text: trimmed,
+        source: 'en',
+        target: 'es',
+      });
+      setMessageTranslations((current) => ({
+        ...current,
+        [messageId]: { text: payload.translatedText || '', loading: false },
+      }));
+    } catch (err: any) {
+      setMessageTranslations((current) => ({
+        ...current,
+        [messageId]: {
+          loading: false,
+          error: err?.message || 'No pudimos traducir este mensaje.',
+        },
+      }));
+    }
+  }, [messageTranslations]);
+
   // Detect newly-met requirements and trigger celebration
   useEffect(() => {
     const newly = Array.from(metRequirements).filter((id) => !prevMetRef.current.has(id));
@@ -152,14 +375,33 @@ export default function Step4({ content: _content, onNext }: Props) {
   }, [metRequirements, playSuccessSound]);
 
   useEffect(() => {
+    if (!missionComplete) return;
+    void syncCompletedOnboardingMission();
+  }, [missionComplete, syncCompletedOnboardingMission]);
+
+  useEffect(() => {
     if (messages.length > 0) {
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 80);
     }
   }, [messages.length]);
 
-  // Cancel recording on background
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const showSub = Keyboard.addListener(showEvent, () => setKeyboardVisible(true));
+    const hideSub = Keyboard.addListener(hideEvent, () => setKeyboardVisible(false));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
   useEffect(() => {
     const sub = AppState.addEventListener('change', (next) => {
+      if (next === 'active') {
+        setKeyboardAvoiderKey((prev) => prev + 1);
+        return;
+      }
       if (next !== 'background') return;
       if (!isStartingRecording.current && !recorder.isRecording()) return;
       isStartingRecording.current = false;
@@ -178,6 +420,7 @@ export default function Step4({ content: _content, onNext }: Props) {
     if (!trimmed) { setFlowState('idle'); return; }
 
     setError(null);
+    setAnalysis(null);
     setFlowState('evaluating');
 
     const pendingMsg: ChatMessage = { id: `user-${Date.now()}`, role: 'user', text: trimmed };
@@ -190,18 +433,34 @@ export default function Step4({ content: _content, onNext }: Props) {
     }));
 
     try {
-      const payload = await sendOnboardingChatMessage({ sessionId, transcript: trimmed, history } as any);
+      const payload = await sendOnboardingChatMessage({
+        sessionId,
+        transcript: trimmed,
+        characterId: selectedCharacter ?? 'zoe',
+        history,
+      });
       setMessages((prev) => [
         ...prev,
         { id: `ai-${Date.now()}`, role: 'assistant', text: payload.aiReply },
       ]);
       setAnalysis(payload);
+      if (payload.profile) {
+        setExtractedProfile((current) => mergeProfile(current, payload.profile));
+      }
+      const payloadRequirements = getPayloadRequirements(payload);
+      if (payloadRequirements) {
+        setEvaluatedRequirements((previous) => {
+          if (!previous) return payloadRequirements;
+          return new Set([...previous, ...payloadRequirements]);
+        });
+        if (payload.objectiveComplete) setMissionComplete(true);
+      }
     } catch (err: any) {
       setError(err?.message || 'No pudimos continuar la conversación.');
     } finally {
       setFlowState('idle');
     }
-  }, [messages]);
+  }, [messages, selectedCharacter]);
 
   const handleSendText = useCallback(async (text: string) => {
     try {
@@ -225,7 +484,8 @@ export default function Step4({ content: _content, onNext }: Props) {
       const recording = await recorder.stop();
       setFlowState('uploading');
       const session = await api.post<{ sessionId: string; uploadUrl: string }>('/sessions/start', {});
-      await uploader.put(session.uploadUrl, { uri: recording.uri }, 'audio/mp4');
+      await uploader.put(session.uploadUrl, { uri: recording.uri }, recording.contentType);
+      setAnalysis(null);
       setFlowState('transcribing');
       const { transcript } = await api.post<{ transcript: string }>(`/sessions/${session.sessionId}/transcribe`);
       await handleAdvance(transcript || '', session.sessionId);
@@ -258,29 +518,68 @@ export default function Step4({ content: _content, onNext }: Props) {
     }
   }, [handleRecordRelease, recorder]);
 
+  const handleFinishMission = useCallback(async () => {
+    await syncCompletedOnboardingMission();
+
+    onComplete({
+      messages: messages.map(({ role, text }) => ({
+        role: role as 'user' | 'assistant',
+        content: text,
+      })),
+      ...(extractedProfile.name || extractedProfile.bio || extractedProfile.goal
+        ? { profile: extractedProfile }
+        : {}),
+      completedRequirementIds: Array.from(metRequirements),
+    });
+
+    if (isSignedIn && (extractedProfile.name || extractedProfile.bio || extractedProfile.goal)) {
+      await updateCurrentUser({
+        displayName: extractedProfile.name,
+        bio: extractedProfile.bio,
+        goal: extractedProfile.goal,
+      });
+    }
+    onNext();
+  }, [
+    extractedProfile,
+    isSignedIn,
+    messages,
+    metRequirements,
+    onComplete,
+    onNext,
+    syncCompletedOnboardingMission,
+    updateCurrentUser,
+  ]);
+
   const sendDisabled = flowState !== 'idle' || !inputText.trim();
   const micDisabled = flowState === 'recording' ? false : flowState !== 'idle';
 
   return (
-    <View style={{ flex: 1 }}>
-      {/* Confetti overlay */}
-      {confetti && (
-        <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
-          <ConfettiCannon
-            key={confetti.key}
-            count={confetti.count}
-            origin={{ x: windowWidth / 2, y: 0 }}
-            fadeOut
-            fallSpeed={2800}
-            explosionSpeed={420}
-            onAnimationEnd={() =>
-              setConfetti((c) => (c?.key === confetti.key ? null : c))
-            }
-          />
-        </View>
-      )}
-      {/* ── Header ── */}
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 20, paddingBottom: 6, minHeight: 148 }}>
+    <KeyboardAvoidingView
+      key={keyboardAvoiderKey}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? Math.max(insets.bottom, 90) : 0}
+      style={{ flex: 1, backgroundColor: COLORS.background }}
+    >
+      <View style={{ flex: 1 }}>
+        {/* Confetti overlay */}
+        {confetti && (
+          <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
+            <ConfettiCannon
+              key={confetti.key}
+              count={confetti.count}
+              origin={{ x: windowWidth / 2, y: 0 }}
+              fadeOut
+              fallSpeed={2800}
+              explosionSpeed={420}
+              onAnimationEnd={() =>
+                setConfetti((c) => (c?.key === confetti.key ? null : c))
+              }
+            />
+          </View>
+        )}
+        {/* ── Header ── */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingBottom: 4, minHeight: 104 }}>
         <View style={{ flex: 1, paddingRight: 10 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
             <Text style={{ color: COLORS.text, fontSize: 14, fontWeight: '800' }}>Tu primera misión</Text>
@@ -293,76 +592,72 @@ export default function Step4({ content: _content, onNext }: Props) {
             </GradientText>
             {' ✨'}
           </Text>
-          <Text style={{ color: COLORS.muted, fontSize: 14, lineHeight: 20, marginTop: 8 }}>
-            Cuéntanos quién eres y por qué quieres aprender inglés.
-          </Text>
         </View>
 
-        {/* Luna avatar + speech bubble */}
-        <View style={{ width: 126, alignItems: 'center' }}>
+        {/* Selected companion avatar */}
+        <View style={{ width: 94, alignItems: 'center' }}>
           <View style={{
-            backgroundColor: 'rgba(10, 16, 36, 0.92)',
-            borderRadius: 14, borderWidth: 1, borderColor: `${LUNA_COLOR}50`,
-            paddingHorizontal: 10, paddingVertical: 8, marginBottom: 6, alignSelf: 'flex-end',
+            width: 86, height: 86, borderRadius: 43,
+            backgroundColor: companion.avatarBg,
+            borderWidth: 2, borderColor: companion.color,
+            alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
           }}>
-            <Text style={{ color: COLORS.text, fontSize: 11, fontWeight: '700', lineHeight: 16, textAlign: 'center' }}>
-              {'¡Estoy emocionada\nde conocerte! 💜'}
-            </Text>
-          </View>
-          <View style={{
-            width: 104, height: 104, borderRadius: 52,
-            backgroundColor: 'rgba(109, 40, 217, 0.42)',
-            borderWidth: 2, borderColor: LUNA_COLOR,
-            alignItems: 'center', justifyContent: 'center',
-          }}>
-            <MaterialIcons name="person" size={54} color={LUNA_COLOR} />
+            <Image
+              source={companion.image}
+              resizeMode="cover"
+              accessibilityLabel={`Avatar de ${companion.name}`}
+              style={{ width: '100%', height: '100%' }}
+            />
           </View>
         </View>
-      </View>
+        </View>
 
-      {/* ── Scrollable content ── */}
-      <ScrollView
-        ref={scrollRef}
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12, gap: 10 }}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
+        {/* ── Scrollable content ── */}
+        <ScrollView
+          ref={scrollRef}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12, gap: 10 }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        >
         {/* Requirements card */}
-        <View style={{ backgroundColor: COLORS.card, borderRadius: 20, borderWidth: 1, borderColor: COLORS.cardBorder, padding: 14 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <MaterialIcons name="assignment" size={18} color={LUNA_COLOR} />
-            <Text style={{ color: LUNA_COLOR, fontSize: 14, fontWeight: '900' }}>Requisitos de la misión</Text>
+        <View style={{ backgroundColor: COLORS.card, borderRadius: 16, borderWidth: 1, borderColor: COLORS.cardBorder, padding: 12 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+            <MaterialIcons name="assignment" size={16} color={LUNA_COLOR} />
+            <Text style={{ color: LUNA_COLOR, fontSize: 13, fontWeight: '900' }}>Requisitos</Text>
           </View>
-          <View style={{ gap: 8 }}>
+          <View style={{ gap: 6 }}>
             {REQUIREMENTS.map((req) => {
               const met = metRequirements.has(req.id);
               return (
                 <View key={req.id} style={{
                   flexDirection: 'row', alignItems: 'center',
                   backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                  borderRadius: 14, borderWidth: 1,
+                  borderRadius: 12, borderWidth: 1,
                   borderColor: met ? `${LUNA_COLOR}40` : COLORS.cardBorder,
-                  padding: 12, gap: 10,
+                  paddingHorizontal: 10, paddingVertical: 8, gap: 8,
                 }}>
                   <View style={{
-                    width: 38, height: 38, borderRadius: 19,
+                    width: 28, height: 28, borderRadius: 14,
                     backgroundColor: `${LUNA_COLOR}20`,
                     alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                   }}>
-                    <MaterialIcons name={req.icon as any} size={20} color={LUNA_COLOR} />
+                    <MaterialIcons name={req.icon as any} size={16} color={LUNA_COLOR} />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: COLORS.text, fontSize: 13, fontWeight: '800', lineHeight: 18 }}>{req.title}</Text>
-                    <Text style={{ color: COLORS.muted, fontSize: 12, marginTop: 1, lineHeight: 16 }}>{req.subtitle}</Text>
+                    <Text style={{ color: COLORS.text, fontSize: 12, fontWeight: '800', lineHeight: 16 }}>{req.title}</Text>
                   </View>
                   <View style={{
-                    width: 28, height: 28, borderRadius: 14,
-                    backgroundColor: met ? '#10b981' : 'transparent',
-                    borderWidth: met ? 0 : 1.5, borderColor: 'rgba(148, 163, 184, 0.35)',
+                    paddingHorizontal: 8, paddingVertical: 4, borderRadius: 999,
+                    backgroundColor: met ? 'rgba(16, 185, 129, 0.16)' : 'rgba(34, 211, 238, 0.12)',
+                    borderWidth: 1,
+                    borderColor: met ? '#10b981' : 'rgba(34, 211, 238, 0.35)',
                     alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                   }}>
-                    {met && <MaterialIcons name="check" size={16} color="#ffffff" />}
+                    <Text style={{ color: met ? '#86efac' : COLORS.cyan, fontSize: 10, fontWeight: '800' }}>
+                      {met ? 'Listo' : 'Pendiente'}
+                    </Text>
                   </View>
                 </View>
               );
@@ -371,25 +666,36 @@ export default function Step4({ content: _content, onNext }: Props) {
         </View>
 
         {/* ── Chat messages ── */}
-        {messages.map((msg) => (
-          msg.role === 'user' ? (
-            <View key={msg.id} style={{ alignItems: 'flex-end' }}>
-              <View style={{
-                maxWidth: '86%', backgroundColor: COLORS.userBubble,
-                borderRadius: 18, borderBottomRightRadius: 4,
-                paddingHorizontal: 14, paddingVertical: 12,
-              }}>
-                <Text style={{ color: COLORS.text, fontSize: 14, lineHeight: 21 }}>{msg.text}</Text>
+        {messages.map((msg) => {
+          if (msg.role === 'user') {
+            return (
+              <View key={msg.id} style={{ alignItems: 'flex-end' }}>
+                <View style={{
+                  maxWidth: '86%', backgroundColor: COLORS.userBubble,
+                  borderRadius: 18, borderBottomRightRadius: 4,
+                  paddingHorizontal: 14, paddingVertical: 12,
+                }}>
+                  <Text style={{ color: COLORS.text, fontSize: 14, lineHeight: 21 }}>{msg.text}</Text>
+                </View>
               </View>
-            </View>
-          ) : (
+            );
+          }
+
+          const translationState = messageTranslations[msg.id];
+
+          return (
             <View key={msg.id} style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
               <View style={{
                 width: 36, height: 36, borderRadius: 18,
                 backgroundColor: `${LUNA_COLOR}22`, borderWidth: 1, borderColor: `${LUNA_COLOR}44`,
-                alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden',
               }}>
-                <MaterialIcons name="smart-toy" size={20} color={LUNA_COLOR} />
+                <Image
+                  source={companion.image}
+                  resizeMode="cover"
+                  accessibilityLabel={`Avatar de ${companion.name}`}
+                  style={{ width: '100%', height: '100%' }}
+                />
               </View>
               <View style={{
                 backgroundColor: COLORS.card, borderRadius: 18, borderBottomLeftRadius: 4,
@@ -397,10 +703,69 @@ export default function Step4({ content: _content, onNext }: Props) {
                 paddingHorizontal: 14, paddingVertical: 12, maxWidth: '78%',
               }}>
                 <Text style={{ color: COLORS.text, fontSize: 14, lineHeight: 21 }}>{msg.text}</Text>
+                {translationState?.text ? (
+                  <>
+                    <View style={{ height: 1, backgroundColor: COLORS.cardBorder, marginVertical: 10 }} />
+                    <Text style={{ color: COLORS.muted, fontSize: 14, lineHeight: 21 }}>
+                      {translationState.text}
+                    </Text>
+                  </>
+                ) : null}
+                {translationState?.error ? (
+                  <Text style={{ marginTop: 8, color: '#ef4444', fontSize: 12 }}>
+                    {translationState.error}
+                  </Text>
+                ) : null}
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 10 }}>
+                  <Pressable
+                    accessibilityLabel="Reproducir mensaje"
+                    onPress={() => speakAssistantMessage(msg.text)}
+                    hitSlop={8}
+                    style={({ pressed }) => ({
+                      width: 34,
+                      height: 34,
+                      borderRadius: 999,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: pressed ? '#dbeafe' : '#eff6ff',
+                      borderWidth: 1,
+                      borderColor: '#bfdbfe',
+                    })}
+                  >
+                    <MaterialIcons name="volume-up" size={18} color="#1d4ed8" />
+                  </Pressable>
+                  <Pressable
+                    accessibilityLabel="Traducir mensaje"
+                    onPress={() => translateAssistantMessage(msg.id, msg.text)}
+                    disabled={!!translationState?.loading}
+                    hitSlop={8}
+                    style={({ pressed }) => ({
+                      width: 34,
+                      height: 34,
+                      borderRadius: 999,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: translationState?.loading
+                        ? '#f1f5f9'
+                        : pressed
+                        ? '#dcfce7'
+                        : '#f0fdf4',
+                      borderWidth: 1,
+                      borderColor: '#bbf7d0',
+                      opacity: translationState?.loading ? 0.75 : 1,
+                    })}
+                  >
+                    {translationState?.loading ? (
+                      <ActivityIndicator size="small" color="#15803d" />
+                    ) : (
+                      <MaterialIcons name="translate" size={18} color="#15803d" />
+                    )}
+                  </Pressable>
+                </View>
               </View>
             </View>
-          )
-        ))}
+          );
+        })}
 
         {/* ── Feedback card (last analysis) ── */}
         {analysis && (
@@ -411,9 +776,6 @@ export default function Step4({ content: _content, onNext }: Props) {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                 <MaterialIcons name="auto-awesome" size={15} color={COLORS.cyan} />
                 <Text style={{ color: COLORS.text, fontSize: 14, fontWeight: '900' }}>Feedback</Text>
-              </View>
-              <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: `${LUNA_COLOR}20`, alignItems: 'center', justifyContent: 'center' }}>
-                <MaterialIcons name="volume-up" size={17} color={LUNA_COLOR} />
               </View>
             </View>
 
@@ -458,45 +820,77 @@ export default function Step4({ content: _content, onNext }: Props) {
         {/* Mission complete banner */}
         {missionComplete && (
           <View style={{
-            backgroundColor: 'rgba(16, 185, 129, 0.12)',
-            borderRadius: 18, borderWidth: 1, borderColor: 'rgba(16, 185, 129, 0.35)',
-            padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12,
+            backgroundColor: 'rgba(16, 185, 129, 0.10)',
+            borderRadius: 20, borderWidth: 1, borderColor: 'rgba(16, 185, 129, 0.35)',
+            padding: 18, gap: 14,
           }}>
-            <View style={{
-              width: 42, height: 42, borderRadius: 21,
-              backgroundColor: 'rgba(16, 185, 129, 0.2)',
-              alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-            }}>
-              <MaterialIcons name="emoji-events" size={24} color="#10b981" />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <View style={{
+                width: 44, height: 44, borderRadius: 22,
+                backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                <MaterialIcons name="emoji-events" size={26} color="#10b981" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: '#10b981', fontSize: 16, fontWeight: '900' }}>
+                  ¡Misión completada! 🎉
+                </Text>
+                <Text style={{ color: COLORS.muted, fontSize: 13, lineHeight: 18, marginTop: 2 }}>
+                  {`Podrás seguir hablando con ${companion.name} más adelante.`}
+                </Text>
+              </View>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: '#10b981', fontSize: 15, fontWeight: '900' }}>
-                ¡Misión completada! 🎉
+            <Pressable
+              onPress={() => void handleFinishMission()}
+              accessibilityRole="button"
+              style={({ pressed }) => ({
+                backgroundColor: pressed ? '#059669' : '#10b981',
+                borderRadius: 14,
+                paddingVertical: 14,
+                alignItems: 'center',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                gap: 8,
+                opacity: pressed ? 0.9 : 1,
+              })}
+            >
+              <MaterialIcons name="auto-awesome" size={18} color="#ffffff" />
+              <Text style={{ color: '#ffffff', fontSize: 15, fontWeight: '900' }}>
+                Recibir mi plan personalizado
               </Text>
-              <Text style={{ color: COLORS.muted, fontSize: 13, lineHeight: 18, marginTop: 2 }}>
-                Cubriste todos los requisitos. ¡Excelente presentación!
-              </Text>
-            </View>
+            </Pressable>
           </View>
         )}
 
         {/* Status / error */}
         {(flowState !== 'idle' || error) && (
           <View style={{ alignItems: 'center', paddingVertical: 6 }}>
-            <Text style={{ color: error ? '#ef4444' : COLORS.muted, fontSize: 13 }}>
-              {error ?? statusLabel(flowState)}
-            </Text>
+            {error ? (
+              <Text style={{ color: '#ef4444', fontSize: 13 }}>
+                {error}
+              </Text>
+            ) : (
+              <Image
+                source={luviLoading}
+                resizeMode="contain"
+                accessibilityLabel="Cargando"
+                style={{ width: 72, height: 72 }}
+              />
+            )}
           </View>
         )}
-      </ScrollView>
+        </ScrollView>
 
-      {/* ── Dark-themed input bar ── */}
-      <View style={{
-        flexDirection: 'row', alignItems: 'center', gap: 8,
-        paddingHorizontal: 12, paddingVertical: 10,
-        borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)',
-        backgroundColor: COLORS.background,
-      }}>
+        {/* ── Dark-themed input bar ── */}
+        <View style={{
+          flexDirection: 'row', alignItems: 'center', gap: 8,
+          paddingHorizontal: 12,
+          paddingTop: 10,
+          paddingBottom: keyboardVisible ? 12 : 8,
+          borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)',
+          backgroundColor: COLORS.background,
+        }}>
         {/* Text input */}
         <View style={{
           flex: 1, flexDirection: 'row', alignItems: 'center',
@@ -557,23 +951,8 @@ export default function Step4({ content: _content, onNext }: Props) {
           <MaterialIcons name="mic" size={22} color={micDisabled && flowState !== 'recording' ? COLORS.muted : '#ffffff'} />
         </Pressable>
 
-        {/* Continuar (visible after first AI reply, or can always show) */}
-        {messages.some((m) => m.role === 'assistant') && (
-          <Pressable
-            onPress={onNext}
-            accessibilityRole="button"
-            accessibilityLabel="Continuar"
-            style={({ pressed }) => ({
-              width: 44, height: 44, borderRadius: 22,
-              backgroundColor: pressed ? '#1d4ed8' : '#2563eb',
-              alignItems: 'center', justifyContent: 'center',
-              opacity: pressed ? 0.85 : 1,
-            })}
-          >
-            <MaterialIcons name="chevron-right" size={26} color="#ffffff" />
-          </Pressable>
-        )}
+        </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }

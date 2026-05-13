@@ -15,6 +15,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import AppTabBar from '../components/AppTabBar';
 import AccountProgressCard from '../components/AccountProgressCard';
+import CoinCountChip from '../components/CoinCountChip';
 import { useAuth } from '../auth/AuthProvider';
 import { FriendCharacter, useFriends } from '../hooks/useFriends';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
@@ -226,6 +227,7 @@ export default function FriendsScreen({ navigation }: Props) {
             position: 'relative',
           }}
         >
+          <CoinCountChip style={{ position: 'absolute', left: 0, top: 6 }} />
           <Image
             source={require('../image/logo.png')}
             style={{ width: 180, height: 48, resizeMode: 'contain' }}
@@ -266,12 +268,7 @@ export default function FriendsScreen({ navigation }: Props) {
           </Text>
         </View>
 
-        {!isSignedIn ? (
-          <AccountProgressCard
-            mode="signed-out"
-            onCreateAccount={handleCreateAccount}
-          />
-        ) : loading ? (
+        {loading ? (
           <View style={{ paddingVertical: 40, alignItems: 'center' }}>
             <ActivityIndicator size="large" color={COLORS.accent} />
             <Text style={{ color: COLORS.muted, marginTop: 10 }}>Cargando amigos...</Text>
@@ -310,6 +307,42 @@ export default function FriendsScreen({ navigation }: Props) {
                 onOpenProfile={handleOpenProfile}
               />
             ))}
+            <Pressable
+              onPress={() => navigation.navigate('Stories')}
+              style={({ pressed }) => ({
+                marginTop: 6,
+                padding: 18,
+                borderRadius: 18,
+                backgroundColor: pressed ? '#0f172a' : COLORS.surface,
+                borderWidth: 1,
+                borderColor: COLORS.border,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 14,
+              })}
+            >
+              <View
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  backgroundColor: '#1e3a5f',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <MaterialIcons name="add" size={24} color={COLORS.accent} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: COLORS.text, fontWeight: '900', fontSize: 16 }}>
+                  Desbloquear más amigos
+                </Text>
+                <Text style={{ color: COLORS.muted, fontSize: 13, marginTop: 3 }}>
+                  Completa más misiones para agregar nuevos personajes
+                </Text>
+              </View>
+              <MaterialIcons name="chevron-right" size={22} color={COLORS.muted} />
+            </Pressable>
           </View>
         ) : (
           <View
@@ -342,6 +375,15 @@ export default function FriendsScreen({ navigation }: Props) {
             </Pressable>
           </View>
         )}
+
+        {!isSignedIn ? (
+          <View style={{ marginTop: 16 }}>
+            <AccountProgressCard
+              mode="signed-out"
+              onCreateAccount={handleCreateAccount}
+            />
+          </View>
+        ) : null}
       </ScrollView>
       <AppTabBar active="friends" />
     </SafeAreaView>

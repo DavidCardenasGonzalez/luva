@@ -46,6 +46,7 @@ import {
   trackMixpanelPracticeHelpRequested,
   trackMixpanelPracticeStarted,
 } from "../marketing/mixpanelEvents";
+import { recordJourneyVocabularyPracticeCompleted } from "../progress/journeyProgress";
 
 type EvalRes = {
   score: number;
@@ -580,6 +581,9 @@ export default function PracticeScreen() {
         if (comp?.streak === 5) {
           // simple streak modal/alert
           console.log("Streak x5! Bonus awarded.");
+        }
+        if (combinedResult === "correct") {
+          await recordJourneyVocabularyPracticeCompleted(String(cardId));
         }
       }
       setState("done");
@@ -1623,6 +1627,9 @@ export default function PracticeScreen() {
                     result: combinedResult,
                     score: ev.score,
                   });
+                  if (combinedResult === "correct") {
+                    await recordJourneyVocabularyPracticeCompleted(String(cardId));
+                  }
                 }
                 setState("done");
                 if (ev.result !== "correct") {

@@ -4,6 +4,7 @@ import { AttributeType, BillingMode, GlobalSecondaryIndexProps, ProjectionType, 
 import { Bucket, BlockPublicAccess, HttpMethods } from 'aws-cdk-lib/aws-s3';
 import {
   UserPool,
+  UserPoolOperation,
   CfnUserPoolGroup,
   AccountRecovery,
   OAuthScope,
@@ -429,6 +430,7 @@ export class LuvaStack extends Stack {
       environment: {
         TABLE_NAME: table.tableName,
         FRIENDSHIPS_TABLE_NAME: friendshipsTable.tableName,
+        USERS_TABLE_NAME: usersTable.tableName,
         FEED_POSTS_TABLE_NAME: feedPostsTable.tableName,
         FEED_POSTS_BY_ORDER_INDEX_NAME: 'FeedPostsByOrderIndex',
         CHARACTER_POSTS_TABLE_NAME: characterPostsTable.tableName,
@@ -448,6 +450,7 @@ export class LuvaStack extends Stack {
 
     table.grantReadWriteData(apiFn);
     friendshipsTable.grantReadWriteData(apiFn);
+    usersTable.grantReadData(apiFn);
     feedPostsTable.grantReadData(apiFn);
     characterPostsTable.grantReadData(apiFn);
     lessonsTable.grantReadData(apiFn);
@@ -480,22 +483,38 @@ export class LuvaStack extends Stack {
       entry: path.join(__dirname, '../../backend/src/handlers/onboarding.ts'),
       handler: 'handler',
       runtime: Runtime.NODEJS_18_X,
-      memorySize: 128,
-      timeout: Duration.seconds(10),
+      memorySize: 256,
+      timeout: Duration.seconds(20),
       logGroup: onboardingFnLogGroup,
       environment: {
+        OPENAI_KEY_PARAM: openAiKeyParam.parameterName,
+        OPENAI_CHAT_MODEL: 'gpt-5.4-nano',
         STAGE: 'prod',
       },
     });
+    onboardingFn.addToRolePolicy(new PolicyStatement({
+      actions: ['ssm:GetParameter', 'ssm:GetParameters', 'ssm:GetParameterHistory'],
+      resources: [openAiKeyParam.parameterArn],
+    }));
 
     const adminFnLogGroup = new LogGroup(this, 'AdminFnLogs', { retention: RetentionDays.ONE_WEEK });
     const adminFn = new NodejsFunction(this, 'AdminFunction', {
       entry: path.join(__dirname, '../../backend/src/handlers/admin.ts'),
       handler: 'handler',
       runtime: Runtime.NODEJS_18_X,
-      memorySize: 256,
+      memorySize: 1024,
       timeout: Duration.minutes(15),
       logGroup: adminFnLogGroup,
+      bundling: {
+        externalModules: ['@aws-sdk/*', 'ffmpeg-static'],
+        commandHooks: {
+          beforeBundling: () => [],
+          beforeInstall: () => [],
+          afterBundling: (_inputDir: string, outputDir: string) => [
+            `cd "${outputDir}" && npm install ffmpeg-static --no-package-lock --no-save`,
+          ],
+        },
+      },
       environment: {
         USERS_TABLE_NAME: usersTable.tableName,
         GENERATED_VIDEOS_TABLE_NAME: generatedVideosTable.tableName,
@@ -519,7 +538,7 @@ export class LuvaStack extends Stack {
         GEMINI_TTS_MODEL: 'gemini-3.1-flash-tts-preview',
         GOOGLE_TRANSLATE_API_KEY_PARAM: googleTranslateKeyParamName,
         GOOGLE_TTS_API_KEY_PARAM: googleTranslateKeyParamName,
-        OPENAI_CHAT_MODEL: 'gpt-5.5',
+        OPENAI_CHAT_MODEL: 'gpt-5.4-nano',
         ASSETS_BUCKET_NAME: assetsBucket.bucketName,
         ASSETS_CLOUDFRONT_DOMAIN_NAME: assetsDistribution.domainName,
         ASSETS_CLOUDFRONT_URL: assetsCloudFrontUrl,
@@ -594,6 +613,16 @@ export class LuvaStack extends Stack {
       targets: [new LambdaFunction(videoPublisherFn)],
     });
 
+    // Lambda: Cognito Custom Message (email verification / password reset)
+    const customMessageFn = new NodejsFunction(this, 'CustomMessageFunction', {
+      entry: path.join(__dirname, '../../backend/src/handlers/custom-message.ts'),
+      handler: 'handler',
+      runtime: Runtime.NODEJS_22_X,
+      memorySize: 128,
+      timeout: Duration.seconds(5),
+    });
+    userPool.addTrigger(UserPoolOperation.CUSTOM_MESSAGE, customMessageFn);
+
     // API Gateway REST
     const api = new RestApi(this, 'LuvaApi', {
       deploy: false,
@@ -612,6 +641,8 @@ export class LuvaStack extends Stack {
     const usersMe = users.addResource('me');
     const usersMeProgress = usersMe.addResource('progress');
     const onboarding = v1.addResource('onboarding');
+    const onboardingChat = onboarding.addResource('chat');
+    const onboardingPlan = onboarding.addResource('plan');
     const friends = v1.addResource('friends');
     const friendById = friends.addResource('{friendId}');
     const friendProfile = friendById.addResource('profile');
@@ -640,6 +671,8 @@ export class LuvaStack extends Stack {
       authorizationType: AuthorizationType.COGNITO,
     });
     onboarding.addMethod('GET', onboardingLambdaIntegration);
+    onboardingChat.addMethod('POST', onboardingLambdaIntegration);
+    onboardingPlan.addMethod('POST', onboardingLambdaIntegration);
     friends.addMethod('GET', lambdaIntegration, {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
@@ -648,10 +681,7 @@ export class LuvaStack extends Stack {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
     });
-    friendProfile.addMethod('GET', lambdaIntegration, {
-      authorizer: usersAuthorizer,
-      authorizationType: AuthorizationType.COGNITO,
-    });
+    friendProfile.addMethod('GET', lambdaIntegration);
     friendChat.addMethod('POST', lambdaIntegration, {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
@@ -669,7 +699,7 @@ export class LuvaStack extends Stack {
 
     const deployment = new Deployment(this, 'Deployment', { api });
     deployment.addToLogicalId({
-      routeManifestVersion: '2026-04-27-onboarding-v1',
+      routeManifestVersion: '2026-05-06-onboarding-plan-v1',
       routes: {
         apiRoot: ['ANY /v1', 'ANY /v1/{proxy+}'],
         users: [
@@ -680,6 +710,8 @@ export class LuvaStack extends Stack {
         ],
         onboarding: [
           'GET /v1/onboarding',
+          'POST /v1/onboarding/chat',
+          'POST /v1/onboarding/plan',
         ],
         friends: [
           'GET /v1/friends',

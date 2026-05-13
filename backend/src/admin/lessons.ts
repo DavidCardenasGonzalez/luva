@@ -1,4 +1,8 @@
 import { createHash, randomUUID } from 'crypto';
+import { execFileSync } from 'child_process';
+import { mkdtempSync, writeFileSync, readFileSync, unlinkSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
   DeleteCommand,
@@ -113,6 +117,8 @@ export type Lesson = {
   translatedSubtitlesUrl?: string;
   videoKey?: string;
   videoUrl?: string;
+  thumbnailKey?: string;
+  thumbnailUrl?: string;
   status: 'draft' | 'ready';
   createdAt: string;
   updatedAt: string;
@@ -128,6 +134,7 @@ export type PublicLesson = {
   title: string;
   prompt?: string;
   videoUrl: string;
+  thumbnailUrl?: string;
   subtitlesUrl?: string;
   translatedSubtitlesUrl?: string;
   quiz?: QuizQuestion[];
@@ -273,6 +280,9 @@ function toLesson(item: unknown): Lesson | undefined {
   const videoKey = asString(r.videoKey)?.trim();
   if (videoKey) { lesson.videoKey = videoKey; lesson.videoUrl = buildAssetUrl(videoKey); }
 
+  const thumbnailKey = asString(r.thumbnailKey)?.trim();
+  if (thumbnailKey) { lesson.thumbnailKey = thumbnailKey; lesson.thumbnailUrl = buildAssetUrl(thumbnailKey); }
+
   return lesson;
 }
 
@@ -333,6 +343,7 @@ function toPublicLesson(lesson: Lesson): PublicLesson | undefined {
     title: lesson.title,
     prompt: lesson.prompt,
     videoUrl: lesson.videoUrl,
+    thumbnailUrl: lesson.thumbnailUrl,
     subtitlesUrl: lesson.subtitlesUrl,
     translatedSubtitlesUrl: lesson.translatedSubtitlesUrl,
     quiz: lesson.quiz,
@@ -524,6 +535,7 @@ export async function deleteAdminLesson(input: {
     lesson.subtitlesKey,
     lesson.translatedSubtitlesKey,
     lesson.videoKey,
+    lesson.thumbnailKey,
   ].filter(Boolean) as string[];
 
   await Promise.all(
@@ -1377,6 +1389,75 @@ export async function translateLessonSubtitles(input: {
     updatedAt: now,
   };
   return { lesson: updated, updatedAt: now };
+}
+
+// ── Thumbnail generation ──────────────────────────────────────────────────────
+export async function generateLessonThumbnail(input: {
+  lessonId?: unknown;
+}): Promise<LessonMutationResponse> {
+  const lessonId = asString(input.lessonId)?.trim();
+  if (!lessonId) throw new Error('INVALID_LESSON_ID');
+
+  const lesson = await getLessonRecord(lessonId);
+  if (!lesson) throw new Error('LESSON_NOT_FOUND');
+  if (!lesson.videoKey) throw new Error('LESSON_VIDEO_REQUIRED');
+
+  const bucket = getAssetsBucketName();
+  const videoBuffer = await getObjectBuffer(bucket, lesson.videoKey);
+
+  const tmpDir = mkdtempSync(join(tmpdir(), 'lesson-thumb-'));
+  const videoPath = join(tmpDir, 'input.mp4');
+  const thumbPath = join(tmpDir, 'thumbnail.webp');
+
+  try {
+    writeFileSync(videoPath, videoBuffer);
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const ffmpegBin: string = require('ffmpeg-static');
+    // Extract frame at 2s (avoids black frames / intro fades), scale-cover to 512x512, output WebP
+    execFileSync(ffmpegBin, [
+      '-ss', '2',
+      '-i', videoPath,
+      '-vframes', '1',
+      '-vf', 'scale=512:512:force_original_aspect_ratio=increase,crop=512:512',
+      '-compression_level', '5',
+      '-y', thumbPath,
+    ], { timeout: 60_000 });
+
+    const thumbnailBuffer = readFileSync(thumbPath);
+    const thumbnailKey = `lessons/${lessonId}/thumbnail.webp`;
+
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: thumbnailKey,
+        Body: thumbnailBuffer,
+        ContentType: 'image/webp',
+        CacheControl: 'public, max-age=31536000, immutable',
+      }),
+    );
+
+    const now = new Date().toISOString();
+    await dynamo.send(
+      new UpdateCommand({
+        TableName: getLessonsTableName(),
+        Key: { lessonId },
+        UpdateExpression: 'SET thumbnailKey = :thumbnailKey, updatedAt = :now',
+        ExpressionAttributeValues: { ':thumbnailKey': thumbnailKey, ':now': now },
+      }),
+    );
+
+    const updated: Lesson = {
+      ...lesson,
+      thumbnailKey,
+      thumbnailUrl: buildAssetUrl(thumbnailKey),
+      updatedAt: now,
+    };
+    return { lesson: updated, updatedAt: now };
+  } finally {
+    try { unlinkSync(videoPath); } catch { /* ignore */ }
+    try { unlinkSync(thumbPath); } catch { /* ignore */ }
+  }
 }
 
 // ── Video upload ──────────────────────────────────────────────────────────────

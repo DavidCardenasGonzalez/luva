@@ -85,6 +85,7 @@ export function StoryProgressProvider({ children }: { children: React.ReactNode 
             console.warn('[StoryProgress] No se pudo sincronizar el progreso:', err?.message || err);
           }
         });
+      return syncQueueRef.current;
     },
     [isSignedIn, mergeRemoteStoriesIntoLocal, user?.email]
   );
@@ -249,7 +250,7 @@ export function StoryProgressProvider({ children }: { children: React.ReactNode 
     await persist(next);
 
     if (isSignedIn && user?.email) {
-      enqueueRemoteMerge({ stories: next });
+      await enqueueRemoteMerge({ stories: next });
     }
   }, [applyDocument, enqueueRemoteMerge, isSignedIn, persist, user?.email]);
 

@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api/api';
 import { useAuth } from '../auth/AuthProvider';
+import {
+  addLocalFriendFromMission,
+  listLocalFriends,
+  mergeFriendLists,
+  syncLocalFriendsToRemote,
+} from '../friends/localFriends';
 import type { StoryDefinition, StoryMission, StoryMissionDefinition } from './useStories';
 
 export type FriendCharacter = {
@@ -55,12 +61,39 @@ type AddFriendResponse = {
   friend?: FriendCharacter;
 };
 
-export async function addFriendFromMission(payload: AddFriendPayload): Promise<FriendCharacter> {
-  const response = await api.post<AddFriendResponse>('/friends', payload);
-  if (!response?.friend) {
-    throw new Error('No pudimos agregar este personaje a amigos.');
+type AddFriendOptions = {
+  localOnly?: boolean;
+};
+
+function isUnauthorizedFriendWrite(err: any) {
+  return (
+    err?.code === 'UNAUTHORIZED' ||
+    err?.message === 'Unauthorized' ||
+    err?.message === 'Missing user identity' ||
+    err?.message === 'HTTP 401'
+  );
+}
+
+export async function addFriendFromMission(
+  payload: AddFriendPayload,
+  options?: AddFriendOptions,
+): Promise<FriendCharacter> {
+  if (options?.localOnly) {
+    return addLocalFriendFromMission(payload);
   }
-  return response.friend;
+
+  try {
+    const response = await api.post<AddFriendResponse>('/friends', payload);
+    if (!response?.friend) {
+      throw new Error('No pudimos agregar este personaje a amigos.');
+    }
+    return response.friend;
+  } catch (err: any) {
+    if (isUnauthorizedFriendWrite(err)) {
+      return addLocalFriendFromMission(payload);
+    }
+    throw err;
+  }
 }
 
 export async function sendFriendChatMessage(
@@ -82,26 +115,40 @@ export function useFriends() {
   const [error, setError] = useState<string | undefined>();
 
   const reload = useCallback(async () => {
+    if (authLoading) {
+      return;
+    }
+
     if (!isSignedIn) {
-      setFriends([]);
+      setLoading(true);
+      setError(undefined);
+      try {
+        setFriends(await listLocalFriends());
+      } catch (err: any) {
+        setError(err?.message || 'No pudimos cargar tus amigos locales.');
+      }
       setLoading(false);
       setLoaded(true);
-      setError(undefined);
       return;
     }
 
     setLoading(true);
     setError(undefined);
     try {
+      await syncLocalFriendsToRemote();
       const response = await api.get<FriendsListResponse>('/friends');
-      setFriends(Array.isArray(response?.items) ? response.items : []);
+      const remoteFriends = Array.isArray(response?.items) ? response.items : [];
+      const pendingLocalFriends = await listLocalFriends();
+      setFriends(mergeFriendLists(remoteFriends, pendingLocalFriends));
     } catch (err: any) {
+      const pendingLocalFriends = await listLocalFriends();
+      setFriends(pendingLocalFriends);
       setError(err?.message || 'No pudimos cargar tus amigos.');
     } finally {
       setLoading(false);
       setLoaded(true);
     }
-  }, [isSignedIn]);
+  }, [authLoading, isSignedIn]);
 
   useEffect(() => {
     if (authLoading) {

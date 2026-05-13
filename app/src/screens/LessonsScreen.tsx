@@ -1,6 +1,8 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
+  LayoutChangeEvent,
   Pressable,
   ScrollView,
   Text,
@@ -10,7 +12,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { ResizeMode, Video } from 'expo-av';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import AppTabBar from '../components/AppTabBar';
 import { Lesson, useLessons } from '../hooks/useLessons';
@@ -27,8 +28,76 @@ const COLORS = {
   muted: '#94a3b8',
   accent: '#22d3ee',
   action: '#2563eb',
-  success: '#22c55e',
 };
+
+function LessonThumbnail({ uri }: { uri: string }) {
+  const [containerSize, setContainerSize] = useState<{ width: number; height: number } | null>(null);
+  const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    Image.getSize(
+      uri,
+      (width, height) => {
+        if (mounted) {
+          setImageSize({ width, height });
+        }
+      },
+      () => {
+        if (mounted) {
+          setImageSize(null);
+        }
+      }
+    );
+
+    return () => {
+      mounted = false;
+    };
+  }, [uri]);
+
+  const handleLayout = useCallback((event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    setContainerSize({ width, height });
+  }, []);
+
+  const imageStyle = useMemo(() => {
+    if (!containerSize || !imageSize || imageSize.width === 0 || imageSize.height === 0) {
+      return { width: '100%' as const, height: '100%' as const };
+    }
+
+    const containerAspect = containerSize.width / containerSize.height;
+    const imageAspect = imageSize.width / imageSize.height;
+
+    if (imageAspect > containerAspect) {
+      const width = containerSize.height * imageAspect;
+
+      return {
+        position: 'absolute' as const,
+        top: 0,
+        left: (containerSize.width - width) / 2,
+        width,
+        height: containerSize.height,
+      };
+    }
+
+    const height = containerSize.width / imageAspect;
+
+    return {
+      position: 'absolute' as const,
+      top: 0,
+      left: 0,
+      width: containerSize.width,
+      height,
+    };
+  }, [containerSize, imageSize]);
+
+  return (
+    <View onLayout={handleLayout} style={{ flex: 1, overflow: 'hidden' }}>
+      <Image source={{ uri }} style={imageStyle} resizeMode={containerSize && imageSize ? 'stretch' : 'cover'} />
+    </View>
+  );
+}
 
 function LessonCard({
   lesson,
@@ -39,9 +108,6 @@ function LessonCard({
   learned: boolean;
   onOpen: (lesson: Lesson) => void;
 }) {
-  const quizCount = lesson.quiz?.length || 0;
-  const hasSpanishSubtitles = Boolean(lesson.translatedSubtitlesUrl);
-
   return (
     <View
       style={{
@@ -56,14 +122,14 @@ function LessonCard({
       }}
     >
       {/* Video preview */}
-      <View style={{ width: '100%', aspectRatio: 16 / 9, backgroundColor: '#07111f' }}>
-        <Video
-          source={{ uri: lesson.videoUrl }}
-          style={{ width: '100%', height: '100%' }}
-          resizeMode={ResizeMode.COVER}
-          shouldPlay={false}
-          isMuted
-        />
+      <View style={{ width: '100%', aspectRatio: 7 / 5, backgroundColor: '#07111f' }}>
+        {lesson.thumbnailUrl ? (
+          <LessonThumbnail uri={lesson.thumbnailUrl} />
+        ) : (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <MaterialIcons name="play-circle-outline" size={42} color={COLORS.accent} />
+          </View>
+        )}
 
         {/* Completed badge */}
         {learned ? (
@@ -90,61 +156,7 @@ function LessonCard({
 
       {/* Info + CTA */}
       <View style={{ padding: 14, gap: 12 }}>
-        <View>
-          <Text style={{ color: '#a5f3fc', fontSize: 11, fontWeight: '900', textTransform: 'uppercase' }}>
-            Lección
-          </Text>
-          <Text
-            style={{ color: COLORS.text, fontSize: 18, fontWeight: '900', marginTop: 3, lineHeight: 24 }}
-            numberOfLines={2}
-          >
-            {lesson.title}
-          </Text>
-          {lesson.prompt ? (
-            <Text style={{ color: COLORS.muted, lineHeight: 20, marginTop: 5 }} numberOfLines={2}>
-              {lesson.prompt}
-            </Text>
-          ) : null}
-        </View>
-
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <View style={{ flexDirection: 'row', gap: 8, flex: 1 }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 5,
-                paddingHorizontal: 10,
-                paddingVertical: 6,
-                borderRadius: 999,
-                backgroundColor: 'rgba(34, 211, 238, 0.12)',
-              }}
-            >
-              <MaterialIcons name="closed-caption" size={14} color={COLORS.accent} />
-              <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '800' }}>
-                {hasSpanishSubtitles ? 'EN + ES' : 'EN'}
-              </Text>
-            </View>
-            {quizCount > 0 ? (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 5,
-                  paddingHorizontal: 10,
-                  paddingVertical: 6,
-                  borderRadius: 999,
-                  backgroundColor: 'rgba(34, 197, 94, 0.12)',
-                }}
-              >
-                <MaterialIcons name="quiz" size={14} color={COLORS.success} />
-                <Text style={{ color: '#bbf7d0', fontSize: 12, fontWeight: '800' }}>
-                  {quizCount} preguntas
-                </Text>
-              </View>
-            ) : null}
-          </View>
-
+        <View style={{ alignItems: 'flex-end' }}>
           <Pressable
             onPress={() => onOpen(lesson)}
             accessibilityRole="button"
@@ -173,6 +185,7 @@ function LessonCard({
 export default function LessonsScreen({ navigation }: Props) {
   const { lessons, loading, error, reload } = useLessons();
   const [learnedIds, setLearnedIds] = useState<Set<string>>(new Set());
+  const [showAll, setShowAll] = useState(false);
 
   const reloadLearned = useCallback(async () => {
     const ids = await getLearnedLessonIds();
@@ -181,9 +194,8 @@ export default function LessonsScreen({ navigation }: Props) {
 
   useFocusEffect(
     useCallback(() => {
-      reload();
       reloadLearned();
-    }, [reload, reloadLearned])
+    }, [reloadLearned])
   );
 
   const handleOpenLesson = useCallback(
@@ -194,6 +206,10 @@ export default function LessonsScreen({ navigation }: Props) {
   );
 
   const completedCount = lessons.filter((l) => learnedIds.has(l.lessonId)).length;
+  const visibleLessons = useMemo(
+    () => (showAll ? lessons : lessons.filter((lesson) => !learnedIds.has(lesson.lessonId))),
+    [learnedIds, lessons, showAll]
+  );
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: COLORS.background }}>
@@ -209,45 +225,65 @@ export default function LessonsScreen({ navigation }: Props) {
             Mira videos con subtítulos y pregúntale a Luvi cuando algo no quede claro.
           </Text>
 
-          {!loading && lessons.length > 0 ? (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 6,
-                marginTop: 4,
-                alignSelf: 'flex-start',
-                paddingHorizontal: 12,
-                paddingVertical: 7,
-                borderRadius: 999,
-                backgroundColor: completedCount === lessons.length
-                  ? 'rgba(34, 197, 94, 0.18)'
-                  : 'rgba(34, 211, 238, 0.10)',
-                borderWidth: 1,
-                borderColor: completedCount === lessons.length
-                  ? 'rgba(34, 197, 94, 0.35)'
-                  : 'rgba(34, 211, 238, 0.2)',
-              }}
-            >
-              <MaterialIcons
-                name={completedCount === lessons.length ? 'emoji-events' : 'bar-chart'}
-                size={15}
-                color={completedCount === lessons.length ? '#4ade80' : COLORS.accent}
-              />
-              <Text
+          {lessons.length > 0 ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 4 }}>
+              <View
                 style={{
-                  color: completedCount === lessons.length ? '#bbf7d0' : '#a5f3fc',
-                  fontSize: 13,
-                  fontWeight: '900',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 6,
+                  flexShrink: 1,
+                  paddingHorizontal: 12,
+                  paddingVertical: 7,
+                  borderRadius: 999,
+                  backgroundColor: completedCount === lessons.length
+                    ? 'rgba(34, 197, 94, 0.18)'
+                    : 'rgba(34, 211, 238, 0.10)',
+                  borderWidth: 1,
+                  borderColor: completedCount === lessons.length
+                    ? 'rgba(34, 197, 94, 0.35)'
+                    : 'rgba(34, 211, 238, 0.2)',
                 }}
               >
-                {completedCount} de {lessons.length} completadas
-              </Text>
+                <MaterialIcons
+                  name={completedCount === lessons.length ? 'emoji-events' : 'bar-chart'}
+                  size={15}
+                  color={completedCount === lessons.length ? '#4ade80' : COLORS.accent}
+                />
+                <Text
+                  style={{
+                    color: completedCount === lessons.length ? '#bbf7d0' : '#a5f3fc',
+                    flexShrink: 1,
+                    fontSize: 13,
+                    fontWeight: '900',
+                  }}
+                  numberOfLines={1}
+                >
+                  {completedCount} de {lessons.length} completadas
+                </Text>
+              </View>
+
+              <Pressable
+                onPress={() => setShowAll((current) => !current)}
+                accessibilityRole="button"
+                accessibilityLabel={showAll ? 'Mostrar lecciones pendientes' : 'Mostrar todas las lecciones'}
+                style={({ pressed }) => ({
+                  flexShrink: 0,
+                  paddingHorizontal: 10,
+                  paddingVertical: 6,
+                  borderRadius: 999,
+                  backgroundColor: pressed ? 'rgba(34, 211, 238, 0.18)' : 'rgba(34, 211, 238, 0.10)',
+                })}
+              >
+                <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '900' }}>
+                  {showAll ? 'Mostrar pendientes' : 'Mostrar todas'}
+                </Text>
+              </Pressable>
             </View>
           ) : null}
         </View>
 
-        {loading ? (
+        {loading && lessons.length === 0 ? (
           <View style={{ paddingVertical: 36, alignItems: 'center' }}>
             <ActivityIndicator color={COLORS.accent} />
             <Text style={{ color: COLORS.muted, marginTop: 10 }}>Cargando lecciones...</Text>
@@ -297,14 +333,31 @@ export default function LessonsScreen({ navigation }: Props) {
           </View>
         ) : (
           <View style={{ gap: 14 }}>
-            {lessons.map((lesson) => (
-              <LessonCard
-                key={lesson.lessonId}
-                lesson={lesson}
-                learned={learnedIds.has(lesson.lessonId)}
-                onOpen={handleOpenLesson}
-              />
-            ))}
+            {visibleLessons.length === 0 ? (
+              <View
+                style={{
+                  padding: 18,
+                  borderRadius: 18,
+                  backgroundColor: COLORS.surface,
+                  borderWidth: 1,
+                  borderColor: COLORS.border,
+                }}
+              >
+                <MaterialIcons name="check-circle" size={30} color="#4ade80" />
+                <Text style={{ color: COLORS.text, fontSize: 18, fontWeight: '900', marginTop: 10 }}>
+                  No tienes lecciones pendientes
+                </Text>
+              </View>
+            ) : (
+              visibleLessons.map((lesson) => (
+                <LessonCard
+                  key={lesson.lessonId}
+                  lesson={lesson}
+                  learned={learnedIds.has(lesson.lessonId)}
+                  onOpen={handleOpenLesson}
+                />
+              ))
+            )}
           </View>
         )}
       </ScrollView>

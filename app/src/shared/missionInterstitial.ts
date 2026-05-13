@@ -8,7 +8,7 @@ const PROD_INTERSTITIAL_AD_UNIT_ID =
   }) ?? 'ca-app-pub-3572102651268229/2484186004';
 
 const FREE_MISSION_INTERSTITIALS_STORAGE_KEY = '@luva/missions/free-interstitials';
-const FREE_MISSION_INTERSTITIAL_LIMIT = 1;
+const FREE_MISSION_INTERSTITIAL_LIMIT = 5;
 
 type MobileAdsModule = {
   AdEventType: {

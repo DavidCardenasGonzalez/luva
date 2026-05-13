@@ -42,6 +42,10 @@ import type {
   StoryRequirementProgress,
   StoryRetryState,
 } from '../progress/types';
+import {
+  AI_CONVERSATION_POINTS_PER_MESSAGE,
+  recordJourneyAiConversationMessageSent,
+} from '../progress/journeyProgress';
 import StoryMessageComposer from '../components/StoryMessageComposer';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
 import { useCoins, CHAT_MISSION_COST, RECORDING_COST } from '../purchases/CoinBalanceProvider';
@@ -62,6 +66,7 @@ import {
 import { prefetchImageUrls } from '../shared/imagePrefetch';
 
 const luviImage = require('../image/luvi.png');
+const luviLoadingGif = require('../image/luvi-loading.gif');
 const successRequirementSoundAsset = require('../sound/succes_req.mp3');
 
 type StoryMessage = {
@@ -130,6 +135,10 @@ const REQUIREMENT_BURST_COLORS = [
   '#a78bfa',
   '#facc15',
 ];
+
+function formatJourneyPoints(points: number) {
+  return Number.isInteger(points) ? String(points) : points.toFixed(1);
+}
 
 function hashString(value: string): number {
   let hash = 0;
@@ -512,6 +521,7 @@ export default function StorySceneScreen() {
   const navigation = useNavigation<any>();
   const storyId: string | undefined = route.params?.storyId;
   const initialSceneIndex: number = route.params?.sceneIndex ?? 0;
+  const fromScreen: 'feed' | 'missions' | undefined = route.params?.from;
   const { isSignedIn } = useAuth();
   const { story, loading, error } = useStoryDetail(storyId);
   const {
@@ -545,6 +555,9 @@ export default function StorySceneScreen() {
   const mission = story?.missions?.[sceneIndex];
   const avatarImageUrl = mission?.avatarImageUrl?.trim();
   const introVideoUri = mission?.videoIntro?.trim();
+  const introVideoSource = useMemo(() => {
+    return introVideoUri ? { uri: introVideoUri } : undefined;
+  }, [introVideoUri]);
 
   const missionAvatar = useMemo(() => {
     if (!mission) return undefined;
@@ -629,6 +642,10 @@ export default function StorySceneScreen() {
   const [requirements, setRequirements] = useState<StoryRequirementState[]>([]);
   const [messages, setMessages] = useState<StoryMessage[]>([]);
   const [messageTranslations, setMessageTranslations] = useState<Record<string, MessageTranslationState>>({});
+  const aiConversationPoints = useMemo(
+    () => messages.filter((message) => message.role === 'user').length * AI_CONVERSATION_POINTS_PER_MESSAGE,
+    [messages]
+  );
   const [analysis, setAnalysis] = useState<StoryAnalysis | null>(null);
   const [missionCompleted, setMissionCompleted] = useState<boolean>(false);
   const [storyCompleted, setStoryCompleted] = useState<boolean>(false);
@@ -1087,6 +1104,7 @@ export default function StorySceneScreen() {
         pendingNext,
         conversationFeedback: cloneConversationFeedback(conversationFeedback),
       };
+      setAnalysis(null);
       setRetryState('none');
       setFlowState('evaluating');
       const wasPreviouslyCompleted = missionCompleted || storyCompleted || conversationFeedback || pendingNext !== null;
@@ -1153,6 +1171,7 @@ export default function StorySceneScreen() {
           persistedRequirements: persistedRequirementPayload,
           persistedMissionCompleted: wasPreviouslyCompleted ? false : missionCompleted,
         });
+        void recordJourneyAiConversationMessageSent();
         console.log('Advance payload', payload);
         const previousRequirementsById = new Map(
           requirements.map((item) => [item.requirementId, item])
@@ -1559,10 +1578,6 @@ export default function StorySceneScreen() {
       setFriendAddError('No encontramos este personaje.');
       return;
     }
-    if (!isSignedIn) {
-      navigation.navigate('EmailSignUp', undefined);
-      return;
-    }
     if (addingFriend) {
       return;
     }
@@ -1576,6 +1591,8 @@ export default function StorySceneScreen() {
         sceneIndex,
         storyDefinition: storyDefinitionPayload,
         missionDefinition: missionDefinitionPayload,
+      }, {
+        localOnly: !isSignedIn,
       });
       setAddedFriendId(friend.friendId);
     } catch (err: any) {
@@ -1588,11 +1605,17 @@ export default function StorySceneScreen() {
     isSignedIn,
     mission,
     missionDefinitionPayload,
-    navigation,
     sceneIndex,
     storyDefinitionPayload,
     storyId,
   ]);
+
+  useEffect(() => {
+    if (missionCompleted && !addedFriendId && !addingFriend) {
+      void handleAddFriend();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [missionCompleted]);
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (nextState) => {
@@ -1700,8 +1723,8 @@ export default function StorySceneScreen() {
 
   const closeIntroVideoModal = useCallback(() => {
     hasDismissedIntroVideo.current = true;
-    void introVideoRef.current?.stopAsync().catch((pauseErr) => {
-      console.warn('Mission intro video stop failed', pauseErr);
+    void introVideoRef.current?.unloadAsync().catch((unloadErr) => {
+      console.warn('Mission intro video unload failed', unloadErr);
     });
     setShowIntroVideoModal(false);
     setIntroVideoLoading(false);
@@ -2117,6 +2140,29 @@ export default function StorySceneScreen() {
           )}
         </View>
 
+        {flowState === 'evaluating' ? (
+          <View
+            style={{
+              marginTop: 16,
+              padding: 16,
+              backgroundColor: 'white',
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: '#e2e8f0',
+              alignItems: 'center',
+            }}
+          >
+            <Image
+              source={luviLoadingGif}
+              style={{ width: 96, height: 96 }}
+              resizeMode="contain"
+            />
+            <Text style={{ marginTop: 8, fontWeight: '700', color: '#1e293b' }}>
+              Analizando tu respuesta...
+            </Text>
+          </View>
+        ) : null}
+
         {analysis ? (
           <View
             style={{
@@ -2178,6 +2224,22 @@ export default function StorySceneScreen() {
         {missionCompleted ? (
           <View style={{ marginTop: 16, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: '#bbf7d0', backgroundColor: '#f0fdf4' }}>
             <Text style={{ fontWeight: '700', color: '#15803d' }}>¡Misión completada!</Text>
+            <View
+              style={{
+                alignSelf: 'flex-start',
+                marginTop: 10,
+                paddingHorizontal: 10,
+                paddingVertical: 6,
+                borderRadius: 999,
+                backgroundColor: '#dcfce7',
+                borderWidth: 1,
+                borderColor: '#86efac',
+              }}
+            >
+              <Text style={{ color: '#166534', fontWeight: '900' }}>
+                +{formatJourneyPoints(aiConversationPoints)} punto{aiConversationPoints === 1 ? '' : 's'} de Conversación AI
+              </Text>
+            </View>
             {conversationFeedback ? (
               <View style={{ marginTop: 10 }}>
                 <Text style={{ fontWeight: '600', color: '#14532d' }}>Feedback general</Text>
@@ -2194,96 +2256,63 @@ export default function StorySceneScreen() {
                 ) : null}
               </View>
             ) : null}
-            <Pressable
-              onPress={() => {
-                if (addedFriendId) {
-                  navigation.navigate('FriendChat', { friendId: addedFriendId });
-                  return;
-                }
-                void handleAddFriend();
-              }}
-              disabled={addingFriend}
-              style={({ pressed }) => ({
-                marginTop: 12,
-                paddingVertical: 10,
-                borderRadius: 999,
-                alignItems: 'center',
-                backgroundColor: addingFriend
-                  ? '#bbf7d0'
-                  : addedFriendId
-                  ? pressed
-                    ? '#0f766e'
-                    : '#14b8a6'
-                  : pressed
-                  ? '#15803d'
-                  : '#16a34a',
-              })}
-            >
-              <Text style={{ color: addedFriendId ? '#032a2a' : 'white', fontWeight: '800' }}>
-                {addingFriend
-                  ? 'Agregando...'
-                  : addedFriendId
-                  ? `Conversar con ${characterDisplayName}`
-                  : isSignedIn
-                  ? 'Agregar a amigos'
-                  : 'Inicia sesión para agregar a amigos'}
-              </Text>
-            </Pressable>
+            <View style={{ marginTop: 16, borderRadius: 12, borderWidth: 1, borderColor: '#bbf7d0', backgroundColor: 'white', overflow: 'hidden' }}>
+              <View style={{ padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                {missionAvatar ? (
+                  <Image source={missionAvatar} style={{ width: 56, height: 56, borderRadius: 28 }} />
+                ) : (
+                  <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 22, fontWeight: '700', color: '#166534' }}>{avatarInitial}</Text>
+                  </View>
+                )}
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontWeight: '700', fontSize: 16, color: '#15803d' }}>{characterDisplayName}</Text>
+                  <Text style={{ fontSize: 13, color: '#166534', marginTop: 2 }}>
+                    {addingFriend ? 'Agregando a amigos...' : addedFriendId ? 'Agregado a tus amigos' : friendAddError ? 'No se pudo agregar' : ''}
+                  </Text>
+                </View>
+              </View>
+              <View style={{ flexDirection: 'row', borderTopWidth: 1, borderTopColor: '#dcfce7' }}>
+                <Pressable
+                  onPress={() => {
+                    if (addedFriendId) {
+                      navigation.navigate('FriendProfile', { friendId: addedFriendId });
+                    }
+                  }}
+                  disabled={!addedFriendId}
+                  style={({ pressed }) => ({
+                    flex: 1,
+                    paddingVertical: 14,
+                    alignItems: 'center',
+                    backgroundColor: pressed ? '#f0fdf4' : 'white',
+                    borderRightWidth: 1,
+                    borderRightColor: '#dcfce7',
+                    opacity: addedFriendId ? 1 : 0.4,
+                  })}
+                >
+                  <Text style={{ fontWeight: '700', color: '#166534' }}>Ver perfil</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    if (fromScreen === 'feed') {
+                      navigation.navigate('Feed');
+                    } else {
+                      navigation.navigate('StoryMissions', { storyId: storyId! });
+                    }
+                  }}
+                  style={({ pressed }) => ({
+                    flex: 1,
+                    paddingVertical: 14,
+                    alignItems: 'center',
+                    backgroundColor: pressed ? '#f0fdf4' : 'white',
+                  })}
+                >
+                  <Text style={{ fontWeight: '700', color: '#166534' }}>Continuar</Text>
+                </Pressable>
+              </View>
+            </View>
             {friendAddError ? (
               <Text style={{ color: '#b91c1c', marginTop: 8 }}>{friendAddError}</Text>
-            ) : null}
-            {storyCompleted ? (
-              <Text style={{ marginTop: 6, color: '#166534' }}>
-                Terminaste toda la historia. Puedes regresar al listado cuando quieras.
-              </Text>
-            ) : (
-              <Text style={{ marginTop: 6, color: '#166534' }}>
-                Avanza para seguir con la siguiente misión.
-              </Text>
-            )}
-            {!storyCompleted && pendingNext !== null ? (
-              <Pressable
-                onPress={() => {
-                  setSceneIndex(pendingNext);
-                }}
-                style={({ pressed }) => ({
-                  marginTop: 12,
-                  paddingVertical: 10,
-                  borderRadius: 999,
-                  alignItems: 'center',
-                  backgroundColor: pressed ? '#22c55e' : '#16a34a',
-                })}
-              >
-                <Text style={{ color: 'white', fontWeight: '700' }}>Ir a la siguiente misión</Text>
-              </Pressable>
-            ) : null}
-            {storyId ? (
-              <Pressable
-                onPress={() => navigation.navigate('StoryMissions', { storyId })}
-                style={({ pressed }) => ({
-                  marginTop: 12,
-                  paddingVertical: 10,
-                  borderRadius: 999,
-                  alignItems: 'center',
-                  backgroundColor: pressed ? '#e2e8f0' : '#f1f5f9',
-                })}
-              >
-                <Text style={{ color: '#1e293b', fontWeight: '700' }}>Ver listado de misiones</Text>
-              </Pressable>
-            ) : null}
-            {storyCompleted ? (
-              <Pressable
-                onPress={() => navigation.navigate('Stories')}
-                style={({ pressed }) => ({
-                  marginTop: 12,
-                  paddingVertical: 10,
-                  borderRadius: 999,
-                  alignItems: 'center',
-                  backgroundColor: pressed ? '#cbd5f5' : '#e0e7ff',
-                })}
-              >
-                <Text style={{ color: '#312e81', fontWeight: '700' }}>Volver a historias</Text>
-              </Pressable>
             ) : null}
           </View>
         ) : null}
@@ -2321,16 +2350,17 @@ export default function StorySceneScreen() {
         onRequestClose={closeIntroVideoModal}
       >
         <View style={{ flex: 1, backgroundColor: 'black' }}>
-          {showIntroVideoModal && introVideoUri ? (
+          {showIntroVideoModal && introVideoSource ? (
             <Video
+              key={introVideoUri}
               ref={introVideoRef}
-              source={{ uri: introVideoUri }}
+              source={introVideoSource}
               style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
               resizeMode={ResizeMode.COVER}
               shouldPlay
               useNativeControls={false}
               isLooping={false}
-              progressUpdateIntervalMillis={250}
+              progressUpdateIntervalMillis={500}
               onLoadStart={() => {
                 setIntroVideoLoading(true);
                 setIntroVideoError(null);

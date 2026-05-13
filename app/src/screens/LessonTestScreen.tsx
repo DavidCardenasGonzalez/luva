@@ -221,7 +221,7 @@ export default function LessonTestScreen({ navigation, route }: Props) {
   }, []);
 
   const handleGoBack = useCallback(() => {
-    navigation.navigate('LessonDetail', { lessonId });
+    navigation.navigate('Lessons');
   }, [lessonId, navigation]);
 
   return (

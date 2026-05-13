@@ -63,6 +63,8 @@ type UserRecord = {
   email: string;
   cognitoSub?: string;
   displayName?: string;
+  bio?: string;
+  goal?: string;
   givenName?: string;
   familyName?: string;
   pictureUrl?: string;
@@ -84,6 +86,8 @@ type StoredUserRecord = Omit<UserRecord, 'proAccess'> & {
 
 type UpsertUserPayload = {
   displayName?: string;
+  bio?: string;
+  goal?: string;
   pictureUrl?: string;
   authProvider?: string;
   promoCode?: string;
@@ -207,6 +211,17 @@ function firstNonEmpty(...values: Array<string | undefined>): string | undefined
     if (trimmed) return trimmed;
   }
   return undefined;
+}
+
+function resolveEditableProfileField(
+  payload: UpsertUserPayload | undefined,
+  previous: Partial<StoredUserRecord> | undefined,
+  key: 'bio' | 'goal'
+): string | undefined {
+  if (payload && hasOwn(payload, key)) {
+    return firstNonEmpty(asString(payload[key]));
+  }
+  return firstNonEmpty(previous?.[key]);
 }
 
 function coerceBoolean(value?: string): boolean | undefined {
@@ -440,6 +455,8 @@ async function upsertCurrentUser(
   }
 
   const summarizedProAccess = summarizeProAccess(nextProAccess, now);
+  const bio = resolveEditableProfileField(payload, previous, 'bio');
+  const goal = resolveEditableProfileField(payload, previous, 'goal');
   const user: UserRecord = {
     email,
     cognitoSub: firstNonEmpty(claims.sub, previous?.cognitoSub),
@@ -448,6 +465,8 @@ async function upsertCurrentUser(
       claims.name,
       previous?.displayName
     ),
+    ...(bio ? { bio } : {}),
+    ...(goal ? { goal } : {}),
     givenName: firstNonEmpty(claims.given_name, previous?.givenName),
     familyName: firstNonEmpty(claims.family_name, previous?.familyName),
     pictureUrl: firstNonEmpty(
