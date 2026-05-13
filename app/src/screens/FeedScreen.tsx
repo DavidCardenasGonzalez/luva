@@ -1527,6 +1527,124 @@ function FriendStoriesStrip({
   );
 }
 
+function FeedSkeletonBlock({
+  width = '100%',
+  height,
+  radius = 999,
+}: {
+  width?: number | `${number}%`;
+  height: number;
+  radius?: number;
+}) {
+  return (
+    <View
+      style={{
+        width,
+        height,
+        borderRadius: radius,
+        backgroundColor: '#111827',
+        borderWidth: 1,
+        borderColor: 'rgba(31, 41, 55, 0.72)',
+      }}
+    />
+  );
+}
+
+function FeedInitialLoadingState() {
+  return (
+    <View style={{ gap: 14 }}>
+      <View
+        style={{
+          borderRadius: 18,
+          overflow: 'hidden',
+          backgroundColor: COLORS.surface,
+          borderWidth: 1,
+          borderColor: COLORS.border,
+        }}
+      >
+        <View style={{ aspectRatio: 0.9, backgroundColor: COLORS.surfaceAlt, padding: 16, justifyContent: 'space-between' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <FeedSkeletonBlock width={82} height={26} radius={999} />
+            <FeedSkeletonBlock width={42} height={42} radius={999} />
+          </View>
+          <View>
+            <FeedSkeletonBlock width="46%" height={12} />
+            <View style={{ height: 8 }} />
+            <FeedSkeletonBlock width="78%" height={24} radius={8} />
+            <View style={{ height: 7 }} />
+            <FeedSkeletonBlock width="58%" height={24} radius={8} />
+          </View>
+        </View>
+        <View style={{ padding: 16 }}>
+          <FeedSkeletonBlock height={14} radius={8} />
+          <View style={{ height: 8 }} />
+          <FeedSkeletonBlock width="84%" height={14} radius={8} />
+          <View style={{ flexDirection: 'row', marginTop: 14, gap: 8 }}>
+            <FeedSkeletonBlock width="66%" height={46} radius={12} />
+            <FeedSkeletonBlock width="31%" height={46} radius={12} />
+          </View>
+        </View>
+      </View>
+
+      <View
+        style={{
+          padding: 16,
+          borderRadius: 18,
+          backgroundColor: COLORS.surface,
+          borderWidth: 1,
+          borderColor: COLORS.border,
+        }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+          <View style={{ flex: 1 }}>
+            <FeedSkeletonBlock width={96} height={12} radius={8} />
+            <View style={{ height: 10 }} />
+            <FeedSkeletonBlock width="62%" height={32} radius={10} />
+          </View>
+          <FeedSkeletonBlock width={44} height={44} radius={999} />
+        </View>
+        <View style={{ marginTop: 14, padding: 12, borderRadius: 14, backgroundColor: '#0b172b' }}>
+          <FeedSkeletonBlock width={86} height={12} radius={8} />
+          <View style={{ height: 10 }} />
+          <FeedSkeletonBlock height={14} radius={8} />
+          <View style={{ height: 8 }} />
+          <FeedSkeletonBlock width="72%" height={14} radius={8} />
+        </View>
+        <View style={{ marginTop: 14, gap: 6 }}>
+          <FeedSkeletonBlock height={40} radius={10} />
+          <FeedSkeletonBlock height={40} radius={10} />
+          <FeedSkeletonBlock height={40} radius={10} />
+        </View>
+      </View>
+
+      <View
+        style={{
+          borderRadius: 18,
+          overflow: 'hidden',
+          backgroundColor: COLORS.surface,
+          borderWidth: 1,
+          borderColor: COLORS.border,
+        }}
+      >
+        <View style={{ aspectRatio: 16 / 9, backgroundColor: COLORS.surfaceAlt }} />
+        <View style={{ padding: 16 }}>
+          <FeedSkeletonBlock width={104} height={13} radius={8} />
+          <View style={{ height: 10 }} />
+          <FeedSkeletonBlock width="72%" height={20} radius={8} />
+          <View style={{ height: 8 }} />
+          <FeedSkeletonBlock height={14} radius={8} />
+          <View style={{ height: 14 }} />
+          <FeedSkeletonBlock height={7} />
+          <View style={{ flexDirection: 'row', marginTop: 14, gap: 8 }}>
+            <FeedSkeletonBlock width="66%" height={46} radius={12} />
+            <FeedSkeletonBlock width="31%" height={46} radius={12} />
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}
+
 function TimerText({ value }: { value: string }) {
   return (
     <Text style={{ color: '#fb4f92', fontSize: 21, fontWeight: '900', minWidth: 27, textAlign: 'center' }}>
@@ -1583,6 +1701,7 @@ export default function FeedScreen({ navigation }: Props) {
   const [visibleShadowingCount, setVisibleShadowingCount] = useState(SHADOWING_BATCH_SIZE);
   const [visibleLessonsCount, setVisibleLessonsCount] = useState(LESSON_BATCH_SIZE);
   const [learnedLessonIds, setLearnedLessonIds] = useState<Set<string>>(() => new Set());
+  const [learnedLessonIdsLoading, setLearnedLessonIdsLoading] = useState(true);
   const [claimedExtraPostIds, setClaimedExtraPostIds] = useState<Set<string>>(() => new Set());
   const [claimingPostId, setClaimingPostId] = useState<string>();
   const [isInterstitialLoading, setIsInterstitialLoading] = useState(false);
@@ -1590,7 +1709,10 @@ export default function FeedScreen({ navigation }: Props) {
   const [suspendFeedVideoPlayback, setSuspendFeedVideoPlayback] = useState(false);
   const [activeFeedMediaId, setActiveFeedMediaId] = useState<string>();
   const [litePromoExpiresAt, setLitePromoExpiresAt] = useState<number | null>(null);
+  const [litePromoLoading, setLitePromoLoading] = useState(true);
   const [timerNow, setTimerNow] = useState(Date.now());
+  const [initialFeedResolved, setInitialFeedResolved] = useState(false);
+  const [stableFeedItems, setStableFeedItems] = useState<FeedItem[]>([]);
   const isOpeningMissionRef = useRef(false);
   const viewabilityConfigRef = useRef({
     itemVisiblePercentThreshold: 65,
@@ -1645,15 +1767,25 @@ export default function FeedScreen({ navigation }: Props) {
       setVisibleVocabularyCount(VOCABULARY_BATCH_SIZE);
       setVisibleShadowingCount(SHADOWING_BATCH_SIZE);
       setVisibleLessonsCount(LESSON_BATCH_SIZE);
+      setLearnedLessonIdsLoading(true);
       reloadFeedPosts();
       reloadLessons();
       reloadShadowing();
       void reloadFriends();
-      void getLearnedLessonIds().then((ids) => {
-        if (active) {
-          setLearnedLessonIds(ids);
-        }
-      });
+      void getLearnedLessonIds()
+        .then((ids) => {
+          if (active) {
+            setLearnedLessonIds(ids);
+          }
+        })
+        .catch((err) => {
+          console.warn('[Feed] No se pudieron cargar las lecciones aprendidas', err);
+        })
+        .finally(() => {
+          if (active) {
+            setLearnedLessonIdsLoading(false);
+          }
+        });
       return () => {
         active = false;
       };
@@ -1663,6 +1795,7 @@ export default function FeedScreen({ navigation }: Props) {
   useFocusEffect(
     useCallback(() => {
       let active = true;
+      setLitePromoLoading(true);
 
       const loadLitePromo = async () => {
         try {
@@ -1687,6 +1820,10 @@ export default function FeedScreen({ navigation }: Props) {
           }
         } catch (err) {
           console.warn('[Feed] No se pudo cargar el temporizador de la promo', err);
+        } finally {
+          if (active) {
+            setLitePromoLoading(false);
+          }
         }
       };
 
@@ -1998,7 +2135,24 @@ export default function FeedScreen({ navigation }: Props) {
     storyProgressLoading ||
     feedPostsLoading ||
     lessonsLoading ||
-    shadowingLoading;
+    shadowingLoading ||
+    learnedLessonIdsLoading ||
+    litePromoLoading;
+  const showInitialFeedSkeleton = loading && !initialFeedResolved;
+
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+
+    setStableFeedItems(feedItems);
+    if (!initialFeedResolved) {
+      setInitialFeedResolved(true);
+    }
+  }, [feedItems, initialFeedResolved, loading]);
+
+  const renderedFeedItems = showInitialFeedSkeleton ? [] : loading ? stableFeedItems : feedItems;
+
   const hasMoreFeedItems =
     visibleMissionsCount < shuffledRegularMissions.length ||
     visibleVocabularyCount < shuffledVocabulary.length ||
@@ -2320,7 +2474,7 @@ export default function FeedScreen({ navigation }: Props) {
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: COLORS.background }}>
       <FlatList<FeedItem>
-        data={feedItems}
+        data={renderedFeedItems}
         keyExtractor={(item) => (item.kind === 'mission' ? item.id : item.feedId)}
         initialNumToRender={6}
         maxToRenderPerBatch={6}
@@ -2502,7 +2656,9 @@ export default function FeedScreen({ navigation }: Props) {
         }
         ItemSeparatorComponent={() => <View style={{ height: 14 }} />}
         ListEmptyComponent={
-          loading ? (
+          showInitialFeedSkeleton ? (
+            <FeedInitialLoadingState />
+          ) : loading ? (
             <View style={{ paddingVertical: 40, alignItems: 'center' }}>
               <ActivityIndicator size="large" color={COLORS.accent} />
               <Text style={{ color: COLORS.muted, marginTop: 10 }}>Preparando tu feed...</Text>
