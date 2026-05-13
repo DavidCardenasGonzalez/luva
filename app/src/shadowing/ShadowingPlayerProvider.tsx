@@ -15,6 +15,7 @@ import {
   getListenedShadowingChapterRecords,
   recordJourneyShadowingChapterListened,
 } from '../progress/journeyProgress';
+import { trackMixpanelShadowingEvent } from '../marketing/mixpanelEvents';
 
 type SelectChapterOptions = {
   shouldPlay?: boolean;
@@ -170,6 +171,16 @@ export function ShadowingPlayerProvider({ children }: { children: React.ReactNod
       const finishedChapterId = currentChapterIdRef.current;
       const listenedAt = new Date().toISOString();
       void recordJourneyShadowingChapterListened(finishedChapterId, listenedAt);
+      const finishedChapter = orderedChaptersRef.current.find((chapter) => chapter.chapterId === finishedChapterId);
+      if (finishedChapter) {
+        void trackMixpanelShadowingEvent('shadowing_chapter_completed', {
+          list_id: finishedChapter.listId,
+          chapter_id: finishedChapter.chapterId,
+          chapter_title: finishedChapter.title,
+          duration_seconds: status.durationMillis ? Math.round(status.durationMillis / 1000) : undefined,
+          playback_rate: playbackRateRef.current,
+        });
+      }
       if (finishedChapterId) {
         setListenedChapterIds((current) => {
           if (current.has(finishedChapterId)) return current;

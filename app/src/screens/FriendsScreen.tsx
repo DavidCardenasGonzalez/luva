@@ -19,6 +19,7 @@ import CoinCountChip from '../components/CoinCountChip';
 import { useAuth } from '../auth/AuthProvider';
 import { FriendCharacter, useFriends } from '../hooks/useFriends';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
+import { trackMixpanelFriendEvent } from '../marketing/mixpanelEvents';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Friends'>;
 
@@ -199,6 +200,13 @@ export default function FriendsScreen({ navigation }: Props) {
 
   const handleOpenFriend = useCallback(
     (friend: FriendCharacter) => {
+      void trackMixpanelFriendEvent('friend_chat_opened', {
+        friend_id: friend.friendId,
+        character_name: friend.characterName,
+        story_id: friend.storyId,
+        mission_id: friend.missionId,
+        source: 'friends',
+      });
       navigation.navigate('FriendChat', { friendId: friend.friendId });
     },
     [navigation]
@@ -206,6 +214,13 @@ export default function FriendsScreen({ navigation }: Props) {
 
   const handleOpenProfile = useCallback(
     (friend: FriendCharacter) => {
+      void trackMixpanelFriendEvent('friend_profile_opened', {
+        friend_id: friend.friendId,
+        character_name: friend.characterName,
+        story_id: friend.storyId,
+        mission_id: friend.missionId,
+        source: 'friends',
+      });
       navigation.navigate('FriendProfile', { friendId: friend.friendId });
     },
     [navigation]

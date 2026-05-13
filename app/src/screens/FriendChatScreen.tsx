@@ -41,6 +41,7 @@ import {
   AI_CONVERSATION_POINTS_PER_MESSAGE,
   recordJourneyAiConversationMessageSent,
 } from '../progress/journeyProgress';
+import { trackMixpanelFriendEvent } from '../marketing/mixpanelEvents';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FriendChat'>;
 
@@ -202,6 +203,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     () => friends.find((item) => item.friendId === friendId),
     [friendId, friends]
   );
+  const trackedFriendViewRef = useRef<string | undefined>(undefined);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messageTranslations, setMessageTranslations] = useState<Record<string, MessageTranslationState>>({});
   const [analysis, setAnalysis] = useState<FriendChatPayload | null>(null);
@@ -249,6 +251,21 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       void reload();
     }
   }, [friendId, reload]);
+
+  useEffect(() => {
+    if (!friend || trackedFriendViewRef.current === friend.friendId) return;
+    trackedFriendViewRef.current = friend.friendId;
+    void trackMixpanelFriendEvent('friend_chat_viewed', {
+      friend_id: friend.friendId,
+      character_name: friend.characterName,
+      story_id: friend.storyId,
+      story_title: friend.storyTitle,
+      mission_id: friend.missionId,
+      mission_title: friend.missionTitle,
+      conversation_count: friend.conversationCount ?? 0,
+      message_count: friend.messageCount ?? 0,
+    });
+  }, [friend]);
 
   useEffect(() => {
     skipExitPromptRef.current = false;
@@ -324,13 +341,28 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   }, [navigation]);
 
   const handleOpenAssistance = useCallback(() => {
+    void trackMixpanelFriendEvent('friend_chat_help_opened', {
+      friend_id: friend?.friendId,
+      character_name: friend?.characterName,
+      story_id: friend?.storyId,
+      mission_id: friend?.missionId,
+      history_message_count: messages.length,
+    });
     setAssistanceQuestion('');
     setAssistanceAnswer('');
     setAssistanceError(null);
     setShowAssistanceModal(true);
-  }, []);
+  }, [friend, messages.length]);
 
   const handleStartNewConversation = useCallback(() => {
+    void trackMixpanelFriendEvent('friend_chat_restarted', {
+      friend_id: friend?.friendId,
+      character_name: friend?.characterName,
+      story_id: friend?.storyId,
+      mission_id: friend?.missionId,
+      previous_history_message_count: messages.length,
+      previous_conversation_ended: conversationEnded,
+    });
     skipExitPromptRef.current = false;
     setMessages([]);
     setMessageTranslations({});
@@ -339,7 +371,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     setConversationFeedback(null);
     setCompletionConfettiKey(null);
     setErrorMessage(null);
-  }, []);
+  }, [conversationEnded, friend, messages.length]);
 
   const handleRequestAssistance = useCallback(async () => {
     const trimmed = assistanceQuestion.trim();
@@ -357,6 +389,15 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     setAssistanceAnswer('');
 
     try {
+      void trackMixpanelFriendEvent('friend_chat_help_requested', {
+        friend_id: friend.friendId,
+        character_name: friend.characterName,
+        story_id: friend.storyId,
+        mission_id: friend.missionId,
+        question_length: trimmed.length,
+        question_word_count: trimmed.split(/\s+/).filter(Boolean).length,
+        history_message_count: messages.length,
+      });
       const historyPayload = messages.map(({ role, text }) => ({ role, content: text }));
       const missionDefinition = {
         missionId: friend.missionId,
@@ -417,11 +458,16 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         console.warn('Friend speech audio mode failed', audioErr);
       }
       Speech.stop();
+      void trackMixpanelFriendEvent('friend_chat_message_spoken', {
+        friend_id: friend?.friendId,
+        character_name: friend?.characterName,
+        message_length: speechText.length,
+      });
       Speech.speak(speechText, { language: 'en-US', pitch: 1.05 });
     } catch (err: any) {
       console.warn('Friend speech playback failed', err?.message || err);
     }
-  }, []);
+  }, [friend]);
 
   const translateAssistantMessage = useCallback(async (messageId: string, text: string) => {
     const trimmed = text.trim();
@@ -440,6 +486,11 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         source: 'en',
         target: 'es',
       });
+      void trackMixpanelFriendEvent('friend_chat_message_translated', {
+        friend_id: friend?.friendId,
+        character_name: friend?.characterName,
+        message_length: trimmed.length,
+      });
       setMessageTranslations((current) => ({
         ...current,
         [messageId]: { text: payload.translatedText || '', loading: false },
@@ -453,7 +504,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         },
       }));
     }
-  }, [messageTranslations]);
+  }, [friend, messageTranslations]);
 
   const handleAdvance = useCallback(
     async (transcript: string, sessionId?: string, inputMethod: 'text' | 'audio' = 'text') => {
@@ -511,6 +562,19 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           history: historyPayload,
         });
         void recordJourneyAiConversationMessageSent();
+        void trackMixpanelFriendEvent('friend_chat_message_sent', {
+          friend_id: friendId,
+          character_name: friend?.characterName,
+          story_id: friend?.storyId,
+          mission_id: friend?.missionId,
+          input_method: inputMethod,
+          transcript_length: trimmed.length,
+          transcript_word_count: trimmed.split(/\s+/).filter(Boolean).length,
+          history_message_count: historyPayload.length,
+          result: payload.result,
+          correctness: payload.correctness,
+          conversation_ended: Boolean(payload.conversationEnded),
+        });
         setMessages((current) => [
           ...current,
           {
@@ -521,6 +585,16 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         ]);
         setAnalysis(payload);
         if (payload.conversationEnded) {
+          void trackMixpanelFriendEvent('friend_chat_completed', {
+            friend_id: friendId,
+            character_name: friend?.characterName,
+            story_id: friend?.storyId,
+            mission_id: friend?.missionId,
+            input_method: inputMethod,
+            history_message_count: historyPayload.length + 1,
+            correctness: payload.correctness,
+            points_earned: AI_CONVERSATION_POINTS_PER_MESSAGE,
+          });
           setConversationEnded(true);
           setConversationFeedback(payload.conversationFeedback ?? null);
           setCompletionConfettiKey(Date.now());
@@ -532,7 +606,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         setFlowState('idle');
       }
     },
-    [coinsLoading, conversationEnded, friendId, isUnlimited, messages, navigation, reload, spendCoins]
+    [coinsLoading, conversationEnded, friend, friendId, isUnlimited, messages, navigation, reload, spendCoins]
   );
 
   const handleSendText = useCallback(
@@ -606,6 +680,12 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           return;
         }
       }
+      void trackMixpanelFriendEvent('friend_chat_recording_started', {
+        friend_id: friendId,
+        character_name: friend?.characterName,
+        story_id: friend?.storyId,
+        mission_id: friend?.missionId,
+      });
       setErrorMessage(null);
       setFlowState('recording');
       stopRequestedWhileStarting.current = false;
@@ -623,7 +703,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       stopRequestedWhileStarting.current = false;
       isStartingRecording.current = false;
     }
-  }, [canSpend, coinsLoading, conversationEnded, friendId, handleRecordRelease, isUnlimited, navigation, recorder, spendCoins]);
+  }, [canSpend, coinsLoading, conversationEnded, friend, friendId, handleRecordRelease, isUnlimited, navigation, recorder, spendCoins]);
 
   const textCoinLocked = !isUnlimited && balance < FRIEND_CHAT_MESSAGE_COST;
   const voiceCoinLocked = !isUnlimited && balance < FRIEND_CHAT_VOICE_TOTAL_COST;

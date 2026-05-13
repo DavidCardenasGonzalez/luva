@@ -23,6 +23,7 @@ import CoinCountChip from '../components/CoinCountChip';
 import AppTabBar from '../components/AppTabBar';
 import TourOverlay, { TourHighlight } from '../components/TourOverlay';
 import { hasSeenTour, markTourAsSeen } from '../tour/tourProgress';
+import { trackMixpanelEvent } from '../marketing/mixpanelEvents';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Deck'>;
 
@@ -371,6 +372,11 @@ export default function DeckScreen({ navigation }: Props) {
   }, [deckTourSteps.length, finishDeckTour, isLastDeckTourStep, showDeckTour]);
 
   const toggleStatus = (status: CardProgressStatus) => {
+    void trackMixpanelEvent('deck_filter_toggled', {
+      event_category: 'deck',
+      status,
+      active_before: activeStatuses.includes(status),
+    });
     setActiveStatuses((prev) => {
       if (prev.includes(status)) {
         if (prev.length === 1) return prev; // evitar dejar sin filtros
@@ -389,6 +395,12 @@ export default function DeckScreen({ navigation }: Props) {
         return;
       }
     }
+    void trackMixpanelEvent('deck_card_opened', {
+      event_category: 'deck',
+      card_id: String(item.id),
+      label: item.label,
+      status: item.status,
+    });
     navigation.navigate('Practice', {
       cardId: String(item.id),
       label: item.label,
@@ -403,6 +415,13 @@ export default function DeckScreen({ navigation }: Props) {
   const handleMarkAsLearned = useCallback(
     (item: DeckItem) => {
       if (item.status === 'learned') return;
+      void trackMixpanelEvent('deck_card_status_changed', {
+        event_category: 'deck',
+        card_id: String(item.id),
+        label: item.label,
+        previous_status: item.status,
+        next_status: 'learned',
+      });
       void setStatus(String(item.id), 'learned');
     },
     [setStatus]
@@ -410,6 +429,13 @@ export default function DeckScreen({ navigation }: Props) {
   const handleMarkAsTodo = useCallback(
     (item: DeckItem) => {
       if (item.status === 'todo') return;
+      void trackMixpanelEvent('deck_card_status_changed', {
+        event_category: 'deck',
+        card_id: String(item.id),
+        label: item.label,
+        previous_status: item.status,
+        next_status: 'todo',
+      });
       void setStatus(String(item.id), 'todo');
     },
     [setStatus]

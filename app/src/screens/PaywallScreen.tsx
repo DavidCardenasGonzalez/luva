@@ -23,6 +23,7 @@ import {
   trackSubscriptionPurchased,
 } from "../marketing/metaAppEvents";
 import {
+  trackMixpanelEvent,
   trackMixpanelPaywallViewed,
   trackMixpanelPremiumActivated,
 } from "../marketing/mixpanelEvents";
@@ -471,6 +472,18 @@ export default function PaywallScreen() {
         subscriptionPeriod: info.pkg.product.subscriptionPeriod,
         hasIntroOffer: Boolean(info.pkg.product.introPrice),
       });
+      void trackMixpanelEvent("purchase_started", {
+        event_category: "monetization",
+        paywall_source: paywallSource || "unknown",
+        package_id: info.pkg.identifier,
+        product_id: info.pkg.product.identifier,
+        price: info.pkg.product.price,
+        price_string: info.pkg.product.priceString,
+        currency: info.pkg.product.currencyCode,
+        subscription_period: info.pkg.product.subscriptionPeriod || undefined,
+        has_intro_offer: Boolean(info.pkg.product.introPrice),
+        paywall_variant: isLitePaywall ? "lite" : "pro",
+      });
       const res = await Purchases.purchasePackage(info.pkg);
       if (res.customerInfo) {
         const entitlement = Object.values(
@@ -508,6 +521,14 @@ export default function PaywallScreen() {
         dismissPaywall();
       }
     } catch (err: any) {
+      void trackMixpanelEvent(err?.userCancelled ? "purchase_cancelled" : "purchase_failed", {
+        event_category: "monetization",
+        paywall_source: paywallSource || "unknown",
+        package_id: info.pkg.identifier,
+        product_id: info.pkg.product.identifier,
+        paywall_variant: isLitePaywall ? "lite" : "pro",
+        error_message: err?.userCancelled ? undefined : err?.message,
+      });
       if (!err?.userCancelled) {
         console.warn("[Paywall] Error al comprar", err);
         setError(err?.message || "No pudimos completar la compra.");
@@ -521,6 +542,10 @@ export default function PaywallScreen() {
     setRestoring(true);
     setError(null);
     try {
+      void trackMixpanelEvent("restore_started", {
+        event_category: "monetization",
+        paywall_source: paywallSource || "unknown",
+      });
       const res = await Purchases.restorePurchases();
       if (res) {
         const entitlement = Object.values(res.entitlements.active || {})[0];
@@ -537,6 +562,11 @@ export default function PaywallScreen() {
         dismissPaywall();
       }
     } catch (err: any) {
+      void trackMixpanelEvent("restore_failed", {
+        event_category: "monetization",
+        paywall_source: paywallSource || "unknown",
+        error_message: err?.message,
+      });
       console.warn("[Paywall] Error al restaurar", err);
       setError(err?.message || "No pudimos restaurar las compras.");
     } finally {

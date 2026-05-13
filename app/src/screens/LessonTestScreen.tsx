@@ -16,6 +16,7 @@ import { Audio } from 'expo-av';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { LessonQuizQuestion, useLessonDetail } from '../hooks/useLessons';
 import { markLessonLearned } from '../progress/lessonProgress';
+import { trackMixpanelLessonEvent } from '../marketing/mixpanelEvents';
 
 const successSound = require('../sound/succes_req.mp3');
 
@@ -169,6 +170,7 @@ export default function LessonTestScreen({ navigation, route }: Props) {
   const [resultVisible, setResultVisible] = useState(false);
   const confettiRef = useRef<ConfettiCannon>(null);
   const resultConfettiRef = useRef<ConfettiCannon>(null);
+  const trackedTestViewRef = useRef<string | undefined>(undefined);
   const { width: screenWidth } = Dimensions.get('window');
 
   const questions = useMemo(
@@ -187,17 +189,45 @@ export default function LessonTestScreen({ navigation, route }: Props) {
   const passed = score >= PASS_THRESHOLD;
 
   useEffect(() => {
+    if (!lesson || trackedTestViewRef.current === lesson.lessonId) return;
+    trackedTestViewRef.current = lesson.lessonId;
+    void trackMixpanelLessonEvent('lesson_test_started', {
+      lesson_id: lesson.lessonId,
+      lesson_title: lesson.title,
+      question_count: lesson.quiz?.length || 0,
+      pass_threshold: PASS_THRESHOLD,
+    });
+  }, [lesson]);
+
+  useEffect(() => {
     if (!allAnswered) return;
     setResultVisible(true);
+    void trackMixpanelLessonEvent('lesson_test_completed', {
+      lesson_id: lessonId,
+      lesson_title: lesson?.title,
+      score,
+      question_count: questions.length,
+      passed,
+      attempt_index: shuffleSeed + 1,
+    });
     if (passed) {
       markLessonLearned(lessonId);
       setTimeout(() => resultConfettiRef.current?.start(), 300);
     }
-  }, [allAnswered]);
+  }, [allAnswered, lesson?.title, lessonId, passed, questions.length, score, shuffleSeed]);
 
   const handleSelectAnswer = useCallback((questionIndex: number, optionIndex: number) => {
     setSelectedAnswers((current) => {
       if (current[questionIndex] != null) return current;
+      const question = questions[questionIndex];
+      void trackMixpanelLessonEvent('lesson_test_answered', {
+        lesson_id: lessonId,
+        lesson_title: lesson?.title,
+        question_index: questionIndex,
+        selected_index: optionIndex,
+        correct_index: question?.correctIndex,
+        answer_matched: question?.correctIndex === optionIndex,
+      });
       return { ...current, [questionIndex]: optionIndex };
     });
     if (
@@ -212,13 +242,20 @@ export default function LessonTestScreen({ navigation, route }: Props) {
         });
       });
     }
-  }, [questions, selectedAnswers]);
+  }, [lesson?.title, lessonId, questions, selectedAnswers]);
 
   const handleRetry = useCallback(() => {
+    void trackMixpanelLessonEvent('lesson_test_retried', {
+      lesson_id: lessonId,
+      lesson_title: lesson?.title,
+      previous_score: score,
+      question_count: questions.length,
+      attempt_index: shuffleSeed + 1,
+    });
     setResultVisible(false);
     setSelectedAnswers({});
     setShuffleSeed((current) => current + 1);
-  }, []);
+  }, [lesson?.title, lessonId, questions.length, score, shuffleSeed]);
 
   const handleGoBack = useCallback(() => {
     navigation.navigate('Lessons');

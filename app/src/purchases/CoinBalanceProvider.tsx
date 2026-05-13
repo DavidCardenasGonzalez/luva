@@ -9,6 +9,11 @@ import React, {
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRevenueCat } from './RevenueCatProvider';
+import {
+  trackMixpanelCoinAdded,
+  trackMixpanelCoinSpendFailed,
+  trackMixpanelCoinSpent,
+} from '../marketing/mixpanelEvents';
 
 const STORAGE_KEY = '@luva/coins/state';
 const MAX_FREE_COINS = 10;
@@ -137,6 +142,11 @@ export function CoinBalanceProvider({ children }: { children: React.ReactNode })
         await persist(current);
       }
       if (current.balance < amount) {
+        void trackMixpanelCoinSpendFailed({
+          amount,
+          reason,
+          balance: current.balance,
+        });
         return false;
       }
       const next: CoinsState = {
@@ -146,6 +156,12 @@ export function CoinBalanceProvider({ children }: { children: React.ReactNode })
       setState(next);
       stateRef.current = next;
       await persist(next);
+      void trackMixpanelCoinSpent({
+        amount,
+        reason,
+        balanceBefore: current.balance,
+        balanceAfter: next.balance,
+      });
       if (__DEV__) {
         console.log('[Coins] Gasto registrado', { amount, reason, balance: next.balance });
       }
@@ -175,6 +191,12 @@ export function CoinBalanceProvider({ children }: { children: React.ReactNode })
       setState(next);
       stateRef.current = next;
       await persist(next);
+      void trackMixpanelCoinAdded({
+        amount: Math.floor(amount),
+        reason,
+        balanceBefore: current.balance,
+        balanceAfter: next.balance,
+      });
       if (__DEV__) {
         console.log('[Coins] Credito registrado', { amount, reason, balance: next.balance });
       }

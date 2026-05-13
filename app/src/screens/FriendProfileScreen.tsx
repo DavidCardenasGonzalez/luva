@@ -19,6 +19,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { CharacterProfilePost, useFriendProfile } from '../hooks/useFriendProfile';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
+import { trackMixpanelFriendEvent } from '../marketing/mixpanelEvents';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FriendProfile'>;
 
@@ -156,12 +157,27 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
   const { friend, posts, loading, loaded, error, reload } = useFriendProfile(friendId);
   const [selectedPost, setSelectedPost] = useState<CharacterProfilePost | null>(null);
   const [avatarModalVisible, setAvatarModalVisible] = useState(false);
+  const trackedProfileViewRef = useRef<string | undefined>(undefined);
 
   useFocusEffect(
     useCallback(() => {
       void reload();
     }, [reload])
   );
+
+  useEffect(() => {
+    if (!friend || trackedProfileViewRef.current === friend.friendId) return;
+    trackedProfileViewRef.current = friend.friendId;
+    void trackMixpanelFriendEvent('friend_profile_viewed', {
+      friend_id: friend.friendId,
+      character_name: friend.characterName,
+      story_id: friend.storyId,
+      story_title: friend.storyTitle,
+      mission_id: friend.missionId,
+      mission_title: friend.missionTitle,
+      post_count: posts.length,
+    });
+  }, [friend, posts.length]);
 
   const avatarSource = useMemo<ImageSourcePropType | undefined>(() => {
     if (!friend) return undefined;
@@ -240,7 +256,16 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
           {friend.characterName}
         </Text>
         <Pressable
-          onPress={() => navigation.navigate('FriendChat', { friendId: friend.friendId })}
+          onPress={() => {
+            void trackMixpanelFriendEvent('friend_chat_opened', {
+              friend_id: friend.friendId,
+              character_name: friend.characterName,
+              story_id: friend.storyId,
+              mission_id: friend.missionId,
+              source: 'friend_profile_header',
+            });
+            navigation.navigate('FriendChat', { friendId: friend.friendId });
+          }}
           hitSlop={10}
           style={({ pressed }) => ({
             width: 40,
@@ -312,7 +337,16 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
 
               <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
                 <Pressable
-                  onPress={() => navigation.navigate('FriendChat', { friendId: friend.friendId })}
+                  onPress={() => {
+                    void trackMixpanelFriendEvent('friend_chat_opened', {
+                      friend_id: friend.friendId,
+                      character_name: friend.characterName,
+                      story_id: friend.storyId,
+                      mission_id: friend.missionId,
+                      source: 'friend_profile_cta',
+                    });
+                    navigation.navigate('FriendChat', { friendId: friend.friendId });
+                  }}
                   style={({ pressed }) => ({
                     flex: 1,
                     paddingVertical: 12,
@@ -357,7 +391,14 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
         }
         renderItem={({ item, index }) => (
           <Pressable
-            onPress={() => setSelectedPost(item)}
+            onPress={() => {
+              void trackMixpanelFriendEvent('friend_profile_post_opened', {
+                friend_id: friend.friendId,
+                character_name: friend.characterName,
+                post_id: item.postId,
+              });
+              setSelectedPost(item);
+            }}
             style={({ pressed }) => ({
               width: tileSize,
               height: tileSize,

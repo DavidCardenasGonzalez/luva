@@ -980,6 +980,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const provider = userRef.current?.lastAuthProvider?.trim().toLowerCase();
+      await trackMixpanelEvent('logout_started', {
+        event_category: 'auth',
+        auth_provider: provider || undefined,
+      });
       const shouldOpenHostedLogout = Boolean(
         DOMAIN &&
         CLIENT_ID &&
@@ -995,6 +999,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } finally {
+      await trackMixpanelEvent('logout_completed', {
+        event_category: 'auth',
+      });
       await clearSession();
       await resetMixpanelUserIdentity();
       setIsBusy(false);

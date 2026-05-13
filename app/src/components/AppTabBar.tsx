@@ -4,6 +4,7 @@ import { StackActions, useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useShadowingPlayer } from '../shadowing/ShadowingPlayerProvider';
+import { trackMixpanelTabSelected } from '../marketing/mixpanelEvents';
 
 type AppTabKey = 'home' | 'practice' | 'missions' | 'lessons' | 'journey' | 'shadowing' | 'feed' | 'friends';
 
@@ -54,11 +55,16 @@ export default function AppTabBar({
     (isPlaying || audioLoading || positionSeconds > 0)
   );
 
-  const navigateToTab = (route: TabConfig['route']) => {
+  const navigateToTab = (tab: TabConfig) => {
     const state = navigation.getState?.();
     const currentRouteName = state?.routes?.[state.index]?.name;
-    if (currentRouteName === route) return;
-    navigation.dispatch(StackActions.replace(route));
+    if (currentRouteName === tab.route) return;
+    void trackMixpanelTabSelected({
+      tabKey: tab.key,
+      routeName: tab.route,
+      previousRouteName: currentRouteName,
+    });
+    navigation.dispatch(StackActions.replace(tab.route));
   };
 
   return (
@@ -144,7 +150,7 @@ export default function AppTabBar({
           return (
             <Pressable
               key={tab.key}
-              onPress={() => navigateToTab(tab.route)}
+              onPress={() => navigateToTab(tab)}
               accessibilityRole="button"
               accessibilityLabel={tab.label}
               style={({ pressed }) => ({

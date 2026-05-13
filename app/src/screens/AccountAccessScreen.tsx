@@ -18,6 +18,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { useAuth } from '../auth/AuthProvider';
 import { markOnboardingCompleted } from '../onboarding/model/progress';
 import { GradientText } from '../onboarding/components/GradientText';
+import { trackMixpanelEvent } from '../marketing/mixpanelEvents';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AccountAccess'>;
 type AuthMode = 'login' | 'signup' | 'confirm';
@@ -105,31 +106,55 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
   }, [authMode, navigation]);
 
   const handleContinueAnonymous = useCallback(async () => {
+    void trackMixpanelEvent('anonymous_continue_selected', {
+      event_category: 'auth',
+      source: fromOnboarding ? 'onboarding' : 'account_access',
+    });
     await markOnboardingCompleted();
     navigation.reset({
       index: 0,
       routes: [{ name: 'Feed' }],
     });
-  }, [navigation]);
+  }, [fromOnboarding, navigation]);
 
   const handleGoogleSignIn = useCallback(() => {
+    void trackMixpanelEvent('login_started', {
+      event_category: 'auth',
+      auth_provider: 'google',
+      source: fromOnboarding ? 'onboarding' : 'account_access',
+    });
     postAuthTargetRef.current = 'feed';
     void signInWithGoogle();
-  }, [signInWithGoogle]);
+  }, [fromOnboarding, signInWithGoogle]);
 
   const handleAppleSignIn = useCallback(() => {
+    void trackMixpanelEvent('login_started', {
+      event_category: 'auth',
+      auth_provider: 'apple',
+      source: fromOnboarding ? 'onboarding' : 'account_access',
+    });
     postAuthTargetRef.current = 'feed';
     void signInWithApple();
-  }, [signInWithApple]);
+  }, [fromOnboarding, signInWithApple]);
 
   const handleEmailSignIn = useCallback(() => {
+    void trackMixpanelEvent('login_started', {
+      event_category: 'auth',
+      auth_provider: 'email',
+      source: fromOnboarding ? 'onboarding' : 'account_access',
+    });
     postAuthTargetRef.current = 'feed';
     void signInWithEmail(email, password);
-  }, [email, password, signInWithEmail]);
+  }, [email, fromOnboarding, password, signInWithEmail]);
 
   const handleCreateAccount = useCallback(async () => {
     setNotice(undefined);
     postAuthTargetRef.current = fromOnboarding ? 'onboarding' : 'feed';
+    void trackMixpanelEvent('signup_started', {
+      event_category: 'auth',
+      auth_provider: 'email',
+      source: fromOnboarding ? 'onboarding' : 'account_access',
+    });
 
     try {
       const result = await signUpWithEmail(email, password);

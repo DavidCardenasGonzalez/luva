@@ -21,6 +21,7 @@ import {
   shouldShowMissionInterstitialForMission,
   showMissionInterstitialBeforeNavigation,
 } from "../shared/missionInterstitial";
+import { trackMixpanelEvent } from "../marketing/mixpanelEvents";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type RouteProps = RouteProp<RootStackParamList, "StoryMissions">;
@@ -92,6 +93,17 @@ export default function StoryMissionsScreen() {
     if (!story || isOpeningMissionRef.current) return;
     const mission = story.missions[index];
     if (!mission) return;
+    void trackMixpanelEvent('story_mission_pressed', {
+      event_category: 'story',
+      story_id: story.storyId,
+      story_title: story.title,
+      mission_id: mission.missionId,
+      mission_title: mission.title,
+      scene_index: index,
+      already_completed: isMissionCompleted(story.storyId, mission.missionId),
+      story_completed: storyCompleted(story.storyId),
+      source: 'story_missions',
+    });
     isOpeningMissionRef.current = true;
     try {
       if (!isUnlimited) {

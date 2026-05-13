@@ -37,7 +37,11 @@ import { CARD_OPEN_COST, CHAT_MISSION_COST, useCoins } from '../purchases/CoinBa
 import CoinCountChip from '../components/CoinCountChip';
 import AppTabBar from '../components/AppTabBar';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
-import { trackMixpanelFeedLoadMore } from '../marketing/mixpanelEvents';
+import {
+  trackMixpanelFeedItemAction,
+  trackMixpanelFeedItemViewed,
+  trackMixpanelFeedLoadMore,
+} from '../marketing/mixpanelEvents';
 import { prefetchImageUrls } from '../shared/imagePrefetch';
 import {
   shouldShowMissionInterstitialForMission,
@@ -263,6 +267,82 @@ function getFeedMediaId(item: FeedItem) {
     return item.feedId;
   }
   return undefined;
+}
+
+function getFeedTrackingProperties(item: FeedItem) {
+  if (item.kind === 'promo') {
+    return {
+      feed_item_id: item.feedId,
+      feed_item_kind: item.kind,
+      remaining_seconds: item.remainingSeconds,
+    };
+  }
+
+  if (item.kind === 'resumeMission') {
+    return {
+      feed_item_id: item.feedId,
+      feed_item_kind: item.kind,
+      story_id: item.storyId,
+      story_title: item.storyTitle,
+      mission_id: item.mission.missionId,
+      mission_title: item.mission.title,
+      scene_index: item.sceneIndex,
+    };
+  }
+
+  if (item.kind === 'mission') {
+    return {
+      feed_item_id: item.id,
+      feed_item_kind: item.kind,
+      story_id: item.storyId,
+      story_title: item.storyTitle,
+      mission_id: item.mission.missionId,
+      mission_title: item.mission.title,
+      scene_index: item.sceneIndex,
+      is_initial_story: Boolean(item.isInitialStory),
+    };
+  }
+
+  if (item.kind === 'vocab') {
+    return {
+      feed_item_id: item.feedId,
+      feed_item_kind: item.kind,
+      card_id: String(item.id),
+      label: item.label,
+      status: item.status,
+    };
+  }
+
+  if (item.kind === 'shadowing') {
+    return {
+      feed_item_id: item.feedId,
+      feed_item_kind: item.kind,
+      list_id: item.listId,
+      list_name: item.name,
+      chapter_id: item.nextChapter.chapterId,
+      chapter_title: item.nextChapter.title,
+      listened_count: item.listenedCount,
+    };
+  }
+
+  if (item.kind === 'lesson') {
+    return {
+      feed_item_id: item.feedId,
+      feed_item_kind: item.kind,
+      lesson_id: item.lessonId,
+      lesson_title: item.title,
+    };
+  }
+
+  return {
+    feed_item_id: item.feedId,
+    feed_item_kind: item.kind,
+    post_id: item.postId,
+    post_type: item.postType,
+    practice_id: item.practiceId,
+    mission_id: item.missionId,
+    coin_amount: item.coinAmount,
+  };
 }
 
 function MissionCard({
@@ -1714,12 +1794,23 @@ export default function FeedScreen({ navigation }: Props) {
   const [initialFeedResolved, setInitialFeedResolved] = useState(false);
   const [stableFeedItems, setStableFeedItems] = useState<FeedItem[]>([]);
   const isOpeningMissionRef = useRef(false);
+  const viewedFeedItemIdsRef = useRef(new Set<string>());
   const viewabilityConfigRef = useRef({
     itemVisiblePercentThreshold: 65,
     minimumViewTime: 120,
   });
   const handleViewableItemsChangedRef = useRef(
     ({ viewableItems }: { viewableItems: ViewToken<FeedItem>[] }) => {
+      viewableItems
+        .filter((entry) => entry.isViewable)
+        .forEach((entry) => {
+          const item = entry.item;
+          const feedItemId = item.kind === 'mission' ? item.id : item.feedId;
+          if (viewedFeedItemIdsRef.current.has(feedItemId)) return;
+          viewedFeedItemIdsRef.current.add(feedItemId);
+          void trackMixpanelFeedItemViewed(getFeedTrackingProperties(item));
+        });
+
       const nextMediaId = viewableItems
         .filter((entry) => entry.isViewable)
         .map((entry) => getFeedMediaId(entry.item))
@@ -2232,8 +2323,16 @@ export default function FeedScreen({ navigation }: Props) {
       previousVocabularyCount,
       nextVocabularyCount,
       vocabularyLoadedCount,
+      previousShadowingCount,
+      nextShadowingCount,
+      shadowingLoadedCount,
+      previousLessonsCount,
+      nextLessonsCount,
+      lessonsLoadedCount,
       totalMissionsAvailable: initialMissions.length + shuffledRegularMissions.length,
       totalVocabularyAvailable: shuffledVocabulary.length,
+      totalShadowingAvailable: shuffledShadowing.length,
+      totalLessonsAvailable: shuffledLessons.length,
       hasMoreAfter:
         nextRegularMissionsCount < shuffledRegularMissions.length ||
         nextVocabularyCount < shuffledVocabulary.length ||
@@ -2270,17 +2369,29 @@ export default function FeedScreen({ navigation }: Props) {
       console.warn('[Feed] No se pudo configurar audio mode para speech', err);
     }
     Speech.stop();
+    void trackMixpanelFeedItemAction({
+      ...getFeedTrackingProperties(item),
+      action: 'listen_vocabulary',
+    });
     Speech.speak(segments.join('. '), { language: 'en-US', pitch: 1.05 });
   }, []);
 
   const handleMarkLearned = useCallback(
     (item: PendingVocab) => {
+      void trackMixpanelFeedItemAction({
+        ...getFeedTrackingProperties(item),
+        action: 'mark_learned',
+      });
       void setStatus(String(item.id), 'learned');
     },
     [setStatus]
   );
 
   const handleGuessCorrect = useCallback((item: PendingVocab) => {
+    void trackMixpanelFeedItemAction({
+      ...getFeedTrackingProperties(item),
+      action: 'quick_guess_correct',
+    });
     void recordJourneyVocabularyQuickGuessCorrect(String(item.id));
   }, []);
 
@@ -2295,6 +2406,12 @@ export default function FeedScreen({ navigation }: Props) {
           return;
         }
       }
+      void trackMixpanelFeedItemAction({
+        feed_item_kind: 'vocab',
+        card_id: String(item.id),
+        label: item.label,
+        action: 'open_practice',
+      });
       navigation.navigate('Practice', {
         cardId: String(item.id),
         label: item.label,
@@ -2352,6 +2469,10 @@ export default function FeedScreen({ navigation }: Props) {
 
   const handleStartMission = useCallback(
     async (item: PendingMission) => {
+      void trackMixpanelFeedItemAction({
+        ...getFeedTrackingProperties(item),
+        action: 'start_mission',
+      });
       await openMission(item.storyId, item.sceneIndex);
     },
     [openMission]
@@ -2359,6 +2480,10 @@ export default function FeedScreen({ navigation }: Props) {
 
   const handleContinueMission = useCallback(
     async (item: ResumeMission) => {
+      void trackMixpanelFeedItemAction({
+        ...getFeedTrackingProperties(item),
+        action: 'continue_mission',
+      });
       await openMission(item.storyId, item.sceneIndex);
     },
     [openMission]
@@ -2368,6 +2493,10 @@ export default function FeedScreen({ navigation }: Props) {
     (item: PendingShadowing) => {
       stopFeedVideos();
       setPostActionMessage(undefined);
+      void trackMixpanelFeedItemAction({
+        ...getFeedTrackingProperties(item),
+        action: 'play_shadowing',
+      });
       setShadowingQueue([item]);
       selectShadowingChapter(item.nextChapter, { shouldPlay: true });
       navigation.navigate('Shadowing', {
@@ -2384,6 +2513,10 @@ export default function FeedScreen({ navigation }: Props) {
     (item: PendingLesson) => {
       stopFeedVideos();
       setPostActionMessage(undefined);
+      void trackMixpanelFeedItemAction({
+        ...getFeedTrackingProperties(item),
+        action: 'open_lesson',
+      });
       navigation.navigate('LessonDetail', { lessonId: item.lessonId });
     },
     [navigation, stopFeedVideos]
@@ -2392,6 +2525,14 @@ export default function FeedScreen({ navigation }: Props) {
   const handleOpenFriendProfile = useCallback(
     (friend: FriendCharacter) => {
       stopFeedVideos();
+      void trackMixpanelFeedItemAction({
+        action: 'open_friend_profile',
+        feed_item_kind: 'friend_story',
+        friend_id: friend.friendId,
+        character_name: friend.characterName,
+        story_id: friend.storyId,
+        mission_id: friend.missionId,
+      });
       navigation.navigate('FriendProfile', { friendId: friend.friendId });
     },
     [navigation, stopFeedVideos]
@@ -2405,6 +2546,10 @@ export default function FeedScreen({ navigation }: Props) {
         return;
       }
       setPostActionMessage(undefined);
+      void trackMixpanelFeedItemAction({
+        ...getFeedTrackingProperties(item),
+        action: 'post_open_practice',
+      });
       await openPractice(practice);
     },
     [learningItems, openPractice]
@@ -2427,6 +2572,10 @@ export default function FeedScreen({ navigation }: Props) {
       }
 
       setPostActionMessage(undefined);
+      void trackMixpanelFeedItemAction({
+        ...getFeedTrackingProperties(item),
+        action: 'post_open_mission',
+      });
       await openMission(target.storyId, target.sceneIndex);
     },
     [openMission, stories]
@@ -2460,6 +2609,10 @@ export default function FeedScreen({ navigation }: Props) {
         next.add(item.postId);
         setClaimedExtraPostIds(next);
         await persistClaimedExtraPostIds(next);
+        void trackMixpanelFeedItemAction({
+          ...getFeedTrackingProperties(item),
+          action: 'claim_extra',
+        });
         setPostActionMessage(`Sumamos ${item.coinAmount} moneda${item.coinAmount === 1 ? '' : 's'} a tu saldo.`);
       } catch (err) {
         console.warn('[Feed] No se pudo reclamar el extra', err);

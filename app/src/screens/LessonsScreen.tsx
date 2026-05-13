@@ -16,6 +16,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import AppTabBar from '../components/AppTabBar';
 import { Lesson, useLessons } from '../hooks/useLessons';
 import { getLearnedLessonIds } from '../progress/lessonProgress';
+import { trackMixpanelLessonEvent } from '../marketing/mixpanelEvents';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Lessons'>;
 
@@ -200,9 +201,15 @@ export default function LessonsScreen({ navigation }: Props) {
 
   const handleOpenLesson = useCallback(
     (lesson: Lesson) => {
+      void trackMixpanelLessonEvent('lesson_opened', {
+        lesson_id: lesson.lessonId,
+        lesson_title: lesson.title,
+        source: 'lessons',
+        learned: learnedIds.has(lesson.lessonId),
+      });
       navigation.navigate('LessonDetail', { lessonId: lesson.lessonId });
     },
-    [navigation]
+    [learnedIds, navigation]
   );
 
   const completedCount = lessons.filter((l) => learnedIds.has(l.lessonId)).length;
@@ -264,7 +271,14 @@ export default function LessonsScreen({ navigation }: Props) {
               </View>
 
               <Pressable
-                onPress={() => setShowAll((current) => !current)}
+                onPress={() => {
+                  void trackMixpanelLessonEvent('lesson_filter_toggled', {
+                    show_all: !showAll,
+                    completed_count: completedCount,
+                    lesson_count: lessons.length,
+                  });
+                  setShowAll((current) => !current);
+                }}
                 accessibilityRole="button"
                 accessibilityLabel={showAll ? 'Mostrar lecciones pendientes' : 'Mostrar todas las lecciones'}
                 style={({ pressed }) => ({

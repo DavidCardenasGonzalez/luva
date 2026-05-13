@@ -10,6 +10,7 @@ import CoinCountChip from '../components/CoinCountChip';
 import AppTabBar from '../components/AppTabBar';
 import TourOverlay, { TourHighlight } from '../components/TourOverlay';
 import { hasSeenTour, markTourAsSeen } from '../tour/tourProgress';
+import { trackMixpanelEvent } from '../marketing/mixpanelEvents';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Stories'>;
 
@@ -37,6 +38,14 @@ export default function StoriesScreen({ navigation }: Props) {
   }, [items, completedCountFor]);
 
   const handlePress = (storyId: string, locked: boolean, title: string, cost: number) => {
+    void trackMixpanelEvent('story_card_pressed', {
+      event_category: 'story',
+      story_id: storyId,
+      story_title: title,
+      locked,
+      unlock_cost: cost,
+      source: 'stories',
+    });
     if (locked) {
       setLockedInfo({ title, cost });
       return;

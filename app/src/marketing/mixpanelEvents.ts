@@ -54,8 +54,16 @@ type MixpanelFeedLoadMoreEvent = {
   previousVocabularyCount: number;
   nextVocabularyCount: number;
   vocabularyLoadedCount: number;
+  previousShadowingCount?: number;
+  nextShadowingCount?: number;
+  shadowingLoadedCount?: number;
+  previousLessonsCount?: number;
+  nextLessonsCount?: number;
+  lessonsLoadedCount?: number;
   totalMissionsAvailable: number;
   totalVocabularyAvailable: number;
+  totalShadowingAvailable?: number;
+  totalLessonsAvailable?: number;
   hasMoreAfter: boolean;
 };
 
@@ -558,8 +566,16 @@ export async function trackMixpanelFeedLoadMore({
   previousVocabularyCount,
   nextVocabularyCount,
   vocabularyLoadedCount,
+  previousShadowingCount,
+  nextShadowingCount,
+  shadowingLoadedCount,
+  previousLessonsCount,
+  nextLessonsCount,
+  lessonsLoadedCount,
   totalMissionsAvailable,
   totalVocabularyAvailable,
+  totalShadowingAvailable,
+  totalLessonsAvailable,
   hasMoreAfter,
 }: MixpanelFeedLoadMoreEvent) {
   await trackMixpanelEvent("feed_load_more", {
@@ -573,9 +589,139 @@ export async function trackMixpanelFeedLoadMore({
     previous_vocabulary_count: previousVocabularyCount,
     next_vocabulary_count: nextVocabularyCount,
     vocabulary_loaded_count: vocabularyLoadedCount,
+    previous_shadowing_count: previousShadowingCount,
+    next_shadowing_count: nextShadowingCount,
+    shadowing_loaded_count: shadowingLoadedCount,
+    previous_lessons_count: previousLessonsCount,
+    next_lessons_count: nextLessonsCount,
+    lessons_loaded_count: lessonsLoadedCount,
     total_missions_available: totalMissionsAvailable,
     total_vocabulary_available: totalVocabularyAvailable,
+    total_shadowing_available: totalShadowingAvailable,
+    total_lessons_available: totalLessonsAvailable,
     has_more_after: hasMoreAfter,
+  });
+}
+
+export async function trackMixpanelTabSelected({
+  tabKey,
+  routeName,
+  previousRouteName,
+}: {
+  tabKey: string;
+  routeName: string;
+  previousRouteName?: string;
+}) {
+  await trackMixpanelEvent("tab_selected", {
+    event_category: "navigation",
+    tab_key: tabKey,
+    route_name: routeName,
+    previous_route_name: previousRouteName,
+  });
+}
+
+export async function trackMixpanelCoinSpent({
+  amount,
+  reason,
+  balanceBefore,
+  balanceAfter,
+}: {
+  amount: number;
+  reason?: string;
+  balanceBefore: number;
+  balanceAfter: number;
+}) {
+  await trackMixpanelEvent("coin_spent", {
+    event_category: "economy",
+    amount,
+    reason: reason?.trim() || undefined,
+    balance_before: balanceBefore,
+    balance_after: balanceAfter,
+  });
+}
+
+export async function trackMixpanelCoinSpendFailed({
+  amount,
+  reason,
+  balance,
+}: {
+  amount: number;
+  reason?: string;
+  balance: number;
+}) {
+  await trackMixpanelEvent("coin_spend_failed", {
+    event_category: "economy",
+    amount,
+    reason: reason?.trim() || undefined,
+    balance,
+  });
+}
+
+export async function trackMixpanelCoinAdded({
+  amount,
+  reason,
+  balanceBefore,
+  balanceAfter,
+}: {
+  amount: number;
+  reason?: string;
+  balanceBefore: number;
+  balanceAfter: number;
+}) {
+  await trackMixpanelEvent("coin_added", {
+    event_category: "economy",
+    amount,
+    reason: reason?.trim() || undefined,
+    balance_before: balanceBefore,
+    balance_after: balanceAfter,
+  });
+}
+
+export async function trackMixpanelFeedItemViewed(
+  properties: MixpanelEventProperties
+) {
+  await trackMixpanelEvent("feed_item_viewed", {
+    event_category: "feed",
+    ...properties,
+  });
+}
+
+export async function trackMixpanelFeedItemAction(
+  properties: MixpanelEventProperties
+) {
+  await trackMixpanelEvent("feed_item_action", {
+    event_category: "feed",
+    ...properties,
+  });
+}
+
+export async function trackMixpanelLessonEvent(
+  eventName: string,
+  properties: MixpanelEventProperties
+) {
+  await trackMixpanelEvent(eventName, {
+    event_category: "lesson",
+    ...properties,
+  });
+}
+
+export async function trackMixpanelShadowingEvent(
+  eventName: string,
+  properties: MixpanelEventProperties
+) {
+  await trackMixpanelEvent(eventName, {
+    event_category: "shadowing",
+    ...properties,
+  });
+}
+
+export async function trackMixpanelFriendEvent(
+  eventName: string,
+  properties: MixpanelEventProperties
+) {
+  await trackMixpanelEvent(eventName, {
+    event_category: "friend_chat",
+    ...properties,
   });
 }
 

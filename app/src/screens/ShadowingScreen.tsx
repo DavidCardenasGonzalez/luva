@@ -23,6 +23,7 @@ import { fetchSrtCaptions } from '../hooks/useLessons';
 import { useShadowingPlayer } from '../shadowing/ShadowingPlayerProvider';
 import { SHADOWING_CHAPTER_COST, useCoins } from '../purchases/CoinBalanceProvider';
 import { LITE_PROMO_EXPIRES_AT_KEY } from '../purchases/litePromo';
+import { trackMixpanelShadowingEvent } from '../marketing/mixpanelEvents';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Shadowing'>;
 
@@ -403,6 +404,7 @@ export default function ShadowingScreen({ navigation, route }: Props) {
   } = useShadowingPlayer();
   const { canSpend, spendCoins, loading: coinsLoading, isUnlimited } = useCoins();
   const chargedChapterIdsRef = useRef(new Set<string>());
+  const trackedPlayStartedChapterIdsRef = useRef(new Set<string>());
 
   const openShadowingPaywall = useCallback(async () => {
     try {
@@ -480,6 +482,13 @@ export default function ShadowingScreen({ navigation, route }: Props) {
   }, [lists, route.params?.autoplay, route.params?.chapterId, route.params?.listId, selectChapter]);
 
   const openList = useCallback((list: ShadowingList) => {
+    void trackMixpanelShadowingEvent('shadowing_list_opened', {
+      list_id: list.listId,
+      list_name: list.name,
+      category: list.category,
+      chapter_count: list.chapters.length,
+      source: 'list_grid',
+    });
     setSelectedListId(list.listId);
     const firstChapter = list.chapters[0];
     if (firstChapter && !list.chapters.some((chapter) => chapter.chapterId === selectedChapter?.chapterId)) {
@@ -488,6 +497,14 @@ export default function ShadowingScreen({ navigation, route }: Props) {
   }, [selectChapter, selectedChapter?.chapterId]);
 
   const openContinueList = useCallback((item: ContinueShadowingListItem) => {
+    void trackMixpanelShadowingEvent('shadowing_list_opened', {
+      list_id: item.list.listId,
+      list_name: item.list.name,
+      category: item.list.category,
+      chapter_count: item.list.chapters.length,
+      listened_count: item.listenedCount,
+      source: 'continue',
+    });
     setSelectedListId(item.list.listId);
     const nextChapter =
       item.list.chapters.find((chapter) => !listenedChapterIds.has(chapter.chapterId)) ||
@@ -499,8 +516,16 @@ export default function ShadowingScreen({ navigation, route }: Props) {
   }, [listenedChapterIds, selectChapter]);
 
   const handleSelectChapter = useCallback((chapter: ShadowingChapter) => {
+    void trackMixpanelShadowingEvent('shadowing_chapter_selected', {
+      list_id: chapter.listId,
+      chapter_id: chapter.chapterId,
+      chapter_title: chapter.title,
+      chapter_order: chapter.order,
+      duration_seconds: chapter.durationSeconds,
+      already_listened: listenedChapterIds.has(chapter.chapterId),
+    });
     selectChapter(chapter);
-  }, [selectChapter]);
+  }, [listenedChapterIds, selectChapter]);
 
   const openCurrentPlayer = useCallback(() => {
     if (!selectedChapter) return;
@@ -574,12 +599,59 @@ export default function ShadowingScreen({ navigation, route }: Props) {
         return;
       }
     }
+    if (
+      !isPlaying &&
+      selectedChapter &&
+      !trackedPlayStartedChapterIdsRef.current.has(selectedChapter.chapterId)
+    ) {
+      trackedPlayStartedChapterIdsRef.current.add(selectedChapter.chapterId);
+      void trackMixpanelShadowingEvent('shadowing_chapter_play_started', {
+        list_id: selectedChapter.listId,
+        chapter_id: selectedChapter.chapterId,
+        chapter_title: selectedChapter.title,
+        position_seconds: Math.round(positionSeconds),
+        duration_seconds: Math.round(durationSeconds || selectedChapter.durationSeconds || 0),
+        playback_rate: playbackRate,
+      });
+    }
     await playPause();
-  }, [canSpend, coinsLoading, isPlaying, isUnlimited, openShadowingPaywall, playPause]);
+  }, [
+    canSpend,
+    coinsLoading,
+    durationSeconds,
+    isPlaying,
+    isUnlimited,
+    openShadowingPaywall,
+    playbackRate,
+    playPause,
+    positionSeconds,
+    selectedChapter,
+  ]);
+
+  useEffect(() => {
+    if (!isPlaying || !selectedChapter) return;
+    if (trackedPlayStartedChapterIdsRef.current.has(selectedChapter.chapterId)) return;
+    trackedPlayStartedChapterIdsRef.current.add(selectedChapter.chapterId);
+    void trackMixpanelShadowingEvent('shadowing_chapter_play_started', {
+      list_id: selectedChapter.listId,
+      chapter_id: selectedChapter.chapterId,
+      chapter_title: selectedChapter.title,
+      position_seconds: Math.round(positionSeconds),
+      duration_seconds: Math.round(durationSeconds || selectedChapter.durationSeconds || 0),
+      playback_rate: playbackRate,
+      autoplay: true,
+    });
+  }, [durationSeconds, isPlaying, playbackRate, positionSeconds, selectedChapter]);
 
   const handlePlaybackRate = useCallback(async (rate: number) => {
+    void trackMixpanelShadowingEvent('shadowing_playback_rate_changed', {
+      list_id: selectedChapter?.listId,
+      chapter_id: selectedChapter?.chapterId,
+      previous_rate: playbackRate,
+      next_rate: rate,
+    });
     await setPlaybackRate(rate);
-  }, [setPlaybackRate]);
+  }, [playbackRate, selectedChapter, setPlaybackRate]);
 
   const handleTranslateSubtitle = useCallback(async () => {
     const subtitle = activeSubtitle?.text.trim();
@@ -603,6 +675,12 @@ export default function ShadowingScreen({ navigation, route }: Props) {
         source: 'en',
         target: 'es',
       });
+      void trackMixpanelShadowingEvent('shadowing_subtitle_translated', {
+        list_id: selectedChapter?.listId,
+        chapter_id: selectedChapter?.chapterId,
+        subtitle_length: subtitle.length,
+        position_seconds: Math.round(positionSeconds),
+      });
       setSubtitleTranslations((current) => ({
         ...current,
         [subtitleKey]: { text: payload.translatedText || '', loading: false },
@@ -616,7 +694,7 @@ export default function ShadowingScreen({ navigation, route }: Props) {
         },
       }));
     }
-  }, [activeSubtitle, activeSubtitleKey, isPlaying, playPause, subtitleTranslations]);
+  }, [activeSubtitle, activeSubtitleKey, isPlaying, playPause, positionSeconds, selectedChapter, subtitleTranslations]);
 
   const measureProgressBar = useCallback(() => {
     progressBarRef.current?.measureInWindow((x, _y, width) => {

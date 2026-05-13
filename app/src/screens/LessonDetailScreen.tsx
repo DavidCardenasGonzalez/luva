@@ -16,6 +16,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { ResizeMode, Video } from 'expo-av';
 import type { AVPlaybackStatus } from 'expo-av';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { trackMixpanelLessonEvent } from '../marketing/mixpanelEvents';
 import {
   combineLessonSubtitles,
   fetchSrtCaptions,
@@ -146,6 +147,8 @@ export default function LessonDetailScreen({ navigation, route }: Props) {
   const [question, setQuestion] = useState('');
   const [helpLoading, setHelpLoading] = useState(false);
   const [helpError, setHelpError] = useState<string | undefined>();
+  const trackedLessonViewRef = useRef<string | undefined>(undefined);
+  const trackedVideoStartRef = useRef<Set<string>>(new Set());
   const lessonVideoSource = useMemo(() => {
     return lesson?.videoUrl ? { uri: lesson.videoUrl } : undefined;
   }, [lesson?.videoUrl]);
@@ -155,6 +158,18 @@ export default function LessonDetailScreen({ navigation, route }: Props) {
       setSubtitleMode('en');
     }
   }, [lesson?.translatedSubtitlesUrl, subtitleMode]);
+
+  useEffect(() => {
+    if (!lesson || trackedLessonViewRef.current === lesson.lessonId) return;
+    trackedLessonViewRef.current = lesson.lessonId;
+    void trackMixpanelLessonEvent('lesson_viewed', {
+      lesson_id: lesson.lessonId,
+      lesson_title: lesson.title,
+      has_subtitles: Boolean(lesson.subtitlesUrl),
+      has_translated_subtitles: Boolean(lesson.translatedSubtitlesUrl),
+      quiz_count: lesson.quiz?.length || 0,
+    });
+  }, [lesson]);
 
   useEffect(() => {
     let cancelled = false;
@@ -248,9 +263,20 @@ export default function LessonDetailScreen({ navigation, route }: Props) {
   }, [scheduleHideControls]);
 
   const handlePlayPause = useCallback(async () => {
-    if (isPlaying) await videoRef.current?.pauseAsync();
-    else await videoRef.current?.playAsync();
-  }, [isPlaying]);
+    if (isPlaying) {
+      await videoRef.current?.pauseAsync();
+      return;
+    }
+    if (lesson && !trackedVideoStartRef.current.has(lesson.lessonId)) {
+      trackedVideoStartRef.current.add(lesson.lessonId);
+      void trackMixpanelLessonEvent('lesson_video_started', {
+        lesson_id: lesson.lessonId,
+        lesson_title: lesson.title,
+        position_seconds: Math.round(positionSeconds),
+      });
+    }
+    await videoRef.current?.playAsync();
+  }, [isPlaying, lesson, positionSeconds]);
 
   const handleSeek = useCallback((locationX: number) => {
     const width = progressBarWidthRef.current;
@@ -261,14 +287,25 @@ export default function LessonDetailScreen({ navigation, route }: Props) {
   }, [durationSeconds, scheduleHideControls]);
 
   const handleSpeedChange = useCallback(async (rate: number) => {
+    void trackMixpanelLessonEvent('lesson_video_speed_changed', {
+      lesson_id: lessonId,
+      lesson_title: lesson?.title,
+      previous_rate: playbackRate,
+      next_rate: rate,
+    });
     setPlaybackRate(rate);
     await videoRef.current?.setRateAsync(rate, true);
     scheduleHideControls();
-  }, [scheduleHideControls]);
+  }, [lesson?.title, lessonId, playbackRate, scheduleHideControls]);
 
   const handleGoToTest = useCallback(() => {
+    void trackMixpanelLessonEvent('lesson_test_opened', {
+      lesson_id: lessonId,
+      lesson_title: lesson?.title,
+      quiz_count: lesson?.quiz?.length || 0,
+    });
     navigation.navigate('LessonTest', { lessonId });
-  }, [lessonId, navigation]);
+  }, [lesson, lessonId, navigation]);
 
   const handleSendQuestion = useCallback(async () => {
     const trimmed = question.trim();
@@ -286,6 +323,15 @@ export default function LessonDetailScreen({ navigation, route }: Props) {
     setHelpError(undefined);
     setHelpLoading(true);
     setMessages((current) => [...current, userMessage]);
+    void trackMixpanelLessonEvent('lesson_help_requested', {
+      lesson_id: lesson.lessonId,
+      lesson_title: lesson.title,
+      question_length: trimmed.length,
+      question_word_count: trimmed.split(/\s+/).filter(Boolean).length,
+      position_seconds: Math.round(positionSeconds),
+      subtitle_mode: subtitleMode,
+      history_message_count: messages.length,
+    });
 
     try {
       const answer = await sendLessonHelp(lesson.lessonId, {
@@ -309,7 +355,7 @@ export default function LessonDetailScreen({ navigation, route }: Props) {
     } finally {
       setHelpLoading(false);
     }
-  }, [cues, helpLoading, lesson, positionSeconds, question, subtitleMode]);
+  }, [cues, helpLoading, lesson, messages.length, positionSeconds, question, subtitleMode]);
 
   const quizCount = lesson?.quiz?.length || 0;
   const sendDisabled = helpLoading || !question.trim() || !lesson;
@@ -504,7 +550,15 @@ export default function LessonDetailScreen({ navigation, route }: Props) {
                       <Pressable
                         key={mode}
                         disabled={disabled}
-                        onPress={() => setSubtitleMode(mode)}
+                        onPress={() => {
+                          void trackMixpanelLessonEvent('lesson_subtitle_mode_changed', {
+                            lesson_id: lesson.lessonId,
+                            lesson_title: lesson.title,
+                            previous_mode: subtitleMode,
+                            next_mode: mode,
+                          });
+                          setSubtitleMode(mode);
+                        }}
                         accessibilityRole="button"
                         accessibilityLabel={mode === 'en' ? 'Subtítulos en inglés' : 'Subtítulos en inglés y español'}
                         style={({ pressed }) => ({
