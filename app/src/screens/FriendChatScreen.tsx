@@ -424,25 +424,22 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     setShowAssistanceModal(true);
   }, [friend, messages.length, sourcePost?.postId]);
 
-  const handleStartNewConversation = useCallback(() => {
-    void trackMixpanelFriendEvent('friend_chat_restarted', {
+  const handleFinishConversation = useCallback(() => {
+    void trackMixpanelFriendEvent('friend_chat_finished', {
       friend_id: friend?.friendId,
       character_name: friend?.characterName,
       story_id: friend?.storyId,
       mission_id: friend?.missionId,
       post_id: sourcePost?.postId,
-      previous_history_message_count: messages.length,
-      previous_conversation_ended: conversationEnded,
+      history_message_count: messages.length,
+      conversation_ended: conversationEnded,
     });
-    skipExitPromptRef.current = false;
-    setMessages([]);
-    setMessageTranslations({});
-    setAnalysis(null);
-    setConversationEnded(false);
-    setConversationFeedback(null);
-    setCompletionConfettiKey(null);
-    setErrorMessage(null);
-  }, [conversationEnded, friend, messages.length, sourcePost?.postId]);
+    skipExitPromptRef.current = true;
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Feed' }],
+    });
+  }, [conversationEnded, friend, messages.length, navigation, sourcePost?.postId]);
 
   const handleRequestAssistance = useCallback(async () => {
     const trimmed = assistanceQuestion.trim();
@@ -1096,10 +1093,10 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           >
             <Text style={{ color: '#15803d', fontWeight: '800' }}>Conversación terminada</Text>
             <Text style={{ color: COLORS.muted, marginTop: 4 }}>
-              El chat quedó cerrado después de tu despedida. Puedes empezar otra conversación cuando quieras.
+              El chat quedó cerrado después de tu despedida. Vuelve al feed para seguir practicando.
             </Text>
             <Pressable
-              onPress={handleStartNewConversation}
+              onPress={handleFinishConversation}
               style={({ pressed }) => ({
                 marginTop: 10,
                 paddingVertical: 11,
@@ -1108,7 +1105,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                 backgroundColor: pressed ? '#047857' : '#10b981',
               })}
             >
-              <Text style={{ color: 'white', fontWeight: '900' }}>Nueva conversación</Text>
+              <Text style={{ color: 'white', fontWeight: '900' }}>Finalizar</Text>
             </Pressable>
           </View>
         ) : (

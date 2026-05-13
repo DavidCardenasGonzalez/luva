@@ -257,14 +257,15 @@ export async function trackPaywallViewed({
   }
 
   try {
-    logViewedContent({
-      contentId: "luva_pro_paywall",
-      contentType: "subscription_paywall",
-      params: {
+    AppEventsLogger.logEvent(
+      META_EVENTS.InitiatedCheckout,
+      normalizeParams({
+        [META_EVENT_PARAMS.ContentID]: "luva_pro_paywall",
+        [META_EVENT_PARAMS.ContentType]: "subscription_paywall",
         paywall_source: source || "unknown",
         paywall_modal: Boolean(asModal),
-      },
-    });
+      })
+    );
   } catch (err) {
     console.warn("[Meta] No se pudo registrar el paywall", err);
   }

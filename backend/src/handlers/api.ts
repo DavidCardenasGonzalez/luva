@@ -830,20 +830,17 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       }
     }
 
-    const friendProfile = path.match(/^\/v1\/friends\/([^/]+)\/profile$/);
+    const friendProfile = path.match(/^\/v1\/(?:friends\/([^/]+)\/profile|friend-profiles\/([^/]+))$/);
     if (method === "GET" && friendProfile) {
       const identity = getUserIdentity(event);
-      const friendId = decodeURIComponent(friendProfile[1]);
-      const storedFriend = identity ? await getFriendRecord(identity.userId, friendId) : undefined;
-      const friend = storedFriend ? publicFriend(storedFriend) : publicCatalogFriend(friendId);
-      if (!friend) {
+      const encodedFriendId = friendProfile[1] || friendProfile[2];
+      const friendId = decodeURIComponent(encodedFriendId);
+      const profile = await getPublicFriendProfile(friendId, identity);
+      if (!profile.friend) {
         return notFound();
       }
 
-      return json(200, {
-        friend,
-        posts: await listPublicCharacterPosts(friend.friendId),
-      });
+      return json(200, profile);
     }
 
     const friendChat = path.match(/^\/v1\/friends\/([^/]+)\/chat$/);
@@ -1186,6 +1183,46 @@ function publicCatalogFriend(friendIdInput: string): FriendCharacter | undefined
   }
 
   return undefined;
+}
+
+function publicFriendFromCharacterPosts(
+  friendIdInput: string,
+  posts: CharacterPost[]
+): FriendCharacter | undefined {
+  const friendId = typeof friendIdInput === "string" ? friendIdInput.trim() : "";
+  const firstPost = posts.find((post) => post.characterId === friendId) || posts[0];
+  if (!friendId || !firstPost) {
+    return undefined;
+  }
+
+  return {
+    friendId,
+    storyId: firstPost.storyId,
+    missionId: firstPost.missionId,
+    sceneIndex: firstPost.sceneIndex,
+    storyTitle: firstPost.storyTitle,
+    missionTitle: firstPost.missionTitle,
+    characterName: firstPost.characterName,
+    aiRole: `You are ${firstPost.characterName}, a friendly English conversation partner.`,
+    ...(firstPost.avatarImageUrl ? { avatarImageUrl: firstPost.avatarImageUrl } : {}),
+    ...(firstPost.context ? { sceneSummary: firstPost.context } : {}),
+    createdAt: firstPost.createdAt,
+    updatedAt: firstPost.updatedAt,
+  };
+}
+
+async function getPublicFriendProfile(
+  friendId: string,
+  identity?: UserIdentity
+): Promise<{ friend?: FriendCharacter; posts: CharacterPost[] }> {
+  const storedFriend = identity ? await getFriendRecord(identity.userId, friendId) : undefined;
+  const friend = storedFriend ? publicFriend(storedFriend) : publicCatalogFriend(friendId);
+  const posts = await listPublicCharacterPosts(friend?.friendId || friendId);
+
+  return {
+    friend: friend || publicFriendFromCharacterPosts(friendId, posts),
+    posts,
+  };
 }
 
 function sanitizeFriendRecord(input: any): FriendRecord | undefined {

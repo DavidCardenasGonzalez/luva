@@ -139,7 +139,7 @@ export function useFriendProfile(friendId?: string) {
 
     try {
       const response = await api.get<FriendProfileResponse>(
-        `/friends/${encodeURIComponent(friendId)}/profile`
+        `/friend-profiles/${encodeURIComponent(friendId)}`
       );
       setFriend(response?.friend);
       setPosts(sanitizeProfilePosts(response?.posts));

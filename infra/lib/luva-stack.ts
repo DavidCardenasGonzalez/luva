@@ -647,6 +647,8 @@ export class LuvaStack extends Stack {
     const friendById = friends.addResource('{friendId}');
     const friendProfile = friendById.addResource('profile');
     const friendChat = friendById.addResource('chat');
+    const friendProfiles = v1.addResource('friend-profiles');
+    const publicFriendProfileById = friendProfiles.addResource('{friendId}');
     const admin = v1.addResource('admin');
     const adminProxy = admin.addResource('{proxy+}');
     const proxy = v1.addResource('{proxy+}');
@@ -682,6 +684,7 @@ export class LuvaStack extends Stack {
       authorizationType: AuthorizationType.COGNITO,
     });
     friendProfile.addMethod('GET', lambdaIntegration);
+    publicFriendProfileById.addMethod('GET', lambdaIntegration);
     friendChat.addMethod('POST', lambdaIntegration, {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
@@ -699,7 +702,7 @@ export class LuvaStack extends Stack {
 
     const deployment = new Deployment(this, 'Deployment', { api });
     deployment.addToLogicalId({
-      routeManifestVersion: '2026-05-06-onboarding-plan-v1',
+      routeManifestVersion: '2026-05-13-public-friend-profiles-v1',
       routes: {
         apiRoot: ['ANY /v1', 'ANY /v1/{proxy+}'],
         users: [
@@ -717,6 +720,7 @@ export class LuvaStack extends Stack {
           'GET /v1/friends',
           'POST /v1/friends',
           'GET /v1/friends/{friendId}/profile',
+          'GET /v1/friend-profiles/{friendId}',
           'POST /v1/friends/{friendId}/chat',
         ],
         admin: [
