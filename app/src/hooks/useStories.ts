@@ -16,7 +16,11 @@ export type StoryMissionDefinition = {
   caracterName?: string;
   caracterPrompt?: string;
   avatarImageUrl?: string;
+  avatarImageXsUrl?: string;
+  avatarImageMdUrl?: string;
   videoIntro?: string;
+  videoPreviewUrl?: string;
+  videoThumbnailUrl?: string;
   requirements: StoryRequirement[];
 };
 
@@ -58,7 +62,11 @@ export type StoryMission = {
   caracterName?: string;
   caracterPrompt?: string;
   avatarImageUrl?: string;
+  avatarImageXsUrl?: string;
+  avatarImageMdUrl?: string;
   videoIntro?: string;
+  videoPreviewUrl?: string;
+  videoThumbnailUrl?: string;
   requirements: StoryRequirementState[];
 };
 
@@ -118,11 +126,35 @@ function sanitizeMission(input: any): StoryMissionDefinition | null {
         : typeof input.avatar_image_url === 'string'
         ? input.avatar_image_url
         : undefined,
+    avatarImageXsUrl:
+      typeof input.avatarImageXsUrl === 'string'
+        ? input.avatarImageXsUrl
+        : typeof input.avatar_image_xs_url === 'string'
+        ? input.avatar_image_xs_url
+        : undefined,
+    avatarImageMdUrl:
+      typeof input.avatarImageMdUrl === 'string'
+        ? input.avatarImageMdUrl
+        : typeof input.avatar_image_md_url === 'string'
+        ? input.avatar_image_md_url
+        : undefined,
     videoIntro:
       typeof input.videoIntro === 'string'
         ? input.videoIntro
         : typeof input.video_intro === 'string'
         ? input.video_intro
+        : undefined,
+    videoPreviewUrl:
+      typeof input.videoPreviewUrl === 'string'
+        ? input.videoPreviewUrl
+        : typeof input.video_preview_url === 'string'
+        ? input.video_preview_url
+        : undefined,
+    videoThumbnailUrl:
+      typeof input.videoThumbnailUrl === 'string'
+        ? input.videoThumbnailUrl
+        : typeof input.video_thumbnail_url === 'string'
+        ? input.video_thumbnail_url
         : undefined,
     requirements,
   };
@@ -167,7 +199,11 @@ function makeLocalVersion(stories: StoryDefinition[]): string {
       isInitial: !!story.isInitial,
       missions: (story.missions || []).map((mission) => ({
         id: mission.missionId,
+        avatarImageXsUrl: mission.avatarImageXsUrl || '',
+        avatarImageMdUrl: mission.avatarImageMdUrl || '',
         videoIntro: mission.videoIntro || '',
+        videoPreviewUrl: mission.videoPreviewUrl || '',
+        videoThumbnailUrl: mission.videoThumbnailUrl || '',
       })),
     }))
   );
@@ -289,7 +325,11 @@ function storyDetailFromDefinition(story: StoryDefinition): StoryDetail {
       caracterName: mission.caracterName,
       caracterPrompt: mission.caracterPrompt,
       avatarImageUrl: mission.avatarImageUrl,
+      avatarImageXsUrl: mission.avatarImageXsUrl,
+      avatarImageMdUrl: mission.avatarImageMdUrl,
       videoIntro: mission.videoIntro,
+      videoPreviewUrl: mission.videoPreviewUrl,
+      videoThumbnailUrl: mission.videoThumbnailUrl,
       requirements: (mission.requirements || []).map((req) => ({
         requirementId: req.requirementId,
         text: req.text,

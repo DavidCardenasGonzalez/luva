@@ -51,7 +51,11 @@ export interface StoryMission {
   caracterName?: string;
   caracterPrompt?: string;
   avatarImageUrl?: string;
+  avatarImageXsUrl?: string;
+  avatarImageMdUrl?: string;
   videoIntro?: string;
+  videoPreviewUrl?: string;
+  videoThumbnailUrl?: string;
   requirements: StoryRequirement[];
 }
 
@@ -142,7 +146,11 @@ export interface FriendCharacter {
   aiRoleFriends?: string;
   characterPrompt?: string;
   avatarImageUrl?: string;
+  avatarImageXsUrl?: string;
+  avatarImageMdUrl?: string;
   videoIntro?: string;
+  videoPreviewUrl?: string;
+  videoThumbnailUrl?: string;
   sceneSummary?: string;
   createdAt: string;
   updatedAt: string;

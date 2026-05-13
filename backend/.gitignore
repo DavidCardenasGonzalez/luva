@@ -1,9 +1,9 @@
 node_modules/
 dist/
 coverage/
+.media-cache/
 *.tsbuildinfo
 .env
 .env.*
 !.env.example
 npm-debug.log*
-

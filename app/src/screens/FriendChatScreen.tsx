@@ -225,8 +225,9 @@ export default function FriendChatScreen({ navigation, route }: Props) {
 
   const avatarSource = useMemo(() => {
     if (!friend) return undefined;
-    return friend.avatarImageUrl?.trim()
-      ? { uri: friend.avatarImageUrl }
+    const avatarUrl = (friend.avatarImageXsUrl || friend.avatarImageUrl)?.trim();
+    return avatarUrl
+      ? { uri: avatarUrl }
       : getChatAvatar(friend.missionId);
   }, [friend]);
   const avatarInitial = (friend?.characterName.trim().charAt(0) || '?').toUpperCase();
@@ -365,7 +366,11 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         caracterName: friend.characterName,
         caracterPrompt: friend.characterPrompt,
         avatarImageUrl: friend.avatarImageUrl,
+        avatarImageXsUrl: friend.avatarImageXsUrl,
+        avatarImageMdUrl: friend.avatarImageMdUrl,
         videoIntro: friend.videoIntro,
+        videoPreviewUrl: friend.videoPreviewUrl,
+        videoThumbnailUrl: friend.videoThumbnailUrl,
         requirements: [],
       };
       const storyDefinition = {

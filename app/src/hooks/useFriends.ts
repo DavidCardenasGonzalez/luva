@@ -20,7 +20,11 @@ export type FriendCharacter = {
   aiRole: string;
   characterPrompt?: string;
   avatarImageUrl?: string;
+  avatarImageXsUrl?: string;
+  avatarImageMdUrl?: string;
   videoIntro?: string;
+  videoPreviewUrl?: string;
+  videoThumbnailUrl?: string;
   sceneSummary?: string;
   createdAt: string;
   updatedAt: string;

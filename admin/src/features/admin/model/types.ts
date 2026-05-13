@@ -190,6 +190,8 @@ export type AdminStoryCharacter = {
   missionTitle: string
   characterName: string
   avatarImageUrl?: string
+  avatarImageXsUrl?: string
+  avatarImageMdUrl?: string
   sceneSummary?: string
 }
 

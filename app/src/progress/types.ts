@@ -64,6 +64,10 @@ export type StoryActiveMission = {
   sceneSummary?: string;
   caracterName?: string;
   avatarImageUrl?: string;
+  avatarImageXsUrl?: string;
+  avatarImageMdUrl?: string;
+  videoPreviewUrl?: string;
+  videoThumbnailUrl?: string;
   messages: StoryChatMessage[];
   requirements: StoryRequirementProgress[];
   analysis: StoryAnalysis | null;

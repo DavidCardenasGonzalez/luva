@@ -256,7 +256,7 @@ function buildFeedItems({
 }
 
 function getFeedMediaId(item: FeedItem) {
-  if (item.kind === 'mission' && item.mission.videoIntro?.trim()) {
+  if (item.kind === 'mission' && (item.mission.videoPreviewUrl?.trim() || item.mission.videoIntro?.trim())) {
     return item.id;
   }
   if (item.kind === 'post' && item.videoUrl?.trim()) {
@@ -276,8 +276,13 @@ function MissionCard({
   onViewAll: () => void;
   playbackEnabled: boolean;
 }) {
-  const avatarImageUrl = item.mission.avatarImageUrl?.trim();
-  const introVideoUrl = item.mission.videoIntro?.trim();
+  const avatarImageUrl = (item.mission.avatarImageXsUrl || item.mission.avatarImageUrl)?.trim();
+  const coverImageUrl = (
+    item.mission.videoThumbnailUrl ||
+    item.mission.avatarImageMdUrl ||
+    item.mission.avatarImageUrl
+  )?.trim();
+  const introVideoUrl = (item.mission.videoPreviewUrl || item.mission.videoIntro)?.trim();
   const introVideoRef = useRef<Video | null>(null);
   const [hasVideoError, setHasVideoError] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
@@ -295,6 +300,9 @@ function MissionCard({
   const missionAvatar = useMemo<ImageSourcePropType | undefined>(() => {
     return avatarImageUrl ? { uri: avatarImageUrl } : getChatAvatar(item.mission.missionId);
   }, [avatarImageUrl, item.mission.missionId]);
+  const missionCover = useMemo<ImageSourcePropType | undefined>(() => {
+    return coverImageUrl ? { uri: coverImageUrl } : missionAvatar;
+  }, [coverImageUrl, missionAvatar]);
 
   const displayName = item.mission.caracterName || item.mission.title || 'Personaje';
   const avatarInitial = (displayName.trim().charAt(0) || '?').toUpperCase();
@@ -504,14 +512,14 @@ function MissionCard({
               </View>
             )}
           </View>
-        ) : missionAvatar ? (
+        ) : missionCover ? (
           <Pressable
             onPress={() => onStart(item)}
             accessibilityRole="button"
             accessibilityLabel={`Empezar misión ${item.mission.title}`}
             style={{ flex: 1 }}
           >
-            <ImageBackground source={missionAvatar} style={{ flex: 1 }} imageStyle={{ resizeMode: 'cover' }}>
+            <ImageBackground source={missionCover} style={{ flex: 1 }} imageStyle={{ resizeMode: 'cover' }}>
               <View
                 style={{
                   position: 'absolute',
@@ -594,7 +602,7 @@ function ResumeMissionCard({
   item: ResumeMission;
   onContinue: (item: ResumeMission) => void;
 }) {
-  const avatarImageUrl = item.mission.avatarImageUrl?.trim();
+  const avatarImageUrl = (item.mission.avatarImageXsUrl || item.mission.avatarImageUrl)?.trim();
 
   const missionAvatar = useMemo<ImageSourcePropType | undefined>(() => {
     return avatarImageUrl ? { uri: avatarImageUrl } : getChatAvatar(item.mission.missionId);
@@ -1356,10 +1364,11 @@ function FriendStoryAvatar({
   onPress: (friend: FriendCharacter) => void;
 }) {
   const avatarSource = useMemo<ImageSourcePropType | undefined>(() => {
-    return friend.avatarImageUrl?.trim()
-      ? { uri: friend.avatarImageUrl }
+    const avatarUrl = (friend.avatarImageXsUrl || friend.avatarImageUrl)?.trim();
+    return avatarUrl
+      ? { uri: avatarUrl }
       : getChatAvatar(friend.missionId);
-  }, [friend.avatarImageUrl, friend.missionId]);
+  }, [friend.avatarImageUrl, friend.avatarImageXsUrl, friend.missionId]);
   const initial = (friend.characterName.trim().charAt(0) || '?').toUpperCase();
 
   return (
@@ -1765,6 +1774,10 @@ export default function FeedScreen({ navigation }: Props) {
         aiRole: 'assistant',
         caracterName: activeMission.caracterName,
         avatarImageUrl: activeMission.avatarImageUrl,
+        avatarImageXsUrl: activeMission.avatarImageXsUrl,
+        avatarImageMdUrl: activeMission.avatarImageMdUrl,
+        videoPreviewUrl: activeMission.videoPreviewUrl,
+        videoThumbnailUrl: activeMission.videoThumbnailUrl,
         requirements: activeMission.requirements.map((requirement) => ({ ...requirement })),
       };
     }
@@ -1942,8 +1955,19 @@ export default function FeedScreen({ navigation }: Props) {
         Math.min(shuffledRegularMissions.length, visibleMissionsCount + MISSION_BATCH_SIZE)
       ),
     ];
-    const missionUrls = upcomingMissions.map((item) => item.mission.avatarImageUrl);
-    const resumeMissionUrls = resumeMission ? [resumeMission.mission.avatarImageUrl] : [];
+    const missionUrls = upcomingMissions.flatMap((item) => [
+      item.mission.videoThumbnailUrl,
+      item.mission.avatarImageXsUrl,
+      item.mission.avatarImageMdUrl,
+      item.mission.avatarImageUrl,
+    ]);
+    const resumeMissionUrls = resumeMission
+      ? [
+          resumeMission.mission.avatarImageXsUrl,
+          resumeMission.mission.avatarImageMdUrl,
+          resumeMission.mission.avatarImageUrl,
+        ]
+      : [];
     const postUrls = feedPostItems.map((item) => item.imageUrl);
     const shadowingUrls = shuffledShadowing
       .slice(0, Math.min(shuffledShadowing.length, visibleShadowingCount + SHADOWING_BATCH_SIZE))

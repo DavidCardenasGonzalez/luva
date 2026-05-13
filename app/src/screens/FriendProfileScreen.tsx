@@ -165,8 +165,9 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
 
   const avatarSource = useMemo<ImageSourcePropType | undefined>(() => {
     if (!friend) return undefined;
-    return friend.avatarImageUrl?.trim()
-      ? { uri: friend.avatarImageUrl }
+    const avatarUrl = (friend.avatarImageMdUrl || friend.avatarImageUrl)?.trim();
+    return avatarUrl
+      ? { uri: avatarUrl }
       : getChatAvatar(friend.missionId);
   }, [friend]);
   const avatarInitial = (friend?.characterName.trim().charAt(0) || '?').toUpperCase();

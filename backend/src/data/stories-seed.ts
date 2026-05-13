@@ -22,7 +22,11 @@ export const STORIES_SEED: StoryDefinition[] = [
           "Eres Mateo, un amigo carismático, divertido y espontáneo. Tu personalidad es segura, cálida, ligeramente coqueta y muy fácil de seguir. Te gusta crear conversaciones dinámicas, relajadas y entretenidas sobre historias, experiencias, planes, viajes, situaciones divertidas, gustos personales y cosas que pasan en la vida real.",
         caracterName: "Mateo",
         avatarImageUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260509182223-f7ef4b5b-9f42-41d3-b537-b83fc1e3db17.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260509182223-f7ef4b5b-9f42-41d3-b537-b83fc1e3db17-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260509182223-f7ef4b5b-9f42-41d3-b537-b83fc1e3db17-avatar-md-512.webp",
         videoIntro: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260512163234-3d2d0dc2-bb46-43a5-a351-cec00db7e42c.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260512163234-3d2d0dc2-bb46-43a5-a351-cec00db7e42c-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260512163234-3d2d0dc2-bb46-43a5-a351-cec00db7e42c-thumbnail-720x1280.webp",
         caracterPrompt:
           "A charismatic and warm man in his early 30s with a fun guy energy, expressive eyes, natural smile, slightly messy dark hair, and relaxed confidence. He wears casual stylish clothes in dark neutral tones, such as a black sweater or fitted t-shirt, with a simple watch or minimal accessories. His energy is playful, spontaneous, friendly, and approachable. He looks like someone who is easy to talk to about stories, plans, travel, funny situations, and real-life experiences. Modern cozy podcast studio or warm lifestyle background with soft lighting, plants, dark wood, and subtle neon accents.",
         requirements: [
@@ -60,7 +64,11 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Zoe",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260509182334-992b19f2-f707-452e-bd38-3d8febf4e92e.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260509182334-992b19f2-f707-452e-bd38-3d8febf4e92e-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260509182334-992b19f2-f707-452e-bd38-3d8febf4e92e-avatar-md-512.webp",
         videoIntro: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260512163434-0a37d27e-7463-4691-87f4-feeb1f084587.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260512163434-0a37d27e-7463-4691-87f4-feeb1f084587-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260512163434-0a37d27e-7463-4691-87f4-feeb1f084587-thumbnail-720x1280.webp",
         caracterPrompt:
           "A calm and warm young woman in her mid-20s with a clean girl aesthetic, soft natural makeup, long dark brown hair, expressive eyes, and a gentle smile. She wears elegant neutral clothes in beige or cream tones with minimal gold jewelry. Her energy is relaxed, approachable, and emotionally intelligent. She looks like someone who is easy to talk to about daily life, feelings, relationships, and personal stories. Modern cozy podcast studio or warm lifestyle background with soft lighting, plants, and subtle neon accents.",
         requirements: [
@@ -108,8 +116,12 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Alexander Beaumont III",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260411071152-7ff0e587-6ccc-47e7-b28a-1acf27706088.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260411071152-7ff0e587-6ccc-47e7-b28a-1acf27706088-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260411071152-7ff0e587-6ccc-47e7-b28a-1acf27706088-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422025840-00013cf6-0c71-462d-817a-9dfd5e1a6090.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422025840-00013cf6-0c71-462d-817a-9dfd5e1a6090-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422025840-00013cf6-0c71-462d-817a-9dfd5e1a6090-thumbnail-720x1280.webp",
         caracterPrompt:
           "A tall, sharply dressed man in his mid-30s wearing an expensive tailored suit and a gold watch. He has slicked-back hair, a confident smirk, and exudes an air of superiority. He’s sitting in a luxurious lounge chair with a glass of champagne.",
         requirements: [
@@ -141,8 +153,12 @@ export const STORIES_SEED: StoryDefinition[] = [
         sceneSummary: "Speed dating con una chica obsesionada con su ex.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260411063822-8d5a58ab-c6da-4eff-a710-9399328aa805.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260411063822-8d5a58ab-c6da-4eff-a710-9399328aa805-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260411063822-8d5a58ab-c6da-4eff-a710-9399328aa805-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422030032-e3d8e6b3-077f-4736-b403-ba8b09a3429c.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422030032-e3d8e6b3-077f-4736-b403-ba8b09a3429c-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422030032-e3d8e6b3-077f-4736-b403-ba8b09a3429c-thumbnail-720x1280.webp",
         aiRole:
           "Eres una chica simpática pero completamente obsesionada con tu ex. Intentas seguir adelante aunque todo te recuerda a él.",
         aiRoleFriends:
@@ -189,8 +205,12 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Nigel Smith",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260411065943-f27f16b8-351f-4c06-b7e0-4920f072a47c.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260411065943-f27f16b8-351f-4c06-b7e0-4920f072a47c-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260411065943-f27f16b8-351f-4c06-b7e0-4920f072a47c-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422030234-567b40af-9eb9-4448-8142-97f6e2b5f022.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422030234-567b40af-9eb9-4448-8142-97f6e2b5f022-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422030234-567b40af-9eb9-4448-8142-97f6e2b5f022-thumbnail-720x1280.webp",
         caracterPrompt:
           "A man in his early 40s wearing a beige cardigan and glasses. He has a neutral facial expression",
         requirements: [
@@ -232,8 +252,12 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Luna Starseed",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260411070143-c013cfcb-7262-471f-b2aa-268085d7a659.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260411070143-c013cfcb-7262-471f-b2aa-268085d7a659-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260411070143-c013cfcb-7262-471f-b2aa-268085d7a659-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422030132-335fe169-ce92-4594-9eb9-992f421b4d16.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422030132-335fe169-ce92-4594-9eb9-992f421b4d16-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422030132-335fe169-ce92-4594-9eb9-992f421b4d16-thumbnail-720x1280.webp",
         caracterPrompt:
           "A free-spirited person in their early 30s wearing colorful, flowing clothes and handmade jewelry. They have long wavy hair, carry crystals in a pouch, and speak with a calm, dreamy voice.",
         requirements: [
@@ -268,8 +292,12 @@ export const STORIES_SEED: StoryDefinition[] = [
         title: "La cita con quien quiere casarse mañana",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260411070442-e5995043-8fdd-41b1-ba2a-3371443898a3.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260411070442-e5995043-8fdd-41b1-ba2a-3371443898a3-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260411070442-e5995043-8fdd-41b1-ba2a-3371443898a3-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422031241-30cca32a-ff5f-48b9-819e-8805aece3f24.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422031241-30cca32a-ff5f-48b9-819e-8805aece3f24-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422031241-30cca32a-ff5f-48b9-819e-8805aece3f24-thumbnail-720x1280.webp",
         sceneSummary:
           "Speed dating con una persona que quiere casarse lo antes posible.",
         aiRole:
@@ -328,8 +356,12 @@ export const STORIES_SEED: StoryDefinition[] = [
         caracterName: "Margo Finch",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260411072015-c14128d7-0f52-4762-af24-cf2f42010d11.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260411072015-c14128d7-0f52-4762-af24-cf2f42010d11-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260411072015-c14128d7-0f52-4762-af24-cf2f42010d11-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422031632-f8301aca-5622-44da-a541-d2341f232f34.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422031632-f8301aca-5622-44da-a541-d2341f232f34-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422031632-f8301aca-5622-44da-a541-d2341f232f34-thumbnail-720x1280.webp",
         caracterPrompt:
           "A middle-aged woman wearing a bright airport uniform and a slightly crooked name badge. She has round glasses, a friendly but flustered expression, and stands behind a cluttered lost-and-found desk surrounded by suitcases and sticky notes.",
         requirements: [
@@ -373,8 +405,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A lively, flamboyant man in colorful travel-worn clothes and a wide hat covered in pins. He carries a ukulele and has a big, welcoming grin. He’s standing in a busy gate area surrounded by chairs and small instruments.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260411172652-a0ca8a82-03f2-43c6-9e87-3800ec6bb8c7.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260411172652-a0ca8a82-03f2-43c6-9e87-3800ec6bb8c7-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260411172652-a0ca8a82-03f2-43c6-9e87-3800ec6bb8c7-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422031800-b4c8f7d0-c608-4b7b-bcb1-eb3e0146441a.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422031800-b4c8f7d0-c608-4b7b-bcb1-eb3e0146441a-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422031800-b4c8f7d0-c608-4b7b-bcb1-eb3e0146441a-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "accept_participation",
@@ -416,8 +452,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A uniformed customs officer with a clipboard, slightly rumpled hat, and a polite but puzzled expression. They stand near an inspection desk with posters about prohibited items behind them.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260411172730-725dd959-d5b5-4728-be23-f30fbcb2452f.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260411172730-725dd959-d5b5-4728-be23-f30fbcb2452f-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260411172730-725dd959-d5b5-4728-be23-f30fbcb2452f-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422031707-540cbb8f-a9d3-4b35-9a24-b3af48e8b549.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422031707-540cbb8f-a9d3-4b35-9a24-b3af48e8b549-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422031707-540cbb8f-a9d3-4b35-9a24-b3af48e8b549-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "state_purpose_of_trip",
@@ -459,8 +499,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A quirky barista wearing an apron splattered with colorful stains and a quirky beanie. He has animated hand gestures, a mischievous smile, and stands behind a counter with strange coffee gadgets and jars labeled with odd names.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260411172951-bb9bd936-63a9-433c-a5a8-03af21306de5.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260411172951-bb9bd936-63a9-433c-a5a8-03af21306de5-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260411172951-bb9bd936-63a9-433c-a5a8-03af21306de5-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422031939-2afa60b5-d39c-4526-b70c-d74cdbdbaee6.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422031939-2afa60b5-d39c-4526-b70c-d74cdbdbaee6-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422031939-2afa60b5-d39c-4526-b70c-d74cdbdbaee6-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "order_coffee",
@@ -502,8 +546,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A worried but determined parent in casual travel clothes, holding a toddler and several boarding passes. She has a slightly exhausted smile and stands near an information desk surrounded by suitcases and toys.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420195834-7efa2820-65dc-4b0d-b7d3-378a430e0007.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420195834-7efa2820-65dc-4b0d-b7d3-378a430e0007-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420195834-7efa2820-65dc-4b0d-b7d3-378a430e0007-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422032037-4e2e8707-41e8-4286-9dce-30a954c4169d.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422032037-4e2e8707-41e8-4286-9dce-30a954c4169d-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422032037-4e2e8707-41e8-4286-9dce-30a954c4169d-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_final_destination",
@@ -556,8 +604,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A lanky young man with wild curly hair, wearing a faded band T-shirt and ripped jeans. He holds an electric guitar slung low, smiling wildly, in a cluttered living room filled with posters and empty coffee cups. He looks passionate and a little oblivious to social norms.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412175310-d2384c97-45bd-4d6f-927d-8beb004604b3.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412175310-d2384c97-45bd-4d6f-927d-8beb004604b3-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412175310-d2384c97-45bd-4d6f-927d-8beb004604b3-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422032507-54681455-eba8-4909-b69b-bad325b785f7.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422032507-54681455-eba8-4909-b69b-bad325b785f7-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422032507-54681455-eba8-4909-b69b-bad325b785f7-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_practice_duration",
@@ -599,8 +651,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A quirky person in a flour-dusted apron, wearing mismatched socks and a bandana. They hold a mysterious Tupperware with a proud grin, standing in a small but chaotic kitchen full of herbs and strange jars.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412175825-0e4c77df-98df-484a-aad9-6ea5e9a8ec12.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412175825-0e4c77df-98df-484a-aad9-6ea5e9a8ec12-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412175825-0e4c77df-98df-484a-aad9-6ea5e9a8ec12-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422032627-2f86653a-82c6-45c4-ba99-3277997a9b12.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422032627-2f86653a-82c6-45c4-ba99-3277997a9b12-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422032627-2f86653a-82c6-45c4-ba99-3277997a9b12-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_smell",
@@ -642,8 +698,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A confident person with colorful hair wearing a leather jacket covered in pins, cradling a small creature with tiny wings that emits a faint glow. They stand in a hallway with scorch marks and a mischievous smile.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412175934-0d0520fb-8483-49ba-bd94-412275dab612.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412175934-0d0520fb-8483-49ba-bd94-412275dab612-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412175934-0d0520fb-8483-49ba-bd94-412275dab612-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422032727-b94b0a49-b709-44e9-a89e-a26202bf0cc6.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422032727-b94b0a49-b709-44e9-a89e-a26202bf0cc6-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422032727-b94b0a49-b709-44e9-a89e-a26202bf0cc6-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_pet_origin",
@@ -685,8 +745,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A neat person in a crisp button-down shirt and glasses, carrying a clipboard and a marker. She stands by a whiteboard with post-it notes and a drawn timetable, looking determined and slightly anxious.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412180759-9b32471c-5e58-4e30-a936-4937812e5daf.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412180759-9b32471c-5e58-4e30-a936-4937812e5daf-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412180759-9b32471c-5e58-4e30-a936-4937812e5daf-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422032543-4e84ee0d-c487-480a-afba-74fca5bfa742.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422032543-4e84ee0d-c487-480a-afba-74fca5bfa742-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422032543-4e84ee0d-c487-480a-afba-74fca5bfa742-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_morning_need",
@@ -728,8 +792,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A cheerful person in a bright Hawaiian shirt with a homemade banner behind them and a plate of dubious snacks. They grin broadly, arms open as if welcoming everyone, in a messy living room full of balloons.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412180930-fc1e606c-a113-4ff9-9dea-0c822d8ca19a.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412180930-fc1e606c-a113-4ff9-9dea-0c822d8ca19a-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412180930-fc1e606c-a113-4ff9-9dea-0c822d8ca19a-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422032815-32778e24-c9af-4a0f-8267-6d962c09eaeb.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422032815-32778e24-c9af-4a0f-8267-6d962c09eaeb-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422032815-32778e24-c9af-4a0f-8267-6d962c09eaeb-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_guest_count",
@@ -782,8 +850,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A young waiter with a slightly rumpled white shirt and a crooked bow tie. He has an apologetic smile, messy hair, and holds a tray with a wrong dish. The setting is a dimly lit, elegant restaurant with clinking glasses.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412182337-bf538009-9d08-435b-8a07-fe69a52112fe.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412182337-bf538009-9d08-435b-8a07-fe69a52112fe-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412182337-bf538009-9d08-435b-8a07-fe69a52112fe-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422145609-207b94be-0095-4992-9027-1823aaf62d0b.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422145609-207b94be-0095-4992-9027-1823aaf62d0b-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422145609-207b94be-0095-4992-9027-1823aaf62d0b-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "comment_wrong_dish",
@@ -825,8 +897,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A quirky diner in a colorful scarf, leaning over the menu with wide eyes. She has playful makeup, a notebook for notes, and sits at a candlelit table surrounded by cookbook sketches.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412182410-7ec354ea-8399-459b-86c1-5b32067f04f9.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412182410-7ec354ea-8399-459b-86c1-5b32067f04f9-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412182410-7ec354ea-8399-459b-86c1-5b32067f04f9-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422145639-6b020026-eb89-4cf9-9f93-f1beabb6c12d.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422145639-6b020026-eb89-4cf9-9f93-f1beabb6c12d-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422145639-6b020026-eb89-4cf9-9f93-f1beabb6c12d-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_main_component",
@@ -868,8 +944,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A middle-aged chef in a stained white apron and a tall chef's hat, arms crossed and an intense look. He stands under warm kitchen lights with a skillet in hand and steam rising behind him.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412182504-7d2537c9-b80a-4297-8302-bfd045e3ec79.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412182504-7d2537c9-b80a-4297-8302-bfd045e3ec79-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412182504-7d2537c9-b80a-4297-8302-bfd045e3ec79-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422145707-0a2f672c-5c7d-4dc1-80f8-9c4d4a8c8299.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422145707-0a2f672c-5c7d-4dc1-80f8-9c4d4a8c8299-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422145707-0a2f672c-5c7d-4dc1-80f8-9c4d4a8c8299-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "express_disappointment",
@@ -911,8 +991,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A fashionable food critic wearing a stylish coat and reading glasses perched on her nose. She has an elegant posture, a notebook full of notes, and a tiny espresso cup on the table.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412182540-61b3a111-952f-49a9-81c3-05c97243b9c1.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412182540-61b3a111-952f-49a9-81c3-05c97243b9c1-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412182540-61b3a111-952f-49a9-81c3-05c97243b9c1-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422145734-b3e5132a-2af9-4b00-ac5a-b2df4a668627.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422145734-b3e5132a-2af9-4b00-ac5a-b2df4a668627-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422145734-b3e5132a-2af9-4b00-ac5a-b2df4a668627-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "describe_taste",
@@ -954,8 +1038,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A cheerful sommelier in a dark vest and bow tie, holding a wine bottle and a tasting glass. He smiles broadly, with a slightly flushed face, standing beside a well-stocked wine cabinet.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260412182606-bddb651c-9215-4a79-b0f1-558dad8d88a0.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412182606-bddb651c-9215-4a79-b0f1-558dad8d88a0-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260412182606-bddb651c-9215-4a79-b0f1-558dad8d88a0-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422145754-ed3de7f4-706c-4120-a717-9aed9da515fa.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422145754-ed3de7f4-706c-4120-a717-9aed9da515fa-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422145754-ed3de7f4-706c-4120-a717-9aed9da515fa-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_red_or_white",
@@ -1007,8 +1095,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A middle-aged man with a mischievous grin, wearing a vintage waistcoat and a pocket watch. He performs a card trick at a small wooden table in a dimly lit office, with a faint smell of pipe tobacco and a cluttered bookshelf behind him.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260413000505-4af4b36a-f834-4320-8d29-184850e3de16.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260413000505-4af4b36a-f834-4320-8d29-184850e3de16-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260413000505-4af4b36a-f834-4320-8d29-184850e3de16-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422150507-37a9fab9-9c4d-4be0-8b10-47e502e9105c.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422150507-37a9fab9-9c4d-4be0-8b10-47e502e9105c-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422150507-37a9fab9-9c4d-4be0-8b10-47e502e9105c-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "state_experience_years",
@@ -1049,8 +1141,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A quirky professor-like figure wearing round glasses and a colorful bow tie. He holds a clipboard covered in stickers, stands in front of a whiteboard scribbled with strange diagrams, and smiles as if every question is a puzzle.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260413000624-1083b219-c66d-469b-9475-c111afd36dd7.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260413000624-1083b219-c66d-469b-9475-c111afd36dd7-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260413000624-1083b219-c66d-469b-9475-c111afd36dd7-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422150628-10bf7c1b-d35b-4495-bd45-12a084b63f6e.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422150628-10bf7c1b-d35b-4495-bd45-12a084b63f6e-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422150628-10bf7c1b-d35b-4495-bd45-12a084b63f6e-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "why_company",
@@ -1092,8 +1188,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A bearded man in a slightly rumpled blazer and a colorful scarf, sitting behind a desk with novelty knick-knacks. He leans forward with an amused expression as if about to tell a joke, surrounded by posters of vintage comedy acts.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260413000730-53c024ec-955a-4dcf-b8d2-78052cd49fa2.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260413000730-53c024ec-955a-4dcf-b8d2-78052cd49fa2-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260413000730-53c024ec-955a-4dcf-b8d2-78052cd49fa2-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422150701-7faee584-74ad-4096-b83d-ca121fa14bbe.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422150701-7faee584-74ad-4096-b83d-ca121fa14bbe-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422150701-7faee584-74ad-4096-b83d-ca121fa14bbe-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "describe_strength",
@@ -1135,8 +1235,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A composed woman in her early 40s wearing a smart blazer and subtle jewelry. She sits at a tidy desk with a laptop open, her expression attentive and encouraging as she leans slightly forward to listen.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260413000803-575a47a0-1a18-4202-92e2-897ada8f2a8d.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260413000803-575a47a0-1a18-4202-92e2-897ada8f2a8d-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260413000803-575a47a0-1a18-4202-92e2-897ada8f2a8d-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422150850-d730f754-bccd-4203-ab97-2789a60154bd.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422150850-d730f754-bccd-4203-ab97-2789a60154bd-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422150850-d730f754-bccd-4203-ab97-2789a60154bd-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "describe_mistake",
@@ -1178,8 +1282,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "An elegant, eccentric executive wearing a bright patterned jacket and oversized glasses. She sits at a long table with a bowl of exotic snacks and a stack of benefit brochures, smiling as she listens to offers.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260413000832-28002c5b-0160-46ca-b187-6a448d6509a8.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260413000832-28002c5b-0160-46ca-b187-6a448d6509a8-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260413000832-28002c5b-0160-46ca-b187-6a448d6509a8-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260414011420-c5882b68-8b1b-4675-8f17-701fe883ec8c.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260414011420-c5882b68-8b1b-4675-8f17-701fe883ec8c-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260414011420-c5882b68-8b1b-4675-8f17-701fe883ec8c-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_budget",
@@ -1232,8 +1340,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A slender middle-aged man wearing a vintage cardigan and a pocket watch. He has soft gray hair, intense eyes, and a knowing smile. He stands in a dim hallway with warm, old-fashioned lighting, leaning slightly forward as if sharing secrets.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260414030720-00e5b902-2d31-4457-8507-1740388e7f86.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260414030720-00e5b902-2d31-4457-8507-1740388e7f86-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260414030720-00e5b902-2d31-4457-8507-1740388e7f86-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422151230-4a8e6674-d794-4f53-8959-187c80f4b705.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422151230-4a8e6674-d794-4f53-8959-187c80f4b705-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422151230-4a8e6674-d794-4f53-8959-187c80f4b705-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "confirm_checkin_time",
@@ -1271,8 +1383,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A middle-aged woman in a floral dress with rubber gloves and an old-fashioned cleaning cart. Her expression is cheerful but distant, as if half-listening to another world. She stands in a sunlit, slightly dusty kitchen.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260414031045-8b40db58-8e75-42de-82de-d79356c3c98b.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260414031045-8b40db58-8e75-42de-82de-d79356c3c98b-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260414031045-8b40db58-8e75-42de-82de-d79356c3c98b-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422151306-bcb85156-5619-4c9a-b518-8fe8eb1eb734.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422151306-bcb85156-5619-4c9a-b518-8fe8eb1eb734-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422151306-bcb85156-5619-4c9a-b518-8fe8eb1eb734-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_personal_history",
@@ -1309,8 +1425,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A quirky older man with messy hair, round glasses, and a stained lab coat covered in pocket gadgets. He holds a peculiar handheld device with blinking lights. The background shows a cluttered workshop with sketches and tools.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260414031155-edaa5036-0100-45aa-afde-71795c722c96.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260414031155-edaa5036-0100-45aa-afde-71795c722c96-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260414031155-edaa5036-0100-45aa-afde-71795c722c96-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422151329-7a804b0a-dfca-4149-8906-4a0581050b38.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422151329-7a804b0a-dfca-4149-8906-4a0581050b38-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422151329-7a804b0a-dfca-4149-8906-4a0581050b38-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_device_purpose",
@@ -1352,8 +1472,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A cheerful woman in a cozy cardigan holding a large tabby cat. She smiles warmly and gestures as if the cat is speaking. The room is cozy with cushions, a teapot, and a window showing a rainy street.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260414031347-c7e61130-7df7-460e-974b-1d60412ab807.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260414031347-c7e61130-7df7-460e-974b-1d60412ab807-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260414031347-c7e61130-7df7-460e-974b-1d60412ab807-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422151349-274f4f3d-187a-4118-8634-030456806d5a.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422151349-274f4f3d-187a-4118-8634-030456806d5a-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422151349-274f4f3d-187a-4118-8634-030456806d5a-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "describe_current_mood",
@@ -1391,8 +1515,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A sleepy-looking young man in striped pajamas holding a small lamp. He has messy hair, a warm but tired smile, and leans against the hallway doorframe. The corridor is dim with moonlight filtering in.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260414031447-4406a098-6ea7-4e28-851d-f123f6b249b3.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260414031447-4406a098-6ea7-4e28-851d-f123f6b249b3-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260414031447-4406a098-6ea7-4e28-851d-f123f6b249b3-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422151409-1fe27eb8-9c84-4c51-98f5-ef0e2296911a.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422151409-1fe27eb8-9c84-4c51-98f5-ef0e2296911a-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422151409-1fe27eb8-9c84-4c51-98f5-ef0e2296911a-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_clock_concern",
@@ -1441,8 +1569,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A middle-aged man wearing a bright, mismatched festival vest covered in badges, with a wide-brimmed hat and a megaphone around his neck. His expression is enthusiastic and slightly bewildered, standing in a crowded festival lane with colorful tents behind him.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260414173720-09397295-b272-4a7a-9576-38534586061e.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260414173720-09397295-b272-4a7a-9576-38534586061e-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260414173720-09397295-b272-4a7a-9576-38534586061e-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422152949-f9a56054-bf28-483b-9254-50d083a2f6d9.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422152949-f9a56054-bf28-483b-9254-50d083a2f6d9-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422152949-f9a56054-bf28-483b-9254-50d083a2f6d9-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_main_exit",
@@ -1480,8 +1612,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A retro-futuristic vending robot with a shiny metal surface, LED display eyes, and a tray full of quirky festival trinkets. It has painted-on smile and a neon apron that reads 'Memories Sold Here'. The setting is a nighttime stall lit by string lights.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260414173916-f368fe39-da12-498f-9300-6f17a0ff1889.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260414173916-f368fe39-da12-498f-9300-6f17a0ff1889-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260414173916-f368fe39-da12-498f-9300-6f17a0ff1889-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422153041-315c61b6-bd41-4311-b20b-4669e539c2cd.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422153041-315c61b6-bd41-4311-b20b-4669e539c2cd-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422153041-315c61b6-bd41-4311-b20b-4669e539c2cd-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_item_price",
@@ -1519,8 +1655,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A flamboyant fortune-teller wearing colorful scarves, glittery makeup, and fingerless gloves. She sits at a small round table with tarot cards and a portable speaker playing energetic music. Her expression mixes mystery and playful intensity.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260414173954-9001d60b-a72d-4c56-a5d8-b2ac6761753c.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260414173954-9001d60b-a72d-4c56-a5d8-b2ac6761753c-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260414173954-9001d60b-a72d-4c56-a5d8-b2ac6761753c-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422153143-cec04892-6c7c-4012-abbd-b1d83859de66.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422153143-cec04892-6c7c-4012-abbd-b1d83859de66-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422153143-cec04892-6c7c-4012-abbd-b1d83859de66-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "clarify_prediction",
@@ -1558,8 +1698,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A fierce punk singer with a neon-dyed mohawk, leather jacket covered in patches, and a microphone in hand. She stands in a cramped backstage area with amps and posters plastered on the walls, scowling but curious.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260416061920-7a181f4a-fde8-496c-96f5-ce1e6b9430d8.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260416061920-7a181f4a-fde8-496c-96f5-ce1e6b9430d8-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260416061920-7a181f4a-fde8-496c-96f5-ce1e6b9430d8-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422153210-62161c36-3f5c-41a0-97fe-c01be4684c43.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422153210-62161c36-3f5c-41a0-97fe-c01be4684c43-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422153210-62161c36-3f5c-41a0-97fe-c01be4684c43-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "introduce_yourself_confidently",
@@ -1597,8 +1741,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A creative chef wearing a stained apron, a quirky hat shaped like a cloud, and food-safe gloves. He stands behind a colorful food truck counter with steam rising and handwritten menu boards full of bizarre dish names.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260416061607-593b76ab-850b-493c-8907-1691aab743a9.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260416061607-593b76ab-850b-493c-8907-1691aab743a9-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260416061607-593b76ab-850b-493c-8907-1691aab743a9-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422153249-ab024a40-3473-49ef-bff0-42958eb1cc9e.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422153249-ab024a40-3473-49ef-bff0-42958eb1cc9e-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422153249-ab024a40-3473-49ef-bff0-42958eb1cc9e-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_signature_dish",
@@ -1646,8 +1794,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A muscular, energetic trainer in bright athletic gear with a whistle around his neck. He has a determined grin, sweaty but vibrant appearance, and is standing in a busy gym surrounded by workout equipment. He gestures dynamically as if counting reps.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260416090803-6b8d7755-60ee-41e3-b3d4-3ab62a487cb3.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260416090803-6b8d7755-60ee-41e3-b3d4-3ab62a487cb3-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260416090803-6b8d7755-60ee-41e3-b3d4-3ab62a487cb3-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422153450-fab167b2-540a-4cbe-a23a-4e2f27db2fcc.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422153450-fab167b2-540a-4cbe-a23a-4e2f27db2fcc-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422153450-fab167b2-540a-4cbe-a23a-4e2f27db2fcc-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_about_warm_up",
@@ -1693,8 +1845,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A calm, graceful yoga instructor wearing flowing clothes and colorful beads, with a soft smile and peaceful eyes. She stands on a yoga mat in a sunlit studio full of plants, gesturing gently as she explains poses.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260416090918-20b4fe95-93fd-410c-810b-bc2286abcd25.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260416090918-20b4fe95-93fd-410c-810b-bc2286abcd25-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260416090918-20b4fe95-93fd-410c-810b-bc2286abcd25-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422153533-ea54e1a2-1fcd-4386-9609-3a309095f1d7.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422153533-ea54e1a2-1fcd-4386-9609-3a309095f1d7-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422153533-ea54e1a2-1fcd-4386-9609-3a309095f1d7-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_pose_name",
@@ -1732,8 +1888,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A lively spin instructor with neon cycling clothes and headphones around his neck, holding a microphone. He has an intense, excited expression and stands next to stationary bikes under colorful lights.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260416090952-c84123e7-3a33-4c84-a45d-f7e7c1b5ac8b.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260416090952-c84123e7-3a33-4c84-a45d-f7e7c1b5ac8b-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260416090952-c84123e7-3a33-4c84-a45d-f7e7c1b5ac8b-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422153610-e051dff8-52de-4cf0-aea6-f55d02c18019.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422153610-e051dff8-52de-4cf0-aea6-f55d02c18019-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422153610-e051dff8-52de-4cf0-aea6-f55d02c18019-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "express_current_fitness",
@@ -1771,8 +1931,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A friendly, slightly clumsy gym-goer wearing a faded tank top and bright trainers. He has a goofy smile, tousled hair, and is holding a pair of dumbbells in a cluttered weight area. His posture suggests eagerness to help.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260416091020-b8854b54-586f-41ef-8a1e-983a65f9b3c0.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260416091020-b8854b54-586f-41ef-8a1e-983a65f9b3c0-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260416091020-b8854b54-586f-41ef-8a1e-983a65f9b3c0-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422153641-b494fefa-9a0d-4753-9e6c-b1e93882200c.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422153641-b494fefa-9a0d-4753-9e6c-b1e93882200c-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422153641-b494fefa-9a0d-4753-9e6c-b1e93882200c-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_if_ready",
@@ -1810,8 +1974,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A cheerful barista in a gym café wearing an apron with a smoothie logo. He has a friendly face, animated hands, and a counter full of fresh fruit and protein tubs, with gym posters in the background.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260416091406-14de1a43-fd1a-4d24-bfb9-7e860e166e58.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260416091406-14de1a43-fd1a-4d24-bfb9-7e860e166e58-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260416091406-14de1a43-fd1a-4d24-bfb9-7e860e166e58-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260422153721-7084e672-fde5-4750-8457-b43f2991339e.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422153721-7084e672-fde5-4750-8457-b43f2991339e-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260422153721-7084e672-fde5-4750-8457-b43f2991339e-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_main_benefit",
@@ -1860,7 +2028,11 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A middle-aged man wearing a vintage uniform with shiny brass buttons, a slightly crooked cap, and round glasses. He holds a magnifying glass and points at a train ticket with an amused, theatrical expression. The background is a bustling train platform with postered walls.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420210625-1261f803-9efe-4dd4-868d-159a1c723529.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420210625-1261f803-9efe-4dd4-868d-159a1c723529-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420210625-1261f803-9efe-4dd4-868d-159a1c723529-avatar-md-512.webp",
         videoIntro: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260511215259-3b1c6bd3-a965-4055-811c-c1398a659634.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260511215259-3b1c6bd3-a965-4055-811c-c1398a659634-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260511215259-3b1c6bd3-a965-4055-811c-c1398a659634-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "present_ticket",
@@ -1898,8 +2070,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A shiny, colorful vending machine with expressive LED 'eyes' and a small digital mouth. Buttons are labeled with quirky icons; steam and neon lights glow around it. It looks futuristic and slightly whimsical while dispensing cans.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420210657-d7aec9eb-c299-49f7-a926-ad2a73875c32.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420210657-d7aec9eb-c299-49f7-a926-ad2a73875c32-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420210657-d7aec9eb-c299-49f7-a926-ad2a73875c32-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260511215037-349086e4-8f9a-4cd8-8629-eb40bc946cb7.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260511215037-349086e4-8f9a-4cd8-8629-eb40bc946cb7-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260511215037-349086e4-8f9a-4cd8-8629-eb40bc946cb7-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "clarify_meaning",
@@ -1937,7 +2113,11 @@ export const STORIES_SEED: StoryDefinition[] = [
           "An older sushi chef in a traditional apron and headband, hands precise and graceful. He stands behind a wooden counter with fresh fish on display, a calm, slightly amused smile, and a warm lantern-lit interior of a small sushi bar.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420210726-08904cbd-9261-4cc8-86ee-c90aa72df254.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420210726-08904cbd-9261-4cc8-86ee-c90aa72df254-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420210726-08904cbd-9261-4cc8-86ee-c90aa72df254-avatar-md-512.webp",
         videoIntro: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260511215333-b52476a3-b8f9-4920-ab85-32f890d1c432.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260511215333-b52476a3-b8f9-4920-ab85-32f890d1c432-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260511215333-b52476a3-b8f9-4920-ab85-32f890d1c432-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "compliment_craft",
@@ -1975,7 +2155,11 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A flashy host with retro sunglasses, a sparkly jacket, and a wireless mic. He stands in a cozy karaoke room with colorful lights and a small stage, striking a dramatic pose and smiling encouragingly.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420210804-7c08f139-ad91-4fe1-b53a-c76169a40aad.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420210804-7c08f139-ad91-4fe1-b53a-c76169a40aad-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420210804-7c08f139-ad91-4fe1-b53a-c76169a40aad-avatar-md-512.webp",
         videoIntro: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260511215407-ac1d91f9-90f9-4386-aa09-6c76698cac58.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260511215407-ac1d91f9-90f9-4386-aa09-6c76698cac58-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260511215407-ac1d91f9-90f9-4386-aa09-6c76698cac58-thumbnail-720x1280.webp",
       
           requirements: [
           {
@@ -2014,7 +2198,11 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A middle-aged Japanese receptionist, with glasses and a neat hairstyle. He wears a formal uniform and has a kind but serious expression. He is behind the reception desk of a capsule hotel, with a brochure about the hotel rules in his hand.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420210901-13d739a2-0d1f-4b2a-801a-de1fb0bf7d15.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420210901-13d739a2-0d1f-4b2a-801a-de1fb0bf7d15-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420210901-13d739a2-0d1f-4b2a-801a-de1fb0bf7d15-avatar-md-512.webp",
         videoIntro: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260511215448-c7aed6a7-3098-45b4-b2b6-e58138861096.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260511215448-c7aed6a7-3098-45b4-b2b6-e58138861096-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260511215448-c7aed6a7-3098-45b4-b2b6-e58138861096-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "confirm_reservation",
@@ -2067,8 +2255,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A young, energetic woman with a quirky hairstyle and bright glasses. She wears a colorful cardigan and holds a mug with a cat drawing. She leans in conspiratorially in a cozy office kitchen, smiling mischievously.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420225532-21bcf1e6-87c4-493f-b802-4bf007f43e89.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420225532-21bcf1e6-87c4-493f-b802-4bf007f43e89-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420225532-21bcf1e6-87c4-493f-b802-4bf007f43e89-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260425042727-4571ecb5-6930-411d-9763-8e58737d646f.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260425042727-4571ecb5-6930-411d-9763-8e58737d646f-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260425042727-4571ecb5-6930-411d-9763-8e58737d646f-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_for_details",
@@ -2110,8 +2302,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A slim, mysterious office worker in a slightly rumpled blazer, holding a laptop close. He has a half-smile and curious eyes, standing under fluorescent office lights with a hint of a city skyline outside the window.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420225718-cfcea6d8-4445-4e27-b56d-5fd11f0652ea.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420225718-cfcea6d8-4445-4e27-b56d-5fd11f0652ea-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420225718-cfcea6d8-4445-4e27-b56d-5fd11f0652ea-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260425042925-1c9cbf56-8fe7-4551-889e-29f7e9c98ff0.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260425042925-1c9cbf56-8fe7-4551-889e-29f7e9c98ff0-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260425042925-1c9cbf56-8fe7-4551-889e-29f7e9c98ff0-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "ask_email_origin",
@@ -2149,8 +2345,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A broad-shouldered man with a loud laugh, wearing a casual shirt and a company lanyard. He stands by the office coffee machine with a furrowed brow and folded arms, as if ready for a small showdown.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420225755-0988ce56-13fb-4332-9e13-9a470ada6a7e.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420225755-0988ce56-13fb-4332-9e13-9a470ada6a7e-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420225755-0988ce56-13fb-4332-9e13-9a470ada6a7e-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260425043209-bfe567de-0fc3-4faf-b659-b7354e138762.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260425043209-bfe567de-0fc3-4faf-b659-b7354e138762-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260425043209-bfe567de-0fc3-4faf-b659-b7354e138762-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "deny_accusation",
@@ -2185,8 +2385,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A composed middle-aged woman in a smart blazer, with a neat bun and an unreadable expression. She sits in a glass-walled office, holding a phone with a poised, authoritative posture.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420225838-8d53a9a6-0460-4223-b80d-921052b0b14e.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420225838-8d53a9a6-0460-4223-b80d-921052b0b14e-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420225838-8d53a9a6-0460-4223-b80d-921052b0b14e-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260425043043-d5d23c2e-ba3e-4216-870d-4bdbc7b55ef7.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260425043043-d5d23c2e-ba3e-4216-870d-4bdbc7b55ef7-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260425043043-d5d23c2e-ba3e-4216-870d-4bdbc7b55ef7-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "clarify_timeline",
@@ -2226,8 +2430,12 @@ export const STORIES_SEED: StoryDefinition[] = [
           "A bubbly coworker in a casual party outfit, twinkling lights behind her and a drink in hand. She laughs easily and gestures theatrically, making the afterwork feel lively and slightly chaotic.",
         avatarImageUrl:
           "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260420225907-30b2fe13-1439-4484-8834-9c754f7f9b69.png",
+        avatarImageXsUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420225907-30b2fe13-1439-4484-8834-9c754f7f9b69-avatar-xs-96.webp",
+        avatarImageMdUrl: "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/optimized/20260420225907-30b2fe13-1439-4484-8834-9c754f7f9b69-avatar-md-512.webp",
         videoIntro:
           "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/20260425043003-bcf2e6d6-4399-44b2-9c37-ab1654a01853.mp4",
+        videoPreviewUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260425043003-bcf2e6d6-4399-44b2-9c37-ab1654a01853-preview-720x1280.mp4",
+        videoThumbnailUrl: "https://d2ozl81tz5pxlo.cloudfront.net/missionIntroVideos/optimized/20260425043003-bcf2e6d6-4399-44b2-9c37-ab1654a01853-thumbnail-720x1280.webp",
         requirements: [
           {
             requirementId: "choose_truth",

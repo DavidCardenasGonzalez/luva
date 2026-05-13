@@ -26,6 +26,8 @@ export type StoryCharacterSummary = {
   missionTitle: string;
   characterName: string;
   avatarImageUrl?: string;
+  avatarImageXsUrl?: string;
+  avatarImageMdUrl?: string;
   sceneSummary?: string;
 };
 
@@ -391,6 +393,8 @@ function buildStoryCharacterSummary(
     missionTitle: mission.title,
     characterName,
     ...(mission.avatarImageUrl ? { avatarImageUrl: mission.avatarImageUrl } : {}),
+    ...(mission.avatarImageXsUrl ? { avatarImageXsUrl: mission.avatarImageXsUrl } : {}),
+    ...(mission.avatarImageMdUrl ? { avatarImageMdUrl: mission.avatarImageMdUrl } : {}),
     ...(mission.sceneSummary ? { sceneSummary: mission.sceneSummary } : {}),
   };
 }

@@ -12,7 +12,11 @@ export type LocalFriendCharacter = {
   aiRole: string;
   characterPrompt?: string;
   avatarImageUrl?: string;
+  avatarImageXsUrl?: string;
+  avatarImageMdUrl?: string;
   videoIntro?: string;
+  videoPreviewUrl?: string;
+  videoThumbnailUrl?: string;
   sceneSummary?: string;
   createdAt: string;
   updatedAt: string;
@@ -36,7 +40,11 @@ type LocalStoryMission = {
   caracterPrompt?: string;
   characterPrompt?: string;
   avatarImageUrl?: string;
+  avatarImageXsUrl?: string;
+  avatarImageMdUrl?: string;
   videoIntro?: string;
+  videoPreviewUrl?: string;
+  videoThumbnailUrl?: string;
   requirements?: LocalStoryRequirement[];
 };
 
@@ -123,7 +131,11 @@ function sanitizeLocalFriend(input: unknown): LocalFriendCharacter | null {
     aiRole,
     ...(asString(raw.characterPrompt) ? { characterPrompt: asString(raw.characterPrompt) } : {}),
     ...(asString(raw.avatarImageUrl) ? { avatarImageUrl: asString(raw.avatarImageUrl) } : {}),
+    ...(asString(raw.avatarImageXsUrl) ? { avatarImageXsUrl: asString(raw.avatarImageXsUrl) } : {}),
+    ...(asString(raw.avatarImageMdUrl) ? { avatarImageMdUrl: asString(raw.avatarImageMdUrl) } : {}),
     ...(asString(raw.videoIntro) ? { videoIntro: asString(raw.videoIntro) } : {}),
+    ...(asString(raw.videoPreviewUrl) ? { videoPreviewUrl: asString(raw.videoPreviewUrl) } : {}),
+    ...(asString(raw.videoThumbnailUrl) ? { videoThumbnailUrl: asString(raw.videoThumbnailUrl) } : {}),
     ...(asString(raw.sceneSummary) ? { sceneSummary: asString(raw.sceneSummary) } : {}),
     createdAt,
     updatedAt,
@@ -211,7 +223,11 @@ function buildLocalFriendFromMission(
     aiRole,
     ...(characterPrompt ? { characterPrompt } : {}),
     ...(asString(mission?.avatarImageUrl) ? { avatarImageUrl: asString(mission?.avatarImageUrl) } : {}),
+    ...(asString(mission?.avatarImageXsUrl) ? { avatarImageXsUrl: asString(mission?.avatarImageXsUrl) } : {}),
+    ...(asString(mission?.avatarImageMdUrl) ? { avatarImageMdUrl: asString(mission?.avatarImageMdUrl) } : {}),
     ...(asString(mission?.videoIntro) ? { videoIntro: asString(mission?.videoIntro) } : {}),
+    ...(asString(mission?.videoPreviewUrl) ? { videoPreviewUrl: asString(mission?.videoPreviewUrl) } : {}),
+    ...(asString(mission?.videoThumbnailUrl) ? { videoThumbnailUrl: asString(mission?.videoThumbnailUrl) } : {}),
     ...(asString(mission?.sceneSummary) ? { sceneSummary: asString(mission?.sceneSummary) } : {}),
     createdAt: existing?.createdAt || now,
     updatedAt: now,
@@ -230,7 +246,11 @@ function buildSyncPayload(friend: LocalFriendCharacter): LocalAddFriendPayload {
     caracterName: friend.characterName,
     caracterPrompt: friend.characterPrompt,
     avatarImageUrl: friend.avatarImageUrl,
+    avatarImageXsUrl: friend.avatarImageXsUrl,
+    avatarImageMdUrl: friend.avatarImageMdUrl,
     videoIntro: friend.videoIntro,
+    videoPreviewUrl: friend.videoPreviewUrl,
+    videoThumbnailUrl: friend.videoThumbnailUrl,
     requirements: [],
   };
 

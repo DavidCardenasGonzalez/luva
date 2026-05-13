@@ -149,7 +149,11 @@ function computeStoriesVersion(stories: StoryDefinition[]): string {
       caracterName: mission.caracterName || '',
       caracterPrompt: mission.caracterPrompt || '',
       avatarImageUrl: mission.avatarImageUrl || '',
+      avatarImageXsUrl: mission.avatarImageXsUrl || '',
+      avatarImageMdUrl: mission.avatarImageMdUrl || '',
       videoIntro: mission.videoIntro || '',
+      videoPreviewUrl: mission.videoPreviewUrl || '',
+      videoThumbnailUrl: mission.videoThumbnailUrl || '',
       requirements: (mission.requirements || []).map((req) => ({
         requirementId: req.requirementId,
         text: req.text,
@@ -368,11 +372,35 @@ function sanitizeStoryMission(input: any): StoryMission | undefined {
       : typeof input.avatar_image_url === 'string'
       ? input.avatar_image_url
       : undefined;
+  const avatarImageXsUrl =
+    typeof input.avatarImageXsUrl === 'string'
+      ? input.avatarImageXsUrl
+      : typeof input.avatar_image_xs_url === 'string'
+      ? input.avatar_image_xs_url
+      : undefined;
+  const avatarImageMdUrl =
+    typeof input.avatarImageMdUrl === 'string'
+      ? input.avatarImageMdUrl
+      : typeof input.avatar_image_md_url === 'string'
+      ? input.avatar_image_md_url
+      : undefined;
   const videoIntro =
     typeof input.videoIntro === 'string'
       ? input.videoIntro
       : typeof input.video_intro === 'string'
       ? input.video_intro
+      : undefined;
+  const videoPreviewUrl =
+    typeof input.videoPreviewUrl === 'string'
+      ? input.videoPreviewUrl
+      : typeof input.video_preview_url === 'string'
+      ? input.video_preview_url
+      : undefined;
+  const videoThumbnailUrl =
+    typeof input.videoThumbnailUrl === 'string'
+      ? input.videoThumbnailUrl
+      : typeof input.video_thumbnail_url === 'string'
+      ? input.video_thumbnail_url
       : undefined;
   const requirementsRaw = Array.isArray(input.requirements) ? input.requirements : [];
   const requirements = requirementsRaw
@@ -387,7 +415,11 @@ function sanitizeStoryMission(input: any): StoryMission | undefined {
     caracterName,
     caracterPrompt,
     avatarImageUrl,
+    avatarImageXsUrl,
+    avatarImageMdUrl,
     videoIntro,
+    videoPreviewUrl,
+    videoThumbnailUrl,
     requirements,
   };
 }
@@ -901,7 +933,11 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
           caracterName: mission.caracterName,
           caracterPrompt: mission.caracterPrompt,
           avatarImageUrl: mission.avatarImageUrl,
+          avatarImageXsUrl: mission.avatarImageXsUrl,
+          avatarImageMdUrl: mission.avatarImageMdUrl,
           videoIntro: mission.videoIntro,
+          videoPreviewUrl: mission.videoPreviewUrl,
+          videoThumbnailUrl: mission.videoThumbnailUrl,
           requirements: initialRequirementStates(mission),
         })) || [],
       });
@@ -1090,7 +1126,11 @@ function publicFriend(record: FriendRecord): FriendCharacter {
     ...(record.aiRoleFriends ? { aiRoleFriends: record.aiRoleFriends } : {}),
     ...(record.characterPrompt ? { characterPrompt: record.characterPrompt } : {}),
     ...(record.avatarImageUrl ? { avatarImageUrl: record.avatarImageUrl } : {}),
+    ...(record.avatarImageXsUrl ? { avatarImageXsUrl: record.avatarImageXsUrl } : {}),
+    ...(record.avatarImageMdUrl ? { avatarImageMdUrl: record.avatarImageMdUrl } : {}),
     ...(record.videoIntro ? { videoIntro: record.videoIntro } : {}),
+    ...(record.videoPreviewUrl ? { videoPreviewUrl: record.videoPreviewUrl } : {}),
+    ...(record.videoThumbnailUrl ? { videoThumbnailUrl: record.videoThumbnailUrl } : {}),
     ...(record.sceneSummary ? { sceneSummary: record.sceneSummary } : {}),
     createdAt: record.createdAt,
     updatedAt: record.updatedAt,
@@ -1126,7 +1166,11 @@ function publicCatalogFriend(friendIdInput: string): FriendCharacter | undefined
         ...(mission.aiRoleFriends ? { aiRoleFriends: mission.aiRoleFriends } : {}),
         ...(mission.caracterPrompt ? { characterPrompt: mission.caracterPrompt } : {}),
         ...(mission.avatarImageUrl ? { avatarImageUrl: mission.avatarImageUrl } : {}),
+        ...(mission.avatarImageXsUrl ? { avatarImageXsUrl: mission.avatarImageXsUrl } : {}),
+        ...(mission.avatarImageMdUrl ? { avatarImageMdUrl: mission.avatarImageMdUrl } : {}),
         ...(mission.videoIntro ? { videoIntro: mission.videoIntro } : {}),
+        ...(mission.videoPreviewUrl ? { videoPreviewUrl: mission.videoPreviewUrl } : {}),
+        ...(mission.videoThumbnailUrl ? { videoThumbnailUrl: mission.videoThumbnailUrl } : {}),
         ...(mission.sceneSummary ? { sceneSummary: mission.sceneSummary } : {}),
         createdAt: "1970-01-01T00:00:00.000Z",
         updatedAt: "1970-01-01T00:00:00.000Z",
@@ -1185,7 +1229,11 @@ function sanitizeFriendRecord(input: any): FriendRecord | undefined {
     ...(typeof input.aiRoleFriends === "string" ? { aiRoleFriends: input.aiRoleFriends } : {}),
     ...(typeof input.characterPrompt === "string" ? { characterPrompt: input.characterPrompt } : {}),
     ...(typeof input.avatarImageUrl === "string" ? { avatarImageUrl: input.avatarImageUrl } : {}),
+    ...(typeof input.avatarImageXsUrl === "string" ? { avatarImageXsUrl: input.avatarImageXsUrl } : {}),
+    ...(typeof input.avatarImageMdUrl === "string" ? { avatarImageMdUrl: input.avatarImageMdUrl } : {}),
     ...(typeof input.videoIntro === "string" ? { videoIntro: input.videoIntro } : {}),
+    ...(typeof input.videoPreviewUrl === "string" ? { videoPreviewUrl: input.videoPreviewUrl } : {}),
+    ...(typeof input.videoThumbnailUrl === "string" ? { videoThumbnailUrl: input.videoThumbnailUrl } : {}),
     ...(typeof input.sceneSummary === "string" ? { sceneSummary: input.sceneSummary } : {}),
     createdAt,
     updatedAt,
@@ -1290,7 +1338,11 @@ async function createFriendFromMission(
     ...(mission.aiRoleFriends ? { aiRoleFriends: mission.aiRoleFriends } : {}),
     ...(mission.caracterPrompt ? { characterPrompt: mission.caracterPrompt } : {}),
     ...(mission.avatarImageUrl ? { avatarImageUrl: mission.avatarImageUrl } : {}),
+    ...(mission.avatarImageXsUrl ? { avatarImageXsUrl: mission.avatarImageXsUrl } : {}),
+    ...(mission.avatarImageMdUrl ? { avatarImageMdUrl: mission.avatarImageMdUrl } : {}),
     ...(mission.videoIntro ? { videoIntro: mission.videoIntro } : {}),
+    ...(mission.videoPreviewUrl ? { videoPreviewUrl: mission.videoPreviewUrl } : {}),
+    ...(mission.videoThumbnailUrl ? { videoThumbnailUrl: mission.videoThumbnailUrl } : {}),
     ...(mission.sceneSummary ? { sceneSummary: mission.sceneSummary } : {}),
     createdAt: existing?.createdAt || now,
     updatedAt: now,

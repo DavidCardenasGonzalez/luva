@@ -6,16 +6,20 @@
   "main": "dist/handlers/api.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "stories:optimize-media": "node scripts/optimize-story-media.js",
     "watch": "tsc -w -p tsconfig.json",
     "test": "npm run build && node --test"
   },
   "dependencies": {
+    "@aws-sdk/client-cloudformation": "^3.888.0",
     "@aws-sdk/client-dynamodb": "^3.632.0",
+    "@aws-sdk/client-lambda": "^3.888.0",
     "@aws-sdk/client-s3": "^3.632.0",
     "@aws-sdk/client-ssm": "^3.632.0",
     "@aws-sdk/lib-dynamodb": "^3.632.0",
     "@aws-sdk/s3-request-presigner": "^3.632.0",
     "ffmpeg-static": "^5.3.0",
+    "sharp": "^0.34.5",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

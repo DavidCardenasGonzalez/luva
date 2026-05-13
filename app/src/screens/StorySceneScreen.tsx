@@ -553,8 +553,8 @@ export default function StorySceneScreen() {
   }, [initialSceneIndex, storyId]);
 
   const mission = story?.missions?.[sceneIndex];
-  const avatarImageUrl = mission?.avatarImageUrl?.trim();
-  const introVideoUri = mission?.videoIntro?.trim();
+  const avatarImageUrl = (mission?.avatarImageMdUrl || mission?.avatarImageUrl)?.trim();
+  const introVideoUri = (mission?.videoPreviewUrl || mission?.videoIntro)?.trim();
   const introVideoSource = useMemo(() => {
     return introVideoUri ? { uri: introVideoUri } : undefined;
   }, [introVideoUri]);
@@ -567,7 +567,7 @@ export default function StorySceneScreen() {
   useEffect(() => {
     const nextMission = story?.missions?.[sceneIndex + 1];
     prefetchImageUrls(
-      [mission, nextMission].map((item) => item?.avatarImageUrl),
+      [mission, nextMission].map((item) => item?.avatarImageMdUrl || item?.avatarImageUrl),
       4
     );
   }, [mission, sceneIndex, story?.missions]);
@@ -612,7 +612,11 @@ export default function StorySceneScreen() {
         caracterName: missionDef.caracterName,
         caracterPrompt: missionDef.caracterPrompt,
         avatarImageUrl: missionDef.avatarImageUrl,
+        avatarImageXsUrl: missionDef.avatarImageXsUrl,
+        avatarImageMdUrl: missionDef.avatarImageMdUrl,
         videoIntro: missionDef.videoIntro,
+        videoPreviewUrl: missionDef.videoPreviewUrl,
+        videoThumbnailUrl: missionDef.videoThumbnailUrl,
         requirements: missionDef.requirements.map((req) => ({
           requirementId: req.requirementId,
           text: req.text,
@@ -631,7 +635,11 @@ export default function StorySceneScreen() {
       caracterName: mission.caracterName,
       caracterPrompt: mission.caracterPrompt,
       avatarImageUrl: mission.avatarImageUrl,
+      avatarImageXsUrl: mission.avatarImageXsUrl,
+      avatarImageMdUrl: mission.avatarImageMdUrl,
       videoIntro: mission.videoIntro,
+      videoPreviewUrl: mission.videoPreviewUrl,
+      videoThumbnailUrl: mission.videoThumbnailUrl,
       requirements: mission.requirements.map((req) => ({
         requirementId: req.requirementId,
         text: req.text,
@@ -932,6 +940,10 @@ export default function StorySceneScreen() {
       sceneSummary: mission.sceneSummary,
       caracterName: mission.caracterName,
       avatarImageUrl: mission.avatarImageUrl,
+      avatarImageXsUrl: mission.avatarImageXsUrl,
+      avatarImageMdUrl: mission.avatarImageMdUrl,
+      videoPreviewUrl: mission.videoPreviewUrl,
+      videoThumbnailUrl: mission.videoThumbnailUrl,
       messages: messages.map(({ role, text }) => ({ role, text })),
       requirements: requirements.map((requirement) => toProgressRequirement(requirement)),
       analysis: cloneStoryAnalysis(analysis),
@@ -952,10 +964,14 @@ export default function StorySceneScreen() {
     lastAttemptSnapshot,
     messages,
     mission?.avatarImageUrl,
+    mission?.avatarImageXsUrl,
+    mission?.avatarImageMdUrl,
     mission?.caracterName,
     mission?.missionId,
     mission?.sceneSummary,
     mission?.title,
+    mission?.videoPreviewUrl,
+    mission?.videoThumbnailUrl,
     missionCompleted,
     missionUnlocked,
     pendingNext,
