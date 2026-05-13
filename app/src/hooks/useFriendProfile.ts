@@ -13,6 +13,7 @@ export type CharacterProfilePost = {
   missionTitle: string;
   characterName: string;
   caption: string;
+  context?: string;
   imageUrl: string;
   order: number;
   avatarImageUrl?: string;
@@ -99,6 +100,7 @@ function sanitizeProfilePost(input: unknown): CharacterProfilePost | null {
     missionTitle,
     characterName,
     caption,
+    context: asString(raw.context),
     imageUrl,
     order,
     avatarImageUrl: normalizeUrl(raw.avatarImageUrl),

@@ -210,6 +210,7 @@ export type AdminCharacterPost = {
   missionTitle: string
   characterName: string
   caption: string
+  context?: string
   imageUrl: string
   order: number
   avatarImageUrl?: string

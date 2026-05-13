@@ -51,6 +51,7 @@ test('buildCharacterPostRecord normalizes a character post', () => {
     character,
     {
       caption: '  First post from Alex  ',
+      context: '  Alex is posting from the gallery opening.  ',
       imageUrl: 'https://assets.example.com/avatarPosts/post.png',
       order: '2',
     },
@@ -71,6 +72,7 @@ test('buildCharacterPostRecord normalizes a character post', () => {
     characterName: 'Alex',
     avatarImageUrl: 'https://assets.example.com/storiesProfile/alex.png',
     caption: 'First post from Alex',
+    context: 'Alex is posting from the gallery opening.',
     imageUrl: 'https://assets.example.com/avatarPosts/post.png',
     order: 2,
     createdAt: '2026-04-25T10:20:30.000Z',
@@ -111,7 +113,7 @@ test('buildCharacterPostRecord requires caption, image URL and order', () => {
 });
 
 test('toCharacterPost validates stored records', () => {
-  assert.equal(
+  assert.deepEqual(
     toCharacterPost({
       characterId: 'speed_dating:date_1',
       postId: 'post-1',
@@ -122,12 +124,28 @@ test('toCharacterPost validates stored records', () => {
       missionTitle: 'La cita uno',
       characterName: 'Alex',
       caption: 'Hola',
+      context: 'Alex is celebrating a tiny win.',
       imageUrl: 'https://assets.example.com/avatarPosts/post.png',
       order: 1,
       createdAt: '2026-04-25T10:20:30.000Z',
       updatedAt: '2026-04-25T10:20:30.000Z',
-    }).postId,
-    'post-1',
+    }),
+    {
+      characterId: 'speed_dating:date_1',
+      postId: 'post-1',
+      storyId: 'speed_dating',
+      missionId: 'date_1',
+      sceneIndex: 0,
+      storyTitle: 'Speed Dating',
+      missionTitle: 'La cita uno',
+      characterName: 'Alex',
+      caption: 'Hola',
+      context: 'Alex is celebrating a tiny win.',
+      imageUrl: 'https://assets.example.com/avatarPosts/post.png',
+      order: 1,
+      createdAt: '2026-04-25T10:20:30.000Z',
+      updatedAt: '2026-04-25T10:20:30.000Z',
+    },
   );
 
   assert.equal(

@@ -49,7 +49,7 @@ import {
   FriendsListResponse,
 } from "../types";
 import { STORIES_SEED } from "../data/stories-seed";
-import { listPublicCharacterPosts } from "../character-posts";
+import { type CharacterPost, listPublicCharacterPosts } from "../character-posts";
 import { listPublicFeedPosts } from "../feed-posts";
 import {
   answerLessonHelp,
@@ -233,6 +233,13 @@ type UserIdentity = {
 type FriendConversationFeedback = {
   summary: string;
   improvements: string[];
+};
+
+type FriendChatPostContext = {
+  postId?: string;
+  context?: string;
+  caption?: string;
+  imageUrl?: string;
 };
 
 type FriendRecord = FriendCharacter & {
@@ -1466,6 +1473,70 @@ function buildFriendConversationFeedbackFallback(args: {
   };
 }
 
+function sanitizeFriendChatText(value: unknown, maxLength: number): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const normalized = value.trim().replace(/\s+\n/g, "\n");
+  if (!normalized) {
+    return undefined;
+  }
+  return normalized.slice(0, maxLength);
+}
+
+function sanitizeFriendChatPostId(value: unknown): string | undefined {
+  return sanitizeFriendChatText(value, 120);
+}
+
+function buildFriendChatPostContextFromPost(post: CharacterPost): FriendChatPostContext {
+  return {
+    postId: post.postId,
+    context: post.context || post.caption,
+    caption: post.caption,
+    imageUrl: post.imageUrl,
+  };
+}
+
+async function resolveFriendChatPostContext(
+  friend: FriendRecord,
+  body: FriendChatRequest
+): Promise<FriendChatPostContext | undefined> {
+  const postId = sanitizeFriendChatPostId(body.postId);
+  if (postId) {
+    try {
+      const posts = await listPublicCharacterPosts(friend.friendId);
+      const post = posts.find((item) => item.postId === postId);
+      if (post) {
+        return buildFriendChatPostContextFromPost(post);
+      }
+    } catch (err) {
+      console.warn(
+        JSON.stringify({
+          scope: "friends.chat.post_context_error",
+          friendId: friend.friendId,
+          postId,
+          message: (err as Error)?.message || "unknown",
+        })
+      );
+    }
+  }
+
+  const context = sanitizeFriendChatText(body.postContext, 3000);
+  const caption = sanitizeFriendChatText(body.postCaption, 2200);
+  const imageUrl = sanitizeFriendChatText(body.postImageUrl, 2048);
+  const fallbackContext = context || caption;
+  if (!postId && !fallbackContext && !imageUrl) {
+    return undefined;
+  }
+
+  return {
+    ...(postId ? { postId } : {}),
+    ...(fallbackContext ? { context: fallbackContext } : {}),
+    ...(caption ? { caption } : {}),
+    ...(imageUrl && /^https?:\/\//i.test(imageUrl) ? { imageUrl } : {}),
+  };
+}
+
 async function advanceFriendChat(
   userId: string,
   friendId: string,
@@ -1478,6 +1549,7 @@ async function advanceFriendChat(
   }
 
   const transcript = body.transcript.trim();
+  const postContext = await resolveFriendChatPostContext(friend, body);
   let conversationHistory = sanitizeHistory(body.history).slice(-FRIEND_HISTORY_LIMIT);
   conversationHistory = appendHistoryEntry(conversationHistory, {
     role: "user",
@@ -1528,7 +1600,8 @@ async function advanceFriendChat(
         correctness,
         conversationEnding: conversationEnded,
       },
-      learnerName
+      learnerName,
+      postContext
     );
   } catch (err) {
     console.error(
@@ -2859,7 +2932,8 @@ async function generateFriendReply(
   friend: FriendRecord,
   history: StoryMessage[],
   evaluation: { result: EvalResult; correctness: number; conversationEnding?: boolean },
-  learnerName?: string
+  learnerName?: string,
+  postContext?: FriendChatPostContext
 ): Promise<string> {
   const apiKey = await getOpenAIKey();
   const model =
@@ -2885,17 +2959,30 @@ async function generateFriendReply(
     .join("\n");
   const normalizedLearnerName = normalizeLearnerName(learnerName);
   const learnerNotes = normalizedLearnerName ? `Learner name: ${normalizedLearnerName}` : "";
+  const postNotes = postContext
+    ? [
+        `The learner is replying to one of ${friend.characterName}'s profile posts.`,
+        postContext.context ? `Post context: ${postContext.context}` : "",
+        postContext.caption && postContext.caption !== postContext.context
+          ? `Visible caption: ${postContext.caption}`
+          : "",
+      ]
+        .filter(Boolean)
+        .join("\n")
+    : "";
   const systemPrompt = `
 You are continuing a free conversation in English with a Spanish-speaking learner.
 
 Persona:
 ${characterNotes}
 ${learnerNotes ? `\nLearner:\n${learnerNotes}` : ""}
+${postNotes ? `\nProfile post being discussed:\n${postNotes}` : ""}
 
 Rules:
 - Stay in character, but keep the conversation natural and casual.
 - If the learner name is provided, you may use it naturally when it feels human; do not overuse it.
 - There are no mission objectives anymore; this is open-ended practice.
+- If profile post context is provided, treat the learner's message as a reply to that post and use that context naturally.
 - ${
     evaluation.conversationEnding
       ? "The learner is ending the chat. Acknowledge the goodbye warmly and do not ask a follow-up."
@@ -2916,6 +3003,7 @@ Rules:
       scope: "friends.reply.openai.begin",
       userId: friend.userId,
       friendId: friend.friendId,
+      postId: postContext?.postId,
       historyCount: conversation.length,
     })
   );

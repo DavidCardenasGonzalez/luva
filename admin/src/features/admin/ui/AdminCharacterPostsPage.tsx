@@ -14,6 +14,7 @@ import { AdminLayout } from '@/features/admin/ui/AdminLayout'
 
 type CharacterPostFormState = {
   caption: string
+  context: string
   imageUrl: string
   order: string
 }
@@ -71,6 +72,7 @@ function getNextOrder(posts: AdminCharacterPost[]) {
 function buildEmptyForm(nextOrder: number): CharacterPostFormState {
   return {
     caption: '',
+    context: '',
     imageUrl: '',
     order: String(Math.max(1, nextOrder)),
   }
@@ -79,6 +81,7 @@ function buildEmptyForm(nextOrder: number): CharacterPostFormState {
 function formFromPost(post: AdminCharacterPost): CharacterPostFormState {
   return {
     caption: post.caption,
+    context: post.context || '',
     imageUrl: post.imageUrl,
     order: String(post.order),
   }
@@ -88,6 +91,7 @@ function buildPayload(form: CharacterPostFormState): AdminCharacterPostWritePayl
   const order = Number(form.order)
   return {
     caption: form.caption.trim(),
+    context: form.context.trim(),
     imageUrl: form.imageUrl.trim(),
     ...(Number.isFinite(order) && order >= 1 ? { order: Math.floor(order) } : {}),
   }
@@ -313,6 +317,16 @@ export function AdminCharacterPostsPage() {
               />
             </label>
 
+            <label className="admin-grant-field">
+              <span>Contexto para chat</span>
+              <textarea
+                value={form.context}
+                onChange={(event) => setForm((current) => ({ ...current, context: event.target.value }))}
+                placeholder="Describe lo que el avatar debe saber cuando alguien responda este post. Si queda vacio se usara el caption."
+                disabled={isSaving}
+              />
+            </label>
+
             <div className="admin-feed-post-form-row">
               <label className="admin-grant-field">
                 <span>Orden</span>
@@ -416,6 +430,7 @@ export function AdminCharacterPostsPage() {
                     <span className="tag tag-muted">Post</span>
                   </div>
                   <p>{post.caption}</p>
+                  {post.context && <p className="admin-video-row-time">Contexto: {post.context}</p>}
                   <span className="admin-video-row-time">Actualizado {formatDateTime(post.updatedAt)}</span>
                 </div>
                 <div className="admin-feed-post-actions">

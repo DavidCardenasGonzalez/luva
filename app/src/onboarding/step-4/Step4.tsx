@@ -553,6 +553,14 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
 
   const sendDisabled = flowState !== 'idle' || !inputText.trim();
   const micDisabled = flowState === 'recording' ? false : flowState !== 'idle';
+  const loadingLabel =
+    flowState === 'uploading'
+      ? 'Subiendo tu audio...'
+      : flowState === 'transcribing'
+      ? 'Transcribiendo tu respuesta...'
+      : flowState === 'evaluating'
+      ? 'Analizando tu respuesta...'
+      : 'Cargando...';
 
   return (
     <KeyboardAvoidingView
@@ -871,12 +879,35 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
                 {error}
               </Text>
             ) : (
-              <Image
-                source={luviLoading}
-                resizeMode="contain"
-                accessibilityLabel="Cargando"
-                style={{ width: 72, height: 72 }}
-              />
+              <View
+                style={{
+                  backgroundColor: '#0f172a',
+                  borderWidth: 1,
+                  borderColor: '#1f2937',
+                  borderRadius: 16,
+                  paddingVertical: 18,
+                  paddingHorizontal: 20,
+                  minWidth: 220,
+                  alignItems: 'center',
+                }}
+              >
+                <Image
+                  source={luviLoading}
+                  resizeMode="contain"
+                  accessibilityLabel="Cargando"
+                  style={{ width: 72, height: 72 }}
+                />
+                <Text
+                  style={{
+                    color: '#e2e8f0',
+                    fontWeight: '700',
+                    marginTop: 12,
+                    textAlign: 'center',
+                  }}
+                >
+                  {loadingLabel}
+                </Text>
+              </View>
             )}
           </View>
         )}

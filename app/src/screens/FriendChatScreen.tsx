@@ -67,6 +67,13 @@ type MessageTranslationState = {
   error?: string;
 };
 
+type FriendChatSourcePost = {
+  postId?: string;
+  imageUrl?: string;
+  caption?: string;
+  context?: string;
+};
+
 const FRIEND_CHAT_MESSAGE_COST = 1;
 const FRIEND_CHAT_VOICE_TOTAL_COST = FRIEND_CHAT_MESSAGE_COST + RECORDING_COST;
 
@@ -192,6 +199,45 @@ function CompletionCard({
   );
 }
 
+function SourcePostCard({ post, friendName }: { post: FriendChatSourcePost; friendName: string }) {
+  return (
+    <View
+      style={{
+        padding: 14,
+        borderRadius: 12,
+        backgroundColor: 'white',
+        borderWidth: 1,
+        borderColor: COLORS.border,
+      }}
+    >
+      <Text style={{ color: '#2563eb', fontSize: 12, fontWeight: '900', textTransform: 'uppercase' }}>
+        Respondiendo a un post
+      </Text>
+      <Text style={{ color: '#1e293b', fontWeight: '800', marginTop: 4 }} numberOfLines={1}>
+        {friendName}
+      </Text>
+      {post.imageUrl ? (
+        <Image
+          source={{ uri: post.imageUrl }}
+          style={{
+            width: '100%',
+            aspectRatio: 1,
+            borderRadius: 10,
+            marginTop: 12,
+            backgroundColor: '#e2e8f0',
+          }}
+          resizeMode="cover"
+        />
+      ) : null}
+      {post.caption ? (
+        <Text style={{ color: COLORS.muted, lineHeight: 20, marginTop: 10 }} numberOfLines={5}>
+          {post.caption}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
 export default function FriendChatScreen({ navigation, route }: Props) {
   const friendId = route.params?.friendId;
   const { width: windowWidth } = useWindowDimensions();
@@ -203,6 +249,27 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     () => friends.find((item) => item.friendId === friendId),
     [friendId, friends]
   );
+  const sourcePost = useMemo<FriendChatSourcePost | undefined>(() => {
+    const postId = route.params?.postId?.trim();
+    const imageUrl = route.params?.postImageUrl?.trim();
+    const caption = route.params?.postCaption?.trim();
+    const context = route.params?.postContext?.trim() || caption;
+    if (!postId && !imageUrl && !caption && !context) {
+      return undefined;
+    }
+    return {
+      ...(postId ? { postId } : {}),
+      ...(imageUrl ? { imageUrl } : {}),
+      ...(caption ? { caption } : {}),
+      ...(context ? { context } : {}),
+    };
+  }, [
+    route.params?.postCaption,
+    route.params?.postContext,
+    route.params?.postId,
+    route.params?.postImageUrl,
+  ]);
+  const chatContextKey = `${friendId || ''}:${sourcePost?.postId || ''}:${sourcePost?.context || ''}`;
   const trackedFriendViewRef = useRef<string | undefined>(undefined);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messageTranslations, setMessageTranslations] = useState<Record<string, MessageTranslationState>>({});
@@ -253,8 +320,8 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   }, [friendId, reload]);
 
   useEffect(() => {
-    if (!friend || trackedFriendViewRef.current === friend.friendId) return;
-    trackedFriendViewRef.current = friend.friendId;
+    if (!friend || trackedFriendViewRef.current === chatContextKey) return;
+    trackedFriendViewRef.current = chatContextKey;
     void trackMixpanelFriendEvent('friend_chat_viewed', {
       friend_id: friend.friendId,
       character_name: friend.characterName,
@@ -262,10 +329,12 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       story_title: friend.storyTitle,
       mission_id: friend.missionId,
       mission_title: friend.missionTitle,
+      post_id: sourcePost?.postId,
+      source: sourcePost ? 'profile_post' : 'friend_chat',
       conversation_count: friend.conversationCount ?? 0,
       message_count: friend.messageCount ?? 0,
     });
-  }, [friend]);
+  }, [chatContextKey, friend, sourcePost]);
 
   useEffect(() => {
     skipExitPromptRef.current = false;
@@ -276,7 +345,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     setConversationFeedback(null);
     setCompletionConfettiKey(null);
     setErrorMessage(null);
-  }, [friendId]);
+  }, [chatContextKey]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -346,13 +415,14 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       character_name: friend?.characterName,
       story_id: friend?.storyId,
       mission_id: friend?.missionId,
+      post_id: sourcePost?.postId,
       history_message_count: messages.length,
     });
     setAssistanceQuestion('');
     setAssistanceAnswer('');
     setAssistanceError(null);
     setShowAssistanceModal(true);
-  }, [friend, messages.length]);
+  }, [friend, messages.length, sourcePost?.postId]);
 
   const handleStartNewConversation = useCallback(() => {
     void trackMixpanelFriendEvent('friend_chat_restarted', {
@@ -360,6 +430,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       character_name: friend?.characterName,
       story_id: friend?.storyId,
       mission_id: friend?.missionId,
+      post_id: sourcePost?.postId,
       previous_history_message_count: messages.length,
       previous_conversation_ended: conversationEnded,
     });
@@ -371,7 +442,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     setConversationFeedback(null);
     setCompletionConfettiKey(null);
     setErrorMessage(null);
-  }, [conversationEnded, friend, messages.length]);
+  }, [conversationEnded, friend, messages.length, sourcePost?.postId]);
 
   const handleRequestAssistance = useCallback(async () => {
     const trimmed = assistanceQuestion.trim();
@@ -394,15 +465,19 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         character_name: friend.characterName,
         story_id: friend.storyId,
         mission_id: friend.missionId,
+        post_id: sourcePost?.postId,
         question_length: trimmed.length,
         question_word_count: trimmed.split(/\s+/).filter(Boolean).length,
         history_message_count: messages.length,
       });
       const historyPayload = messages.map(({ role, text }) => ({ role, content: text }));
+      const contextualSceneSummary = sourcePost?.context
+        ? `The learner is replying to a profile post from ${friend.characterName}: ${sourcePost.context}`
+        : friend.sceneSummary;
       const missionDefinition = {
         missionId: friend.missionId,
         title: friend.missionTitle,
-        sceneSummary: friend.sceneSummary,
+        sceneSummary: contextualSceneSummary,
         aiRole: friend.aiRole,
         caracterName: friend.characterName,
         caracterPrompt: friend.characterPrompt,
@@ -417,7 +492,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       const storyDefinition = {
         storyId: friend.storyId,
         title: friend.storyTitle,
-        summary: friend.sceneSummary || friend.missionTitle,
+        summary: contextualSceneSummary || friend.missionTitle,
         missions: [missionDefinition],
       };
 
@@ -440,7 +515,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     } finally {
       setAssistanceLoading(false);
     }
-  }, [assistanceQuestion, friend, messages]);
+  }, [assistanceQuestion, friend, messages, sourcePost]);
 
   const speakAssistantMessage = useCallback(async (text: string) => {
     const speechText = text.trim();
@@ -559,6 +634,10 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         const payload = await sendFriendChatMessage(friendId, {
           sessionId,
           transcript: trimmed,
+          ...(sourcePost?.postId ? { postId: sourcePost.postId } : {}),
+          ...(sourcePost?.context ? { postContext: sourcePost.context } : {}),
+          ...(sourcePost?.caption ? { postCaption: sourcePost.caption } : {}),
+          ...(sourcePost?.imageUrl ? { postImageUrl: sourcePost.imageUrl } : {}),
           history: historyPayload,
         });
         void recordJourneyAiConversationMessageSent();
@@ -567,6 +646,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           character_name: friend?.characterName,
           story_id: friend?.storyId,
           mission_id: friend?.missionId,
+          post_id: sourcePost?.postId,
           input_method: inputMethod,
           transcript_length: trimmed.length,
           transcript_word_count: trimmed.split(/\s+/).filter(Boolean).length,
@@ -590,6 +670,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
             character_name: friend?.characterName,
             story_id: friend?.storyId,
             mission_id: friend?.missionId,
+            post_id: sourcePost?.postId,
             input_method: inputMethod,
             history_message_count: historyPayload.length + 1,
             correctness: payload.correctness,
@@ -606,7 +687,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         setFlowState('idle');
       }
     },
-    [coinsLoading, conversationEnded, friend, friendId, isUnlimited, messages, navigation, reload, spendCoins]
+    [coinsLoading, conversationEnded, friend, friendId, isUnlimited, messages, navigation, reload, sourcePost, spendCoins]
   );
 
   const handleSendText = useCallback(
@@ -685,6 +766,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         character_name: friend?.characterName,
         story_id: friend?.storyId,
         mission_id: friend?.missionId,
+        post_id: sourcePost?.postId,
       });
       setErrorMessage(null);
       setFlowState('recording');
@@ -703,7 +785,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       stopRequestedWhileStarting.current = false;
       isStartingRecording.current = false;
     }
-  }, [canSpend, coinsLoading, conversationEnded, friend, friendId, handleRecordRelease, isUnlimited, navigation, recorder, spendCoins]);
+  }, [canSpend, coinsLoading, conversationEnded, friend, friendId, handleRecordRelease, isUnlimited, navigation, recorder, sourcePost?.postId, spendCoins]);
 
   const textCoinLocked = !isUnlimited && balance < FRIEND_CHAT_MESSAGE_COST;
   const voiceCoinLocked = !isUnlimited && balance < FRIEND_CHAT_VOICE_TOTAL_COST;
@@ -843,7 +925,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                 {friend.characterName}
               </Text>
               <Text style={{ fontSize: 12, color: '#e2e8f0' }} numberOfLines={1}>
-                {conversationEnded ? 'Conversación terminada' : 'Conversación libre'}
+                {conversationEnded ? 'Conversación terminada' : sourcePost ? 'Respondiendo un post' : 'Conversación libre'}
               </Text>
             </View>
             <CoinCountChip />
@@ -874,11 +956,15 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={{ padding: 14, borderRadius: 12, backgroundColor: 'white', borderWidth: 1, borderColor: COLORS.border }}>
+          {sourcePost ? <SourcePostCard post={sourcePost} friendName={friend.characterName} /> : null}
+
+          <View style={{ padding: 14, borderRadius: 12, backgroundColor: 'white', borderWidth: 1, borderColor: COLORS.border, marginTop: sourcePost ? 12 : 0 }}>
             <Text style={{ fontWeight: '800', color: '#1e293b' }}>{friend.missionTitle}</Text>
             <Text style={{ color: COLORS.muted, marginTop: 6, lineHeight: 20 }}>
               {conversationEnded
                 ? 'Esta práctica ya terminó. Puedes revisar la conversación y el feedback final.'
+                : sourcePost
+                ? 'Responde en inglés usando el post como contexto. El avatar contestará tomando esa foto en cuenta.'
                 : 'Ahora puedes practicar sin requisitos. Mantén la conversación en inglés y revisa el feedback después de cada mensaje.'}
             </Text>
           </View>
@@ -890,6 +976,8 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                 <Text style={{ color: COLORS.muted }}>
                   {conversationEnded
                     ? 'Esta conversación ya fue marcada como terminada.'
+                    : sourcePost
+                    ? 'Escríbele o graba una respuesta al post para empezar.'
                     : 'Escríbele o graba tu primer mensaje para empezar una práctica libre.'}
                 </Text>
               </View>

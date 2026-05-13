@@ -105,6 +105,10 @@ export async function sendFriendChatMessage(
   payload: {
     sessionId?: string;
     transcript: string;
+    postId?: string;
+    postContext?: string;
+    postCaption?: string;
+    postImageUrl?: string;
     history?: Array<{ role: 'user' | 'assistant'; content: string }>;
   }
 ): Promise<FriendChatPayload> {

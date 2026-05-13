@@ -55,6 +55,7 @@ export type AdminFeedPostWritePayload = {
 export type AdminCharacterPostWritePayload = {
   postId?: string
   caption: string
+  context?: string
   imageUrl: string
   order?: number
 }

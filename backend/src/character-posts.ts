@@ -47,6 +47,7 @@ export type StoredCharacterPostRecord = {
   characterName?: unknown;
   avatarImageUrl?: unknown;
   caption?: unknown;
+  context?: unknown;
   imageUrl?: unknown;
   imageURL?: unknown;
   order?: unknown;
@@ -64,6 +65,7 @@ export type CharacterPost = {
   missionTitle: string;
   characterName: string;
   caption: string;
+  context?: string;
   imageUrl: string;
   order: number;
   avatarImageUrl?: string;
@@ -94,6 +96,7 @@ type CharacterPostWriteInput = {
   postId?: unknown;
   caption?: unknown;
   text?: unknown;
+  context?: unknown;
   imageUrl?: unknown;
   imageURL?: unknown;
   order?: unknown;
@@ -283,6 +286,8 @@ export function buildCharacterPostRecord(
   if (!caption) {
     throw new Error('INVALID_CHARACTER_POST_CAPTION');
   }
+  const hasContextInput = Object.prototype.hasOwnProperty.call(input, 'context');
+  const context = hasContextInput ? normalizeContext(input.context) : options?.existing?.context;
 
   const imageUrl = normalizeOptionalUrl(input.imageUrl ?? input.imageURL);
   if (!imageUrl) {
@@ -311,6 +316,7 @@ export function buildCharacterPostRecord(
     characterName: character.characterName,
     ...(character.avatarImageUrl ? { avatarImageUrl: character.avatarImageUrl } : {}),
     caption,
+    ...(context ? { context } : {}),
     imageUrl,
     order,
     createdAt,
@@ -329,6 +335,7 @@ export function toCharacterPost(input: unknown): CharacterPost | undefined {
   const missionTitle = normalizeLabel(raw?.missionTitle);
   const characterName = normalizeLabel(raw?.characterName);
   const caption = normalizeCaption(raw?.caption);
+  const context = normalizeContext(raw?.context);
   const imageUrl = normalizeStoredOptionalUrl(raw?.imageUrl ?? raw?.imageURL);
   const order = normalizeOrder(raw?.order);
 
@@ -363,6 +370,7 @@ export function toCharacterPost(input: unknown): CharacterPost | undefined {
     characterName,
     ...(avatarImageUrl ? { avatarImageUrl } : {}),
     caption,
+    ...(context ? { context } : {}),
     imageUrl,
     order,
     createdAt,
@@ -495,6 +503,15 @@ function normalizeCaption(value: unknown): string | undefined {
   }
 
   return normalized.slice(0, 2200);
+}
+
+function normalizeContext(value: unknown): string | undefined {
+  const normalized = asString(value)?.trim().replace(/\s+\n/g, '\n');
+  if (!normalized) {
+    return undefined;
+  }
+
+  return normalized.slice(0, 3000);
 }
 
 function normalizeOrder(value: unknown): number | undefined {

@@ -192,6 +192,28 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
     : undefined;
   const tileGap = 3;
   const tileSize = Math.floor((width - tileGap * 2) / 3);
+  const handleReplyToPost = useCallback(
+    (post: CharacterProfilePost) => {
+      if (!friend) return;
+      void trackMixpanelFriendEvent('friend_chat_opened', {
+        friend_id: friend.friendId,
+        character_name: friend.characterName,
+        story_id: friend.storyId,
+        mission_id: friend.missionId,
+        post_id: post.postId,
+        source: 'friend_profile_post',
+      });
+      setSelectedPost(null);
+      navigation.navigate('FriendChat', {
+        friendId: friend.friendId,
+        postId: post.postId,
+        postImageUrl: post.imageUrl,
+        postCaption: post.caption,
+        postContext: post.context || post.caption,
+      });
+    },
+    [friend, navigation]
+  );
 
   if ((!loaded || loading) && !friend) {
     return (
@@ -447,6 +469,24 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
               >
                 <Text style={{ color: COLORS.text, fontWeight: '900' }}>{friend.characterName}</Text>
                 <Text style={{ color: COLORS.muted, lineHeight: 20, marginTop: 8 }}>{selectedPost.caption}</Text>
+                <Pressable
+                  onPress={() => handleReplyToPost(selectedPost)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Responder al post de ${friend.characterName}`}
+                  style={({ pressed }) => ({
+                    marginTop: 14,
+                    alignSelf: 'flex-start',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingHorizontal: 16,
+                    paddingVertical: 11,
+                    borderRadius: 999,
+                    backgroundColor: pressed ? '#1d4ed8' : COLORS.action,
+                  })}
+                >
+                  <MaterialIcons name="reply" size={18} color="white" />
+                  <Text style={{ color: 'white', fontWeight: '900', marginLeft: 8 }}>Responder</Text>
+                </Pressable>
               </View>
             </View>
           )}

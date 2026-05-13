@@ -18,6 +18,7 @@ dotenv.config({ path: path.join(__dirname, "..", ".env") });
 // ── Rutas ────────────────────────────────────────────────────────────────────
 const SUBMITTED_PATH = path.join(__dirname, "submitted.json");
 const PUBLISHED_PATH = path.join(__dirname, "published.json");
+const COMFY_RESULTS_PATH = path.join(__dirname, "comfyResults.json");
 const STORIES_SEED_PATH = path.resolve(
   __dirname, "..", "..", "..", "backend", "src", "data", "stories-seed.ts"
 );
@@ -204,6 +205,17 @@ async function generateCaptionWithRetry(characterName, imagePrompt, options) {
   }
 }
 
+function buildPostContext(characterName, imagePrompt, caption) {
+  return [
+    `The learner is replying to ${characterName}'s profile post.`,
+    imagePrompt ? `Photo context: ${String(imagePrompt).trim()}` : "",
+    caption ? `Visible caption: ${String(caption).trim()}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n")
+    .slice(0, 3000);
+}
+
 // ── Image finder ──────────────────────────────────────────────────────────────
 
 function findGeneratedImage(filenamePrefix) {
@@ -283,6 +295,7 @@ function writeJsonFile(filePath, value) {
 
 async function main() {
   const submitted = readJsonFile(SUBMITTED_PATH, {});
+  const comfyResults = readJsonFile(COMFY_RESULTS_PATH, {});
   const jobKeys = Object.keys(submitted);
 
   if (jobKeys.length === 0) {
@@ -324,6 +337,10 @@ async function main() {
     }
 
     const { filenamePrefix } = submitted[jobKey];
+    const imagePrompt =
+      typeof comfyResults[jobKey]?.enrichedPrompt === "string" && comfyResults[jobKey].enrichedPrompt.trim()
+        ? comfyResults[jobKey].enrichedPrompt.trim()
+        : filenamePrefix.replace(/_/g, " ");
     // jobKey = "{missionId}__day{N}"
     const [missionId, dayPart] = jobKey.split("__day");
     const day = Number(dayPart) + 1; // dayIndex is 0-based
@@ -352,7 +369,7 @@ async function main() {
     try {
       caption = await generateCaptionWithRetry(
         character.characterName,
-        filenamePrefix.replace(/_/g, " "),
+        imagePrompt,
         lmOptions
       );
       console.log(`ok (${caption.length} chars)`);
@@ -375,6 +392,7 @@ async function main() {
     }
 
     const imageUrl = `${cdnBase}/${s3Key}`;
+    const context = buildPostContext(character.characterName, imagePrompt, caption);
 
     // 4. Guardar CharacterPost en DynamoDB
     const now = new Date().toISOString();
@@ -390,6 +408,7 @@ async function main() {
       characterName: character.characterName,
       ...(character.avatarImageUrl ? { avatarImageUrl: character.avatarImageUrl } : {}),
       caption,
+      context,
       imageUrl,
       order: day,
       createdAt: now,
