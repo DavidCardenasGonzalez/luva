@@ -90,6 +90,8 @@ export type ShadowingList = {
   status: ShadowingStatus;
   coverImageKey?: string;
   coverImageUrl?: string;
+  coverImageMdKey?: string;
+  coverImageMdUrl?: string;
   assetsBucketName?: string;
   createdAt: string;
   updatedAt: string;
@@ -395,6 +397,7 @@ function toShadowingList(item: unknown): ShadowingList | undefined {
   const category = asString(raw.category)?.trim();
   if (!listId || !name || !category) return undefined;
   const coverImageKey = asString(raw.coverImageKey)?.trim();
+  const coverImageMdKey = asString(raw.coverImageMdKey)?.trim();
 
   return {
     listId,
@@ -406,6 +409,10 @@ function toShadowingList(item: unknown): ShadowingList | undefined {
     coverImageUrl:
       asString(raw.coverImageUrl)?.trim() ||
       (coverImageKey ? buildAssetUrl(coverImageKey) : undefined),
+    coverImageMdKey,
+    coverImageMdUrl:
+      asString(raw.coverImageMdUrl)?.trim() ||
+      (coverImageMdKey ? buildAssetUrl(coverImageMdKey) : undefined),
     assetsBucketName: asString(raw.assetsBucketName)?.trim(),
     createdAt: asString(raw.createdAt)?.trim() || MIN_TIMESTAMP,
     updatedAt: asString(raw.updatedAt)?.trim() || MIN_TIMESTAMP,

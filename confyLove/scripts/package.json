@@ -4,6 +4,8 @@
     "shadowing:audio": "node shadowings/generateShadowingAudio.js",
     "shadowing:publish": "node shadowings/generateShadowingAudio.js --publish",
     "shadowing:mp3": "node shadowings/convertShadowingAudioToMp3.js",
+    "shadowing:covers:generate": "node shadowings/generateCoverImages.js",
+    "shadowing:covers:publish": "node shadowings/publishCoverImages.js",
     "voicebox:test": "node lessons/testVoicebox.js"
   },
   "dependencies": {

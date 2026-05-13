@@ -20,6 +20,7 @@ export type ShadowingList = {
   category: string;
   order: number;
   coverImageUrl?: string;
+  coverImageMdUrl?: string;
   chapters: ShadowingChapter[];
   updatedAt: string;
 };
@@ -98,7 +99,8 @@ function sanitizeList(input: unknown): ShadowingList | null {
     name,
     category,
     order: normalizeOrder(raw.order),
-    coverImageUrl: normalizeUrl(raw.coverImageUrl),
+    coverImageUrl: normalizeUrl(raw.coverImageMdUrl) || normalizeUrl(raw.coverImageUrl),
+    coverImageMdUrl: normalizeUrl(raw.coverImageMdUrl),
     chapters,
     updatedAt: asString(raw.updatedAt) || new Date(0).toISOString(),
   };

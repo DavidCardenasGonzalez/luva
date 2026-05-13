@@ -422,6 +422,8 @@ export type AdminShadowingList = {
   status: AdminShadowingStatus
   coverImageKey?: string
   coverImageUrl?: string
+  coverImageMdKey?: string
+  coverImageMdUrl?: string
   assetsBucketName?: string
   chapters: AdminShadowingChapter[]
   createdAt: string
