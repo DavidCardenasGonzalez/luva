@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import {
   ActivityIndicator,
+  Animated,
   AppState,
   Image,
   Keyboard,
@@ -25,6 +27,11 @@ import { addFriendFromMission } from '../../hooks/useFriends';
 import { useStoryProgress } from '../../progress/StoryProgressProvider';
 import useAudioRecorder from '../../shared/useAudioRecorder';
 import useUploadToS3 from '../../shared/useUploadToS3';
+import {
+  trackMetaOnboardingStep4FirstMessage,
+  trackMetaOnboardingStep5ReachedFromStep4,
+} from '../../marketing/metaAppEvents';
+import { trackMixpanelEvent } from '../../marketing/mixpanelEvents';
 import { sendOnboardingChatMessage } from '../model/api';
 import {
   OnboardingCharacterId,
@@ -39,6 +46,8 @@ const luviLoading = require('../../image/luvi-loading.gif');
 
 const LUNA_COLOR = '#a855f7';
 const LUNA_GRADIENT: [string, string] = ['#a855f7', '#c084fc'];
+const INITIAL_MESSAGE_DELAY_MS = 700;
+const SKIP_INITIAL_MESSAGE_PHRASE = 'or you can skip this part for now if you prefer';
 
 const CHARACTER_PROFILES: Record<OnboardingCharacterId, {
   name: string;
@@ -106,7 +115,6 @@ const COLORS = {
 const REQUIREMENTS = [
   { id: 'name', icon: 'person', title: 'Di tu nombre', subtitle: 'Cuéntanos cómo te llamas.' },
   { id: 'why', icon: 'gps-fixed', title: 'Explica por qué quieres aprender inglés', subtitle: 'Cuéntanos tu objetivo o motivación.' },
-  { id: 'about', icon: 'chat', title: 'Cuenta un poco sobre ti', subtitle: 'Tu trabajo, estudios, hobbies o rutina.' },
 ] as const;
 
 type RequirementId = typeof REQUIREMENTS[number]['id'];
@@ -121,12 +129,16 @@ type TranslationResponse = {
   targetLanguage: string;
 };
 
+function isVisibleRequirementId(id: string): id is RequirementId {
+  return REQUIREMENTS.some((item) => item.id === id);
+}
+
 function getPayloadRequirements(payload: OnboardingChatPayload): Set<RequirementId> | null {
   if (!Array.isArray(payload.requirements)) return null;
 
   const ids = new Set<RequirementId>();
   payload.requirements.forEach((requirement) => {
-    if (requirement.met && REQUIREMENTS.some((item) => item.id === requirement.id)) {
+    if (requirement.met && isVisibleRequirementId(requirement.id)) {
       ids.add(requirement.id);
     }
   });
@@ -141,8 +153,11 @@ function checkRequirements(messages: ChatMessage[]): Set<RequirementId> {
   const met = new Set<RequirementId>();
   if (/my name is|i'?m |i am |me llamo|soy /i.test(userText)) met.add('name');
   if (/because|want to (learn|improve|practice)|to (learn|improve|get|work|travel)|para (aprender|mejorar|trabajar|viajar)/i.test(userText)) met.add('why');
-  if (/work(ing)?|job|stud(y|ying|ent)|engineer|doctor|teach|dev|software|design|hobby|hobbies|love|like|play|sport|fitness|hiking|guitar|music|cook/i.test(userText)) met.add('about');
   return met;
+}
+
+function getWordCount(text: string) {
+  return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
 function mergeProfile(current: ExtractedProfile, next?: ExtractedProfile): ExtractedProfile {
@@ -162,6 +177,69 @@ type Props = {
   onComplete: (summary: OnboardingSpeakingSummary) => void;
 };
 
+function getInitialAssistantMessages(characterName: string) {
+  return [
+    `Hey! I’m ${characterName} 👋, real conversations are the fastest way to improve your English.`,
+    // 'Don’t worry about mistakes 😊 I’ll help you with feedback and more natural ways to say things.',
+    'We can practice your first conversation right now, or you can skip this part for now if you prefer.',
+    'First question 👀 What’s your name?',
+  ];
+}
+
+function AnimatedMessage({ children }: { children: ReactNode }) {
+  const progress = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(progress, {
+      toValue: 1,
+      duration: 260,
+      useNativeDriver: true,
+    }).start();
+  }, [progress]);
+
+  return (
+    <Animated.View
+      style={{
+        opacity: progress,
+        transform: [
+          {
+            translateY: progress.interpolate({
+              inputRange: [0, 1],
+              outputRange: [10, 0],
+            }),
+          },
+        ],
+      }}
+    >
+      {children}
+    </Animated.View>
+  );
+}
+
+function renderAssistantText(text: string, onSkip: () => void) {
+  const phraseIndex = text.indexOf(SKIP_INITIAL_MESSAGE_PHRASE);
+  if (phraseIndex < 0) {
+    return <Text style={{ color: COLORS.text, fontSize: 14, lineHeight: 21 }}>{text}</Text>;
+  }
+
+  const before = text.slice(0, phraseIndex);
+  const after = text.slice(phraseIndex + SKIP_INITIAL_MESSAGE_PHRASE.length);
+
+  return (
+    <Text style={{ color: COLORS.text, fontSize: 14, lineHeight: 21 }}>
+      {before}
+      <Text
+        accessibilityRole="button"
+        onPress={onSkip}
+        style={{ color: LUNA_COLOR, fontWeight: '900', textDecorationLine: 'underline' }}
+      >
+        {SKIP_INITIAL_MESSAGE_PHRASE}
+      </Text>
+      {after}
+    </Text>
+  );
+}
+
 export default function Step4({ content: _content, selectedCharacter, onNext, onComplete }: Props) {
   const { width: windowWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -172,6 +250,10 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
   const confettiKeyRef = useRef(0);
   const prevMetRef = useRef<Set<RequirementId>>(new Set());
   const onboardingMissionSyncPromiseRef = useRef<Promise<void> | null>(null);
+  const trackedFirstMessageMetaRef = useRef(false);
+  const trackedStep5MetaRef = useRef(false);
+  const introMessagesStartedRef = useRef(false);
+  const trackedSkipRef = useRef(false);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [analysis, setAnalysis] = useState<OnboardingChatPayload | null>(null);
@@ -185,6 +267,7 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [messageTranslations, setMessageTranslations] = useState<Record<string, MessageTranslation>>({});
   const [extractedProfile, setExtractedProfile] = useState<ExtractedProfile>({});
+  const [introMessagesComplete, setIntroMessagesComplete] = useState(false);
 
   const recorder = useAudioRecorder();
   const uploader = useUploadToS3();
@@ -193,6 +276,65 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
 
   const metRequirements = evaluatedRequirements ?? checkRequirements(messages);
   const companion = CHARACTER_PROFILES[selectedCharacter ?? 'zoe'];
+
+  useEffect(() => {
+    if (introMessagesStartedRef.current) return;
+    introMessagesStartedRef.current = true;
+
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const initialMessages = getInitialAssistantMessages(companion.name);
+
+    initialMessages.forEach((text, index) => {
+      timers.push(setTimeout(() => {
+        const messageId = `intro-${selectedCharacter ?? 'zoe'}-${index}`;
+        setMessages((current) => [
+          ...current,
+          {
+            id: messageId,
+            role: 'assistant',
+            text,
+          },
+        ]);
+        void trackMixpanelEvent('onboarding_step4_message', {
+          event_category: 'onboarding',
+          step_number: 4,
+          step_id: 'step-4',
+          character_id: selectedCharacter ?? 'zoe',
+          role: 'assistant',
+          message_source: 'intro',
+          message_index: index + 1,
+          message_length: text.length,
+          message_word_count: getWordCount(text),
+        });
+
+        if (index === initialMessages.length - 1) {
+          setIntroMessagesComplete(true);
+        }
+      }, INITIAL_MESSAGE_DELAY_MS * index));
+    });
+
+    return () => {
+      timers.forEach(clearTimeout);
+      introMessagesStartedRef.current = false;
+    };
+  }, [companion.name, selectedCharacter]);
+
+  const handleSkipPractice = useCallback(() => {
+    if (!trackedSkipRef.current) {
+      trackedSkipRef.current = true;
+      void trackMixpanelEvent('onboarding_step4_skipped', {
+        event_category: 'onboarding',
+        step_number: 4,
+        step_id: 'step-4',
+        character_id: selectedCharacter ?? 'zoe',
+        user_message_count: messages.filter((message) => message.role === 'user').length,
+        assistant_message_count: messages.filter((message) => message.role === 'assistant').length,
+        completed_requirement_count: metRequirements.size,
+        completed_requirement_ids: Array.from(metRequirements).join(','),
+      });
+    }
+    onNext();
+  }, [messages, metRequirements, onNext, selectedCharacter]);
 
   const syncCompletedOnboardingMission = useCallback(async () => {
     if (!onboardingMissionSyncPromiseRef.current) {
@@ -415,7 +557,11 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
     };
   }, [recorder]);
 
-  const handleAdvance = useCallback(async (transcript: string, sessionId?: string) => {
+  const handleAdvance = useCallback(async (
+    transcript: string,
+    sessionId?: string,
+    inputMethod: 'text' | 'audio' = 'text'
+  ) => {
     const trimmed = transcript.trim();
     if (!trimmed) { setFlowState('idle'); return; }
 
@@ -426,6 +572,31 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
     const pendingMsg: ChatMessage = { id: `user-${Date.now()}`, role: 'user', text: trimmed };
     const nextMessages = [...messages, pendingMsg];
     setMessages(nextMessages);
+    const userMessageCount = nextMessages.filter((message) => message.role === 'user').length;
+
+    void trackMixpanelEvent('onboarding_step4_message', {
+      event_category: 'onboarding',
+      step_number: 4,
+      step_id: 'step-4',
+      character_id: selectedCharacter ?? 'zoe',
+      role: 'user',
+      message_source: 'practice',
+      message_index: userMessageCount,
+      input_method: inputMethod,
+      message_length: trimmed.length,
+      message_word_count: getWordCount(trimmed),
+      history_message_count: nextMessages.length,
+      completed_requirement_count: metRequirements.size,
+      completed_requirement_ids: Array.from(metRequirements).join(','),
+    });
+
+    if (!trackedFirstMessageMetaRef.current) {
+      trackedFirstMessageMetaRef.current = true;
+      void trackMetaOnboardingStep4FirstMessage({
+        characterId: selectedCharacter ?? 'zoe',
+        messageCount: userMessageCount,
+      });
+    }
 
     const history = nextMessages.map(({ role, text }) => ({
       role: role as 'user' | 'assistant',
@@ -439,10 +610,27 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
         characterId: selectedCharacter ?? 'zoe',
         history,
       });
+      const assistantMessageCount =
+        nextMessages.filter((message) => message.role === 'assistant').length + 1;
       setMessages((prev) => [
         ...prev,
         { id: `ai-${Date.now()}`, role: 'assistant', text: payload.aiReply },
       ]);
+      void trackMixpanelEvent('onboarding_step4_message', {
+        event_category: 'onboarding',
+        step_number: 4,
+        step_id: 'step-4',
+        character_id: selectedCharacter ?? 'zoe',
+        role: 'assistant',
+        message_source: 'practice',
+        message_index: assistantMessageCount,
+        message_length: payload.aiReply.length,
+        message_word_count: getWordCount(payload.aiReply),
+        history_message_count: nextMessages.length + 1,
+        result: payload.result,
+        correctness: payload.correctness,
+        objective_complete: payload.objectiveComplete,
+      });
       setAnalysis(payload);
       if (payload.profile) {
         setExtractedProfile((current) => mergeProfile(current, payload.profile));
@@ -460,11 +648,11 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
     } finally {
       setFlowState('idle');
     }
-  }, [messages, selectedCharacter]);
+  }, [messages, metRequirements, selectedCharacter]);
 
   const handleSendText = useCallback(async (text: string) => {
     try {
-      await handleAdvance(text);
+      await handleAdvance(text, undefined, 'text');
       return true;
     } catch {
       setFlowState('idle');
@@ -488,7 +676,7 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
       setAnalysis(null);
       setFlowState('transcribing');
       const { transcript } = await api.post<{ transcript: string }>(`/sessions/${session.sessionId}/transcribe`);
-      await handleAdvance(transcript || '', session.sessionId);
+      await handleAdvance(transcript || '', session.sessionId, 'audio');
     } catch (err: any) {
       setError(err?.message || 'No pudimos procesar tu audio.');
       setFlowState('idle');
@@ -521,6 +709,15 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
   const handleFinishMission = useCallback(async () => {
     await syncCompletedOnboardingMission();
 
+    if (!trackedStep5MetaRef.current) {
+      trackedStep5MetaRef.current = true;
+      void trackMetaOnboardingStep5ReachedFromStep4({
+        characterId: selectedCharacter ?? 'zoe',
+        completedRequirementIds: Array.from(metRequirements),
+        messageCount: messages.filter((message) => message.role === 'user').length,
+      });
+    }
+
     onComplete({
       messages: messages.map(({ role, text }) => ({
         role: role as 'user' | 'assistant',
@@ -547,12 +744,13 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
     metRequirements,
     onComplete,
     onNext,
+    selectedCharacter,
     syncCompletedOnboardingMission,
     updateCurrentUser,
   ]);
 
-  const sendDisabled = flowState !== 'idle' || !inputText.trim();
-  const micDisabled = flowState === 'recording' ? false : flowState !== 'idle';
+  const sendDisabled = flowState !== 'idle' || !introMessagesComplete || !inputText.trim();
+  const micDisabled = flowState === 'recording' ? false : flowState !== 'idle' || !introMessagesComplete;
   const loadingLabel =
     flowState === 'uploading'
       ? 'Subiendo tu audio...'
@@ -677,101 +875,105 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
         {messages.map((msg) => {
           if (msg.role === 'user') {
             return (
-              <View key={msg.id} style={{ alignItems: 'flex-end' }}>
-                <View style={{
-                  maxWidth: '86%', backgroundColor: COLORS.userBubble,
-                  borderRadius: 18, borderBottomRightRadius: 4,
-                  paddingHorizontal: 14, paddingVertical: 12,
-                }}>
-                  <Text style={{ color: COLORS.text, fontSize: 14, lineHeight: 21 }}>{msg.text}</Text>
+              <AnimatedMessage key={msg.id}>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <View style={{
+                    maxWidth: '86%', backgroundColor: COLORS.userBubble,
+                    borderRadius: 18, borderBottomRightRadius: 4,
+                    paddingHorizontal: 14, paddingVertical: 12,
+                  }}>
+                    <Text style={{ color: COLORS.text, fontSize: 14, lineHeight: 21 }}>{msg.text}</Text>
+                  </View>
                 </View>
-              </View>
+              </AnimatedMessage>
             );
           }
 
           const translationState = messageTranslations[msg.id];
 
           return (
-            <View key={msg.id} style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
-              <View style={{
-                width: 36, height: 36, borderRadius: 18,
-                backgroundColor: `${LUNA_COLOR}22`, borderWidth: 1, borderColor: `${LUNA_COLOR}44`,
-                alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden',
-              }}>
-                <Image
-                  source={companion.image}
-                  resizeMode="cover"
-                  accessibilityLabel={`Avatar de ${companion.name}`}
-                  style={{ width: '100%', height: '100%' }}
-                />
-              </View>
-              <View style={{
-                backgroundColor: COLORS.card, borderRadius: 18, borderBottomLeftRadius: 4,
-                borderWidth: 1, borderColor: COLORS.cardBorder,
-                paddingHorizontal: 14, paddingVertical: 12, maxWidth: '78%',
-              }}>
-                <Text style={{ color: COLORS.text, fontSize: 14, lineHeight: 21 }}>{msg.text}</Text>
-                {translationState?.text ? (
-                  <>
-                    <View style={{ height: 1, backgroundColor: COLORS.cardBorder, marginVertical: 10 }} />
-                    <Text style={{ color: COLORS.muted, fontSize: 14, lineHeight: 21 }}>
-                      {translationState.text}
+            <AnimatedMessage key={msg.id}>
+              <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
+                <View style={{
+                  width: 36, height: 36, borderRadius: 18,
+                  backgroundColor: `${LUNA_COLOR}22`, borderWidth: 1, borderColor: `${LUNA_COLOR}44`,
+                  alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden',
+                }}>
+                  <Image
+                    source={companion.image}
+                    resizeMode="cover"
+                    accessibilityLabel={`Avatar de ${companion.name}`}
+                    style={{ width: '100%', height: '100%' }}
+                  />
+                </View>
+                <View style={{
+                  backgroundColor: COLORS.card, borderRadius: 18, borderBottomLeftRadius: 4,
+                  borderWidth: 1, borderColor: COLORS.cardBorder,
+                  paddingHorizontal: 14, paddingVertical: 12, maxWidth: '78%',
+                }}>
+                  {renderAssistantText(msg.text, handleSkipPractice)}
+                  {translationState?.text ? (
+                    <>
+                      <View style={{ height: 1, backgroundColor: COLORS.cardBorder, marginVertical: 10 }} />
+                      <Text style={{ color: COLORS.muted, fontSize: 14, lineHeight: 21 }}>
+                        {translationState.text}
+                      </Text>
+                    </>
+                  ) : null}
+                  {translationState?.error ? (
+                    <Text style={{ marginTop: 8, color: '#ef4444', fontSize: 12 }}>
+                      {translationState.error}
                     </Text>
-                  </>
-                ) : null}
-                {translationState?.error ? (
-                  <Text style={{ marginTop: 8, color: '#ef4444', fontSize: 12 }}>
-                    {translationState.error}
-                  </Text>
-                ) : null}
-                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 10 }}>
-                  <Pressable
-                    accessibilityLabel="Reproducir mensaje"
-                    onPress={() => speakAssistantMessage(msg.text)}
-                    hitSlop={8}
-                    style={({ pressed }) => ({
-                      width: 34,
-                      height: 34,
-                      borderRadius: 999,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: pressed ? '#dbeafe' : '#eff6ff',
-                      borderWidth: 1,
-                      borderColor: '#bfdbfe',
-                    })}
-                  >
-                    <MaterialIcons name="volume-up" size={18} color="#1d4ed8" />
-                  </Pressable>
-                  <Pressable
-                    accessibilityLabel="Traducir mensaje"
-                    onPress={() => translateAssistantMessage(msg.id, msg.text)}
-                    disabled={!!translationState?.loading}
-                    hitSlop={8}
-                    style={({ pressed }) => ({
-                      width: 34,
-                      height: 34,
-                      borderRadius: 999,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: translationState?.loading
-                        ? '#f1f5f9'
-                        : pressed
-                        ? '#dcfce7'
-                        : '#f0fdf4',
-                      borderWidth: 1,
-                      borderColor: '#bbf7d0',
-                      opacity: translationState?.loading ? 0.75 : 1,
-                    })}
-                  >
-                    {translationState?.loading ? (
-                      <ActivityIndicator size="small" color="#15803d" />
-                    ) : (
-                      <MaterialIcons name="translate" size={18} color="#15803d" />
-                    )}
-                  </Pressable>
+                  ) : null}
+                  <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 10 }}>
+                    <Pressable
+                      accessibilityLabel="Reproducir mensaje"
+                      onPress={() => speakAssistantMessage(msg.text)}
+                      hitSlop={8}
+                      style={({ pressed }) => ({
+                        width: 34,
+                        height: 34,
+                        borderRadius: 999,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: pressed ? '#dbeafe' : '#eff6ff',
+                        borderWidth: 1,
+                        borderColor: '#bfdbfe',
+                      })}
+                    >
+                      <MaterialIcons name="volume-up" size={18} color="#1d4ed8" />
+                    </Pressable>
+                    <Pressable
+                      accessibilityLabel="Traducir mensaje"
+                      onPress={() => translateAssistantMessage(msg.id, msg.text)}
+                      disabled={!!translationState?.loading}
+                      hitSlop={8}
+                      style={({ pressed }) => ({
+                        width: 34,
+                        height: 34,
+                        borderRadius: 999,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: translationState?.loading
+                          ? '#f1f5f9'
+                          : pressed
+                          ? '#dcfce7'
+                          : '#f0fdf4',
+                        borderWidth: 1,
+                        borderColor: '#bbf7d0',
+                        opacity: translationState?.loading ? 0.75 : 1,
+                      })}
+                    >
+                      {translationState?.loading ? (
+                        <ActivityIndicator size="small" color="#15803d" />
+                      ) : (
+                        <MaterialIcons name="translate" size={18} color="#15803d" />
+                      )}
+                    </Pressable>
+                  </View>
                 </View>
               </View>
-            </View>
+            </AnimatedMessage>
           );
         })}
 
@@ -935,7 +1137,7 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
             placeholder="Escribe tu mensaje en inglés..."
             placeholderTextColor={COLORS.muted}
             multiline
-            editable={flowState === 'idle'}
+            editable={flowState === 'idle' && introMessagesComplete}
             style={{ flex: 1, color: COLORS.text, fontSize: 14, maxHeight: 100, paddingVertical: 0, paddingRight: 8 }}
             onSubmitEditing={async () => {
               const t = inputText.trim();

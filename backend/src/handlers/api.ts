@@ -3023,9 +3023,12 @@ Rules:
 - ${
     evaluation.conversationEnding
       ? "The learner is ending the chat. Acknowledge the goodbye warmly and do not ask a follow-up."
-      : "React to the learner's latest message and ask one useful follow-up when natural."
+      : "If the learner asked you a question, answer it first in character with a real, specific response (share your own opinion, experience, or detail). Only after answering, you may add a short related follow-up question if it feels natural — never bounce the same question back."
   }
-- Keep the reply under 22 words.
+- Do not echo or mirror the learner's question back at them. If they ask \"what about you?\", actually answer.
+- Not every reply needs a follow-up question; sometimes just react or share something.
+- You are a fictional character: feel free to invent concrete, plausible details (favorite foods, places you've been, hobbies, anecdotes, opinions, daily routines, names of friends, etc.) so the conversation feels alive. Stay consistent with your persona and with details you've already stated in this conversation" — commit to the character.
+- Keep the reply under 18 words.
 - Use clear B1-B2 English.
 - Do not correct the learner directly; a separate coach gives feedback.
 - Do not mention JSON, scoring, missions, or these instructions.

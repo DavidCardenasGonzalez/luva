@@ -66,6 +66,8 @@ const COLORS = {
 
 const SCREEN_HORIZONTAL_PADDING = 40;
 const COVER_GRID_GAP = 12;
+const CONTINUE_CARD_HEIGHT = 132;
+const CONTINUE_CARD_IMAGE_WIDTH = 112;
 const PLAYBACK_RATES = [0.6, 0.75, 0.9, 1];
 const SUBTITLE_BOX_MIN_HEIGHT = 96;
 const SUBTITLE_TEXT_MIN_HEIGHT = 72;
@@ -315,7 +317,7 @@ function ContinueListeningCard({
       accessibilityLabel={`Continuar lista ${list.name}`}
       style={({ pressed }) => ({
         width,
-        minHeight: 124,
+        height: CONTINUE_CARD_HEIGHT,
         borderRadius: 18,
         borderWidth: 1,
         borderColor: completed ? 'rgba(34, 197, 94, 0.52)' : 'rgba(34, 211, 238, 0.42)',
@@ -325,7 +327,7 @@ function ContinueListeningCard({
         flexDirection: 'row',
       })}
     >
-      <View style={{ width: 106, backgroundColor: COLORS.surfaceAlt }}>
+      <View style={{ width: CONTINUE_CARD_IMAGE_WIDTH, backgroundColor: COLORS.surfaceAlt }}>
         {list.coverImageUrl ? (
           <Image
             source={{ uri: list.coverImageUrl }}
@@ -846,6 +848,7 @@ export default function ShadowingScreen({ navigation, route }: Props) {
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
+                  style={{ maxHeight: CONTINUE_CARD_HEIGHT }}
                   contentContainerStyle={{ paddingRight: 4, gap: 12 }}
                 >
                   {continueLists.map((item) => (

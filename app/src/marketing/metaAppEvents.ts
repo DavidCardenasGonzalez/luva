@@ -53,10 +53,10 @@ type MetaViewedContentEvent = {
   params?: Record<string, string | number | boolean | null | undefined>;
 };
 
-type MetaOnboardingStepEvent = {
-  stepNumber: number;
-  stepId: string;
-  title?: string;
+type MetaOnboardingStep4Event = {
+  characterId?: string | null;
+  completedRequirementIds?: string[];
+  messageCount?: number;
 };
 
 type TrackingStatus =
@@ -67,7 +67,10 @@ type TrackingStatus =
   | "unavailable";
 
 const extra = Constants.expoConfig?.extra || {};
-const META_ENABLED = Boolean(extra.META_ENABLED);
+const ANALYTICS_ENABLED_IN_DEV = Boolean(extra.ANALYTICS_ENABLED_IN_DEV);
+const META_ENABLED = Boolean(
+  extra.META_ENABLED && (!__DEV__ || ANALYTICS_ENABLED_IN_DEV)
+);
 
 const META_EVENTS = AppEventsLogger.AppEvents || {
   InitiatedCheckout: "fb_mobile_initiated_checkout",
@@ -146,9 +149,11 @@ function logViewedContent({
 }: MetaViewedContentEvent) {
   AppEventsLogger.logEvent(
     META_EVENTS.ViewedContent,
+    0,
     normalizeParams({
       [META_EVENT_PARAMS.ContentID]: contentId,
       [META_EVENT_PARAMS.ContentType]: contentType,
+      [META_EVENT_PARAMS.Currency]: "USD",
       [META_EVENT_PARAMS.Description]: description?.trim() || undefined,
       ...params,
     })
@@ -271,11 +276,10 @@ export async function trackPaywallViewed({
   }
 }
 
-export async function trackMetaOnboardingStepViewed({
-  stepNumber,
-  stepId,
-  title,
-}: MetaOnboardingStepEvent) {
+export async function trackMetaOnboardingStep4FirstMessage({
+  characterId,
+  messageCount,
+}: MetaOnboardingStep4Event = {}) {
   const initialized = await initializeMetaSdk();
   if (!initialized) {
     return;
@@ -283,15 +287,46 @@ export async function trackMetaOnboardingStepViewed({
 
   try {
     logViewedContent({
-      contentId: stepId,
-      contentType: "onboarding_step",
-      description: title,
+      contentId: "onboarding-step-4-first-message",
+      contentType: "onboarding_step4_first_message",
+      description: "Primer mensaje enviado en onboarding step 4",
       params: {
-        step_number: stepNumber,
+        step_number: 4,
+        character_id: characterId || undefined,
+        message_count: messageCount,
       },
     });
   } catch (err) {
-    console.warn("[Meta] No se pudo registrar ViewContent de onboarding", err);
+    console.warn("[Meta] No se pudo registrar ViewContent del primer mensaje de onboarding", err);
+  }
+}
+
+export async function trackMetaOnboardingStep5ReachedFromStep4({
+  characterId,
+  completedRequirementIds,
+  messageCount,
+}: MetaOnboardingStep4Event = {}) {
+  const initialized = await initializeMetaSdk();
+  if (!initialized) {
+    return;
+  }
+
+  try {
+    logViewedContent({
+      contentId: "onboarding-step-5-from-step-4-mission-complete",
+      contentType: "onboarding_step5_reached",
+      description: "Step 5 alcanzado despues de completar la mision del step 4",
+      params: {
+        step_number: 5,
+        completed_step_number: 4,
+        character_id: characterId || undefined,
+        completed_requirement_count: completedRequirementIds?.length,
+        completed_requirement_ids: completedRequirementIds?.join(",") || undefined,
+        message_count: messageCount,
+      },
+    });
+  } catch (err) {
+    console.warn("[Meta] No se pudo registrar ViewContent al llegar al step 5", err);
   }
 }
 

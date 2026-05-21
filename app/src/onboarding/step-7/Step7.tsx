@@ -112,7 +112,7 @@ export default function Step7({
   const productDetails = product?.billingDetails || product?.monthlyEquivalent;
   const titleText = title || (isPromo ? '50% de descuento' : 'Obtén acceso ilimitado con el plan Pro');
   const subtitleText = subtitle || (isPromo ? 'por tiempo limitado' : 'Elige cómo quieres pagar');
-  const buttonText = ctaLabel || (isPromo ? 'Comenzar oferta' : 'Continuar con Pro');
+  const buttonText = ctaLabel || (isPromo ? 'Empezar Gratis' : 'Continuar con Pro');
   const loadingText = isPromo ? 'Cargando oferta...' : 'Cargando planes...';
   const footerText =
     helperText ||

@@ -14,6 +14,8 @@ const mixpanelServerUrl = process.env.MIXPANEL_SERVER_URL?.trim();
 const mixpanelTrackAutomaticEvents =
   process.env.MIXPANEL_TRACK_AUTOMATIC_EVENTS?.trim().toLowerCase() === "true";
 const mixpanelConfigured = Boolean(mixpanelProjectToken);
+const analyticsEnabledInDev =
+  process.env.ANALYTICS_ENABLED_IN_DEV?.trim().toLowerCase() === "true";
 
 const plugins = [
   "expo-dev-client",
@@ -128,6 +130,7 @@ module.exports = {
       MIXPANEL_PROJECT_TOKEN: mixpanelProjectToken,
       MIXPANEL_SERVER_URL: mixpanelServerUrl,
       MIXPANEL_TRACK_AUTOMATIC_EVENTS: mixpanelTrackAutomaticEvents,
+      ANALYTICS_ENABLED_IN_DEV: analyticsEnabledInDev,
       eas: { projectId: "f907b78e-85ff-4222-a01f-5c469f016c89" },
     },
   },

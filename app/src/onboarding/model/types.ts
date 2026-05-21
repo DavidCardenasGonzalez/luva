@@ -150,7 +150,7 @@ export const DEFAULT_ONBOARDING_STEPS: OnboardingStepContent[] = [
   },
   {
     stepNumber: 4,
-    eyebrow: "Tu primera misión",
+    eyebrow: "Tu primera conversación",
     title: "Preséntate en inglés",
     subtitle: "Cuéntanos quién eres y por qué quieres aprender inglés.",
     primaryCta: "",
