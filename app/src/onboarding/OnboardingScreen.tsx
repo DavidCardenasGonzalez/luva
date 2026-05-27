@@ -11,9 +11,13 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { fetchOnboardingContent } from './model/api';
-import { markOnboardingCompleted } from './model/progress';
+import {
+  getOnboardingDraftProgress,
+  markOnboardingCompleted,
+  saveOnboardingDraftProgress,
+} from './model/progress';
 import { trackOnboardingStepViewed } from './model/tracking';
-import { saveJourneyPlan } from '../progress/journeyProgress';
+import { getStoredJourneyPlan, saveJourneyPlan } from '../progress/journeyProgress';
 import {
   DEFAULT_ONBOARDING_STEPS,
   OnboardingCharacterId,
@@ -38,6 +42,15 @@ const COLORS = {
   cyan: '#22d3ee',
   action: '#2563eb',
 };
+
+function getStepIndexForStepNumber(steps: OnboardingStepContent[], stepNumber?: number) {
+  if (!stepNumber) return 0;
+
+  const stepIndex = steps.findIndex((step) => step.stepNumber === stepNumber);
+  if (stepIndex >= 0) return stepIndex;
+
+  return Math.max(0, Math.min(stepNumber - 1, steps.length - 1));
+}
 
 function renderStep(
   step: OnboardingStepContent,
@@ -102,8 +115,11 @@ function renderStep(
 }
 
 export default function OnboardingScreen({ navigation, route }: Props) {
+  const initialStartAtStepRef = useRef(route.params?.startAtStep);
   const [steps, setSteps] = useState(DEFAULT_ONBOARDING_STEPS);
-  const [stepIndex, setStepIndex] = useState(0);
+  const [stepIndex, setStepIndex] = useState(() => (
+    getStepIndexForStepNumber(DEFAULT_ONBOARDING_STEPS, initialStartAtStepRef.current)
+  ));
   const [loadingContent, setLoadingContent] = useState(true);
   const [selectedCharacter, setSelectedCharacter] = useState<OnboardingCharacterId | null>(null);
   const [phraseSelections, setPhraseSelections] = useState<OnboardingPhraseSelection[]>([]);
@@ -118,10 +134,31 @@ export default function OnboardingScreen({ navigation, route }: Props) {
 
   useEffect(() => {
     let mounted = true;
+    const startAtStep = initialStartAtStepRef.current;
 
-    fetchOnboardingContent()
-      .then((nextSteps) => {
-        if (mounted) setSteps(nextSteps);
+    Promise.all([
+      fetchOnboardingContent(),
+      startAtStep ? Promise.resolve(null) : getOnboardingDraftProgress(),
+      getStoredJourneyPlan(),
+    ])
+      .then(([nextSteps, draftProgress, storedPlan]) => {
+        if (!mounted) return;
+
+        setSteps(nextSteps);
+        if (storedPlan) {
+          setOnboardingPlan(storedPlan);
+        }
+
+        if (draftProgress && !startAtStep) {
+          setSelectedCharacter(draftProgress.selectedCharacter);
+          setPhraseSelections(draftProgress.phraseSelections);
+          setSpeakingSummary(draftProgress.speakingSummary);
+        }
+
+        const initialStepNumber = startAtStep ?? draftProgress?.stepNumber;
+        if (initialStepNumber) {
+          setStepIndex(getStepIndexForStepNumber(nextSteps, initialStepNumber));
+        }
       })
       .finally(() => {
         if (mounted) setLoadingContent(false);
@@ -133,19 +170,31 @@ export default function OnboardingScreen({ navigation, route }: Props) {
   }, []);
 
   useEffect(() => {
+    if (loadingContent) return;
     if (trackedStepsRef.current.has(activeStep.stepNumber)) return;
     trackedStepsRef.current.add(activeStep.stepNumber);
     void trackOnboardingStepViewed(activeStep);
-  }, [activeStep]);
+  }, [activeStep, loadingContent]);
 
   useEffect(() => {
     const requestedStep = route.params?.startAtStep;
-    if (!requestedStep) return;
+    if (!requestedStep || loadingContent) return;
 
-    const nextIndex = Math.max(0, Math.min(requestedStep - 1, steps.length - 1));
+    const nextIndex = getStepIndexForStepNumber(steps, requestedStep);
     setStepIndex(nextIndex);
     navigation.setParams({ startAtStep: undefined });
-  }, [navigation, route.params?.startAtStep, steps.length]);
+  }, [loadingContent, navigation, route.params?.startAtStep, steps]);
+
+  useEffect(() => {
+    if (loadingContent) return;
+
+    void saveOnboardingDraftProgress({
+      stepNumber: activeStep.stepNumber,
+      selectedCharacter,
+      phraseSelections,
+      speakingSummary,
+    });
+  }, [activeStep.stepNumber, loadingContent, phraseSelections, selectedCharacter, speakingSummary]);
 
   const finishOnboarding = useCallback(async (showLiteOffer = false) => {
     if (onboardingPlan) {
@@ -311,23 +360,30 @@ export default function OnboardingScreen({ navigation, route }: Props) {
 
         {/* ── Step content ── */}
         <View style={{ flex: 1 }}>
-          {renderStep(
-            activeStep,
-            goNext,
-            selectedCharacter,
-            selectCharacter,
-            phraseSelections,
-            setPhraseSelections,
-            speakingSummary,
-            setSpeakingSummary,
-            onboardingPlan,
-            handlePlanReady,
-            skipPracticeAndCreatePlan,
+          {loadingContent ? (
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+              <ActivityIndicator color={COLORS.cyan} />
+            </View>
+          ) : (
+            renderStep(
+              activeStep,
+              goNext,
+              selectedCharacter,
+              selectCharacter,
+              phraseSelections,
+              setPhraseSelections,
+              speakingSummary,
+              setSpeakingSummary,
+              onboardingPlan,
+              handlePlanReady,
+              skipPracticeAndCreatePlan,
+            )
           )}
         </View>
 
         {/* ── CTA button (hidden for steps that provide their own controls) ── */}
-        {activeStep.primaryCta &&
+        {!loadingContent &&
+        activeStep.primaryCta &&
         activeStep.stepNumber !== 3 &&
         activeStep.stepNumber !== 4 &&
         activeStep.stepNumber !== 6 ? (

@@ -367,6 +367,7 @@ function MissionCard({
   const [hasVideoError, setHasVideoError] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [hasVideoEnded, setHasVideoEnded] = useState(false);
+  const [isIntroVideoReadyForDisplay, setIsIntroVideoReadyForDisplay] = useState(false);
   const introVideoSource = useMemo(() => {
     return introVideoUrl ? { uri: introVideoUrl } : undefined;
   }, [introVideoUrl]);
@@ -375,6 +376,7 @@ function MissionCard({
     setHasVideoError(false);
     setIsVideoPlaying(false);
     setHasVideoEnded(false);
+    setIsIntroVideoReadyForDisplay(false);
   }, [introVideoUrl]);
 
   const missionAvatar = useMemo<ImageSourcePropType | undefined>(() => {
@@ -428,6 +430,7 @@ function MissionCard({
     }
 
     setIsVideoPlaying(false);
+    setIsIntroVideoReadyForDisplay(false);
     void introVideoRef.current?.unloadAsync().catch((unloadErr) => {
       console.warn('[Feed] No se pudo descargar el intro al salir de la pantalla', unloadErr);
     });
@@ -507,20 +510,38 @@ function MissionCard({
       <View style={{ aspectRatio: 0.9, backgroundColor: COLORS.surfaceAlt }}>
         {shouldMountVideo ? (
           <View style={{ flex: 1 }}>
+            {missionCover ? (
+              <Image
+                source={missionCover}
+                style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+                resizeMode="cover"
+              />
+            ) : null}
             <Video
               key={introVideoUrl}
               ref={introVideoRef}
               source={introVideoSource}
-              style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0,
+                opacity: isIntroVideoReadyForDisplay ? 1 : 0,
+              }}
               resizeMode={ResizeMode.COVER}
               shouldPlay={false}
               isLooping={false}
               useNativeControls={false}
               progressUpdateIntervalMillis={500}
+              onLoadStart={() => setIsIntroVideoReadyForDisplay(false)}
+              onLoad={() => setIsIntroVideoReadyForDisplay(true)}
+              onReadyForDisplay={() => setIsIntroVideoReadyForDisplay(true)}
               onPlaybackStatusUpdate={handleIntroVideoStatus}
               onError={() => {
                 setHasVideoError(true);
                 setIsVideoPlaying(false);
+                setIsIntroVideoReadyForDisplay(false);
               }}
             />
             <View
@@ -1207,6 +1228,7 @@ function FeedPostCard({
   const imageUrl = item.imageUrl?.trim();
   const videoUrl = item.videoUrl?.trim();
   const videoRef = useRef<Video | null>(null);
+  const [isVideoReadyForDisplay, setIsVideoReadyForDisplay] = useState(false);
   const hasMedia = !!imageUrl || !!videoUrl;
   const canClaimExtra = item.postType === 'extra' && !!item.coinAmount && !item.claimed;
   const videoSource = useMemo(() => {
@@ -1214,10 +1236,15 @@ function FeedPostCard({
   }, [videoUrl]);
 
   useEffect(() => {
+    setIsVideoReadyForDisplay(false);
+  }, [videoUrl]);
+
+  useEffect(() => {
     if (playbackEnabled || !videoUrl) {
       return;
     }
 
+    setIsVideoReadyForDisplay(false);
     void videoRef.current?.unloadAsync().catch((unloadErr) => {
       console.warn('[Feed] No se pudo descargar el video del post al salir de la pantalla', unloadErr);
     });
@@ -1273,19 +1300,39 @@ function FeedPostCard({
     >
       {hasMedia ? (
         <View style={{ aspectRatio: videoUrl ? 9 / 11 : 1, backgroundColor: COLORS.surfaceAlt }}>
+          {imageUrl ? (
+            <Image
+              source={{ uri: imageUrl }}
+              style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+              resizeMode="cover"
+            />
+          ) : null}
           {shouldMountVideo ? (
             <Video
               key={videoUrl}
               ref={videoRef}
               source={videoSource}
-              style={{ width: '100%', height: '100%' }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0,
+                opacity: isVideoReadyForDisplay ? 1 : 0,
+              }}
               resizeMode={ResizeMode.COVER}
               useNativeControls
               shouldPlay={false}
               progressUpdateIntervalMillis={1000}
+              pointerEvents={isVideoReadyForDisplay ? 'auto' : 'none'}
+              onLoadStart={() => setIsVideoReadyForDisplay(false)}
+              onLoad={() => setIsVideoReadyForDisplay(true)}
+              onReadyForDisplay={() => setIsVideoReadyForDisplay(true)}
+              onError={(videoError) => {
+                setIsVideoReadyForDisplay(false);
+                console.warn('[Feed] No se pudo cargar el video del post', videoError);
+              }}
             />
-          ) : imageUrl ? (
-            <Image source={{ uri: imageUrl }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
           ) : null}
         </View>
       ) : null}
