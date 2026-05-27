@@ -240,6 +240,7 @@ type FriendChatPostContext = {
   context?: string;
   caption?: string;
   imageUrl?: string;
+  videoUrl?: string;
 };
 
 type FriendRecord = FriendCharacter & {
@@ -1531,6 +1532,7 @@ function buildFriendChatPostContextFromPost(post: CharacterPost): FriendChatPost
     context: post.context || post.caption,
     caption: post.caption,
     imageUrl: post.imageUrl,
+    ...(post.videoUrl ? { videoUrl: post.videoUrl } : {}),
   };
 }
 
@@ -1561,8 +1563,9 @@ async function resolveFriendChatPostContext(
   const context = sanitizeFriendChatText(body.postContext, 3000);
   const caption = sanitizeFriendChatText(body.postCaption, 2200);
   const imageUrl = sanitizeFriendChatText(body.postImageUrl, 2048);
+  const videoUrl = sanitizeFriendChatText(body.postVideoUrl, 2048);
   const fallbackContext = context || caption;
-  if (!postId && !fallbackContext && !imageUrl) {
+  if (!postId && !fallbackContext && !imageUrl && !videoUrl) {
     return undefined;
   }
 
@@ -1571,6 +1574,7 @@ async function resolveFriendChatPostContext(
     ...(fallbackContext ? { context: fallbackContext } : {}),
     ...(caption ? { caption } : {}),
     ...(imageUrl && /^https?:\/\//i.test(imageUrl) ? { imageUrl } : {}),
+    ...(videoUrl && /^https?:\/\//i.test(videoUrl) ? { videoUrl } : {}),
   };
 }
 
@@ -3003,6 +3007,7 @@ async function generateFriendReply(
         postContext.caption && postContext.caption !== postContext.context
           ? `Visible caption: ${postContext.caption}`
           : "",
+        postContext.videoUrl ? "Post media: video." : "",
       ]
         .filter(Boolean)
         .join("\n")

@@ -57,6 +57,8 @@ export type AdminCharacterPostWritePayload = {
   caption: string
   context?: string
   imageUrl: string
+  thumbnailUrl?: string
+  videoUrl?: string
   order?: number
 }
 

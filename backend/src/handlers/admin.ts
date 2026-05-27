@@ -977,7 +977,21 @@ function handleCharacterPostError(error: unknown): Result | undefined {
   if (error.message === 'INVALID_CHARACTER_POST_IMAGE_URL') {
     return json(400, {
       code: 'INVALID_CHARACTER_POST_IMAGE_URL',
-      message: 'Sube una imagen valida o usa una URL https valida.',
+      message: 'Sube una imagen o thumbnail valido, o usa una URL https valida.',
+    });
+  }
+
+  if (error.message === 'INVALID_CHARACTER_POST_THUMBNAIL_URL') {
+    return json(400, {
+      code: 'INVALID_CHARACTER_POST_THUMBNAIL_URL',
+      message: 'Sube un thumbnail valido o usa una URL https valida.',
+    });
+  }
+
+  if (error.message === 'INVALID_CHARACTER_POST_VIDEO_URL') {
+    return json(400, {
+      code: 'INVALID_CHARACTER_POST_VIDEO_URL',
+      message: 'Sube un video valido o usa una URL https valida.',
     });
   }
 

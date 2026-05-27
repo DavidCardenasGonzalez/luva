@@ -71,11 +71,22 @@ const ASSET_CONTENT_TYPE_CONFIG: Record<
     }),
   },
   avatarPosts: {
-    contentTypes: IMAGE_CONTENT_TYPES,
-    contentTypeByExtension: buildContentTypeByExtension(IMAGE_CONTENT_TYPES, {
-      jpg: 'image/jpeg',
-      jpeg: 'image/jpeg',
-    }),
+    contentTypes: {
+      ...IMAGE_CONTENT_TYPES,
+      ...VIDEO_CONTENT_TYPES,
+    },
+    contentTypeByExtension: buildContentTypeByExtension(
+      {
+        ...IMAGE_CONTENT_TYPES,
+        ...VIDEO_CONTENT_TYPES,
+      },
+      {
+        jpg: 'image/jpeg',
+        jpeg: 'image/jpeg',
+        mov: 'video/quicktime',
+        m4v: 'video/x-m4v',
+      },
+    ),
   },
   feedPostImages: {
     contentTypes: IMAGE_CONTENT_TYPES,

@@ -79,6 +79,7 @@ export type RootStackParamList = {
     friendId: string;
     postId?: string;
     postImageUrl?: string;
+    postVideoUrl?: string;
     postCaption?: string;
     postContext?: string;
   };

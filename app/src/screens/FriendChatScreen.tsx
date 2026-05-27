@@ -70,6 +70,7 @@ type MessageTranslationState = {
 type FriendChatSourcePost = {
   postId?: string;
   imageUrl?: string;
+  videoUrl?: string;
   caption?: string;
   context?: string;
 };
@@ -217,17 +218,35 @@ function SourcePostCard({ post, friendName }: { post: FriendChatSourcePost; frie
         {friendName}
       </Text>
       {post.imageUrl ? (
-        <Image
-          source={{ uri: post.imageUrl }}
-          style={{
-            width: '100%',
-            aspectRatio: 1,
-            borderRadius: 10,
-            marginTop: 12,
-            backgroundColor: '#e2e8f0',
-          }}
-          resizeMode="cover"
-        />
+        <View style={{ marginTop: 12 }}>
+          <Image
+            source={{ uri: post.imageUrl }}
+            style={{
+              width: '100%',
+              aspectRatio: 1,
+              borderRadius: 10,
+              backgroundColor: '#e2e8f0',
+            }}
+            resizeMode="cover"
+          />
+          {post.videoUrl ? (
+            <View
+              style={{
+                position: 'absolute',
+                right: 10,
+                bottom: 10,
+                width: 32,
+                height: 32,
+                borderRadius: 999,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'rgba(15, 23, 42, 0.72)',
+              }}
+            >
+              <MaterialIcons name="play-arrow" size={22} color="white" />
+            </View>
+          ) : null}
+        </View>
       ) : null}
       {post.caption ? (
         <Text style={{ color: COLORS.muted, lineHeight: 20, marginTop: 10 }} numberOfLines={5}>
@@ -252,14 +271,16 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const sourcePost = useMemo<FriendChatSourcePost | undefined>(() => {
     const postId = route.params?.postId?.trim();
     const imageUrl = route.params?.postImageUrl?.trim();
+    const videoUrl = route.params?.postVideoUrl?.trim();
     const caption = route.params?.postCaption?.trim();
     const context = route.params?.postContext?.trim() || caption;
-    if (!postId && !imageUrl && !caption && !context) {
+    if (!postId && !imageUrl && !videoUrl && !caption && !context) {
       return undefined;
     }
     return {
       ...(postId ? { postId } : {}),
       ...(imageUrl ? { imageUrl } : {}),
+      ...(videoUrl ? { videoUrl } : {}),
       ...(caption ? { caption } : {}),
       ...(context ? { context } : {}),
     };
@@ -268,6 +289,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     route.params?.postContext,
     route.params?.postId,
     route.params?.postImageUrl,
+    route.params?.postVideoUrl,
   ]);
   const chatContextKey = `${friendId || ''}:${sourcePost?.postId || ''}:${sourcePost?.context || ''}`;
   const trackedFriendViewRef = useRef<string | undefined>(undefined);
@@ -635,6 +657,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           ...(sourcePost?.context ? { postContext: sourcePost.context } : {}),
           ...(sourcePost?.caption ? { postCaption: sourcePost.caption } : {}),
           ...(sourcePost?.imageUrl ? { postImageUrl: sourcePost.imageUrl } : {}),
+          ...(sourcePost?.videoUrl ? { postVideoUrl: sourcePost.videoUrl } : {}),
           history: historyPayload,
         });
         void recordJourneyAiConversationMessageSent();

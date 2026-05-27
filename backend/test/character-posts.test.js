@@ -80,6 +80,29 @@ test('buildCharacterPostRecord normalizes a character post', () => {
   });
 });
 
+test('buildCharacterPostRecord normalizes a video character post with thumbnail', () => {
+  const record = buildCharacterPostRecord(
+    character,
+    {
+      caption: '  New reel from Alex  ',
+      context: '  Alex recorded a vertical update.  ',
+      imageUrl: 'https://assets.example.com/avatarPosts/post-thumb.webp',
+      thumbnailUrl: 'https://assets.example.com/avatarPosts/post-thumb.webp',
+      videoUrl: 'https://assets.example.com/avatarPosts/post-mobile.mp4',
+      order: '3',
+    },
+    {
+      postId: 'post-video-1',
+      now: '2026-04-25T10:25:30.000Z',
+    },
+  );
+
+  assert.equal(record.imageUrl, 'https://assets.example.com/avatarPosts/post-thumb.webp');
+  assert.equal(record.thumbnailUrl, 'https://assets.example.com/avatarPosts/post-thumb.webp');
+  assert.equal(record.videoUrl, 'https://assets.example.com/avatarPosts/post-mobile.mp4');
+  assert.equal(record.order, 3);
+});
+
 test('buildCharacterPostRecord requires caption, image URL and order', () => {
   assert.throws(
     () =>
@@ -143,6 +166,43 @@ test('toCharacterPost validates stored records', () => {
       context: 'Alex is celebrating a tiny win.',
       imageUrl: 'https://assets.example.com/avatarPosts/post.png',
       order: 1,
+      createdAt: '2026-04-25T10:20:30.000Z',
+      updatedAt: '2026-04-25T10:20:30.000Z',
+    },
+  );
+
+  assert.deepEqual(
+    toCharacterPost({
+      characterId: 'speed_dating:date_1',
+      postId: 'post-video-1',
+      storyId: 'speed_dating',
+      missionId: 'date_1',
+      sceneIndex: 0,
+      storyTitle: 'Speed Dating',
+      missionTitle: 'La cita uno',
+      characterName: 'Alex',
+      caption: 'Video',
+      imageUrl: 'https://assets.example.com/avatarPosts/post-thumb.webp',
+      thumbnailUrl: 'https://assets.example.com/avatarPosts/post-thumb.webp',
+      videoUrl: 'https://assets.example.com/avatarPosts/post-mobile.mp4',
+      order: 2,
+      createdAt: '2026-04-25T10:20:30.000Z',
+      updatedAt: '2026-04-25T10:20:30.000Z',
+    }),
+    {
+      characterId: 'speed_dating:date_1',
+      postId: 'post-video-1',
+      storyId: 'speed_dating',
+      missionId: 'date_1',
+      sceneIndex: 0,
+      storyTitle: 'Speed Dating',
+      missionTitle: 'La cita uno',
+      characterName: 'Alex',
+      caption: 'Video',
+      imageUrl: 'https://assets.example.com/avatarPosts/post-thumb.webp',
+      thumbnailUrl: 'https://assets.example.com/avatarPosts/post-thumb.webp',
+      videoUrl: 'https://assets.example.com/avatarPosts/post-mobile.mp4',
+      order: 2,
       createdAt: '2026-04-25T10:20:30.000Z',
       updatedAt: '2026-04-25T10:20:30.000Z',
     },

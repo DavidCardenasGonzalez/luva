@@ -1,5 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
+import { FFmpeg } from '@ffmpeg/ffmpeg'
+import { fetchFile } from '@ffmpeg/util'
 import { useNavigate, useParams } from 'react-router-dom'
+import ffmpegClassWorkerUrl from '../../../../node_modules/@ffmpeg/ffmpeg/dist/esm/worker.js?url'
+import ffmpegCoreUrl from '@ffmpeg/core?url'
+import ffmpegWasmUrl from '@ffmpeg/core/wasm?url'
 import { appPaths } from '@/app/router/paths'
 import {
   createAdminAssetUpload,
@@ -13,9 +18,12 @@ import type { AdminCharacterPost } from '@/features/admin/model/types'
 import { AdminLayout } from '@/features/admin/ui/AdminLayout'
 
 type CharacterPostFormState = {
+  mediaMode: 'image' | 'video'
   caption: string
   context: string
   imageUrl: string
+  thumbnailUrl: string
+  videoUrl: string
   order: string
 }
 
@@ -71,48 +79,253 @@ function getNextOrder(posts: AdminCharacterPost[]) {
 
 function buildEmptyForm(nextOrder: number): CharacterPostFormState {
   return {
+    mediaMode: 'image',
     caption: '',
     context: '',
     imageUrl: '',
+    thumbnailUrl: '',
+    videoUrl: '',
     order: String(Math.max(1, nextOrder)),
   }
 }
 
 function formFromPost(post: AdminCharacterPost): CharacterPostFormState {
   return {
+    mediaMode: post.videoUrl ? 'video' : 'image',
     caption: post.caption,
     context: post.context || '',
     imageUrl: post.imageUrl,
+    thumbnailUrl: post.thumbnailUrl || (post.videoUrl ? post.imageUrl : ''),
+    videoUrl: post.videoUrl || '',
     order: String(post.order),
   }
 }
 
+function trimOptional(value: string) {
+  return value.trim() || undefined
+}
+
 function buildPayload(form: CharacterPostFormState): AdminCharacterPostWritePayload {
   const order = Number(form.order)
+  const videoUrl = form.mediaMode === 'video' ? trimOptional(form.videoUrl) : undefined
+  const thumbnailUrl = form.mediaMode === 'video'
+    ? trimOptional(form.thumbnailUrl) || trimOptional(form.imageUrl)
+    : undefined
+  const imageUrl = form.mediaMode === 'video'
+    ? thumbnailUrl || ''
+    : form.imageUrl.trim()
+
   return {
     caption: form.caption.trim(),
     context: form.context.trim(),
-    imageUrl: form.imageUrl.trim(),
+    imageUrl,
+    ...(thumbnailUrl ? { thumbnailUrl } : {}),
+    ...(videoUrl ? { videoUrl } : {}),
     ...(Number.isFinite(order) && order >= 1 ? { order: Math.floor(order) } : {}),
   }
 }
 
-async function uploadAvatarPostImage(file: File) {
-  const upload = await createAdminAssetUpload('avatarPosts', file.type, file.name)
+function getFileStem(fileName: string) {
+  const normalized = fileName.trim() || 'avatar-post'
+  const dotIndex = normalized.lastIndexOf('.')
+  return (dotIndex > 0 ? normalized.slice(0, dotIndex) : normalized)
+    .replace(/[^a-zA-Z0-9-_]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80) || 'avatar-post'
+}
+
+function getFileExtension(file: File) {
+  const extension = file.name.trim().toLowerCase().split('.').pop()
+  if (extension && extension !== file.name.trim().toLowerCase()) {
+    return extension
+  }
+
+  if (file.type === 'video/quicktime') return 'mov'
+  if (file.type === 'video/webm') return 'webm'
+  if (file.type === 'video/x-m4v') return 'm4v'
+  return 'mp4'
+}
+
+function makeOutputName(file: File, suffix: string, extension: string) {
+  return `${getFileStem(file.name)}-${suffix}.${extension}`
+}
+
+async function ensureFfmpegLoaded(ffmpeg: FFmpeg) {
+  if (ffmpeg.loaded) {
+    return
+  }
+
+  await ffmpeg.load({
+    classWorkerURL: ffmpegClassWorkerUrl,
+    coreURL: ffmpegCoreUrl,
+    wasmURL: ffmpegWasmUrl,
+  })
+}
+
+async function uploadAvatarPostAsset(blob: Blob, fileName: string) {
+  const contentType = blob.type
+  const upload = await createAdminAssetUpload('avatarPosts', contentType, fileName)
   const uploadResponse = await fetch(upload.uploadUrl, {
     method: 'PUT',
     headers: {
       'Content-Type': upload.contentType,
       ...(upload.cacheControl ? { 'Cache-Control': upload.cacheControl } : {}),
     },
-    body: file,
+    body: blob,
   })
 
   if (!uploadResponse.ok) {
-    throw new Error(`No pudimos subir ${file.name}. HTTP ${uploadResponse.status}`)
+    throw new Error(`No pudimos subir ${fileName}. HTTP ${uploadResponse.status}`)
   }
 
   return upload.url
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number) {
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error('No pudimos comprimir la imagen.'))
+        return
+      }
+      resolve(blob)
+    }, type, quality)
+  })
+}
+
+function getContainedSize(width: number, height: number, maxWidth: number, maxHeight: number) {
+  const safeWidth = Math.max(1, width)
+  const safeHeight = Math.max(1, height)
+  const scale = Math.min(1, maxWidth / safeWidth, maxHeight / safeHeight)
+  return {
+    width: Math.max(1, Math.round(safeWidth * scale)),
+    height: Math.max(1, Math.round(safeHeight * scale)),
+  }
+}
+
+async function compressImageToWebp(file: File) {
+  const objectUrl = URL.createObjectURL(file)
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const element = new Image()
+      element.onload = () => resolve(element)
+      element.onerror = () => reject(new Error('No pudimos leer la imagen seleccionada.'))
+      element.src = objectUrl
+    })
+    const size = getContainedSize(image.naturalWidth, image.naturalHeight, 720, 1280)
+    const canvas = document.createElement('canvas')
+    canvas.width = size.width
+    canvas.height = size.height
+    const context = canvas.getContext('2d')
+    if (!context) {
+      throw new Error('No pudimos preparar el compresor de imagen.')
+    }
+    context.drawImage(image, 0, 0, size.width, size.height)
+    return canvasToBlob(canvas, 'image/webp', 0.82)
+  } finally {
+    URL.revokeObjectURL(objectUrl)
+  }
+}
+
+async function captureVideoThumbnail(videoBlob: Blob) {
+  const objectUrl = URL.createObjectURL(videoBlob)
+  try {
+    const video = document.createElement('video')
+    video.src = objectUrl
+    video.muted = true
+    video.playsInline = true
+    video.preload = 'metadata'
+
+    await new Promise<void>((resolve, reject) => {
+      video.onloadedmetadata = () => resolve()
+      video.onerror = () => reject(new Error('No pudimos leer el video para generar thumbnail.'))
+    })
+
+    const duration = Number.isFinite(video.duration) ? video.duration : 0
+    const captureAt = duration > 1.2 ? 1 : Math.max(0, duration * 0.5)
+    if (captureAt > 0.05) {
+      await new Promise<void>((resolve, reject) => {
+        video.onseeked = () => resolve()
+        video.onerror = () => reject(new Error('No pudimos capturar el thumbnail del video.'))
+        video.currentTime = captureAt
+      })
+    } else if (video.readyState < 2) {
+      await new Promise<void>((resolve, reject) => {
+        video.onloadeddata = () => resolve()
+        video.onerror = () => reject(new Error('No pudimos cargar el primer frame del video.'))
+      })
+    }
+
+    const size = getContainedSize(video.videoWidth || 720, video.videoHeight || 1280, 720, 1280)
+    const canvas = document.createElement('canvas')
+    canvas.width = size.width
+    canvas.height = size.height
+    const context = canvas.getContext('2d')
+    if (!context) {
+      throw new Error('No pudimos preparar el thumbnail.')
+    }
+    context.drawImage(video, 0, 0, size.width, size.height)
+    return canvasToBlob(canvas, 'image/webp', 0.82)
+  } finally {
+    URL.revokeObjectURL(objectUrl)
+  }
+}
+
+async function optimizeVideoForMobile(
+  ffmpeg: FFmpeg,
+  file: File,
+) {
+  const inputName = `input.${getFileExtension(file)}`
+  const outputName = 'avatar-post-mobile.mp4'
+  await ffmpeg.writeFile(inputName, await fetchFile(file))
+  const exitCode = await ffmpeg.exec([
+    '-y',
+    '-i',
+    inputName,
+    '-map',
+    '0:v:0',
+    '-map',
+    '0:a?',
+    '-vf',
+    "scale=w='min(720,iw)':h='min(1280,ih)':force_original_aspect_ratio=decrease,scale=w='trunc(iw/2)*2':h='trunc(ih/2)*2',setsar=1",
+    '-r',
+    '30',
+    '-c:v',
+    'libx264',
+    '-preset',
+    'veryfast',
+    '-crf',
+    '28',
+    '-maxrate',
+    '1600k',
+    '-bufsize',
+    '3200k',
+    '-pix_fmt',
+    'yuv420p',
+    '-c:a',
+    'aac',
+    '-b:a',
+    '96k',
+    '-ac',
+    '2',
+    '-movflags',
+    '+faststart',
+    outputName,
+  ])
+  if (exitCode !== 0) {
+    throw new Error(`FFmpeg termino con codigo ${exitCode}.`)
+  }
+
+  const output = await ffmpeg.readFile(outputName)
+  if (typeof output === 'string') {
+    throw new Error('FFmpeg devolvio una salida invalida.')
+  }
+  const bytes = output instanceof Uint8Array ? output : new Uint8Array(output)
+  const arrayBuffer = bytes.buffer.slice(
+    bytes.byteOffset,
+    bytes.byteOffset + bytes.byteLength,
+  ) as ArrayBuffer
+  return new Blob([arrayBuffer], { type: 'video/mp4' })
 }
 
 export function AdminCharacterPostsPage() {
@@ -121,31 +334,45 @@ export function AdminCharacterPostsPage() {
   const characterId = decodeParam(params.characterId)
   const { data, error, isLoading, reload } = useAdminCharacterPosts(characterId)
   const posts = useMemo(() => data?.posts || [], [data?.posts])
+  const ffmpegRef = useRef<FFmpeg | null>(null)
   const [editingPostId, setEditingPostId] = useState<string>()
   const [form, setForm] = useState<CharacterPostFormState>(() => buildEmptyForm(1))
   const [imageFile, setImageFile] = useState<File>()
+  const [videoFile, setVideoFile] = useState<File>()
+  const [thumbnailFile, setThumbnailFile] = useState<File>()
   const [isSaving, setIsSaving] = useState(false)
   const [isDeletingPostId, setIsDeletingPostId] = useState<string>()
   const [stage, setStage] = useState<string>()
+  const [mediaProgress, setMediaProgress] = useState<number>()
+  const [ffmpegLog, setFfmpegLog] = useState<string>()
   const [actionError, setActionError] = useState<string>()
   const [actionMessage, setActionMessage] = useState<string>()
 
   const character = data?.character
   const nextOrder = getNextOrder(posts)
   const hasImages = posts.filter((post) => post.imageUrl).length
+  const videoPosts = posts.filter((post) => post.videoUrl).length
 
   const resetForm = () => {
     setEditingPostId(undefined)
     setForm(buildEmptyForm(nextOrder))
     setImageFile(undefined)
+    setVideoFile(undefined)
+    setThumbnailFile(undefined)
     setStage(undefined)
+    setMediaProgress(undefined)
+    setFfmpegLog(undefined)
   }
 
   const handleEdit = (post: AdminCharacterPost) => {
     setEditingPostId(post.postId)
     setForm(formFromPost(post))
     setImageFile(undefined)
+    setVideoFile(undefined)
+    setThumbnailFile(undefined)
     setStage(undefined)
+    setMediaProgress(undefined)
+    setFfmpegLog(undefined)
     setActionError(undefined)
     setActionMessage(undefined)
   }
@@ -158,18 +385,106 @@ export function AdminCharacterPostsPage() {
     setIsSaving(true)
     setActionError(undefined)
     setActionMessage(undefined)
+    setMediaProgress(undefined)
+    setFfmpegLog(undefined)
 
     try {
       let nextForm = form
 
-      if (imageFile) {
-        setStage('Subiendo imagen a avatarPosts...')
-        const imageUrl = await uploadAvatarPostImage(imageFile)
-        nextForm = { ...nextForm, imageUrl }
-      }
+      if (form.mediaMode === 'image') {
+        if (imageFile) {
+          setStage('Comprimiendo imagen para mobile...')
+          const imageBlob = await compressImageToWebp(imageFile)
+          setStage(`Subiendo imagen optimizada (${formatBytes(imageBlob.size)})...`)
+          const imageUrl = await uploadAvatarPostAsset(
+            imageBlob,
+            makeOutputName(imageFile, 'mobile', 'webp'),
+          )
+          nextForm = {
+            ...nextForm,
+            imageUrl,
+            thumbnailUrl: '',
+            videoUrl: '',
+          }
+        }
 
-      if (!nextForm.imageUrl.trim()) {
-        throw new Error('Selecciona una imagen para guardar el post.')
+        if (!nextForm.imageUrl.trim()) {
+          throw new Error('Selecciona una imagen para guardar el post.')
+        }
+      } else {
+        let optimizedVideoBlob: Blob | undefined
+
+        if (videoFile) {
+          if (!ffmpegRef.current) {
+            ffmpegRef.current = new FFmpeg()
+          }
+          const ffmpeg = ffmpegRef.current
+          const handleProgress = ({ progress }: { progress: number }) => {
+            const safeProgress = Number.isFinite(progress) ? Math.max(0, Math.min(progress, 1)) : 0
+            setMediaProgress(safeProgress)
+            setStage(`Comprimiendo video para mobile... ${Math.round(safeProgress * 100)}%`)
+          }
+          const handleLog = ({ message }: { message: string }) => {
+            if (message && !message.startsWith('frame=')) {
+              setFfmpegLog(message)
+            }
+          }
+
+          ffmpeg.on('progress', handleProgress)
+          ffmpeg.on('log', handleLog)
+          try {
+            setStage('Cargando motor de compresion de video...')
+            await ensureFfmpegLoaded(ffmpeg)
+            setStage('Comprimiendo video para mobile...')
+            optimizedVideoBlob = await optimizeVideoForMobile(ffmpeg, videoFile)
+          } finally {
+            ffmpeg.off('progress', handleProgress)
+            ffmpeg.off('log', handleLog)
+          }
+
+          setMediaProgress(1)
+          setStage(`Subiendo video optimizado (${formatBytes(optimizedVideoBlob.size)})...`)
+          const videoUrl = await uploadAvatarPostAsset(
+            optimizedVideoBlob,
+            makeOutputName(videoFile, 'mobile', 'mp4'),
+          )
+          nextForm = { ...nextForm, videoUrl }
+        }
+
+        if (thumbnailFile) {
+          setStage('Comprimiendo thumbnail...')
+          const thumbnailBlob = await compressImageToWebp(thumbnailFile)
+          setStage(`Subiendo thumbnail optimizado (${formatBytes(thumbnailBlob.size)})...`)
+          const thumbnailUrl = await uploadAvatarPostAsset(
+            thumbnailBlob,
+            makeOutputName(thumbnailFile, 'thumbnail', 'webp'),
+          )
+          nextForm = { ...nextForm, imageUrl: thumbnailUrl, thumbnailUrl }
+        } else if (optimizedVideoBlob) {
+          setStage('Generando thumbnail desde el segundo 1...')
+          const generatedThumbnailBlob = await captureVideoThumbnail(optimizedVideoBlob)
+          setStage(`Subiendo thumbnail generado (${formatBytes(generatedThumbnailBlob.size)})...`)
+          const thumbnailFileName = videoFile
+            ? makeOutputName(videoFile, 'thumbnail', 'webp')
+            : 'avatar-post-thumbnail.webp'
+          const thumbnailUrl = await uploadAvatarPostAsset(
+            generatedThumbnailBlob,
+            thumbnailFileName,
+          )
+          nextForm = { ...nextForm, imageUrl: thumbnailUrl, thumbnailUrl }
+        } else if (nextForm.thumbnailUrl && !nextForm.imageUrl) {
+          nextForm = { ...nextForm, imageUrl: nextForm.thumbnailUrl }
+        }
+
+        if (!nextForm.videoUrl.trim()) {
+          throw new Error('Selecciona un video para guardar el post.')
+        }
+
+        const thumbnailUrl = nextForm.thumbnailUrl.trim() || nextForm.imageUrl.trim()
+        if (!thumbnailUrl) {
+          throw new Error('Sube un thumbnail o deja que el portal lo genere desde el video.')
+        }
+        nextForm = { ...nextForm, imageUrl: thumbnailUrl, thumbnailUrl }
       }
 
       setStage(editingPostId ? 'Actualizando post del perfil...' : 'Guardando post del perfil...')
@@ -186,7 +501,11 @@ export function AdminCharacterPostsPage() {
       setEditingPostId(undefined)
       setForm(buildEmptyForm(Math.max(nextOrder, (payload.order || nextOrder) + 1)))
       setImageFile(undefined)
+      setVideoFile(undefined)
+      setThumbnailFile(undefined)
       setStage(undefined)
+      setMediaProgress(undefined)
+      setFfmpegLog(undefined)
       reload()
     } catch (saveError) {
       setActionError(
@@ -246,12 +565,12 @@ export function AdminCharacterPostsPage() {
         <article className="admin-stat-card">
           <span className="eyebrow">Posts</span>
           <strong>{posts.length}</strong>
-          <p>Imagenes guardadas en el perfil del personaje.</p>
+          <p>Media guardada en el perfil del personaje.</p>
         </article>
         <article className="admin-stat-card">
-          <span className="eyebrow">Con imagen</span>
-          <strong>{hasImages}</strong>
-          <p>Posts con URL publica de CloudFront.</p>
+          <span className="eyebrow">Videos</span>
+          <strong>{videoPosts}</strong>
+          <p>Posts con video optimizado para mobile.</p>
         </article>
         <article className="admin-stat-card">
           <span className="eyebrow">Siguiente orden</span>
@@ -261,7 +580,7 @@ export function AdminCharacterPostsPage() {
         <article className="admin-stat-card">
           <span className="eyebrow">Carpeta</span>
           <strong>avatarPosts</strong>
-          <p>Subidas dedicadas para imagenes del perfil.</p>
+          <p>{hasImages} thumbnails o imagenes con URL publica.</p>
         </article>
       </section>
 
@@ -307,6 +626,41 @@ export function AdminCharacterPostsPage() {
           )}
 
           <div className="admin-feed-post-form">
+            <div className="admin-character-media-toggle" role="group" aria-label="Tipo de media del post">
+              <button
+                type="button"
+                className={form.mediaMode === 'image' ? 'btn primary' : 'btn secondary'}
+                onClick={() => {
+                  setForm((current) => ({
+                    ...current,
+                    mediaMode: 'image',
+                    thumbnailUrl: '',
+                    videoUrl: '',
+                  }))
+                  setVideoFile(undefined)
+                  setThumbnailFile(undefined)
+                }}
+                disabled={isSaving}
+              >
+                Imagen
+              </button>
+              <button
+                type="button"
+                className={form.mediaMode === 'video' ? 'btn primary' : 'btn secondary'}
+                onClick={() => {
+                  setForm((current) => ({
+                    ...current,
+                    mediaMode: 'video',
+                    thumbnailUrl: current.thumbnailUrl || current.imageUrl,
+                  }))
+                  setImageFile(undefined)
+                }}
+                disabled={isSaving}
+              >
+                Video vertical
+              </button>
+            </div>
+
             <label className="admin-grant-field">
               <span>Caption</span>
               <textarea
@@ -340,20 +694,48 @@ export function AdminCharacterPostsPage() {
                 />
               </label>
 
+              {form.mediaMode === 'image' ? (
+                <label className="admin-grant-field">
+                  <span>Imagen</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    disabled={isSaving}
+                    onChange={(event) => {
+                      setImageFile(event.target.files?.[0])
+                    }}
+                  />
+                </label>
+              ) : (
+                <label className="admin-grant-field">
+                  <span>Video vertical</span>
+                  <input
+                    type="file"
+                    accept="video/mp4,video/quicktime,video/webm,video/x-m4v,video/mpeg"
+                    disabled={isSaving}
+                    onChange={(event) => {
+                      setVideoFile(event.target.files?.[0])
+                    }}
+                  />
+                </label>
+              )}
+            </div>
+
+            {form.mediaMode === 'video' && (
               <label className="admin-grant-field">
-                <span>Imagen</span>
+                <span>Thumbnail opcional</span>
                 <input
                   type="file"
                   accept="image/*"
                   disabled={isSaving}
                   onChange={(event) => {
-                    setImageFile(event.target.files?.[0])
+                    setThumbnailFile(event.target.files?.[0])
                   }}
                 />
               </label>
-            </div>
+            )}
 
-            {(imageFile || form.imageUrl) && (
+            {(imageFile || videoFile || thumbnailFile || form.imageUrl || form.thumbnailUrl || form.videoUrl) && (
               <div className="admin-session-list admin-asset-meta-list">
                 {imageFile && (
                   <div className="admin-session-item">
@@ -362,21 +744,53 @@ export function AdminCharacterPostsPage() {
                     <p>{formatBytes(imageFile.size)}</p>
                   </div>
                 )}
-                {form.imageUrl && (
+                {videoFile && (
                   <div className="admin-session-item">
-                    <span>Imagen guardada</span>
+                    <span>Video nuevo</span>
+                    <strong>{videoFile.name}</strong>
+                    <p>{formatBytes(videoFile.size)}</p>
+                  </div>
+                )}
+                {thumbnailFile && (
+                  <div className="admin-session-item">
+                    <span>Thumbnail nuevo</span>
+                    <strong>{thumbnailFile.name}</strong>
+                    <p>{formatBytes(thumbnailFile.size)}</p>
+                  </div>
+                )}
+                {form.videoUrl && (
+                  <div className="admin-session-item">
+                    <span>Video guardado</span>
                     <strong>
-                      <a href={form.imageUrl} target="_blank" rel="noreferrer">
+                      <a href={form.videoUrl} target="_blank" rel="noreferrer">
+                        Abrir video
+                      </a>
+                    </strong>
+                    <button
+                      type="button"
+                      className="btn ghost"
+                      onClick={() => setForm((current) => ({ ...current, videoUrl: '' }))}
+                      disabled={isSaving}
+                    >
+                      Quitar video
+                    </button>
+                  </div>
+                )}
+                {(form.thumbnailUrl || form.imageUrl) && (
+                  <div className="admin-session-item">
+                    <span>{form.mediaMode === 'video' ? 'Thumbnail guardado' : 'Imagen guardada'}</span>
+                    <strong>
+                      <a href={form.thumbnailUrl || form.imageUrl} target="_blank" rel="noreferrer">
                         Abrir imagen
                       </a>
                     </strong>
                     <button
                       type="button"
                       className="btn ghost"
-                      onClick={() => setForm((current) => ({ ...current, imageUrl: '' }))}
+                      onClick={() => setForm((current) => ({ ...current, imageUrl: '', thumbnailUrl: '' }))}
                       disabled={isSaving}
                     >
-                      Quitar imagen
+                      Quitar {form.mediaMode === 'video' ? 'thumbnail' : 'imagen'}
                     </button>
                   </div>
                 )}
@@ -386,6 +800,8 @@ export function AdminCharacterPostsPage() {
             {stage && (
               <div className="admin-inline-note">
                 <p><strong>{stage}</strong></p>
+                {mediaProgress !== undefined ? <p>Progreso: {Math.round(mediaProgress * 100)}%</p> : null}
+                {ffmpegLog ? <p>FFmpeg: {ffmpegLog}</p> : null}
               </div>
             )}
 
@@ -421,15 +837,31 @@ export function AdminCharacterPostsPage() {
                 key={post.postId}
                 className={editingPostId === post.postId ? 'admin-character-post-card admin-character-post-card-active' : 'admin-character-post-card'}
               >
-                <a href={post.imageUrl} target="_blank" rel="noreferrer" className="admin-character-post-image">
+                <a
+                  href={post.videoUrl || post.imageUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="admin-character-post-image"
+                >
                   <img src={post.imageUrl} alt="" />
+                  {post.videoUrl ? (
+                    <span className="admin-character-post-video-badge">Video</span>
+                  ) : null}
                 </a>
                 <div className="admin-character-post-copy">
                   <div className="admin-video-row-headline">
                     <strong>#{post.order}</strong>
-                    <span className="tag tag-muted">Post</span>
+                    <span className="tag tag-muted">{post.videoUrl ? 'Video' : 'Imagen'}</span>
                   </div>
                   <p>{post.caption}</p>
+                  {post.videoUrl && (
+                    <p className="admin-video-row-time">
+                      Video:{' '}
+                      <a href={post.videoUrl} target="_blank" rel="noreferrer">
+                        abrir
+                      </a>
+                    </p>
+                  )}
                   {post.context && <p className="admin-video-row-time">Contexto: {post.context}</p>}
                   <span className="admin-video-row-time">Actualizado {formatDateTime(post.updatedAt)}</span>
                 </div>
@@ -459,7 +891,7 @@ export function AdminCharacterPostsPage() {
             {!posts.length && (
               <div className="admin-empty-state admin-empty-state-compact">
                 <strong>No hay posts para este perfil.</strong>
-                <p>Sube la primera imagen y agrega su caption.</p>
+                <p>Sube la primera imagen o video y agrega su caption.</p>
               </div>
             )}
           </div>

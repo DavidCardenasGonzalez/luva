@@ -178,6 +178,7 @@ export interface FriendChatRequest {
   postContext?: string;
   postCaption?: string;
   postImageUrl?: string;
+  postVideoUrl?: string;
   history?: Array<{ role: 'user' | 'assistant'; content: string }>;
 }
 

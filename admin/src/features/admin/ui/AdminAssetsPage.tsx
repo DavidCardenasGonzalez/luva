@@ -21,8 +21,8 @@ const ASSET_FOLDER_OPTIONS: Array<{
   {
     value: 'avatarPosts',
     label: 'avatarPosts',
-    accept: 'image/*',
-    mediaKind: 'image',
+    accept: 'image/*,video/mp4,video/quicktime,video/webm,video/x-m4v,video/mpeg',
+    mediaKind: 'video',
   },
   {
     value: 'missionIntroVideos',
@@ -88,6 +88,9 @@ export function AdminAssetsPage() {
   const [stage, setStage] = useState<string>()
   const selectedFolderOption =
     ASSET_FOLDER_OPTIONS.find((option) => option.value === folder) ?? ASSET_FOLDER_OPTIONS[0]
+  const previewIsVideo = file?.type
+    ? file.type.startsWith('video/')
+    : selectedFolderOption.mediaKind === 'video'
 
   useEffect(() => {
     if (!file) {
@@ -270,7 +273,7 @@ export function AdminAssetsPage() {
 
           {localPreviewUrl ? (
             <div className="admin-asset-preview">
-              {selectedFolderOption.mediaKind === 'video' ? (
+              {previewIsVideo ? (
                 <video src={localPreviewUrl} controls muted playsInline preload="metadata" />
               ) : (
                 <img src={localPreviewUrl} alt="Vista previa del archivo seleccionado" />

@@ -16,6 +16,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
+import { ResizeMode, Video } from 'expo-av';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { CharacterProfilePost, useFriendProfile } from '../hooks/useFriendProfile';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
@@ -157,6 +158,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
   const { friend, posts, loading, loaded, error, reload } = useFriendProfile(friendId);
   const [selectedPost, setSelectedPost] = useState<CharacterProfilePost | null>(null);
   const [avatarModalVisible, setAvatarModalVisible] = useState(false);
+  const postVideoRef = useRef<Video | null>(null);
   const trackedProfileViewRef = useRef<string | undefined>(undefined);
 
   useFocusEffect(
@@ -178,6 +180,24 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
       post_count: posts.length,
     });
   }, [friend, posts.length]);
+
+  useEffect(() => {
+    if (selectedPost?.videoUrl) {
+      return;
+    }
+
+    void postVideoRef.current?.unloadAsync().catch(() => {
+      // Best effort cleanup when leaving a video post.
+    });
+  }, [selectedPost?.videoUrl]);
+
+  useEffect(() => {
+    return () => {
+      void postVideoRef.current?.unloadAsync().catch(() => {
+        // Best effort cleanup on unmount.
+      });
+    };
+  }, []);
 
   const avatarSource = useMemo<ImageSourcePropType | undefined>(() => {
     if (!friend) return undefined;
@@ -208,6 +228,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
         friendId: friend.friendId,
         postId: post.postId,
         postImageUrl: post.imageUrl,
+        postVideoUrl: post.videoUrl,
         postCaption: post.caption,
         postContext: post.context || post.caption,
       });
@@ -430,7 +451,29 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
               backgroundColor: COLORS.surface,
             })}
           >
-            <Image source={{ uri: item.imageUrl }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+            <Image
+              source={{ uri: item.thumbnailUrl || item.imageUrl }}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="cover"
+            />
+            {item.videoUrl ? (
+              <View
+                pointerEvents="none"
+                style={{
+                  position: 'absolute',
+                  right: 8,
+                  bottom: 8,
+                  width: 28,
+                  height: 28,
+                  borderRadius: 999,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: 'rgba(2, 6, 23, 0.68)',
+                }}
+              >
+                <MaterialIcons name="play-arrow" size={20} color="white" />
+              </View>
+            ) : null}
           </Pressable>
         )}
         ListEmptyComponent={
@@ -453,10 +496,31 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
         <View style={{ flex: 1, backgroundColor: 'rgba(2, 6, 23, 0.92)', justifyContent: 'center', padding: 18 }}>
           {selectedPost && (
             <View style={{ flex: 1, margin: -18 }}>
-              <ZoomableImage uri={selectedPost.imageUrl} fullScreen resizeMode="contain" />
+              {selectedPost.videoUrl ? (
+                <View style={{ flex: 1, backgroundColor: '#020617' }}>
+                  <Video
+                    key={selectedPost.videoUrl}
+                    ref={postVideoRef}
+                    source={{ uri: selectedPost.videoUrl }}
+                    style={{ width: '100%', height: '100%' }}
+                    resizeMode={ResizeMode.CONTAIN}
+                    shouldPlay
+                    useNativeControls
+                    posterSource={{ uri: selectedPost.thumbnailUrl || selectedPost.imageUrl }}
+                    usePoster
+                  />
+                </View>
+              ) : (
+                <ZoomableImage uri={selectedPost.imageUrl} fullScreen resizeMode="contain" />
+              )}
               <View
                 pointerEvents="box-none"
-                style={{
+                style={selectedPost.videoUrl ? {
+                  paddingHorizontal: 18,
+                  paddingTop: 14,
+                  paddingBottom: Math.max(insets.bottom, 18),
+                  backgroundColor: 'rgba(2, 6, 23, 0.96)',
+                } : {
                   position: 'absolute',
                   left: 0,
                   right: 0,

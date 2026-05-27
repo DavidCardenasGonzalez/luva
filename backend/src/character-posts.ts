@@ -50,6 +50,10 @@ export type StoredCharacterPostRecord = {
   context?: unknown;
   imageUrl?: unknown;
   imageURL?: unknown;
+  thumbnailUrl?: unknown;
+  thumbnailURL?: unknown;
+  videoUrl?: unknown;
+  videoURL?: unknown;
   order?: unknown;
   createdAt?: unknown;
   updatedAt?: unknown;
@@ -67,6 +71,8 @@ export type CharacterPost = {
   caption: string;
   context?: string;
   imageUrl: string;
+  thumbnailUrl?: string;
+  videoUrl?: string;
   order: number;
   avatarImageUrl?: string;
   createdAt: string;
@@ -99,6 +105,10 @@ type CharacterPostWriteInput = {
   context?: unknown;
   imageUrl?: unknown;
   imageURL?: unknown;
+  thumbnailUrl?: unknown;
+  thumbnailURL?: unknown;
+  videoUrl?: unknown;
+  videoURL?: unknown;
   order?: unknown;
 };
 
@@ -289,7 +299,15 @@ export function buildCharacterPostRecord(
   const hasContextInput = Object.prototype.hasOwnProperty.call(input, 'context');
   const context = hasContextInput ? normalizeContext(input.context) : options?.existing?.context;
 
-  const imageUrl = normalizeOptionalUrl(input.imageUrl ?? input.imageURL);
+  const videoUrl = normalizeOptionalUrl(input.videoUrl ?? input.videoURL, 'INVALID_CHARACTER_POST_VIDEO_URL');
+  const thumbnailUrl = normalizeOptionalUrl(
+    input.thumbnailUrl ?? input.thumbnailURL,
+    'INVALID_CHARACTER_POST_THUMBNAIL_URL',
+  );
+  const imageUrl = normalizeOptionalUrl(
+    input.imageUrl ?? input.imageURL ?? thumbnailUrl,
+    'INVALID_CHARACTER_POST_IMAGE_URL',
+  );
   if (!imageUrl) {
     throw new Error('INVALID_CHARACTER_POST_IMAGE_URL');
   }
@@ -318,6 +336,8 @@ export function buildCharacterPostRecord(
     caption,
     ...(context ? { context } : {}),
     imageUrl,
+    ...(thumbnailUrl || videoUrl ? { thumbnailUrl: thumbnailUrl || imageUrl } : {}),
+    ...(videoUrl ? { videoUrl } : {}),
     order,
     createdAt,
     updatedAt: now,
@@ -336,7 +356,9 @@ export function toCharacterPost(input: unknown): CharacterPost | undefined {
   const characterName = normalizeLabel(raw?.characterName);
   const caption = normalizeCaption(raw?.caption);
   const context = normalizeContext(raw?.context);
-  const imageUrl = normalizeStoredOptionalUrl(raw?.imageUrl ?? raw?.imageURL);
+  const videoUrl = normalizeStoredOptionalUrl(raw?.videoUrl ?? raw?.videoURL);
+  const thumbnailUrl = normalizeStoredOptionalUrl(raw?.thumbnailUrl ?? raw?.thumbnailURL);
+  const imageUrl = normalizeStoredOptionalUrl(raw?.imageUrl ?? raw?.imageURL ?? thumbnailUrl);
   const order = normalizeOrder(raw?.order);
 
   if (
@@ -372,6 +394,8 @@ export function toCharacterPost(input: unknown): CharacterPost | undefined {
     caption,
     ...(context ? { context } : {}),
     imageUrl,
+    ...(thumbnailUrl || videoUrl ? { thumbnailUrl: thumbnailUrl || imageUrl } : {}),
+    ...(videoUrl ? { videoUrl } : {}),
     order,
     createdAt,
     updatedAt,
@@ -545,14 +569,17 @@ function normalizeSceneIndex(value: unknown): number | undefined {
   return Math.max(0, Math.floor(parsed));
 }
 
-function normalizeOptionalUrl(value: unknown): string | undefined {
+function normalizeOptionalUrl(
+  value: unknown,
+  errorCode: string = 'INVALID_CHARACTER_POST_IMAGE_URL',
+): string | undefined {
   const normalized = asString(value)?.trim();
   if (!normalized) {
     return undefined;
   }
 
   if (!/^https?:\/\//i.test(normalized)) {
-    throw new Error('INVALID_CHARACTER_POST_IMAGE_URL');
+    throw new Error(errorCode);
   }
 
   return normalized.slice(0, 2048);

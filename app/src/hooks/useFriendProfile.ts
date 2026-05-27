@@ -15,6 +15,8 @@ export type CharacterProfilePost = {
   caption: string;
   context?: string;
   imageUrl: string;
+  thumbnailUrl?: string;
+  videoUrl?: string;
   order: number;
   avatarImageUrl?: string;
   createdAt?: string;
@@ -71,7 +73,9 @@ function sanitizeProfilePost(input: unknown): CharacterProfilePost | null {
   const missionTitle = asString(raw.missionTitle);
   const characterName = asString(raw.characterName);
   const caption = asString(raw.caption);
-  const imageUrl = normalizeUrl(raw.imageUrl);
+  const thumbnailUrl = normalizeUrl(raw.thumbnailUrl);
+  const videoUrl = normalizeUrl(raw.videoUrl);
+  const imageUrl = normalizeUrl(raw.imageUrl) || thumbnailUrl;
   const order = normalizeOrder(raw.order);
 
   if (
@@ -102,6 +106,8 @@ function sanitizeProfilePost(input: unknown): CharacterProfilePost | null {
     caption,
     context: asString(raw.context),
     imageUrl,
+    thumbnailUrl: thumbnailUrl || (videoUrl ? imageUrl : undefined),
+    videoUrl,
     order,
     avatarImageUrl: normalizeUrl(raw.avatarImageUrl),
     createdAt: asString(raw.createdAt),

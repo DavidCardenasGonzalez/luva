@@ -212,6 +212,8 @@ export type AdminCharacterPost = {
   caption: string
   context?: string
   imageUrl: string
+  thumbnailUrl?: string
+  videoUrl?: string
   order: number
   avatarImageUrl?: string
   createdAt: string

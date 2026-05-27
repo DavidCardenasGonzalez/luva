@@ -1393,6 +1393,12 @@
   gap: 20px;
 }
 
+.admin-character-media-toggle {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .admin-character-post-grid {
   margin-top: 22px;
   display: grid;
@@ -1416,6 +1422,7 @@
 }
 
 .admin-character-post-image {
+  position: relative;
   display: block;
   overflow: hidden;
   aspect-ratio: 1 / 1;
@@ -1429,6 +1436,20 @@
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.admin-character-post-video-badge {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.78);
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .admin-character-post-copy {
