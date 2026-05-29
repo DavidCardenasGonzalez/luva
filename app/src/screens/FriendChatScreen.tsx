@@ -92,6 +92,7 @@ const COLORS = {
 };
 
 const luviImage = require('../image/luvi.png');
+const luviLoadingGif = require('../image/luvi-loading.gif');
 
 function AnalysisCard({ analysis }: { analysis: FriendChatPayload }) {
   return (
@@ -637,6 +638,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       }
 
       setErrorMessage(null);
+      setAnalysis(null);
       setFlowState('evaluating');
       const pendingUserMessage: ChatMessage = {
         id: `user-${Date.now()}`,
@@ -1086,6 +1088,29 @@ export default function FriendChatScreen({ navigation, route }: Props) {
               </View>
             )}
           </View>
+
+          {flowState === 'evaluating' ? (
+            <View
+              style={{
+                marginTop: 16,
+                padding: 16,
+                backgroundColor: 'white',
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: COLORS.border,
+                alignItems: 'center',
+              }}
+            >
+              <Image
+                source={luviLoadingGif}
+                style={{ width: 96, height: 96 }}
+                resizeMode="contain"
+              />
+              <Text style={{ marginTop: 8, fontWeight: '700', color: '#1e293b' }}>
+                Analizando tu inglés...
+              </Text>
+            </View>
+          ) : null}
 
           {analysis ? <AnalysisCard analysis={analysis} /> : null}
           {conversationEnded ? (
