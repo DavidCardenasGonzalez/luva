@@ -70,6 +70,18 @@ export interface StoryDefinition {
   missions: StoryMission[];
 }
 
+export interface CharacterDefinition extends StoryMission {
+  characterId: string;
+  storyId: string;
+  storyTitle: string;
+  storySummary: string;
+  storyIsInitial?: boolean;
+  storyLevel?: string;
+  storyTags?: string[];
+  storyUnlockCost?: number;
+  sceneIndex?: number;
+}
+
 export interface StorySummaryItem {
   storyId: string;
   isInitial?: boolean;

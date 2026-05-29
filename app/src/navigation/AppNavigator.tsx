@@ -75,6 +75,7 @@ export type RootStackParamList = {
     postVideoUrl?: string;
     postCaption?: string;
     postContext?: string;
+    initialDraft?: string;
   };
   FriendProfile: { friendId: string };
   Profile: undefined;

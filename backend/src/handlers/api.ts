@@ -49,6 +49,7 @@ import {
   FriendsListResponse,
 } from "../types";
 import { CHARACTERS } from "../data/characters";
+import { storiesFromCharacters } from "../data/character-stories";
 import {
   type CharacterPost,
   listPublicCharacterPosts,
@@ -130,7 +131,7 @@ function loadStories(): StoryDefinition[] {
     STORIES_CACHE = fromDisk;
     return STORIES_CACHE;
   }
-  const fallbackStories = sanitizeStoriesList(CHARACTERS, 'seed');
+  const fallbackStories = sanitizeStoriesList(storiesFromCharacters(CHARACTERS), 'seed');
   STORIES_CACHE = fallbackStories;
   return STORIES_CACHE;
 }

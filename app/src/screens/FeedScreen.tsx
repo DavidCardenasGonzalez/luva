@@ -5,10 +5,13 @@ import {
   Image,
   ImageBackground,
   ImageSourcePropType,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   Text,
+  TextInput,
   useWindowDimensions,
   View,
   type ViewToken,
@@ -908,19 +911,38 @@ function CharacterVideoPage({
   bottomInset,
   playbackEnabled,
   onOpenProfile,
+  onReply,
 }: {
   item: CharacterVideoFeedItem;
   height: number;
   bottomInset: number;
   playbackEnabled: boolean;
   onOpenProfile: (item: CharacterVideoFeedItem) => void;
+  onReply: (item: CharacterVideoFeedItem, draft: string) => void;
 }) {
   const videoRef = useRef<Video | null>(null);
   const posterUrl = (item.thumbnailUrl || item.imageUrl).trim();
   const videoUrl = item.videoUrl.trim();
   const [isVideoReadyForDisplay, setIsVideoReadyForDisplay] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [replyText, setReplyText] = useState('');
+  const replyInputRef = useRef<TextInput | null>(null);
   const videoSource = useMemo(() => ({ uri: videoUrl }), [videoUrl]);
+
+  useEffect(() => {
+    if (!playbackEnabled) {
+      setReplyText('');
+      replyInputRef.current?.blur();
+    }
+  }, [playbackEnabled]);
+
+  const handleSubmitReply = useCallback(() => {
+    const trimmed = replyText.trim();
+    if (!trimmed) return;
+    replyInputRef.current?.blur();
+    setReplyText('');
+    onReply(item, trimmed);
+  }, [item, onReply, replyText]);
 
   useEffect(() => {
     setIsVideoReadyForDisplay(false);
@@ -1017,45 +1039,108 @@ function CharacterVideoPage({
           </View>
         </View>
       ) : null}
-      <View
+      <KeyboardAvoidingView
         pointerEvents="box-none"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={{
           position: 'absolute',
           left: 0,
           right: 0,
           bottom: 0,
-          paddingHorizontal: 18,
-          paddingBottom: Math.max(28, bottomInset + 18),
-          paddingTop: 96,
-          backgroundColor: 'rgba(0, 0, 0, 0.34)',
         }}
       >
-        <Pressable
-          onPress={() => onOpenProfile(item)}
-          accessibilityRole="button"
-          accessibilityLabel={`Abrir perfil de ${item.characterName}`}
-          style={({ pressed }) => ({
-            alignSelf: 'flex-start',
+        <View
+          pointerEvents="box-none"
+          style={{
+            paddingHorizontal: 18,
+            paddingTop: 96,
+            paddingBottom: 12,
+            backgroundColor: 'rgba(0, 0, 0, 0.34)',
+          }}
+        >
+          <Pressable
+            onPress={() => onOpenProfile(item)}
+            accessibilityRole="button"
+            accessibilityLabel={`Abrir perfil de ${item.characterName}`}
+            style={({ pressed }) => ({
+              alignSelf: 'flex-start',
+              flexDirection: 'row',
+              alignItems: 'center',
+              opacity: pressed ? 0.75 : 1,
+            })}
+          >
+            {item.avatarImageUrl ? (
+              <Image
+                source={{ uri: item.avatarImageUrl }}
+                style={{ width: 34, height: 34, borderRadius: 999, marginRight: 10 }}
+                resizeMode="cover"
+              />
+            ) : null}
+            <Text style={{ color: 'white', fontSize: 16, fontWeight: '900' }} numberOfLines={1}>
+              {item.characterName}
+            </Text>
+          </Pressable>
+          <Text style={{ color: '#e2e8f0', marginTop: 10, fontSize: 14, lineHeight: 20 }} numberOfLines={3}>
+            {item.caption}
+          </Text>
+        </View>
+        <View
+          style={{
             flexDirection: 'row',
             alignItems: 'center',
-            opacity: pressed ? 0.75 : 1,
-          })}
+            paddingHorizontal: 14,
+            paddingTop: 10,
+            paddingBottom: Math.max(14, bottomInset + 10),
+            backgroundColor: 'rgba(0, 0, 0, 0.34)',
+          }}
         >
-          {item.avatarImageUrl ? (
-            <Image
-              source={{ uri: item.avatarImageUrl }}
-              style={{ width: 34, height: 34, borderRadius: 999, marginRight: 10 }}
-              resizeMode="cover"
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              alignItems: 'center',
+              borderRadius: 999,
+              borderWidth: 1,
+              borderColor: 'rgba(226, 232, 240, 0.45)',
+              backgroundColor: 'rgba(15, 23, 42, 0.55)',
+              paddingHorizontal: 16,
+              paddingVertical: Platform.OS === 'ios' ? 10 : 6,
+            }}
+          >
+            <TextInput
+              ref={replyInputRef}
+              value={replyText}
+              onChangeText={setReplyText}
+              placeholder={`Enviar mensaje a ${item.characterName.split(' ')[0]}...`}
+              placeholderTextColor="rgba(226, 232, 240, 0.7)"
+              style={{
+                flex: 1,
+                color: 'white',
+                fontSize: 14,
+                paddingVertical: 0,
+                paddingRight: 8,
+              }}
+              returnKeyType="send"
+              blurOnSubmit
+              onSubmitEditing={handleSubmitReply}
             />
-          ) : null}
-          <Text style={{ color: 'white', fontSize: 16, fontWeight: '900' }} numberOfLines={1}>
-            {item.characterName}
-          </Text>
-        </Pressable>
-        <Text style={{ color: '#e2e8f0', marginTop: 10, fontSize: 14, lineHeight: 20 }} numberOfLines={3}>
-          {item.caption}
-        </Text>
-      </View>
+            {replyText.trim().length ? (
+              <Pressable
+                onPress={handleSubmitReply}
+                accessibilityRole="button"
+                accessibilityLabel="Enviar respuesta"
+                hitSlop={8}
+                style={({ pressed }) => ({
+                  marginLeft: 6,
+                  opacity: pressed ? 0.7 : 1,
+                })}
+              >
+                <Text style={{ color: '#38bdf8', fontWeight: '800', fontSize: 14 }}>Enviar</Text>
+              </Pressable>
+            ) : null}
+          </View>
+        </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -1066,12 +1151,14 @@ function CharacterVideoDumbscrollModal({
   initialFeedId,
   onClose,
   onOpenProfile,
+  onReply,
 }: {
   visible: boolean;
   videos: CharacterVideoFeedItem[];
   initialFeedId?: string;
   onClose: () => void;
   onOpenProfile: (item: CharacterVideoFeedItem) => void;
+  onReply: (item: CharacterVideoFeedItem, draft: string) => void;
 }) {
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -1117,6 +1204,7 @@ function CharacterVideoDumbscrollModal({
               bottomInset={insets.bottom}
               playbackEnabled={visible && focusedFeedId === item.feedId}
               onOpenProfile={onOpenProfile}
+              onReply={onReply}
             />
           )}
           initialScrollIndex={initialIndex}
@@ -2986,6 +3074,26 @@ export default function FeedScreen({ navigation }: Props) {
     [navigation]
   );
 
+  const handleReplyToCharacterVideo = useCallback(
+    (item: CharacterVideoFeedItem, draft: string) => {
+      setCharacterVideoViewerVisible(false);
+      void trackMixpanelFeedItemAction({
+        ...getFeedTrackingProperties(item),
+        action: 'reply_to_character_video',
+      });
+      navigation.navigate('FriendChat', {
+        friendId: item.characterId,
+        postId: item.postId,
+        postImageUrl: item.imageUrl,
+        postVideoUrl: item.videoUrl,
+        postCaption: item.caption,
+        postContext: item.context || item.caption,
+        initialDraft: draft,
+      });
+    },
+    [navigation]
+  );
+
   const handlePracticePost = useCallback(
     async (item: FeedPostItem) => {
       const practice = learningItems.find((learningItem) => String(learningItem.id) === String(item.practiceId));
@@ -3308,6 +3416,7 @@ export default function FeedScreen({ navigation }: Props) {
         initialFeedId={selectedCharacterVideoFeedId}
         onClose={handleCloseCharacterVideoViewer}
         onOpenProfile={handleOpenCharacterVideoProfile}
+        onReply={handleReplyToCharacterVideo}
       />
       {isInterstitialLoading ? (
         <View

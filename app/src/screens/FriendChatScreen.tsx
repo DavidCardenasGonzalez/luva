@@ -314,6 +314,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const isStartingRecording = useRef(false);
   const stopRequestedWhileStarting = useRef(false);
   const skipExitPromptRef = useRef(false);
+  const autoSentDraftKeyRef = useRef<string | undefined>(undefined);
 
   const avatarSource = useMemo(() => {
     if (!friend) return undefined;
@@ -696,6 +697,31 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     },
     [handleAdvance]
   );
+
+  useEffect(() => {
+    const draft = route.params?.initialDraft?.trim();
+    if (!draft) return;
+    if (!friend) return;
+    if (coinsLoading) return;
+    if (conversationEnded) return;
+    if (flowState !== 'idle') return;
+    if (messages.length > 0) return;
+    const autoSendKey = `${chatContextKey}:${draft}`;
+    if (autoSentDraftKeyRef.current === autoSendKey) return;
+    autoSentDraftKeyRef.current = autoSendKey;
+    navigation.setParams({ initialDraft: undefined });
+    void handleSendText(draft);
+  }, [
+    chatContextKey,
+    coinsLoading,
+    conversationEnded,
+    flowState,
+    friend,
+    handleSendText,
+    messages.length,
+    navigation,
+    route.params?.initialDraft,
+  ]);
 
   const handleRecordRelease = useCallback(async (skipStartGuard = false) => {
     try {
