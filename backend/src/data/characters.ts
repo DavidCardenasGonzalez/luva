@@ -1,6 +1,6 @@
 ﻿import { StoryDefinition } from "../types";
 
-export const STORIES_SEED: StoryDefinition[] = [
+export const CHARACTERS: StoryDefinition[] = [
   {
     storyId: "initials",
     isInitial: true,

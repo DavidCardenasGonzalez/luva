@@ -12,7 +12,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
 import DeckScreen from '../screens/DeckScreen';
 import PracticeScreen from '../screens/PracticeScreen';
-import StoriesScreen from '../screens/StoriesScreen';
 import LessonsScreen from '../screens/LessonsScreen';
 import LessonDetailScreen from '../screens/LessonDetailScreen';
 import LessonTestScreen from '../screens/LessonTestScreen';
@@ -22,8 +21,6 @@ import MyJourneyScreen from '../screens/MyJourneyScreen';
 import FriendsScreen from '../screens/FriendsScreen';
 import FriendChatScreen from '../screens/FriendChatScreen';
 import FriendProfileScreen from '../screens/FriendProfileScreen';
-import StoryMissionsScreen from '../screens/StoryMissionsScreen';
-import StorySceneScreen from '../screens/StorySceneScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import AuthCallbackScreen from '../screens/AuthCallbackScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -47,10 +44,7 @@ export type PaywallSource =
   | 'promo_lite_offer'
   | 'settings_lite'
   | 'settings_subscription'
-  | 'shadowing_chapter_unlock'
-  | 'story_mission_unlock'
-  | 'story_scene_mission_unlock'
-  | 'story_scene_recording';
+  | 'shadowing_chapter_unlock';
 
 export type RootStackParamList = {
   Onboarding: { startAtStep?: number } | undefined;
@@ -67,7 +61,6 @@ export type RootStackParamList = {
     answer?: 'a' | 'b' | 'c';
     explanation?: string;
   };
-  Stories: undefined;
   Lessons: undefined;
   LessonDetail: { lessonId: string };
   LessonTest: { lessonId: string };
@@ -84,8 +77,6 @@ export type RootStackParamList = {
     postContext?: string;
   };
   FriendProfile: { friendId: string };
-  StoryMissions: { storyId: string };
-  StoryScene: { storyId: string; sceneIndex: number; from?: 'feed' | 'missions' };
   Profile: undefined;
   AuthCallback: undefined;
   Settings: undefined;
@@ -176,7 +167,6 @@ export default function AppNavigator() {
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Deck" component={DeckScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Practice" component={PracticeScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Stories" component={StoriesScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Lessons" component={LessonsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="LessonDetail" component={LessonDetailScreen} options={{ headerShown: false }} />
         <Stack.Screen name="LessonTest" component={LessonTestScreen} options={{ headerShown: false }} />
@@ -186,8 +176,6 @@ export default function AppNavigator() {
         <Stack.Screen name="Friends" component={FriendsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FriendChat" component={FriendChatScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FriendProfile" component={FriendProfileScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="StoryMissions" component={StoryMissionsScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="StoryScene" component={StorySceneScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="AuthCallback" component={AuthCallbackScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />

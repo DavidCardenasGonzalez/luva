@@ -22,7 +22,7 @@ const sharp = require("sharp");
 
 const ROOT_DIR = path.resolve(__dirname, "../..");
 const BACKEND_DIR = path.resolve(__dirname, "..");
-const DEFAULT_SEED_PATH = path.join(BACKEND_DIR, "src/data/stories-seed.ts");
+const DEFAULT_SEED_PATH = path.join(BACKEND_DIR, "src/data/characters.ts");
 const CACHE_DIR = path.join(BACKEND_DIR, ".media-cache/story-media");
 const CACHE_CONTROL = "public, max-age=31536000, immutable";
 const DEFAULT_REGION = "us-west-2";
@@ -200,9 +200,9 @@ function loadStories(seedPath) {
   sandbox.module.exports = sandbox.exports;
 
   vm.runInNewContext(transpiled.outputText, sandbox, { filename: seedPath });
-  const stories = sandbox.exports.STORIES_SEED || sandbox.module.exports.STORIES_SEED;
+  const stories = sandbox.exports.CHARACTERS || sandbox.module.exports.CHARACTERS;
   if (!Array.isArray(stories)) {
-    throw new Error(`Could not load STORIES_SEED from ${seedPath}`);
+    throw new Error(`Could not load CHARACTERS from ${seedPath}`);
   }
   return stories;
 }

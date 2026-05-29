@@ -7,7 +7,39 @@ import {
   mergeFriendLists,
   syncLocalFriendsToRemote,
 } from '../friends/localFriends';
-import type { StoryDefinition, StoryMission, StoryMissionDefinition } from './useStories';
+
+export type CharacterRequirement = {
+  requirementId: string;
+  text: string;
+};
+
+export type CharacterMissionDefinition = {
+  missionId: string;
+  title: string;
+  sceneSummary?: string;
+  aiRole: string;
+  aiRoleFriends?: string;
+  caracterName?: string;
+  caracterPrompt?: string;
+  avatarImageUrl?: string;
+  avatarImageXsUrl?: string;
+  avatarImageMdUrl?: string;
+  videoIntro?: string;
+  videoPreviewUrl?: string;
+  videoThumbnailUrl?: string;
+  requirements?: CharacterRequirement[];
+};
+
+export type CharacterStoryDefinition = {
+  storyId: string;
+  isInitial?: boolean;
+  title: string;
+  summary: string;
+  level?: string;
+  tags?: string[];
+  unlockCost?: number;
+  missions: CharacterMissionDefinition[];
+};
 
 export type FriendCharacter = {
   friendId: string;
@@ -42,8 +74,8 @@ export type AddFriendPayload = {
   storyId?: string;
   missionId?: string;
   sceneIndex?: number;
-  storyDefinition?: StoryDefinition;
-  missionDefinition?: StoryMission | StoryMissionDefinition;
+  storyDefinition?: CharacterStoryDefinition;
+  missionDefinition?: CharacterMissionDefinition;
 };
 
 export type FriendChatPayload = {
@@ -58,6 +90,10 @@ export type FriendChatPayload = {
 };
 
 type FriendsListResponse = {
+  items?: FriendCharacter[];
+};
+
+type CharactersListResponse = {
   items?: FriendCharacter[];
 };
 
@@ -116,6 +152,11 @@ export async function sendFriendChatMessage(
   return api.post<FriendChatPayload>(`/friends/${encodeURIComponent(friendId)}/chat`, payload);
 }
 
+async function listCatalogCharacters(): Promise<FriendCharacter[]> {
+  const response = await api.get<CharactersListResponse>('/characters');
+  return Array.isArray(response?.items) ? response.items : [];
+}
+
 export function useFriends() {
   const { isSignedIn, isLoading: authLoading } = useAuth();
   const [friends, setFriends] = useState<FriendCharacter[]>([]);
@@ -132,9 +173,15 @@ export function useFriends() {
       setLoading(true);
       setError(undefined);
       try {
-        setFriends(await listLocalFriends());
+        const [catalogFriends, localFriends] = await Promise.all([
+          listCatalogCharacters(),
+          listLocalFriends(),
+        ]);
+        setFriends(mergeFriendLists(localFriends, catalogFriends));
       } catch (err: any) {
-        setError(err?.message || 'No pudimos cargar tus amigos locales.');
+        const localFriends = await listLocalFriends();
+        setFriends(localFriends);
+        setError(err?.message || 'No pudimos cargar tus personajes.');
       }
       setLoading(false);
       setLoaded(true);
@@ -145,14 +192,17 @@ export function useFriends() {
     setError(undefined);
     try {
       await syncLocalFriendsToRemote();
-      const response = await api.get<FriendsListResponse>('/friends');
+      const [catalogFriends, response, pendingLocalFriends] = await Promise.all([
+        listCatalogCharacters(),
+        api.get<FriendsListResponse>('/friends'),
+        listLocalFriends(),
+      ]);
       const remoteFriends = Array.isArray(response?.items) ? response.items : [];
-      const pendingLocalFriends = await listLocalFriends();
-      setFriends(mergeFriendLists(remoteFriends, pendingLocalFriends));
+      setFriends(mergeFriendLists(remoteFriends, mergeFriendLists(pendingLocalFriends, catalogFriends)));
     } catch (err: any) {
       const pendingLocalFriends = await listLocalFriends();
       setFriends(pendingLocalFriends);
-      setError(err?.message || 'No pudimos cargar tus amigos.');
+      setError(err?.message || 'No pudimos cargar tus personajes.');
     } finally {
       setLoading(false);
       setLoaded(true);

@@ -11,13 +11,11 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useLearningItems } from '../hooks/useLearningItems';
-import { useStories } from '../hooks/useStories';
 import {
   CARD_STATUS_LABELS,
   CardProgressStatus,
   useCardProgress,
 } from '../progress/CardProgressProvider';
-import { useStoryProgress } from '../progress/StoryProgressProvider';
 import CoinCountChip from '../components/CoinCountChip';
 import AppTabBar from '../components/AppTabBar';
 import { useRevenueCat } from '../purchases/RevenueCatProvider';
@@ -36,13 +34,11 @@ const STATUS_COLORS: Record<CardProgressStatus, string> = {
 
 export default function HomeScreen({ navigation }: Props) {
   const { items } = useLearningItems();
-  const { items: stories } = useStories();
   const { loading: cardLoading, statusFor, statuses } = useCardProgress();
-  const { loading: storyLoading, completedCountFor } = useStoryProgress();
   const { isPro, loading: rcLoading } = useRevenueCat();
   const progressHighlightRef = useRef<View>(null);
   const deckButtonRef = useRef<View>(null);
-  const storiesButtonRef = useRef<View>(null);
+  const friendsButtonRef = useRef<View>(null);
   const [showHomeTour, setShowHomeTour] = useState(false);
   const [tourHighlight, setTourHighlight] = useState<TourHighlight | null>(null);
   const [tourStepIndex, setTourStepIndex] = useState(0);
@@ -62,10 +58,10 @@ export default function HomeScreen({ navigation }: Props) {
         description: 'Aquí encontrarás todo el vocabulario que debes aprender para llegar a nivel avanzado.',
       },
       {
-        key: 'stories',
-        ref: storiesButtonRef,
-        title: 'Historias (Misión narrativa)',
-        description: 'Aquí podrás conversar con nuestros personajes de IA y recibir feedback inmediato mientras completas misiones.',
+        key: 'friends',
+        ref: friendsButtonRef,
+        title: 'Personajes AI',
+        description: 'Aquí puedes conversar libremente con los personajes y recibir feedback inmediato.',
       },
     ],
     []
@@ -87,27 +83,11 @@ export default function HomeScreen({ navigation }: Props) {
     return { totalCards: items.length, learnedCards: totals.learned, counts: totals, percentages: pct };
   }, [items, statuses, statusFor]);
 
-  const { totalMissions, completedMissions } = useMemo(() => {
-    const totals = stories.reduce(
-      (acc, story) => {
-        const missions = story.missionsCount || 0;
-        const completed = Math.min(completedCountFor(story.storyId), missions);
-        acc.total += missions;
-        acc.completed += completed;
-        return acc;
-      },
-      { total: 0, completed: 0 }
-    );
-    return { totalMissions: totals.total, completedMissions: totals.completed };
-  }, [stories, completedCountFor]);
-
-  const totalWeighted = totalCards + totalMissions * 2;
-  const completedWeighted = learnedCards + completedMissions * 2;
+  const totalWeighted = totalCards;
+  const completedWeighted = learnedCards;
   const overallProgress = totalWeighted > 0 ? Math.round((completedWeighted / totalWeighted) * 100) : 0;
-  const isLoading = cardLoading || storyLoading;
-  const missionsProgress = totalMissions > 0 ? Math.round((completedMissions / totalMissions) * 100) : 0;
+  const isLoading = cardLoading;
   const remainingCards = Math.max(totalCards - learnedCards, 0);
-  const remainingMissions = Math.max(totalMissions - completedMissions, 0);
 
   useEffect(() => {
     let mounted = true;
@@ -260,7 +240,7 @@ export default function HomeScreen({ navigation }: Props) {
               <Text style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>Aprendidas</Text>
             </Pressable>
             <Pressable
-              onPress={() => navigation.navigate('Stories')}
+              onPress={() => navigation.navigate('Friends')}
               style={({ pressed }) => ({
                 padding: 12,
                 borderRadius: 12,
@@ -272,9 +252,9 @@ export default function HomeScreen({ navigation }: Props) {
                 opacity: pressed ? 0.85 : 1,
               })}
             >
-              <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '700' }}>Misiones</Text>
-              <Text style={{ color: '#e2e8f0', marginTop: 4, fontWeight: '800' }}>{completedMissions}/{totalMissions}</Text>
-              <Text style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>Completadas</Text>
+              <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '700' }}>Personajes</Text>
+              <Text style={{ color: '#e2e8f0', marginTop: 4, fontWeight: '800' }}>Libre</Text>
+              <Text style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>Conversación AI</Text>
             </Pressable>
           </View>
         </View>
@@ -301,10 +281,10 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={{ color: '#e0f2fe', fontSize: 12, marginTop: 2 }}>Reanudar práctica</Text>
           </Pressable>
           <Pressable
-            ref={storiesButtonRef}
+            ref={friendsButtonRef}
             collapsable={false}
             onLayout={measureTourTarget}
-            onPress={() => navigation.navigate('Stories')}
+            onPress={() => navigation.navigate('Friends')}
             style={({ pressed }) => ({
               flex: 1,
               backgroundColor: pressed ? '#0f766e' : '#0d9488',
@@ -313,8 +293,8 @@ export default function HomeScreen({ navigation }: Props) {
               alignItems: 'center',
             })}
           >
-            <Text style={{ color: 'white', fontWeight: '800', letterSpacing: 0.3 }}>Historias</Text>
-            <Text style={{ color: '#ccfbf1', fontSize: 12, marginTop: 2 }}>Misión narrativa</Text>
+            <Text style={{ color: 'white', fontWeight: '800', letterSpacing: 0.3 }}>Amigos</Text>
+            <Text style={{ color: '#ccfbf1', fontSize: 12, marginTop: 2 }}>Conversación libre</Text>
           </Pressable>
         </View>
       </View>
@@ -368,31 +348,29 @@ export default function HomeScreen({ navigation }: Props) {
 
       <View style={{ marginTop: 14, flexDirection: 'row' }}>
         <View style={{ flex: 1, backgroundColor: '#fff', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#e5e7eb', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, marginRight: 10 }}>
-          <Text style={{ color: '#0f172a', fontWeight: '800', fontSize: 15 }}>Misiones narrativas</Text>
-          <Text style={{ color: '#475569', marginTop: 6 }}>Completa escenas para empujar el avance combinado.</Text>
+          <Text style={{ color: '#0f172a', fontWeight: '800', fontSize: 15 }}>Conversación AI</Text>
+          <Text style={{ color: '#475569', marginTop: 6 }}>Practica con personajes sin misiones ni requisitos.</Text>
           <View style={{ marginTop: 12, height: 10, borderRadius: 999, backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
-            <View style={{ width: `${missionsProgress}%`, backgroundColor: '#0ea5e9', height: '100%' }} />
+            <View style={{ width: '100%', backgroundColor: '#0ea5e9', height: '100%' }} />
           </View>
           <Text style={{ color: '#475569', marginTop: 8, fontSize: 12 }}>
-            {completedMissions} de {totalMissions || 0} misiones completas
+            Las conversaciones ahora son libres.
           </Text>
           <Text style={{ color: '#0f172a', fontSize: 12, marginTop: 4, fontWeight: '700' }}>
-            {remainingMissions > 0
-              ? `Faltan ${remainingMissions} misión${remainingMissions === 1 ? '' : 'es'}.`
-              : 'Sin misiones pendientes.'}
+            Abre Amigos para elegir un personaje.
           </Text>
         </View>
 
         <View style={{ flex: 1, backgroundColor: '#0f172a', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#1f2937', shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 10 }}>
           <Text style={{ color: '#e2e8f0', fontWeight: '800', fontSize: 15 }}>Detalle rápido</Text>
           <Text style={{ color: '#94a3b8', marginTop: 6, lineHeight: 18 }}>
-            Prioriza misiones o termina {remainingCards > 0 ? `${remainingCards} tarjeta${remainingCards === 1 ? '' : 's'} pendientes` : 'las tarjetas de repaso'} para subir el porcentaje.
+            Termina {remainingCards > 0 ? `${remainingCards} tarjeta${remainingCards === 1 ? '' : 's'} pendientes` : 'las tarjetas de repaso'} para subir el porcentaje.
           </Text>
           <View style={{ marginTop: 12, padding: 12, borderRadius: 12, backgroundColor: '#111827', borderWidth: 1, borderColor: '#1f2937' }}>
             <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '700' }}>Tarjetas aprendidas</Text>
             <Text style={{ color: '#e2e8f0', marginTop: 4 }}>{learnedCards}/{totalCards}</Text>
-            <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '700', marginTop: 10 }}>Misiones completadas</Text>
-            <Text style={{ color: '#e2e8f0', marginTop: 4 }}>{completedMissions}/{totalMissions || 0}</Text>
+            <Text style={{ color: '#a5f3fc', fontSize: 12, fontWeight: '700', marginTop: 10 }}>Conversaciones</Text>
+            <Text style={{ color: '#e2e8f0', marginTop: 4 }}>Sin requisitos</Text>
           </View>
         </View>
       </View>

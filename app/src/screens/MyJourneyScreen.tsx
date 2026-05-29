@@ -35,7 +35,7 @@ const mountainBackground = require('../onboarding/step-6/mountain.png');
 const levelUpSoundAsset = require('../sound/level_up.wav');
 
 type Props = NativeStackScreenProps<RootStackParamList, 'MyJourney'>;
-type ObjectiveRoute = 'Stories' | 'Shadowing' | 'Deck' | 'Lessons';
+type ObjectiveRoute = 'Friends' | 'Shadowing' | 'Deck' | 'Lessons';
 
 const COLORS = {
   background: '#020817',
@@ -125,7 +125,7 @@ const EMPTY_PROGRESS: JourneyProgressState = {
 };
 
 const OBJECTIVE_ROUTES: Record<OnboardingTrainingFocusId, ObjectiveRoute> = {
-  aiConversation: 'Stories',
+  aiConversation: 'Friends',
   shadowing: 'Shadowing',
   vocabulary: 'Deck',
   structures: 'Lessons',

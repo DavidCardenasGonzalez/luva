@@ -6,6 +6,7 @@ import {
   GetCommand,
   PutCommand,
   QueryCommand,
+  ScanCommand,
 } from '@aws-sdk/lib-dynamodb';
 import type { StoryDefinition, StoryMission } from './types';
 
@@ -151,6 +152,28 @@ export async function listPublicCharacterPosts(characterId: string): Promise<Cha
       .map((record) => toCharacterPost(record))
       .filter((post): post is CharacterPost => !!post)
       .sort(compareCharacterPosts);
+  } catch (error) {
+    if (error instanceof Error && error.message === 'CHARACTER_POSTS_TABLE_NAME not set') {
+      return [];
+    }
+
+    throw error;
+  }
+}
+
+export async function listPublicCharacterVideoPosts(limitInput = 80): Promise<CharacterPost[]> {
+  const parsedLimit = Math.floor(Number(limitInput));
+  const limit = Number.isFinite(parsedLimit) ? Math.max(1, Math.min(parsedLimit, 200)) : 80;
+
+  try {
+    const records = await scanAllCharacterPostRecords();
+    return records
+      .map((record) => toCharacterPost(record))
+      .filter((post): post is CharacterPost => !!post?.videoUrl?.trim())
+      .map((post) => ({ post, rank: Math.random() }))
+      .sort((left, right) => left.rank - right.rank || compareCharacterPosts(left.post, right.post))
+      .map(({ post }) => post)
+      .slice(0, limit);
   } catch (error) {
     if (error instanceof Error && error.message === 'CHARACTER_POSTS_TABLE_NAME not set') {
       return [];
@@ -465,6 +488,25 @@ async function queryAllCharacterPostRecords(characterIdInput: string): Promise<u
         ExpressionAttributeValues: {
           ':characterId': characterId,
         },
+        ExclusiveStartKey: exclusiveStartKey,
+      }),
+    );
+
+    items.push(...(page.Items || []));
+    exclusiveStartKey = page.LastEvaluatedKey as Record<string, unknown> | undefined;
+  } while (exclusiveStartKey);
+
+  return items;
+}
+
+async function scanAllCharacterPostRecords(): Promise<unknown[]> {
+  const items: unknown[] = [];
+  let exclusiveStartKey: Record<string, unknown> | undefined;
+
+  do {
+    const page = await dynamo.send(
+      new ScanCommand({
+        TableName: getCharacterPostsTableName(),
         ExclusiveStartKey: exclusiveStartKey,
       }),
     );

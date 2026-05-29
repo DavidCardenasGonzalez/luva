@@ -48,8 +48,12 @@ import {
   FriendChatPayload,
   FriendsListResponse,
 } from "../types";
-import { STORIES_SEED } from "../data/stories-seed";
-import { type CharacterPost, listPublicCharacterPosts } from "../character-posts";
+import { CHARACTERS } from "../data/characters";
+import {
+  type CharacterPost,
+  listPublicCharacterPosts,
+  listPublicCharacterVideoPosts,
+} from "../character-posts";
 import { listPublicFeedPosts } from "../feed-posts";
 import {
   answerLessonHelp,
@@ -70,7 +74,7 @@ let OPENAI_API_KEY_CACHE: string | undefined;
 let GOOGLE_TRANSLATE_API_KEY_CACHE: string | undefined;
 const DEFAULT_OPENAI_CHAT_MODEL = "gpt-5.4-nano";
 const STORIES_PATH_CANDIDATES: (string | undefined)[] = [
-  // Only allow override via explicit env var; default source is STORIES_SEED.
+  // Only allow override via explicit env var; default source is CHARACTERS.
   process.env.STORIES_PATH,
 ];
 let STORIES_CACHE: StoryDefinition[] | null = null;
@@ -126,7 +130,7 @@ function loadStories(): StoryDefinition[] {
     STORIES_CACHE = fromDisk;
     return STORIES_CACHE;
   }
-  const fallbackStories = sanitizeStoriesList(STORIES_SEED, 'seed');
+  const fallbackStories = sanitizeStoriesList(CHARACTERS, 'seed');
   STORIES_CACHE = fallbackStories;
   return STORIES_CACHE;
 }
@@ -740,20 +744,16 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       });
     }
 
-    if (method === "GET" && path === `${ROUTE_PREFIX}/stories`) {
-      const stories = loadStories();
-      const version = getStoriesVersion(stories);
-      return json(200, { version, items: listStorySummaries(stories) });
-    }
-
-    if (method === "GET" && path === `${ROUTE_PREFIX}/stories/full`) {
-      const stories = loadStories();
-      const version = getStoriesVersion(stories);
-      return json(200, { version, items: sortInitialStoriesFirst(stories) });
+    if (method === "GET" && path === `${ROUTE_PREFIX}/characters`) {
+      return json(200, { items: listCatalogFriends() });
     }
 
     if (method === "GET" && path === `${ROUTE_PREFIX}/feed/posts`) {
       return json(200, await listPublicFeedPosts());
+    }
+
+    if (method === "GET" && path === `${ROUTE_PREFIX}/feed/character-videos`) {
+      return json(200, { posts: await listPublicCharacterVideoPosts() });
     }
 
     if (method === "GET" && path === `${ROUTE_PREFIX}/lessons`) {
@@ -876,6 +876,74 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       }
     }
 
+    const friendAssist = path.match(/^\/v1\/friends\/([^/]+)\/assist$/);
+    if (method === "POST" && friendAssist) {
+      const identity = getUserIdentity(event);
+      if (!identity) {
+        return unauthorized("Missing user identity");
+      }
+      const friendId = decodeURIComponent(friendAssist[1]);
+      const body = parseBody(event.body) as any;
+      const question = typeof body?.question === "string" ? body.question.trim() : "";
+      if (!question) {
+        return badRequest("Missing question");
+      }
+      try {
+        const answer = await answerFriendAssistance(identity.userId, friendId, {
+          ...(body || {}),
+          question,
+        });
+        return json(200, { answer });
+      } catch (err: any) {
+        if (err?.message === "FRIEND_NOT_FOUND") {
+          return notFound();
+        }
+        console.error(
+          JSON.stringify({
+            scope: "friends.assist.error",
+            message: err?.message || "unknown",
+          })
+        );
+        return json(500, { message: "No pudimos generar la asistencia", code: "FRIEND_ASSISTANCE_FAILED" });
+      }
+    }
+
+    if (method === "POST" && path === `${ROUTE_PREFIX}/practice/assist`) {
+      const body = parseBody(event.body) as StoryAssistanceRequest;
+      const question = typeof body?.question === "string" ? body.question.trim() : "";
+      if (!question) {
+        return badRequest("Missing question");
+      }
+      const story = sanitizeStoryDefinition(body?.storyDefinition, "practice-session");
+      const mission =
+        sanitizeStoryMission(body?.missionDefinition) ||
+        story?.missions?.[0];
+      if (!story || !mission) {
+        return badRequest("Missing practice context");
+      }
+      try {
+        const answer = await generateAssistanceAnswer({
+          story,
+          mission,
+          history: sanitizeHistory(body?.history).slice(-STORY_HISTORY_LIMIT),
+          requirements: Array.isArray(body?.requirements)
+            ? alignRequirementStates(mission, body.requirements)
+            : [],
+          question,
+          conversationFeedback: body?.conversationFeedback || null,
+        });
+        return json(200, { answer } as StoryAssistanceResponse);
+      } catch (err: any) {
+        console.error(
+          JSON.stringify({
+            scope: "practice.assist.error",
+            message: err?.message || "unknown",
+          })
+        );
+        return json(500, { message: "No pudimos generar la asistencia", code: "PRACTICE_ASSISTANCE_FAILED" });
+      }
+    }
+
     if (method === "POST" && path === `${ROUTE_PREFIX}/translate`) {
       const body = parseBody(event.body) as TranslationRequest | undefined;
       const text = typeof body?.text === "string" ? body.text.trim() : "";
@@ -914,138 +982,6 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
           code: "TRANSLATION_FAILED",
         });
       }
-    }
-
-    const storyDetail = path.match(/^\/v1\/stories\/([^/]+)$/);
-    if (method === "GET" && storyDetail) {
-      const storyId = storyDetail[1];
-      const story = getStory(storyId);
-      if (!story) {
-        return notFound();
-      }
-      const version = getStoriesVersion();
-      return json(200, {
-        version,
-        storyId: story.storyId,
-        title: story.title,
-        summary: story.summary,
-        level: story.level,
-        missions: story.missions?.map((mission) => ({
-          missionId: mission.missionId,
-          title: mission.title,
-          sceneSummary: mission.sceneSummary,
-          aiRole: mission.aiRole,
-          caracterName: mission.caracterName,
-          caracterPrompt: mission.caracterPrompt,
-          avatarImageUrl: mission.avatarImageUrl,
-          avatarImageXsUrl: mission.avatarImageXsUrl,
-          avatarImageMdUrl: mission.avatarImageMdUrl,
-          videoIntro: mission.videoIntro,
-          videoPreviewUrl: mission.videoPreviewUrl,
-          videoThumbnailUrl: mission.videoThumbnailUrl,
-          requirements: initialRequirementStates(mission),
-        })) || [],
-      });
-    }
-
-    const storyAssist = path.match(/^\/v1\/stories\/([^/]+)\/assist$/);
-    if (method === "POST" && storyAssist) {
-      const storyId = storyAssist[1];
-      const body = parseBody(event.body) as StoryAssistanceRequest;
-      const question = typeof body?.question === 'string' ? body.question.trim() : '';
-      if (!question) {
-        return badRequest('Missing question');
-      }
-      const sessionId = typeof body?.sessionId === 'string' ? body.sessionId : undefined;
-      let sessionState = sessionId ? STORY_SESSIONS.get(sessionId) : undefined;
-      let story = getStory(storyId) || sessionState?.story || sanitizeStoryDefinition(body?.storyDefinition, storyId);
-      if (!story) {
-        return notFound();
-      }
-      const missions = story.missions || [];
-      const rawIndex =
-        typeof body?.sceneIndex === 'number'
-          ? body.sceneIndex
-          : Number(body?.sceneIndex);
-      const targetIndex = Number.isFinite(rawIndex)
-        ? Math.max(0, Math.min(missions.length - 1, Math.floor(rawIndex as number)))
-        : sessionState?.missionIndex ?? 0;
-      let mission = missions[targetIndex];
-      if (!mission && body?.missionDefinition) {
-        mission = sanitizeStoryMission(body.missionDefinition) || mission;
-      }
-      if (!mission) {
-        return badRequest('Mission not found');
-      }
-
-      let history = sanitizeHistory(body?.history).slice(-STORY_HISTORY_LIMIT);
-      if (sessionState?.history?.length) {
-        history = mergeHistory(sessionState.history, history);
-      }
-      history = history.slice(-STORY_HISTORY_LIMIT);
-
-      const requirementStates = Array.isArray(body?.requirements)
-        ? alignRequirementStates(mission, body.requirements)
-        : alignRequirementStates(mission, sessionState?.requirements || []);
-
-      try {
-        const answer = await generateAssistanceAnswer({
-          story,
-          mission,
-          history,
-          requirements: requirementStates,
-          question,
-          conversationFeedback: body?.conversationFeedback || null,
-        });
-        if (sessionState) {
-          sessionState.history = history;
-          sessionState.missionIndex = targetIndex;
-          sessionState.story = story;
-          sessionState.lastUpdated = Date.now();
-        }
-        return json(200, { answer } as StoryAssistanceResponse);
-      } catch (err: any) {
-        console.error(
-          JSON.stringify({
-            scope: 'stories.assist.error',
-            message: err?.message || 'unknown',
-          })
-        );
-        return json(500, { message: 'No pudimos generar la asistencia', code: 'ASSISTANCE_FAILED' });
-      }
-    }
-
-    const storyAdvance = path.match(/^\/v1\/stories\/([^/]+)\/advance$/);
-    if (method === "POST" && storyAdvance) {
-      let storyId = storyAdvance[1];
-      const body = parseBody(event.body) as StoryAdvanceRequest;
-      if (!body || typeof body.transcript !== 'string' || !body.transcript.trim()) {
-        return badRequest('Missing transcript');
-      }
-      if (!body.sessionId || typeof body.sessionId !== 'string') {
-        return badRequest('Missing sessionId');
-      }
-      const sessionState = STORY_SESSIONS.get(body.sessionId);
-      if (!storyId && sessionState?.storyId) {
-        storyId = sessionState.storyId;
-      }
-      const fallbackStory = sanitizeStoryDefinition(body.storyDefinition, storyId);
-      let story = storyId ? getStory(storyId) : undefined;
-      if (!story && sessionState?.story) {
-        story = sessionState.story;
-      }
-      if (!story && fallbackStory) {
-        story = fallbackStory;
-      }
-      if (!story) {
-        return notFound();
-      }
-      const payload = await advanceStoryMission(story, body);
-      if (sessionState) {
-        sessionState.story = story;
-        sessionState.storyId = story.storyId;
-      }
-      return json(200, payload);
     }
 
     if (method === "GET" && path === `${ROUTE_PREFIX}/me/progress`) {
@@ -1184,6 +1120,20 @@ function publicCatalogFriend(friendIdInput: string): FriendCharacter | undefined
   }
 
   return undefined;
+}
+
+function listCatalogFriends(): FriendCharacter[] {
+  const items: FriendCharacter[] = [];
+  for (const story of sortInitialStoriesFirst(loadStories())) {
+    const missions = story.missions || [];
+    missions.forEach((mission) => {
+      const friend = publicCatalogFriend(buildFriendId(story.storyId, mission.missionId));
+      if (friend) {
+        items.push(friend);
+      }
+    });
+  }
+  return items;
 }
 
 function publicFriendFromCharacterPosts(
@@ -1407,6 +1357,72 @@ async function createFriendFromMission(
   return publicFriend(item);
 }
 
+async function resolveFriendRecord(userId: string, friendId: string): Promise<FriendRecord | undefined> {
+  let friend = await getFriendRecord(userId, friendId);
+  if (friend) {
+    return friend;
+  }
+
+  const catalogFriend = publicCatalogFriend(friendId);
+  if (!catalogFriend) {
+    return undefined;
+  }
+
+  await createFriendFromMission(userId, {
+    storyId: catalogFriend.storyId,
+    missionId: catalogFriend.missionId,
+    sceneIndex: catalogFriend.sceneIndex,
+  });
+  return getFriendRecord(userId, friendId);
+}
+
+async function answerFriendAssistance(
+  userId: string,
+  friendId: string,
+  body: { question: string; history?: StoryMessage[]; postContext?: string }
+): Promise<string> {
+  const friend = await resolveFriendRecord(userId, friendId);
+  if (!friend) {
+    throw new Error("FRIEND_NOT_FOUND");
+  }
+
+  const sceneSummary =
+    typeof body.postContext === "string" && body.postContext.trim()
+      ? `The learner is replying to a profile post from ${friend.characterName}: ${body.postContext.trim()}`
+      : friend.sceneSummary;
+  const mission: StoryMission = {
+    missionId: friend.missionId,
+    title: friend.missionTitle,
+    sceneSummary,
+    aiRole: friend.aiRoleFriends || friend.aiRole,
+    ...(friend.aiRoleFriends ? { aiRoleFriends: friend.aiRoleFriends } : {}),
+    caracterName: friend.characterName,
+    caracterPrompt: friend.characterPrompt,
+    avatarImageUrl: friend.avatarImageUrl,
+    avatarImageXsUrl: friend.avatarImageXsUrl,
+    avatarImageMdUrl: friend.avatarImageMdUrl,
+    videoIntro: friend.videoIntro,
+    videoPreviewUrl: friend.videoPreviewUrl,
+    videoThumbnailUrl: friend.videoThumbnailUrl,
+    requirements: [],
+  };
+  const story: StoryDefinition = {
+    storyId: friend.storyId,
+    title: friend.storyTitle,
+    summary: sceneSummary || friend.missionTitle,
+    missions: [mission],
+  };
+
+  return generateAssistanceAnswer({
+    story,
+    mission,
+    history: sanitizeHistory(body.history).slice(-STORY_HISTORY_LIMIT),
+    requirements: [],
+    question: body.question,
+    conversationFeedback: null,
+  });
+}
+
 async function touchFriendChat(
   userId: string,
   friendId: string,
@@ -1584,7 +1600,7 @@ async function advanceFriendChat(
   body: FriendChatRequest,
   learnerName?: string
 ): Promise<FriendChatPayload> {
-  const friend = await getFriendRecord(userId, friendId);
+  const friend = await resolveFriendRecord(userId, friendId);
   if (!friend) {
     throw new Error("FRIEND_NOT_FOUND");
   }

@@ -12,7 +12,7 @@ type TabConfig = {
   key: AppTabKey;
   label: string;
   icon: React.ComponentProps<typeof MaterialIcons>['name'];
-  route: 'Deck' | 'Stories' | 'Lessons' | 'MyJourney' | 'Shadowing' | 'Feed' | 'Friends';
+  route: 'Deck' | 'Lessons' | 'MyJourney' | 'Shadowing' | 'Feed' | 'Friends';
 };
 
 const TABS: TabConfig[] = [

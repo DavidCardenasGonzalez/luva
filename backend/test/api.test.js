@@ -73,17 +73,16 @@ test('POST /v1/app/version-check returns required update for unsupported version
 });
 
 test('GET /v1/friends/{friendId}/profile returns public catalog profile without auth', async () => {
-  const storiesRes = await handler({
+  const charactersRes = await handler({
     httpMethod: 'GET',
-    path: '/v1/stories/full',
-    requestContext: { http: { method: 'GET', path: '/v1/stories/full' } },
+    path: '/v1/characters',
+    requestContext: { http: { method: 'GET', path: '/v1/characters' } },
   });
-  assert.equal(storiesRes.statusCode, 200);
-  const storiesBody = JSON.parse(storiesRes.body);
-  const story = storiesBody.items.find((item) => item.missions && item.missions.length);
-  assert.ok(story);
-  const mission = story.missions[0];
-  const friendId = `${story.storyId}:${mission.missionId}`;
+  assert.equal(charactersRes.statusCode, 200);
+  const charactersBody = JSON.parse(charactersRes.body);
+  const character = charactersBody.items.find((item) => item.friendId);
+  assert.ok(character);
+  const friendId = character.friendId;
   const encodedFriendId = encodeURIComponent(friendId);
 
   const res = await handler({
@@ -100,23 +99,22 @@ test('GET /v1/friends/{friendId}/profile returns public catalog profile without 
   assert.equal(res.statusCode, 200);
   const body = JSON.parse(res.body);
   assert.equal(body.friend.friendId, friendId);
-  assert.equal(body.friend.storyId, story.storyId);
-  assert.equal(body.friend.missionId, mission.missionId);
+  assert.equal(body.friend.storyId, character.storyId);
+  assert.equal(body.friend.missionId, character.missionId);
   assert.ok(Array.isArray(body.posts));
 });
 
 test('GET /v1/friend-profiles/{friendId} returns public catalog profile without auth', async () => {
-  const storiesRes = await handler({
+  const charactersRes = await handler({
     httpMethod: 'GET',
-    path: '/v1/stories/full',
-    requestContext: { http: { method: 'GET', path: '/v1/stories/full' } },
+    path: '/v1/characters',
+    requestContext: { http: { method: 'GET', path: '/v1/characters' } },
   });
-  assert.equal(storiesRes.statusCode, 200);
-  const storiesBody = JSON.parse(storiesRes.body);
-  const story = storiesBody.items.find((item) => item.missions && item.missions.length);
-  assert.ok(story);
-  const mission = story.missions[0];
-  const friendId = `${story.storyId}:${mission.missionId}`;
+  assert.equal(charactersRes.statusCode, 200);
+  const charactersBody = JSON.parse(charactersRes.body);
+  const character = charactersBody.items.find((item) => item.friendId);
+  assert.ok(character);
+  const friendId = character.friendId;
   const encodedFriendId = encodeURIComponent(friendId);
 
   const res = await handler({
@@ -133,7 +131,28 @@ test('GET /v1/friend-profiles/{friendId} returns public catalog profile without 
   assert.equal(res.statusCode, 200);
   const body = JSON.parse(res.body);
   assert.equal(body.friend.friendId, friendId);
-  assert.equal(body.friend.storyId, story.storyId);
-  assert.equal(body.friend.missionId, mission.missionId);
+  assert.equal(body.friend.storyId, character.storyId);
+  assert.equal(body.friend.missionId, character.missionId);
   assert.ok(Array.isArray(body.posts));
+});
+
+test('GET /v1/feed/character-videos returns a public video posts list', async () => {
+  const previousTableName = process.env.CHARACTER_POSTS_TABLE_NAME;
+  delete process.env.CHARACTER_POSTS_TABLE_NAME;
+
+  try {
+    const res = await handler({
+      httpMethod: 'GET',
+      path: '/v1/feed/character-videos',
+      requestContext: { http: { method: 'GET', path: '/v1/feed/character-videos' } },
+    });
+
+    assert.equal(res.statusCode, 200);
+    const body = JSON.parse(res.body);
+    assert.ok(Array.isArray(body.posts));
+  } finally {
+    if (previousTableName) {
+      process.env.CHARACTER_POSTS_TABLE_NAME = previousTableName;
+    }
+  }
 });

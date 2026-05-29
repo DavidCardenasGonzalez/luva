@@ -60,10 +60,14 @@ type MixpanelFeedLoadMoreEvent = {
   previousLessonsCount?: number;
   nextLessonsCount?: number;
   lessonsLoadedCount?: number;
+  previousCharacterVideosCount?: number;
+  nextCharacterVideosCount?: number;
+  characterVideosLoadedCount?: number;
   totalMissionsAvailable: number;
   totalVocabularyAvailable: number;
   totalShadowingAvailable?: number;
   totalLessonsAvailable?: number;
+  totalCharacterVideosAvailable?: number;
   hasMoreAfter: boolean;
 };
 
@@ -575,10 +579,14 @@ export async function trackMixpanelFeedLoadMore({
   previousLessonsCount,
   nextLessonsCount,
   lessonsLoadedCount,
+  previousCharacterVideosCount,
+  nextCharacterVideosCount,
+  characterVideosLoadedCount,
   totalMissionsAvailable,
   totalVocabularyAvailable,
   totalShadowingAvailable,
   totalLessonsAvailable,
+  totalCharacterVideosAvailable,
   hasMoreAfter,
 }: MixpanelFeedLoadMoreEvent) {
   await trackMixpanelEvent("feed_load_more", {
@@ -598,10 +606,14 @@ export async function trackMixpanelFeedLoadMore({
     previous_lessons_count: previousLessonsCount,
     next_lessons_count: nextLessonsCount,
     lessons_loaded_count: lessonsLoadedCount,
+    previous_character_videos_count: previousCharacterVideosCount,
+    next_character_videos_count: nextCharacterVideosCount,
+    character_videos_loaded_count: characterVideosLoadedCount,
     total_missions_available: totalMissionsAvailable,
     total_vocabulary_available: totalVocabularyAvailable,
     total_shadowing_available: totalShadowingAvailable,
     total_lessons_available: totalLessonsAvailable,
+    total_character_videos_available: totalCharacterVideosAvailable,
     has_more_after: hasMoreAfter,
   });
 }

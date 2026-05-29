@@ -276,10 +276,10 @@ export default function FriendsScreen({ navigation }: Props) {
             Amigos
           </Text>
           <Text style={{ color: COLORS.text, fontSize: 24, fontWeight: '900', marginTop: 6 }}>
-            Tus personajes favoritos
+            Personajes disponibles
           </Text>
           <Text style={{ color: COLORS.muted, lineHeight: 21, marginTop: 8 }}>
-            Agrega personajes al completar misiones y vuelve a practicar inglés con conversaciones libres.
+            Elige cualquier personaje para practicar inglés con conversaciones libres.
           </Text>
         </View>
 
@@ -322,42 +322,6 @@ export default function FriendsScreen({ navigation }: Props) {
                 onOpenProfile={handleOpenProfile}
               />
             ))}
-            <Pressable
-              onPress={() => navigation.navigate('Stories')}
-              style={({ pressed }) => ({
-                marginTop: 6,
-                padding: 18,
-                borderRadius: 18,
-                backgroundColor: pressed ? '#0f172a' : COLORS.surface,
-                borderWidth: 1,
-                borderColor: COLORS.border,
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 14,
-              })}
-            >
-              <View
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 12,
-                  backgroundColor: '#1e3a5f',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <MaterialIcons name="add" size={24} color={COLORS.accent} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: COLORS.text, fontWeight: '900', fontSize: 16 }}>
-                  Desbloquear más amigos
-                </Text>
-                <Text style={{ color: COLORS.muted, fontSize: 13, marginTop: 3 }}>
-                  Completa más misiones para agregar nuevos personajes
-                </Text>
-              </View>
-              <MaterialIcons name="chevron-right" size={22} color={COLORS.muted} />
-            </Pressable>
           </View>
         ) : (
           <View
@@ -371,10 +335,10 @@ export default function FriendsScreen({ navigation }: Props) {
             }}
           >
             <Text style={{ color: COLORS.text, fontWeight: '900', textAlign: 'center' }}>
-              Aún no tienes amigos.
+              No encontramos personajes.
             </Text>
             <Text style={{ color: COLORS.muted, marginTop: 6, textAlign: 'center', lineHeight: 20 }}>
-              Termina una misión y toca “Agregar a amigos” para desbloquear una conversación libre.
+              Intenta recargar el catálogo para iniciar una conversación libre.
             </Text>
             <Pressable
               onPress={() => navigation.navigate('Feed')}

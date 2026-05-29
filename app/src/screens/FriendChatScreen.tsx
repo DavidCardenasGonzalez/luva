@@ -491,41 +491,12 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         history_message_count: messages.length,
       });
       const historyPayload = messages.map(({ role, text }) => ({ role, content: text }));
-      const contextualSceneSummary = sourcePost?.context
-        ? `The learner is replying to a profile post from ${friend.characterName}: ${sourcePost.context}`
-        : friend.sceneSummary;
-      const missionDefinition = {
-        missionId: friend.missionId,
-        title: friend.missionTitle,
-        sceneSummary: contextualSceneSummary,
-        aiRole: friend.aiRole,
-        caracterName: friend.characterName,
-        caracterPrompt: friend.characterPrompt,
-        avatarImageUrl: friend.avatarImageUrl,
-        avatarImageXsUrl: friend.avatarImageXsUrl,
-        avatarImageMdUrl: friend.avatarImageMdUrl,
-        videoIntro: friend.videoIntro,
-        videoPreviewUrl: friend.videoPreviewUrl,
-        videoThumbnailUrl: friend.videoThumbnailUrl,
-        requirements: [],
-      };
-      const storyDefinition = {
-        storyId: friend.storyId,
-        title: friend.storyTitle,
-        summary: contextualSceneSummary || friend.missionTitle,
-        missions: [missionDefinition],
-      };
-
       const payload = await api.post<FriendAssistanceResponse>(
-        `/stories/${encodeURIComponent(friend.storyId)}/assist`,
+        `/friends/${encodeURIComponent(friend.friendId)}/assist`,
         {
-          sceneIndex: 0,
           question: trimmed,
           history: historyPayload,
-          storyDefinition,
-          missionDefinition,
-          requirements: [],
-          conversationFeedback: null,
+          ...(sourcePost?.context ? { postContext: sourcePost.context } : {}),
         }
       );
       setAssistanceAnswer(payload?.answer || '');

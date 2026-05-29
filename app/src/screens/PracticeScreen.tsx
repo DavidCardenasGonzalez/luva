@@ -800,7 +800,7 @@ export default function PracticeScreen() {
         hasFeedback: Boolean(feedback),
       });
       const payload = await api.post<StoryAssistanceResponse>(
-        `/stories/${encodeURIComponent(assistanceStoryId)}/assist`,
+        "/practice/assist",
         {
           sceneIndex: assistanceSceneIndex,
           question: trimmed,

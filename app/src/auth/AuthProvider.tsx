@@ -561,10 +561,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [applySession, clearSession]);
 
   const ensureValidSession = useCallback(async (): Promise<string | undefined> => {
-    const currentBearer = idTokenRef.current || accessTokenRef.current;
+    const currentIdToken = idTokenRef.current;
+    const currentBearer = currentIdToken || accessTokenRef.current;
     const currentExpiresAt = sessionExpiresAtRef.current;
+    const shouldRefreshMissingIdToken = !currentIdToken && Boolean(refreshTokenRef.current);
 
-    if (currentBearer && (!currentExpiresAt || !isSessionExpired(currentExpiresAt))) {
+    if (!currentIdToken && currentBearer && !refreshTokenRef.current) {
+      await clearSession();
+      return undefined;
+    }
+
+    if (currentBearer && !shouldRefreshMissingIdToken && (!currentExpiresAt || !isSessionExpired(currentExpiresAt))) {
       api.setToken(currentBearer);
       return currentBearer;
     }
@@ -672,11 +679,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           { persist: false }
         );
 
+        if (storedAccessToken && !storedIdToken && !storedRefreshToken) {
+          await clearSession();
+          return;
+        }
+
         const shouldRefresh =
           Boolean(storedRefreshToken) &&
           (
             !storedExpiresAt ||
             !storedAccessToken ||
+            !storedIdToken ||
             isSessionExpired(storedExpiresAt)
           );
 
@@ -709,7 +722,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [applySession, refreshSession]);
+  }, [applySession, clearSession, refreshSession]);
 
   useEffect(() => {
     api.setTokenResolver({

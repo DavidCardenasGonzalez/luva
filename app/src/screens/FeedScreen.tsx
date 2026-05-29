@@ -5,9 +5,11 @@ import {
   Image,
   ImageBackground,
   ImageSourcePropType,
+  Modal,
   Pressable,
   ScrollView,
   Text,
+  useWindowDimensions,
   View,
   type ViewToken,
 } from 'react-native';
@@ -21,19 +23,17 @@ import type { AVPlaybackStatus } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { LearningItem, LearningItemOptionKey, useLearningItems } from '../hooks/useLearningItems';
+import { CharacterVideoPost, useCharacterVideoPosts } from '../hooks/useCharacterVideoPosts';
 import { FeedPost, useFeedPosts } from '../hooks/useFeedPosts';
 import { FriendCharacter, useFriends } from '../hooks/useFriends';
 import { Lesson, useLessons } from '../hooks/useLessons';
 import { ShadowingChapter, ShadowingList, useShadowing } from '../hooks/useShadowing';
-import { StoryMission, useStoryCatalog } from '../hooks/useStories';
 import {
   CARD_STATUS_LABELS,
   CardProgressStatus,
   useCardProgress,
 } from '../progress/CardProgressProvider';
-import { useStoryProgress } from '../progress/StoryProgressProvider';
-import type { StoryActiveMission } from '../progress/types';
-import { CARD_OPEN_COST, CHAT_MISSION_COST, useCoins } from '../purchases/CoinBalanceProvider';
+import { CARD_OPEN_COST, useCoins } from '../purchases/CoinBalanceProvider';
 import CoinCountChip from '../components/CoinCountChip';
 import AppTabBar from '../components/AppTabBar';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
@@ -43,16 +43,51 @@ import {
   trackMixpanelFeedLoadMore,
 } from '../marketing/mixpanelEvents';
 import { prefetchImageUrls } from '../shared/imagePrefetch';
-import {
-  shouldShowMissionInterstitialForMission,
-  showMissionInterstitialBeforeNavigation,
-} from '../shared/missionInterstitial';
 import { LITE_PROMO_EXPIRES_AT_KEY } from '../purchases/litePromo';
 import { getLearnedLessonIds } from '../progress/lessonProgress';
 import { recordJourneyVocabularyQuickGuessCorrect } from '../progress/journeyProgress';
 import { useShadowingPlayer } from '../shadowing/ShadowingPlayerProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Feed'>;
+
+type StoryMission = {
+  missionId: string;
+  title: string;
+  sceneSummary?: string;
+  aiRole: string;
+  caracterName?: string;
+  avatarImageUrl?: string;
+  avatarImageXsUrl?: string;
+  avatarImageMdUrl?: string;
+  videoIntro?: string;
+  videoPreviewUrl?: string;
+  videoThumbnailUrl?: string;
+  requirements: Array<{ requirementId: string; text: string; met?: boolean; feedback?: string }>;
+};
+
+type StoryCatalogItem = {
+  storyId: string;
+  isInitial?: boolean;
+  title: string;
+  missions: StoryMission[];
+};
+
+type StoryActiveMission = {
+  storyId: string;
+  missionId: string;
+  sceneIndex: number;
+  storyTitle?: string;
+  missionTitle?: string;
+  sceneSummary?: string;
+  caracterName?: string;
+  avatarImageUrl?: string;
+  avatarImageXsUrl?: string;
+  avatarImageMdUrl?: string;
+  videoPreviewUrl?: string;
+  videoThumbnailUrl?: string;
+  requirements: StoryMission['requirements'];
+  updatedAt: string;
+};
 
 type PendingMission = {
   kind: 'mission';
@@ -78,6 +113,11 @@ type PendingVocab = LearningItem & {
   kind: 'vocab';
   feedId: string;
   status: CardProgressStatus;
+};
+
+type CharacterVideoFeedItem = CharacterVideoPost & {
+  kind: 'characterVideo';
+  feedId: string;
 };
 
 type FeedPostItem = FeedPost & {
@@ -108,6 +148,7 @@ type FeedItem =
   | PromoFeedItem
   | ResumeMission
   | PendingMission
+  | CharacterVideoFeedItem
   | PendingVocab
   | PendingShadowing
   | PendingLesson
@@ -126,7 +167,7 @@ const COLORS = {
   warning: '#f59e0b',
 };
 
-const MISSION_BATCH_SIZE = 1;
+const CHARACTER_VIDEO_BATCH_SIZE = 1;
 const VOCABULARY_BATCH_SIZE = 3;
 const SHADOWING_BATCH_SIZE = 1;
 const LESSON_BATCH_SIZE = 1;
@@ -176,41 +217,38 @@ function pickRandom<T>(list: T[], count: number, seed: string, keyFor: (item: T)
 
 function buildFeedItems({
   promo,
-  missions,
+  characterVideos,
   vocabulary,
   shadowing,
   lessons,
   posts,
 }: {
   promo?: PromoFeedItem;
-  missions: PendingMission[];
+  characterVideos: CharacterVideoFeedItem[];
   vocabulary: PendingVocab[];
   shadowing: PendingShadowing[];
   lessons: PendingLesson[];
   posts: FeedPostItem[];
 }) {
-  const initialMissions = missions.filter((mission) => mission.isInitialStory);
-  const regularMissions = missions.filter((mission) => !mission.isInitialStory);
   const baseFeed: FeedItem[] = [];
   if (promo) {
     baseFeed.push(promo);
   }
-  baseFeed.push(...initialMissions);
-  let missionIndex = 0;
+  let characterVideoIndex = 0;
   let vocabularyIndex = 0;
   let shadowingIndex = 0;
   let lessonIndex = 0;
 
   while (
-    missionIndex < regularMissions.length ||
+    characterVideoIndex < characterVideos.length ||
     vocabularyIndex < vocabulary.length ||
     shadowingIndex < shadowing.length ||
     lessonIndex < lessons.length
   ) {
-    const mission = regularMissions[missionIndex];
-    if (mission) {
-      baseFeed.push(mission);
-      missionIndex += 1;
+    const characterVideo = characterVideos[characterVideoIndex];
+    if (characterVideo) {
+      baseFeed.push(characterVideo);
+      characterVideoIndex += 1;
     }
 
     const firstVocab = vocabulary[vocabularyIndex];
@@ -245,7 +283,7 @@ function buildFeedItems({
   }
 
   const feed: FeedItem[] = [...baseFeed];
-  const pinnedItemsCount = initialMissions.length + (promo ? 1 : 0);
+  const pinnedItemsCount = promo ? 1 : 0;
   const orderOffsets = new Map<number, number>();
   [...posts]
     .sort((left, right) => left.order - right.order || left.postId.localeCompare(right.postId))
@@ -300,6 +338,19 @@ function getFeedTrackingProperties(item: FeedItem) {
       mission_title: item.mission.title,
       scene_index: item.sceneIndex,
       is_initial_story: Boolean(item.isInitialStory),
+    };
+  }
+
+  if (item.kind === 'characterVideo') {
+    return {
+      feed_item_id: item.feedId,
+      feed_item_kind: item.kind,
+      character_id: item.characterId,
+      character_name: item.characterName,
+      post_id: item.postId,
+      story_id: item.storyId,
+      mission_id: item.missionId,
+      scene_index: item.sceneIndex,
     };
   }
 
@@ -775,6 +826,338 @@ function ResumeMissionCard({
         <Text style={{ color: '#032a2a', fontWeight: '900' }}>Continuar donde la dejé</Text>
       </Pressable>
     </View>
+  );
+}
+
+function CharacterVideoCard({
+  item,
+  onPress,
+}: {
+  item: CharacterVideoFeedItem;
+  onPress: (item: CharacterVideoFeedItem) => void;
+}) {
+  const thumbnailUrl = (item.thumbnailUrl || item.imageUrl).trim();
+
+  return (
+    <Pressable
+      onPress={() => onPress(item)}
+      accessibilityRole="button"
+      accessibilityLabel={`Reproducir video de ${item.characterName}`}
+      style={({ pressed }) => ({
+        borderRadius: 18,
+        overflow: 'hidden',
+        backgroundColor: COLORS.surface,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        shadowColor: '#000',
+        shadowOpacity: 0.14,
+        shadowRadius: 12,
+        opacity: pressed ? 0.9 : 1,
+      })}
+    >
+      <View style={{ aspectRatio: 9 / 11, backgroundColor: COLORS.surfaceAlt }}>
+        <Image
+          source={{ uri: thumbnailUrl }}
+          style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+          resizeMode="cover"
+        />
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            backgroundColor: 'rgba(11, 18, 36, 0.18)',
+          }}
+        />
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <View
+            style={{
+              width: 72,
+              height: 72,
+              borderRadius: 999,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(11, 18, 36, 0.82)',
+              borderWidth: 1,
+              borderColor: 'rgba(226, 232, 240, 0.28)',
+            }}
+          >
+            <MaterialIcons name="play-arrow" size={38} color="white" />
+          </View>
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
+function CharacterVideoPage({
+  item,
+  height,
+  bottomInset,
+  playbackEnabled,
+  onOpenProfile,
+}: {
+  item: CharacterVideoFeedItem;
+  height: number;
+  bottomInset: number;
+  playbackEnabled: boolean;
+  onOpenProfile: (item: CharacterVideoFeedItem) => void;
+}) {
+  const videoRef = useRef<Video | null>(null);
+  const posterUrl = (item.thumbnailUrl || item.imageUrl).trim();
+  const videoUrl = item.videoUrl.trim();
+  const [isVideoReadyForDisplay, setIsVideoReadyForDisplay] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const videoSource = useMemo(() => ({ uri: videoUrl }), [videoUrl]);
+
+  useEffect(() => {
+    setIsVideoReadyForDisplay(false);
+    setPaused(false);
+  }, [videoUrl]);
+
+  useEffect(() => {
+    if (playbackEnabled) {
+      setPaused(false);
+      return;
+    }
+
+    void videoRef.current?.pauseAsync().catch(() => {
+      // Best effort pause while another dumbscroll page is focused.
+    });
+  }, [playbackEnabled]);
+
+  useEffect(() => {
+    return () => {
+      void videoRef.current?.unloadAsync().catch(() => {
+        // Best effort cleanup on unmount.
+      });
+    };
+  }, []);
+
+  return (
+    <View style={{ height, backgroundColor: 'black' }}>
+      <Image
+        source={{ uri: posterUrl }}
+        style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+        resizeMode="cover"
+      />
+      <Video
+        key={videoUrl}
+        ref={videoRef}
+        source={videoSource}
+        style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0,
+          opacity: isVideoReadyForDisplay ? 1 : 0,
+        }}
+        resizeMode={ResizeMode.COVER}
+        shouldPlay={playbackEnabled && !paused}
+        isLooping
+        useNativeControls={false}
+        progressUpdateIntervalMillis={500}
+        onLoadStart={() => setIsVideoReadyForDisplay(false)}
+        onLoad={() => setIsVideoReadyForDisplay(true)}
+        onReadyForDisplay={() => setIsVideoReadyForDisplay(true)}
+        onError={(videoError) => {
+          setIsVideoReadyForDisplay(false);
+          console.warn('[Feed] No se pudo cargar el video de personaje', videoError);
+        }}
+      />
+      <Pressable
+        onPress={() => {
+          if (playbackEnabled) {
+            setPaused((current) => !current);
+          }
+        }}
+        accessibilityRole="button"
+        accessibilityLabel={paused ? 'Reproducir video' : 'Pausar video'}
+        style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+      />
+      {!isVideoReadyForDisplay || paused ? (
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <View
+            style={{
+              width: 76,
+              height: 76,
+              borderRadius: 999,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(11, 18, 36, 0.82)',
+              borderWidth: 1,
+              borderColor: 'rgba(226, 232, 240, 0.28)',
+            }}
+          >
+            <MaterialIcons name="play-arrow" size={40} color="white" />
+          </View>
+        </View>
+      ) : null}
+      <View
+        pointerEvents="box-none"
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          paddingHorizontal: 18,
+          paddingBottom: Math.max(28, bottomInset + 18),
+          paddingTop: 96,
+          backgroundColor: 'rgba(0, 0, 0, 0.34)',
+        }}
+      >
+        <Pressable
+          onPress={() => onOpenProfile(item)}
+          accessibilityRole="button"
+          accessibilityLabel={`Abrir perfil de ${item.characterName}`}
+          style={({ pressed }) => ({
+            alignSelf: 'flex-start',
+            flexDirection: 'row',
+            alignItems: 'center',
+            opacity: pressed ? 0.75 : 1,
+          })}
+        >
+          {item.avatarImageUrl ? (
+            <Image
+              source={{ uri: item.avatarImageUrl }}
+              style={{ width: 34, height: 34, borderRadius: 999, marginRight: 10 }}
+              resizeMode="cover"
+            />
+          ) : null}
+          <Text style={{ color: 'white', fontSize: 16, fontWeight: '900' }} numberOfLines={1}>
+            {item.characterName}
+          </Text>
+        </Pressable>
+        <Text style={{ color: '#e2e8f0', marginTop: 10, fontSize: 14, lineHeight: 20 }} numberOfLines={3}>
+          {item.caption}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+function CharacterVideoDumbscrollModal({
+  visible,
+  videos,
+  initialFeedId,
+  onClose,
+  onOpenProfile,
+}: {
+  visible: boolean;
+  videos: CharacterVideoFeedItem[];
+  initialFeedId?: string;
+  onClose: () => void;
+  onOpenProfile: (item: CharacterVideoFeedItem) => void;
+}) {
+  const { height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const listRef = useRef<FlatList<CharacterVideoFeedItem> | null>(null);
+  const initialIndex = Math.max(
+    0,
+    videos.findIndex((item) => item.feedId === initialFeedId)
+  );
+  const [focusedFeedId, setFocusedFeedId] = useState(initialFeedId || videos[0]?.feedId);
+  const viewabilityConfigRef = useRef({ itemVisiblePercentThreshold: 70 });
+  const handleViewableItemsChangedRef = useRef(
+    ({ viewableItems }: { viewableItems: ViewToken<CharacterVideoFeedItem>[] }) => {
+      const nextFocused = viewableItems.find((entry) => entry.isViewable)?.item.feedId;
+      if (nextFocused) {
+        setFocusedFeedId((current) => (current === nextFocused ? current : nextFocused));
+      }
+    }
+  );
+
+  useEffect(() => {
+    if (!visible) {
+      return;
+    }
+    setFocusedFeedId(initialFeedId || videos[initialIndex]?.feedId);
+  }, [initialFeedId, initialIndex, videos, visible]);
+
+  if (!videos.length) {
+    return null;
+  }
+
+  return (
+    <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={onClose}>
+      <View style={{ flex: 1, backgroundColor: 'black' }}>
+        <FlatList<CharacterVideoFeedItem>
+          key={`${visible ? 'open' : 'closed'}:${initialFeedId || 'first'}`}
+          ref={listRef}
+          data={videos}
+          keyExtractor={(item) => item.feedId}
+          renderItem={({ item }) => (
+            <CharacterVideoPage
+              item={item}
+              height={height}
+              bottomInset={insets.bottom}
+              playbackEnabled={visible && focusedFeedId === item.feedId}
+              onOpenProfile={onOpenProfile}
+            />
+          )}
+          initialScrollIndex={initialIndex}
+          getItemLayout={(_, index) => ({ length: height, offset: height * index, index })}
+          pagingEnabled
+          decelerationRate="fast"
+          snapToInterval={height}
+          showsVerticalScrollIndicator={false}
+          viewabilityConfig={viewabilityConfigRef.current}
+          onViewableItemsChanged={handleViewableItemsChangedRef.current}
+          windowSize={5}
+          maxToRenderPerBatch={3}
+          onScrollToIndexFailed={(info) => {
+            setTimeout(() => {
+              listRef.current?.scrollToIndex({ index: info.index, animated: false });
+            }, 60);
+          }}
+        />
+        <Pressable
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel="Cerrar videos"
+          hitSlop={12}
+          style={({ pressed }) => ({
+            position: 'absolute',
+            top: insets.top + 10,
+            right: 14,
+            width: 42,
+            height: 42,
+            borderRadius: 999,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: pressed ? 'rgba(15, 23, 42, 0.9)' : 'rgba(15, 23, 42, 0.72)',
+            borderWidth: 1,
+            borderColor: 'rgba(226, 232, 240, 0.24)',
+          })}
+        >
+          <MaterialIcons name="close" size={24} color="white" />
+        </Pressable>
+      </View>
+    </Modal>
   );
 }
 
@@ -1613,7 +1996,7 @@ function FriendStoriesStrip({
           <Pressable
             onPress={onAddMore}
             accessibilityRole="button"
-            accessibilityLabel="Hacer más misiones para desbloquear amigos"
+            accessibilityLabel="Explorar personajes"
             style={({ pressed }) => ({
               width: 74,
               alignItems: 'center',
@@ -1645,7 +2028,7 @@ function FriendStoriesStrip({
               }}
               numberOfLines={1}
             >
-              Discover
+              Amigos
             </Text>
           </Pressable>
         ) : null}
@@ -1784,7 +2167,9 @@ export default function FeedScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const isFeedFocused = useIsFocused();
   const { items: learningItems } = useLearningItems();
-  const { stories, loading: storiesLoading, error: storiesError } = useStoryCatalog();
+  const stories = useMemo<StoryCatalogItem[]>(() => [], []);
+  const storiesLoading = false;
+  const storiesError = undefined;
   const { lessons, loading: lessonsLoading, error: lessonsError, reload: reloadLessons } = useLessons();
   const {
     lists: shadowingLists,
@@ -1804,6 +2189,12 @@ export default function FeedScreen({ navigation }: Props) {
     reload: reloadFeedPosts,
   } = useFeedPosts();
   const {
+    posts: characterVideoPosts,
+    loading: characterVideosLoading,
+    error: characterVideosError,
+    reload: reloadCharacterVideos,
+  } = useCharacterVideoPosts();
+  const {
     friends,
     loading: friendsLoading,
     error: friendsError,
@@ -1815,15 +2206,13 @@ export default function FeedScreen({ navigation }: Props) {
     statuses,
     setStatus,
   } = useCardProgress();
-  const {
-    activeMission,
-    loading: storyProgressLoading,
-    isMissionCompleted,
-    progress: storyProgress,
-  } = useStoryProgress();
+  const activeMission = undefined as StoryActiveMission | undefined;
+  const storyProgressLoading = false;
+  const storyProgress = useMemo(() => ({}), []);
+  const isMissionCompleted = useCallback((_storyId?: string, _missionId?: string) => false, []);
   const { addCoins, canSpend, loading: coinsLoading, isUnlimited } = useCoins();
   const [feedSeed, setFeedSeed] = useState(() => `${Date.now()}:${Math.random()}`);
-  const [visibleMissionsCount, setVisibleMissionsCount] = useState(MISSION_BATCH_SIZE);
+  const [visibleCharacterVideoCount, setVisibleCharacterVideoCount] = useState(CHARACTER_VIDEO_BATCH_SIZE);
   const [visibleVocabularyCount, setVisibleVocabularyCount] = useState(VOCABULARY_BATCH_SIZE);
   const [visibleShadowingCount, setVisibleShadowingCount] = useState(SHADOWING_BATCH_SIZE);
   const [visibleLessonsCount, setVisibleLessonsCount] = useState(LESSON_BATCH_SIZE);
@@ -1840,6 +2229,8 @@ export default function FeedScreen({ navigation }: Props) {
   const [timerNow, setTimerNow] = useState(Date.now());
   const [initialFeedResolved, setInitialFeedResolved] = useState(false);
   const [stableFeedItems, setStableFeedItems] = useState<FeedItem[]>([]);
+  const [characterVideoViewerVisible, setCharacterVideoViewerVisible] = useState(false);
+  const [selectedCharacterVideoFeedId, setSelectedCharacterVideoFeedId] = useState<string>();
   const isOpeningMissionRef = useRef(false);
   const viewedFeedItemIdsRef = useRef(new Set<string>());
   const viewabilityConfigRef = useRef({
@@ -1901,12 +2292,13 @@ export default function FeedScreen({ navigation }: Props) {
     useCallback(() => {
       let active = true;
       setFeedSeed(`${Date.now()}:${Math.random()}`);
-      setVisibleMissionsCount(MISSION_BATCH_SIZE);
+      setVisibleCharacterVideoCount(CHARACTER_VIDEO_BATCH_SIZE);
       setVisibleVocabularyCount(VOCABULARY_BATCH_SIZE);
       setVisibleShadowingCount(SHADOWING_BATCH_SIZE);
       setVisibleLessonsCount(LESSON_BATCH_SIZE);
       setLearnedLessonIdsLoading(true);
       reloadFeedPosts();
+      reloadCharacterVideos();
       reloadLessons();
       reloadShadowing();
       void reloadFriends();
@@ -1927,7 +2319,7 @@ export default function FeedScreen({ navigation }: Props) {
       return () => {
         active = false;
       };
-    }, [reloadFeedPosts, reloadFriends, reloadLessons, reloadShadowing])
+    }, [reloadCharacterVideos, reloadFeedPosts, reloadFriends, reloadLessons, reloadShadowing])
   );
 
   useFocusEffect(
@@ -2132,25 +2524,23 @@ export default function FeedScreen({ navigation }: Props) {
     }));
   }, [claimedExtraPostIds, configuredPosts]);
 
-  const initialMissions = useMemo(
-    () => pendingMissions.filter((mission) => mission.isInitialStory),
-    [pendingMissions]
-  );
+  const characterVideoItems = useMemo<CharacterVideoFeedItem[]>(() => {
+    return characterVideoPosts.map((post) => ({
+      ...post,
+      kind: 'characterVideo' as const,
+      feedId: `character-video:${post.characterId}:${post.postId}`,
+    }));
+  }, [characterVideoPosts]);
 
-  const regularMissions = useMemo(
-    () => pendingMissions.filter((mission) => !mission.isInitialStory),
-    [pendingMissions]
-  );
-
-  const shuffledRegularMissions = useMemo(
+  const shuffledCharacterVideos = useMemo(
     () =>
       pickRandom(
-        regularMissions,
-        regularMissions.length,
-        `${feedSeed}:missions`,
-        (item) => item.id
+        characterVideoItems,
+        characterVideoItems.length,
+        `${feedSeed}:character-videos`,
+        (item) => item.feedId
       ),
-    [feedSeed, regularMissions]
+    [characterVideoItems, feedSeed]
   );
 
   const shuffledVocabulary = useMemo(
@@ -2168,12 +2558,9 @@ export default function FeedScreen({ navigation }: Props) {
     [feedSeed, pendingLessons]
   );
 
-  const visibleMissions = useMemo(
-    () => [
-      ...initialMissions,
-      ...shuffledRegularMissions.slice(0, visibleMissionsCount),
-    ],
-    [initialMissions, shuffledRegularMissions, visibleMissionsCount]
+  const visibleCharacterVideos = useMemo(
+    () => shuffledCharacterVideos.slice(0, visibleCharacterVideoCount),
+    [shuffledCharacterVideos, visibleCharacterVideoCount]
   );
 
   const visibleVocabulary = useMemo(
@@ -2202,7 +2589,7 @@ export default function FeedScreen({ navigation }: Props) {
         : undefined;
       const next = buildFeedItems({
         promo,
-        missions: visibleMissions,
+        characterVideos: visibleCharacterVideos,
         vocabulary: visibleVocabulary,
         shadowing: visibleShadowing,
         lessons: visibleLessons,
@@ -2215,26 +2602,22 @@ export default function FeedScreen({ navigation }: Props) {
       litePromoRemainingSeconds,
       resumeMission,
       showLitePromoTimer,
+      visibleCharacterVideos,
       visibleLessons,
-      visibleMissions,
       visibleShadowing,
       visibleVocabulary,
     ]
   );
 
   const imageUrlsToPrefetch = useMemo(() => {
-    const upcomingMissions = [
-      ...initialMissions,
-      ...shuffledRegularMissions.slice(
-        0,
-        Math.min(shuffledRegularMissions.length, visibleMissionsCount + MISSION_BATCH_SIZE)
-      ),
-    ];
-    const missionUrls = upcomingMissions.flatMap((item) => [
-      item.mission.videoThumbnailUrl,
-      item.mission.avatarImageXsUrl,
-      item.mission.avatarImageMdUrl,
-      item.mission.avatarImageUrl,
+    const upcomingCharacterVideos = shuffledCharacterVideos.slice(
+      0,
+      Math.min(shuffledCharacterVideos.length, visibleCharacterVideoCount + CHARACTER_VIDEO_BATCH_SIZE)
+    );
+    const characterVideoUrls = upcomingCharacterVideos.flatMap((item) => [
+      item.thumbnailUrl,
+      item.imageUrl,
+      item.avatarImageUrl,
     ]);
     const resumeMissionUrls = resumeMission
       ? [
@@ -2250,16 +2633,15 @@ export default function FeedScreen({ navigation }: Props) {
     const lessonUrls = shuffledLessons
       .slice(0, Math.min(shuffledLessons.length, visibleLessonsCount + LESSON_BATCH_SIZE))
       .map((item) => item.thumbnailUrl);
-    return [...resumeMissionUrls, ...missionUrls, ...shadowingUrls, ...lessonUrls, ...postUrls];
+    return [...resumeMissionUrls, ...characterVideoUrls, ...shadowingUrls, ...lessonUrls, ...postUrls];
   }, [
     feedPostItems,
-    initialMissions,
     resumeMission,
     shuffledLessons,
-    shuffledRegularMissions,
+    shuffledCharacterVideos,
     shuffledShadowing,
+    visibleCharacterVideoCount,
     visibleLessonsCount,
-    visibleMissionsCount,
     visibleShadowingCount,
   ]);
 
@@ -2272,6 +2654,7 @@ export default function FeedScreen({ navigation }: Props) {
     cardProgressLoading ||
     storyProgressLoading ||
     feedPostsLoading ||
+    characterVideosLoading ||
     lessonsLoading ||
     shadowingLoading ||
     learnedLessonIdsLoading ||
@@ -2292,7 +2675,7 @@ export default function FeedScreen({ navigation }: Props) {
   const renderedFeedItems = showInitialFeedSkeleton ? [] : loading ? stableFeedItems : feedItems;
 
   const hasMoreFeedItems =
-    visibleMissionsCount < shuffledRegularMissions.length ||
+    visibleCharacterVideoCount < shuffledCharacterVideos.length ||
     visibleVocabularyCount < shuffledVocabulary.length ||
     visibleShadowingCount < shuffledShadowing.length ||
     visibleLessonsCount < shuffledLessons.length;
@@ -2300,8 +2683,10 @@ export default function FeedScreen({ navigation }: Props) {
   const loadMoreFeedItems = useCallback(() => {
     if (loading || !hasMoreFeedItems) return;
 
-    const previousRegularMissionsCount = Math.min(visibleMissionsCount, shuffledRegularMissions.length);
-    const previousMissionsCount = initialMissions.length + previousRegularMissionsCount;
+    const previousCharacterVideosCount = Math.min(
+      visibleCharacterVideoCount,
+      shuffledCharacterVideos.length
+    );
     const previousVocabularyCount = Math.min(
       visibleVocabularyCount,
       shuffledVocabulary.length
@@ -2314,11 +2699,10 @@ export default function FeedScreen({ navigation }: Props) {
       visibleLessonsCount,
       shuffledLessons.length
     );
-    const nextRegularMissionsCount = Math.min(
-      visibleMissionsCount + MISSION_BATCH_SIZE,
-      shuffledRegularMissions.length
+    const nextCharacterVideosCount = Math.min(
+      visibleCharacterVideoCount + CHARACTER_VIDEO_BATCH_SIZE,
+      shuffledCharacterVideos.length
     );
-    const nextMissionsCount = initialMissions.length + nextRegularMissionsCount;
     const nextVocabularyCount = Math.min(
       visibleVocabularyCount + VOCABULARY_BATCH_SIZE,
       shuffledVocabulary.length
@@ -2331,8 +2715,8 @@ export default function FeedScreen({ navigation }: Props) {
       visibleLessonsCount + LESSON_BATCH_SIZE,
       shuffledLessons.length
     );
-    const missionsLoadedCount = Math.max(
-      nextMissionsCount - previousMissionsCount,
+    const characterVideosLoadedCount = Math.max(
+      nextCharacterVideosCount - previousCharacterVideosCount,
       0
     );
     const vocabularyLoadedCount = Math.max(
@@ -2348,25 +2732,28 @@ export default function FeedScreen({ navigation }: Props) {
       0
     );
     const itemsLoadedCount =
-      missionsLoadedCount + vocabularyLoadedCount + shadowingLoadedCount + lessonsLoadedCount;
+      characterVideosLoadedCount + vocabularyLoadedCount + shadowingLoadedCount + lessonsLoadedCount;
 
     if (itemsLoadedCount <= 0) {
       return;
     }
 
-    setVisibleMissionsCount(nextRegularMissionsCount);
+    setVisibleCharacterVideoCount(nextCharacterVideosCount);
     setVisibleVocabularyCount(nextVocabularyCount);
     setVisibleShadowingCount(nextShadowingCount);
     setVisibleLessonsCount(nextLessonsCount);
     void trackMixpanelFeedLoadMore({
       previousItemsCount:
-        previousMissionsCount + previousVocabularyCount + previousShadowingCount + previousLessonsCount,
+        previousCharacterVideosCount + previousVocabularyCount + previousShadowingCount + previousLessonsCount,
       nextItemsCount:
-        nextMissionsCount + nextVocabularyCount + nextShadowingCount + nextLessonsCount,
+        nextCharacterVideosCount + nextVocabularyCount + nextShadowingCount + nextLessonsCount,
       itemsLoadedCount,
-      previousMissionsCount,
-      nextMissionsCount,
-      missionsLoadedCount,
+      previousMissionsCount: 0,
+      nextMissionsCount: 0,
+      missionsLoadedCount: 0,
+      previousCharacterVideosCount,
+      nextCharacterVideosCount,
+      characterVideosLoadedCount,
       previousVocabularyCount,
       nextVocabularyCount,
       vocabularyLoadedCount,
@@ -2376,26 +2763,26 @@ export default function FeedScreen({ navigation }: Props) {
       previousLessonsCount,
       nextLessonsCount,
       lessonsLoadedCount,
-      totalMissionsAvailable: initialMissions.length + shuffledRegularMissions.length,
+      totalMissionsAvailable: 0,
+      totalCharacterVideosAvailable: shuffledCharacterVideos.length,
       totalVocabularyAvailable: shuffledVocabulary.length,
       totalShadowingAvailable: shuffledShadowing.length,
       totalLessonsAvailable: shuffledLessons.length,
       hasMoreAfter:
-        nextRegularMissionsCount < shuffledRegularMissions.length ||
+        nextCharacterVideosCount < shuffledCharacterVideos.length ||
         nextVocabularyCount < shuffledVocabulary.length ||
         nextShadowingCount < shuffledShadowing.length ||
         nextLessonsCount < shuffledLessons.length,
     });
   }, [
     hasMoreFeedItems,
-    initialMissions.length,
     loading,
     shuffledLessons.length,
-    shuffledRegularMissions.length,
+    shuffledCharacterVideos.length,
     shuffledShadowing.length,
     shuffledVocabulary.length,
+    visibleCharacterVideoCount,
     visibleLessonsCount,
-    visibleMissionsCount,
     visibleShadowingCount,
     visibleVocabularyCount,
   ]);
@@ -2480,38 +2867,19 @@ export default function FeedScreen({ navigation }: Props) {
   );
 
   const openMission = useCallback(
-    async (storyId: string, sceneIndex: number) => {
+    async (_storyId: string, _sceneIndex: number) => {
       if (isOpeningMissionRef.current) return;
       isOpeningMissionRef.current = true;
       try {
         stopFeedVideos();
-        if (!isUnlimited) {
-          if (coinsLoading) return;
-          const enough = await canSpend(CHAT_MISSION_COST);
-          if (!enough) {
-            navigation.navigate('Paywall', { source: 'story_mission_unlock' });
-            return;
-          }
-
-          const missionId = stories.find((story) => story.storyId === storyId)?.missions?.[sceneIndex]?.missionId;
-          const shouldShowInterstitial = await shouldShowMissionInterstitialForMission(storyId, missionId);
-          if (shouldShowInterstitial) {
-            setIsInterstitialLoading(true);
-            await showMissionInterstitialBeforeNavigation();
-          }
-        }
-
-        navigation.navigate('StoryScene', {
-          storyId,
-          sceneIndex,
-          from: 'feed',
-        });
+        setPostActionMessage('Las misiones fueron reemplazadas por conversaciones libres. Elige un personaje en Amigos.');
+        navigation.navigate('Friends');
       } finally {
         setIsInterstitialLoading(false);
         isOpeningMissionRef.current = false;
       }
     },
-    [canSpend, coinsLoading, isUnlimited, navigation, stopFeedVideos, stories]
+    [navigation, stopFeedVideos]
   );
 
   const handleStartMission = useCallback(
@@ -2583,6 +2951,39 @@ export default function FeedScreen({ navigation }: Props) {
       navigation.navigate('FriendProfile', { friendId: friend.friendId });
     },
     [navigation, stopFeedVideos]
+  );
+
+  const handleOpenCharacterVideo = useCallback(
+    (item: CharacterVideoFeedItem) => {
+      stopFeedVideos();
+      setPostActionMessage(undefined);
+      setSelectedCharacterVideoFeedId(item.feedId);
+      setCharacterVideoViewerVisible(true);
+      void trackMixpanelFeedItemAction({
+        ...getFeedTrackingProperties(item),
+        action: 'open_character_video',
+      });
+    },
+    [stopFeedVideos]
+  );
+
+  const handleCloseCharacterVideoViewer = useCallback(() => {
+    setCharacterVideoViewerVisible(false);
+    if (isFeedFocused) {
+      setSuspendFeedVideoPlayback(false);
+    }
+  }, [isFeedFocused]);
+
+  const handleOpenCharacterVideoProfile = useCallback(
+    (item: CharacterVideoFeedItem) => {
+      setCharacterVideoViewerVisible(false);
+      void trackMixpanelFeedItemAction({
+        ...getFeedTrackingProperties(item),
+        action: 'open_character_profile_from_video',
+      });
+      navigation.navigate('FriendProfile', { friendId: item.characterId });
+    },
+    [navigation]
   );
 
   const handlePracticePost = useCallback(
@@ -2726,7 +3127,7 @@ export default function FeedScreen({ navigation }: Props) {
               loading={friendsLoading}
               error={friendsError}
               onOpenFriend={handleOpenFriendProfile}
-              onAddMore={() => navigation.navigate('Stories')}
+              onAddMore={() => navigation.navigate('Friends')}
             />
 
             {storiesError ? (
@@ -2756,6 +3157,21 @@ export default function FeedScreen({ navigation }: Props) {
                 }}
               >
                 <Text style={{ color: '#fecdd3', fontWeight: '700' }}>{feedPostsError}</Text>
+              </View>
+            ) : null}
+
+            {characterVideosError ? (
+              <View
+                style={{
+                  marginTop: 12,
+                  padding: 12,
+                  borderRadius: 14,
+                  backgroundColor: '#3f1d2e',
+                  borderWidth: 1,
+                  borderColor: '#7f1d1d',
+                }}
+              >
+                <Text style={{ color: '#fecdd3', fontWeight: '700' }}>{characterVideosError}</Text>
               </View>
             ) : null}
 
@@ -2820,9 +3236,11 @@ export default function FeedScreen({ navigation }: Props) {
             <MissionCard
               item={item}
               onStart={handleStartMission}
-              onViewAll={() => navigation.navigate('Stories')}
+              onViewAll={() => navigation.navigate('Friends')}
               playbackEnabled={videoPlaybackEnabled && activeFeedMediaId === item.id}
             />
+          ) : item.kind === 'characterVideo' ? (
+            <CharacterVideoCard item={item} onPress={handleOpenCharacterVideo} />
           ) : item.kind === 'vocab' ? (
             <VocabularyCard
               item={item}
@@ -2878,11 +3296,18 @@ export default function FeedScreen({ navigation }: Props) {
                 No hay pendientes por ahora.
               </Text>
               <Text style={{ color: COLORS.muted, marginTop: 6, textAlign: 'center', lineHeight: 20 }}>
-                Cuando aparezcan nuevas tarjetas o misiones, las verás aquí.
+                Cuando aparezcan nuevas tarjetas o videos, las verás aquí.
               </Text>
             </View>
           )
         }
+      />
+      <CharacterVideoDumbscrollModal
+        visible={characterVideoViewerVisible}
+        videos={shuffledCharacterVideos}
+        initialFeedId={selectedCharacterVideoFeedId}
+        onClose={handleCloseCharacterVideoViewer}
+        onOpenProfile={handleOpenCharacterVideoProfile}
       />
       {isInterstitialLoading ? (
         <View
