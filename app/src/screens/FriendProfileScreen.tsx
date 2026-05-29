@@ -151,15 +151,212 @@ function ZoomableImage({
   );
 }
 
+function ProfileFeedPost({
+  item,
+  avatarSource,
+  avatarInitial,
+  playbackEnabled,
+  onReply,
+}: {
+  item: CharacterProfilePost;
+  avatarSource?: ImageSourcePropType;
+  avatarInitial: string;
+  playbackEnabled: boolean;
+  onReply: (post: CharacterProfilePost) => void;
+}) {
+  const videoUrl = item.videoUrl?.trim();
+  const imageUrl = item.imageUrl?.trim();
+  const videoRef = useRef<Video | null>(null);
+  const [isVideoReadyForDisplay, setIsVideoReadyForDisplay] = useState(false);
+  const videoSource = useMemo(() => {
+    return videoUrl ? { uri: videoUrl } : undefined;
+  }, [videoUrl]);
+
+  useEffect(() => {
+    setIsVideoReadyForDisplay(false);
+  }, [videoUrl]);
+
+  useEffect(() => {
+    if (playbackEnabled || !videoUrl) return;
+
+    setIsVideoReadyForDisplay(false);
+    void videoRef.current?.unloadAsync().catch(() => {
+      // Best effort cleanup when this post leaves focus.
+    });
+  }, [playbackEnabled, videoUrl]);
+
+  useEffect(() => {
+    return () => {
+      void videoRef.current?.unloadAsync().catch(() => {
+        // Best effort cleanup on unmount.
+      });
+    };
+  }, []);
+
+  const shouldMountVideo = playbackEnabled && !!videoSource;
+
+  return (
+    <View style={{ paddingHorizontal: 14, paddingVertical: 6 }}>
+      <View
+        style={{
+          overflow: 'hidden',
+          backgroundColor: COLORS.surface,
+          borderWidth: 1,
+          borderColor: COLORS.border,
+          borderRadius: 14,
+        }}
+      >
+        <View style={{ aspectRatio: videoUrl ? 9 / 11 : 1, backgroundColor: '#020617' }}>
+          {imageUrl ? (
+            <Image
+              source={{ uri: item.thumbnailUrl || imageUrl }}
+              style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+              resizeMode="cover"
+            />
+          ) : null}
+
+          {shouldMountVideo ? (
+            <Video
+              key={`${item.postId}:${videoUrl}`}
+              ref={videoRef}
+              source={videoSource}
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0,
+                opacity: isVideoReadyForDisplay ? 1 : 0,
+              }}
+              resizeMode={ResizeMode.COVER}
+              shouldPlay={playbackEnabled}
+              useNativeControls
+              posterSource={{ uri: item.thumbnailUrl || item.imageUrl }}
+              usePoster
+              onLoadStart={() => setIsVideoReadyForDisplay(false)}
+              onLoad={() => setIsVideoReadyForDisplay(true)}
+              onReadyForDisplay={() => setIsVideoReadyForDisplay(true)}
+              onError={(videoError) => {
+                setIsVideoReadyForDisplay(false);
+                console.warn('[FriendProfile] No se pudo cargar el video del post', videoError);
+              }}
+            />
+          ) : null}
+
+          {videoUrl && !shouldMountVideo ? (
+            <View
+              pointerEvents="none"
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'rgba(2, 6, 23, 0.18)',
+              }}
+            >
+              <View
+                style={{
+                  width: 58,
+                  height: 58,
+                  borderRadius: 999,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: 'rgba(2, 6, 23, 0.72)',
+                }}
+              >
+                <MaterialIcons name="play-arrow" size={34} color="white" />
+              </View>
+            </View>
+          ) : null}
+        </View>
+
+        <View style={{ padding: 14 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 999,
+                overflow: 'hidden',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#0b172b',
+                borderWidth: 1,
+                borderColor: 'rgba(34, 211, 238, 0.26)',
+              }}
+            >
+              {avatarSource ? (
+                <Image source={avatarSource} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+              ) : (
+                <Text style={{ color: COLORS.text, fontWeight: '900' }}>{avatarInitial}</Text>
+              )}
+            </View>
+            <View style={{ flex: 1, marginLeft: 10 }}>
+              <Text style={{ color: COLORS.text, fontWeight: '900' }} numberOfLines={1}>
+                {item.characterName}
+              </Text>
+              <Text style={{ color: COLORS.muted, fontSize: 12, fontWeight: '700', marginTop: 2 }} numberOfLines={1}>
+                {item.storyTitle}
+              </Text>
+            </View>
+          </View>
+
+          <Text style={{ color: COLORS.muted, lineHeight: 20, marginTop: 12 }}>{item.caption}</Text>
+
+          <Pressable
+            onPress={() => onReply(item)}
+            accessibilityRole="button"
+            accessibilityLabel={`Responder al post de ${item.characterName}`}
+            style={({ pressed }) => ({
+              marginTop: 14,
+              alignSelf: 'flex-start',
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingHorizontal: 16,
+              paddingVertical: 11,
+              borderRadius: 999,
+              backgroundColor: pressed ? '#1d4ed8' : COLORS.action,
+            })}
+          >
+            <MaterialIcons name="reply" size={18} color="white" />
+            <Text style={{ color: 'white', fontWeight: '900', marginLeft: 8 }}>Responder</Text>
+          </Pressable>
+        </View>
+      </View>
+    </View>
+  );
+}
+
 export default function FriendProfileScreen({ navigation, route }: Props) {
   const friendId = route.params?.friendId;
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { friend, posts, loading, loaded, error, reload } = useFriendProfile(friendId);
   const [selectedPost, setSelectedPost] = useState<CharacterProfilePost | null>(null);
+  const [focusedPostId, setFocusedPostId] = useState<string | undefined>();
   const [avatarModalVisible, setAvatarModalVisible] = useState(false);
-  const postVideoRef = useRef<Video | null>(null);
+  const focusedFeedListRef = useRef<FlatList<CharacterProfilePost> | null>(null);
   const trackedProfileViewRef = useRef<string | undefined>(undefined);
+  const selectedPostIndex = useMemo(() => {
+    if (!selectedPost) return -1;
+    return posts.findIndex((post) => post.postId === selectedPost.postId);
+  }, [posts, selectedPost]);
+  const focusedPosts = useMemo(() => {
+    if (!selectedPost || selectedPostIndex < 0) return posts;
+    return [...posts.slice(selectedPostIndex), ...posts.slice(0, selectedPostIndex)];
+  }, [posts, selectedPost, selectedPostIndex]);
+  const handleFocusedViewableItemsChanged = useRef(
+    ({ viewableItems }: { viewableItems: Array<{ item?: CharacterProfilePost }> }) => {
+      const post = viewableItems.find((viewableItem) => !!viewableItem.item)?.item;
+      if (post) {
+        setFocusedPostId(post.postId);
+      }
+    }
+  ).current;
+  const focusedViewabilityConfig = useRef({ itemVisiblePercentThreshold: 55 }).current;
 
   useFocusEffect(
     useCallback(() => {
@@ -180,24 +377,6 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
       post_count: posts.length,
     });
   }, [friend, posts.length]);
-
-  useEffect(() => {
-    if (selectedPost?.videoUrl) {
-      return;
-    }
-
-    void postVideoRef.current?.unloadAsync().catch(() => {
-      // Best effort cleanup when leaving a video post.
-    });
-  }, [selectedPost?.videoUrl]);
-
-  useEffect(() => {
-    return () => {
-      void postVideoRef.current?.unloadAsync().catch(() => {
-        // Best effort cleanup on unmount.
-      });
-    };
-  }, []);
 
   const avatarSource = useMemo<ImageSourcePropType | undefined>(() => {
     if (!friend) return undefined;
@@ -224,6 +403,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
         source: 'friend_profile_post',
       });
       setSelectedPost(null);
+      setFocusedPostId(undefined);
       navigation.navigate('FriendChat', {
         friendId: friend.friendId,
         postId: post.postId,
@@ -264,6 +444,97 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
           <Text style={{ color: 'white', fontWeight: '900' }}>Volver</Text>
         </Pressable>
       </View>
+    );
+  }
+
+  if (selectedPost && posts.length > 0) {
+    return (
+      <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: COLORS.background }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            borderBottomWidth: 1,
+            borderBottomColor: COLORS.border,
+          }}
+        >
+          <Pressable
+            onPress={() => {
+              setSelectedPost(null);
+              setFocusedPostId(undefined);
+            }}
+            hitSlop={12}
+            style={({ pressed }) => ({
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: pressed ? '#111827' : COLORS.surface,
+              borderWidth: 1,
+              borderColor: COLORS.border,
+            })}
+          >
+            <MaterialIcons name="grid-on" size={20} color={COLORS.text} />
+          </Pressable>
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text style={{ color: COLORS.text, fontWeight: '900', fontSize: 18 }} numberOfLines={1}>
+              {friend.characterName}
+            </Text>
+            <Text style={{ color: COLORS.muted, fontSize: 12, fontWeight: '700', marginTop: 2 }} numberOfLines={1}>
+              Posts
+            </Text>
+          </View>
+          <Pressable
+            onPress={() => {
+              void trackMixpanelFriendEvent('friend_chat_opened', {
+                friend_id: friend.friendId,
+                character_name: friend.characterName,
+                story_id: friend.storyId,
+                mission_id: friend.missionId,
+                source: 'friend_profile_feed_header',
+              });
+              setSelectedPost(null);
+              setFocusedPostId(undefined);
+              navigation.navigate('FriendChat', { friendId: friend.friendId });
+            }}
+            hitSlop={10}
+            style={({ pressed }) => ({
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: pressed ? '#1d4ed8' : COLORS.action,
+            })}
+          >
+            <MaterialIcons name="chat-bubble-outline" size={18} color="white" />
+          </Pressable>
+        </View>
+
+        <FlatList
+          key={`friend-profile-focused-feed:${selectedPost.postId}`}
+          ref={focusedFeedListRef}
+          data={focusedPosts}
+          keyExtractor={(item) => item.postId}
+          initialNumToRender={6}
+          onViewableItemsChanged={handleFocusedViewableItemsChanged}
+          viewabilityConfig={focusedViewabilityConfig}
+          contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 18) }}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <ProfileFeedPost
+              item={item}
+              avatarSource={avatarSource}
+              avatarInitial={avatarInitial}
+              playbackEnabled={(focusedPostId || selectedPost.postId) === item.postId}
+              onReply={handleReplyToPost}
+            />
+          )}
+        />
+      </SafeAreaView>
     );
   }
 
@@ -324,6 +595,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
       </View>
 
       <FlatList
+        key="friend-profile-grid"
         data={posts}
         keyExtractor={(item) => item.postId}
         numColumns={3}
@@ -440,6 +712,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
                 character_name: friend.characterName,
                 post_id: item.postId,
               });
+              setFocusedPostId(item.postId);
               setSelectedPost(item);
             }}
             style={({ pressed }) => ({
@@ -486,94 +759,6 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
           </View>
         }
       />
-
-      <Modal
-        visible={!!selectedPost}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setSelectedPost(null)}
-      >
-        <View style={{ flex: 1, backgroundColor: 'rgba(2, 6, 23, 0.92)', justifyContent: 'center', padding: 18 }}>
-          {selectedPost && (
-            <View style={{ flex: 1, margin: -18 }}>
-              {selectedPost.videoUrl ? (
-                <View style={{ flex: 1, backgroundColor: '#020617' }}>
-                  <Video
-                    key={selectedPost.videoUrl}
-                    ref={postVideoRef}
-                    source={{ uri: selectedPost.videoUrl }}
-                    style={{ width: '100%', height: '100%' }}
-                    resizeMode={ResizeMode.CONTAIN}
-                    shouldPlay
-                    useNativeControls
-                    posterSource={{ uri: selectedPost.thumbnailUrl || selectedPost.imageUrl }}
-                    usePoster
-                  />
-                </View>
-              ) : (
-                <ZoomableImage uri={selectedPost.imageUrl} fullScreen resizeMode="contain" />
-              )}
-              <View
-                pointerEvents="box-none"
-                style={selectedPost.videoUrl ? {
-                  paddingHorizontal: 18,
-                  paddingTop: 14,
-                  paddingBottom: Math.max(insets.bottom, 18),
-                  backgroundColor: 'rgba(2, 6, 23, 0.96)',
-                } : {
-                  position: 'absolute',
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  paddingHorizontal: 18,
-                  paddingTop: 18,
-                  paddingBottom: Math.max(insets.bottom, 18),
-                  backgroundColor: 'rgba(2, 6, 23, 0.78)',
-                }}
-              >
-                <Text style={{ color: COLORS.text, fontWeight: '900' }}>{friend.characterName}</Text>
-                <Text style={{ color: COLORS.muted, lineHeight: 20, marginTop: 8 }}>{selectedPost.caption}</Text>
-                <Pressable
-                  onPress={() => handleReplyToPost(selectedPost)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Responder al post de ${friend.characterName}`}
-                  style={({ pressed }) => ({
-                    marginTop: 14,
-                    alignSelf: 'flex-start',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    paddingHorizontal: 16,
-                    paddingVertical: 11,
-                    borderRadius: 999,
-                    backgroundColor: pressed ? '#1d4ed8' : COLORS.action,
-                  })}
-                >
-                  <MaterialIcons name="reply" size={18} color="white" />
-                  <Text style={{ color: 'white', fontWeight: '900', marginLeft: 8 }}>Responder</Text>
-                </Pressable>
-              </View>
-            </View>
-          )}
-          <Pressable
-            onPress={() => setSelectedPost(null)}
-            style={({ pressed }) => ({
-              position: 'absolute',
-              top: Math.max(insets.top, 16),
-              right: 16,
-              width: 46,
-              height: 46,
-              borderRadius: 999,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: pressed ? '#111827' : COLORS.surface,
-              borderWidth: 1,
-              borderColor: COLORS.border,
-            })}
-          >
-            <MaterialIcons name="close" size={22} color={COLORS.text} />
-          </Pressable>
-        </View>
-      </Modal>
 
       <Modal
         visible={avatarModalVisible}
