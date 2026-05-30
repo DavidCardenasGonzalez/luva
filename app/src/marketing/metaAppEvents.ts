@@ -59,6 +59,15 @@ type MetaOnboardingStep4Event = {
   messageCount?: number;
 };
 
+type MetaFriendChatStartedEvent = {
+  friendId?: string;
+  characterName?: string;
+  storyId?: string;
+  missionId?: string;
+  postId?: string;
+  inputMethod?: "text" | "audio";
+};
+
 type TrackingStatus =
   | "granted"
   | "denied"
@@ -273,6 +282,40 @@ export async function trackPaywallViewed({
     );
   } catch (err) {
     console.warn("[Meta] No se pudo registrar el paywall", err);
+  }
+}
+
+export async function trackMetaFriendChatStarted({
+  friendId,
+  characterName,
+  storyId,
+  missionId,
+  postId,
+  inputMethod,
+}: MetaFriendChatStartedEvent = {}) {
+  const initialized = await initializeMetaSdk();
+  if (!initialized) {
+    return;
+  }
+
+  try {
+    logViewedContent({
+      contentId: friendId
+        ? `friend_chat_started:${normalizeContentId(friendId)}`
+        : "friend_chat_started",
+      contentType: "friend_chat_started",
+      description: "Primer mensaje enviado en una conversación con un amigo",
+      params: {
+        friend_id: friendId,
+        character_name: characterName,
+        story_id: storyId,
+        mission_id: missionId,
+        post_id: postId,
+        input_method: inputMethod,
+      },
+    });
+  } catch (err) {
+    console.warn("[Meta] No se pudo registrar ViewContent de inicio de conversacion", err);
   }
 }
 

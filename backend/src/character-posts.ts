@@ -66,6 +66,9 @@ export type StoredCharacterPostRecord = {
   subtitlesKey?: unknown;
   order?: unknown;
   likeCount?: unknown;
+  playCount?: unknown;
+  watched3sCount?: unknown;
+  conversationCount?: unknown;
   createdAt?: unknown;
   updatedAt?: unknown;
 };
@@ -88,9 +91,29 @@ export type CharacterPost = {
   subtitlesKey?: string;
   order: number;
   likeCount: number;
+  playCount: number;
+  watched3sCount: number;
+  conversationCount: number;
   avatarImageUrl?: string;
   createdAt: string;
   updatedAt: string;
+};
+
+export type CharacterPostMetric = 'play' | 'watched3s' | 'conversation';
+
+export type CharacterPostMetricResponse = {
+  characterId: string;
+  postId: string;
+  metric: CharacterPostMetric;
+  playCount: number;
+  watched3sCount: number;
+  conversationCount: number;
+};
+
+const METRIC_FIELD_BY_NAME: Record<CharacterPostMetric, 'playCount' | 'watched3sCount' | 'conversationCount'> = {
+  play: 'playCount',
+  watched3s: 'watched3sCount',
+  conversation: 'conversationCount',
 };
 
 export type CharacterPostsResponse = {
@@ -406,6 +429,9 @@ export function buildCharacterPostRecord(
   const now = asTimestamp(options?.now) || new Date().toISOString();
   const createdAt = options?.existing?.createdAt || now;
   const likeCount = normalizeLikeCount(options?.existing?.likeCount) ?? 0;
+  const playCount = normalizeLikeCount(options?.existing?.playCount) ?? 0;
+  const watched3sCount = normalizeLikeCount(options?.existing?.watched3sCount) ?? 0;
+  const conversationCount = normalizeLikeCount(options?.existing?.conversationCount) ?? 0;
 
   return {
     characterId,
@@ -426,6 +452,9 @@ export function buildCharacterPostRecord(
     ...(subtitlesKey ? { subtitlesKey } : {}),
     order,
     likeCount,
+    playCount,
+    watched3sCount,
+    conversationCount,
     createdAt,
     updatedAt: now,
   };
@@ -450,6 +479,9 @@ export function toCharacterPost(input: unknown): CharacterPost | undefined {
   const imageUrl = normalizeStoredOptionalUrl(raw?.imageUrl ?? raw?.imageURL ?? thumbnailUrl);
   const order = normalizeOrder(raw?.order);
   const likeCount = normalizeLikeCount(raw?.likeCount) ?? 0;
+  const playCount = normalizeLikeCount(raw?.playCount) ?? 0;
+  const watched3sCount = normalizeLikeCount(raw?.watched3sCount) ?? 0;
+  const conversationCount = normalizeLikeCount(raw?.conversationCount) ?? 0;
 
   if (
     !characterId ||
@@ -490,9 +522,69 @@ export function toCharacterPost(input: unknown): CharacterPost | undefined {
     ...(subtitlesKey ? { subtitlesKey } : {}),
     order,
     likeCount,
+    playCount,
+    watched3sCount,
+    conversationCount,
     createdAt,
     updatedAt,
   };
+}
+
+export async function incrementCharacterPostMetric(
+  characterIdInput: unknown,
+  postIdInput: unknown,
+  metricInput: unknown,
+): Promise<CharacterPostMetricResponse> {
+  const characterId = normalizeCharacterId(characterIdInput);
+  const postId = normalizePostId(postIdInput);
+  const metric = normalizeCharacterPostMetric(metricInput);
+  if (!characterId) {
+    throw new Error('INVALID_CHARACTER_ID');
+  }
+  if (!postId) {
+    throw new Error('INVALID_CHARACTER_POST_ID');
+  }
+  if (!metric) {
+    throw new Error('INVALID_CHARACTER_POST_METRIC');
+  }
+
+  const field = METRIC_FIELD_BY_NAME[metric];
+  const result = await dynamo.send(
+    new UpdateCommand({
+      TableName: getCharacterPostsTableName(),
+      Key: { characterId, postId },
+      UpdateExpression: `SET #field = if_not_exists(#field, :zero) + :one, updatedAt = :now`,
+      ExpressionAttributeNames: {
+        '#field': field,
+      },
+      ExpressionAttributeValues: {
+        ':zero': 0,
+        ':one': 1,
+        ':now': new Date().toISOString(),
+      },
+      ConditionExpression: 'attribute_exists(characterId) AND attribute_exists(postId)',
+      ReturnValues: 'ALL_NEW',
+    }),
+  );
+
+  const attrs = (result.Attributes || {}) as StoredCharacterPostRecord;
+  return {
+    characterId,
+    postId,
+    metric,
+    playCount: normalizeLikeCount(attrs.playCount) ?? 0,
+    watched3sCount: normalizeLikeCount(attrs.watched3sCount) ?? 0,
+    conversationCount: normalizeLikeCount(attrs.conversationCount) ?? 0,
+  };
+}
+
+function normalizeCharacterPostMetric(value: unknown): CharacterPostMetric | undefined {
+  if (typeof value !== 'string') return undefined;
+  const normalized = value.trim();
+  if (normalized === 'play' || normalized === 'watched3s' || normalized === 'conversation') {
+    return normalized;
+  }
+  return undefined;
 }
 
 function flattenStoryCharacters(stories: StoryDefinition[]): StoryCharacterSummary[] {

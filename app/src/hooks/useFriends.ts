@@ -63,11 +63,19 @@ export type FriendCharacter = {
   lastMessageAt?: string;
   messageCount?: number;
   conversationCount?: number;
+  conversationSnapshot?: FriendConversationSnapshot;
 };
 
 export type FriendConversationFeedback = {
   summary: string;
   improvements: string[];
+};
+
+export type FriendConversationSnapshot = {
+  messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+  conversationEnded: boolean;
+  conversationFeedback?: FriendConversationFeedback | null;
+  updatedAt: string;
 };
 
 export type AddFriendPayload = {
@@ -76,6 +84,7 @@ export type AddFriendPayload = {
   sceneIndex?: number;
   storyDefinition?: CharacterStoryDefinition;
   missionDefinition?: CharacterMissionDefinition;
+  conversationSnapshot?: FriendConversationSnapshot;
 };
 
 export type FriendChatPayload = {
@@ -103,6 +112,10 @@ type AddFriendResponse = {
 
 type AddFriendOptions = {
   localOnly?: boolean;
+};
+
+type FriendChatRequestOptions = {
+  anonymous?: boolean;
 };
 
 function isUnauthorizedFriendWrite(err: any) {
@@ -147,22 +160,26 @@ export async function sendFriendChatMessage(
     postImageUrl?: string;
     postVideoUrl?: string;
     history?: Array<{ role: 'user' | 'assistant'; content: string }>;
-  }
+  },
+  options?: FriendChatRequestOptions,
 ): Promise<FriendChatPayload> {
-  return api.post<FriendChatPayload>(`/friends/${encodeURIComponent(friendId)}/chat`, payload);
+  const basePath = options?.anonymous ? '/public/friends' : '/friends';
+  return api.post<FriendChatPayload>(`${basePath}/${encodeURIComponent(friendId)}/chat`, payload);
 }
 
 export async function finishFriendChat(
   friendId: string,
   payload: {
     history?: Array<{ role: 'user' | 'assistant'; content: string }>;
-  }
+  },
+  options?: FriendChatRequestOptions,
 ): Promise<{
   friendId: string;
   conversationEnded: boolean;
   conversationFeedback: FriendConversationFeedback | null;
 }> {
-  return api.post(`/friends/${encodeURIComponent(friendId)}/finish`, payload);
+  const basePath = options?.anonymous ? '/public/friends' : '/friends';
+  return api.post(`${basePath}/${encodeURIComponent(friendId)}/finish`, payload);
 }
 
 async function listCatalogCharacters(): Promise<FriendCharacter[]> {

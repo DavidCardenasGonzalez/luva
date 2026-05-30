@@ -56,14 +56,14 @@ function renderStep(
   step: OnboardingStepContent,
   onNext: () => void,
   selectedCharacter: OnboardingCharacterId | null,
-  onSelectCharacter: (characterId: OnboardingCharacterId) => void,
   phraseSelections: OnboardingPhraseSelection[],
   onPhraseSelectionsChange: (selections: OnboardingPhraseSelection[]) => void,
   speakingSummary: OnboardingSpeakingSummary,
   onSpeakingSummaryChange: (summary: OnboardingSpeakingSummary) => void,
   onboardingPlan: OnboardingPlanResponse | null,
   onPlanReady: (plan: OnboardingPlanResponse) => void,
-  onSkipPractice: () => void,
+  onStartReels: () => void,
+  onSkipToFeed: () => void,
 ) {
   if (step.stepNumber === 1) return <Step1 content={step} />;
   if (step.stepNumber === 2) {
@@ -79,9 +79,8 @@ function renderStep(
     return (
       <Step3
         content={step}
-        selectedCharacter={selectedCharacter}
-        onSelectCharacter={onSelectCharacter}
-        onSkipPractice={onSkipPractice}
+        onStart={onStartReels}
+        onSkip={onSkipToFeed}
       />
     );
   }
@@ -131,6 +130,10 @@ export default function OnboardingScreen({ navigation, route }: Props) {
   const trackedStepsRef = useRef<Set<number>>(new Set());
   const activeStep = steps[stepIndex] || DEFAULT_ONBOARDING_STEPS[0];
   const isLastStep = stepIndex >= steps.length - 1;
+  const visibleStepCount = activeStep.stepNumber <= 3 ? Math.min(3, steps.length) : steps.length;
+  const visibleStepPosition = activeStep.stepNumber <= 3
+    ? Math.min(stepIndex + 1, visibleStepCount)
+    : stepIndex + 1;
 
   useEffect(() => {
     let mounted = true;
@@ -196,7 +199,7 @@ export default function OnboardingScreen({ navigation, route }: Props) {
     });
   }, [activeStep.stepNumber, loadingContent, phraseSelections, selectedCharacter, speakingSummary]);
 
-  const finishOnboarding = useCallback(async (showLiteOffer = false) => {
+  const finishOnboarding = useCallback(async (showLiteOffer = false, openReels = false) => {
     if (onboardingPlan) {
       await saveJourneyPlan(onboardingPlan);
     }
@@ -221,9 +224,27 @@ export default function OnboardingScreen({ navigation, route }: Props) {
 
     navigation.reset({
       index: 0,
-      routes: [{ name: 'Feed' }],
+      routes: [
+        openReels
+          ? { name: 'Feed', params: { openReels: true } }
+          : { name: 'Feed' },
+      ],
     });
   }, [navigation, onboardingPlan]);
+
+  const goToReelsForFirstConversation = useCallback(async () => {
+    await saveOnboardingDraftProgress({
+      stepNumber: 5,
+      selectedCharacter,
+      phraseSelections,
+      speakingSummary,
+    });
+
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Feed', params: { openReels: true } }],
+    });
+  }, [navigation, phraseSelections, selectedCharacter, speakingSummary]);
 
   const handlePlanReady = useCallback((plan: OnboardingPlanResponse) => {
     setOnboardingPlan(plan);
@@ -247,21 +268,15 @@ export default function OnboardingScreen({ navigation, route }: Props) {
     navigation.navigate('AccountAccess', { fromOnboarding: true });
   }, [navigation]);
 
-  const selectCharacter = useCallback((characterId: OnboardingCharacterId) => {
-    setSelectedCharacter(characterId);
-    setStepIndex((current) => Math.min(current + 1, steps.length - 1));
-  }, [steps.length]);
+  const startReelsFromOnboarding = useCallback(() => {
+    void goToReelsForFirstConversation();
+  }, [goToReelsForFirstConversation]);
 
-  const skipPracticeAndCreatePlan = useCallback(() => {
-    setSelectedCharacter((current) => current ?? 'zoe');
-    setStepIndex((current) => {
-      const planStepIndex = steps.findIndex((step) => step.stepNumber === 5);
-      if (planStepIndex >= 0) return planStepIndex;
-      return Math.min(current + 2, steps.length - 1);
-    });
-  }, [steps]);
+  const skipReelsFromOnboarding = useCallback(() => {
+    void finishOnboarding(false, false);
+  }, [finishOnboarding]);
 
-  const showProgress = !loadingContent && steps.length > 1;
+  const showProgress = !loadingContent && visibleStepCount > 1;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
@@ -279,7 +294,7 @@ export default function OnboardingScreen({ navigation, route }: Props) {
           }}
         >
           {/* Back button */}
-          {stepIndex > 0 ? (
+          {stepIndex > 0 && activeStep.stepNumber !== 5 ? (
             <Pressable
               onPress={goBack}
               accessibilityRole="button"
@@ -314,15 +329,15 @@ export default function OnboardingScreen({ navigation, route }: Props) {
             {loadingContent ? (
               <ActivityIndicator color={COLORS.cyan} />
             ) : showProgress ? (
-              steps.map((_, i) => (
+              Array.from({ length: visibleStepCount }, (_, i) => (
                 <View
                   key={i}
                   style={{
                     height: 3,
-                    width: i === stepIndex ? 24 : 14,
+                    width: i === visibleStepPosition - 1 ? 24 : 14,
                     borderRadius: 2,
                     backgroundColor:
-                      i === stepIndex
+                      i === visibleStepPosition - 1
                         ? COLORS.cyan
                         : 'rgba(148, 163, 184, 0.28)',
                   }}
@@ -350,7 +365,7 @@ export default function OnboardingScreen({ navigation, route }: Props) {
                   fontWeight: '700',
                 }}
               >
-                {stepIndex + 1} de {steps.length}
+                {visibleStepPosition} de {visibleStepCount}
               </Text>
             </View>
           ) : (
@@ -369,14 +384,14 @@ export default function OnboardingScreen({ navigation, route }: Props) {
               activeStep,
               goNext,
               selectedCharacter,
-              selectCharacter,
               phraseSelections,
               setPhraseSelections,
               speakingSummary,
               setSpeakingSummary,
               onboardingPlan,
               handlePlanReady,
-              skipPracticeAndCreatePlan,
+              startReelsFromOnboarding,
+              skipReelsFromOnboarding,
             )
           )}
         </View>

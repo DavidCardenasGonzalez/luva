@@ -169,6 +169,17 @@ export interface FriendCharacter {
   lastMessageAt?: string;
   messageCount?: number;
   conversationCount?: number;
+  conversationSnapshot?: FriendConversationSnapshot;
+}
+
+export interface FriendConversationSnapshot {
+  messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+  conversationEnded: boolean;
+  conversationFeedback?: {
+    summary: string;
+    improvements: string[];
+  } | null;
+  updatedAt: string;
 }
 
 export interface CreateFriendRequest {
@@ -177,6 +188,11 @@ export interface CreateFriendRequest {
   sceneIndex?: number;
   storyDefinition?: StoryDefinition;
   missionDefinition?: StoryMission;
+  lastMessageAt?: string;
+  lastUserMessage?: string;
+  messageCount?: number;
+  conversationCount?: number;
+  conversationSnapshot?: FriendConversationSnapshot;
 }
 
 export interface FriendsListResponse {

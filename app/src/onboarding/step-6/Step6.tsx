@@ -263,41 +263,6 @@ export default function Step6({ content, plan, onNext }: Props) {
         ))}
       </View>
 
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 12,
-          borderRadius: 18,
-          borderWidth: 1,
-          borderColor: 'rgba(139, 92, 246, 0.24)',
-          backgroundColor: 'rgba(88, 28, 135, 0.20)',
-          padding: 14,
-          marginTop: 12,
-        }}
-      >
-        <View
-          style={{
-            width: 42,
-            height: 42,
-            borderRadius: 12,
-            backgroundColor: 'rgba(124, 58, 237, 0.30)',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <MaterialIcons name="stacked-line-chart" size={24} color="#c084fc" />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={{ color: COLORS.text, fontSize: 13, fontWeight: '900' }}>
-            Este plan se ajustará contigo cada semana
-          </Text>
-          <Text style={{ color: COLORS.muted, fontSize: 11, lineHeight: 16, marginTop: 2 }}>
-            Cada nivel equivale a {progressModel.pointsPerLevel} puntos internos según lo que practiques.
-          </Text>
-        </View>
-      </View>
-
       <Pressable
         onPress={onNext}
         accessibilityRole="button"

@@ -12,6 +12,11 @@ type Props = {
 export default function CoinCountChip({ style, variant = 'dark' }: Props) {
   const { balance, isUnlimited, loading } = useCoins();
   const navigation = useNavigation<any>();
+
+  if (isUnlimited) {
+    return null;
+  }
+
   const palette =
     variant === 'light'
       ? {
@@ -27,7 +32,7 @@ export default function CoinCountChip({ style, variant = 'dark' }: Props) {
           icon: '#22d3ee',
         };
 
-  const label = isUnlimited ? '∞' : loading ? '...' : String(balance);
+  const label = loading ? '...' : String(balance);
 
   return (
     <Pressable

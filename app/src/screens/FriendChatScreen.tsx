@@ -24,7 +24,6 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import CoinCountChip from '../components/CoinCountChip';
 import StoryMessageComposer, { StoryFlowState } from '../components/StoryMessageComposer';
-import AccountProgressCard from '../components/AccountProgressCard';
 import { useAuth } from '../auth/AuthProvider';
 import { api } from '../api/api';
 import { shouldRecordLikes } from '../config/likeRecording';
@@ -35,15 +34,31 @@ import {
   finishFriendChat,
   FriendChatPayload,
   FriendConversationFeedback,
+  FriendConversationSnapshot,
   sendFriendChatMessage,
   useFriends,
 } from '../hooks/useFriends';
+import {
+  buildLocalFriendConversationKey,
+  loadLocalFriendConversation,
+  saveLocalFriendConversation,
+} from '../friends/localFriendConversations';
+import {
+  recordLocalFriendConversationFinished,
+  recordLocalFriendMessageSent,
+} from '../friends/localFriends';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
+import {
+  getOnboardingDraftProgress,
+  hasCompletedOnboarding,
+  saveOnboardingDraftProgress,
+} from '../onboarding/model/progress';
 import {
   AI_CONVERSATION_POINTS_PER_MESSAGE,
   recordJourneyAiConversationMessageSent,
 } from '../progress/journeyProgress';
 import { trackMixpanelFriendEvent } from '../marketing/mixpanelEvents';
+import { trackMetaFriendChatStarted } from '../marketing/metaAppEvents';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FriendChat'>;
 
@@ -52,6 +67,23 @@ type ChatMessage = {
   role: 'user' | 'assistant';
   text: string;
 };
+
+function messagesFromRemoteConversation(snapshot?: FriendConversationSnapshot | null): ChatMessage[] {
+  const messages = Array.isArray(snapshot?.messages) ? snapshot.messages : [];
+  return messages
+    .map((message, index) => {
+      const text = typeof message.content === 'string' ? message.content.trim() : '';
+      if (!text || (message.role !== 'user' && message.role !== 'assistant')) {
+        return null;
+      }
+      return {
+        id: `remote-${index}-${message.role}`,
+        role: message.role,
+        text,
+      };
+    })
+    .filter((message): message is ChatMessage => !!message);
+}
 
 type TranslationResponse = {
   translatedText: string;
@@ -295,6 +327,10 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     route.params?.postVideoUrl,
   ]);
   const chatContextKey = `${friendId || ''}:${sourcePost?.postId || ''}:${sourcePost?.context || ''}`;
+  const localConversationKey = useMemo(
+    () => buildLocalFriendConversationKey(friendId, sourcePost),
+    [friendId, sourcePost]
+  );
   const trackedFriendViewRef = useRef<string | undefined>(undefined);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messageTranslations, setMessageTranslations] = useState<Record<string, MessageTranslationState>>({});
@@ -319,6 +355,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const skipExitPromptRef = useRef(false);
   const autoSentDraftKeyRef = useRef<string | undefined>(undefined);
   const likeRecordedForPostRef = useRef<string | undefined>(undefined);
+  const remoteHydratedKeyRef = useRef<string | undefined>(undefined);
 
   const avatarSource = useMemo(() => {
     if (!friend) return undefined;
@@ -365,6 +402,8 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   }, [chatContextKey, friend, sourcePost]);
 
   useEffect(() => {
+    let mounted = true;
+    remoteHydratedKeyRef.current = undefined;
     skipExitPromptRef.current = false;
     setMessages([]);
     setMessageTranslations({});
@@ -373,7 +412,64 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     setConversationFeedback(null);
     setCompletionConfettiKey(null);
     setErrorMessage(null);
-  }, [chatContextKey]);
+
+    void loadLocalFriendConversation(localConversationKey).then((snapshot) => {
+      if (!mounted || !snapshot) return;
+      setMessages(snapshot.messages);
+      setAnalysis(snapshot.analysis ?? null);
+      setConversationEnded(Boolean(snapshot.conversationEnded));
+      setConversationFeedback(snapshot.conversationFeedback ?? null);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [chatContextKey, localConversationKey]);
+
+  useEffect(() => {
+    if (remoteHydratedKeyRef.current === localConversationKey) return;
+    if (messages.length > 0) {
+      remoteHydratedKeyRef.current = localConversationKey;
+      return;
+    }
+    const remoteMessages = messagesFromRemoteConversation(friend?.conversationSnapshot);
+    if (!remoteMessages.length) return;
+    remoteHydratedKeyRef.current = localConversationKey;
+    setMessages(remoteMessages);
+    setConversationEnded(Boolean(friend?.conversationSnapshot?.conversationEnded));
+    setConversationFeedback(friend?.conversationSnapshot?.conversationFeedback ?? null);
+  }, [friend?.conversationSnapshot, localConversationKey, messages.length]);
+
+  const persistConversationSnapshot = useCallback(
+    async ({
+      nextMessages,
+      nextAnalysis = analysis,
+      nextConversationEnded = conversationEnded,
+      nextConversationFeedback = conversationFeedback,
+    }: {
+      nextMessages: ChatMessage[];
+      nextAnalysis?: FriendChatPayload | null;
+      nextConversationEnded?: boolean;
+      nextConversationFeedback?: FriendConversationFeedback | null;
+    }) => {
+      if (!friendId || !nextMessages.length) return;
+      try {
+        await saveLocalFriendConversation({
+          conversationKey: localConversationKey,
+          friendId,
+          sourcePost,
+          messages: nextMessages,
+          analysis: nextAnalysis,
+          conversationEnded: Boolean(nextConversationEnded),
+          conversationFeedback: nextConversationFeedback ?? null,
+          updatedAt: new Date().toISOString(),
+        });
+      } catch (err: any) {
+        console.warn('[FriendChat] No se pudo guardar la conversación local:', err?.message || err);
+      }
+    },
+    [analysis, conversationEnded, conversationFeedback, friendId, localConversationKey, sourcePost]
+  );
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -441,10 +537,6 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     return () => sub.remove();
   }, [recorder]);
 
-  const handleCreateAccount = useCallback((prefillEmail?: string) => {
-    navigation.navigate('EmailSignUp', { prefillEmail });
-  }, [navigation]);
-
   const handleOpenAssistance = useCallback(() => {
     void trackMixpanelFriendEvent('friend_chat_help_opened', {
       friend_id: friend?.friendId,
@@ -478,10 +570,20 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         history_message_count: messages.length,
       });
       const historyPayload = messages.map(({ role, text }) => ({ role, content: text }));
-      const payload = await finishFriendChat(friendId, { history: historyPayload });
+      const payload = await finishFriendChat(friendId, { history: historyPayload }, { anonymous: !isSignedIn });
       setConversationEnded(true);
       setConversationFeedback(payload.conversationFeedback ?? null);
       setCompletionConfettiKey(Date.now());
+      void persistConversationSnapshot({
+        nextMessages: messages,
+        nextConversationEnded: true,
+        nextConversationFeedback: payload.conversationFeedback ?? null,
+      });
+      if (!isSignedIn && friend) {
+        void recordLocalFriendConversationFinished(friend).then(() => reload()).catch((err: any) => {
+          console.warn('[FriendChat] No se pudo guardar el cierre local:', err?.message || err);
+        });
+      }
       void trackMixpanelFriendEvent('friend_chat_completed', {
         friend_id: friendId,
         character_name: friend?.characterName,
@@ -500,7 +602,18 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       setEndingConversation(false);
       setFlowState('idle');
     }
-  }, [conversationEnded, endingConversation, flowState, friend, friendId, messages, reload, sourcePost]);
+  }, [
+    conversationEnded,
+    endingConversation,
+    flowState,
+    friend,
+    friendId,
+    isSignedIn,
+    messages,
+    persistConversationSnapshot,
+    reload,
+    sourcePost,
+  ]);
 
   useEffect(() => {
     handleEndConversationRef.current = () => {
@@ -508,7 +621,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     };
   }, [handleEndConversation]);
 
-  const handleFinishConversation = useCallback(() => {
+  const handleFinishConversation = useCallback(async () => {
     void trackMixpanelFriendEvent('friend_chat_finished', {
       friend_id: friend?.friendId,
       character_name: friend?.characterName,
@@ -519,11 +632,31 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       conversation_ended: conversationEnded,
     });
     skipExitPromptRef.current = true;
+
+    const onboardingCompleted = await hasCompletedOnboarding();
+    if (!onboardingCompleted) {
+      const existingDraft = await getOnboardingDraftProgress();
+      await saveOnboardingDraftProgress({
+        stepNumber: 5,
+        selectedCharacter: existingDraft?.selectedCharacter ?? null,
+        phraseSelections: existingDraft?.phraseSelections ?? [],
+        speakingSummary: {
+          messages: messages.map(({ role, text }) => ({ role, content: text })),
+          completedRequirementIds: [],
+        },
+      });
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Onboarding', params: { startAtStep: 5 } }],
+      });
+      return;
+    }
+
     navigation.reset({
       index: 0,
       routes: [{ name: 'Feed' }],
     });
-  }, [conversationEnded, friend, messages.length, navigation, sourcePost?.postId]);
+  }, [conversationEnded, friend, messages, navigation, sourcePost?.postId]);
 
   const handleRequestAssistance = useCallback(async () => {
     const trimmed = assistanceQuestion.trim();
@@ -552,8 +685,9 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         history_message_count: messages.length,
       });
       const historyPayload = messages.map(({ role, text }) => ({ role, content: text }));
+      const assistanceBasePath = isSignedIn ? '/friends' : '/public/friends';
       const payload = await api.post<FriendAssistanceResponse>(
-        `/friends/${encodeURIComponent(friend.friendId)}/assist`,
+        `${assistanceBasePath}/${encodeURIComponent(friend.friendId)}/assist`,
         {
           question: trimmed,
           history: historyPayload,
@@ -567,7 +701,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     } finally {
       setAssistanceLoading(false);
     }
-  }, [assistanceQuestion, friend, messages, sourcePost]);
+  }, [assistanceQuestion, friend, isSignedIn, messages, sourcePost]);
 
   const speakAssistantMessage = useCallback(async (text: string) => {
     const speechText = text.trim();
@@ -681,7 +815,14 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         role,
         content: text,
       }));
-      setMessages((current) => [...current, pendingUserMessage]);
+      const messagesWithPendingUser = [...messages, pendingUserMessage];
+      setMessages(messagesWithPendingUser);
+      void persistConversationSnapshot({
+        nextMessages: messagesWithPendingUser,
+        nextAnalysis: null,
+        nextConversationEnded: false,
+        nextConversationFeedback: null,
+      });
 
       const sourcePostId = sourcePost?.postId;
       if (
@@ -701,6 +842,8 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           });
       }
 
+      const isFirstUserMessage = messages.length === 0;
+
       try {
         const payload = await sendFriendChatMessage(friendId, {
           sessionId,
@@ -711,7 +854,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           ...(sourcePost?.imageUrl ? { postImageUrl: sourcePost.imageUrl } : {}),
           ...(sourcePost?.videoUrl ? { postVideoUrl: sourcePost.videoUrl } : {}),
           history: historyPayload,
-        });
+        }, { anonymous: !isSignedIn });
         void recordJourneyAiConversationMessageSent();
         void trackMixpanelFriendEvent('friend_chat_message_sent', {
           friend_id: friendId,
@@ -726,22 +869,54 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           result: payload.result,
           correctness: payload.correctness,
         });
-        setMessages((current) => [
-          ...current,
-          {
-            id: `ai-${Date.now()}`,
-            role: 'assistant',
-            text: payload.aiReply,
-          },
-        ]);
+        if (isFirstUserMessage) {
+          void trackMetaFriendChatStarted({
+            friendId,
+            characterName: friend?.characterName,
+            storyId: friend?.storyId,
+            missionId: friend?.missionId,
+            postId: sourcePost?.postId,
+            inputMethod,
+          });
+        }
+        const assistantMessage: ChatMessage = {
+          id: `ai-${Date.now()}`,
+          role: 'assistant',
+          text: payload.aiReply,
+        };
+        const messagesWithReply = [...messagesWithPendingUser, assistantMessage];
+        setMessages(messagesWithReply);
         setAnalysis(payload);
+        void persistConversationSnapshot({
+          nextMessages: messagesWithReply,
+          nextAnalysis: payload,
+          nextConversationEnded: false,
+          nextConversationFeedback: null,
+        });
+        if (!isSignedIn && friend) {
+          void recordLocalFriendMessageSent(friend, trimmed).catch((err: any) => {
+            console.warn('[FriendChat] No se pudo guardar el mensaje local:', err?.message || err);
+          });
+        }
       } catch (err: any) {
         setErrorMessage(err?.message || 'No pudimos continuar la conversación.');
       } finally {
         setFlowState('idle');
       }
     },
-    [coinsLoading, conversationEnded, friend, friendId, isUnlimited, messages, navigation, sourcePost, spendCoins]
+    [
+      coinsLoading,
+      conversationEnded,
+      friend,
+      friendId,
+      isSignedIn,
+      isUnlimited,
+      messages,
+      navigation,
+      persistConversationSnapshot,
+      sourcePost,
+      spendCoins,
+    ]
   );
 
   const handleSendText = useCallback(
@@ -880,6 +1055,9 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       case 'evaluating':
         return 'Analizando tu inglés...';
       default:
+        if (isUnlimited) {
+          return 'Listo para conversar';
+        }
         if (coinsLoading) {
           return 'Cargando tus monedas...';
         }
@@ -891,32 +1069,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         }
         return 'Enviar cuesta 1 moneda · Voz cuesta 2 monedas';
     }
-  }, [coinsLoading, flowState, textCoinLocked, voiceCoinLocked]);
-
-  if (!isSignedIn) {
-    return (
-      <View style={{ flex: 1, backgroundColor: '#0b1224', paddingTop: insets.top + 16, paddingHorizontal: 20 }}>
-        <Pressable
-          onPress={() => navigation.goBack()}
-          style={({ pressed }) => ({
-            width: 42,
-            height: 42,
-            borderRadius: 12,
-            backgroundColor: '#0f172a',
-            borderWidth: 1,
-            borderColor: '#1f2937',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.8 : 1,
-            marginBottom: 16,
-          })}
-        >
-          <MaterialIcons name="arrow-back" size={20} color="#e2e8f0" />
-        </Pressable>
-        <AccountProgressCard mode="signed-out" onCreateAccount={handleCreateAccount} />
-      </View>
-    );
-  }
+  }, [coinsLoading, flowState, isUnlimited, textCoinLocked, voiceCoinLocked]);
 
   if ((!loaded || loading) && !friend) {
     return (
@@ -1249,7 +1402,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
             <StoryMessageComposer
               flowState={flowState}
               retryBlocked={false}
-              recordBlocked={coinsLoading || voiceCoinLocked}
+              recordBlocked={(!isUnlimited && coinsLoading) || voiceCoinLocked}
               statusLabel={statusLabel}
               onSendText={handleSendText}
               onRecordPressIn={handleRecordPressIn}

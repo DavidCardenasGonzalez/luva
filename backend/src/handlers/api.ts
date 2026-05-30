@@ -46,6 +46,7 @@ import {
   FriendCharacter,
   FriendChatRequest,
   FriendChatPayload,
+  FriendConversationSnapshot,
   FriendsListResponse,
 } from "../types";
 import { CHARACTERS } from "../data/characters";
@@ -53,6 +54,7 @@ import { storiesFromCharacters } from "../data/character-stories";
 import {
   type CharacterPost,
   incrementCharacterPostLike,
+  incrementCharacterPostMetric,
   listPublicCharacterPosts,
   listPublicCharacterVideoPosts,
 } from "../character-posts";
@@ -758,6 +760,35 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       return json(200, { posts: await listPublicCharacterVideoPosts() });
     }
 
+    const characterVideoMetric = path.match(
+      /^\/v1\/feed\/character-videos\/([^/]+)\/([^/]+)\/metric$/,
+    );
+    if (method === "POST" && characterVideoMetric) {
+      try {
+        const body = parseBody(event.body) || {};
+        return json(
+          200,
+          await incrementCharacterPostMetric(
+            decodeURIComponent(characterVideoMetric[1]),
+            decodeURIComponent(characterVideoMetric[2]),
+            (body as { event?: unknown }).event,
+          ),
+        );
+      } catch (err: any) {
+        if (
+          err?.message === 'INVALID_CHARACTER_ID' ||
+          err?.message === 'INVALID_CHARACTER_POST_ID' ||
+          err?.message === 'INVALID_CHARACTER_POST_METRIC'
+        ) {
+          return badRequest(err.message);
+        }
+        if (err?.name === 'ConditionalCheckFailedException') {
+          return notFound();
+        }
+        throw err;
+      }
+    }
+
     const characterVideoLike = path.match(
       /^\/v1\/feed\/character-videos\/([^/]+)\/([^/]+)\/like$/,
     );
@@ -870,6 +901,77 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       }
 
       return json(200, profile);
+    }
+
+    const publicFriendFinish = path.match(/^\/v1\/public\/friends\/([^/]+)\/finish$/);
+    if (method === "POST" && publicFriendFinish) {
+      const friendId = decodeURIComponent(publicFriendFinish[1]);
+      const body = parseBody(event.body) as
+        | { history?: Array<{ role: 'user' | 'assistant'; content: string }> }
+        | undefined;
+      try {
+        const feedback = await finishFriendChat(undefined, friendId, body || {});
+        return json(200, { friendId, conversationEnded: true, conversationFeedback: feedback });
+      } catch (err: any) {
+        if (err?.message === "FRIEND_NOT_FOUND") {
+          return notFound();
+        }
+        throw err;
+      }
+    }
+
+    const publicFriendChat = path.match(/^\/v1\/public\/friends\/([^/]+)\/chat$/);
+    if (method === "POST" && publicFriendChat) {
+      const friendId = decodeURIComponent(publicFriendChat[1]);
+      const body = parseBody(event.body) as FriendChatRequest | undefined;
+      const transcript = typeof body?.transcript === "string" ? body.transcript.trim() : "";
+      if (!transcript) {
+        return badRequest("Missing transcript");
+      }
+      try {
+        const payload = await advanceFriendChat(
+          undefined,
+          friendId,
+          {
+            ...(body || {}),
+            transcript,
+          }
+        );
+        return json(200, payload);
+      } catch (err: any) {
+        if (err?.message === "FRIEND_NOT_FOUND") {
+          return notFound();
+        }
+        throw err;
+      }
+    }
+
+    const publicFriendAssist = path.match(/^\/v1\/public\/friends\/([^/]+)\/assist$/);
+    if (method === "POST" && publicFriendAssist) {
+      const friendId = decodeURIComponent(publicFriendAssist[1]);
+      const body = parseBody(event.body) as any;
+      const question = typeof body?.question === "string" ? body.question.trim() : "";
+      if (!question) {
+        return badRequest("Missing question");
+      }
+      try {
+        const answer = await answerFriendAssistance(undefined, friendId, {
+          ...(body || {}),
+          question,
+        });
+        return json(200, { answer });
+      } catch (err: any) {
+        if (err?.message === "FRIEND_NOT_FOUND") {
+          return notFound();
+        }
+        console.error(
+          JSON.stringify({
+            scope: "friends.public_assist.error",
+            message: err?.message || "unknown",
+          })
+        );
+        return json(500, { message: "No pudimos generar la asistencia", code: "FRIEND_ASSISTANCE_FAILED" });
+      }
     }
 
     const friendFinish = path.match(/^\/v1\/friends\/([^/]+)\/finish$/);
@@ -1103,6 +1205,28 @@ function sanitizeFriendConversationFeedback(input: any): FriendConversationFeedb
   return { summary, improvements };
 }
 
+function sanitizeFriendConversationSnapshot(input: any): FriendConversationSnapshot | undefined {
+  if (!input || typeof input !== "object") return undefined;
+  const messages = sanitizeHistory(input.messages).slice(-FRIEND_HISTORY_LIMIT);
+  if (!messages.length) return undefined;
+  const updatedAt = sanitizeSyncTimestamp(input.updatedAt) || new Date().toISOString();
+  return {
+    messages,
+    conversationEnded: Boolean(input.conversationEnded),
+    conversationFeedback: sanitizeFriendConversationFeedback(input.conversationFeedback) || null,
+    updatedAt,
+  };
+}
+
+function latestConversationSnapshot(
+  left?: FriendConversationSnapshot,
+  right?: FriendConversationSnapshot
+): FriendConversationSnapshot | undefined {
+  if (!left) return right;
+  if (!right) return left;
+  return Date.parse(right.updatedAt) > Date.parse(left.updatedAt) ? right : left;
+}
+
 function publicFriend(record: FriendRecord): FriendCharacter {
   return {
     friendId: record.friendId,
@@ -1127,6 +1251,7 @@ function publicFriend(record: FriendRecord): FriendCharacter {
     ...(record.lastMessageAt ? { lastMessageAt: record.lastMessageAt } : {}),
     ...(typeof record.messageCount === "number" ? { messageCount: record.messageCount } : {}),
     ...(typeof record.conversationCount === "number" ? { conversationCount: record.conversationCount } : {}),
+    ...(record.conversationSnapshot ? { conversationSnapshot: record.conversationSnapshot } : {}),
   };
 }
 
@@ -1259,6 +1384,7 @@ function sanitizeFriendRecord(input: any): FriendRecord | undefined {
   ) {
     return undefined;
   }
+  const conversationSnapshot = sanitizeFriendConversationSnapshot(input.conversationSnapshot);
 
   return {
     userId,
@@ -1285,6 +1411,7 @@ function sanitizeFriendRecord(input: any): FriendRecord | undefined {
     ...(typeof input.lastUserMessage === "string" ? { lastUserMessage: input.lastUserMessage } : {}),
     ...(typeof input.messageCount === "number" ? { messageCount: input.messageCount } : {}),
     ...(typeof conversationCount === "number" ? { conversationCount } : {}),
+    ...(conversationSnapshot ? { conversationSnapshot } : {}),
   };
 }
 
@@ -1313,6 +1440,30 @@ async function listFriends(userId: string): Promise<FriendCharacter[]> {
     .filter((item): item is FriendRecord => !!item)
     .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))
     .map(publicFriend);
+}
+
+function sanitizeSyncCount(value: unknown): number | undefined {
+  const parsed =
+    typeof value === "number"
+      ? value
+      : typeof value === "string"
+      ? Number(value.trim())
+      : Number.NaN;
+  if (!Number.isFinite(parsed)) return undefined;
+  return Math.max(0, Math.floor(parsed));
+}
+
+function sanitizeSyncTimestamp(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  if (!trimmed || !Number.isFinite(Date.parse(trimmed))) return undefined;
+  return new Date(trimmed).toISOString();
+}
+
+function latestTimestamp(...values: Array<string | undefined>): string | undefined {
+  return values
+    .filter((value): value is string => Boolean(value && Number.isFinite(Date.parse(value))))
+    .sort((left, right) => Date.parse(right) - Date.parse(left))[0];
 }
 
 async function createFriendFromMission(
@@ -1369,6 +1520,20 @@ async function createFriendFromMission(
   const friendId = buildFriendId(storyId, mission.missionId);
   const existing = await getFriendRecord(userId, friendId);
   const now = new Date().toISOString();
+  const syncedLastMessageAt = sanitizeSyncTimestamp(body.lastMessageAt);
+  const syncedLastUserMessage =
+    typeof body.lastUserMessage === "string" && body.lastUserMessage.trim()
+      ? body.lastUserMessage.trim().slice(0, 500)
+      : undefined;
+  const syncedMessageCount = sanitizeSyncCount(body.messageCount);
+  const syncedConversationCount = sanitizeSyncCount(body.conversationCount);
+  const messageCount = Math.max(existing?.messageCount ?? 0, syncedMessageCount ?? 0);
+  const conversationCount = Math.max(existing?.conversationCount ?? 0, syncedConversationCount ?? 0);
+  const lastMessageAt = latestTimestamp(existing?.lastMessageAt, syncedLastMessageAt);
+  const conversationSnapshot = latestConversationSnapshot(
+    existing?.conversationSnapshot,
+    sanitizeFriendConversationSnapshot(body.conversationSnapshot)
+  );
   const item: FriendRecord = {
     userId,
     friendId,
@@ -1390,10 +1555,13 @@ async function createFriendFromMission(
     ...(mission.sceneSummary ? { sceneSummary: mission.sceneSummary } : {}),
     createdAt: existing?.createdAt || now,
     updatedAt: now,
-    ...(existing?.lastMessageAt ? { lastMessageAt: existing.lastMessageAt } : {}),
-    ...(existing?.lastUserMessage ? { lastUserMessage: existing.lastUserMessage } : {}),
-    ...(typeof existing?.messageCount === "number" ? { messageCount: existing.messageCount } : {}),
-    ...(typeof existing?.conversationCount === "number" ? { conversationCount: existing.conversationCount } : {}),
+    ...(lastMessageAt ? { lastMessageAt } : {}),
+    ...(syncedLastUserMessage || existing?.lastUserMessage
+      ? { lastUserMessage: syncedLastUserMessage || existing?.lastUserMessage }
+      : {}),
+    ...(messageCount > 0 ? { messageCount } : {}),
+    ...(conversationCount > 0 ? { conversationCount } : {}),
+    ...(conversationSnapshot ? { conversationSnapshot } : {}),
   };
 
   await dynamo.send(
@@ -1425,12 +1593,59 @@ async function resolveFriendRecord(userId: string, friendId: string): Promise<Fr
   return getFriendRecord(userId, friendId);
 }
 
+function publicFriendRecord(friend: FriendCharacter, userId = "anonymous"): FriendRecord {
+  return {
+    userId,
+    friendId: friend.friendId,
+    storyId: friend.storyId,
+    missionId: friend.missionId,
+    sceneIndex: friend.sceneIndex,
+    storyTitle: friend.storyTitle,
+    missionTitle: friend.missionTitle,
+    characterName: friend.characterName,
+    aiRole: friend.aiRole,
+    ...(friend.aiRoleFriends ? { aiRoleFriends: friend.aiRoleFriends } : {}),
+    ...(friend.characterPrompt ? { characterPrompt: friend.characterPrompt } : {}),
+    ...(friend.avatarImageUrl ? { avatarImageUrl: friend.avatarImageUrl } : {}),
+    ...(friend.avatarImageXsUrl ? { avatarImageXsUrl: friend.avatarImageXsUrl } : {}),
+    ...(friend.avatarImageMdUrl ? { avatarImageMdUrl: friend.avatarImageMdUrl } : {}),
+    ...(friend.videoIntro ? { videoIntro: friend.videoIntro } : {}),
+    ...(friend.videoPreviewUrl ? { videoPreviewUrl: friend.videoPreviewUrl } : {}),
+    ...(friend.videoThumbnailUrl ? { videoThumbnailUrl: friend.videoThumbnailUrl } : {}),
+    ...(friend.sceneSummary ? { sceneSummary: friend.sceneSummary } : {}),
+    createdAt: friend.createdAt,
+    updatedAt: friend.updatedAt,
+    ...(friend.lastMessageAt ? { lastMessageAt: friend.lastMessageAt } : {}),
+    ...(typeof friend.messageCount === "number" ? { messageCount: friend.messageCount } : {}),
+    ...(typeof friend.conversationCount === "number" ? { conversationCount: friend.conversationCount } : {}),
+    ...(friend.conversationSnapshot ? { conversationSnapshot: friend.conversationSnapshot } : {}),
+  };
+}
+
+async function resolvePublicFriendRecord(friendId: string): Promise<FriendRecord | undefined> {
+  const catalogFriend = publicCatalogFriend(friendId);
+  if (catalogFriend) {
+    return publicFriendRecord(catalogFriend);
+  }
+
+  const posts = await listPublicCharacterPosts(friendId);
+  const postFriend = publicFriendFromCharacterPosts(friendId, posts);
+  return postFriend ? publicFriendRecord(postFriend) : undefined;
+}
+
+async function resolveFriendRecordForChat(
+  userId: string | undefined,
+  friendId: string
+): Promise<FriendRecord | undefined> {
+  return userId ? resolveFriendRecord(userId, friendId) : resolvePublicFriendRecord(friendId);
+}
+
 async function answerFriendAssistance(
-  userId: string,
+  userId: string | undefined,
   friendId: string,
   body: { question: string; history?: StoryMessage[]; postContext?: string }
 ): Promise<string> {
-  const friend = await resolveFriendRecord(userId, friendId);
+  const friend = await resolveFriendRecordForChat(userId, friendId);
   if (!friend) {
     throw new Error("FRIEND_NOT_FOUND");
   }
@@ -1476,7 +1691,8 @@ async function touchFriendChat(
   userId: string,
   friendId: string,
   transcript: string,
-  conversationEnded: boolean
+  conversationEnded: boolean,
+  conversationSnapshot?: FriendConversationSnapshot
 ): Promise<void> {
   try {
     const setExpressions = [
@@ -1489,6 +1705,13 @@ async function touchFriendChat(
       ":message": transcript.slice(0, 500),
       ":one": 1,
     };
+    if (conversationSnapshot) {
+      setExpressions.push("conversationSnapshot = :conversationSnapshot");
+      expressionAttributeValues[":conversationSnapshot"] = {
+        ...conversationSnapshot,
+        updatedAt: conversationSnapshot.updatedAt || expressionAttributeValues[":now"],
+      };
+    }
     const addExpressions = ["messageCount :one"];
     if (conversationEnded) {
       addExpressions.push("conversationCount :one");
@@ -1603,12 +1826,12 @@ async function resolveFriendChatPostContext(
 }
 
 async function advanceFriendChat(
-  userId: string,
+  userId: string | undefined,
   friendId: string,
   body: FriendChatRequest,
   learnerName?: string
 ): Promise<FriendChatPayload> {
-  const friend = await resolveFriendRecord(userId, friendId);
+  const friend = await resolveFriendRecordForChat(userId, friendId);
   if (!friend) {
     throw new Error("FRIEND_NOT_FOUND");
   }
@@ -1675,7 +1898,19 @@ async function advanceFriendChat(
     );
   }
 
-  await touchFriendChat(userId, friendId, transcript, false);
+  const conversationWithReply = appendHistoryEntry(conversationHistory, {
+    role: "assistant",
+    content: aiReply,
+  }).slice(-FRIEND_HISTORY_LIMIT);
+
+  if (userId) {
+    await touchFriendChat(userId, friendId, transcript, false, {
+      messages: conversationWithReply,
+      conversationEnded: false,
+      conversationFeedback: null,
+      updatedAt: new Date().toISOString(),
+    });
+  }
 
   return {
     friendId,
@@ -1690,11 +1925,11 @@ async function advanceFriendChat(
 }
 
 async function finishFriendChat(
-  userId: string,
+  userId: string | undefined,
   friendId: string,
   body: { history?: Array<{ role: 'user' | 'assistant'; content: string }> }
 ): Promise<FriendConversationFeedback> {
-  const friend = await resolveFriendRecord(userId, friendId);
+  const friend = await resolveFriendRecordForChat(userId, friendId);
   if (!friend) {
     throw new Error("FRIEND_NOT_FOUND");
   }
@@ -1716,7 +1951,14 @@ async function finishFriendChat(
       reformulations: [],
     });
   }
-  await touchFriendChat(userId, friendId, "", true);
+  if (userId) {
+    await touchFriendChat(userId, friendId, "", true, {
+      messages: history,
+      conversationEnded: true,
+      conversationFeedback: feedback,
+      updatedAt: new Date().toISOString(),
+    });
+  }
   return feedback;
 }
 

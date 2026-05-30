@@ -189,6 +189,8 @@ const COLORS = {
 };
 
 const CHARACTER_VIDEO_BATCH_SIZE = 1;
+const ONBOARDING_REELS_PRELOAD_COUNT = 3;
+const ONBOARDING_REELS_PRELOAD_TIMEOUT_MS = 1400;
 const VOCABULARY_BATCH_SIZE = 3;
 const SHADOWING_BATCH_SIZE = 1;
 const LESSON_BATCH_SIZE = 1;
@@ -243,6 +245,36 @@ function pickRandom<T>(list: T[], count: number, seed: string, keyFor: (item: T)
   return [...list]
     .sort((a, b) => hashString(`${seed}:${keyFor(a)}`) - hashString(`${seed}:${keyFor(b)}`))
     .slice(0, count);
+}
+
+function waitForMilliseconds(ms: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+async function preloadOnboardingReelPreviewAssets(videos: CharacterVideoFeedItem[]) {
+  const urls = Array.from(
+    new Set(
+      videos
+        .flatMap((item) => [
+          item.thumbnailUrl,
+          item.imageUrl,
+          item.avatarImageUrl,
+        ])
+        .map((url) => url?.trim())
+        .filter((url): url is string => !!url && /^https?:\/\//i.test(url))
+    )
+  );
+
+  if (!urls.length) {
+    return;
+  }
+
+  await Promise.race([
+    Promise.all(urls.map((url) => Image.prefetch(url).catch(() => false))).then(() => undefined),
+    waitForMilliseconds(ONBOARDING_REELS_PRELOAD_TIMEOUT_MS),
+  ]);
 }
 
 function buildFeedItems({
@@ -1035,7 +1067,7 @@ function CharacterVideoPage({
   );
   const activeSubtitleKey = useMemo(() => getVideoSubtitleKey(activeSubtitle), [activeSubtitle]);
   const activeTranslation = activeSubtitleKey ? subtitleTranslations[activeSubtitleKey] : undefined;
-  const subtitleBottomOffset = Math.max(height * 0.31, bottomInset + 188);
+  const subtitleBottomOffset = bottomInset + 168;
 
   useEffect(() => {
     if (!playbackEnabled) {
@@ -1223,7 +1255,11 @@ function CharacterVideoPage({
               borderColor: 'rgba(226, 232, 240, 0.28)',
             }}
           >
-            <MaterialIcons name="play-arrow" size={40} color="white" />
+            {!isVideoReadyForDisplay && !paused ? (
+              <ActivityIndicator size="large" color="white" />
+            ) : (
+              <MaterialIcons name="play-arrow" size={40} color="white" />
+            )}
           </View>
         </View>
       ) : null}
@@ -2546,7 +2582,63 @@ function TimerText({ value }: { value: string }) {
   );
 }
 
-export default function FeedScreen({ navigation }: Props) {
+function ReelsStartupOverlay() {
+  return (
+    <View
+      pointerEvents="auto"
+      style={{
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: COLORS.background,
+        paddingHorizontal: 28,
+      }}
+    >
+      <View
+        style={{
+          width: 76,
+          height: 76,
+          borderRadius: 38,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'rgba(124, 58, 237, 0.16)',
+          borderWidth: 1,
+          borderColor: 'rgba(168, 85, 247, 0.34)',
+        }}
+      >
+        <ActivityIndicator size="large" color="#a855f7" />
+      </View>
+      <Text
+        style={{
+          color: COLORS.text,
+          fontSize: 20,
+          fontWeight: '900',
+          marginTop: 18,
+          textAlign: 'center',
+        }}
+      >
+        Preparando reels...
+      </Text>
+      <Text
+        style={{
+          color: COLORS.muted,
+          fontSize: 14,
+          lineHeight: 20,
+          marginTop: 8,
+          textAlign: 'center',
+        }}
+      >
+        Cargando la primera conversación.
+      </Text>
+    </View>
+  );
+}
+
+export default function FeedScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
   const isFeedFocused = useIsFocused();
   const { items: learningItems } = useLearningItems();
@@ -2614,7 +2706,10 @@ export default function FeedScreen({ navigation }: Props) {
   const [stableFeedItems, setStableFeedItems] = useState<FeedItem[]>([]);
   const [characterVideoViewerVisible, setCharacterVideoViewerVisible] = useState(false);
   const [selectedCharacterVideoFeedId, setSelectedCharacterVideoFeedId] = useState<string>();
+  const [openingReelsFromOnboarding, setOpeningReelsFromOnboarding] = useState(route.params?.openReels === true);
   const isOpeningMissionRef = useRef(false);
+  const autoOpenedReelsRef = useRef(false);
+  const openingReelsRef = useRef(false);
   const viewedFeedItemIdsRef = useRef(new Set<string>());
   const viewabilityConfigRef = useRef({
     itemVisiblePercentThreshold: 65,
@@ -2925,6 +3020,55 @@ export default function FeedScreen({ navigation }: Props) {
       ),
     [characterVideoItems, feedSeed]
   );
+
+  useEffect(() => {
+    if (route.params?.openReels === true && !characterVideoViewerVisible) {
+      setOpeningReelsFromOnboarding(true);
+    }
+  }, [characterVideoViewerVisible, route.params?.openReels]);
+
+  useEffect(() => {
+    if (
+      route.params?.openReels !== true ||
+      autoOpenedReelsRef.current ||
+      openingReelsRef.current ||
+      characterVideosLoading
+    ) {
+      return;
+    }
+
+    const firstVideo = shuffledCharacterVideos[0];
+    if (!firstVideo) {
+      autoOpenedReelsRef.current = true;
+      navigation.setParams({ openReels: undefined });
+      setOpeningReelsFromOnboarding(false);
+      return;
+    }
+
+    openingReelsRef.current = true;
+    setOpeningReelsFromOnboarding(true);
+    setSuspendFeedVideoPlayback(true);
+
+    let cancelled = false;
+    void preloadOnboardingReelPreviewAssets(
+      shuffledCharacterVideos.slice(0, ONBOARDING_REELS_PRELOAD_COUNT)
+    ).finally(() => {
+      if (cancelled) {
+        openingReelsRef.current = false;
+        return;
+      }
+      autoOpenedReelsRef.current = true;
+      openingReelsRef.current = false;
+      navigation.setParams({ openReels: undefined });
+      setSelectedCharacterVideoFeedId(firstVideo.feedId);
+      setCharacterVideoViewerVisible(true);
+      setOpeningReelsFromOnboarding(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [characterVideosLoading, navigation, route.params?.openReels, shuffledCharacterVideos]);
 
   const shuffledVocabulary = useMemo(
     () => pickRandom(pendingVocabulary, pendingVocabulary.length, `${feedSeed}:vocab`, (item) => item.feedId),
@@ -3748,6 +3892,9 @@ export default function FeedScreen({ navigation }: Props) {
         </View>
       ) : null}
       <AppTabBar active="feed" />
+      {openingReelsFromOnboarding && !characterVideoViewerVisible ? (
+        <ReelsStartupOverlay />
+      ) : null}
     </SafeAreaView>
   );
 }

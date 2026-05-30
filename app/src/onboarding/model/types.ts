@@ -143,9 +143,9 @@ export const DEFAULT_ONBOARDING_STEPS: OnboardingStepContent[] = [
   },
   {
     stepNumber: 3,
-    eyebrow: "Elige tu compañero",
-    title: "Elige a tu compañero de inglés",
-    subtitle: "Practicarás conversaciones reales y mejorarás hablando con tu nuevo amigo de IA.",
+    eyebrow: "Reels",
+    title: "Encuentra tu compañero ideal",
+    subtitle: "Desliza hacia arriba para descubrir personajes y conversaciones que te encantarán.",
     primaryCta: "Comenzar",
   },
   {

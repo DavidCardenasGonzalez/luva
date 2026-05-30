@@ -1,5 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../api/api';
+import {
+  getLatestLocalFriendConversationForFriend,
+  toFriendConversationSnapshot,
+} from './localFriendConversations';
 
 export type LocalFriendCharacter = {
   friendId: string;
@@ -21,6 +25,7 @@ export type LocalFriendCharacter = {
   createdAt: string;
   updatedAt: string;
   lastMessageAt?: string;
+  lastUserMessage?: string;
   messageCount?: number;
   conversationCount?: number;
 };
@@ -65,6 +70,19 @@ export type LocalAddFriendPayload = {
   sceneIndex?: number;
   storyDefinition?: LocalStoryDefinition;
   missionDefinition?: LocalStoryMission;
+  lastMessageAt?: string;
+  lastUserMessage?: string;
+  messageCount?: number;
+  conversationCount?: number;
+  conversationSnapshot?: {
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+    conversationEnded: boolean;
+    conversationFeedback?: {
+      summary: string;
+      improvements: string[];
+    } | null;
+    updatedAt: string;
+  };
 };
 
 type FriendsListResponse = {
@@ -140,6 +158,7 @@ function sanitizeLocalFriend(input: unknown): LocalFriendCharacter | null {
     createdAt,
     updatedAt,
     ...(asString(raw.lastMessageAt) ? { lastMessageAt: asString(raw.lastMessageAt) } : {}),
+    ...(asString(raw.lastUserMessage) ? { lastUserMessage: asString(raw.lastUserMessage) } : {}),
     ...(asFiniteNumber(raw.messageCount) !== undefined ? { messageCount: Math.max(0, Math.floor(asFiniteNumber(raw.messageCount)!)) } : {}),
     ...(asFiniteNumber(raw.conversationCount) !== undefined
       ? { conversationCount: Math.max(0, Math.floor(asFiniteNumber(raw.conversationCount)!)) }
@@ -232,12 +251,14 @@ function buildLocalFriendFromMission(
     createdAt: existing?.createdAt || now,
     updatedAt: now,
     ...(existing?.lastMessageAt ? { lastMessageAt: existing.lastMessageAt } : {}),
+    ...(existing?.lastUserMessage ? { lastUserMessage: existing.lastUserMessage } : {}),
     ...(typeof existing?.messageCount === 'number' ? { messageCount: existing.messageCount } : {}),
     ...(typeof existing?.conversationCount === 'number' ? { conversationCount: existing.conversationCount } : {}),
   };
 }
 
-function buildSyncPayload(friend: LocalFriendCharacter): LocalAddFriendPayload {
+async function buildSyncPayload(friend: LocalFriendCharacter): Promise<LocalAddFriendPayload> {
+  const latestConversation = await getLatestLocalFriendConversationForFriend(friend.friendId);
   const missionDefinition: LocalStoryMission = {
     missionId: friend.missionId,
     title: friend.missionTitle,
@@ -265,7 +286,52 @@ function buildSyncPayload(friend: LocalFriendCharacter): LocalAddFriendPayload {
       missions: [missionDefinition],
     },
     missionDefinition,
+    ...(friend.lastMessageAt ? { lastMessageAt: friend.lastMessageAt } : {}),
+    ...(friend.lastUserMessage ? { lastUserMessage: friend.lastUserMessage } : {}),
+    ...(typeof friend.messageCount === 'number' ? { messageCount: friend.messageCount } : {}),
+    ...(typeof friend.conversationCount === 'number' ? { conversationCount: friend.conversationCount } : {}),
+    ...(latestConversation ? { conversationSnapshot: toFriendConversationSnapshot(latestConversation) } : {}),
   };
+}
+
+function isEpochTimestamp(value?: string) {
+  return !value || value === '1970-01-01T00:00:00.000Z';
+}
+
+function normalizeFriendForLocalStorage(
+  friend: LocalFriendCharacter,
+  existing?: LocalFriendCharacter,
+): LocalFriendCharacter {
+  const now = new Date().toISOString();
+  const createdAt = existing?.createdAt || (isEpochTimestamp(friend.createdAt) ? now : friend.createdAt);
+  return {
+    ...friend,
+    createdAt,
+    updatedAt: now,
+    ...(existing?.lastMessageAt || friend.lastMessageAt
+      ? { lastMessageAt: existing?.lastMessageAt || friend.lastMessageAt }
+      : {}),
+    ...(existing?.lastUserMessage || friend.lastUserMessage
+      ? { lastUserMessage: existing?.lastUserMessage || friend.lastUserMessage }
+      : {}),
+    messageCount: Math.max(0, Math.floor(existing?.messageCount ?? friend.messageCount ?? 0)),
+    conversationCount: Math.max(0, Math.floor(existing?.conversationCount ?? friend.conversationCount ?? 0)),
+  };
+}
+
+async function updateLocalFriend(
+  friend: LocalFriendCharacter,
+  updater: (current: LocalFriendCharacter) => LocalFriendCharacter,
+): Promise<LocalFriendCharacter> {
+  const friends = await readLocalFriends();
+  const existing = friends.find((item) => item.friendId === friend.friendId);
+  const base = normalizeFriendForLocalStorage(friend, existing);
+  const nextFriend = updater(base);
+  await writeLocalFriends([
+    nextFriend,
+    ...friends.filter((item) => item.friendId !== nextFriend.friendId),
+  ]);
+  return nextFriend;
 }
 
 export async function listLocalFriends(): Promise<LocalFriendCharacter[]> {
@@ -294,6 +360,38 @@ export async function addLocalFriendFromMission(payload: LocalAddFriendPayload):
   return nextFriend;
 }
 
+export async function recordLocalFriendMessageSent(
+  friend: LocalFriendCharacter,
+  transcript: string,
+): Promise<LocalFriendCharacter> {
+  const trimmedTranscript = transcript.trim();
+  return updateLocalFriend(friend, (current) => {
+    const now = new Date().toISOString();
+    return {
+      ...current,
+      updatedAt: now,
+      lastMessageAt: now,
+      ...(trimmedTranscript ? { lastUserMessage: trimmedTranscript.slice(0, 500) } : {}),
+      messageCount: Math.max(0, Math.floor(current.messageCount ?? 0)) + 1,
+    };
+  });
+}
+
+export async function recordLocalFriendConversationFinished(
+  friend: LocalFriendCharacter,
+): Promise<LocalFriendCharacter> {
+  return updateLocalFriend(friend, (current) => {
+    const now = new Date().toISOString();
+    return {
+      ...current,
+      updatedAt: now,
+      lastMessageAt: now,
+      messageCount: Math.max(0, Math.floor(current.messageCount ?? 0)) + 1,
+      conversationCount: Math.max(0, Math.floor(current.conversationCount ?? 0)) + 1,
+    };
+  });
+}
+
 export async function removeLocalFriends(friendIds: string[]): Promise<void> {
   const ids = new Set(friendIds.map((id) => id.trim()).filter(Boolean));
   if (!ids.size) return;
@@ -318,7 +416,7 @@ export async function syncLocalFriendsToRemote(): Promise<number> {
   const syncedFriendIds: string[] = [];
   for (const friend of localFriends) {
     try {
-      await api.post<FriendsListResponse>('/friends', buildSyncPayload(friend));
+      await api.post<FriendsListResponse>('/friends', await buildSyncPayload(friend));
       syncedFriendIds.push(friend.friendId);
     } catch (err: any) {
       console.warn('[Friends] No se pudo sincronizar amigo local:', err?.message || err);

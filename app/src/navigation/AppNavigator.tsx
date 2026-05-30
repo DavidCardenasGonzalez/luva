@@ -65,7 +65,7 @@ export type RootStackParamList = {
   LessonDetail: { lessonId: string };
   LessonTest: { lessonId: string };
   Shadowing: { listId?: string; chapterId?: string; autoplay?: boolean; origin?: 'feed' } | undefined;
-  Feed: undefined;
+  Feed: { openReels?: boolean } | undefined;
   MyJourney: undefined;
   Friends: undefined;
   FriendChat: {

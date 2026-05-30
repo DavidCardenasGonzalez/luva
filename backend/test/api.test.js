@@ -136,6 +136,48 @@ test('GET /v1/friend-profiles/{friendId} returns public catalog profile without 
   assert.ok(Array.isArray(body.posts));
 });
 
+test('POST /v1/public/friends/{friendId}/chat is public and validates transcript', async () => {
+  const charactersRes = await handler({
+    httpMethod: 'GET',
+    path: '/v1/characters',
+    requestContext: { http: { method: 'GET', path: '/v1/characters' } },
+  });
+  assert.equal(charactersRes.statusCode, 200);
+  const charactersBody = JSON.parse(charactersRes.body);
+  const character = charactersBody.items.find((item) => item.friendId);
+  assert.ok(character);
+
+  const encodedFriendId = encodeURIComponent(character.friendId);
+  const res = await handler({
+    httpMethod: 'POST',
+    path: `/v1/public/friends/${encodedFriendId}/chat`,
+    body: JSON.stringify({ transcript: '' }),
+    requestContext: {
+      http: {
+        method: 'POST',
+        path: `/v1/public/friends/${encodedFriendId}/chat`,
+      },
+    },
+  });
+
+  assert.equal(res.statusCode, 400);
+  const body = JSON.parse(res.body);
+  assert.equal(body.message, 'Missing transcript');
+});
+
+test('POST /v1/feed/character-videos/:characterId/:postId/metric rejects unknown event', async () => {
+  const res = await handler({
+    httpMethod: 'POST',
+    path: '/v1/feed/character-videos/ch1/p1/metric',
+    requestContext: { http: { method: 'POST', path: '/v1/feed/character-videos/ch1/p1/metric' } },
+    body: JSON.stringify({ event: 'bogus' }),
+  });
+
+  assert.equal(res.statusCode, 400);
+  const body = JSON.parse(res.body);
+  assert.equal(body.message, 'INVALID_CHARACTER_POST_METRIC');
+});
+
 test('GET /v1/feed/character-videos returns a public video posts list', async () => {
   const previousTableName = process.env.CHARACTER_POSTS_TABLE_NAME;
   delete process.env.CHARACTER_POSTS_TABLE_NAME;
