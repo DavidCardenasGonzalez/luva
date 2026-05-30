@@ -192,8 +192,8 @@ export default function Step3({ content: _content, onStart, onSkip }: Props) {
           Desliza hacia arriba para descubrir{' '}
           <Text style={{ color: COLORS.purple, fontWeight: '800' }}>personajes</Text>
           {' y '}
-          <Text style={{ color: COLORS.cyan, fontWeight: '800' }}>conversaciones</Text>
-          {' que te encantarán.'}
+          <Text style={{ color: COLORS.cyan, fontWeight: '800' }}>responde</Text>
+          {' para empezar nuevas conversaciones.'}
         </Text>
       </View>
 

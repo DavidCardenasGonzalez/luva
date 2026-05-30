@@ -342,6 +342,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [endingConversation, setEndingConversation] = useState(false);
   const [showAssistanceModal, setShowAssistanceModal] = useState(false);
+  const [showProfilePreview, setShowProfilePreview] = useState(false);
   const [assistanceQuestion, setAssistanceQuestion] = useState('');
   const [assistanceAnswer, setAssistanceAnswer] = useState('');
   const [assistanceLoading, setAssistanceLoading] = useState(false);
@@ -360,6 +361,17 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const avatarSource = useMemo(() => {
     if (!friend) return undefined;
     const avatarUrl = (friend.avatarImageXsUrl || friend.avatarImageUrl)?.trim();
+    return avatarUrl
+      ? { uri: avatarUrl }
+      : getChatAvatar(friend.missionId);
+  }, [friend]);
+  const largeAvatarSource = useMemo(() => {
+    if (!friend) return undefined;
+    const avatarUrl = (
+      friend.avatarImageUrl ||
+      friend.avatarImageMdUrl ||
+      friend.avatarImageXsUrl
+    )?.trim();
     return avatarUrl
       ? { uri: avatarUrl }
       : getChatAvatar(friend.missionId);
@@ -1143,7 +1155,21 @@ export default function FriendChatScreen({ navigation, route }: Props) {
             >
               <Text style={{ fontSize: 24, color: 'white', fontWeight: '700', lineHeight: 26 }}>{'‹'}</Text>
             </Pressable>
-            <View style={{ width: 42, height: 42, borderRadius: 999, overflow: 'hidden', backgroundColor: '#0b172b', marginRight: 12 }}>
+            <Pressable
+              onPress={() => setShowProfilePreview(true)}
+              accessibilityRole="button"
+              accessibilityLabel={`Ver perfil de ${friend.characterName}`}
+              hitSlop={8}
+              style={({ pressed }) => ({
+                width: 42,
+                height: 42,
+                borderRadius: 999,
+                overflow: 'hidden',
+                backgroundColor: '#0b172b',
+                marginRight: 12,
+                opacity: pressed ? 0.7 : 1,
+              })}
+            >
               {avatarSource ? (
                 <Image source={avatarSource} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
               ) : (
@@ -1151,7 +1177,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                   <Text style={{ color: 'white', fontWeight: '900' }}>{avatarInitial}</Text>
                 </View>
               )}
-            </View>
+            </Pressable>
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text style={{ fontSize: 16, fontWeight: '800', color: 'white' }} numberOfLines={1}>
                 {friend.characterName}
@@ -1410,6 +1436,90 @@ export default function FriendChatScreen({ navigation, route }: Props) {
             />
           </View>
         )}
+
+        <Modal
+          visible={showProfilePreview}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowProfilePreview(false)}
+        >
+          <Pressable
+            style={{ flex: 1, backgroundColor: 'rgba(4,7,17,0.8)', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+            onPress={() => setShowProfilePreview(false)}
+          >
+            <Pressable
+              onPress={() => {}}
+              style={{
+                width: '100%',
+                maxWidth: 320,
+                backgroundColor: 'white',
+                borderRadius: 20,
+                padding: 24,
+                alignItems: 'center',
+              }}
+            >
+              <View
+                style={{
+                  width: 220,
+                  height: 220,
+                  borderRadius: 999,
+                  overflow: 'hidden',
+                  backgroundColor: '#0b172b',
+                  marginBottom: 16,
+                }}
+              >
+                {largeAvatarSource ? (
+                  <Image source={largeAvatarSource} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                ) : (
+                  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ color: 'white', fontSize: 48, fontWeight: '900' }}>{avatarInitial}</Text>
+                  </View>
+                )}
+              </View>
+              <Text style={{ fontSize: 20, fontWeight: '900', color: '#0f172a', textAlign: 'center' }} numberOfLines={2}>
+                {friend.characterName}
+              </Text>
+              <Pressable
+                onPress={() => {
+                  setShowProfilePreview(false);
+                  skipExitPromptRef.current = true;
+                  const unsubscribeFocus = navigation.addListener('focus', () => {
+                    skipExitPromptRef.current = false;
+                    unsubscribeFocus();
+                  });
+                  navigation.push('FriendProfile', { friendId: friend.friendId });
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="Ver perfil completo"
+                style={({ pressed }) => ({
+                  marginTop: 20,
+                  alignSelf: 'stretch',
+                  paddingVertical: 12,
+                  borderRadius: 999,
+                  alignItems: 'center',
+                  backgroundColor: pressed ? '#1d4ed8' : '#2563eb',
+                })}
+              >
+                <Text style={{ color: 'white', fontWeight: '900' }}>Ver perfil</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setShowProfilePreview(false)}
+                accessibilityRole="button"
+                accessibilityLabel="Cerrar"
+                style={({ pressed }) => ({
+                  marginTop: 10,
+                  alignSelf: 'stretch',
+                  paddingVertical: 10,
+                  borderRadius: 999,
+                  alignItems: 'center',
+                  backgroundColor: pressed ? '#e2e8f0' : 'transparent',
+                })}
+              >
+                <Text style={{ color: '#475569', fontWeight: '700' }}>Cerrar</Text>
+              </Pressable>
+            </Pressable>
+          </Pressable>
+        </Modal>
 
         <Modal
           visible={showAssistanceModal}

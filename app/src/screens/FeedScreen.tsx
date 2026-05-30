@@ -28,6 +28,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { LearningItem, LearningItemOptionKey, useLearningItems } from '../hooks/useLearningItems';
 import { CharacterVideoPost, useCharacterVideoPosts } from '../hooks/useCharacterVideoPosts';
 import { useCharacterPostLike } from '../hooks/useCharacterPostLike';
+import { recordVideoPostMetric } from '../feed/videoPostMetrics';
 import { FeedPost, useFeedPosts } from '../hooks/useFeedPosts';
 import { FriendCharacter, useFriends } from '../hooks/useFriends';
 import { Lesson, fetchSrtCaptions, useLessons } from '../hooks/useLessons';
@@ -1088,6 +1089,7 @@ function CharacterVideoPage({
     replyInputRef.current?.blur();
     setReplyText('');
     ensureLiked();
+    recordVideoPostMetric(item.characterId, item.postId, 'conversation');
     onReply(item, trimmed);
   }, [ensureLiked, item, onReply, replyText]);
 
@@ -1129,7 +1131,13 @@ function CharacterVideoPage({
   const handlePlaybackStatusUpdate = useCallback((status: AVPlaybackStatus) => {
     if (!status.isLoaded) return;
     setPlaybackPositionSeconds(status.positionMillis / 1000);
-  }, []);
+    if (status.isPlaying) {
+      recordVideoPostMetric(item.characterId, item.postId, 'play');
+      if (status.positionMillis >= 3000) {
+        recordVideoPostMetric(item.characterId, item.postId, 'watched3s');
+      }
+    }
+  }, [item.characterId, item.postId]);
 
   useEffect(() => {
     setIsVideoReadyForDisplay(false);
