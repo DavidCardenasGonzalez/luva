@@ -15,7 +15,9 @@ export type CharacterVideoPost = {
   imageUrl: string;
   thumbnailUrl?: string;
   videoUrl: string;
+  subtitlesUrl?: string;
   order: number;
+  likeCount: number;
   avatarImageUrl?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -56,6 +58,18 @@ function normalizeUrl(value: unknown): string | undefined {
   const url = asString(value);
   if (!url || !/^https?:\/\//i.test(url)) return undefined;
   return url;
+}
+
+function normalizeLikeCount(value: unknown): number {
+  const parsed =
+    typeof value === 'number'
+      ? value
+      : typeof value === 'string'
+      ? Number(value.trim())
+      : Number.NaN;
+  if (!Number.isFinite(parsed)) return 0;
+  const count = Math.floor(parsed);
+  return count > 0 ? count : 0;
 }
 
 function sanitizeCharacterVideoPost(input: unknown): CharacterVideoPost | null {
@@ -106,7 +120,9 @@ function sanitizeCharacterVideoPost(input: unknown): CharacterVideoPost | null {
     imageUrl,
     thumbnailUrl: thumbnailUrl || imageUrl,
     videoUrl,
+    subtitlesUrl: normalizeUrl(raw.subtitlesUrl),
     order,
+    likeCount: normalizeLikeCount(raw.likeCount),
     avatarImageUrl: normalizeUrl(raw.avatarImageUrl),
     createdAt: asString(raw.createdAt),
     updatedAt: asString(raw.updatedAt),

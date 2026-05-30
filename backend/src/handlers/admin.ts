@@ -941,10 +941,15 @@ function handleCharacterPostError(error: unknown): Result | undefined {
     return undefined;
   }
 
-  if (error.message === 'CHARACTER_POSTS_TABLE_NAME not set') {
+  if (
+    error.message === 'CHARACTER_POSTS_TABLE_NAME not set' ||
+    error.message === 'ASSETS_BUCKET_NAME not set' ||
+    error.message === 'ASSETS_CLOUDFRONT_DOMAIN_NAME not set' ||
+    error.message === 'OPENAI_KEY_PARAM not set'
+  ) {
     return json(503, {
       code: 'CHARACTER_POSTS_NOT_CONFIGURED',
-      message: 'Configura la tabla de posts de personajes en la lambda admin.',
+      message: 'Configura la tabla de posts, assets y OpenAI en la lambda admin.',
     });
   }
 
@@ -997,10 +1002,34 @@ function handleCharacterPostError(error: unknown): Result | undefined {
     });
   }
 
+  if (error.message === 'INVALID_CHARACTER_POST_SUBTITLES_URL') {
+    return json(400, {
+      code: 'INVALID_CHARACTER_POST_SUBTITLES_URL',
+      message: 'Usa una URL https valida para los subtitulos.',
+    });
+  }
+
   if (error.message === 'INVALID_CHARACTER_POST_ORDER') {
     return json(400, {
       code: 'INVALID_CHARACTER_POST_ORDER',
       message: 'Usa un orden numerico mayor a cero.',
+    });
+  }
+
+  if (
+    error.message.startsWith('OPENAI_TRANSCRIBE_HTTP_') ||
+    error.message === 'OPENAI_TRANSCRIBE_EMPTY_RESPONSE'
+  ) {
+    return json(502, {
+      code: 'OPENAI_TRANSCRIBE_ERROR',
+      message: 'No pudimos generar los subtitulos del video con Whisper. Intenta de nuevo.',
+    });
+  }
+
+  if (error.message.startsWith('CHARACTER_POST_VIDEO_FETCH_HTTP_')) {
+    return json(502, {
+      code: 'CHARACTER_POST_VIDEO_FETCH_ERROR',
+      message: 'No pudimos descargar el video para generar subtitulos. Intenta de nuevo.',
     });
   }
 

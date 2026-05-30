@@ -27,10 +27,12 @@ import StoryMessageComposer, { StoryFlowState } from '../components/StoryMessage
 import AccountProgressCard from '../components/AccountProgressCard';
 import { useAuth } from '../auth/AuthProvider';
 import { api } from '../api/api';
+import { shouldRecordLikes } from '../config/likeRecording';
 import { RECORDING_COST, useCoins } from '../purchases/CoinBalanceProvider';
 import useAudioRecorder from '../shared/useAudioRecorder';
 import useUploadToS3 from '../shared/useUploadToS3';
 import {
+  finishFriendChat,
   FriendChatPayload,
   FriendConversationFeedback,
   sendFriendChatMessage,
@@ -157,7 +159,7 @@ function CompletionCard({
     >
       <Text style={{ fontWeight: '800', color: '#15803d' }}>Conversación terminada</Text>
       <Text style={{ marginTop: 6, color: '#166534', lineHeight: 20 }}>
-        Te despediste de {friendName}. Esta práctica quedó marcada como terminada.
+        Terminaste tu práctica con {friendName}. Esta conversación quedó marcada como terminada.
       </Text>
       <View
         style={{
@@ -302,6 +304,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const [completionConfettiKey, setCompletionConfettiKey] = useState<number | null>(null);
   const [flowState, setFlowState] = useState<StoryFlowState>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [endingConversation, setEndingConversation] = useState(false);
   const [showAssistanceModal, setShowAssistanceModal] = useState(false);
   const [assistanceQuestion, setAssistanceQuestion] = useState('');
   const [assistanceAnswer, setAssistanceAnswer] = useState('');
@@ -315,6 +318,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const stopRequestedWhileStarting = useRef(false);
   const skipExitPromptRef = useRef(false);
   const autoSentDraftKeyRef = useRef<string | undefined>(undefined);
+  const likeRecordedForPostRef = useRef<string | undefined>(undefined);
 
   const avatarSource = useMemo(() => {
     if (!friend) return undefined;
@@ -383,14 +387,16 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     };
   }, []);
 
+  const handleEndConversationRef = useRef<() => void>(() => {});
+
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (event: any) => {
       if (skipExitPromptRef.current) return;
       if (!hasStartedConversation || conversationEnded) return;
       event.preventDefault();
       Alert.alert(
-        'Despídete de tu amigo',
-        `Envía una despedida a ${friend?.characterName || 'tu amigo'} para cerrar la conversación y ver tu feedback final.`,
+        '¿Quieres terminar la conversación?',
+        `Antes de salir puedes recibir feedback sobre tu práctica con ${friend?.characterName || 'tu amigo'}.`,
         [
           { text: 'Seguir hablando', style: 'cancel' },
           {
@@ -399,6 +405,12 @@ export default function FriendChatScreen({ navigation, route }: Props) {
             onPress: () => {
               skipExitPromptRef.current = true;
               navigation.dispatch(event.data.action);
+            },
+          },
+          {
+            text: 'Recibir feedback',
+            onPress: () => {
+              handleEndConversationRef.current();
             },
           },
         ]
@@ -447,6 +459,54 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     setAssistanceError(null);
     setShowAssistanceModal(true);
   }, [friend, messages.length, sourcePost?.postId]);
+
+  const handleEndConversation = useCallback(async () => {
+    if (!friendId) return;
+    if (conversationEnded) return;
+    if (endingConversation) return;
+    if (flowState !== 'idle') return;
+    setErrorMessage(null);
+    setEndingConversation(true);
+    setFlowState('evaluating');
+    try {
+      void trackMixpanelFriendEvent('friend_chat_end_requested', {
+        friend_id: friendId,
+        character_name: friend?.characterName,
+        story_id: friend?.storyId,
+        mission_id: friend?.missionId,
+        post_id: sourcePost?.postId,
+        history_message_count: messages.length,
+      });
+      const historyPayload = messages.map(({ role, text }) => ({ role, content: text }));
+      const payload = await finishFriendChat(friendId, { history: historyPayload });
+      setConversationEnded(true);
+      setConversationFeedback(payload.conversationFeedback ?? null);
+      setCompletionConfettiKey(Date.now());
+      void trackMixpanelFriendEvent('friend_chat_completed', {
+        friend_id: friendId,
+        character_name: friend?.characterName,
+        story_id: friend?.storyId,
+        mission_id: friend?.missionId,
+        post_id: sourcePost?.postId,
+        input_method: 'manual_end',
+        history_message_count: messages.length,
+        correctness: 0,
+        points_earned: AI_CONVERSATION_POINTS_PER_MESSAGE,
+      });
+      void reload();
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'No pudimos finalizar la conversación.');
+    } finally {
+      setEndingConversation(false);
+      setFlowState('idle');
+    }
+  }, [conversationEnded, endingConversation, flowState, friend, friendId, messages, reload, sourcePost]);
+
+  useEffect(() => {
+    handleEndConversationRef.current = () => {
+      void handleEndConversation();
+    };
+  }, [handleEndConversation]);
 
   const handleFinishConversation = useCallback(() => {
     void trackMixpanelFriendEvent('friend_chat_finished', {
@@ -623,6 +683,24 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       }));
       setMessages((current) => [...current, pendingUserMessage]);
 
+      const sourcePostId = sourcePost?.postId;
+      if (
+        sourcePostId &&
+        messages.length === 0 &&
+        likeRecordedForPostRef.current !== `${friendId}:${sourcePostId}` &&
+        shouldRecordLikes()
+      ) {
+        likeRecordedForPostRef.current = `${friendId}:${sourcePostId}`;
+        void api
+          .post<unknown>(
+            `/feed/character-videos/${encodeURIComponent(friendId)}/${encodeURIComponent(sourcePostId)}/like`,
+            {},
+          )
+          .catch(() => {
+            // best effort — silent failure keeps the chat flow unaffected
+          });
+      }
+
       try {
         const payload = await sendFriendChatMessage(friendId, {
           sessionId,
@@ -647,7 +725,6 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           history_message_count: historyPayload.length,
           result: payload.result,
           correctness: payload.correctness,
-          conversation_ended: Boolean(payload.conversationEnded),
         });
         setMessages((current) => [
           ...current,
@@ -658,30 +735,13 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           },
         ]);
         setAnalysis(payload);
-        if (payload.conversationEnded) {
-          void trackMixpanelFriendEvent('friend_chat_completed', {
-            friend_id: friendId,
-            character_name: friend?.characterName,
-            story_id: friend?.storyId,
-            mission_id: friend?.missionId,
-            post_id: sourcePost?.postId,
-            input_method: inputMethod,
-            history_message_count: historyPayload.length + 1,
-            correctness: payload.correctness,
-            points_earned: AI_CONVERSATION_POINTS_PER_MESSAGE,
-          });
-          setConversationEnded(true);
-          setConversationFeedback(payload.conversationFeedback ?? null);
-          setCompletionConfettiKey(Date.now());
-          void reload();
-        }
       } catch (err: any) {
         setErrorMessage(err?.message || 'No pudimos continuar la conversación.');
       } finally {
         setFlowState('idle');
       }
     },
-    [coinsLoading, conversationEnded, friend, friendId, isUnlimited, messages, navigation, reload, sourcePost, spendCoins]
+    [coinsLoading, conversationEnded, friend, friendId, isUnlimited, messages, navigation, sourcePost, spendCoins]
   );
 
   const handleSendText = useCallback(
@@ -1138,7 +1198,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           >
             <Text style={{ color: '#15803d', fontWeight: '800' }}>Conversación terminada</Text>
             <Text style={{ color: COLORS.muted, marginTop: 4 }}>
-              El chat quedó cerrado después de tu despedida. Vuelve al feed para seguir practicando.
+              El chat quedó cerrado. Vuelve al feed para seguir practicando.
             </Text>
             <Pressable
               onPress={handleFinishConversation}
@@ -1154,15 +1214,48 @@ export default function FriendChatScreen({ navigation, route }: Props) {
             </Pressable>
           </View>
         ) : (
-          <StoryMessageComposer
-            flowState={flowState}
-            retryBlocked={false}
-            recordBlocked={coinsLoading || voiceCoinLocked}
-            statusLabel={statusLabel}
-            onSendText={handleSendText}
-            onRecordPressIn={handleRecordPressIn}
-            onRecordRelease={handleRecordRelease}
-          />
+          <View>
+            {hasStartedConversation ? (
+              <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
+                <Pressable
+                  accessibilityLabel="Finalizar conversación y recibir feedback"
+                  onPress={handleEndConversation}
+                  disabled={endingConversation || flowState !== 'idle'}
+                  style={({ pressed }) => ({
+                    alignSelf: 'flex-end',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 6,
+                    paddingHorizontal: 12,
+                    paddingVertical: 8,
+                    borderRadius: 999,
+                    backgroundColor: pressed ? '#dcfce7' : '#f0fdf4',
+                    borderWidth: 1,
+                    borderColor: '#bbf7d0',
+                    opacity: endingConversation || flowState !== 'idle' ? 0.6 : 1,
+                  })}
+                >
+                  {endingConversation ? (
+                    <ActivityIndicator size="small" color="#15803d" />
+                  ) : (
+                    <MaterialIcons name="flag" size={16} color="#15803d" />
+                  )}
+                  <Text style={{ color: '#15803d', fontWeight: '800', fontSize: 13 }}>
+                    {endingConversation ? 'Finalizando…' : 'Finalizar y recibir feedback'}
+                  </Text>
+                </Pressable>
+              </View>
+            ) : null}
+            <StoryMessageComposer
+              flowState={flowState}
+              retryBlocked={false}
+              recordBlocked={coinsLoading || voiceCoinLocked}
+              statusLabel={statusLabel}
+              onSendText={handleSendText}
+              onRecordPressIn={handleRecordPressIn}
+              onRecordRelease={handleRecordRelease}
+            />
+          </View>
         )}
 
         <Modal

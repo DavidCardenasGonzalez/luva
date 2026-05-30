@@ -27,9 +27,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { LearningItem, LearningItemOptionKey, useLearningItems } from '../hooks/useLearningItems';
 import { CharacterVideoPost, useCharacterVideoPosts } from '../hooks/useCharacterVideoPosts';
+import { useCharacterPostLike } from '../hooks/useCharacterPostLike';
 import { FeedPost, useFeedPosts } from '../hooks/useFeedPosts';
 import { FriendCharacter, useFriends } from '../hooks/useFriends';
-import { Lesson, useLessons } from '../hooks/useLessons';
+import { Lesson, fetchSrtCaptions, useLessons } from '../hooks/useLessons';
 import { ShadowingChapter, ShadowingList, useShadowing } from '../hooks/useShadowing';
 import {
   CARD_STATUS_LABELS,
@@ -50,6 +51,7 @@ import { LITE_PROMO_EXPIRES_AT_KEY } from '../purchases/litePromo';
 import { getLearnedLessonIds } from '../progress/lessonProgress';
 import { recordJourneyVocabularyQuickGuessCorrect } from '../progress/journeyProgress';
 import { useShadowingPlayer } from '../shadowing/ShadowingPlayerProvider';
+import { api } from '../api/api';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Feed'>;
 
@@ -121,6 +123,22 @@ type PendingVocab = LearningItem & {
 type CharacterVideoFeedItem = CharacterVideoPost & {
   kind: 'characterVideo';
   feedId: string;
+};
+
+type CharacterVideoSubtitleCue = {
+  startSeconds: number;
+  endSeconds: number;
+  text: string;
+};
+
+type SubtitleTranslationState = {
+  text?: string;
+  loading?: boolean;
+  error?: string;
+};
+
+type TranslationResponse = {
+  translatedText?: string;
 };
 
 type FeedPostItem = FeedPost & {
@@ -201,6 +219,15 @@ function formatFeedDuration(seconds?: number) {
   const minutes = Math.floor(totalSeconds / 60);
   const rest = totalSeconds % 60;
   return `${minutes}:${String(rest).padStart(2, '0')}`;
+}
+
+function findActiveVideoSubtitle(cues: CharacterVideoSubtitleCue[], timeSeconds: number) {
+  return cues.find((cue) => timeSeconds >= cue.startSeconds && timeSeconds <= cue.endSeconds + 0.25);
+}
+
+function getVideoSubtitleKey(cue?: CharacterVideoSubtitleCue) {
+  if (!cue) return undefined;
+  return `${cue.startSeconds.toFixed(2)}:${cue.endSeconds.toFixed(2)}:${cue.text}`;
 }
 
 function hashString(input: string) {
@@ -840,6 +867,11 @@ function CharacterVideoCard({
   onPress: (item: CharacterVideoFeedItem) => void;
 }) {
   const thumbnailUrl = (item.thumbnailUrl || item.imageUrl).trim();
+  const { userLiked, displayedLabel, toggleLike } = useCharacterPostLike(
+    item.characterId,
+    item.postId,
+    item.likeCount,
+  );
 
   return (
     <Pressable
@@ -900,6 +932,72 @@ function CharacterVideoCard({
             <MaterialIcons name="play-arrow" size={38} color="white" />
           </View>
         </View>
+        <View
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            paddingHorizontal: 12,
+            paddingVertical: 10,
+            backgroundColor: 'rgba(0, 0, 0, 0.34)',
+          }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {item.avatarImageUrl ? (
+              <Image
+                source={{ uri: item.avatarImageUrl }}
+                style={{ width: 26, height: 26, borderRadius: 999, marginRight: 8 }}
+                resizeMode="cover"
+              />
+            ) : null}
+            <Text
+              style={{ flex: 1, color: 'white', fontSize: 13, fontWeight: '900' }}
+              numberOfLines={1}
+            >
+              {item.characterName}
+            </Text>
+            <Pressable
+              onPress={toggleLike}
+              accessibilityRole="button"
+              accessibilityLabel={userLiked ? 'Quitar me gusta' : 'Me gusta'}
+              hitSlop={8}
+              style={({ pressed }) => ({
+                marginLeft: 10,
+                flexDirection: 'row',
+                alignItems: 'center',
+                opacity: pressed ? 0.7 : 1,
+              })}
+            >
+              <MaterialIcons
+                name={userLiked ? 'favorite' : 'favorite-border'}
+                size={20}
+                color={userLiked ? '#f43f5e' : 'white'}
+              />
+              <Text
+                style={{
+                  marginLeft: 4,
+                  color: 'white',
+                  fontSize: 12,
+                  fontWeight: '800',
+                  minWidth: 22,
+                  textAlign: 'left',
+                }}
+                numberOfLines={1}
+              >
+                {displayedLabel}
+              </Text>
+            </Pressable>
+          </View>
+          {item.caption ? (
+            <Text
+              style={{ color: '#e2e8f0', marginTop: 6, fontSize: 12, lineHeight: 16 }}
+              numberOfLines={2}
+            >
+              {item.caption}
+            </Text>
+          ) : null}
+        </View>
       </View>
     </Pressable>
   );
@@ -926,8 +1024,18 @@ function CharacterVideoPage({
   const [isVideoReadyForDisplay, setIsVideoReadyForDisplay] = useState(false);
   const [paused, setPaused] = useState(false);
   const [replyText, setReplyText] = useState('');
+  const [playbackPositionSeconds, setPlaybackPositionSeconds] = useState(0);
+  const [subtitleCues, setSubtitleCues] = useState<CharacterVideoSubtitleCue[]>([]);
+  const [subtitleTranslations, setSubtitleTranslations] = useState<Record<string, SubtitleTranslationState>>({});
   const replyInputRef = useRef<TextInput | null>(null);
   const videoSource = useMemo(() => ({ uri: videoUrl }), [videoUrl]);
+  const activeSubtitle = useMemo(
+    () => findActiveVideoSubtitle(subtitleCues, playbackPositionSeconds),
+    [playbackPositionSeconds, subtitleCues]
+  );
+  const activeSubtitleKey = useMemo(() => getVideoSubtitleKey(activeSubtitle), [activeSubtitle]);
+  const activeTranslation = activeSubtitleKey ? subtitleTranslations[activeSubtitleKey] : undefined;
+  const subtitleBottomOffset = Math.max(height * 0.31, bottomInset + 188);
 
   useEffect(() => {
     if (!playbackEnabled) {
@@ -936,18 +1044,97 @@ function CharacterVideoPage({
     }
   }, [playbackEnabled]);
 
+  const { userLiked, displayedLabel, toggleLike, ensureLiked } = useCharacterPostLike(
+    item.characterId,
+    item.postId,
+    item.likeCount,
+  );
+
   const handleSubmitReply = useCallback(() => {
     const trimmed = replyText.trim();
     if (!trimmed) return;
     replyInputRef.current?.blur();
     setReplyText('');
+    ensureLiked();
     onReply(item, trimmed);
-  }, [item, onReply, replyText]);
+  }, [ensureLiked, item, onReply, replyText]);
+
+  const handleTranslateSubtitle = useCallback(async () => {
+    const subtitle = activeSubtitle?.text.trim();
+    const subtitleKey = activeSubtitleKey;
+    if (!subtitle || !subtitleKey) return;
+
+    const existing = subtitleTranslations[subtitleKey];
+    if (existing?.loading || existing?.text) return;
+
+    setSubtitleTranslations((current) => ({
+      ...current,
+      [subtitleKey]: { ...current[subtitleKey], loading: true, error: undefined },
+    }));
+    setPaused(true);
+
+    try {
+      const payload = await api.post<TranslationResponse>('/translate', {
+        text: subtitle,
+        source: 'en',
+        target: 'es',
+      });
+      setSubtitleTranslations((current) => ({
+        ...current,
+        [subtitleKey]: { text: payload.translatedText || '', loading: false },
+      }));
+    } catch (err: any) {
+      setSubtitleTranslations((current) => ({
+        ...current,
+        [subtitleKey]: {
+          loading: false,
+          error: err?.message || 'No pudimos traducir este subtitulo.',
+        },
+      }));
+    }
+  }, [activeSubtitle, activeSubtitleKey, subtitleTranslations]);
+
+  const handlePlaybackStatusUpdate = useCallback((status: AVPlaybackStatus) => {
+    if (!status.isLoaded) return;
+    setPlaybackPositionSeconds(status.positionMillis / 1000);
+  }, []);
 
   useEffect(() => {
     setIsVideoReadyForDisplay(false);
     setPaused(false);
+    setPlaybackPositionSeconds(0);
+    setSubtitleTranslations({});
   }, [videoUrl]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setSubtitleCues([]);
+    setSubtitleTranslations({});
+
+    if (!item.subtitlesUrl) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    (async () => {
+      try {
+        const cues = await fetchSrtCaptions(item.subtitlesUrl);
+        if (!cancelled) {
+          setSubtitleCues(cues);
+        }
+      } catch (subtitleError) {
+        console.warn('[Feed] No se pudieron cargar subtitulos del video de personaje', subtitleError);
+        if (!cancelled) {
+          setSubtitleCues([]);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [item.subtitlesUrl]);
 
   useEffect(() => {
     if (playbackEnabled) {
@@ -995,6 +1182,7 @@ function CharacterVideoPage({
         onLoadStart={() => setIsVideoReadyForDisplay(false)}
         onLoad={() => setIsVideoReadyForDisplay(true)}
         onReadyForDisplay={() => setIsVideoReadyForDisplay(true)}
+        onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
         onError={(videoError) => {
           setIsVideoReadyForDisplay(false);
           console.warn('[Feed] No se pudo cargar el video de personaje', videoError);
@@ -1039,6 +1227,80 @@ function CharacterVideoPage({
           </View>
         </View>
       ) : null}
+      {activeSubtitle ? (
+        <View
+          pointerEvents="box-none"
+          style={{
+            position: 'absolute',
+            left: 18,
+            right: 18,
+            bottom: subtitleBottomOffset,
+          }}
+        >
+          <View
+            style={{
+              borderRadius: 15,
+              borderWidth: 1,
+              borderColor: 'rgba(226, 232, 240, 0.24)',
+              backgroundColor: 'rgba(15, 23, 42, 0.72)',
+              paddingHorizontal: 14,
+              paddingVertical: 12,
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+              <Text
+                style={{ flex: 1, color: 'white', fontSize: 19, lineHeight: 25, fontWeight: '800' }}
+                numberOfLines={3}
+              >
+                {activeSubtitle.text}
+              </Text>
+              {!activeTranslation?.text ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Traducir subtitulo"
+                  onPress={() => { void handleTranslateSubtitle(); }}
+                  disabled={!!activeTranslation?.loading}
+                  hitSlop={8}
+                  style={({ pressed }) => ({
+                    width: 38,
+                    height: 38,
+                    borderRadius: 999,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginLeft: 12,
+                    backgroundColor: activeTranslation?.loading
+                      ? 'rgba(240, 253, 244, 0.82)'
+                      : pressed
+                        ? 'rgba(220, 252, 231, 0.92)'
+                        : 'rgba(240, 253, 244, 0.92)',
+                    borderWidth: 1,
+                    borderColor: 'rgba(187, 247, 208, 0.82)',
+                    opacity: activeTranslation?.loading ? 0.76 : 1,
+                  })}
+                >
+                  {activeTranslation?.loading ? (
+                    <ActivityIndicator size="small" color="#15803d" />
+                  ) : (
+                    <MaterialIcons name="translate" size={20} color="#15803d" />
+                  )}
+                </Pressable>
+              ) : null}
+            </View>
+            {activeTranslation?.text ? (
+              <Text
+                style={{ marginTop: 9, color: '#dbeafe', fontSize: 16, lineHeight: 22, fontWeight: '800' }}
+                numberOfLines={3}
+              >
+                {activeTranslation.text}
+              </Text>
+            ) : activeTranslation?.error ? (
+              <Text style={{ marginTop: 8, color: '#fecaca', fontSize: 13, lineHeight: 18 }} numberOfLines={2}>
+                {activeTranslation.error}
+              </Text>
+            ) : null}
+          </View>
+        </View>
+      ) : null}
       <KeyboardAvoidingView
         pointerEvents="box-none"
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -1053,33 +1315,66 @@ function CharacterVideoPage({
           pointerEvents="box-none"
           style={{
             paddingHorizontal: 18,
-            paddingTop: 96,
+            paddingTop: 14,
             paddingBottom: 12,
             backgroundColor: 'rgba(0, 0, 0, 0.34)',
           }}
         >
-          <Pressable
-            onPress={() => onOpenProfile(item)}
-            accessibilityRole="button"
-            accessibilityLabel={`Abrir perfil de ${item.characterName}`}
-            style={({ pressed }) => ({
-              alignSelf: 'flex-start',
-              flexDirection: 'row',
-              alignItems: 'center',
-              opacity: pressed ? 0.75 : 1,
-            })}
-          >
-            {item.avatarImageUrl ? (
-              <Image
-                source={{ uri: item.avatarImageUrl }}
-                style={{ width: 34, height: 34, borderRadius: 999, marginRight: 10 }}
-                resizeMode="cover"
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Pressable
+              onPress={() => onOpenProfile(item)}
+              accessibilityRole="button"
+              accessibilityLabel={`Abrir perfil de ${item.characterName}`}
+              style={({ pressed }) => ({
+                flex: 1,
+                flexDirection: 'row',
+                alignItems: 'center',
+                opacity: pressed ? 0.75 : 1,
+              })}
+            >
+              {item.avatarImageUrl ? (
+                <Image
+                  source={{ uri: item.avatarImageUrl }}
+                  style={{ width: 34, height: 34, borderRadius: 999, marginRight: 10 }}
+                  resizeMode="cover"
+                />
+              ) : null}
+              <Text style={{ color: 'white', fontSize: 16, fontWeight: '900', flexShrink: 1 }} numberOfLines={1}>
+                {item.characterName}
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={toggleLike}
+              accessibilityRole="button"
+              accessibilityLabel={userLiked ? 'Quitar me gusta' : 'Me gusta'}
+              hitSlop={8}
+              style={({ pressed }) => ({
+                marginLeft: 12,
+                flexDirection: 'row',
+                alignItems: 'center',
+                opacity: pressed ? 0.7 : 1,
+              })}
+            >
+              <MaterialIcons
+                name={userLiked ? 'favorite' : 'favorite-border'}
+                size={26}
+                color={userLiked ? '#f43f5e' : 'white'}
               />
-            ) : null}
-            <Text style={{ color: 'white', fontSize: 16, fontWeight: '900' }} numberOfLines={1}>
-              {item.characterName}
-            </Text>
-          </Pressable>
+              <Text
+                style={{
+                  marginLeft: 6,
+                  color: 'white',
+                  fontSize: 14,
+                  fontWeight: '800',
+                  minWidth: 28,
+                  textAlign: 'left',
+                }}
+                numberOfLines={1}
+              >
+                {displayedLabel}
+              </Text>
+            </Pressable>
+          </View>
           <Text style={{ color: '#e2e8f0', marginTop: 10, fontSize: 14, lineHeight: 20 }} numberOfLines={3}>
             {item.caption}
           </Text>

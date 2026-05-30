@@ -1,5 +1,7 @@
 import { randomUUID } from 'crypto';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 import {
   DeleteCommand,
   DynamoDBDocumentClient,
@@ -7,6 +9,7 @@ import {
   PutCommand,
   QueryCommand,
   ScanCommand,
+  UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import type { StoryDefinition, StoryMission } from './types';
 
@@ -15,8 +18,11 @@ const dynamo = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
     removeUndefinedValues: true,
   },
 });
+const s3 = new S3Client({});
+const ssm = new SSMClient({});
 
 const MIN_TIMESTAMP = '1970-01-01T00:00:00.000Z';
+let OPENAI_KEY_CACHE: string | undefined;
 
 export type StoryCharacterSummary = {
   characterId: string;
@@ -55,7 +61,11 @@ export type StoredCharacterPostRecord = {
   thumbnailURL?: unknown;
   videoUrl?: unknown;
   videoURL?: unknown;
+  subtitlesUrl?: unknown;
+  subtitlesURL?: unknown;
+  subtitlesKey?: unknown;
   order?: unknown;
+  likeCount?: unknown;
   createdAt?: unknown;
   updatedAt?: unknown;
 };
@@ -74,7 +84,10 @@ export type CharacterPost = {
   imageUrl: string;
   thumbnailUrl?: string;
   videoUrl?: string;
+  subtitlesUrl?: string;
+  subtitlesKey?: string;
   order: number;
+  likeCount: number;
   avatarImageUrl?: string;
   createdAt: string;
   updatedAt: string;
@@ -97,6 +110,12 @@ export type CharacterPostDeleteResponse = {
   deletedAt: string;
 };
 
+export type CharacterPostLikeResponse = {
+  characterId: string;
+  postId: string;
+  likeCount: number;
+};
+
 type CharacterPostRecord = CharacterPost;
 
 type CharacterPostWriteInput = {
@@ -110,6 +129,9 @@ type CharacterPostWriteInput = {
   thumbnailURL?: unknown;
   videoUrl?: unknown;
   videoURL?: unknown;
+  subtitlesUrl?: unknown;
+  subtitlesURL?: unknown;
+  subtitlesKey?: unknown;
   order?: unknown;
 };
 
@@ -205,11 +227,11 @@ export async function createAdminCharacterPost(
 ): Promise<CharacterPostMutationResponse> {
   const existingPosts = await listPublicCharacterPosts(character.characterId);
   const nextOrder = existingPosts.reduce((max, post) => Math.max(max, post.order), 0) + 1;
-  const record = buildCharacterPostRecord(character, input, {
+  const record = await ensureCharacterPostSubtitles(buildCharacterPostRecord(character, input, {
     postId: randomUUID(),
     defaultOrder: nextOrder,
     now: new Date().toISOString(),
-  });
+  }));
 
   await dynamo.send(
     new PutCommand({
@@ -240,10 +262,10 @@ export async function updateAdminCharacterPost(
     throw new Error('CHARACTER_POST_NOT_FOUND');
   }
 
-  const record = buildCharacterPostRecord(character, input, {
+  const record = await ensureCharacterPostSubtitles(buildCharacterPostRecord(character, input, {
     existing: existingPost,
     now: new Date().toISOString(),
-  });
+  }), existingPost);
 
   await dynamo.send(
     new PutCommand({
@@ -292,6 +314,37 @@ export async function deleteAdminCharacterPost(
   };
 }
 
+export async function incrementCharacterPostLike(
+  characterIdInput: unknown,
+  postIdInput: unknown,
+): Promise<CharacterPostLikeResponse> {
+  const characterId = normalizeCharacterId(characterIdInput);
+  const postId = normalizePostId(postIdInput);
+  if (!characterId) {
+    throw new Error('INVALID_CHARACTER_ID');
+  }
+  if (!postId) {
+    throw new Error('INVALID_CHARACTER_POST_ID');
+  }
+
+  const result = await dynamo.send(
+    new UpdateCommand({
+      TableName: getCharacterPostsTableName(),
+      Key: { characterId, postId },
+      UpdateExpression: 'SET likeCount = if_not_exists(likeCount, :zero) + :one',
+      ExpressionAttributeValues: {
+        ':zero': 0,
+        ':one': 1,
+      },
+      ConditionExpression: 'attribute_exists(characterId) AND attribute_exists(postId)',
+      ReturnValues: 'ALL_NEW',
+    }),
+  );
+
+  const likeCount = normalizeLikeCount(result.Attributes?.likeCount) ?? 0;
+  return { characterId, postId, likeCount };
+}
+
 export function buildCharacterPostRecord(
   character: StoryCharacterSummary,
   input: CharacterPostWriteInput,
@@ -334,6 +387,13 @@ export function buildCharacterPostRecord(
   if (!imageUrl) {
     throw new Error('INVALID_CHARACTER_POST_IMAGE_URL');
   }
+  const shouldKeepExistingSubtitles = !!options?.existing?.videoUrl && videoUrl === options.existing.videoUrl;
+  const subtitlesUrl =
+    normalizeOptionalUrl(input.subtitlesUrl ?? input.subtitlesURL, 'INVALID_CHARACTER_POST_SUBTITLES_URL') ||
+    (shouldKeepExistingSubtitles ? options?.existing?.subtitlesUrl : undefined);
+  const subtitlesKey =
+    normalizeSubtitleKey(input.subtitlesKey) ||
+    (shouldKeepExistingSubtitles ? options?.existing?.subtitlesKey : undefined);
 
   const order =
     normalizeOrder(input.order) ||
@@ -345,6 +405,7 @@ export function buildCharacterPostRecord(
 
   const now = asTimestamp(options?.now) || new Date().toISOString();
   const createdAt = options?.existing?.createdAt || now;
+  const likeCount = normalizeLikeCount(options?.existing?.likeCount) ?? 0;
 
   return {
     characterId,
@@ -361,7 +422,10 @@ export function buildCharacterPostRecord(
     imageUrl,
     ...(thumbnailUrl || videoUrl ? { thumbnailUrl: thumbnailUrl || imageUrl } : {}),
     ...(videoUrl ? { videoUrl } : {}),
+    ...(subtitlesUrl ? { subtitlesUrl } : {}),
+    ...(subtitlesKey ? { subtitlesKey } : {}),
     order,
+    likeCount,
     createdAt,
     updatedAt: now,
   };
@@ -381,8 +445,11 @@ export function toCharacterPost(input: unknown): CharacterPost | undefined {
   const context = normalizeContext(raw?.context);
   const videoUrl = normalizeStoredOptionalUrl(raw?.videoUrl ?? raw?.videoURL);
   const thumbnailUrl = normalizeStoredOptionalUrl(raw?.thumbnailUrl ?? raw?.thumbnailURL);
+  const subtitlesUrl = normalizeStoredOptionalUrl(raw?.subtitlesUrl ?? raw?.subtitlesURL);
+  const subtitlesKey = normalizeSubtitleKey(raw?.subtitlesKey);
   const imageUrl = normalizeStoredOptionalUrl(raw?.imageUrl ?? raw?.imageURL ?? thumbnailUrl);
   const order = normalizeOrder(raw?.order);
+  const likeCount = normalizeLikeCount(raw?.likeCount) ?? 0;
 
   if (
     !characterId ||
@@ -419,7 +486,10 @@ export function toCharacterPost(input: unknown): CharacterPost | undefined {
     imageUrl,
     ...(thumbnailUrl || videoUrl ? { thumbnailUrl: thumbnailUrl || imageUrl } : {}),
     ...(videoUrl ? { videoUrl } : {}),
+    ...(subtitlesUrl ? { subtitlesUrl } : {}),
+    ...(subtitlesKey ? { subtitlesKey } : {}),
     order,
+    likeCount,
     createdAt,
     updatedAt,
   };
@@ -526,6 +596,162 @@ function compareCharacterPosts(left: CharacterPost, right: CharacterPost): numbe
   );
 }
 
+async function ensureCharacterPostSubtitles(
+  record: CharacterPostRecord,
+  existing?: CharacterPost,
+): Promise<CharacterPostRecord> {
+  if (!record.videoUrl || record.subtitlesUrl) {
+    return record;
+  }
+
+  if (existing?.videoUrl === record.videoUrl && existing.subtitlesUrl) {
+    return {
+      ...record,
+      subtitlesUrl: existing.subtitlesUrl,
+      ...(existing.subtitlesKey ? { subtitlesKey: existing.subtitlesKey } : {}),
+    };
+  }
+
+  const srt = await transcribeCharacterPostVideo(record.videoUrl, buildCharacterPostVideoFilename(record));
+  const trimmedSrt = srt.trim();
+  if (!trimmedSrt) {
+    throw new Error('OPENAI_TRANSCRIBE_EMPTY_RESPONSE');
+  }
+
+  const subtitlesKey = buildCharacterPostSubtitlesKey(record);
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: getAssetsBucketName(),
+      Key: subtitlesKey,
+      Body: `${trimmedSrt}\n`,
+      ContentType: 'application/x-subrip; charset=utf-8',
+      CacheControl: 'public, max-age=31536000, immutable',
+    }),
+  );
+
+  return {
+    ...record,
+    subtitlesKey,
+    subtitlesUrl: buildAssetUrl(subtitlesKey),
+  };
+}
+
+async function transcribeCharacterPostVideo(videoUrl: string, filename: string): Promise<string> {
+  const key = await getOpenAiKey();
+  const videoResponse = await fetch(videoUrl);
+  if (!videoResponse.ok) {
+    throw new Error(`CHARACTER_POST_VIDEO_FETCH_HTTP_${videoResponse.status}`);
+  }
+
+  const contentType = videoResponse.headers.get('content-type') || 'video/mp4';
+  const video = Buffer.from(await videoResponse.arrayBuffer());
+  const form = new FormData();
+  form.append('file', new Blob([video], { type: contentType }) as any, filename);
+  form.append('model', 'whisper-1');
+  form.append('response_format', 'srt');
+
+  const transcriptionResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${key}`,
+    },
+    body: form as any,
+  });
+
+  if (!transcriptionResponse.ok) {
+    const detail = await transcriptionResponse.text().catch(() => '');
+    console.warn('[CharacterPosts] Whisper failed', transcriptionResponse.status, detail.slice(0, 500));
+    throw new Error(`OPENAI_TRANSCRIBE_HTTP_${transcriptionResponse.status}`);
+  }
+
+  return transcriptionResponse.text();
+}
+
+async function getOpenAiKey(): Promise<string> {
+  if (OPENAI_KEY_CACHE) {
+    return OPENAI_KEY_CACHE;
+  }
+
+  const direct = process.env.OPENAI_KEY || process.env.OPENAI_API_KEY;
+  if (direct?.trim()) {
+    OPENAI_KEY_CACHE = direct.trim();
+    return OPENAI_KEY_CACHE;
+  }
+
+  const param = process.env.OPENAI_KEY_PARAM;
+  if (!param) {
+    throw new Error('OPENAI_KEY_PARAM not set');
+  }
+
+  const response = await ssm.send(new GetParameterCommand({ Name: param, WithDecryption: true }));
+  const value = response.Parameter?.Value?.trim();
+  if (!value) {
+    throw new Error('OPENAI_KEY_PARAM empty');
+  }
+
+  OPENAI_KEY_CACHE = value;
+  return value;
+}
+
+function getAssetsBucketName(): string {
+  const name = process.env.ASSETS_BUCKET_NAME?.trim();
+  if (!name) {
+    throw new Error('ASSETS_BUCKET_NAME not set');
+  }
+
+  return name;
+}
+
+function getAssetsBaseUrl(): string {
+  const url =
+    process.env.ASSETS_CLOUDFRONT_URL?.trim() ||
+    process.env.ASSETS_CLOUDFRONT_DOMAIN_NAME?.trim();
+  if (!url) {
+    throw new Error('ASSETS_CLOUDFRONT_DOMAIN_NAME not set');
+  }
+
+  return url.startsWith('http') ? url.replace(/\/$/, '') : `https://${url.replace(/\/$/, '')}`;
+}
+
+function buildAssetUrl(key: string): string {
+  return `${getAssetsBaseUrl()}/${key}`;
+}
+
+function buildCharacterPostSubtitlesKey(record: CharacterPostRecord): string {
+  return [
+    'character-posts',
+    sanitizeAssetPathSegment(record.characterId),
+    sanitizeAssetPathSegment(record.postId),
+    'subtitles.srt',
+  ].join('/');
+}
+
+function buildCharacterPostVideoFilename(record: CharacterPostRecord): string {
+  const extension = getUrlPathExtension(record.videoUrl || '') || 'mp4';
+  return `${sanitizeAssetPathSegment(record.postId)}.${extension}`;
+}
+
+function getUrlPathExtension(url: string): string | undefined {
+  try {
+    const extension = new URL(url).pathname.split('.').pop()?.toLowerCase();
+    if (!extension || !/^[a-z0-9]{2,8}$/.test(extension)) {
+      return undefined;
+    }
+    return extension;
+  } catch {
+    return undefined;
+  }
+}
+
+function sanitizeAssetPathSegment(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 120) || 'post';
+}
+
 function normalizeCharacterId(value: unknown): string | undefined {
   const normalized = asString(value)?.trim();
   if (!normalized) {
@@ -580,6 +806,15 @@ function normalizeContext(value: unknown): string | undefined {
   return normalized.slice(0, 3000);
 }
 
+function normalizeSubtitleKey(value: unknown): string | undefined {
+  const normalized = asString(value)?.trim();
+  if (!normalized || normalized.includes('..') || normalized.startsWith('/')) {
+    return undefined;
+  }
+
+  return normalized.slice(0, 1024);
+}
+
 function normalizeOrder(value: unknown): number | undefined {
   const parsed =
     typeof value === 'number'
@@ -594,6 +829,22 @@ function normalizeOrder(value: unknown): number | undefined {
 
   const order = Math.floor(parsed);
   return order >= 1 && order <= 999999 ? order : undefined;
+}
+
+function normalizeLikeCount(value: unknown): number | undefined {
+  const parsed =
+    typeof value === 'number'
+      ? value
+      : typeof value === 'string'
+      ? Number(value.trim())
+      : Number.NaN;
+
+  if (!Number.isFinite(parsed)) {
+    return undefined;
+  }
+
+  const count = Math.floor(parsed);
+  return count >= 0 ? count : 0;
 }
 
 function normalizeSceneIndex(value: unknown): number | undefined {

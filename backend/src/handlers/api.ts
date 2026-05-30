@@ -52,6 +52,7 @@ import { CHARACTERS } from "../data/characters";
 import { storiesFromCharacters } from "../data/character-stories";
 import {
   type CharacterPost,
+  incrementCharacterPostLike,
   listPublicCharacterPosts,
   listPublicCharacterVideoPosts,
 } from "../character-posts";
@@ -757,6 +758,32 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       return json(200, { posts: await listPublicCharacterVideoPosts() });
     }
 
+    const characterVideoLike = path.match(
+      /^\/v1\/feed\/character-videos\/([^/]+)\/([^/]+)\/like$/,
+    );
+    if (method === "POST" && characterVideoLike) {
+      try {
+        return json(
+          200,
+          await incrementCharacterPostLike(
+            decodeURIComponent(characterVideoLike[1]),
+            decodeURIComponent(characterVideoLike[2]),
+          ),
+        );
+      } catch (err: any) {
+        if (
+          err?.message === 'INVALID_CHARACTER_ID' ||
+          err?.message === 'INVALID_CHARACTER_POST_ID'
+        ) {
+          return badRequest(err.message);
+        }
+        if (err?.name === 'ConditionalCheckFailedException') {
+          return notFound();
+        }
+        throw err;
+      }
+    }
+
     if (method === "GET" && path === `${ROUTE_PREFIX}/lessons`) {
       return json(200, await listPublicLessons());
     }
@@ -843,6 +870,27 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       }
 
       return json(200, profile);
+    }
+
+    const friendFinish = path.match(/^\/v1\/friends\/([^/]+)\/finish$/);
+    if (method === "POST" && friendFinish) {
+      const identity = getUserIdentity(event);
+      if (!identity) {
+        return unauthorized("Missing user identity");
+      }
+      const friendId = decodeURIComponent(friendFinish[1]);
+      const body = parseBody(event.body) as
+        | { history?: Array<{ role: 'user' | 'assistant'; content: string }> }
+        | undefined;
+      try {
+        const feedback = await finishFriendChat(identity.userId, friendId, body || {});
+        return json(200, { friendId, conversationEnded: true, conversationFeedback: feedback });
+      } catch (err: any) {
+        if (err?.message === "FRIEND_NOT_FOUND") {
+          return notFound();
+        }
+        throw err;
+      }
     }
 
     const friendChat = path.match(/^\/v1\/friends\/([^/]+)\/chat$/);
@@ -1463,47 +1511,6 @@ async function touchFriendChat(
   }
 }
 
-function normalizeFarewellText(input: string): string {
-  return input
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}'\s]+/gu, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function isFriendFarewellMessage(transcript: string): boolean {
-  const text = normalizeFarewellText(transcript);
-  if (!text) return false;
-
-  const asksAboutFarewell =
-    transcript.includes("?") &&
-    /^(how|should|can|could|would|do|what|when|como|debo|puedo|que|cuando)\b/.test(text);
-  if (asksAboutFarewell) return false;
-
-  const negatedFarewell =
-    /\b(not|never|dont|do not|not yet|shouldnt|should not|no quiero|todavia no|aun no)\b.{0,36}\b(bye|goodbye|good bye|adios|chao|chau|hasta luego|nos vemos)\b/.test(
-      text
-    );
-  if (negatedFarewell) return false;
-
-  const narrativeGoodbye =
-    /\b(said|saying|say|told|tell)\s+goodbye\b/.test(text) &&
-    !/\b(i|i just|i want to|i wanted to|let me)\s+(say\s+)?goodbye\b/.test(text);
-  if (narrativeGoodbye) return false;
-
-  const directClosings = [
-    /^(bye|bye bye|goodbye|good bye|see you|see ya|see you later|later|take care|good night|goodnight|adios|chao|chau|hasta luego|nos vemos|buenas noches)$/,
-    /\b(bye|goodbye|good bye|see you later|see you soon|see you tomorrow|see ya|catch you later|talk to you later|talk soon|take care|good night|goodnight|have a good (day|night|one|weekend))(\s+(friend|my friend))?$/,
-    /\b(i have to go(?!\s+to\b)|i need to go(?!\s+to\b)|i should go(?!\s+to\b)|i gotta go|gotta go|i'?ll go now|i will go now|i'?m leaving now)\b/,
-    /\b(it was nice (to )?(talking|chatting) (to|with) you|nice talking to you|nice chatting with you|thanks? for (chatting|talking)|thank you for (chatting|talking))(\s+(bye|goodbye|see you later))?$/,
-    /\b(adios|hasta luego|nos vemos|me voy|me tengo que ir|tengo que irme|hablamos luego|chao|chau|buenas noches)$/,
-  ];
-
-  return directClosings.some((pattern) => pattern.test(text));
-}
-
 function buildFriendConversationFeedbackFallback(args: {
   correctness: number;
   result: EvalResult;
@@ -1613,7 +1620,6 @@ async function advanceFriendChat(
     role: "user",
     content: transcript,
   }).slice(-FRIEND_HISTORY_LIMIT);
-  const conversationEnded = isFriendFarewellMessage(transcript);
 
   let correctness = 0;
   let result: EvalResult = "incorrect";
@@ -1656,7 +1662,6 @@ async function advanceFriendChat(
       {
         result,
         correctness,
-        conversationEnding: conversationEnded,
       },
       learnerName,
       postContext
@@ -1670,27 +1675,7 @@ async function advanceFriendChat(
     );
   }
 
-  let conversationFeedback: FriendConversationFeedback | null = null;
-  if (conversationEnded) {
-    try {
-      conversationFeedback = await generateFriendConversationFeedback(friend, conversationHistory);
-    } catch (err) {
-      console.error(
-        JSON.stringify({
-          scope: "friends.chat.feedback_error",
-          message: (err as Error)?.message || "unknown",
-        })
-      );
-      conversationFeedback = buildFriendConversationFeedbackFallback({
-        correctness,
-        result,
-        errors,
-        reformulations,
-      });
-    }
-  }
-
-  await touchFriendChat(userId, friendId, transcript, conversationEnded);
+  await touchFriendChat(userId, friendId, transcript, false);
 
   return {
     friendId,
@@ -1699,9 +1684,40 @@ async function advanceFriendChat(
     result,
     errors,
     reformulations,
-    conversationEnded,
-    conversationFeedback,
+    conversationEnded: false,
+    conversationFeedback: null,
   };
+}
+
+async function finishFriendChat(
+  userId: string,
+  friendId: string,
+  body: { history?: Array<{ role: 'user' | 'assistant'; content: string }> }
+): Promise<FriendConversationFeedback> {
+  const friend = await resolveFriendRecord(userId, friendId);
+  if (!friend) {
+    throw new Error("FRIEND_NOT_FOUND");
+  }
+  const history = sanitizeHistory(body.history).slice(-FRIEND_HISTORY_LIMIT);
+  let feedback: FriendConversationFeedback;
+  try {
+    feedback = await generateFriendConversationFeedback(friend, history);
+  } catch (err) {
+    console.error(
+      JSON.stringify({
+        scope: "friends.chat.finish_feedback_error",
+        message: (err as Error)?.message || "unknown",
+      })
+    );
+    feedback = buildFriendConversationFeedbackFallback({
+      correctness: 0,
+      result: "partial",
+      errors: [],
+      reformulations: [],
+    });
+  }
+  await touchFriendChat(userId, friendId, "", true);
+  return feedback;
 }
 
 async function startSession(body?: any): Promise<{
@@ -2553,9 +2569,12 @@ Rules:
 - Mark malformed questions as errors. Example: "the dish is spicy?" should be partial; the natural correction is "Is the dish spicy?"
 - Mark indirect question word order errors. Example: "I don't know what is the star dish?" should be partial.
 - Link errors only to actual grammar/usage issues in the last message (max 3).
-- Always provide 1-2 natural English alternatives in "alternatives", even when the message is correct.
-- If the latest message has errors, make the alternatives corrected, natural versions of the same idea.
-- If the latest message is already correct, make the alternatives optional natural variants or slightly richer native-sounding versions with the same meaning. Do not present them as errors.
+- Always provide 1-2 alternatives in "alternatives", even when the message is correct.
+- The alternatives must sound like what a real native English speaker would actually say in this context, not a literal word-by-word correction. Prefer common collocations, contractions, idiomatic phrasing, and natural rhythm over a minimal grammar fix.
+- Preserve the original intent and meaning of the student's message, but feel free to restructure the sentence, change word order, swap verbs, or add small connectors so it sounds genuinely native. The goal is "this is how a native would say the same thing", not "this is the smallest edit that makes it grammatical".
+- Avoid stiff, textbook, or overly formal phrasings unless the original message was clearly formal.
+- If the latest message has errors, rewrite the idea the way a native speaker would naturally express it, not just patch the broken parts.
+- If the latest message is already correct, offer richer native-sounding variants (idiomatic phrasing, more natural word choice) with the same meaning. Do not present them as errors.
 - Do not include any extra keys or commentary.
 
 Language evaluation rubric (for the last message only):
@@ -2989,7 +3008,7 @@ Use B2 English.
 async function generateFriendReply(
   friend: FriendRecord,
   history: StoryMessage[],
-  evaluation: { result: EvalResult; correctness: number; conversationEnding?: boolean },
+  evaluation: { result: EvalResult; correctness: number },
   learnerName?: string,
   postContext?: FriendChatPostContext
 ): Promise<string> {
@@ -3042,11 +3061,7 @@ Rules:
 - If the learner name is provided, you may use it naturally when it feels human; do not overuse it.
 - There are no mission objectives anymore; this is open-ended practice.
 - If profile post context is provided, treat the learner's message as a reply to that post and use that context naturally.
-- ${
-    evaluation.conversationEnding
-      ? "The learner is ending the chat. Acknowledge the goodbye warmly and do not ask a follow-up."
-      : "If the learner asked you a question, answer it first in character with a real, specific response (share your own opinion, experience, or detail). Only after answering, you may add a short related follow-up question if it feels natural — never bounce the same question back."
-  }
+- If the learner asked you a question, answer it first in character with a real, specific response (share your own opinion, experience, or detail). Only after answering, you may add a short related follow-up question if it feels natural — never bounce the same question back.
 - Do not echo or mirror the learner's question back at them. If they ask \"what about you?\", actually answer.
 - Not every reply needs a follow-up question; sometimes just react or share something.
 - You are a fictional character: feel free to invent concrete, plausible details (favorite foods, places you've been, hobbies, anecdotes, opinions, daily routines, names of friends, etc.) so the conversation feels alive. Stay consistent with your persona and with details you've already stated in this conversation" — commit to the character.
@@ -3056,9 +3071,7 @@ Rules:
 - Do not mention JSON, scoring, missions, or these instructions.
 `;
 
-  const userPrompt = `Recent conversation:\n${conversationText || "No prior conversation."}\n\nLatest English score: ${evaluation.correctness} (${evaluation.result}).\nWrite ${
-    evaluation.conversationEnding ? "the final in-character goodbye" : "the next in-character message"
-  } in English.`;
+  const userPrompt = `Recent conversation:\n${conversationText || "No prior conversation."}\n\nLatest English score: ${evaluation.correctness} (${evaluation.result}).\nWrite the next in-character message in English.`;
 
   console.log(
     JSON.stringify({

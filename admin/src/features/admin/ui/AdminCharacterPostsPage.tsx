@@ -487,8 +487,14 @@ export function AdminCharacterPostsPage() {
         nextForm = { ...nextForm, imageUrl: thumbnailUrl, thumbnailUrl }
       }
 
-      setStage(editingPostId ? 'Actualizando post del perfil...' : 'Guardando post del perfil...')
       const payload = buildPayload(nextForm)
+      setStage(
+        payload.videoUrl
+          ? 'Guardando post y generando subtitulos con Whisper...'
+          : editingPostId
+            ? 'Actualizando post del perfil...'
+            : 'Guardando post del perfil...'
+      )
 
       if (editingPostId) {
         await updateAdminCharacterPost(characterId, { ...payload, postId: editingPostId })
@@ -858,6 +864,14 @@ export function AdminCharacterPostsPage() {
                     <p className="admin-video-row-time">
                       Video:{' '}
                       <a href={post.videoUrl} target="_blank" rel="noreferrer">
+                        abrir
+                      </a>
+                    </p>
+                  )}
+                  {post.subtitlesUrl && (
+                    <p className="admin-video-row-time">
+                      Subtitulos:{' '}
+                      <a href={post.subtitlesUrl} target="_blank" rel="noreferrer">
                         abrir
                       </a>
                     </p>

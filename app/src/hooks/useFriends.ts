@@ -152,6 +152,19 @@ export async function sendFriendChatMessage(
   return api.post<FriendChatPayload>(`/friends/${encodeURIComponent(friendId)}/chat`, payload);
 }
 
+export async function finishFriendChat(
+  friendId: string,
+  payload: {
+    history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+  }
+): Promise<{
+  friendId: string;
+  conversationEnded: boolean;
+  conversationFeedback: FriendConversationFeedback | null;
+}> {
+  return api.post(`/friends/${encodeURIComponent(friendId)}/finish`, payload);
+}
+
 async function listCatalogCharacters(): Promise<FriendCharacter[]> {
   const response = await api.get<CharactersListResponse>('/characters');
   return Array.isArray(response?.items) ? response.items : [];

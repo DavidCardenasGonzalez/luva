@@ -452,7 +452,7 @@ export class LuvaStack extends Stack {
     friendshipsTable.grantReadWriteData(apiFn);
     usersTable.grantReadData(apiFn);
     feedPostsTable.grantReadData(apiFn);
-    characterPostsTable.grantReadData(apiFn);
+    characterPostsTable.grantReadWriteData(apiFn);
     lessonsTable.grantReadData(apiFn);
     shadowingListsTable.grantReadData(apiFn);
     shadowingChaptersTable.grantReadData(apiFn);
@@ -647,6 +647,7 @@ export class LuvaStack extends Stack {
     const friendById = friends.addResource('{friendId}');
     const friendProfile = friendById.addResource('profile');
     const friendChat = friendById.addResource('chat');
+    const friendFinish = friendById.addResource('finish');
     const friendProfiles = v1.addResource('friend-profiles');
     const publicFriendProfileById = friendProfiles.addResource('{friendId}');
     const admin = v1.addResource('admin');
@@ -689,6 +690,10 @@ export class LuvaStack extends Stack {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
     });
+    friendFinish.addMethod('POST', lambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
     admin.addMethod('ANY', adminLambdaIntegration, {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
@@ -722,6 +727,7 @@ export class LuvaStack extends Stack {
           'GET /v1/friends/{friendId}/profile',
           'GET /v1/friend-profiles/{friendId}',
           'POST /v1/friends/{friendId}/chat',
+          'POST /v1/friends/{friendId}/finish',
         ],
         admin: [
           'ANY /v1/admin',
