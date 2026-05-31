@@ -577,7 +577,14 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         history_message_count: messages.length,
       });
       const historyPayload = messages.map(({ role, text }) => ({ role, content: text }));
-      const payload = await finishFriendChat(friendId, { history: historyPayload }, { anonymous: !isSignedIn });
+      const payload = await finishFriendChat(
+        friendId,
+        {
+          ...(sourcePost?.postId ? { postId: sourcePost.postId } : {}),
+          history: historyPayload,
+        },
+        { anonymous: !isSignedIn },
+      );
       setConversationEnded(true);
       setConversationFeedback(payload.conversationFeedback ?? null);
       setCompletionConfettiKey(Date.now());

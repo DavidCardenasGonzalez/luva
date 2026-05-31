@@ -77,6 +77,7 @@ export interface CharacterDefinition {
   aiRole: string;
   caracterName?: string;
   caracterPrompt?: string;
+  characterBio?: string;
   avatarImageUrl?: string;
   avatarImageXsUrl?: string;
   avatarImageMdUrl?: string;
@@ -151,6 +152,7 @@ export interface FriendCharacter {
   characterName: string;
   aiRole: string;
   characterPrompt?: string;
+  characterBio?: string;
   avatarImageUrl?: string;
   avatarImageXsUrl?: string;
   avatarImageMdUrl?: string;

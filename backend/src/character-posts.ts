@@ -63,6 +63,7 @@ export type StoredCharacterPostRecord = {
   playCount?: unknown;
   watched3sCount?: unknown;
   conversationCount?: unknown;
+  messageCount?: unknown;
   createdAt?: unknown;
   updatedAt?: unknown;
 };
@@ -83,6 +84,7 @@ export type CharacterPost = {
   playCount: number;
   watched3sCount: number;
   conversationCount: number;
+  messageCount: number;
   avatarImageUrl?: string;
   createdAt: string;
   updatedAt: string;
@@ -97,6 +99,7 @@ export type CharacterPostMetricResponse = {
   playCount: number;
   watched3sCount: number;
   conversationCount: number;
+  messageCount: number;
 };
 
 const METRIC_FIELD_BY_NAME: Record<CharacterPostMetric, 'playCount' | 'watched3sCount' | 'conversationCount'> = {
@@ -126,6 +129,13 @@ export type CharacterPostLikeResponse = {
   characterId: string;
   postId: string;
   likeCount: number;
+};
+
+export type CharacterPostConversationMessageResponse = {
+  characterId: string;
+  postId: string;
+  conversationCount: number;
+  messageCount: number;
 };
 
 type CharacterPostRecord = CharacterPost;
@@ -357,6 +367,50 @@ export async function incrementCharacterPostLike(
   return { characterId, postId, likeCount };
 }
 
+export async function incrementCharacterPostConversationMessages(
+  characterIdInput: unknown,
+  postIdInput: unknown,
+  messageCountInput: unknown,
+): Promise<CharacterPostConversationMessageResponse> {
+  const characterId = normalizeCharacterId(characterIdInput);
+  const postId = normalizePostId(postIdInput);
+  const messageCount = normalizePositiveCount(messageCountInput);
+  if (!characterId) {
+    throw new Error('INVALID_CHARACTER_ID');
+  }
+  if (!postId) {
+    throw new Error('INVALID_CHARACTER_POST_ID');
+  }
+  if (!messageCount) {
+    throw new Error('INVALID_CHARACTER_POST_MESSAGE_COUNT');
+  }
+
+  const result = await dynamo.send(
+    new UpdateCommand({
+      TableName: getCharacterPostsTableName(),
+      Key: { characterId, postId },
+      UpdateExpression:
+        'SET messageCount = if_not_exists(messageCount, :zero) + :messageCount, conversationCount = if_not_exists(conversationCount, :zero) + :one, updatedAt = :now',
+      ExpressionAttributeValues: {
+        ':zero': 0,
+        ':one': 1,
+        ':messageCount': messageCount,
+        ':now': new Date().toISOString(),
+      },
+      ConditionExpression: 'attribute_exists(characterId) AND attribute_exists(postId)',
+      ReturnValues: 'ALL_NEW',
+    }),
+  );
+
+  const attrs = (result.Attributes || {}) as StoredCharacterPostRecord;
+  return {
+    characterId,
+    postId,
+    conversationCount: normalizeLikeCount(attrs.conversationCount) ?? 0,
+    messageCount: normalizeLikeCount(attrs.messageCount) ?? 0,
+  };
+}
+
 export function buildCharacterPostRecord(
   character: StoryCharacterSummary,
   input: CharacterPostWriteInput,
@@ -421,6 +475,7 @@ export function buildCharacterPostRecord(
   const playCount = normalizeLikeCount(options?.existing?.playCount) ?? 0;
   const watched3sCount = normalizeLikeCount(options?.existing?.watched3sCount) ?? 0;
   const conversationCount = normalizeLikeCount(options?.existing?.conversationCount) ?? 0;
+  const messageCount = normalizeLikeCount(options?.existing?.messageCount) ?? 0;
 
   return {
     characterId,
@@ -439,6 +494,7 @@ export function buildCharacterPostRecord(
     playCount,
     watched3sCount,
     conversationCount,
+    messageCount,
     createdAt,
     updatedAt: now,
   };
@@ -462,6 +518,7 @@ export function toCharacterPost(input: unknown): CharacterPost | undefined {
   const playCount = normalizeLikeCount(raw?.playCount) ?? 0;
   const watched3sCount = normalizeLikeCount(raw?.watched3sCount) ?? 0;
   const conversationCount = normalizeLikeCount(raw?.conversationCount) ?? 0;
+  const messageCount = normalizeLikeCount(raw?.messageCount) ?? 0;
 
   if (!characterId || !postId || !caption || !imageUrl || !order) {
     return undefined;
@@ -488,6 +545,7 @@ export function toCharacterPost(input: unknown): CharacterPost | undefined {
     playCount,
     watched3sCount,
     conversationCount,
+    messageCount,
     createdAt,
     updatedAt,
   };
@@ -538,6 +596,7 @@ export async function incrementCharacterPostMetric(
     playCount: normalizeLikeCount(attrs.playCount) ?? 0,
     watched3sCount: normalizeLikeCount(attrs.watched3sCount) ?? 0,
     conversationCount: normalizeLikeCount(attrs.conversationCount) ?? 0,
+    messageCount: normalizeLikeCount(attrs.messageCount) ?? 0,
   };
 }
 
@@ -548,6 +607,18 @@ function normalizeCharacterPostMetric(value: unknown): CharacterPostMetric | und
     return normalized;
   }
   return undefined;
+}
+
+function normalizePositiveCount(value: unknown): number | undefined {
+  const parsed =
+    typeof value === 'number'
+      ? value
+      : typeof value === 'string'
+      ? Number(value.trim())
+      : Number.NaN;
+  if (!Number.isFinite(parsed)) return undefined;
+  const count = Math.floor(parsed);
+  return count >= 1 ? count : undefined;
 }
 
 function flattenStoryCharacters(characters: CharacterDefinition[]): StoryCharacterSummary[] {

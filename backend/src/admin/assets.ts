@@ -189,6 +189,96 @@ export function buildAdminAssetObjectKey(input: {
   return `${input.folder}/${compactTimestamp}-${safeId}.${extension}`;
 }
 
+const AVATAR_VARIANT_DEFS = [
+  { field: 'avatarImageXsUrl' as const, suffix: 'avatar-xs-96' },
+  { field: 'avatarImageMdUrl' as const, suffix: 'avatar-md-512' },
+];
+
+const AVATAR_VARIANT_CONTENT_TYPE = 'image/webp';
+
+export type AdminAvatarVariantUploadsInput = {
+  originalKey?: unknown;
+};
+
+export type AdminAvatarVariantTarget = {
+  field: 'avatarImageXsUrl' | 'avatarImageMdUrl';
+  key: string;
+  uploadUrl: string;
+  url: string;
+  contentType: string;
+  cacheControl: string;
+};
+
+export type AdminAvatarVariantUploadsResponse = {
+  bucketName: string;
+  expiresAt: string;
+  avatarImageXsUrl: string;
+  avatarImageMdUrl: string;
+  variants: AdminAvatarVariantTarget[];
+};
+
+export async function createAdminAvatarVariantUploads(
+  input: AdminAvatarVariantUploadsInput,
+): Promise<AdminAvatarVariantUploadsResponse> {
+  const originalKey = asString(input.originalKey)?.trim();
+  if (!originalKey || !isValidStoriesProfileOriginalKey(originalKey)) {
+    throw new Error('INVALID_AVATAR_ORIGINAL_KEY');
+  }
+
+  const bucketName = getAssetsBucketName();
+  const baseUrl = getAssetsPublicBaseUrl();
+  const expiresInSeconds = 60 * 10;
+  const expiresAt = new Date(Date.now() + expiresInSeconds * 1000).toISOString();
+  const baseName = originalKey
+    .slice('storiesProfile/'.length)
+    .replace(/\.[^./]+$/, '');
+
+  const variants = await Promise.all(
+    AVATAR_VARIANT_DEFS.map(async ({ field, suffix }) => {
+      const key = `storiesProfile/optimized/${baseName}-${suffix}.webp`;
+      const uploadUrl = await getSignedUrl(
+        s3,
+        new PutObjectCommand({
+          Bucket: bucketName,
+          Key: key,
+          ContentType: AVATAR_VARIANT_CONTENT_TYPE,
+          CacheControl: ADMIN_ASSET_CACHE_CONTROL,
+        }),
+        { expiresIn: expiresInSeconds },
+      );
+      return {
+        field,
+        key,
+        uploadUrl,
+        url: buildAssetPublicUrl(key, baseUrl),
+        contentType: AVATAR_VARIANT_CONTENT_TYPE,
+        cacheControl: ADMIN_ASSET_CACHE_CONTROL,
+      };
+    }),
+  );
+
+  const xs = variants.find((variant) => variant.field === 'avatarImageXsUrl');
+  const md = variants.find((variant) => variant.field === 'avatarImageMdUrl');
+  if (!xs || !md) {
+    throw new Error('INVALID_AVATAR_VARIANTS');
+  }
+
+  return {
+    bucketName,
+    expiresAt,
+    avatarImageXsUrl: xs.url,
+    avatarImageMdUrl: md.url,
+    variants,
+  };
+}
+
+function isValidStoriesProfileOriginalKey(key: string): boolean {
+  if (!key.startsWith('storiesProfile/')) return false;
+  const rest = key.slice('storiesProfile/'.length);
+  if (!rest || rest.includes('/')) return false;
+  return /\.(png|jpe?g|webp|avif|gif|heic|heif)$/i.test(rest);
+}
+
 export function buildAssetPublicUrl(key: string, baseUrl: string): string {
   const normalizedBaseUrl = normalizePublicBaseUrl(baseUrl);
   const encodedKey = key

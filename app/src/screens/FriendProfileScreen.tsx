@@ -303,24 +303,30 @@ function ProfileFeedPost({
 
           <Text style={{ color: COLORS.muted, lineHeight: 20, marginTop: 12 }}>{item.caption}</Text>
 
-          <Pressable
-            onPress={() => onReply(item)}
-            accessibilityRole="button"
-            accessibilityLabel={`Responder al post de ${item.characterName}`}
-            style={({ pressed }) => ({
-              marginTop: 14,
-              alignSelf: 'flex-start',
-              flexDirection: 'row',
-              alignItems: 'center',
-              paddingHorizontal: 16,
-              paddingVertical: 11,
-              borderRadius: 999,
-              backgroundColor: pressed ? '#1d4ed8' : COLORS.action,
-            })}
-          >
-            <MaterialIcons name="reply" size={18} color="white" />
-            <Text style={{ color: 'white', fontWeight: '900', marginLeft: 8 }}>Responder</Text>
-          </Pressable>
+          <View style={{ marginTop: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Pressable
+              onPress={() => onReply(item)}
+              accessibilityRole="button"
+              accessibilityLabel={`Responder al post de ${item.characterName}`}
+              style={({ pressed }) => ({
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingHorizontal: 16,
+                paddingVertical: 11,
+                borderRadius: 999,
+                backgroundColor: pressed ? '#1d4ed8' : COLORS.action,
+              })}
+            >
+              <MaterialIcons name="reply" size={18} color="white" />
+              <Text style={{ color: 'white', fontWeight: '900', marginLeft: 8 }}>Responder</Text>
+            </Pressable>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 12 }}>
+              <MaterialIcons name="chat-bubble-outline" size={17} color={COLORS.muted} />
+              <Text style={{ color: COLORS.muted, fontSize: 12, fontWeight: '800', marginLeft: 5 }}>
+                {item.messageCount}
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
     </View>
@@ -345,6 +351,10 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
     if (!selectedPost || selectedPostIndex < 0) return posts;
     return [...posts.slice(selectedPostIndex), ...posts.slice(0, selectedPostIndex)];
   }, [posts, selectedPost, selectedPostIndex]);
+  const totalPostMessages = useMemo(
+    () => posts.reduce((sum, post) => sum + post.messageCount, 0),
+    [posts],
+  );
   const handleFocusedViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: Array<{ item?: CharacterProfilePost }> }) => {
       const post = viewableItems.find((viewableItem) => !!viewableItem.item)?.item;
@@ -626,13 +636,19 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
 
                 <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-around', marginLeft: 18 }}>
                   <StatBlock label="posts" value={posts.length} />
-                  <StatBlock label="chat" value="on" />
+                  <StatBlock label="mensajes" value={totalPostMessages} />
                 </View>
               </View>
 
               <Text style={{ color: COLORS.text, fontSize: 22, fontWeight: '900', marginTop: 16 }} numberOfLines={1}>
                 {friend.characterName}
               </Text>
+
+              {friend.characterBio ? (
+                <Text style={{ color: COLORS.muted, fontSize: 14, lineHeight: 20, marginTop: 8 }}>
+                  {friend.characterBio}
+                </Text>
+              ) : null}
 
               <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
                 <Pressable

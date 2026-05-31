@@ -1,5 +1,5 @@
 import type { APIGatewayProxyResultV2 as Result } from 'aws-lambda';
-import { createAdminAssetUpload } from '../admin/assets';
+import { createAdminAssetUpload, createAdminAvatarVariantUploads } from '../admin/assets';
 import { buildAdminOverview } from '../admin/overview';
 import {
   completeAdminTikTokAuth,
@@ -68,6 +68,7 @@ import {
   updateAdminShadowingList,
 } from '../shadowing';
 import { CHARACTERS } from '../data/characters';
+import { purgeCharacterEverywhere } from '../admin/purge-character';
 
 const ROUTE_PREFIX = '/v1';
 const LESSON_AUDIO_WORKER_SOURCE = 'luva.admin.lessons.audio';
@@ -202,6 +203,27 @@ export const handler = async (event: any): Promise<Result> => {
         const handled = handleCharacterPostError(error);
         if (handled) return handled;
         throw error;
+      }
+    }
+
+    const characterPurge = path.match(/^\/v1\/admin\/story-characters\/([^/]+)\/purge$/);
+    if (method === 'POST' && characterPurge) {
+      const characterId = decodeURIComponent(characterPurge[1]);
+      try {
+        const result = await purgeCharacterEverywhere(characterId);
+        return json(200, result);
+      } catch (error: any) {
+        console.error(
+          JSON.stringify({
+            scope: 'admin.character.purge.error',
+            characterId,
+            message: error?.message || 'unknown',
+          }),
+        );
+        return json(500, {
+          code: 'CHARACTER_PURGE_FAILED',
+          message: 'No pudimos eliminar al personaje y sus referencias.',
+        });
       }
     }
 
@@ -372,6 +394,34 @@ export const handler = async (event: any): Promise<Result> => {
       } catch (error) {
         const handled = handleShadowingError(error);
         if (handled) return handled;
+        throw error;
+      }
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/assets/avatar-variants`) {
+      try {
+        return json(200, await createAdminAvatarVariantUploads(parseBody(event.body) || {}));
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message === 'INVALID_AVATAR_ORIGINAL_KEY') {
+            return json(400, {
+              code: 'INVALID_AVATAR_ORIGINAL_KEY',
+              message:
+                'La key original debe estar en storiesProfile/ y tener extension de imagen valida.',
+            });
+          }
+
+          if (
+            error.message === 'ASSETS_BUCKET_NAME not set' ||
+            error.message === 'ASSETS_CLOUDFRONT_DOMAIN_NAME not set'
+          ) {
+            return json(503, {
+              code: 'ASSETS_NOT_CONFIGURED',
+              message: 'Configura el bucket assets y su distribucion CloudFront en la lambda admin.',
+            });
+          }
+        }
+
         throw error;
       }
     }

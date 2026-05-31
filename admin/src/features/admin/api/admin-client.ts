@@ -2,6 +2,7 @@ import { adminApi } from '@/shared/api/client'
 import type {
   AdminAssetFolder,
   AdminAssetUploadResponse,
+  AdminAvatarVariantUploadsResponse,
   AdminCharacterPostDeleteResponse,
   AdminCharacterPostMutationResponse,
   AdminCharacterPostsResponse,
@@ -139,6 +140,22 @@ export function deleteAdminCharacterPost(characterId: string, postId: string) {
   )
 }
 
+export type AdminCharacterPurgeResponse = {
+  characterId: string
+  posts: { scanned: number; deleted: number }
+  videos: { scanned: number; deleted: number }
+  friendships: { scanned: number; deleted: number }
+  userProgress: { scanned: number; updated: number }
+  s3: { assets: number; videos: number; failures: number }
+}
+
+export function purgeAdminCharacter(characterId: string) {
+  return adminApi.post<AdminCharacterPurgeResponse>(
+    `/story-characters/${encodeURIComponent(characterId)}/purge`,
+    {},
+  )
+}
+
 export function createAdminFeedPost(payload: AdminFeedPostWritePayload) {
   return adminApi.post<AdminFeedPostMutationResponse>('/feed-posts', payload)
 }
@@ -160,6 +177,12 @@ export function createAdminAssetUpload(
     folder,
     contentType,
     fileName,
+  })
+}
+
+export function createAdminAvatarVariantUploads(originalKey: string) {
+  return adminApi.post<AdminAvatarVariantUploadsResponse>('/assets/avatar-variants', {
+    originalKey,
   })
 }
 

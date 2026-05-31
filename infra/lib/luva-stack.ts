@@ -521,6 +521,7 @@ export class LuvaStack extends Stack {
         FEED_POSTS_TABLE_NAME: feedPostsTable.tableName,
         FEED_POSTS_BY_ORDER_INDEX_NAME: 'FeedPostsByOrderIndex',
         CHARACTER_POSTS_TABLE_NAME: characterPostsTable.tableName,
+        FRIENDSHIPS_TABLE_NAME: friendshipsTable.tableName,
         REVENUECAT_SECRET_KEY: process.env.REVENUECAT_SECRET_KEY || '',
         REVENUECAT_ENTITLEMENT_ID: process.env.REVENUECAT_ENTITLEMENT_ID || 'Luva Pro',
         TIKTOK_CLIENT_KEY: process.env.TIKTOK_CLIENT_KEY || '',
@@ -549,6 +550,7 @@ export class LuvaStack extends Stack {
     generatedVideosTable.grantReadWriteData(adminFn);
     feedPostsTable.grantReadWriteData(adminFn);
     characterPostsTable.grantReadWriteData(adminFn);
+    friendshipsTable.grantReadWriteData(adminFn);
     lessonsTable.grantReadWriteData(adminFn);
     shadowingListsTable.grantReadWriteData(adminFn);
     shadowingChaptersTable.grantReadWriteData(adminFn);

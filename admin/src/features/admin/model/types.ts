@@ -82,6 +82,7 @@ export type AdminUsersResponse = {
 export type AdminVideoStatus = 'por_programar' | 'programado' | 'subido' | 'descartado'
 
 export type AdminVideoSummary = {
+  characterId: string
   storyId: string
   videoId: string
   title: string
@@ -122,6 +123,7 @@ export type AdminVideoUpdateResponse = {
 }
 
 export type AdminVideoPreviewResponse = {
+  characterId: string
   storyId: string
   videoId: string
   previewUrl: string
@@ -130,6 +132,7 @@ export type AdminVideoPreviewResponse = {
 }
 
 export type AdminVideoReplaceUploadResponse = {
+  characterId: string
   storyId: string
   videoId: string
   uploadUrl: string
@@ -148,6 +151,25 @@ export type AdminAssetUploadResponse = {
   expiresAt: string
   contentType: string
   cacheControl: string
+}
+
+export type AdminAvatarVariantField = 'avatarImageXsUrl' | 'avatarImageMdUrl'
+
+export type AdminAvatarVariantTarget = {
+  field: AdminAvatarVariantField
+  key: string
+  uploadUrl: string
+  url: string
+  contentType: string
+  cacheControl: string
+}
+
+export type AdminAvatarVariantUploadsResponse = {
+  bucketName: string
+  expiresAt: string
+  avatarImageXsUrl: string
+  avatarImageMdUrl: string
+  variants: AdminAvatarVariantTarget[]
 }
 
 export type AdminFeedPostType = 'normal' | 'practice_guide' | 'mission_guide' | 'extra'
@@ -183,16 +205,10 @@ export type AdminFeedPostDeleteResponse = {
 
 export type AdminStoryCharacter = {
   characterId: string
-  storyId: string
-  missionId: string
-  sceneIndex: number
-  storyTitle: string
-  missionTitle: string
   characterName: string
   avatarImageUrl?: string
   avatarImageXsUrl?: string
   avatarImageMdUrl?: string
-  sceneSummary?: string
 }
 
 export type AdminStoryCharactersResponse = {
@@ -203,11 +219,6 @@ export type AdminStoryCharactersResponse = {
 export type AdminCharacterPost = {
   characterId: string
   postId: string
-  storyId: string
-  missionId: string
-  sceneIndex: number
-  storyTitle: string
-  missionTitle: string
   characterName: string
   caption: string
   context?: string

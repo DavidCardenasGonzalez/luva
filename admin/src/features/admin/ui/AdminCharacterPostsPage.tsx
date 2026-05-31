@@ -555,11 +555,11 @@ export function AdminCharacterPostsPage() {
   return (
     <AdminLayout
       title={character?.characterName || 'Perfil de personaje'}
-      description={character ? `${character.storyTitle} · ${character.missionTitle}` : 'Carga posts con imagen y caption para este personaje.'}
+      description={character ? character.characterId : 'Carga posts con imagen y caption para este personaje.'}
       actions={
         <>
-          <button type="button" className="btn secondary" onClick={() => navigate(appPaths.stories)}>
-            Volver a stories
+          <button type="button" className="btn secondary" onClick={() => navigate(appPaths.characters)}>
+            Volver a personajes
           </button>
           <button type="button" className="btn ghost" onClick={reload} disabled={isLoading}>
             {isLoading ? 'Actualizando...' : 'Recargar'}
@@ -622,11 +622,7 @@ export function AdminCharacterPostsPage() {
               </span>
               <div>
                 <strong>{character.characterName}</strong>
-                <p>{character.missionTitle}</p>
-                <div className="admin-user-row-meta">
-                  <span className="tag">{character.storyTitle}</span>
-                  <span className="tag tag-muted">Escena {character.sceneIndex + 1}</span>
-                </div>
+                <p>{character.characterId}</p>
               </div>
             </div>
           )}

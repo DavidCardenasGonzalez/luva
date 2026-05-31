@@ -13,6 +13,8 @@ export type CharacterProfilePost = {
   thumbnailUrl?: string;
   videoUrl?: string;
   order: number;
+  messageCount: number;
+  conversationCount: number;
   avatarImageUrl?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -37,6 +39,18 @@ function normalizeOrder(value: unknown): number | undefined {
   if (!Number.isFinite(parsed)) return undefined;
   const order = Math.floor(parsed);
   return order >= 1 ? order : undefined;
+}
+
+function normalizeCount(value: unknown): number {
+  const parsed =
+    typeof value === 'number'
+      ? value
+      : typeof value === 'string'
+      ? Number(value.trim())
+      : Number.NaN;
+  if (!Number.isFinite(parsed)) return 0;
+  const count = Math.floor(parsed);
+  return count > 0 ? count : 0;
 }
 
 function normalizeUrl(value: unknown): string | undefined {
@@ -71,6 +85,8 @@ function sanitizeProfilePost(input: unknown): CharacterProfilePost | null {
     thumbnailUrl: thumbnailUrl || (videoUrl ? imageUrl : undefined),
     videoUrl,
     order,
+    messageCount: normalizeCount(raw.messageCount),
+    conversationCount: normalizeCount(raw.conversationCount),
     avatarImageUrl: normalizeUrl(raw.avatarImageUrl),
     createdAt: asString(raw.createdAt),
     updatedAt: asString(raw.updatedAt),

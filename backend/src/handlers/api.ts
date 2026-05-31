@@ -52,6 +52,7 @@ import {
 import { CHARACTERS } from "../data/characters";
 import {
   type CharacterPost,
+  incrementCharacterPostConversationMessages,
   incrementCharacterPostLike,
   incrementCharacterPostMetric,
   listPublicCharacterPosts,
@@ -163,6 +164,11 @@ type UserIdentity = {
 type FriendConversationFeedback = {
   summary: string;
   improvements: string[];
+};
+
+type FriendChatFinishRequest = {
+  postId?: unknown;
+  history?: Array<{ role: 'user' | 'assistant'; content: string }>;
 };
 
 type FriendChatPostContext = {
@@ -407,7 +413,7 @@ function unauthorized(message: string = "Unauthorized"): ApiResponse {
 
 const ROUTE_PREFIX = "/v1";
 const APP_VERSION_POLICY = {
-  latestVersion: "1.1.9",
+  latestVersion: "1.2.0",
   recommendedMinimumVersion: "1.1.3",
   minimumSupportedVersion: "1.1.3",
   iosStoreUrl: "https://apps.apple.com/us/app/luva-ingles/id6758112881",
@@ -828,9 +834,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
     const publicFriendFinish = path.match(/^\/v1\/public\/friends\/([^/]+)\/finish$/);
     if (method === "POST" && publicFriendFinish) {
       const friendId = decodeURIComponent(publicFriendFinish[1]);
-      const body = parseBody(event.body) as
-        | { history?: Array<{ role: 'user' | 'assistant'; content: string }> }
-        | undefined;
+      const body = parseBody(event.body) as FriendChatFinishRequest | undefined;
       try {
         const feedback = await finishFriendChat(undefined, friendId, body || {});
         return json(200, { friendId, conversationEnded: true, conversationFeedback: feedback });
@@ -903,9 +907,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
         return unauthorized("Missing user identity");
       }
       const friendId = decodeURIComponent(friendFinish[1]);
-      const body = parseBody(event.body) as
-        | { history?: Array<{ role: 'user' | 'assistant'; content: string }> }
-        | undefined;
+      const body = parseBody(event.body) as FriendChatFinishRequest | undefined;
       try {
         const feedback = await finishFriendChat(identity.userId, friendId, body || {});
         return json(200, { friendId, conversationEnded: true, conversationFeedback: feedback });
@@ -1151,6 +1153,7 @@ function publicFriend(record: FriendRecord): FriendCharacter {
     characterName: record.characterName,
     aiRole: record.aiRole,
     ...(record.characterPrompt ? { characterPrompt: record.characterPrompt } : {}),
+    ...(record.characterBio ? { characterBio: record.characterBio } : {}),
     ...(record.avatarImageUrl ? { avatarImageUrl: record.avatarImageUrl } : {}),
     ...(record.avatarImageXsUrl ? { avatarImageXsUrl: record.avatarImageXsUrl } : {}),
     ...(record.avatarImageMdUrl ? { avatarImageMdUrl: record.avatarImageMdUrl } : {}),
@@ -1169,6 +1172,7 @@ function friendFromCharacter(character: CharacterDefinition): FriendCharacter {
     characterName: character.caracterName || "Personaje",
     aiRole: character.aiRole,
     ...(character.caracterPrompt ? { characterPrompt: character.caracterPrompt } : {}),
+    ...(character.characterBio ? { characterBio: character.characterBio } : {}),
     ...(character.avatarImageUrl ? { avatarImageUrl: character.avatarImageUrl } : {}),
     ...(character.avatarImageXsUrl ? { avatarImageXsUrl: character.avatarImageXsUrl } : {}),
     ...(character.avatarImageMdUrl ? { avatarImageMdUrl: character.avatarImageMdUrl } : {}),
@@ -1219,7 +1223,11 @@ async function getPublicFriendProfile(
   identity?: UserIdentity
 ): Promise<{ friend?: FriendCharacter; posts: CharacterPost[] }> {
   const storedFriend = identity ? await getFriendRecord(identity.userId, friendId) : undefined;
-  const friend = storedFriend ? publicFriend(storedFriend) : publicCatalogFriend(friendId);
+  const catalogFriend = publicCatalogFriend(friendId);
+  let friend = storedFriend ? publicFriend(storedFriend) : catalogFriend;
+  if (friend && !friend.characterBio && catalogFriend?.characterBio) {
+    friend = { ...friend, characterBio: catalogFriend.characterBio };
+  }
   const posts = await listPublicCharacterPosts(friend?.friendId || friendId);
 
   return {
@@ -1253,6 +1261,7 @@ function sanitizeFriendRecord(input: any): FriendRecord | undefined {
     characterName,
     aiRole,
     ...(typeof input.characterPrompt === "string" ? { characterPrompt: input.characterPrompt } : {}),
+    ...(typeof input.characterBio === "string" ? { characterBio: input.characterBio } : {}),
     ...(typeof input.avatarImageUrl === "string" ? { avatarImageUrl: input.avatarImageUrl } : {}),
     ...(typeof input.avatarImageXsUrl === "string" ? { avatarImageXsUrl: input.avatarImageXsUrl } : {}),
     ...(typeof input.avatarImageMdUrl === "string" ? { avatarImageMdUrl: input.avatarImageMdUrl } : {}),
@@ -1359,6 +1368,7 @@ async function createFriendFromMission(
     characterName: character.caracterName || "Personaje",
     aiRole: character.aiRole,
     ...(character.caracterPrompt ? { characterPrompt: character.caracterPrompt } : {}),
+    ...(character.characterBio ? { characterBio: character.characterBio } : {}),
     ...(character.avatarImageUrl ? { avatarImageUrl: character.avatarImageUrl } : {}),
     ...(character.avatarImageXsUrl ? { avatarImageXsUrl: character.avatarImageXsUrl } : {}),
     ...(character.avatarImageMdUrl ? { avatarImageMdUrl: character.avatarImageMdUrl } : {}),
@@ -1718,13 +1728,15 @@ async function advanceFriendChat(
 async function finishFriendChat(
   userId: string | undefined,
   friendId: string,
-  body: { history?: Array<{ role: 'user' | 'assistant'; content: string }> }
+  body: FriendChatFinishRequest
 ): Promise<FriendConversationFeedback> {
   const friend = await resolveFriendRecordForChat(userId, friendId);
   if (!friend) {
     throw new Error("FRIEND_NOT_FOUND");
   }
   const history = sanitizeHistory(body.history).slice(-FRIEND_HISTORY_LIMIT);
+  const postId = sanitizeFriendChatPostId(body.postId);
+  const userMessageCount = history.filter((entry) => entry.role === "user").length;
   let feedback: FriendConversationFeedback;
   try {
     feedback = await generateFriendConversationFeedback(friend, history);
@@ -1750,7 +1762,30 @@ async function finishFriendChat(
       updatedAt: new Date().toISOString(),
     });
   }
+  if (postId && userMessageCount > 0) {
+    await recordFinishedPostConversation(friendId, postId, userMessageCount);
+  }
   return feedback;
+}
+
+async function recordFinishedPostConversation(
+  characterId: string,
+  postId: string,
+  messageCount: number,
+): Promise<void> {
+  try {
+    await incrementCharacterPostConversationMessages(characterId, postId, messageCount);
+  } catch (err: any) {
+    console.warn(
+      JSON.stringify({
+        scope: "friends.chat.post_message_count_error",
+        characterId,
+        postId,
+        messageCount,
+        message: err?.message || "unknown",
+      })
+    );
+  }
 }
 
 async function startSession(body?: any): Promise<{

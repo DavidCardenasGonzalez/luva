@@ -89,7 +89,7 @@ export function AppRouter() {
         }
       />
       <Route
-        path={appPaths.stories}
+        path={appPaths.characters}
         element={
           <ProtectedRoute
             requiredRoles={ADMIN_ROLES}
@@ -101,7 +101,7 @@ export function AppRouter() {
         }
       />
       <Route
-        path="/stories/:characterId"
+        path="/characters/:characterId"
         element={
           <ProtectedRoute
             requiredRoles={ADMIN_ROLES}

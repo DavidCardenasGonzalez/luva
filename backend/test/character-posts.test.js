@@ -60,6 +60,7 @@ test('buildCharacterPostRecord normalizes a character post', () => {
     playCount: 0,
     watched3sCount: 0,
     conversationCount: 0,
+    messageCount: 0,
     createdAt: '2026-04-25T10:20:30.000Z',
     updatedAt: '2026-04-25T10:20:30.000Z',
   });
@@ -145,6 +146,7 @@ test('toCharacterPost validates stored records', () => {
       playCount: 0,
       watched3sCount: 0,
       conversationCount: 0,
+      messageCount: 0,
       createdAt: '2026-04-25T10:20:30.000Z',
       updatedAt: '2026-04-25T10:20:30.000Z',
     },

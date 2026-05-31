@@ -13,6 +13,7 @@ export type FriendCharacter = {
   characterName: string;
   aiRole: string;
   characterPrompt?: string;
+  characterBio?: string;
   avatarImageUrl?: string;
   avatarImageXsUrl?: string;
   avatarImageMdUrl?: string;
@@ -130,6 +131,7 @@ export async function sendFriendChatMessage(
 export async function finishFriendChat(
   friendId: string,
   payload: {
+    postId?: string;
     history?: Array<{ role: 'user' | 'assistant'; content: string }>;
   },
   options?: FriendChatRequestOptions,
