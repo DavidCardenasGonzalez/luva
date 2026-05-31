@@ -61,9 +61,8 @@ type MetaOnboardingStep4Event = {
 
 type MetaFriendChatStartedEvent = {
   friendId?: string;
+  characterId?: string;
   characterName?: string;
-  storyId?: string;
-  missionId?: string;
   postId?: string;
   inputMethod?: "text" | "audio";
 };
@@ -287,9 +286,8 @@ export async function trackPaywallViewed({
 
 export async function trackMetaFriendChatStarted({
   friendId,
+  characterId,
   characterName,
-  storyId,
-  missionId,
   postId,
   inputMethod,
 }: MetaFriendChatStartedEvent = {}) {
@@ -307,9 +305,8 @@ export async function trackMetaFriendChatStarted({
       description: "Primer mensaje enviado en una conversación con un amigo",
       params: {
         friend_id: friendId,
+        character_id: characterId || friendId,
         character_name: characterName,
-        story_id: storyId,
-        mission_id: missionId,
         post_id: postId,
         input_method: inputMethod,
       },

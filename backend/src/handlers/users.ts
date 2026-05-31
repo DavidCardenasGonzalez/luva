@@ -7,6 +7,7 @@ import {
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import {
+  deriveLegacyStoriesDocument,
   mergeUserProgressRecords,
   normalizeUserProgressRecord,
   type UserProgressRecord,
@@ -132,7 +133,7 @@ export const handler = async (event: any): Promise<Result> => {
       }
 
       const progress = await getCurrentUserProgress(email);
-      return json(200, { progress });
+      return json(200, { progress: progressApiPayload(progress) });
     }
 
     if (method === 'POST' && path === `${ROUTE_PREFIX}/users/me/progress`) {
@@ -148,7 +149,7 @@ export const handler = async (event: any): Promise<Result> => {
           ? (payload as Record<string, unknown>).progress
           : payload;
       const progress = await mergeCurrentUserProgress(email, progressInput);
-      return json(200, { progress });
+      return json(200, { progress: progressApiPayload(progress) });
     }
 
     return json(404, { code: 'NOT_FOUND', message: 'Not found' });
@@ -528,7 +529,7 @@ async function mergeCurrentUserProgress(
 ): Promise<UserProgressRecord> {
   const previous = await getCurrentStoredUser(email);
   const progress = mergeUserProgressRecords(previous?.appProgress, input);
-  const progressUpdatedAt = maxTimestamp(progress.cards.updatedAt, progress.stories.updatedAt);
+  const progressUpdatedAt = maxTimestamp(progress.cards.updatedAt, progress.characters.updatedAt);
 
   await dynamo.send(
     new UpdateCommand({
@@ -543,6 +544,16 @@ async function mergeCurrentUserProgress(
   );
 
   return progress;
+}
+
+function progressApiPayload(progress: UserProgressRecord) {
+  // Emit both the canonical `characters` shape and the legacy `stories` shape so
+  // existing mobile clients (which read `stories.items[storyId].completedMissions`)
+  // keep working until they migrate to the characterId-flat shape.
+  return {
+    ...progress,
+    stories: deriveLegacyStoriesDocument(progress.characters),
+  };
 }
 
 function getUsersTableName(): string {

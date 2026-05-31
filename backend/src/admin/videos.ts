@@ -62,6 +62,9 @@ type StoredAdminVideoRecord = {
 };
 
 export type AdminVideoSummary = {
+  // `storyId` is kept as the DynamoDB partition key attribute name.
+  // `characterId` is the canonical name in this app; it carries the same value.
+  characterId: string;
   storyId: string;
   videoId: string;
   title: string;
@@ -97,6 +100,7 @@ export type AdminVideosResponse = {
 };
 
 export type UpdateAdminVideoInput = {
+  characterId?: unknown;
   storyId?: unknown;
   videoId?: unknown;
   status?: unknown;
@@ -109,6 +113,7 @@ export type UpdateAdminVideoResponse = {
 };
 
 export type AdminVideoPreviewResponse = {
+  characterId: string;
   storyId: string;
   videoId: string;
   previewUrl: string;
@@ -117,12 +122,14 @@ export type AdminVideoPreviewResponse = {
 };
 
 export type AdminVideoReplaceUploadInput = {
+  characterId?: unknown;
   storyId?: unknown;
   videoId?: unknown;
   contentType?: unknown;
 };
 
 export type AdminVideoReplaceUploadResponse = {
+  characterId: string;
   storyId: string;
   videoId: string;
   uploadUrl: string;
@@ -131,6 +138,7 @@ export type AdminVideoReplaceUploadResponse = {
 };
 
 export type CompleteAdminVideoReplaceInput = {
+  characterId?: unknown;
   storyId?: unknown;
   videoId?: unknown;
   contentType?: unknown;
@@ -197,7 +205,7 @@ export function buildAdminVideoPublicationState(
 export async function updateAdminVideoPublication(
   input: UpdateAdminVideoInput,
 ): Promise<UpdateAdminVideoResponse> {
-  const storyId = normalizeKey(input.storyId);
+  const storyId = normalizeKey(input.characterId) || normalizeKey(input.storyId);
   const videoId = normalizeKey(input.videoId);
 
   if (!storyId || !videoId) {
@@ -285,10 +293,11 @@ export function buildAdminVideoPublicationUpdate(
 }
 
 export async function getAdminVideoPreview(input: {
+  characterId?: unknown;
   storyId?: unknown;
   videoId?: unknown;
 }): Promise<AdminVideoPreviewResponse> {
-  const storyId = normalizeKey(input.storyId);
+  const storyId = normalizeKey(input.characterId) || normalizeKey(input.storyId);
   const videoId = normalizeKey(input.videoId);
 
   if (!storyId || !videoId) {
@@ -315,6 +324,7 @@ export async function getAdminVideoPreview(input: {
   const expiresAt = new Date(Date.now() + expiresInSeconds * 1000).toISOString();
 
   return {
+    characterId: storyId,
     storyId,
     videoId,
     previewUrl,
@@ -326,7 +336,7 @@ export async function getAdminVideoPreview(input: {
 export async function createAdminVideoReplaceUpload(
   input: AdminVideoReplaceUploadInput,
 ): Promise<AdminVideoReplaceUploadResponse> {
-  const storyId = normalizeKey(input.storyId);
+  const storyId = normalizeKey(input.characterId) || normalizeKey(input.storyId);
   const videoId = normalizeKey(input.videoId);
   const contentType = normalizeContentType(input.contentType) || 'video/mp4';
 
@@ -354,6 +364,7 @@ export async function createAdminVideoReplaceUpload(
   const expiresAt = new Date(Date.now() + expiresInSeconds * 1000).toISOString();
 
   return {
+    characterId: storyId,
     storyId,
     videoId,
     uploadUrl,
@@ -365,7 +376,7 @@ export async function createAdminVideoReplaceUpload(
 export async function completeAdminVideoReplace(
   input: CompleteAdminVideoReplaceInput,
 ): Promise<CompleteAdminVideoReplaceResponse> {
-  const storyId = normalizeKey(input.storyId);
+  const storyId = normalizeKey(input.characterId) || normalizeKey(input.storyId);
   const videoId = normalizeKey(input.videoId);
   const contentType = normalizeContentType(input.contentType);
   const sizeBytes = asNumber(input.sizeBytes);
@@ -476,6 +487,7 @@ function toAdminVideoSummary(input: unknown): AdminVideoSummary | undefined {
   }
 
   return {
+    characterId: storyId,
     storyId,
     videoId,
     title: firstNonEmpty(asString(raw?.title), storyId) || storyId,

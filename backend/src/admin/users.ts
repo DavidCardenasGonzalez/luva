@@ -179,15 +179,15 @@ function toAdminUserSummary(input: unknown): AdminUserSummary | undefined {
 function summarizeProgress(input: unknown): AdminUserSummary['progress'] {
   const progress = normalizeUserProgressRecord(input);
   const cards = Object.values(progress.cards.items);
-  const stories = Object.values(progress.stories.items).filter((item) => !item.deletedAt);
-  const updatedAt = maxTimestamp(progress.cards.updatedAt, progress.stories.updatedAt);
+  const characters = Object.values(progress.characters.items).filter((item) => !item.deletedAt);
+  const updatedAt = maxTimestamp(progress.cards.updatedAt, progress.characters.updatedAt);
 
   return {
     cardsTotal: cards.length,
     cardsLearning: cards.filter((item) => item.status === 'learning').length,
     cardsLearned: cards.filter((item) => item.status === 'learned').length,
-    storiesStarted: stories.length,
-    storiesCompleted: stories.filter((item) => !!item.storyCompletedAt).length,
+    storiesStarted: characters.length,
+    storiesCompleted: characters.filter((item) => !!item.completedAt).length,
     ...(updatedAt !== MIN_PROGRESS_TIMESTAMP ? { updatedAt } : {}),
   };
 }

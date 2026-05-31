@@ -11,7 +11,7 @@ import {
   ScanCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
-import type { StoryDefinition, StoryMission } from './types';
+import type { CharacterDefinition } from './types';
 
 const dynamo = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
   marshallOptions: {
@@ -26,16 +26,10 @@ let OPENAI_KEY_CACHE: string | undefined;
 
 export type StoryCharacterSummary = {
   characterId: string;
-  storyId: string;
-  missionId: string;
-  sceneIndex: number;
-  storyTitle: string;
-  missionTitle: string;
   characterName: string;
   avatarImageUrl?: string;
   avatarImageXsUrl?: string;
   avatarImageMdUrl?: string;
-  sceneSummary?: string;
 };
 
 export type StoryCharactersResponse = {
@@ -76,11 +70,6 @@ export type StoredCharacterPostRecord = {
 export type CharacterPost = {
   characterId: string;
   postId: string;
-  storyId: string;
-  missionId: string;
-  sceneIndex: number;
-  storyTitle: string;
-  missionTitle: string;
   characterName: string;
   caption: string;
   context?: string;
@@ -162,15 +151,15 @@ export function buildCharacterId(storyId: string, missionId: string): string {
   return `${storyId}:${missionId}`;
 }
 
-export function listStoryCharacters(stories: StoryDefinition[]): StoryCharactersResponse {
+export function listStoryCharacters(characters: CharacterDefinition[]): StoryCharactersResponse {
   return {
-    characters: flattenStoryCharacters(stories),
+    characters: flattenStoryCharacters(characters),
     generatedAt: new Date().toISOString(),
   };
 }
 
 export function findStoryCharacter(
-  stories: StoryDefinition[],
+  characters: CharacterDefinition[],
   characterId: string,
 ): StoryCharacterSummary | undefined {
   const normalizedCharacterId = normalizeCharacterId(characterId);
@@ -178,7 +167,7 @@ export function findStoryCharacter(
     return undefined;
   }
 
-  return flattenStoryCharacters(stories).find(
+  return flattenStoryCharacters(characters).find(
     (character) => character.characterId === normalizedCharacterId,
   );
 }
@@ -436,11 +425,6 @@ export function buildCharacterPostRecord(
   return {
     characterId,
     postId,
-    storyId: character.storyId,
-    missionId: character.missionId,
-    sceneIndex: character.sceneIndex,
-    storyTitle: character.storyTitle,
-    missionTitle: character.missionTitle,
     characterName: character.characterName,
     ...(character.avatarImageUrl ? { avatarImageUrl: character.avatarImageUrl } : {}),
     caption,
@@ -464,12 +448,8 @@ export function toCharacterPost(input: unknown): CharacterPost | undefined {
   const raw = asRecord(input) as StoredCharacterPostRecord | undefined;
   const characterId = normalizeCharacterId(raw?.characterId);
   const postId = normalizePostId(raw?.postId);
-  const storyId = normalizeTargetId(raw?.storyId);
-  const missionId = normalizeTargetId(raw?.missionId);
-  const sceneIndex = normalizeSceneIndex(raw?.sceneIndex);
-  const storyTitle = normalizeLabel(raw?.storyTitle);
-  const missionTitle = normalizeLabel(raw?.missionTitle);
-  const characterName = normalizeLabel(raw?.characterName);
+  const characterName =
+    normalizeLabel(raw?.characterName) || normalizeLabel(raw?.missionTitle) || 'Personaje';
   const caption = normalizeCaption(raw?.caption);
   const context = normalizeContext(raw?.context);
   const videoUrl = normalizeStoredOptionalUrl(raw?.videoUrl ?? raw?.videoURL);
@@ -483,19 +463,7 @@ export function toCharacterPost(input: unknown): CharacterPost | undefined {
   const watched3sCount = normalizeLikeCount(raw?.watched3sCount) ?? 0;
   const conversationCount = normalizeLikeCount(raw?.conversationCount) ?? 0;
 
-  if (
-    !characterId ||
-    !postId ||
-    !storyId ||
-    !missionId ||
-    sceneIndex === undefined ||
-    !storyTitle ||
-    !missionTitle ||
-    !characterName ||
-    !caption ||
-    !imageUrl ||
-    !order
-  ) {
+  if (!characterId || !postId || !caption || !imageUrl || !order) {
     return undefined;
   }
 
@@ -506,11 +474,6 @@ export function toCharacterPost(input: unknown): CharacterPost | undefined {
   return {
     characterId,
     postId,
-    storyId,
-    missionId,
-    sceneIndex,
-    storyTitle,
-    missionTitle,
     characterName,
     ...(avatarImageUrl ? { avatarImageUrl } : {}),
     caption,
@@ -587,32 +550,17 @@ function normalizeCharacterPostMetric(value: unknown): CharacterPostMetric | und
   return undefined;
 }
 
-function flattenStoryCharacters(stories: StoryDefinition[]): StoryCharacterSummary[] {
-  return (stories || []).flatMap((story) =>
-    (story.missions || []).map((mission, sceneIndex) =>
-      buildStoryCharacterSummary(story, mission, sceneIndex),
-    ),
-  );
+function flattenStoryCharacters(characters: CharacterDefinition[]): StoryCharacterSummary[] {
+  return (characters || []).map(buildStoryCharacterSummary);
 }
 
-function buildStoryCharacterSummary(
-  story: StoryDefinition,
-  mission: StoryMission,
-  sceneIndex: number,
-): StoryCharacterSummary {
-  const characterName = mission.caracterName || mission.title || 'Personaje';
+function buildStoryCharacterSummary(character: CharacterDefinition): StoryCharacterSummary {
   return {
-    characterId: buildCharacterId(story.storyId, mission.missionId),
-    storyId: story.storyId,
-    missionId: mission.missionId,
-    sceneIndex,
-    storyTitle: story.title,
-    missionTitle: mission.title,
-    characterName,
-    ...(mission.avatarImageUrl ? { avatarImageUrl: mission.avatarImageUrl } : {}),
-    ...(mission.avatarImageXsUrl ? { avatarImageXsUrl: mission.avatarImageXsUrl } : {}),
-    ...(mission.avatarImageMdUrl ? { avatarImageMdUrl: mission.avatarImageMdUrl } : {}),
-    ...(mission.sceneSummary ? { sceneSummary: mission.sceneSummary } : {}),
+    characterId: character.characterId,
+    characterName: character.caracterName || 'Personaje',
+    ...(character.avatarImageUrl ? { avatarImageUrl: character.avatarImageUrl } : {}),
+    ...(character.avatarImageXsUrl ? { avatarImageXsUrl: character.avatarImageXsUrl } : {}),
+    ...(character.avatarImageMdUrl ? { avatarImageMdUrl: character.avatarImageMdUrl } : {}),
   };
 }
 
@@ -862,15 +810,6 @@ function normalizePostId(value: unknown): string | undefined {
   return normalized.slice(0, 120);
 }
 
-function normalizeTargetId(value: unknown): string | undefined {
-  const normalized = asString(value)?.trim();
-  if (!normalized) {
-    return undefined;
-  }
-
-  return normalized.slice(0, 180);
-}
-
 function normalizeLabel(value: unknown): string | undefined {
   const normalized = asString(value)?.trim();
   if (!normalized) {
@@ -937,21 +876,6 @@ function normalizeLikeCount(value: unknown): number | undefined {
 
   const count = Math.floor(parsed);
   return count >= 0 ? count : 0;
-}
-
-function normalizeSceneIndex(value: unknown): number | undefined {
-  const parsed =
-    typeof value === 'number'
-      ? value
-      : typeof value === 'string'
-      ? Number(value.trim())
-      : Number.NaN;
-
-  if (!Number.isFinite(parsed)) {
-    return undefined;
-  }
-
-  return Math.max(0, Math.floor(parsed));
 }
 
 function normalizeOptionalUrl(

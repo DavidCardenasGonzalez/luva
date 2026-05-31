@@ -7,21 +7,12 @@ import {
 
 export type LocalFriendCharacter = {
   friendId: string;
-  storyId: string;
-  missionId: string;
-  sceneIndex: number;
-  storyTitle: string;
-  missionTitle: string;
   characterName: string;
   aiRole: string;
   characterPrompt?: string;
   avatarImageUrl?: string;
   avatarImageXsUrl?: string;
   avatarImageMdUrl?: string;
-  videoIntro?: string;
-  videoPreviewUrl?: string;
-  videoThumbnailUrl?: string;
-  sceneSummary?: string;
   createdAt: string;
   updatedAt: string;
   lastMessageAt?: string;
@@ -30,46 +21,14 @@ export type LocalFriendCharacter = {
   conversationCount?: number;
 };
 
-type LocalStoryRequirement = {
-  requirementId: string;
-  text: string;
-};
-
-type LocalStoryMission = {
-  missionId: string;
-  title: string;
-  sceneSummary?: string;
-  aiRole: string;
-  caracterName?: string;
+export type LocalAddFriendPayload = {
+  characterId: string;
   characterName?: string;
-  caracterPrompt?: string;
+  aiRole?: string;
   characterPrompt?: string;
   avatarImageUrl?: string;
   avatarImageXsUrl?: string;
   avatarImageMdUrl?: string;
-  videoIntro?: string;
-  videoPreviewUrl?: string;
-  videoThumbnailUrl?: string;
-  requirements?: LocalStoryRequirement[];
-};
-
-type LocalStoryDefinition = {
-  storyId: string;
-  isInitial?: boolean;
-  title: string;
-  summary: string;
-  level?: string;
-  tags?: string[];
-  unlockCost?: number;
-  missions: LocalStoryMission[];
-};
-
-export type LocalAddFriendPayload = {
-  storyId?: string;
-  missionId?: string;
-  sceneIndex?: number;
-  storyDefinition?: LocalStoryDefinition;
-  missionDefinition?: LocalStoryMission;
   lastMessageAt?: string;
   lastUserMessage?: string;
   messageCount?: number;
@@ -105,61 +64,48 @@ function asFiniteNumber(value: unknown): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
-function buildFriendId(storyId: string, missionId: string) {
-  return `${storyId}:${missionId}`;
-}
-
+/**
+ * Sanitize a friend record from AsyncStorage.
+ *
+ * Records may have been written by older builds with legacy fields
+ * (storyId, missionId, sceneIndex, storyTitle, missionTitle, sceneSummary, video*).
+ * We read what we need and drop the rest, deriving `friendId` from legacy
+ * `storyId:missionId` when necessary.
+ */
 function sanitizeLocalFriend(input: unknown): LocalFriendCharacter | null {
   if (!input || typeof input !== 'object') return null;
   const raw = input as Record<string, unknown>;
-  const friendId = asString(raw.friendId);
-  const storyId = asString(raw.storyId);
-  const missionId = asString(raw.missionId);
-  const sceneIndex = asFiniteNumber(raw.sceneIndex);
-  const storyTitle = asString(raw.storyTitle);
-  const missionTitle = asString(raw.missionTitle);
+
+  const legacyStoryId = asString(raw.storyId);
+  const legacyMissionId = asString(raw.missionId);
+  const friendId =
+    asString(raw.friendId) ||
+    asString(raw.characterId) ||
+    (legacyStoryId && legacyMissionId ? `${legacyStoryId}:${legacyMissionId}` : undefined);
   const characterName = asString(raw.characterName);
   const aiRole = asString(raw.aiRole);
   const createdAt = asString(raw.createdAt);
   const updatedAt = asString(raw.updatedAt);
 
-  if (
-    !friendId ||
-    !storyId ||
-    !missionId ||
-    sceneIndex === undefined ||
-    !storyTitle ||
-    !missionTitle ||
-    !characterName ||
-    !aiRole ||
-    !createdAt ||
-    !updatedAt
-  ) {
+  if (!friendId || !characterName || !aiRole || !createdAt || !updatedAt) {
     return null;
   }
 
   return {
     friendId,
-    storyId,
-    missionId,
-    sceneIndex: Math.max(0, Math.floor(sceneIndex)),
-    storyTitle,
-    missionTitle,
     characterName,
     aiRole,
     ...(asString(raw.characterPrompt) ? { characterPrompt: asString(raw.characterPrompt) } : {}),
     ...(asString(raw.avatarImageUrl) ? { avatarImageUrl: asString(raw.avatarImageUrl) } : {}),
     ...(asString(raw.avatarImageXsUrl) ? { avatarImageXsUrl: asString(raw.avatarImageXsUrl) } : {}),
     ...(asString(raw.avatarImageMdUrl) ? { avatarImageMdUrl: asString(raw.avatarImageMdUrl) } : {}),
-    ...(asString(raw.videoIntro) ? { videoIntro: asString(raw.videoIntro) } : {}),
-    ...(asString(raw.videoPreviewUrl) ? { videoPreviewUrl: asString(raw.videoPreviewUrl) } : {}),
-    ...(asString(raw.videoThumbnailUrl) ? { videoThumbnailUrl: asString(raw.videoThumbnailUrl) } : {}),
-    ...(asString(raw.sceneSummary) ? { sceneSummary: asString(raw.sceneSummary) } : {}),
     createdAt,
     updatedAt,
     ...(asString(raw.lastMessageAt) ? { lastMessageAt: asString(raw.lastMessageAt) } : {}),
     ...(asString(raw.lastUserMessage) ? { lastUserMessage: asString(raw.lastUserMessage) } : {}),
-    ...(asFiniteNumber(raw.messageCount) !== undefined ? { messageCount: Math.max(0, Math.floor(asFiniteNumber(raw.messageCount)!)) } : {}),
+    ...(asFiniteNumber(raw.messageCount) !== undefined
+      ? { messageCount: Math.max(0, Math.floor(asFiniteNumber(raw.messageCount)!)) }
+      : {}),
     ...(asFiniteNumber(raw.conversationCount) !== undefined
       ? { conversationCount: Math.max(0, Math.floor(asFiniteNumber(raw.conversationCount)!)) }
       : {}),
@@ -193,61 +139,35 @@ async function writeLocalFriends(friends: LocalFriendCharacter[]): Promise<void>
   await AsyncStorage.setItem(LOCAL_FRIENDS_STORAGE_KEY, JSON.stringify(next));
 }
 
-function pickMission(payload: LocalAddFriendPayload): LocalStoryMission | undefined {
-  if (payload.missionDefinition?.missionId) {
-    return payload.missionDefinition;
-  }
-
-  const missions = payload.storyDefinition?.missions || [];
-  if (payload.missionId) {
-    const byId = missions.find((mission) => mission.missionId === payload.missionId);
-    if (byId) return byId;
-  }
-
-  const sceneIndex = Math.max(0, Math.floor(Number(payload.sceneIndex) || 0));
-  return missions[sceneIndex];
-}
-
-function buildLocalFriendFromMission(
+function buildLocalFriendFromPayload(
   payload: LocalAddFriendPayload,
   existing?: LocalFriendCharacter,
 ): LocalFriendCharacter {
-  const mission = pickMission(payload);
-  const storyId = asString(payload.storyId) || asString(payload.storyDefinition?.storyId);
-  const missionId = asString(payload.missionId) || asString(mission?.missionId);
-  const sceneIndex = Math.max(0, Math.floor(Number(payload.sceneIndex) || 0));
-  const storyTitle = asString(payload.storyDefinition?.title) || 'Historia';
-  const missionTitle = asString(mission?.title);
-  const aiRole = asString(mission?.aiRole);
+  const characterId = asString(payload.characterId);
+  const characterName = asString(payload.characterName) || existing?.characterName;
+  const aiRole = asString(payload.aiRole) || existing?.aiRole;
 
-  if (!storyId || !missionId || !missionTitle || !aiRole) {
+  if (!characterId || !characterName || !aiRole) {
     throw new Error('No pudimos agregar este personaje a amigos.');
   }
 
   const now = new Date().toISOString();
-  const characterName =
-    asString(mission?.caracterName) ||
-    asString(mission?.characterName) ||
-    missionTitle;
-  const characterPrompt = asString(mission?.caracterPrompt) || asString(mission?.characterPrompt);
+  const characterPrompt = asString(payload.characterPrompt) || existing?.characterPrompt;
 
   return {
-    friendId: buildFriendId(storyId, missionId),
-    storyId,
-    missionId,
-    sceneIndex,
-    storyTitle,
-    missionTitle,
+    friendId: characterId,
     characterName,
     aiRole,
     ...(characterPrompt ? { characterPrompt } : {}),
-    ...(asString(mission?.avatarImageUrl) ? { avatarImageUrl: asString(mission?.avatarImageUrl) } : {}),
-    ...(asString(mission?.avatarImageXsUrl) ? { avatarImageXsUrl: asString(mission?.avatarImageXsUrl) } : {}),
-    ...(asString(mission?.avatarImageMdUrl) ? { avatarImageMdUrl: asString(mission?.avatarImageMdUrl) } : {}),
-    ...(asString(mission?.videoIntro) ? { videoIntro: asString(mission?.videoIntro) } : {}),
-    ...(asString(mission?.videoPreviewUrl) ? { videoPreviewUrl: asString(mission?.videoPreviewUrl) } : {}),
-    ...(asString(mission?.videoThumbnailUrl) ? { videoThumbnailUrl: asString(mission?.videoThumbnailUrl) } : {}),
-    ...(asString(mission?.sceneSummary) ? { sceneSummary: asString(mission?.sceneSummary) } : {}),
+    ...(asString(payload.avatarImageUrl) || existing?.avatarImageUrl
+      ? { avatarImageUrl: asString(payload.avatarImageUrl) || existing?.avatarImageUrl }
+      : {}),
+    ...(asString(payload.avatarImageXsUrl) || existing?.avatarImageXsUrl
+      ? { avatarImageXsUrl: asString(payload.avatarImageXsUrl) || existing?.avatarImageXsUrl }
+      : {}),
+    ...(asString(payload.avatarImageMdUrl) || existing?.avatarImageMdUrl
+      ? { avatarImageMdUrl: asString(payload.avatarImageMdUrl) || existing?.avatarImageMdUrl }
+      : {}),
     createdAt: existing?.createdAt || now,
     updatedAt: now,
     ...(existing?.lastMessageAt ? { lastMessageAt: existing.lastMessageAt } : {}),
@@ -257,35 +177,10 @@ function buildLocalFriendFromMission(
   };
 }
 
-async function buildSyncPayload(friend: LocalFriendCharacter): Promise<LocalAddFriendPayload> {
+async function buildSyncPayload(friend: LocalFriendCharacter): Promise<Record<string, unknown>> {
   const latestConversation = await getLatestLocalFriendConversationForFriend(friend.friendId);
-  const missionDefinition: LocalStoryMission = {
-    missionId: friend.missionId,
-    title: friend.missionTitle,
-    sceneSummary: friend.sceneSummary,
-    aiRole: friend.aiRole,
-    caracterName: friend.characterName,
-    caracterPrompt: friend.characterPrompt,
-    avatarImageUrl: friend.avatarImageUrl,
-    avatarImageXsUrl: friend.avatarImageXsUrl,
-    avatarImageMdUrl: friend.avatarImageMdUrl,
-    videoIntro: friend.videoIntro,
-    videoPreviewUrl: friend.videoPreviewUrl,
-    videoThumbnailUrl: friend.videoThumbnailUrl,
-    requirements: [],
-  };
-
   return {
-    storyId: friend.storyId,
-    missionId: friend.missionId,
-    sceneIndex: friend.sceneIndex,
-    storyDefinition: {
-      storyId: friend.storyId,
-      title: friend.storyTitle,
-      summary: friend.sceneSummary || friend.missionTitle,
-      missions: [missionDefinition],
-    },
-    missionDefinition,
+    characterId: friend.friendId,
     ...(friend.lastMessageAt ? { lastMessageAt: friend.lastMessageAt } : {}),
     ...(friend.lastUserMessage ? { lastUserMessage: friend.lastUserMessage } : {}),
     ...(typeof friend.messageCount === 'number' ? { messageCount: friend.messageCount } : {}),
@@ -347,12 +242,12 @@ export async function getLocalFriend(friendId?: string): Promise<LocalFriendChar
 
 export async function addLocalFriendFromMission(payload: LocalAddFriendPayload): Promise<LocalFriendCharacter> {
   const friends = await readLocalFriends();
-  const friendId = buildFriendId(
-    asString(payload.storyId) || asString(payload.storyDefinition?.storyId) || '',
-    asString(payload.missionId) || asString(pickMission(payload)?.missionId) || '',
-  );
-  const existing = friends.find((friend) => friend.friendId === friendId);
-  const nextFriend = buildLocalFriendFromMission(payload, existing);
+  const characterId = asString(payload.characterId);
+  if (!characterId) {
+    throw new Error('No pudimos agregar este personaje a amigos.');
+  }
+  const existing = friends.find((friend) => friend.friendId === characterId);
+  const nextFriend = buildLocalFriendFromPayload(payload, existing);
   await writeLocalFriends([
     nextFriend,
     ...friends.filter((friend) => friend.friendId !== nextFriend.friendId),

@@ -363,7 +363,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     const avatarUrl = (friend.avatarImageXsUrl || friend.avatarImageUrl)?.trim();
     return avatarUrl
       ? { uri: avatarUrl }
-      : getChatAvatar(friend.missionId);
+      : getChatAvatar(friend.friendId);
   }, [friend]);
   const largeAvatarSource = useMemo(() => {
     if (!friend) return undefined;
@@ -374,7 +374,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     )?.trim();
     return avatarUrl
       ? { uri: avatarUrl }
-      : getChatAvatar(friend.missionId);
+      : getChatAvatar(friend.friendId);
   }, [friend]);
   const avatarInitial = (friend?.characterName.trim().charAt(0) || '?').toUpperCase();
   const hasStartedConversation = useMemo(
@@ -401,11 +401,8 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     trackedFriendViewRef.current = chatContextKey;
     void trackMixpanelFriendEvent('friend_chat_viewed', {
       friend_id: friend.friendId,
+      character_id: friend.friendId,
       character_name: friend.characterName,
-      story_id: friend.storyId,
-      story_title: friend.storyTitle,
-      mission_id: friend.missionId,
-      mission_title: friend.missionTitle,
       post_id: sourcePost?.postId,
       source: sourcePost ? 'profile_post' : 'friend_chat',
       conversation_count: friend.conversationCount ?? 0,
@@ -553,8 +550,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     void trackMixpanelFriendEvent('friend_chat_help_opened', {
       friend_id: friend?.friendId,
       character_name: friend?.characterName,
-      story_id: friend?.storyId,
-      mission_id: friend?.missionId,
+      character_id: friend?.friendId,
       post_id: sourcePost?.postId,
       history_message_count: messages.length,
     });
@@ -576,8 +572,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       void trackMixpanelFriendEvent('friend_chat_end_requested', {
         friend_id: friendId,
         character_name: friend?.characterName,
-        story_id: friend?.storyId,
-        mission_id: friend?.missionId,
+        character_id: friend?.friendId,
         post_id: sourcePost?.postId,
         history_message_count: messages.length,
       });
@@ -599,8 +594,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       void trackMixpanelFriendEvent('friend_chat_completed', {
         friend_id: friendId,
         character_name: friend?.characterName,
-        story_id: friend?.storyId,
-        mission_id: friend?.missionId,
+        character_id: friend?.friendId,
         post_id: sourcePost?.postId,
         input_method: 'manual_end',
         history_message_count: messages.length,
@@ -637,8 +631,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     void trackMixpanelFriendEvent('friend_chat_finished', {
       friend_id: friend?.friendId,
       character_name: friend?.characterName,
-      story_id: friend?.storyId,
-      mission_id: friend?.missionId,
+      character_id: friend?.friendId,
       post_id: sourcePost?.postId,
       history_message_count: messages.length,
       conversation_ended: conversationEnded,
@@ -689,8 +682,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       void trackMixpanelFriendEvent('friend_chat_help_requested', {
         friend_id: friend.friendId,
         character_name: friend.characterName,
-        story_id: friend.storyId,
-        mission_id: friend.missionId,
+        character_id: friend.friendId,
         post_id: sourcePost?.postId,
         question_length: trimmed.length,
         question_word_count: trimmed.split(/\s+/).filter(Boolean).length,
@@ -871,8 +863,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         void trackMixpanelFriendEvent('friend_chat_message_sent', {
           friend_id: friendId,
           character_name: friend?.characterName,
-          story_id: friend?.storyId,
-          mission_id: friend?.missionId,
+          character_id: friend?.friendId,
           post_id: sourcePost?.postId,
           input_method: inputMethod,
           transcript_length: trimmed.length,
@@ -885,8 +876,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           void trackMetaFriendChatStarted({
             friendId,
             characterName: friend?.characterName,
-            storyId: friend?.storyId,
-            missionId: friend?.missionId,
+            characterId: friend?.friendId,
             postId: sourcePost?.postId,
             inputMethod,
           });
@@ -1030,8 +1020,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       void trackMixpanelFriendEvent('friend_chat_recording_started', {
         friend_id: friendId,
         character_name: friend?.characterName,
-        story_id: friend?.storyId,
-        mission_id: friend?.missionId,
+        character_id: friend?.friendId,
         post_id: sourcePost?.postId,
       });
       setErrorMessage(null);
@@ -1217,7 +1206,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           {sourcePost ? <SourcePostCard post={sourcePost} friendName={friend.characterName} /> : null}
 
           <View style={{ padding: 14, borderRadius: 12, backgroundColor: 'white', borderWidth: 1, borderColor: COLORS.border, marginTop: sourcePost ? 12 : 0 }}>
-            <Text style={{ fontWeight: '800', color: '#1e293b' }}>{friend.missionTitle}</Text>
+            <Text style={{ fontWeight: '800', color: '#1e293b' }}>{friend.characterName}</Text>
             <Text style={{ color: COLORS.muted, marginTop: 6, lineHeight: 20 }}>
               {conversationEnded
                 ? 'Esta práctica ya terminó. Puedes revisar la conversación y el feedback final.'
@@ -1582,7 +1571,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                       Luvi puede ayudarte a seguir la conversación libre con {friend.characterName}.
                     </Text>
                     <Text style={{ marginTop: 4, fontSize: 12, color: '#64748b', textAlign: 'center' }}>
-                      Chat: {friend.missionTitle}
+                      Chat: {friend.characterName}
                     </Text>
                   </View>
                   <TextInput

@@ -9,41 +9,27 @@ const {
   toCharacterPost,
 } = require('../dist/character-posts.js');
 
-const story = {
-  storyId: 'speed_dating',
-  title: 'Speed Dating',
-  summary: 'Citas rapidas',
-  missions: [
-    {
-      missionId: 'date_1',
-      title: 'La cita uno',
-      aiRole: 'Role',
-      caracterName: 'Alex',
-      avatarImageUrl: 'https://assets.example.com/storiesProfile/alex.png',
-      sceneSummary: 'Una escena',
-      requirements: [],
-    },
-  ],
-};
+const characters = [
+  {
+    characterId: 'speed_dating:date_1',
+    aiRole: 'Role',
+    caracterName: 'Alex',
+    avatarImageUrl: 'https://assets.example.com/storiesProfile/alex.png',
+  },
+];
 
-const character = listStoryCharacters([story]).characters[0];
+const character = listStoryCharacters(characters).characters[0];
 
-test('listStoryCharacters flattens stories and missions into character rows', () => {
-  const response = listStoryCharacters([story]);
+test('listStoryCharacters maps characters to summary rows', () => {
+  const response = listStoryCharacters(characters);
 
   assert.equal(response.characters.length, 1);
   assert.deepEqual(response.characters[0], {
     characterId: 'speed_dating:date_1',
-    storyId: 'speed_dating',
-    missionId: 'date_1',
-    sceneIndex: 0,
-    storyTitle: 'Speed Dating',
-    missionTitle: 'La cita uno',
     characterName: 'Alex',
     avatarImageUrl: 'https://assets.example.com/storiesProfile/alex.png',
-    sceneSummary: 'Una escena',
   });
-  assert.equal(findStoryCharacter([story], 'speed_dating:date_1').characterName, 'Alex');
+  assert.equal(findStoryCharacter(characters, 'speed_dating:date_1').characterName, 'Alex');
 });
 
 test('buildCharacterPostRecord normalizes a character post', () => {
@@ -64,17 +50,16 @@ test('buildCharacterPostRecord normalizes a character post', () => {
   assert.deepEqual(record, {
     characterId: 'speed_dating:date_1',
     postId: 'post-1',
-    storyId: 'speed_dating',
-    missionId: 'date_1',
-    sceneIndex: 0,
-    storyTitle: 'Speed Dating',
-    missionTitle: 'La cita uno',
     characterName: 'Alex',
     avatarImageUrl: 'https://assets.example.com/storiesProfile/alex.png',
     caption: 'First post from Alex',
     context: 'Alex is posting from the gallery opening.',
     imageUrl: 'https://assets.example.com/avatarPosts/post.png',
     order: 2,
+    likeCount: 0,
+    playCount: 0,
+    watched3sCount: 0,
+    conversationCount: 0,
     createdAt: '2026-04-25T10:20:30.000Z',
     updatedAt: '2026-04-25T10:20:30.000Z',
   });
@@ -140,11 +125,6 @@ test('toCharacterPost validates stored records', () => {
     toCharacterPost({
       characterId: 'speed_dating:date_1',
       postId: 'post-1',
-      storyId: 'speed_dating',
-      missionId: 'date_1',
-      sceneIndex: 0,
-      storyTitle: 'Speed Dating',
-      missionTitle: 'La cita uno',
       characterName: 'Alex',
       caption: 'Hola',
       context: 'Alex is celebrating a tiny win.',
@@ -156,68 +136,52 @@ test('toCharacterPost validates stored records', () => {
     {
       characterId: 'speed_dating:date_1',
       postId: 'post-1',
-      storyId: 'speed_dating',
-      missionId: 'date_1',
-      sceneIndex: 0,
-      storyTitle: 'Speed Dating',
-      missionTitle: 'La cita uno',
       characterName: 'Alex',
       caption: 'Hola',
       context: 'Alex is celebrating a tiny win.',
       imageUrl: 'https://assets.example.com/avatarPosts/post.png',
       order: 1,
+      likeCount: 0,
+      playCount: 0,
+      watched3sCount: 0,
+      conversationCount: 0,
       createdAt: '2026-04-25T10:20:30.000Z',
       updatedAt: '2026-04-25T10:20:30.000Z',
     },
   );
 
-  assert.deepEqual(
-    toCharacterPost({
-      characterId: 'speed_dating:date_1',
-      postId: 'post-video-1',
-      storyId: 'speed_dating',
-      missionId: 'date_1',
-      sceneIndex: 0,
-      storyTitle: 'Speed Dating',
-      missionTitle: 'La cita uno',
-      characterName: 'Alex',
-      caption: 'Video',
-      imageUrl: 'https://assets.example.com/avatarPosts/post-thumb.webp',
-      thumbnailUrl: 'https://assets.example.com/avatarPosts/post-thumb.webp',
-      videoUrl: 'https://assets.example.com/avatarPosts/post-mobile.mp4',
-      order: 2,
-      createdAt: '2026-04-25T10:20:30.000Z',
-      updatedAt: '2026-04-25T10:20:30.000Z',
-    }),
-    {
-      characterId: 'speed_dating:date_1',
-      postId: 'post-video-1',
-      storyId: 'speed_dating',
-      missionId: 'date_1',
-      sceneIndex: 0,
-      storyTitle: 'Speed Dating',
-      missionTitle: 'La cita uno',
-      characterName: 'Alex',
-      caption: 'Video',
-      imageUrl: 'https://assets.example.com/avatarPosts/post-thumb.webp',
-      thumbnailUrl: 'https://assets.example.com/avatarPosts/post-thumb.webp',
-      videoUrl: 'https://assets.example.com/avatarPosts/post-mobile.mp4',
-      order: 2,
-      createdAt: '2026-04-25T10:20:30.000Z',
-      updatedAt: '2026-04-25T10:20:30.000Z',
-    },
-  );
+  // Legacy records with extra fields still parse (extra fields are ignored on output).
+  const legacyParsed = toCharacterPost({
+    characterId: 'speed_dating:date_1',
+    postId: 'post-video-1',
+    storyId: 'speed_dating',
+    missionId: 'date_1',
+    sceneIndex: 0,
+    storyTitle: 'Speed Dating',
+    missionTitle: 'La cita uno',
+    characterName: 'Alex',
+    caption: 'Video',
+    imageUrl: 'https://assets.example.com/avatarPosts/post-thumb.webp',
+    thumbnailUrl: 'https://assets.example.com/avatarPosts/post-thumb.webp',
+    videoUrl: 'https://assets.example.com/avatarPosts/post-mobile.mp4',
+    order: 2,
+    createdAt: '2026-04-25T10:20:30.000Z',
+    updatedAt: '2026-04-25T10:20:30.000Z',
+  });
+  assert.equal(legacyParsed.videoUrl, 'https://assets.example.com/avatarPosts/post-mobile.mp4');
+  assert.equal(legacyParsed.characterName, 'Alex');
+  assert.equal(Object.prototype.hasOwnProperty.call(legacyParsed, 'storyId'), false);
 
-  assert.equal(
-    toCharacterPost({
-      characterId: 'speed_dating:date_1',
-      postId: 'post-2',
-      caption: 'Sin metadata',
-      imageUrl: 'https://assets.example.com/avatarPosts/post.png',
-      order: 1,
-    }),
-    undefined,
-  );
+  // Records missing characterName fall back to missionTitle (legacy data) or default.
+  const fallbackParsed = toCharacterPost({
+    characterId: 'speed_dating:date_1',
+    postId: 'post-2',
+    missionTitle: 'La cita uno',
+    caption: 'Sin metadata',
+    imageUrl: 'https://assets.example.com/avatarPosts/post.png',
+    order: 1,
+  });
+  assert.equal(fallbackParsed.characterName, 'La cita uno');
 });
 
 test('buildCharacterPostsResponse sorts posts by configured order', () => {
@@ -225,11 +189,6 @@ test('buildCharacterPostsResponse sorts posts by configured order', () => {
     {
       characterId: 'speed_dating:date_1',
       postId: 'post-3',
-      storyId: 'speed_dating',
-      missionId: 'date_1',
-      sceneIndex: 0,
-      storyTitle: 'Speed Dating',
-      missionTitle: 'La cita uno',
       characterName: 'Alex',
       caption: 'Tercero',
       imageUrl: 'https://assets.example.com/avatarPosts/post-3.png',
@@ -240,11 +199,6 @@ test('buildCharacterPostsResponse sorts posts by configured order', () => {
     {
       characterId: 'speed_dating:date_1',
       postId: 'post-1',
-      storyId: 'speed_dating',
-      missionId: 'date_1',
-      sceneIndex: 0,
-      storyTitle: 'Speed Dating',
-      missionTitle: 'La cita uno',
       characterName: 'Alex',
       caption: 'Primero',
       imageUrl: 'https://assets.example.com/avatarPosts/post-1.png',

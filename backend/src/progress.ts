@@ -13,22 +13,21 @@ export type CardProgressDocument = {
   items: Record<string, CardProgressEntry>;
 };
 
-export type StoryProgressItem = {
+export type CharacterProgressItem = {
   updatedAt: string;
   deletedAt?: string;
-  storyCompletedAt?: string;
-  completedMissions: Record<string, string>;
+  completedAt?: string;
 };
 
-export type StoryProgressDocument = {
+export type CharacterProgressDocument = {
   updatedAt: string;
   resetAt?: string;
-  items: Record<string, StoryProgressItem>;
+  items: Record<string, CharacterProgressItem>;
 };
 
 export type UserProgressRecord = {
   cards: CardProgressDocument;
-  stories: StoryProgressDocument;
+  characters: CharacterProgressDocument;
 };
 
 const CARD_STATUSES: CardProgressStatus[] = ["todo", "learning", "learned"];
@@ -40,7 +39,7 @@ export function emptyCardProgressDocument(): CardProgressDocument {
   };
 }
 
-export function emptyStoryProgressDocument(): StoryProgressDocument {
+export function emptyCharacterProgressDocument(): CharacterProgressDocument {
   return {
     updatedAt: MIN_PROGRESS_TIMESTAMP,
     items: {},
@@ -50,15 +49,17 @@ export function emptyStoryProgressDocument(): StoryProgressDocument {
 export function emptyUserProgressRecord(): UserProgressRecord {
   return {
     cards: emptyCardProgressDocument(),
-    stories: emptyStoryProgressDocument(),
+    characters: emptyCharacterProgressDocument(),
   };
 }
 
 export function normalizeUserProgressRecord(input: unknown): UserProgressRecord {
   const raw = asRecord(input);
+  // Accept both new (`characters`) and legacy (`stories`) input keys.
+  const charactersSource = raw && (raw.characters ?? raw.stories);
   return {
     cards: normalizeCardProgressDocument(raw?.cards),
-    stories: normalizeStoryProgressDocument(raw?.stories),
+    characters: normalizeCharacterProgressDocument(charactersSource),
   };
 }
 
@@ -69,13 +70,17 @@ export function mergeUserProgressRecords(base: unknown, incoming: unknown): User
     return baseRecord;
   }
 
+  const hasCharactersInput = hasOwn(rawIncoming, "characters") || hasOwn(rawIncoming, "stories");
   return {
     cards: hasOwn(rawIncoming, "cards")
       ? mergeCardProgressDocuments(baseRecord.cards, rawIncoming.cards)
       : baseRecord.cards,
-    stories: hasOwn(rawIncoming, "stories")
-      ? mergeStoryProgressDocuments(baseRecord.stories, rawIncoming.stories)
-      : baseRecord.stories,
+    characters: hasCharactersInput
+      ? mergeCharacterProgressDocuments(
+          baseRecord.characters,
+          rawIncoming.characters ?? rawIncoming.stories
+        )
+      : baseRecord.characters,
   };
 }
 
@@ -131,22 +136,28 @@ export function mergeCardProgressDocuments(
   };
 }
 
-export function normalizeStoryProgressDocument(input: unknown): StoryProgressDocument {
+export function normalizeCharacterProgressDocument(input: unknown): CharacterProgressDocument {
   const raw = asRecord(input);
   if (!raw) {
-    return emptyStoryProgressDocument();
+    return emptyCharacterProgressDocument();
   }
 
   const itemsRaw = asRecord(raw.items);
-  const items: Record<string, StoryProgressItem> = {};
+  const items: Record<string, CharacterProgressItem> = {};
   let updatedAt = asTimestamp(raw.updatedAt) || MIN_PROGRESS_TIMESTAMP;
   const resetAt = asTimestamp(raw.resetAt);
 
-  for (const [storyId, value] of Object.entries(itemsRaw || {})) {
-    const item = normalizeStoryProgressItem(value, resetAt);
-    if (!item) continue;
-    items[storyId] = item;
-    updatedAt = maxTimestamp(updatedAt, item.updatedAt);
+  for (const [key, value] of Object.entries(itemsRaw || {})) {
+    // Each item may be a new-shape CharacterProgressItem (key = characterId)
+    // or a legacy story progress item (key = storyId, value.completedMissions = { missionId: ts }).
+    const expanded = expandToCharacterEntries(key, value, resetAt);
+    for (const [characterId, entry] of expanded) {
+      const prior = items[characterId];
+      const next = mergeCharacterEntries(prior, entry, resetAt);
+      if (!next) continue;
+      items[characterId] = next;
+      updatedAt = maxTimestamp(updatedAt, next.updatedAt);
+    }
   }
 
   return {
@@ -156,27 +167,83 @@ export function normalizeStoryProgressDocument(input: unknown): StoryProgressDoc
   };
 }
 
-export function mergeStoryProgressDocuments(
+export function mergeCharacterProgressDocuments(
   base: unknown,
   incoming: unknown
-): StoryProgressDocument {
-  const left = normalizeStoryProgressDocument(base);
-  const right = normalizeStoryProgressDocument(incoming);
+): CharacterProgressDocument {
+  const left = normalizeCharacterProgressDocument(base);
+  const right = normalizeCharacterProgressDocument(incoming);
   const resetAt = maxTimestamp(left.resetAt, right.resetAt);
-  const storyIds = new Set([...Object.keys(left.items), ...Object.keys(right.items)]);
-  const items: Record<string, StoryProgressItem> = {};
+  const characterIds = new Set([...Object.keys(left.items), ...Object.keys(right.items)]);
+  const items: Record<string, CharacterProgressItem> = {};
   let updatedAt = maxTimestamp(left.updatedAt, right.updatedAt, resetAt);
 
-  for (const storyId of storyIds) {
-    const merged = mergeStoryProgressItems(left.items[storyId], right.items[storyId], resetAt);
+  for (const characterId of characterIds) {
+    const merged = mergeCharacterEntries(left.items[characterId], right.items[characterId], resetAt);
     if (!merged) continue;
-    items[storyId] = merged;
+    items[characterId] = merged;
     updatedAt = maxTimestamp(updatedAt, merged.updatedAt);
   }
 
   return {
     updatedAt,
     ...(resetAt ? { resetAt } : {}),
+    items,
+  };
+}
+
+/**
+ * Build the legacy `stories` shape from the canonical character progress so
+ * older mobile clients (pre-character migration) can keep reading progress.
+ * Each character entry contributes a `storyId.completedMissions[missionId]`
+ * pair, derived by splitting the characterId on the first colon.
+ */
+export function deriveLegacyStoriesDocument(
+  doc: CharacterProgressDocument
+): {
+  updatedAt: string;
+  resetAt?: string;
+  items: Record<
+    string,
+    {
+      updatedAt: string;
+      deletedAt?: string;
+      storyCompletedAt?: string;
+      completedMissions: Record<string, string>;
+    }
+  >;
+} {
+  const items: Record<
+    string,
+    {
+      updatedAt: string;
+      deletedAt?: string;
+      storyCompletedAt?: string;
+      completedMissions: Record<string, string>;
+    }
+  > = {};
+
+  for (const [characterId, entry] of Object.entries(doc.items)) {
+    const { storyId, missionId } = splitCharacterId(characterId);
+    if (!items[storyId]) {
+      items[storyId] = {
+        updatedAt: entry.updatedAt,
+        completedMissions: {},
+      };
+    }
+    const story = items[storyId];
+    story.updatedAt = maxTimestamp(story.updatedAt, entry.updatedAt);
+    if (entry.completedAt) {
+      story.completedMissions[missionId] = entry.completedAt;
+    }
+    if (entry.deletedAt) {
+      story.deletedAt = maxTimestamp(story.deletedAt, entry.deletedAt);
+    }
+  }
+
+  return {
+    updatedAt: doc.updatedAt,
+    ...(doc.resetAt ? { resetAt: doc.resetAt } : {}),
     items,
   };
 }
@@ -199,90 +266,108 @@ function newerCardEntry(
   return compareTimestamps(left.updatedAt, right.updatedAt) >= 0 ? left : right;
 }
 
-function normalizeStoryProgressItem(
-  input: unknown,
+function expandToCharacterEntries(
+  key: string,
+  value: unknown,
   resetAt?: string
-): StoryProgressItem | undefined {
-  const raw = asRecord(input);
-  if (!raw) return undefined;
+): Array<[string, CharacterProgressItem]> {
+  const raw = asRecord(value);
+  if (!raw) return [];
 
-  const completedRaw = asRecord(raw.completedMissions);
-  const completedMissions: Record<string, string> = {};
   const deletedAt = asTimestamp(raw.deletedAt);
-  const storyCompletedAt = filterTimestamp(
-    asTimestamp(raw.storyCompletedAt),
+  const directCompletedAt = filterTimestamp(asTimestamp(raw.completedAt), resetAt, deletedAt);
+  const baseUpdatedAt = asTimestamp(raw.updatedAt);
+  const completedMissions = asRecord(raw.completedMissions);
+  const storyCompletedAt = filterTimestamp(asTimestamp(raw.storyCompletedAt), resetAt, deletedAt);
+
+  // New shape: key is a characterId (or any opaque id) and the value already
+  // carries `completedAt`. No completedMissions sub-map and no legacy fields.
+  if (!completedMissions && !storyCompletedAt) {
+    const updatedAt = maxTimestamp(baseUpdatedAt, directCompletedAt, deletedAt);
+    if (!directCompletedAt && !deletedAt && updatedAt === MIN_PROGRESS_TIMESTAMP) {
+      return [];
+    }
+    const entry: CharacterProgressItem = {
+      updatedAt,
+      ...(deletedAt ? { deletedAt } : {}),
+      ...(directCompletedAt ? { completedAt: directCompletedAt } : {}),
+    };
+    return [[key, entry]];
+  }
+
+  // Legacy story shape: explode completedMissions into individual characterId entries.
+  const out: Array<[string, CharacterProgressItem]> = [];
+  for (const [missionId, missionValue] of Object.entries(completedMissions || {})) {
+    const completedAt = filterTimestamp(asTimestamp(missionValue), resetAt, deletedAt);
+    if (!completedAt && !deletedAt) continue;
+    const characterId = `${key}:${missionId}`;
+    const updatedAt = maxTimestamp(baseUpdatedAt, completedAt, deletedAt);
+    out.push([
+      characterId,
+      {
+        updatedAt,
+        ...(deletedAt ? { deletedAt } : {}),
+        ...(completedAt ? { completedAt } : {}),
+      },
+    ]);
+  }
+  return out;
+}
+
+function mergeCharacterEntries(
+  left: CharacterProgressItem | undefined,
+  right: CharacterProgressItem | undefined,
+  resetAt?: string
+): CharacterProgressItem | undefined {
+  if (!left) return right ? filterCharacterEntry(right, resetAt) : undefined;
+  if (!right) return filterCharacterEntry(left, resetAt);
+
+  const deletedAt = maxTimestamp(left.deletedAt, right.deletedAt) || undefined;
+  const completedAt = filterTimestamp(
+    maxTimestamp(left.completedAt, right.completedAt),
     resetAt,
     deletedAt
   );
-
-  let updatedAt = maxTimestamp(
-    asTimestamp(raw.updatedAt),
+  const updatedAt = maxTimestamp(
+    left.updatedAt,
+    right.updatedAt,
     deletedAt,
-    storyCompletedAt
+    completedAt
   );
 
-  for (const [missionId, value] of Object.entries(completedRaw || {})) {
-    const completedAt = filterTimestamp(asTimestamp(value), resetAt, deletedAt);
-    if (!completedAt) continue;
-    completedMissions[missionId] = completedAt;
-    updatedAt = maxTimestamp(updatedAt, completedAt);
-  }
-
-  if (!deletedAt && !storyCompletedAt && !Object.keys(completedMissions).length) {
+  if (!deletedAt && !completedAt) {
     return undefined;
   }
 
   return {
     updatedAt,
     ...(deletedAt ? { deletedAt } : {}),
-    ...(storyCompletedAt ? { storyCompletedAt } : {}),
-    completedMissions,
+    ...(completedAt ? { completedAt } : {}),
   };
 }
 
-function mergeStoryProgressItems(
-  base: StoryProgressItem | undefined,
-  incoming: StoryProgressItem | undefined,
+function filterCharacterEntry(
+  entry: CharacterProgressItem,
   resetAt?: string
-): StoryProgressItem | undefined {
-  const left = normalizeStoryProgressItem(base, resetAt);
-  const right = normalizeStoryProgressItem(incoming, resetAt);
-  if (!left) return right;
-  if (!right) return left;
-
-  const deletedAt = maxTimestamp(left.deletedAt, right.deletedAt);
-  const storyCompletedAt = filterTimestamp(
-    maxTimestamp(left.storyCompletedAt, right.storyCompletedAt),
-    resetAt,
-    deletedAt
-  );
-  const missionIds = new Set([
-    ...Object.keys(left.completedMissions),
-    ...Object.keys(right.completedMissions),
-  ]);
-  const completedMissions: Record<string, string> = {};
-  let updatedAt = maxTimestamp(left.updatedAt, right.updatedAt, deletedAt, storyCompletedAt);
-
-  for (const missionId of missionIds) {
-    const completedAt = filterTimestamp(
-      maxTimestamp(left.completedMissions[missionId], right.completedMissions[missionId]),
-      resetAt,
-      deletedAt
-    );
-    if (!completedAt) continue;
-    completedMissions[missionId] = completedAt;
-    updatedAt = maxTimestamp(updatedAt, completedAt);
-  }
-
-  if (!deletedAt && !storyCompletedAt && !Object.keys(completedMissions).length) {
-    return undefined;
-  }
-
+): CharacterProgressItem | undefined {
+  const deletedAt = entry.deletedAt;
+  const completedAt = filterTimestamp(entry.completedAt, resetAt, deletedAt);
+  if (!deletedAt && !completedAt) return undefined;
   return {
-    updatedAt,
+    updatedAt: entry.updatedAt,
     ...(deletedAt ? { deletedAt } : {}),
-    ...(storyCompletedAt ? { storyCompletedAt } : {}),
-    completedMissions,
+    ...(completedAt ? { completedAt } : {}),
+  };
+}
+
+function splitCharacterId(characterId: string): { storyId: string; missionId: string } {
+  const colon = characterId.indexOf(":");
+  if (colon < 0) {
+    return { storyId: characterId, missionId: characterId };
+  }
+  return {
+    storyId: characterId.slice(0, colon),
+    missionId: characterId.slice(colon + 1),
   };
 }
 

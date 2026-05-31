@@ -75,6 +75,7 @@ type StoredVideoRecord = {
 };
 
 export type ScheduledVideoRecord = {
+  characterId: string;
   storyId: string;
   videoId: string;
   title: string;
@@ -1854,6 +1855,7 @@ function toScheduledVideoRecord(input: unknown): ScheduledVideoRecord | undefine
   }
 
   return {
+    characterId: storyId,
     storyId,
     videoId,
     title: firstNonEmpty(asString(raw?.title), storyId) || storyId,

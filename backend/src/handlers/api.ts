@@ -2,7 +2,7 @@
   APIGatewayProxyEventV2 as Event,
   APIGatewayProxyResultV2 as Result,
 } from "aws-lambda";
-import { createHash, randomUUID } from "crypto";
+import { randomUUID } from "crypto";
 import fs from "fs";
 import path from "path";
 import {
@@ -26,7 +26,6 @@ import {
   SessionStartResponse,
   CardItem,
   StoryDefinition,
-  StorySummaryItem,
   StoryAdvanceRequest,
   StoryAdvancePayload,
   StoryMission,
@@ -42,6 +41,7 @@ import {
   AppVersionCheckRequest,
   AppVersionCheckResponse,
   AppVersionCheckStatus,
+  CharacterDefinition,
   CreateFriendRequest,
   FriendCharacter,
   FriendChatRequest,
@@ -50,7 +50,6 @@ import {
   FriendsListResponse,
 } from "../types";
 import { CHARACTERS } from "../data/characters";
-import { storiesFromCharacters } from "../data/character-stories";
 import {
   type CharacterPost,
   incrementCharacterPostLike,
@@ -82,7 +81,6 @@ const STORIES_PATH_CANDIDATES: (string | undefined)[] = [
   process.env.STORIES_PATH,
 ];
 let STORIES_CACHE: StoryDefinition[] | null = null;
-let STORIES_VERSION_CACHE: string | null = null;
 
 function sanitizeStoriesList(input: any[], fallbackPrefix: string): StoryDefinition[] {
   const sanitized: StoryDefinition[] = [];
@@ -130,88 +128,12 @@ function readStoriesFromDisk(): StoryDefinition[] | undefined {
 function loadStories(): StoryDefinition[] {
   if (STORIES_CACHE) return STORIES_CACHE;
   const fromDisk = readStoriesFromDisk();
-  if (fromDisk && fromDisk.length) {
-    STORIES_CACHE = fromDisk;
-    return STORIES_CACHE;
-  }
-  const fallbackStories = sanitizeStoriesList(storiesFromCharacters(CHARACTERS), 'seed');
-  STORIES_CACHE = fallbackStories;
+  STORIES_CACHE = fromDisk && fromDisk.length ? fromDisk : [];
   return STORIES_CACHE;
-}
-
-function computeStoriesVersion(stories: StoryDefinition[]): string {
-  if (!stories || !stories.length) return 'empty';
-  const normalized = stories.map((story) => ({
-    storyId: story.storyId,
-    isInitial: !!story.isInitial,
-    title: story.title,
-    summary: story.summary,
-    level: story.level || '',
-    tags: story.tags || [],
-    unlockCost: story.unlockCost ?? 0,
-    missions: (story.missions || []).map((mission) => ({
-      missionId: mission.missionId,
-      title: mission.title,
-      sceneSummary: mission.sceneSummary || '',
-      aiRole: mission.aiRole,
-      caracterName: mission.caracterName || '',
-      caracterPrompt: mission.caracterPrompt || '',
-      avatarImageUrl: mission.avatarImageUrl || '',
-      avatarImageXsUrl: mission.avatarImageXsUrl || '',
-      avatarImageMdUrl: mission.avatarImageMdUrl || '',
-      videoIntro: mission.videoIntro || '',
-      videoPreviewUrl: mission.videoPreviewUrl || '',
-      videoThumbnailUrl: mission.videoThumbnailUrl || '',
-      requirements: (mission.requirements || []).map((req) => ({
-        requirementId: req.requirementId,
-        text: req.text,
-      })),
-    })),
-  }));
-  const hash = createHash('sha256').update(JSON.stringify(normalized)).digest('hex');
-  return hash.slice(0, 12);
-}
-
-function getStoriesVersion(stories?: StoryDefinition[]): string {
-  if (STORIES_VERSION_CACHE) return STORIES_VERSION_CACHE;
-  const override = process.env.STORIES_VERSION;
-  if (override) {
-    STORIES_VERSION_CACHE = override;
-    return STORIES_VERSION_CACHE;
-  }
-  const source = stories || loadStories();
-  STORIES_VERSION_CACHE = computeStoriesVersion(source);
-  return STORIES_VERSION_CACHE;
-}
-
-function sortInitialStoriesFirst(stories: StoryDefinition[]): StoryDefinition[] {
-  return [...stories].sort((left, right) => Number(!!right.isInitial) - Number(!!left.isInitial));
-}
-
-function listStorySummaries(stories: StoryDefinition[] = loadStories()): StorySummaryItem[] {
-  return sortInitialStoriesFirst(stories).map((story) => ({
-    storyId: story.storyId,
-    isInitial: story.isInitial,
-    title: story.title,
-    summary: story.summary,
-    level: story.level,
-    tags: story.tags || [],
-    unlockCost: story.unlockCost ?? 0,
-    locked: false,
-    missionsCount: story.missions?.length || 0,
-  }));
 }
 
 function getStory(storyId: string): StoryDefinition | undefined {
   return loadStories().find((s) => s.storyId === storyId);
-}
-
-function initialRequirementStates(mission: StoryMission): StoryAdvanceRequirementState[] {
-  return (mission.requirements || []).map((req) => ({
-    requirementId: req.requirementId,
-    text: req.text,
-    met: false,
-  }));
 }
 
 type StoryMessage = { role: 'user' | 'assistant'; content: string };
@@ -1188,10 +1110,6 @@ function getFriendshipsTableName(): string {
   return tableName;
 }
 
-function buildFriendId(storyId: string, missionId: string): string {
-  return `${storyId}:${missionId}`;
-}
-
 function sanitizeFriendConversationFeedback(input: any): FriendConversationFeedback | undefined {
   if (!input || typeof input !== "object") return undefined;
   const summary = typeof input.summary === "string" ? input.summary.trim() : "";
@@ -1230,22 +1148,12 @@ function latestConversationSnapshot(
 function publicFriend(record: FriendRecord): FriendCharacter {
   return {
     friendId: record.friendId,
-    storyId: record.storyId,
-    missionId: record.missionId,
-    sceneIndex: record.sceneIndex,
-    storyTitle: record.storyTitle,
-    missionTitle: record.missionTitle,
     characterName: record.characterName,
     aiRole: record.aiRole,
-    ...(record.aiRoleFriends ? { aiRoleFriends: record.aiRoleFriends } : {}),
     ...(record.characterPrompt ? { characterPrompt: record.characterPrompt } : {}),
     ...(record.avatarImageUrl ? { avatarImageUrl: record.avatarImageUrl } : {}),
     ...(record.avatarImageXsUrl ? { avatarImageXsUrl: record.avatarImageXsUrl } : {}),
     ...(record.avatarImageMdUrl ? { avatarImageMdUrl: record.avatarImageMdUrl } : {}),
-    ...(record.videoIntro ? { videoIntro: record.videoIntro } : {}),
-    ...(record.videoPreviewUrl ? { videoPreviewUrl: record.videoPreviewUrl } : {}),
-    ...(record.videoThumbnailUrl ? { videoThumbnailUrl: record.videoThumbnailUrl } : {}),
-    ...(record.sceneSummary ? { sceneSummary: record.sceneSummary } : {}),
     createdAt: record.createdAt,
     updatedAt: record.updatedAt,
     ...(record.lastMessageAt ? { lastMessageAt: record.lastMessageAt } : {}),
@@ -1255,59 +1163,35 @@ function publicFriend(record: FriendRecord): FriendCharacter {
   };
 }
 
+function friendFromCharacter(character: CharacterDefinition): FriendCharacter {
+  return {
+    friendId: character.characterId,
+    characterName: character.caracterName || "Personaje",
+    aiRole: character.aiRole,
+    ...(character.caracterPrompt ? { characterPrompt: character.caracterPrompt } : {}),
+    ...(character.avatarImageUrl ? { avatarImageUrl: character.avatarImageUrl } : {}),
+    ...(character.avatarImageXsUrl ? { avatarImageXsUrl: character.avatarImageXsUrl } : {}),
+    ...(character.avatarImageMdUrl ? { avatarImageMdUrl: character.avatarImageMdUrl } : {}),
+    createdAt: "1970-01-01T00:00:00.000Z",
+    updatedAt: "1970-01-01T00:00:00.000Z",
+  };
+}
+
+function findCharacter(characterId: string): CharacterDefinition | undefined {
+  const trimmed = typeof characterId === "string" ? characterId.trim() : "";
+  if (!trimmed) return undefined;
+  return CHARACTERS.find((character) => character.characterId === trimmed);
+}
+
 function publicCatalogFriend(friendIdInput: string): FriendCharacter | undefined {
-  const friendId = typeof friendIdInput === "string" ? friendIdInput.trim() : "";
-  if (!friendId) {
-    return undefined;
-  }
-
-  for (const story of loadStories()) {
-    const missions = story.missions || [];
-    for (let sceneIndex = 0; sceneIndex < missions.length; sceneIndex += 1) {
-      const mission = missions[sceneIndex];
-      if (buildFriendId(story.storyId, mission.missionId) !== friendId) {
-        continue;
-      }
-
-      return {
-        friendId,
-        storyId: story.storyId,
-        missionId: mission.missionId,
-        sceneIndex,
-        storyTitle: story.title,
-        missionTitle: mission.title,
-        characterName: mission.caracterName || mission.title || "Personaje",
-        aiRole: mission.aiRole,
-        ...(mission.aiRoleFriends ? { aiRoleFriends: mission.aiRoleFriends } : {}),
-        ...(mission.caracterPrompt ? { characterPrompt: mission.caracterPrompt } : {}),
-        ...(mission.avatarImageUrl ? { avatarImageUrl: mission.avatarImageUrl } : {}),
-        ...(mission.avatarImageXsUrl ? { avatarImageXsUrl: mission.avatarImageXsUrl } : {}),
-        ...(mission.avatarImageMdUrl ? { avatarImageMdUrl: mission.avatarImageMdUrl } : {}),
-        ...(mission.videoIntro ? { videoIntro: mission.videoIntro } : {}),
-        ...(mission.videoPreviewUrl ? { videoPreviewUrl: mission.videoPreviewUrl } : {}),
-        ...(mission.videoThumbnailUrl ? { videoThumbnailUrl: mission.videoThumbnailUrl } : {}),
-        ...(mission.sceneSummary ? { sceneSummary: mission.sceneSummary } : {}),
-        createdAt: "1970-01-01T00:00:00.000Z",
-        updatedAt: "1970-01-01T00:00:00.000Z",
-      };
-    }
-  }
-
-  return undefined;
+  const character = findCharacter(friendIdInput);
+  return character ? friendFromCharacter(character) : undefined;
 }
 
 function listCatalogFriends(): FriendCharacter[] {
-  const items: FriendCharacter[] = [];
-  for (const story of sortInitialStoriesFirst(loadStories())) {
-    const missions = story.missions || [];
-    missions.forEach((mission) => {
-      const friend = publicCatalogFriend(buildFriendId(story.storyId, mission.missionId));
-      if (friend) {
-        items.push(friend);
-      }
-    });
-  }
-  return items;
+  const initials = CHARACTERS.filter((character) => character.storyIsInitial);
+  const rest = CHARACTERS.filter((character) => !character.storyIsInitial);
+  return [...initials, ...rest].map(friendFromCharacter);
 }
 
 function publicFriendFromCharacterPosts(
@@ -1322,15 +1206,9 @@ function publicFriendFromCharacterPosts(
 
   return {
     friendId,
-    storyId: firstPost.storyId,
-    missionId: firstPost.missionId,
-    sceneIndex: firstPost.sceneIndex,
-    storyTitle: firstPost.storyTitle,
-    missionTitle: firstPost.missionTitle,
     characterName: firstPost.characterName,
     aiRole: `You are ${firstPost.characterName}, a friendly English conversation partner.`,
     ...(firstPost.avatarImageUrl ? { avatarImageUrl: firstPost.avatarImageUrl } : {}),
-    ...(firstPost.context ? { sceneSummary: firstPost.context } : {}),
     createdAt: firstPost.createdAt,
     updatedAt: firstPost.updatedAt,
   };
@@ -1354,11 +1232,6 @@ function sanitizeFriendRecord(input: any): FriendRecord | undefined {
   if (!input || typeof input !== "object") return undefined;
   const userId = typeof input.userId === "string" ? input.userId : undefined;
   const friendId = typeof input.friendId === "string" ? input.friendId : undefined;
-  const storyId = typeof input.storyId === "string" ? input.storyId : undefined;
-  const missionId = typeof input.missionId === "string" ? input.missionId : undefined;
-  const sceneIndex = Number(input.sceneIndex);
-  const storyTitle = typeof input.storyTitle === "string" ? input.storyTitle : undefined;
-  const missionTitle = typeof input.missionTitle === "string" ? input.missionTitle : undefined;
   const characterName = typeof input.characterName === "string" ? input.characterName : undefined;
   const aiRole = typeof input.aiRole === "string" ? input.aiRole : undefined;
   const createdAt = typeof input.createdAt === "string" ? input.createdAt : undefined;
@@ -1369,19 +1242,7 @@ function sanitizeFriendRecord(input: any): FriendRecord | undefined {
       : typeof input.completedAt === "string"
       ? 1
       : undefined;
-  if (
-    !userId ||
-    !friendId ||
-    !storyId ||
-    !missionId ||
-    !Number.isFinite(sceneIndex) ||
-    !storyTitle ||
-    !missionTitle ||
-    !characterName ||
-    !aiRole ||
-    !createdAt ||
-    !updatedAt
-  ) {
+  if (!userId || !friendId || !characterName || !aiRole || !createdAt || !updatedAt) {
     return undefined;
   }
   const conversationSnapshot = sanitizeFriendConversationSnapshot(input.conversationSnapshot);
@@ -1389,22 +1250,12 @@ function sanitizeFriendRecord(input: any): FriendRecord | undefined {
   return {
     userId,
     friendId,
-    storyId,
-    missionId,
-    sceneIndex: Math.max(0, Math.floor(sceneIndex)),
-    storyTitle,
-    missionTitle,
     characterName,
     aiRole,
-    ...(typeof input.aiRoleFriends === "string" ? { aiRoleFriends: input.aiRoleFriends } : {}),
     ...(typeof input.characterPrompt === "string" ? { characterPrompt: input.characterPrompt } : {}),
     ...(typeof input.avatarImageUrl === "string" ? { avatarImageUrl: input.avatarImageUrl } : {}),
     ...(typeof input.avatarImageXsUrl === "string" ? { avatarImageXsUrl: input.avatarImageXsUrl } : {}),
     ...(typeof input.avatarImageMdUrl === "string" ? { avatarImageMdUrl: input.avatarImageMdUrl } : {}),
-    ...(typeof input.videoIntro === "string" ? { videoIntro: input.videoIntro } : {}),
-    ...(typeof input.videoPreviewUrl === "string" ? { videoPreviewUrl: input.videoPreviewUrl } : {}),
-    ...(typeof input.videoThumbnailUrl === "string" ? { videoThumbnailUrl: input.videoThumbnailUrl } : {}),
-    ...(typeof input.sceneSummary === "string" ? { sceneSummary: input.sceneSummary } : {}),
     createdAt,
     updatedAt,
     ...(typeof input.lastMessageAt === "string" ? { lastMessageAt: input.lastMessageAt } : {}),
@@ -1466,58 +1317,26 @@ function latestTimestamp(...values: Array<string | undefined>): string | undefin
     .sort((left, right) => Date.parse(right) - Date.parse(left))[0];
 }
 
+function resolveCharacterFromBody(body: CreateFriendRequest): CharacterDefinition | undefined {
+  const characterId =
+    typeof body.characterId === "string" && body.characterId.trim()
+      ? body.characterId.trim()
+      : typeof body.storyId === "string" && typeof body.missionId === "string"
+      ? `${body.storyId.trim()}:${body.missionId.trim()}`
+      : undefined;
+  return characterId ? findCharacter(characterId) : undefined;
+}
+
 async function createFriendFromMission(
   userId: string,
   body: CreateFriendRequest
 ): Promise<FriendCharacter> {
-  const fallbackStoryId =
-    typeof body.storyId === "string" && body.storyId.trim()
-      ? body.storyId.trim()
-      : body.storyDefinition?.storyId;
-  const story =
-    (fallbackStoryId ? getStory(fallbackStoryId) : undefined) ||
-    sanitizeStoryDefinition(body.storyDefinition, fallbackStoryId);
-  const rawSceneIndex = Number(body.sceneIndex);
-  const requestedSceneIndex = Number.isFinite(rawSceneIndex)
-    ? Math.max(0, Math.floor(rawSceneIndex))
-    : undefined;
-  const requestedMissionId =
-    typeof body.missionId === "string" && body.missionId.trim()
-      ? body.missionId.trim()
-      : body.missionDefinition?.missionId;
-  let sceneIndex = requestedSceneIndex ?? 0;
-  let mission: StoryMission | undefined;
-
-  if (story) {
-    if (requestedMissionId) {
-      const byIdIndex = story.missions.findIndex((item) => item.missionId === requestedMissionId);
-      if (byIdIndex >= 0) {
-        sceneIndex = byIdIndex;
-        mission = story.missions[byIdIndex];
-      }
-    }
-    if (!mission && requestedSceneIndex !== undefined) {
-      mission = story.missions[requestedSceneIndex];
-      sceneIndex = requestedSceneIndex;
-    }
-    if (!mission) {
-      mission = story.missions[sceneIndex];
-    }
+  const character = resolveCharacterFromBody(body);
+  if (!character) {
+    throw new Error("FRIEND_CHARACTER_NOT_FOUND");
   }
 
-  if (!mission && body.missionDefinition) {
-    mission = sanitizeStoryMission(body.missionDefinition);
-  }
-
-  if (!fallbackStoryId && !story?.storyId) {
-    throw new Error("FRIEND_STORY_NOT_FOUND");
-  }
-  if (!mission) {
-    throw new Error("FRIEND_MISSION_NOT_FOUND");
-  }
-
-  const storyId = story?.storyId || fallbackStoryId || "story";
-  const friendId = buildFriendId(storyId, mission.missionId);
+  const friendId = character.characterId;
   const existing = await getFriendRecord(userId, friendId);
   const now = new Date().toISOString();
   const syncedLastMessageAt = sanitizeSyncTimestamp(body.lastMessageAt);
@@ -1537,22 +1356,12 @@ async function createFriendFromMission(
   const item: FriendRecord = {
     userId,
     friendId,
-    storyId,
-    missionId: mission.missionId,
-    sceneIndex,
-    storyTitle: story?.title || "Historia",
-    missionTitle: mission.title,
-    characterName: mission.caracterName || mission.title || "Personaje",
-    aiRole: mission.aiRole,
-    ...(mission.aiRoleFriends ? { aiRoleFriends: mission.aiRoleFriends } : {}),
-    ...(mission.caracterPrompt ? { characterPrompt: mission.caracterPrompt } : {}),
-    ...(mission.avatarImageUrl ? { avatarImageUrl: mission.avatarImageUrl } : {}),
-    ...(mission.avatarImageXsUrl ? { avatarImageXsUrl: mission.avatarImageXsUrl } : {}),
-    ...(mission.avatarImageMdUrl ? { avatarImageMdUrl: mission.avatarImageMdUrl } : {}),
-    ...(mission.videoIntro ? { videoIntro: mission.videoIntro } : {}),
-    ...(mission.videoPreviewUrl ? { videoPreviewUrl: mission.videoPreviewUrl } : {}),
-    ...(mission.videoThumbnailUrl ? { videoThumbnailUrl: mission.videoThumbnailUrl } : {}),
-    ...(mission.sceneSummary ? { sceneSummary: mission.sceneSummary } : {}),
+    characterName: character.caracterName || "Personaje",
+    aiRole: character.aiRole,
+    ...(character.caracterPrompt ? { characterPrompt: character.caracterPrompt } : {}),
+    ...(character.avatarImageUrl ? { avatarImageUrl: character.avatarImageUrl } : {}),
+    ...(character.avatarImageXsUrl ? { avatarImageXsUrl: character.avatarImageXsUrl } : {}),
+    ...(character.avatarImageMdUrl ? { avatarImageMdUrl: character.avatarImageMdUrl } : {}),
     createdAt: existing?.createdAt || now,
     updatedAt: now,
     ...(lastMessageAt ? { lastMessageAt } : {}),
@@ -1585,11 +1394,7 @@ async function resolveFriendRecord(userId: string, friendId: string): Promise<Fr
     return undefined;
   }
 
-  await createFriendFromMission(userId, {
-    storyId: catalogFriend.storyId,
-    missionId: catalogFriend.missionId,
-    sceneIndex: catalogFriend.sceneIndex,
-  });
+  await createFriendFromMission(userId, { characterId: catalogFriend.friendId });
   return getFriendRecord(userId, friendId);
 }
 
@@ -1597,22 +1402,12 @@ function publicFriendRecord(friend: FriendCharacter, userId = "anonymous"): Frie
   return {
     userId,
     friendId: friend.friendId,
-    storyId: friend.storyId,
-    missionId: friend.missionId,
-    sceneIndex: friend.sceneIndex,
-    storyTitle: friend.storyTitle,
-    missionTitle: friend.missionTitle,
     characterName: friend.characterName,
     aiRole: friend.aiRole,
-    ...(friend.aiRoleFriends ? { aiRoleFriends: friend.aiRoleFriends } : {}),
     ...(friend.characterPrompt ? { characterPrompt: friend.characterPrompt } : {}),
     ...(friend.avatarImageUrl ? { avatarImageUrl: friend.avatarImageUrl } : {}),
     ...(friend.avatarImageXsUrl ? { avatarImageXsUrl: friend.avatarImageXsUrl } : {}),
     ...(friend.avatarImageMdUrl ? { avatarImageMdUrl: friend.avatarImageMdUrl } : {}),
-    ...(friend.videoIntro ? { videoIntro: friend.videoIntro } : {}),
-    ...(friend.videoPreviewUrl ? { videoPreviewUrl: friend.videoPreviewUrl } : {}),
-    ...(friend.videoThumbnailUrl ? { videoThumbnailUrl: friend.videoThumbnailUrl } : {}),
-    ...(friend.sceneSummary ? { sceneSummary: friend.sceneSummary } : {}),
     createdAt: friend.createdAt,
     updatedAt: friend.updatedAt,
     ...(friend.lastMessageAt ? { lastMessageAt: friend.lastMessageAt } : {}),
@@ -1653,27 +1448,23 @@ async function answerFriendAssistance(
   const sceneSummary =
     typeof body.postContext === "string" && body.postContext.trim()
       ? `The learner is replying to a profile post from ${friend.characterName}: ${body.postContext.trim()}`
-      : friend.sceneSummary;
+      : undefined;
   const mission: StoryMission = {
-    missionId: friend.missionId,
-    title: friend.missionTitle,
+    missionId: friend.friendId,
+    title: friend.characterName,
     sceneSummary,
-    aiRole: friend.aiRoleFriends || friend.aiRole,
-    ...(friend.aiRoleFriends ? { aiRoleFriends: friend.aiRoleFriends } : {}),
+    aiRole: friend.aiRole,
     caracterName: friend.characterName,
     caracterPrompt: friend.characterPrompt,
     avatarImageUrl: friend.avatarImageUrl,
     avatarImageXsUrl: friend.avatarImageXsUrl,
     avatarImageMdUrl: friend.avatarImageMdUrl,
-    videoIntro: friend.videoIntro,
-    videoPreviewUrl: friend.videoPreviewUrl,
-    videoThumbnailUrl: friend.videoThumbnailUrl,
     requirements: [],
   };
   const story: StoryDefinition = {
-    storyId: friend.storyId,
-    title: friend.storyTitle,
-    summary: sceneSummary || friend.missionTitle,
+    storyId: friend.friendId,
+    title: friend.characterName,
+    summary: sceneSummary || friend.characterName,
     missions: [mission],
   };
 
@@ -2011,11 +1802,6 @@ async function startSession(body?: any): Promise<{
     })
   );
   return { sessionId, uploadUrl };
-}
-
-async function transcribeMock(sessionId: string): Promise<string> {
-  // Placeholder: In real impl, fetch S3 object and call Whisper
-  return `Transcription for session ${sessionId} (mock)`;
 }
 
 async function transcribeWhisper(sessionId: string): Promise<string> {
@@ -2417,196 +2203,6 @@ Responde Ãºnicamente el JSON, da tu respuesta de una forma amable.`;
     errors,
     improvements,
   } as any;
-}
-
-async function advanceStoryMission(
-  story: StoryDefinition,
-  body: StoryAdvanceRequest
-): Promise<StoryAdvancePayload> {
-  const missions = story.missions || [];
-  const rawIndex =
-    typeof body.sceneIndex === 'number' ? body.sceneIndex : Number(body.sceneIndex);
-  const targetIndex = Number.isFinite(rawIndex)
-    ? Math.max(0, Math.min(missions.length - 1, Math.floor(rawIndex)))
-    : 0;
-  let mission = missions[targetIndex];
-  if (!mission && body.missionDefinition) {
-    const fallbackMission = sanitizeStoryMission(body.missionDefinition);
-    if (fallbackMission) {
-      missions[targetIndex] = fallbackMission;
-      mission = fallbackMission;
-    }
-  }
-  if (!mission) {
-    throw new Error('STORY_MISSION_NOT_FOUND');
-  }
-
-  const transcript = (body.transcript || '').trim();
-  const requestHistory = sanitizeHistory(body.history).slice(-STORY_HISTORY_LIMIT);
-  const sessionId = typeof body.sessionId === 'string' ? body.sessionId : undefined;
-  let sessionState = sessionId ? STORY_SESSIONS.get(sessionId) : undefined;
-
-  if (!sessionState && sessionId) {
-    sessionState = {
-      storyId: story.storyId,
-      missionIndex: targetIndex,
-      history: requestHistory,
-      requirements: [],
-      lastUpdated: Date.now(),
-      story,
-    };
-    STORY_SESSIONS.set(sessionId, sessionState);
-    pruneStorySessions();
-  }
-
-  if (sessionState) {
-    sessionState.storyId = sessionState.storyId || story.storyId;
-    sessionState.story = sessionState.story || story;
-    sessionState.missionIndex = targetIndex;
-    if (requestHistory.length) {
-      sessionState.history = mergeHistory(sessionState.history, requestHistory);
-    }
-  }
-
-  let conversationHistory: StoryMessage[] = sessionState ? sessionState.history : requestHistory;
-  conversationHistory = appendHistoryEntry(conversationHistory, {
-    role: 'user',
-    content: transcript,
-  });
-  if (sessionState) {
-    sessionState.history = conversationHistory;
-  }
-
-  let correctness = 0;
-  let result: EvalResult = 'incorrect';
-  let errors: string[] = [];
-  let reformulations: string[] = [];
-  const missionRequirementIds = new Set(
-    (mission.requirements || []).map((item) => item.requirementId)
-  );
-  let requirements = alignRequirementStates(mission, []);
-  const previousRequirements =
-    sessionState?.requirements &&
-    sessionState.requirements.every((req) => missionRequirementIds.has(req.requirementId))
-      ? sessionState.requirements
-      : [];
-  const clientPersistedRequirements =
-    Array.isArray(body.persistedRequirements) && body.persistedRequirements.length
-      ? alignRequirementStates(mission, body.persistedRequirements)
-      : [];
-  const [englishEvalResult, requirementEvalResult] = await Promise.allSettled([
-    evaluateStoryEnglish(conversationHistory, transcript),
-    evaluateStoryRequirementProgress(story, mission, conversationHistory),
-  ]);
-
-  if (englishEvalResult.status === 'fulfilled') {
-    const englishEval = englishEvalResult.value;
-    const rawScore = Number(englishEval.score ?? englishEval.correctness ?? 0);
-    correctness = Math.max(0, Math.min(100, Math.round(rawScore)));
-    const rawResult = (englishEval.result || englishEval.status || '').toString().toLowerCase();
-    if (rawResult === 'correct' || rawResult === 'partial' || rawResult === 'incorrect') {
-      result = rawResult as EvalResult;
-    } else {
-      result = correctness >= 85 ? 'correct' : correctness >= 60 ? 'partial' : 'incorrect';
-    }
-    errors = englishEval.errors.slice(0, 3).map((item) => String(item));
-    const alternatives = englishEval.alternatives ?? englishEval.improvements ?? englishEval.suggestions ?? [];
-    reformulations = alternatives.slice(0, 2).map((item) => String(item));
-  } else {
-    console.error(
-      JSON.stringify({
-        scope: 'stories.advance.english_error',
-        message: (englishEvalResult.reason as Error)?.message || 'unknown',
-      })
-    );
-  }
-
-  if (requirementEvalResult.status === 'fulfilled') {
-    const requirementEval = requirementEvalResult.value;
-    requirements = alignRequirementStates(mission, requirementEval.requirements);
-  } else {
-    console.error(
-      JSON.stringify({
-        scope: 'stories.advance.requirements_error',
-        message: (requirementEvalResult.reason as Error)?.message || 'unknown',
-      })
-    );
-  }
-
-  requirements = mergeRequirementProgress(previousRequirements, requirements);
-  if (clientPersistedRequirements.length) {
-    requirements = mergeRequirementProgress(clientPersistedRequirements, requirements);
-  }
-
-  let aiReply = 'Thanks for sharing! Could you add a bit more detail?';
-  try {
-    aiReply = await generateStoryReply(
-      story,
-      mission,
-      conversationHistory,
-      requirements,
-      { result, correctness }
-    );
-  } catch (err) {
-    console.error(
-      JSON.stringify({
-        scope: 'stories.advance.reply_error',
-        message: (err as Error)?.message || 'unknown',
-      })
-    );
-  }
-
-  conversationHistory = appendHistoryEntry(conversationHistory, {
-    role: 'assistant',
-    content: aiReply,
-  });
-  if (sessionState) {
-    sessionState.history = conversationHistory;
-  }
-
-  let missionCompleted = requirements.every((req) => req.met);
-  const nextIndex = missionCompleted ? targetIndex + 1 : targetIndex;
-  const storyCompleted = missionCompleted && nextIndex >= missions.length;
-
-  if (sessionState) {
-    sessionState.requirements = requirements;
-    sessionState.missionIndex = storyCompleted ? nextIndex : targetIndex;
-    sessionState.story = story;
-    if (storyCompleted && sessionId) {
-      STORY_SESSIONS.delete(sessionId);
-    }
-  }
-
-  let conversationFeedback: { summary: string; improvements: string[] } | null = null;
-  if (missionCompleted) {
-    try {
-      conversationFeedback = await generateStoryMissionFeedback(
-        story,
-        mission,
-        conversationHistory
-      );
-    } catch (err) {
-      console.error(
-        JSON.stringify({
-          scope: 'stories.advance.feedback_error',
-          message: (err as Error)?.message || 'unknown',
-        })
-      );
-    }
-  }
-
-  return {
-    sceneIndex: storyCompleted ? targetIndex : nextIndex,
-    missionCompleted,
-    storyCompleted,
-    requirements,
-    aiReply,
-    correctness,
-    result,
-    errors,
-    reformulations,
-    conversationFeedback,
-  };
 }
 
 async function generateAssistanceAnswer(args: {
@@ -3270,9 +2866,8 @@ async function generateFriendReply(
     .trim();
   const characterNotes = [
     `Character name: ${friend.characterName}`,
-    `Original role: ${friend.aiRoleFriends ?? friend.aiRole}`,
+    `Original role: ${friend.aiRole}`,
     friend.characterPrompt ? `Character notes: ${friend.characterPrompt}` : "",
-    friend.sceneSummary ? `How you met: ${friend.sceneSummary}` : "",
   ]
     .filter(Boolean)
     .join("\n");
@@ -3463,7 +3058,6 @@ Return ONLY JSON with the exact shape:
 `;
 
   const userPrompt = `Friend: ${friend.characterName}
-Conversation context: ${friend.sceneSummary || friend.missionTitle}
 
 Full conversation transcript:
 ${conversationText || "No conversation available."}`;

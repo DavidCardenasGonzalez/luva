@@ -346,35 +346,10 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
 
         try {
           await addFriendFromMission({
-            storyId: ONBOARDING_STORY_ID,
-            missionId: mission.missionId,
-            sceneIndex: mission.sceneIndex,
-            storyDefinition: {
-              storyId: ONBOARDING_STORY_ID,
-              isInitial: true,
-              title: 'Iniciando Conversaciones',
-              summary: 'Conoce a los personajes que te acompañarán en este viaje de aprendizaje.',
-              missions: [
-                {
-                  missionId: mission.missionId,
-                  title: mission.title,
-                  sceneSummary: mission.sceneSummary,
-                  aiRole: mission.aiRole,
-                  caracterName: CHARACTER_PROFILES[characterId].name,
-                  avatarImageUrl: mission.avatarImageUrl,
-                  requirements: [],
-                },
-              ],
-            },
-            missionDefinition: {
-              missionId: mission.missionId,
-              title: mission.title,
-              sceneSummary: mission.sceneSummary,
-              aiRole: mission.aiRole,
-              caracterName: CHARACTER_PROFILES[characterId].name,
-              avatarImageUrl: mission.avatarImageUrl,
-              requirements: [],
-            },
+            characterId: `${ONBOARDING_STORY_ID}:${mission.missionId}`,
+            characterName: CHARACTER_PROFILES[characterId].name,
+            aiRole: mission.aiRole,
+            avatarImageUrl: mission.avatarImageUrl,
           }, {
             localOnly: !isSignedIn,
           });

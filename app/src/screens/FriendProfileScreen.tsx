@@ -298,9 +298,6 @@ function ProfileFeedPost({
               <Text style={{ color: COLORS.text, fontWeight: '900' }} numberOfLines={1}>
                 {item.characterName}
               </Text>
-              <Text style={{ color: COLORS.muted, fontSize: 12, fontWeight: '700', marginTop: 2 }} numberOfLines={1}>
-                {item.storyTitle}
-              </Text>
             </View>
           </View>
 
@@ -369,11 +366,8 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
     trackedProfileViewRef.current = friend.friendId;
     void trackMixpanelFriendEvent('friend_profile_viewed', {
       friend_id: friend.friendId,
+      character_id: friend.friendId,
       character_name: friend.characterName,
-      story_id: friend.storyId,
-      story_title: friend.storyTitle,
-      mission_id: friend.missionId,
-      mission_title: friend.missionTitle,
       post_count: posts.length,
     });
   }, [friend, posts.length]);
@@ -383,7 +377,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
     const avatarUrl = (friend.avatarImageMdUrl || friend.avatarImageUrl)?.trim();
     return avatarUrl
       ? { uri: avatarUrl }
-      : getChatAvatar(friend.missionId);
+      : getChatAvatar(friend.friendId);
   }, [friend]);
   const avatarInitial = (friend?.characterName.trim().charAt(0) || '?').toUpperCase();
   const avatarUri = typeof avatarSource === 'object' && avatarSource && 'uri' in avatarSource
@@ -396,9 +390,8 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
       if (!friend) return;
       void trackMixpanelFriendEvent('friend_chat_opened', {
         friend_id: friend.friendId,
+        character_id: friend.friendId,
         character_name: friend.characterName,
-        story_id: friend.storyId,
-        mission_id: friend.missionId,
         post_id: post.postId,
         source: 'friend_profile_post',
       });
@@ -492,8 +485,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
               void trackMixpanelFriendEvent('friend_chat_opened', {
                 friend_id: friend.friendId,
                 character_name: friend.characterName,
-                story_id: friend.storyId,
-                mission_id: friend.missionId,
+                character_id: friend.friendId,
                 source: 'friend_profile_feed_header',
               });
               setSelectedPost(null);
@@ -574,8 +566,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
             void trackMixpanelFriendEvent('friend_chat_opened', {
               friend_id: friend.friendId,
               character_name: friend.characterName,
-              story_id: friend.storyId,
-              mission_id: friend.missionId,
+              character_id: friend.friendId,
               source: 'friend_profile_header',
             });
             navigation.navigate('FriendChat', { friendId: friend.friendId });
@@ -635,19 +626,12 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
 
                 <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-around', marginLeft: 18 }}>
                   <StatBlock label="posts" value={posts.length} />
-                  <StatBlock label="story" value={friend.sceneIndex + 1} />
                   <StatBlock label="chat" value="on" />
                 </View>
               </View>
 
               <Text style={{ color: COLORS.text, fontSize: 22, fontWeight: '900', marginTop: 16 }} numberOfLines={1}>
                 {friend.characterName}
-              </Text>
-              <Text style={{ color: COLORS.accent, fontSize: 12, fontWeight: '800', marginTop: 4 }} numberOfLines={1}>
-                {friend.storyTitle}
-              </Text>
-              <Text style={{ color: COLORS.muted, lineHeight: 20, marginTop: 8 }}>
-                {friend.sceneSummary || friend.missionTitle}
               </Text>
 
               <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
@@ -656,8 +640,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
                     void trackMixpanelFriendEvent('friend_chat_opened', {
                       friend_id: friend.friendId,
                       character_name: friend.characterName,
-                      story_id: friend.storyId,
-                      mission_id: friend.missionId,
+                      character_id: friend.friendId,
                       source: 'friend_profile_cta',
                     });
                     navigation.navigate('FriendChat', { friendId: friend.friendId });

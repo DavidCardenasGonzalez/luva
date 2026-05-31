@@ -70,16 +70,16 @@ export interface StoryDefinition {
   missions: StoryMission[];
 }
 
-export interface CharacterDefinition extends StoryMission {
+export interface CharacterDefinition {
   characterId: string;
-  storyId: string;
-  storyTitle: string;
-  storySummary: string;
   storyIsInitial?: boolean;
-  storyLevel?: string;
-  storyTags?: string[];
-  storyUnlockCost?: number;
-  sceneIndex?: number;
+  characterTags?: string[];
+  aiRole: string;
+  caracterName?: string;
+  caracterPrompt?: string;
+  avatarImageUrl?: string;
+  avatarImageXsUrl?: string;
+  avatarImageMdUrl?: string;
 }
 
 export interface StorySummaryItem {
@@ -148,22 +148,12 @@ export interface StoryAssistanceResponse {
 
 export interface FriendCharacter {
   friendId: string;
-  storyId: string;
-  missionId: string;
-  sceneIndex: number;
-  storyTitle: string;
-  missionTitle: string;
   characterName: string;
   aiRole: string;
-  aiRoleFriends?: string;
   characterPrompt?: string;
   avatarImageUrl?: string;
   avatarImageXsUrl?: string;
   avatarImageMdUrl?: string;
-  videoIntro?: string;
-  videoPreviewUrl?: string;
-  videoThumbnailUrl?: string;
-  sceneSummary?: string;
   createdAt: string;
   updatedAt: string;
   lastMessageAt?: string;
@@ -183,11 +173,9 @@ export interface FriendConversationSnapshot {
 }
 
 export interface CreateFriendRequest {
+  characterId?: string;
   storyId?: string;
   missionId?: string;
-  sceneIndex?: number;
-  storyDefinition?: StoryDefinition;
-  missionDefinition?: StoryMission;
   lastMessageAt?: string;
   lastUserMessage?: string;
   messageCount?: number;

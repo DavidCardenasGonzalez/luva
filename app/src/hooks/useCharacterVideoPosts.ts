@@ -4,11 +4,6 @@ import { api } from '../api/api';
 export type CharacterVideoPost = {
   characterId: string;
   postId: string;
-  storyId: string;
-  missionId: string;
-  sceneIndex: number;
-  storyTitle: string;
-  missionTitle: string;
   characterName: string;
   caption: string;
   context?: string;
@@ -43,17 +38,6 @@ function normalizeOrder(value: unknown): number | undefined {
   return order >= 1 ? order : undefined;
 }
 
-function normalizeSceneIndex(value: unknown): number | undefined {
-  const parsed =
-    typeof value === 'number'
-      ? value
-      : typeof value === 'string'
-      ? Number(value.trim())
-      : Number.NaN;
-  if (!Number.isFinite(parsed)) return undefined;
-  return Math.max(0, Math.floor(parsed));
-}
-
 function normalizeUrl(value: unknown): string | undefined {
   const url = asString(value);
   if (!url || !/^https?:\/\//i.test(url)) return undefined;
@@ -77,11 +61,6 @@ function sanitizeCharacterVideoPost(input: unknown): CharacterVideoPost | null {
   const raw = input as Record<string, unknown>;
   const characterId = asString(raw.characterId);
   const postId = asString(raw.postId);
-  const storyId = asString(raw.storyId);
-  const missionId = asString(raw.missionId);
-  const sceneIndex = normalizeSceneIndex(raw.sceneIndex);
-  const storyTitle = asString(raw.storyTitle);
-  const missionTitle = asString(raw.missionTitle);
   const characterName = asString(raw.characterName);
   const caption = asString(raw.caption);
   const thumbnailUrl = normalizeUrl(raw.thumbnailUrl);
@@ -89,31 +68,13 @@ function sanitizeCharacterVideoPost(input: unknown): CharacterVideoPost | null {
   const imageUrl = normalizeUrl(raw.imageUrl) || thumbnailUrl;
   const order = normalizeOrder(raw.order);
 
-  if (
-    !characterId ||
-    !postId ||
-    !storyId ||
-    !missionId ||
-    sceneIndex === undefined ||
-    !storyTitle ||
-    !missionTitle ||
-    !characterName ||
-    !caption ||
-    !imageUrl ||
-    !videoUrl ||
-    !order
-  ) {
+  if (!characterId || !postId || !characterName || !caption || !imageUrl || !videoUrl || !order) {
     return null;
   }
 
   return {
     characterId,
     postId,
-    storyId,
-    missionId,
-    sceneIndex,
-    storyTitle,
-    missionTitle,
     characterName,
     caption,
     context: asString(raw.context),

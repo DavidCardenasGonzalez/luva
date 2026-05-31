@@ -45,8 +45,8 @@ function FriendCard({
   const avatarSource = useMemo<ImageSourcePropType | undefined>(() => {
     return friend.avatarImageUrl?.trim()
       ? { uri: friend.avatarImageUrl }
-      : getChatAvatar(friend.missionId);
-  }, [friend.avatarImageUrl, friend.missionId]);
+      : getChatAvatar(friend.friendId);
+  }, [friend.avatarImageUrl, friend.friendId]);
   const initial = (friend.characterName.trim().charAt(0) || '?').toUpperCase();
   const lastActivity = friend.lastMessageAt || friend.updatedAt;
   const conversationCount = friend.conversationCount ?? 0;
@@ -92,17 +92,8 @@ function FriendCard({
           <Text style={{ color: COLORS.text, fontSize: 20, fontWeight: '900', marginTop: 4 }} numberOfLines={1}>
             {friend.characterName}
           </Text>
-          <Text style={{ color: COLORS.muted, marginTop: 4 }} numberOfLines={1}>
-            {friend.missionTitle}
-          </Text>
         </View>
       </View>
-
-      {friend.sceneSummary ? (
-        <Text style={{ color: '#cbd5e1', lineHeight: 21, marginTop: 14 }} numberOfLines={3}>
-          {friend.sceneSummary}
-        </Text>
-      ) : null}
 
       <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
         <View
@@ -139,9 +130,6 @@ function FriendCard({
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={{ color: COLORS.muted, fontSize: 12 }} numberOfLines={1}>
             Última actividad: {new Date(lastActivity).toLocaleDateString()}
-          </Text>
-          <Text style={{ color: '#64748b', fontSize: 12, marginTop: 2 }} numberOfLines={1}>
-            {friend.storyTitle}
           </Text>
         </View>
         <Pressable
@@ -202,9 +190,8 @@ export default function FriendsScreen({ navigation }: Props) {
     (friend: FriendCharacter) => {
       void trackMixpanelFriendEvent('friend_chat_opened', {
         friend_id: friend.friendId,
+        character_id: friend.friendId,
         character_name: friend.characterName,
-        story_id: friend.storyId,
-        mission_id: friend.missionId,
         source: 'friends',
       });
       navigation.navigate('FriendChat', { friendId: friend.friendId });
@@ -216,9 +203,8 @@ export default function FriendsScreen({ navigation }: Props) {
     (friend: FriendCharacter) => {
       void trackMixpanelFriendEvent('friend_profile_opened', {
         friend_id: friend.friendId,
+        character_id: friend.friendId,
         character_name: friend.characterName,
-        story_id: friend.storyId,
-        mission_id: friend.missionId,
         source: 'friends',
       });
       navigation.navigate('FriendProfile', { friendId: friend.friendId });

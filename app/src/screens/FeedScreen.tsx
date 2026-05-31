@@ -411,9 +411,6 @@ function getFeedTrackingProperties(item: FeedItem) {
       character_id: item.characterId,
       character_name: item.characterName,
       post_id: item.postId,
-      story_id: item.storyId,
-      mission_id: item.missionId,
-      scene_index: item.sceneIndex,
     };
   }
 
@@ -2304,8 +2301,8 @@ function FriendStoryAvatar({
     const avatarUrl = (friend.avatarImageXsUrl || friend.avatarImageUrl)?.trim();
     return avatarUrl
       ? { uri: avatarUrl }
-      : getChatAvatar(friend.missionId);
-  }, [friend.avatarImageUrl, friend.avatarImageXsUrl, friend.missionId]);
+      : getChatAvatar(friend.friendId);
+  }, [friend.avatarImageUrl, friend.avatarImageXsUrl, friend.friendId]);
   const initial = (friend.characterName.trim().charAt(0) || '?').toUpperCase();
 
   return (
@@ -3479,9 +3476,8 @@ export default function FeedScreen({ navigation, route }: Props) {
         action: 'open_friend_profile',
         feed_item_kind: 'friend_story',
         friend_id: friend.friendId,
+        character_id: friend.friendId,
         character_name: friend.characterName,
-        story_id: friend.storyId,
-        mission_id: friend.missionId,
       });
       navigation.navigate('FriendProfile', { friendId: friend.friendId });
     },

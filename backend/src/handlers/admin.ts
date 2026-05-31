@@ -68,14 +68,12 @@ import {
   updateAdminShadowingList,
 } from '../shadowing';
 import { CHARACTERS } from '../data/characters';
-import { storiesFromCharacters } from '../data/character-stories';
 
 const ROUTE_PREFIX = '/v1';
 const LESSON_AUDIO_WORKER_SOURCE = 'luva.admin.lessons.audio';
 const lambdaSdkModuleName = ['@aws-sdk', 'client-lambda'].join('/');
 const { InvokeCommand, LambdaClient } = require(lambdaSdkModuleName);
 const lambda = new LambdaClient({});
-const CHARACTER_STORIES = storiesFromCharacters(CHARACTERS);
 
 export const handler = async (event: any): Promise<Result> => {
   if (event?.source === LESSON_AUDIO_WORKER_SOURCE) {
@@ -134,12 +132,12 @@ export const handler = async (event: any): Promise<Result> => {
     }
 
     if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/story-characters`) {
-      return json(200, listStoryCharacters(CHARACTER_STORIES));
+      return json(200, listStoryCharacters(CHARACTERS));
     }
 
     const characterPosts = path.match(/^\/v1\/admin\/story-characters\/([^/]+)\/posts$/);
     if (method === 'GET' && characterPosts) {
-      const character = findStoryCharacter(CHARACTER_STORIES, decodeURIComponent(characterPosts[1]));
+      const character = findStoryCharacter(CHARACTERS, decodeURIComponent(characterPosts[1]));
       if (!character) {
         return json(404, {
           code: 'STORY_CHARACTER_NOT_FOUND',
@@ -157,7 +155,7 @@ export const handler = async (event: any): Promise<Result> => {
     }
 
     if (method === 'POST' && characterPosts) {
-      const character = findStoryCharacter(CHARACTER_STORIES, decodeURIComponent(characterPosts[1]));
+      const character = findStoryCharacter(CHARACTERS, decodeURIComponent(characterPosts[1]));
       if (!character) {
         return json(404, {
           code: 'STORY_CHARACTER_NOT_FOUND',
@@ -176,7 +174,7 @@ export const handler = async (event: any): Promise<Result> => {
 
     const characterPostUpdate = path.match(/^\/v1\/admin\/story-characters\/([^/]+)\/posts\/update$/);
     if (method === 'POST' && characterPostUpdate) {
-      const character = findStoryCharacter(CHARACTER_STORIES, decodeURIComponent(characterPostUpdate[1]));
+      const character = findStoryCharacter(CHARACTERS, decodeURIComponent(characterPostUpdate[1]));
       if (!character) {
         return json(404, {
           code: 'STORY_CHARACTER_NOT_FOUND',

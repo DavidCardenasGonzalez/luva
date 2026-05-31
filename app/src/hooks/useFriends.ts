@@ -8,56 +8,14 @@ import {
   syncLocalFriendsToRemote,
 } from '../friends/localFriends';
 
-export type CharacterRequirement = {
-  requirementId: string;
-  text: string;
-};
-
-export type CharacterMissionDefinition = {
-  missionId: string;
-  title: string;
-  sceneSummary?: string;
-  aiRole: string;
-  aiRoleFriends?: string;
-  caracterName?: string;
-  caracterPrompt?: string;
-  avatarImageUrl?: string;
-  avatarImageXsUrl?: string;
-  avatarImageMdUrl?: string;
-  videoIntro?: string;
-  videoPreviewUrl?: string;
-  videoThumbnailUrl?: string;
-  requirements?: CharacterRequirement[];
-};
-
-export type CharacterStoryDefinition = {
-  storyId: string;
-  isInitial?: boolean;
-  title: string;
-  summary: string;
-  level?: string;
-  tags?: string[];
-  unlockCost?: number;
-  missions: CharacterMissionDefinition[];
-};
-
 export type FriendCharacter = {
   friendId: string;
-  storyId: string;
-  missionId: string;
-  sceneIndex: number;
-  storyTitle: string;
-  missionTitle: string;
   characterName: string;
   aiRole: string;
   characterPrompt?: string;
   avatarImageUrl?: string;
   avatarImageXsUrl?: string;
   avatarImageMdUrl?: string;
-  videoIntro?: string;
-  videoPreviewUrl?: string;
-  videoThumbnailUrl?: string;
-  sceneSummary?: string;
   createdAt: string;
   updatedAt: string;
   lastMessageAt?: string;
@@ -79,11 +37,13 @@ export type FriendConversationSnapshot = {
 };
 
 export type AddFriendPayload = {
-  storyId?: string;
-  missionId?: string;
-  sceneIndex?: number;
-  storyDefinition?: CharacterStoryDefinition;
-  missionDefinition?: CharacterMissionDefinition;
+  characterId: string;
+  characterName?: string;
+  aiRole?: string;
+  characterPrompt?: string;
+  avatarImageUrl?: string;
+  avatarImageXsUrl?: string;
+  avatarImageMdUrl?: string;
   conversationSnapshot?: FriendConversationSnapshot;
 };
 
