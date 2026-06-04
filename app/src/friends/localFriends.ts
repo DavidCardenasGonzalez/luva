@@ -287,6 +287,28 @@ export async function recordLocalFriendConversationFinished(
   });
 }
 
+export async function recordLocalFriendMessageRetried(
+  friend: LocalFriendCharacter,
+  lastUserMessage?: string,
+): Promise<LocalFriendCharacter> {
+  const trimmedLastUserMessage = lastUserMessage?.trim();
+  return updateLocalFriend(friend, (current) => {
+    const now = new Date().toISOString();
+    const { lastMessageAt: _lastMessageAt, lastUserMessage: _lastUserMessage, ...rest } = current;
+    return {
+      ...rest,
+      updatedAt: now,
+      ...(trimmedLastUserMessage
+        ? {
+            lastMessageAt: now,
+            lastUserMessage: trimmedLastUserMessage.slice(0, 500),
+          }
+        : {}),
+      messageCount: Math.max(0, Math.floor(current.messageCount ?? 0) - 1),
+    };
+  });
+}
+
 export async function removeLocalFriends(friendIds: string[]): Promise<void> {
   const ids = new Set(friendIds.map((id) => id.trim()).filter(Boolean));
   if (!ids.size) return;

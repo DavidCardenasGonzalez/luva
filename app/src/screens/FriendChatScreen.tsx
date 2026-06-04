@@ -16,6 +16,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useIsFocused } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
@@ -35,16 +36,19 @@ import {
   FriendChatPayload,
   FriendConversationFeedback,
   FriendConversationSnapshot,
+  retryFriendChatMessage,
   sendFriendChatMessage,
   useFriends,
 } from '../hooks/useFriends';
 import {
   buildLocalFriendConversationKey,
+  deleteLocalFriendConversation,
   loadLocalFriendConversation,
   saveLocalFriendConversation,
 } from '../friends/localFriendConversations';
 import {
   recordLocalFriendConversationFinished,
+  recordLocalFriendMessageRetried,
   recordLocalFriendMessageSent,
 } from '../friends/localFriends';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
@@ -116,6 +120,25 @@ function formatJourneyPoints(points: number) {
   return Number.isInteger(points) ? String(points) : points.toFixed(1);
 }
 
+function removeLastUserExchange(currentMessages: ChatMessage[]): {
+  nextMessages: ChatMessage[];
+  removedMessages: ChatMessage[];
+} | null {
+  const lastUserIndex = currentMessages.map((message) => message.role).lastIndexOf('user');
+  if (lastUserIndex < 0) return null;
+  const removeThroughIndex =
+    currentMessages[lastUserIndex + 1]?.role === 'assistant'
+      ? lastUserIndex + 2
+      : lastUserIndex + 1;
+  return {
+    nextMessages: [
+      ...currentMessages.slice(0, lastUserIndex),
+      ...currentMessages.slice(removeThroughIndex),
+    ],
+    removedMessages: currentMessages.slice(lastUserIndex, removeThroughIndex),
+  };
+}
+
 const COLORS = {
   header: '#0b1224',
   background: '#f8fafc',
@@ -128,7 +151,16 @@ const COLORS = {
 const luviImage = require('../image/luvi.png');
 const luviLoadingGif = require('../image/luvi-loading.gif');
 
-function AnalysisCard({ analysis }: { analysis: FriendChatPayload }) {
+function AnalysisCard({
+  analysis,
+  onRetry,
+  retryDisabled,
+}: {
+  analysis: FriendChatPayload;
+  onRetry?: () => void | Promise<void>;
+  retryDisabled?: boolean;
+}) {
+  const canRetry = analysis.result !== 'correct' && !!onRetry;
   return (
     <View
       style={{
@@ -164,6 +196,33 @@ function AnalysisCard({ analysis }: { analysis: FriendChatPayload }) {
             </Text>
           ))}
         </View>
+      ) : null}
+      {canRetry ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Reintentar último mensaje"
+          onPress={onRetry}
+          disabled={retryDisabled}
+          style={({ pressed }) => ({
+            alignSelf: 'flex-start',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+            marginTop: 14,
+            paddingHorizontal: 12,
+            paddingVertical: 9,
+            borderRadius: 999,
+            backgroundColor: retryDisabled
+              ? '#e2e8f0'
+              : pressed
+              ? '#1d4ed8'
+              : '#2563eb',
+            opacity: retryDisabled ? 0.65 : 1,
+          })}
+        >
+          <MaterialIcons name="replay" size={18} color="white" />
+          <Text style={{ color: 'white', fontWeight: '900' }}>Retry</Text>
+        </Pressable>
       ) : null}
     </View>
   );
@@ -296,6 +355,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const friendId = route.params?.friendId;
   const { width: windowWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const isFocused = useIsFocused();
   const { isSignedIn } = useAuth();
   const { friends, loading, loaded, error, reload } = useFriends();
   const { canSpend, spendCoins, loading: coinsLoading, isUnlimited, balance } = useCoins();
@@ -331,7 +391,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     () => buildLocalFriendConversationKey(friendId, sourcePost),
     [friendId, sourcePost]
   );
-  const trackedFriendViewRef = useRef<string | undefined>(undefined);
+  const trackedFriendFocusKeyRef = useRef<string | undefined>(undefined);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messageTranslations, setMessageTranslations] = useState<Record<string, MessageTranslationState>>({});
   const [analysis, setAnalysis] = useState<FriendChatPayload | null>(null);
@@ -341,6 +401,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const [flowState, setFlowState] = useState<StoryFlowState>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [endingConversation, setEndingConversation] = useState(false);
+  const [retryingLastExchange, setRetryingLastExchange] = useState(false);
   const [showAssistanceModal, setShowAssistanceModal] = useState(false);
   const [showProfilePreview, setShowProfilePreview] = useState(false);
   const [assistanceQuestion, setAssistanceQuestion] = useState('');
@@ -397,8 +458,12 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   }, [friendId, reload]);
 
   useEffect(() => {
-    if (!friend || trackedFriendViewRef.current === chatContextKey) return;
-    trackedFriendViewRef.current = chatContextKey;
+    if (!isFocused) {
+      trackedFriendFocusKeyRef.current = undefined;
+      return;
+    }
+    if (!friend || trackedFriendFocusKeyRef.current === chatContextKey) return;
+    trackedFriendFocusKeyRef.current = chatContextKey;
     void trackMixpanelFriendEvent('friend_chat_viewed', {
       friend_id: friend.friendId,
       character_id: friend.friendId,
@@ -408,7 +473,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       conversation_count: friend.conversationCount ?? 0,
       message_count: friend.messageCount ?? 0,
     });
-  }, [chatContextKey, friend, sourcePost]);
+  }, [chatContextKey, friend, isFocused, sourcePost]);
 
   useEffect(() => {
     let mounted = true;
@@ -479,6 +544,88 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     },
     [analysis, conversationEnded, conversationFeedback, friendId, localConversationKey, sourcePost]
   );
+
+  const handleRetryLastExchange = useCallback(async () => {
+    if (!friendId) return;
+    if (conversationEnded) {
+      setErrorMessage('Esta conversación ya terminó.');
+      return;
+    }
+    if (flowState !== 'idle' || retryingLastExchange) {
+      setErrorMessage('Espera a que termine el análisis antes de reintentar.');
+      return;
+    }
+
+    const retryState = removeLastUserExchange(messages);
+    if (!retryState) {
+      setErrorMessage('No encontramos un mensaje para reintentar.');
+      return;
+    }
+
+    const { nextMessages, removedMessages } = retryState;
+    const lastUserMessage = [...nextMessages].reverse().find((message) => message.role === 'user')?.text;
+    remoteHydratedKeyRef.current = localConversationKey;
+    setErrorMessage(null);
+    setAnalysis(null);
+    setConversationEnded(false);
+    setConversationFeedback(null);
+    setMessages(nextMessages);
+    setRetryingLastExchange(true);
+    setMessageTranslations((current) => {
+      const next = { ...current };
+      removedMessages.forEach((message) => {
+        delete next[message.id];
+      });
+      return next;
+    });
+
+    try {
+      if (nextMessages.length) {
+        await persistConversationSnapshot({
+          nextMessages,
+          nextAnalysis: null,
+          nextConversationEnded: false,
+          nextConversationFeedback: null,
+        });
+      } else {
+        await deleteLocalFriendConversation(localConversationKey);
+      }
+
+      const historyPayload = nextMessages.map(({ role, text }) => ({ role, content: text }));
+      if (isSignedIn) {
+        await retryFriendChatMessage(friendId, { history: historyPayload });
+        await reload();
+      } else if (friend) {
+        await recordLocalFriendMessageRetried(friend, lastUserMessage);
+        await reload();
+      }
+    } catch (err: any) {
+      console.warn('[FriendChat] No se pudo sincronizar el retry:', err?.message || err);
+    } finally {
+      setRetryingLastExchange(false);
+    }
+
+    void trackMixpanelFriendEvent('friend_chat_message_retry', {
+      friend_id: friendId,
+      character_name: friend?.characterName,
+      character_id: friend?.friendId,
+      post_id: sourcePost?.postId,
+      remaining_message_count: nextMessages.length,
+      removed_message_count: removedMessages.length,
+    });
+  }, [
+    conversationEnded,
+    flowState,
+    friend,
+    friendId,
+    isSignedIn,
+    localConversationKey,
+    messages,
+    persistConversationSnapshot,
+    reload,
+    retryingLastExchange,
+    sourcePost?.postId,
+  ]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -796,6 +943,11 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         setFlowState('idle');
         return;
       }
+      if (retryingLastExchange) {
+        setErrorMessage('Espera a que termine el retry.');
+        setFlowState('idle');
+        return;
+      }
       if (coinsLoading) {
         setErrorMessage('Cargando tus monedas...');
         setFlowState('idle');
@@ -854,6 +1006,21 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       }
 
       const isFirstUserMessage = messages.length === 0;
+      const transcriptWordCount = trimmed.split(/\s+/).filter(Boolean).length;
+      const userMessageIndex = messages.filter((message) => message.role === 'user').length + 1;
+      void trackMixpanelFriendEvent('friend_chat_message_submitted', {
+        friend_id: friendId,
+        character_name: friend?.characterName,
+        character_id: friend?.friendId,
+        post_id: sourcePost?.postId,
+        source: sourcePost ? 'post_reply' : 'friend_chat',
+        input_method: inputMethod,
+        message_index: userMessageIndex,
+        is_first_user_message: userMessageIndex === 1,
+        transcript_length: trimmed.length,
+        transcript_word_count: transcriptWordCount,
+        history_message_count: historyPayload.length,
+      });
 
       try {
         const payload = await sendFriendChatMessage(friendId, {
@@ -872,9 +1039,12 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           character_name: friend?.characterName,
           character_id: friend?.friendId,
           post_id: sourcePost?.postId,
+          source: sourcePost ? 'post_reply' : 'friend_chat',
           input_method: inputMethod,
+          message_index: userMessageIndex,
+          is_first_user_message: userMessageIndex === 1,
           transcript_length: trimmed.length,
-          transcript_word_count: trimmed.split(/\s+/).filter(Boolean).length,
+          transcript_word_count: transcriptWordCount,
           history_message_count: historyPayload.length,
           result: payload.result,
           correctness: payload.correctness,
@@ -923,6 +1093,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       messages,
       navigation,
       persistConversationSnapshot,
+      retryingLastExchange,
       sourcePost,
       spendCoins,
     ]
@@ -948,6 +1119,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     if (!friend) return;
     if (coinsLoading) return;
     if (conversationEnded) return;
+    if (retryingLastExchange) return;
     if (flowState !== 'idle') return;
     if (messages.length > 0) return;
     const autoSendKey = `${chatContextKey}:${draft}`;
@@ -964,6 +1136,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     handleSendText,
     messages.length,
     navigation,
+    retryingLastExchange,
     route.params?.initialDraft,
   ]);
 
@@ -1063,6 +1236,9 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       case 'evaluating':
         return 'Analizando tu inglés...';
       default:
+        if (retryingLastExchange) {
+          return 'Preparando reintento...';
+        }
         if (isUnlimited) {
           return 'Listo para conversar';
         }
@@ -1077,7 +1253,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         }
         return 'Enviar cuesta 1 moneda · Voz cuesta 2 monedas';
     }
-  }, [coinsLoading, flowState, isUnlimited, textCoinLocked, voiceCoinLocked]);
+  }, [coinsLoading, flowState, isUnlimited, retryingLastExchange, textCoinLocked, voiceCoinLocked]);
 
   if ((!loaded || loading) && !friend) {
     return (
@@ -1344,7 +1520,13 @@ export default function FriendChatScreen({ navigation, route }: Props) {
             </View>
           ) : null}
 
-          {analysis ? <AnalysisCard analysis={analysis} /> : null}
+          {analysis ? (
+            <AnalysisCard
+              analysis={analysis}
+              onRetry={handleRetryLastExchange}
+              retryDisabled={flowState !== 'idle' || retryingLastExchange}
+            />
+          ) : null}
           {conversationEnded ? (
             <CompletionCard
               feedback={conversationFeedback}
@@ -1395,7 +1577,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                 <Pressable
                   accessibilityLabel="Finalizar conversación y recibir feedback"
                   onPress={handleEndConversation}
-                  disabled={endingConversation || flowState !== 'idle'}
+                  disabled={endingConversation || flowState !== 'idle' || retryingLastExchange}
                   style={({ pressed }) => ({
                     alignSelf: 'flex-end',
                     flexDirection: 'row',
@@ -1407,7 +1589,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                     backgroundColor: pressed ? '#dcfce7' : '#f0fdf4',
                     borderWidth: 1,
                     borderColor: '#bbf7d0',
-                    opacity: endingConversation || flowState !== 'idle' ? 0.6 : 1,
+                    opacity: endingConversation || flowState !== 'idle' || retryingLastExchange ? 0.6 : 1,
                   })}
                 >
                   {endingConversation ? (
@@ -1423,8 +1605,8 @@ export default function FriendChatScreen({ navigation, route }: Props) {
             ) : null}
             <StoryMessageComposer
               flowState={flowState}
-              retryBlocked={false}
-              recordBlocked={(!isUnlimited && coinsLoading) || voiceCoinLocked}
+              retryBlocked={retryingLastExchange}
+              recordBlocked={retryingLastExchange || (!isUnlimited && coinsLoading) || voiceCoinLocked}
               statusLabel={statusLabel}
               onSendText={handleSendText}
               onRecordPressIn={handleRecordPressIn}

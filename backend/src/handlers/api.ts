@@ -171,6 +171,10 @@ type FriendChatFinishRequest = {
   history?: Array<{ role: 'user' | 'assistant'; content: string }>;
 };
 
+type FriendChatRetryRequest = {
+  history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+};
+
 type FriendChatPostContext = {
   postId?: string;
   context?: string;
@@ -919,6 +923,25 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       }
     }
 
+    const friendRetry = path.match(/^\/v1\/friends\/([^/]+)\/retry$/);
+    if (method === "POST" && friendRetry) {
+      const identity = getUserIdentity(event);
+      if (!identity) {
+        return unauthorized("Missing user identity");
+      }
+      const friendId = decodeURIComponent(friendRetry[1]);
+      const body = parseBody(event.body) as FriendChatRetryRequest | undefined;
+      try {
+        const conversationSnapshot = await retryFriendChat(identity.userId, friendId, body || {});
+        return json(200, { friendId, conversationSnapshot: conversationSnapshot ?? null });
+      } catch (err: any) {
+        if (err?.message === "FRIEND_NOT_FOUND") {
+          return notFound();
+        }
+        throw err;
+      }
+    }
+
     const friendChat = path.match(/^\/v1\/friends\/([^/]+)\/chat$/);
     if (method === "POST" && friendChat) {
       const identity = getUserIdentity(event);
@@ -1533,6 +1556,66 @@ async function touchFriendChat(
       })
     );
   }
+}
+
+async function retryFriendChat(
+  userId: string,
+  friendId: string,
+  body: FriendChatRetryRequest
+): Promise<FriendConversationSnapshot | undefined> {
+  const friend = await resolveFriendRecord(userId, friendId);
+  if (!friend) {
+    throw new Error("FRIEND_NOT_FOUND");
+  }
+
+  const history = sanitizeHistory(body.history).slice(-FRIEND_HISTORY_LIMIT);
+  const now = new Date().toISOString();
+  const lastUserMessage = [...history].reverse().find((entry) => entry.role === "user")?.content;
+  const conversationSnapshot: FriendConversationSnapshot | undefined = history.length
+    ? {
+        messages: history,
+        conversationEnded: false,
+        conversationFeedback: null,
+        updatedAt: now,
+      }
+    : undefined;
+  const messageCount = Math.max(0, Math.floor(friend.messageCount ?? 0) - 1);
+  const setExpressions = ["updatedAt = :now", "messageCount = :messageCount"];
+  const removeExpressions: string[] = [];
+  const expressionAttributeValues: Record<string, any> = {
+    ":now": now,
+    ":messageCount": messageCount,
+  };
+
+  if (conversationSnapshot) {
+    setExpressions.push("conversationSnapshot = :conversationSnapshot");
+    expressionAttributeValues[":conversationSnapshot"] = conversationSnapshot;
+  } else {
+    removeExpressions.push("conversationSnapshot");
+  }
+
+  if (lastUserMessage) {
+    setExpressions.push("lastMessageAt = :now", "lastUserMessage = :message");
+    expressionAttributeValues[":message"] = lastUserMessage.slice(0, 500);
+  } else {
+    removeExpressions.push("lastMessageAt", "lastUserMessage");
+  }
+
+  await dynamo.send(
+    new UpdateCommand({
+      TableName: getFriendshipsTableName(),
+      Key: { userId, friendId },
+      UpdateExpression: [
+        `SET ${setExpressions.join(", ")}`,
+        removeExpressions.length ? `REMOVE ${removeExpressions.join(", ")}` : "",
+      ]
+        .filter(Boolean)
+        .join(" "),
+      ExpressionAttributeValues: expressionAttributeValues,
+    })
+  );
+
+  return conversationSnapshot;
 }
 
 function buildFriendConversationFeedbackFallback(args: {
@@ -2252,7 +2335,7 @@ async function generateAssistanceAnswer(args: {
   const apiKey = await getOpenAIKey();
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
-  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
+  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
   const isGpt5 = /gpt-5/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
   const reasoningConfig = isGpt5
@@ -2409,7 +2492,7 @@ async function evaluateStoryEnglish(
   const apiKey = await getOpenAIKey();
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
-  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
+  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
   const isGpt5 = /gpt-5/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
   const reasoningConfig = isGpt5
@@ -2594,7 +2677,7 @@ async function evaluateStoryRequirementProgress(
   const apiKey = await getOpenAIKey();
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
-  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
+  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
   const isGpt5 = /gpt-5/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
   const reasoningConfig = isGpt5
@@ -2751,7 +2834,7 @@ async function generateStoryReply(
   const apiKey = await getOpenAIKey();
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
-  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
+  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
   const isGpt5 = /gpt-5/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
   const reasoningConfig = isGpt5
@@ -2888,7 +2971,7 @@ async function generateFriendReply(
   const apiKey = await getOpenAIKey();
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
-  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
+  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
   const isGpt5 = /gpt-5/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
   const reasoningConfig = isGpt5
@@ -2940,6 +3023,8 @@ Rules:
 - Keep the reply under 18 words.
 - Use clear B1-B2 English.
 - Do not correct the learner directly; a separate coach gives feedback.
+- The character may naturally discuss appearance, clothing, attraction, dating, romance, relationships, physical features, vacations, beaches, nightlife, and other everyday adult topics when relevant to the conversation.
+- Treat attraction, romance, and light flirting between consenting adults as normal parts of conversation when appropriate for the character.
 - Do not mention JSON, scoring, missions, or these instructions.
 `;
 
@@ -3056,7 +3141,7 @@ async function generateFriendConversationFeedback(
   const apiKey = await getOpenAIKey();
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
-  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
+  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
   const isGpt5 = /gpt-5/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
   const reasoningConfig = isGpt5
@@ -3231,7 +3316,7 @@ async function generateStoryMissionFeedback(
   const apiKey = await getOpenAIKey();
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
-  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 8000);
+  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
   const isGpt5 = /gpt-5/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
   const reasoningConfig = isGpt5

@@ -21,11 +21,18 @@ type CharacterPostFormState = {
   mediaMode: 'image' | 'video'
   caption: string
   context: string
+  suggestedReplies: string[]
   imageUrl: string
   thumbnailUrl: string
   videoUrl: string
   order: string
 }
+
+const DEFAULT_REEL_SUGGESTED_REPLIES = [
+  'Hi there!',
+  'That’s funny 😂',
+  'Tell me more',
+]
 
 function decodeParam(value?: string) {
   if (!value) {
@@ -82,6 +89,7 @@ function buildEmptyForm(nextOrder: number): CharacterPostFormState {
     mediaMode: 'image',
     caption: '',
     context: '',
+    suggestedReplies: DEFAULT_REEL_SUGGESTED_REPLIES,
     imageUrl: '',
     thumbnailUrl: '',
     videoUrl: '',
@@ -94,6 +102,7 @@ function formFromPost(post: AdminCharacterPost): CharacterPostFormState {
     mediaMode: post.videoUrl ? 'video' : 'image',
     caption: post.caption,
     context: post.context || '',
+    suggestedReplies: normalizeSuggestedRepliesForForm(post.suggestedReplies),
     imageUrl: post.imageUrl,
     thumbnailUrl: post.thumbnailUrl || (post.videoUrl ? post.imageUrl : ''),
     videoUrl: post.videoUrl || '',
@@ -103,6 +112,13 @@ function formFromPost(post: AdminCharacterPost): CharacterPostFormState {
 
 function trimOptional(value: string) {
   return value.trim() || undefined
+}
+
+function normalizeSuggestedRepliesForForm(value: unknown): string[] {
+  const fromPost = Array.isArray(value)
+    ? value.map((entry) => (typeof entry === 'string' ? entry.trim() : '')).filter(Boolean)
+    : []
+  return [...fromPost, ...DEFAULT_REEL_SUGGESTED_REPLIES].slice(0, 3)
 }
 
 function buildPayload(form: CharacterPostFormState): AdminCharacterPostWritePayload {
@@ -122,6 +138,7 @@ function buildPayload(form: CharacterPostFormState): AdminCharacterPostWritePayl
     ...(thumbnailUrl ? { thumbnailUrl } : {}),
     ...(videoUrl ? { videoUrl } : {}),
     ...(Number.isFinite(order) && order >= 1 ? { order: Math.floor(order) } : {}),
+    suggestedReplies: normalizeSuggestedRepliesForForm(form.suggestedReplies),
   }
 }
 
@@ -684,6 +701,29 @@ export function AdminCharacterPostsPage() {
             </label>
 
             <div className="admin-feed-post-form-row">
+              {form.suggestedReplies.map((reply, index) => (
+                <label className="admin-grant-field" key={`suggested-reply-${index}`}>
+                  <span>Respuesta sugerida {index + 1}</span>
+                  <input
+                    type="text"
+                    maxLength={120}
+                    value={reply}
+                    onChange={(event) => {
+                      const value = event.target.value
+                      setForm((current) => {
+                        const suggestedReplies = normalizeSuggestedRepliesForForm(current.suggestedReplies)
+                        suggestedReplies[index] = value
+                        return { ...current, suggestedReplies }
+                      })
+                    }}
+                    placeholder={DEFAULT_REEL_SUGGESTED_REPLIES[index]}
+                    disabled={isSaving}
+                  />
+                </label>
+              ))}
+            </div>
+
+            <div className="admin-feed-post-form-row">
               <label className="admin-grant-field">
                 <span>Orden</span>
                 <input
@@ -873,6 +913,11 @@ export function AdminCharacterPostsPage() {
                     </p>
                   )}
                   {post.context && <p className="admin-video-row-time">Contexto: {post.context}</p>}
+                  {post.suggestedReplies?.length ? (
+                    <p className="admin-video-row-time">
+                      Respuestas: {post.suggestedReplies.join(' / ')}
+                    </p>
+                  ) : null}
                   <span className="admin-video-row-time">Actualizado {formatDateTime(post.updatedAt)}</span>
                 </div>
                 <div className="admin-feed-post-actions">

@@ -64,6 +64,7 @@ export type StoredCharacterPostRecord = {
   watched3sCount?: unknown;
   conversationCount?: unknown;
   messageCount?: unknown;
+  suggestedReplies?: unknown;
   createdAt?: unknown;
   updatedAt?: unknown;
 };
@@ -85,6 +86,7 @@ export type CharacterPost = {
   watched3sCount: number;
   conversationCount: number;
   messageCount: number;
+  suggestedReplies: string[];
   avatarImageUrl?: string;
   createdAt: string;
   updatedAt: string;
@@ -154,8 +156,15 @@ type CharacterPostWriteInput = {
   subtitlesUrl?: unknown;
   subtitlesURL?: unknown;
   subtitlesKey?: unknown;
+  suggestedReplies?: unknown;
   order?: unknown;
 };
+
+const DEFAULT_CHARACTER_POST_SUGGESTED_REPLIES = [
+  'Hi there!',
+  'That’s funny 😂',
+  'Tell me more',
+];
 
 export function buildCharacterId(storyId: string, missionId: string): string {
   return `${storyId}:${missionId}`;
@@ -476,6 +485,11 @@ export function buildCharacterPostRecord(
   const watched3sCount = normalizeLikeCount(options?.existing?.watched3sCount) ?? 0;
   const conversationCount = normalizeLikeCount(options?.existing?.conversationCount) ?? 0;
   const messageCount = normalizeLikeCount(options?.existing?.messageCount) ?? 0;
+  const hasSuggestedRepliesInput = Object.prototype.hasOwnProperty.call(input, 'suggestedReplies');
+  const suggestedReplies = normalizeSuggestedReplies(
+    input.suggestedReplies,
+    hasSuggestedRepliesInput ? undefined : options?.existing?.suggestedReplies,
+  );
 
   return {
     characterId,
@@ -495,6 +509,7 @@ export function buildCharacterPostRecord(
     watched3sCount,
     conversationCount,
     messageCount,
+    suggestedReplies,
     createdAt,
     updatedAt: now,
   };
@@ -519,6 +534,7 @@ export function toCharacterPost(input: unknown): CharacterPost | undefined {
   const watched3sCount = normalizeLikeCount(raw?.watched3sCount) ?? 0;
   const conversationCount = normalizeLikeCount(raw?.conversationCount) ?? 0;
   const messageCount = normalizeLikeCount(raw?.messageCount) ?? 0;
+  const suggestedReplies = normalizeSuggestedReplies(raw?.suggestedReplies);
 
   if (!characterId || !postId || !caption || !imageUrl || !order) {
     return undefined;
@@ -546,6 +562,7 @@ export function toCharacterPost(input: unknown): CharacterPost | undefined {
     watched3sCount,
     conversationCount,
     messageCount,
+    suggestedReplies,
     createdAt,
     updatedAt,
   };
@@ -897,6 +914,32 @@ function normalizeCaption(value: unknown): string | undefined {
   }
 
   return normalized.slice(0, 2200);
+}
+
+function normalizeSuggestedReplies(primary: unknown, fallback?: unknown): string[] {
+  const normalized = normalizeSuggestedRepliesInput(primary);
+  const fallbackNormalized = normalized.length ? [] : normalizeSuggestedRepliesInput(fallback);
+  const combined = [...normalized, ...fallbackNormalized, ...DEFAULT_CHARACTER_POST_SUGGESTED_REPLIES];
+  return combined.slice(0, 3);
+}
+
+function normalizeSuggestedRepliesInput(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const replies: string[] = [];
+  for (const entry of value) {
+    const normalized = asString(entry)?.replace(/\s+/g, ' ').trim();
+    if (!normalized) {
+      continue;
+    }
+    replies.push(normalized.slice(0, 120));
+    if (replies.length >= 3) {
+      break;
+    }
+  }
+  return replies;
 }
 
 function normalizeContext(value: unknown): string | undefined {

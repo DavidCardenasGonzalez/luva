@@ -144,6 +144,18 @@ export async function finishFriendChat(
   return api.post(`${basePath}/${encodeURIComponent(friendId)}/finish`, payload);
 }
 
+export async function retryFriendChatMessage(
+  friendId: string,
+  payload: {
+    history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+  },
+): Promise<{
+  friendId: string;
+  conversationSnapshot: FriendConversationSnapshot | null;
+}> {
+  return api.post(`/friends/${encodeURIComponent(friendId)}/retry`, payload);
+}
+
 async function listCatalogCharacters(): Promise<FriendCharacter[]> {
   const response = await api.get<CharactersListResponse>('/characters');
   return Array.isArray(response?.items) ? response.items : [];

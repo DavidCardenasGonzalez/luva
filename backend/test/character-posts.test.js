@@ -61,6 +61,7 @@ test('buildCharacterPostRecord normalizes a character post', () => {
     watched3sCount: 0,
     conversationCount: 0,
     messageCount: 0,
+    suggestedReplies: ['Hi there!', 'That’s funny 😂', 'Tell me more'],
     createdAt: '2026-04-25T10:20:30.000Z',
     updatedAt: '2026-04-25T10:20:30.000Z',
   });
@@ -75,6 +76,7 @@ test('buildCharacterPostRecord normalizes a video character post with thumbnail'
       imageUrl: 'https://assets.example.com/avatarPosts/post-thumb.webp',
       thumbnailUrl: 'https://assets.example.com/avatarPosts/post-thumb.webp',
       videoUrl: 'https://assets.example.com/avatarPosts/post-mobile.mp4',
+      suggestedReplies: ['Wait, what?', 'That is wild'],
       order: '3',
     },
     {
@@ -86,6 +88,7 @@ test('buildCharacterPostRecord normalizes a video character post with thumbnail'
   assert.equal(record.imageUrl, 'https://assets.example.com/avatarPosts/post-thumb.webp');
   assert.equal(record.thumbnailUrl, 'https://assets.example.com/avatarPosts/post-thumb.webp');
   assert.equal(record.videoUrl, 'https://assets.example.com/avatarPosts/post-mobile.mp4');
+  assert.deepEqual(record.suggestedReplies, ['Wait, what?', 'That is wild', 'Hi there!']);
   assert.equal(record.order, 3);
 });
 
@@ -147,6 +150,7 @@ test('toCharacterPost validates stored records', () => {
       watched3sCount: 0,
       conversationCount: 0,
       messageCount: 0,
+      suggestedReplies: ['Hi there!', 'That’s funny 😂', 'Tell me more'],
       createdAt: '2026-04-25T10:20:30.000Z',
       updatedAt: '2026-04-25T10:20:30.000Z',
     },
@@ -172,6 +176,7 @@ test('toCharacterPost validates stored records', () => {
   });
   assert.equal(legacyParsed.videoUrl, 'https://assets.example.com/avatarPosts/post-mobile.mp4');
   assert.equal(legacyParsed.characterName, 'Alex');
+  assert.deepEqual(legacyParsed.suggestedReplies, ['Hi there!', 'That’s funny 😂', 'Tell me more']);
   assert.equal(Object.prototype.hasOwnProperty.call(legacyParsed, 'storyId'), false);
 
   // Records missing characterName fall back to missionTitle (legacy data) or default.
@@ -184,6 +189,21 @@ test('toCharacterPost validates stored records', () => {
     order: 1,
   });
   assert.equal(fallbackParsed.characterName, 'La cita uno');
+});
+
+test('toCharacterPost normalizes custom suggested replies to exactly three options', () => {
+  const parsed = toCharacterPost({
+    characterId: 'speed_dating:date_1',
+    postId: 'post-with-replies',
+    characterName: 'Alex',
+    caption: 'Video',
+    imageUrl: 'https://assets.example.com/avatarPosts/post-thumb.webp',
+    videoUrl: 'https://assets.example.com/avatarPosts/post-mobile.mp4',
+    suggestedReplies: ['  No way  ', '', 'Can you explain?'],
+    order: 1,
+  });
+
+  assert.deepEqual(parsed.suggestedReplies, ['No way', 'Can you explain?', 'Hi there!']);
 });
 
 test('buildCharacterPostsResponse sorts posts by configured order', () => {

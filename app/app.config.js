@@ -57,7 +57,7 @@ module.exports = {
     name: "Luva",
     slug: "luva",
     scheme: "myapp",
-    version: "1.2.0",
+    version: "1.2.1",
     orientation: "portrait",
     updates: { fallbackToCacheTimeout: 0 },
     assetBundlePatterns: ["**/*"],
@@ -70,7 +70,7 @@ module.exports = {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.cardi7.luva",
-      buildNumber: "1.2.0",
+      buildNumber: "1.2.1",
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
         UIBackgroundModes: ["audio"],
@@ -92,7 +92,7 @@ module.exports = {
         backgroundColor: "#0b1224",
       },
       package: "com.cardi7.luva",
-      versionCode: 10,
+      versionCode: 11,
       intentFilters: [
         {
           action: "VIEW",

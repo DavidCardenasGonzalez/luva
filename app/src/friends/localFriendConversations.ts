@@ -177,3 +177,9 @@ export async function saveLocalFriendConversation(
 
   await AsyncStorage.setItem(storageKey(conversationKey), JSON.stringify(sanitized));
 }
+
+export async function deleteLocalFriendConversation(conversationKey?: string): Promise<void> {
+  const key = conversationKey?.trim();
+  if (!key) return;
+  await AsyncStorage.removeItem(storageKey(key));
+}

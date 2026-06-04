@@ -710,6 +710,15 @@ export async function trackMixpanelFeedItemAction(
   });
 }
 
+export async function trackMixpanelFeedReelScroll(
+  properties: MixpanelEventProperties
+) {
+  await trackMixpanelEvent("feed reel scroll", {
+    event_category: "feed",
+    ...properties,
+  });
+}
+
 export async function trackMixpanelLessonEvent(
   eventName: string,
   properties: MixpanelEventProperties

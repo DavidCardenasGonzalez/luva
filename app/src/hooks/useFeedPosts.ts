@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../api/api';
 
 export type FeedPostType = 'normal' | 'practice_guide' | 'mission_guide' | 'extra';
@@ -20,6 +21,14 @@ export type FeedPost = {
 type FeedPostsResponse = {
   posts?: unknown[];
 };
+
+type FeedPostsCache = {
+  posts: FeedPost[];
+  cachedAt: string;
+};
+
+const FEED_POSTS_CACHE_KEY = '@luva/feed/posts-cache';
+const GENERIC_FEED_POSTS_ERROR = 'No pudimos cargar los posts del feed.';
 
 function asString(value: unknown): string | undefined {
   return typeof value === 'string' ? value.trim() || undefined : undefined;
@@ -107,6 +116,39 @@ function sanitizeFeedPosts(input: unknown): FeedPost[] {
     .sort((left, right) => left.order - right.order || left.postId.localeCompare(right.postId));
 }
 
+function getFeedPostsErrorMessage(err: any) {
+  const message = typeof err?.message === 'string' ? err.message.trim() : '';
+  if (!message || /^internal/i.test(message) || /^http 5\d\d/i.test(message)) {
+    return GENERIC_FEED_POSTS_ERROR;
+  }
+  return message;
+}
+
+async function readCachedFeedPosts(): Promise<FeedPostsCache | null> {
+  try {
+    const raw = await AsyncStorage.getItem(FEED_POSTS_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const posts = sanitizeFeedPosts(parsed?.posts);
+    const cachedAt = asString(parsed?.cachedAt);
+    if (!posts.length || !cachedAt) return null;
+    return { posts, cachedAt };
+  } catch {
+    return null;
+  }
+}
+
+async function writeCachedFeedPosts(posts: FeedPost[]): Promise<void> {
+  try {
+    await AsyncStorage.setItem(
+      FEED_POSTS_CACHE_KEY,
+      JSON.stringify({ posts, cachedAt: new Date().toISOString() })
+    );
+  } catch {
+    // Cache is an optimization; API data is still the source of truth.
+  }
+}
+
 export function useFeedPosts() {
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -120,15 +162,28 @@ export function useFeedPosts() {
     setError(undefined);
 
     (async () => {
+      let hasCachedPosts = false;
       try {
+        const cached = await readCachedFeedPosts();
+        if (cancelled) return;
+        if (cached?.posts.length) {
+          hasCachedPosts = true;
+          setPosts(cached.posts);
+        }
+
         const response = await api.get<FeedPostsResponse>('/feed/posts');
         if (cancelled) return;
-        setPosts(sanitizeFeedPosts(response?.posts));
+        const nextPosts = sanitizeFeedPosts(response?.posts);
+        setPosts(nextPosts);
+        setError(undefined);
+        void writeCachedFeedPosts(nextPosts);
         setLoading(false);
       } catch (loadError: any) {
         if (cancelled) return;
-        setPosts([]);
-        setError(loadError?.message || 'No pudimos cargar los posts del feed.');
+        if (!hasCachedPosts) {
+          setPosts([]);
+          setError(getFeedPostsErrorMessage(loadError));
+        }
         setLoading(false);
       }
     })();

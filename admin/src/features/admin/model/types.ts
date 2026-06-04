@@ -228,6 +228,7 @@ export type AdminCharacterPost = {
   subtitlesUrl?: string
   subtitlesKey?: string
   order: number
+  suggestedReplies: string[]
   avatarImageUrl?: string
   createdAt: string
   updatedAt: string

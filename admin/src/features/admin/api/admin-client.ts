@@ -61,6 +61,7 @@ export type AdminCharacterPostWritePayload = {
   thumbnailUrl?: string
   videoUrl?: string
   order?: number
+  suggestedReplies?: string[]
 }
 
 export type AdminShadowingListWritePayload = {

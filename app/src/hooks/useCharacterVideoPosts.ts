@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../api/api';
 
 export type CharacterVideoPost = {
@@ -13,6 +14,7 @@ export type CharacterVideoPost = {
   subtitlesUrl?: string;
   order: number;
   likeCount: number;
+  suggestedReplies: string[];
   avatarImageUrl?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -21,6 +23,19 @@ export type CharacterVideoPost = {
 type CharacterVideoPostsResponse = {
   posts?: unknown[];
 };
+
+type CharacterVideoPostsCache = {
+  posts: CharacterVideoPost[];
+  cachedAt: string;
+};
+
+const CHARACTER_VIDEO_POSTS_CACHE_KEY = '@luva/feed/character-video-posts-cache';
+const GENERIC_CHARACTER_VIDEO_POSTS_ERROR = 'No pudimos cargar los videos de personajes.';
+const DEFAULT_CHARACTER_VIDEO_SUGGESTED_REPLIES = [
+  'Hi there!',
+  'That’s funny 😂',
+  'Tell me more',
+];
 
 function asString(value: unknown): string | undefined {
   return typeof value === 'string' ? value.trim() || undefined : undefined;
@@ -56,6 +71,15 @@ function normalizeLikeCount(value: unknown): number {
   return count > 0 ? count : 0;
 }
 
+function normalizeSuggestedReplies(value: unknown): string[] {
+  const rawReplies = Array.isArray(value) ? value : [];
+  const normalizedReplies = rawReplies
+    .map((reply) => (typeof reply === 'string' ? reply.replace(/\s+/g, ' ').trim() : ''))
+    .filter(Boolean)
+    .slice(0, 3);
+  return [...normalizedReplies, ...DEFAULT_CHARACTER_VIDEO_SUGGESTED_REPLIES].slice(0, 3);
+}
+
 function sanitizeCharacterVideoPost(input: unknown): CharacterVideoPost | null {
   if (!input || typeof input !== 'object') return null;
   const raw = input as Record<string, unknown>;
@@ -84,6 +108,7 @@ function sanitizeCharacterVideoPost(input: unknown): CharacterVideoPost | null {
     subtitlesUrl: normalizeUrl(raw.subtitlesUrl),
     order,
     likeCount: normalizeLikeCount(raw.likeCount),
+    suggestedReplies: normalizeSuggestedReplies(raw.suggestedReplies),
     avatarImageUrl: normalizeUrl(raw.avatarImageUrl),
     createdAt: asString(raw.createdAt),
     updatedAt: asString(raw.updatedAt),
@@ -96,6 +121,39 @@ function sanitizeCharacterVideoPosts(input: unknown): CharacterVideoPost[] {
     .map(sanitizeCharacterVideoPost)
     .filter((post): post is CharacterVideoPost => !!post)
     .sort((left, right) => left.order - right.order || left.postId.localeCompare(right.postId));
+}
+
+function getCharacterVideoPostsErrorMessage(err: any) {
+  const message = typeof err?.message === 'string' ? err.message.trim() : '';
+  if (!message || /^internal/i.test(message) || /^http 5\d\d/i.test(message)) {
+    return GENERIC_CHARACTER_VIDEO_POSTS_ERROR;
+  }
+  return message;
+}
+
+async function readCachedCharacterVideoPosts(): Promise<CharacterVideoPostsCache | null> {
+  try {
+    const raw = await AsyncStorage.getItem(CHARACTER_VIDEO_POSTS_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const posts = sanitizeCharacterVideoPosts(parsed?.posts);
+    const cachedAt = asString(parsed?.cachedAt);
+    if (!posts.length || !cachedAt) return null;
+    return { posts, cachedAt };
+  } catch {
+    return null;
+  }
+}
+
+async function writeCachedCharacterVideoPosts(posts: CharacterVideoPost[]): Promise<void> {
+  try {
+    await AsyncStorage.setItem(
+      CHARACTER_VIDEO_POSTS_CACHE_KEY,
+      JSON.stringify({ posts, cachedAt: new Date().toISOString() })
+    );
+  } catch {
+    // Cache is an optimization; API data is still the source of truth.
+  }
 }
 
 export function useCharacterVideoPosts() {
@@ -111,15 +169,28 @@ export function useCharacterVideoPosts() {
     setError(undefined);
 
     (async () => {
+      let hasCachedPosts = false;
       try {
+        const cached = await readCachedCharacterVideoPosts();
+        if (cancelled) return;
+        if (cached?.posts.length) {
+          hasCachedPosts = true;
+          setPosts(cached.posts);
+        }
+
         const response = await api.get<CharacterVideoPostsResponse>('/feed/character-videos');
         if (cancelled) return;
-        setPosts(sanitizeCharacterVideoPosts(response?.posts));
+        const nextPosts = sanitizeCharacterVideoPosts(response?.posts);
+        setPosts(nextPosts);
+        setError(undefined);
+        void writeCachedCharacterVideoPosts(nextPosts);
         setLoading(false);
       } catch (loadError: any) {
         if (cancelled) return;
-        setPosts([]);
-        setError(loadError?.message || 'No pudimos cargar los videos de personajes.');
+        if (!hasCachedPosts) {
+          setPosts([]);
+          setError(getCharacterVideoPostsErrorMessage(loadError));
+        }
         setLoading(false);
       }
     })();

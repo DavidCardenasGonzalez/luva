@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Animated,
+  Easing,
   FlatList,
   Image,
   ImageBackground,
@@ -45,6 +47,7 @@ import { getChatAvatar } from '../chatimages/chatAvatarMap';
 import {
   trackMixpanelFeedItemAction,
   trackMixpanelFeedItemViewed,
+  trackMixpanelFeedReelScroll,
   trackMixpanelFeedLoadMore,
 } from '../marketing/mixpanelEvents';
 import { prefetchImageUrls } from '../shared/imagePrefetch';
@@ -1065,7 +1068,8 @@ function CharacterVideoPage({
   );
   const activeSubtitleKey = useMemo(() => getVideoSubtitleKey(activeSubtitle), [activeSubtitle]);
   const activeTranslation = activeSubtitleKey ? subtitleTranslations[activeSubtitleKey] : undefined;
-  const subtitleBottomOffset = bottomInset + 168;
+  const subtitleBottomOffset = bottomInset + 252;
+  const suggestedReplies = useMemo(() => item.suggestedReplies.slice(0, 3), [item.suggestedReplies]);
 
   useEffect(() => {
     if (!playbackEnabled) {
@@ -1080,15 +1084,19 @@ function CharacterVideoPage({
     item.likeCount,
   );
 
-  const handleSubmitReply = useCallback(() => {
-    const trimmed = replyText.trim();
+  const handleSendReply = useCallback((draft: string) => {
+    const trimmed = draft.trim();
     if (!trimmed) return;
     replyInputRef.current?.blur();
     setReplyText('');
     ensureLiked();
     recordVideoPostMetric(item.characterId, item.postId, 'conversation');
     onReply(item, trimmed);
-  }, [ensureLiked, item, onReply, replyText]);
+  }, [ensureLiked, item, onReply]);
+
+  const handleSubmitReply = useCallback(() => {
+    handleSendReply(replyText);
+  }, [handleSendReply, replyText]);
 
   const handleTranslateSubtitle = useCallback(async () => {
     const subtitle = activeSubtitle?.text.trim();
@@ -1422,17 +1430,37 @@ function CharacterVideoPage({
         </View>
         <View
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
             paddingHorizontal: 14,
             paddingTop: 10,
             paddingBottom: Math.max(14, bottomInset + 10),
             backgroundColor: 'rgba(0, 0, 0, 0.34)',
           }}
         >
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+            {suggestedReplies.map((reply, index) => (
+              <Pressable
+                key={`${index}:${reply}`}
+                onPress={() => handleSendReply(reply)}
+                accessibilityRole="button"
+                accessibilityLabel={`Enviar ${reply}`}
+                style={({ pressed }) => ({
+                  maxWidth: '100%',
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                  borderRadius: 999,
+                  backgroundColor: pressed ? 'rgba(226, 232, 240, 0.3)' : 'rgba(226, 232, 240, 0.18)',
+                  borderWidth: 1,
+                  borderColor: 'rgba(226, 232, 240, 0.32)',
+                })}
+              >
+                <Text style={{ color: 'white', fontSize: 13, fontWeight: '800' }} numberOfLines={1}>
+                  {reply}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
           <View
             style={{
-              flex: 1,
               flexDirection: 'row',
               alignItems: 'center',
               borderRadius: 999,
@@ -1488,6 +1516,7 @@ function CharacterVideoDumbscrollModal({
   onClose,
   onOpenProfile,
   onReply,
+  overlay,
 }: {
   visible: boolean;
   videos: CharacterVideoFeedItem[];
@@ -1495,6 +1524,7 @@ function CharacterVideoDumbscrollModal({
   onClose: () => void;
   onOpenProfile: (item: CharacterVideoFeedItem) => void;
   onReply: (item: CharacterVideoFeedItem, draft: string) => void;
+  overlay?: React.ReactNode;
 }) {
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -1504,12 +1534,28 @@ function CharacterVideoDumbscrollModal({
     videos.findIndex((item) => item.feedId === initialFeedId)
   );
   const [focusedFeedId, setFocusedFeedId] = useState(initialFeedId || videos[0]?.feedId);
+  const focusedFeedIdRef = useRef(initialFeedId || videos[0]?.feedId);
   const viewabilityConfigRef = useRef({ itemVisiblePercentThreshold: 70 });
   const handleViewableItemsChangedRef = useRef(
     ({ viewableItems }: { viewableItems: ViewToken<CharacterVideoFeedItem>[] }) => {
-      const nextFocused = viewableItems.find((entry) => entry.isViewable)?.item.feedId;
-      if (nextFocused) {
-        setFocusedFeedId((current) => (current === nextFocused ? current : nextFocused));
+      const nextFocusedItem = viewableItems.find((entry) => entry.isViewable)?.item;
+      if (!nextFocusedItem) {
+        return;
+      }
+
+      const previousFeedId = focusedFeedIdRef.current;
+      if (previousFeedId === nextFocusedItem.feedId) {
+        return;
+      }
+
+      focusedFeedIdRef.current = nextFocusedItem.feedId;
+      setFocusedFeedId(nextFocusedItem.feedId);
+
+      if (previousFeedId) {
+        void trackMixpanelFeedReelScroll({
+          ...getFeedTrackingProperties(nextFocusedItem),
+          previous_feed_item_id: previousFeedId,
+        });
       }
     }
   );
@@ -1518,7 +1564,9 @@ function CharacterVideoDumbscrollModal({
     if (!visible) {
       return;
     }
-    setFocusedFeedId(initialFeedId || videos[initialIndex]?.feedId);
+    const nextFocusedFeedId = initialFeedId || videos[initialIndex]?.feedId;
+    focusedFeedIdRef.current = nextFocusedFeedId;
+    setFocusedFeedId(nextFocusedFeedId);
   }, [initialFeedId, initialIndex, videos, visible]);
 
   if (!videos.length) {
@@ -1580,6 +1628,7 @@ function CharacterVideoDumbscrollModal({
         >
           <MaterialIcons name="close" size={24} color="white" />
         </Pressable>
+        {overlay}
       </View>
     </Modal>
   );
@@ -2643,6 +2692,116 @@ function ReelsStartupOverlay() {
   );
 }
 
+const SWIPE_UP_TOUR_STORAGE_KEY = '@luva/feedSwipeUpTourSeen';
+
+type FeedTourStep = 'swipeUp' | 'sendMessage';
+
+function FeedTourOverlay({
+  step,
+  onDismiss,
+}: {
+  step: FeedTourStep;
+  onDismiss: () => void;
+}) {
+  const translateY = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  const isSwipeUp = step === 'swipeUp';
+  const toValue = isSwipeUp ? -90 : 40;
+
+  useEffect(() => {
+    opacity.setValue(0);
+    translateY.setValue(0);
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 260,
+      useNativeDriver: true,
+    }).start();
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(translateY, {
+          toValue,
+          duration: 900,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateY, {
+          toValue: 0,
+          duration: 600,
+          easing: Easing.in(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.delay(180),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [opacity, translateY, toValue]);
+
+  return (
+    <Pressable
+      onPress={onDismiss}
+      style={{
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        backgroundColor: 'rgba(0,0,0,0.72)',
+        zIndex: 1000,
+      }}
+    >
+      <Animated.View
+        style={{
+          opacity,
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: isSwipeUp ? 'center' : 'flex-end',
+          paddingHorizontal: 32,
+          paddingBottom: isSwipeUp ? 0 : 160,
+        }}
+      >
+        <Text
+          style={{
+            color: '#ffffff',
+            fontSize: 20,
+            fontWeight: '800',
+            textAlign: 'center',
+            marginBottom: isSwipeUp ? 40 : 24,
+            lineHeight: 28,
+          }}
+        >
+          {isSwipeUp
+            ? 'Desliza hacia arriba para encontrar tu compañero de práctica'
+            : 'Envía un mensaje para seguir practicando'}
+        </Text>
+        <Animated.Image
+          source={
+            isSwipeUp
+              ? require('../image/swipe-up-hand.png')
+              : require('../image/swipe-down-hand.png')
+          }
+          style={{
+            width: isSwipeUp ? 140 : 120,
+            height: isSwipeUp ? 200 : 170,
+            resizeMode: 'contain',
+            transform: [{ translateY }],
+          }}
+        />
+        <Text
+          style={{
+            color: 'rgba(255,255,255,0.7)',
+            fontSize: 13,
+            fontWeight: '600',
+            marginTop: isSwipeUp ? 32 : 20,
+          }}
+        >
+          Toca para continuar
+        </Text>
+      </Animated.View>
+    </Pressable>
+  );
+}
+
 export default function FeedScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
   const isFeedFocused = useIsFocused();
@@ -2662,6 +2821,21 @@ export default function FeedScreen({ navigation, route }: Props) {
     setQueue: setShadowingQueue,
     selectChapter: selectShadowingChapter,
   } = useShadowingPlayer();
+  const [feedTourStep, setFeedTourStep] = useState<FeedTourStep | null>(null);
+  const [feedTourPending, setFeedTourPending] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    AsyncStorage.getItem(SWIPE_UP_TOUR_STORAGE_KEY)
+      .then((value) => {
+        if (!cancelled && value !== '1') {
+          setFeedTourPending(true);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const {
     posts: configuredPosts,
     loading: feedPostsLoading,
@@ -2710,11 +2884,18 @@ export default function FeedScreen({ navigation, route }: Props) {
   const [initialFeedResolved, setInitialFeedResolved] = useState(false);
   const [stableFeedItems, setStableFeedItems] = useState<FeedItem[]>([]);
   const [characterVideoViewerVisible, setCharacterVideoViewerVisible] = useState(false);
+  useEffect(() => {
+    if (characterVideoViewerVisible && feedTourPending && feedTourStep === null) {
+      setFeedTourStep('swipeUp');
+      setFeedTourPending(false);
+    }
+  }, [characterVideoViewerVisible, feedTourPending, feedTourStep]);
   const [selectedCharacterVideoFeedId, setSelectedCharacterVideoFeedId] = useState<string>();
   const [openingReelsFromOnboarding, setOpeningReelsFromOnboarding] = useState(route.params?.openReels === true);
   const isOpeningMissionRef = useRef(false);
   const autoOpenedReelsRef = useRef(false);
   const openingReelsRef = useRef(false);
+  const hasFocusedFeedOnceRef = useRef(false);
   const viewedFeedItemIdsRef = useRef(new Set<string>());
   const viewabilityConfigRef = useRef({
     itemVisiblePercentThreshold: 65,
@@ -2774,17 +2955,21 @@ export default function FeedScreen({ navigation, route }: Props) {
   useFocusEffect(
     useCallback(() => {
       let active = true;
+      const isInitialFocus = !hasFocusedFeedOnceRef.current;
+      hasFocusedFeedOnceRef.current = true;
       setFeedSeed(`${Date.now()}:${Math.random()}`);
       setVisibleCharacterVideoCount(CHARACTER_VIDEO_BATCH_SIZE);
       setVisibleVocabularyCount(VOCABULARY_BATCH_SIZE);
       setVisibleShadowingCount(SHADOWING_BATCH_SIZE);
       setVisibleLessonsCount(LESSON_BATCH_SIZE);
       setLearnedLessonIdsLoading(true);
-      reloadFeedPosts();
-      reloadCharacterVideos();
-      reloadLessons();
-      reloadShadowing();
-      void reloadFriends();
+      if (!isInitialFocus) {
+        reloadFeedPosts();
+        reloadCharacterVideos();
+        reloadLessons();
+        reloadShadowing();
+        void reloadFriends();
+      }
       void getLearnedLessonIds()
         .then((ids) => {
           if (active) {
@@ -3860,6 +4045,21 @@ export default function FeedScreen({ navigation, route }: Props) {
         onClose={handleCloseCharacterVideoViewer}
         onOpenProfile={handleOpenCharacterVideoProfile}
         onReply={handleReplyToCharacterVideo}
+        overlay={
+          feedTourStep ? (
+            <FeedTourOverlay
+              step={feedTourStep}
+              onDismiss={() => {
+                if (feedTourStep === 'swipeUp') {
+                  setFeedTourStep('sendMessage');
+                } else {
+                  setFeedTourStep(null);
+                  void AsyncStorage.setItem(SWIPE_UP_TOUR_STORAGE_KEY, '1').catch(() => {});
+                }
+              }}
+            />
+          ) : null
+        }
       />
       {isInterstitialLoading ? (
         <View

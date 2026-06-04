@@ -15,7 +15,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { ResizeMode, Video } from 'expo-av';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { CharacterProfilePost, useFriendProfile } from '../hooks/useFriendProfile';
@@ -336,13 +336,14 @@ function ProfileFeedPost({
 export default function FriendProfileScreen({ navigation, route }: Props) {
   const friendId = route.params?.friendId;
   const insets = useSafeAreaInsets();
+  const isFocused = useIsFocused();
   const { width } = useWindowDimensions();
   const { friend, posts, loading, loaded, error, reload } = useFriendProfile(friendId);
   const [selectedPost, setSelectedPost] = useState<CharacterProfilePost | null>(null);
   const [focusedPostId, setFocusedPostId] = useState<string | undefined>();
   const [avatarModalVisible, setAvatarModalVisible] = useState(false);
   const focusedFeedListRef = useRef<FlatList<CharacterProfilePost> | null>(null);
-  const trackedProfileViewRef = useRef<string | undefined>(undefined);
+  const trackedProfileFocusKeyRef = useRef<string | undefined>(undefined);
   const selectedPostIndex = useMemo(() => {
     if (!selectedPost) return -1;
     return posts.findIndex((post) => post.postId === selectedPost.postId);
@@ -372,15 +373,19 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
   );
 
   useEffect(() => {
-    if (!friend || trackedProfileViewRef.current === friend.friendId) return;
-    trackedProfileViewRef.current = friend.friendId;
+    if (!isFocused) {
+      trackedProfileFocusKeyRef.current = undefined;
+      return;
+    }
+    if (!friend || trackedProfileFocusKeyRef.current === friend.friendId) return;
+    trackedProfileFocusKeyRef.current = friend.friendId;
     void trackMixpanelFriendEvent('friend_profile_viewed', {
       friend_id: friend.friendId,
       character_id: friend.friendId,
       character_name: friend.characterName,
       post_count: posts.length,
     });
-  }, [friend, posts.length]);
+  }, [friend, isFocused, posts.length]);
 
   const avatarSource = useMemo<ImageSourcePropType | undefined>(() => {
     if (!friend) return undefined;
