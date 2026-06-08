@@ -22,6 +22,13 @@ const plugins = [
   "expo-secure-store",
   "expo-web-browser",
   [
+    "expo-notifications",
+    {
+      defaultChannel: "default",
+      color: "#22d3ee",
+    },
+  ],
+  [
     "react-native-google-mobile-ads",
     {
       androidAppId: "ca-app-pub-3572102651268229~7758474310",

@@ -19,6 +19,7 @@ export type ApiClient = {
   get: <T>(path: string) => Promise<T>;
   post: <T>(path: string, body?: any) => Promise<T>;
   put: <T>(path: string, body?: any, headers?: Record<string, string>) => Promise<T>;
+  delete: <T>(path: string) => Promise<T>;
 };
 
 export type AuthTokenResolver = {
@@ -147,6 +148,7 @@ export function createApi(): ApiClient {
     get: <T>(path: string) => request<T>('GET', path),
     post: <T>(path: string, body?: any) => request<T>('POST', path, body),
     put: <T>(path: string, body?: any, headers?: Record<string, string>) => request<T>('PUT', path, body, headers),
+    delete: <T>(path: string) => request<T>('DELETE', path),
   };
 }
 

@@ -548,14 +548,29 @@ function getUsersTableNameOptional(): string | undefined {
   return process.env.USERS_TABLE_NAME || undefined;
 }
 
-async function resolveLearnerName(identity: UserIdentity): Promise<string | undefined> {
+type LearnerDifficulty = 'easy' | 'medium' | 'hard';
+
+type LearnerProfile = {
+  name?: string;
+  difficulty?: LearnerDifficulty;
+};
+
+function normalizeLearnerDifficulty(value: unknown): LearnerDifficulty | undefined {
+  const normalized = (typeof value === 'string' ? value : '').trim().toLowerCase();
+  if (normalized === 'easy' || normalized === 'medium' || normalized === 'hard') {
+    return normalized;
+  }
+  return undefined;
+}
+
+async function resolveLearnerProfile(identity: UserIdentity): Promise<LearnerProfile> {
   const fallbackName =
     normalizeLearnerName(identity.displayName) ||
     normalizeLearnerName([identity.givenName, identity.familyName].filter(Boolean).join(" "));
 
   const tableName = getUsersTableNameOptional();
   if (!tableName || !identity.email) {
-    return fallbackName;
+    return { name: fallbackName };
   }
 
   try {
@@ -563,7 +578,7 @@ async function resolveLearnerName(identity: UserIdentity): Promise<string | unde
       new GetCommand({
         TableName: tableName,
         Key: { email: identity.email },
-        ProjectionExpression: "displayName, givenName, familyName",
+        ProjectionExpression: "displayName, givenName, familyName, englishDifficulty",
       })
     );
     const item = out.Item as
@@ -571,21 +586,24 @@ async function resolveLearnerName(identity: UserIdentity): Promise<string | unde
           displayName?: string;
           givenName?: string;
           familyName?: string;
+          englishDifficulty?: string;
         }
       | undefined;
-    return (
-      normalizeLearnerName(item?.displayName) ||
-      normalizeLearnerName([item?.givenName, item?.familyName].filter(Boolean).join(" ")) ||
-      fallbackName
-    );
+    return {
+      name:
+        normalizeLearnerName(item?.displayName) ||
+        normalizeLearnerName([item?.givenName, item?.familyName].filter(Boolean).join(" ")) ||
+        fallbackName,
+      difficulty: normalizeLearnerDifficulty(item?.englishDifficulty),
+    };
   } catch (err) {
     console.warn(
       JSON.stringify({
-        scope: "friends.chat.learner_name_error",
+        scope: "friends.chat.learner_profile_error",
         message: (err as Error)?.message || "unknown",
       })
     );
-    return fallbackName;
+    return { name: fallbackName };
   }
 }
 
@@ -955,7 +973,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
         return badRequest("Missing transcript");
       }
       try {
-        const learnerName = await resolveLearnerName(identity);
+        const learnerProfile = await resolveLearnerProfile(identity);
         const payload = await advanceFriendChat(
           identity.userId,
           friendId,
@@ -963,7 +981,8 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
             ...(body || {}),
             transcript,
           },
-          learnerName
+          learnerProfile.name,
+          learnerProfile.difficulty
         );
         return json(200, payload);
       } catch (err: any) {
@@ -1713,7 +1732,8 @@ async function advanceFriendChat(
   userId: string | undefined,
   friendId: string,
   body: FriendChatRequest,
-  learnerName?: string
+  learnerName?: string,
+  learnerDifficulty?: LearnerDifficulty
 ): Promise<FriendChatPayload> {
   const friend = await resolveFriendRecordForChat(userId, friendId);
   if (!friend) {
@@ -1721,6 +1741,8 @@ async function advanceFriendChat(
   }
 
   const transcript = body.transcript.trim();
+  const effectiveDifficulty =
+    normalizeLearnerDifficulty(body.englishDifficulty) || learnerDifficulty;
   const postContext = await resolveFriendChatPostContext(friend, body);
   let conversationHistory = sanitizeHistory(body.history).slice(-FRIEND_HISTORY_LIMIT);
   conversationHistory = appendHistoryEntry(conversationHistory, {
@@ -1771,7 +1793,8 @@ async function advanceFriendChat(
         correctness,
       },
       learnerName,
-      postContext
+      postContext,
+      effectiveDifficulty
     );
   } catch (err) {
     console.error(
@@ -2966,7 +2989,8 @@ async function generateFriendReply(
   history: StoryMessage[],
   evaluation: { result: EvalResult; correctness: number },
   learnerName?: string,
-  postContext?: FriendChatPostContext
+  postContext?: FriendChatPostContext,
+  learnerDifficulty?: LearnerDifficulty
 ): Promise<string> {
   const apiKey = await getOpenAIKey();
   const model =
@@ -3020,8 +3044,13 @@ Rules:
 - Do not echo or mirror the learner's question back at them. If they ask \"what about you?\", actually answer.
 - Not every reply needs a follow-up question; sometimes just react or share something.
 - You are a fictional character: feel free to invent concrete, plausible details (favorite foods, places you've been, hobbies, anecdotes, opinions, daily routines, names of friends, etc.) so the conversation feels alive. Stay consistent with your persona and with details you've already stated in this conversation" — commit to the character.
-- Keep the reply under 18 words.
-- Use clear B1-B2 English.
+- ${
+  learnerDifficulty === 'easy'
+    ? 'Keep the reply short: maximum 14 words total. Use the simplest possible English (A1 level)'
+    : learnerDifficulty === 'hard'
+    ? 'Keep the reply under 18 words. Use native, natural English: idioms, phrasal verbs, contractions, and casual expressions are welcome when they fit the character.'
+    : 'Keep the reply under 18 words. Use clear B1-B2 English.'
+}
 - Do not correct the learner directly; a separate coach gives feedback.
 - The character may naturally discuss appearance, clothing, attraction, dating, romance, relationships, physical features, vacations, beaches, nightlife, and other everyday adult topics when relevant to the conversation.
 - Treat attraction, romance, and light flirting between consenting adults as normal parts of conversation when appropriate for the character.

@@ -197,6 +197,7 @@ export interface FriendChatRequest {
   postCaption?: string;
   postImageUrl?: string;
   postVideoUrl?: string;
+  englishDifficulty?: 'easy' | 'medium' | 'hard';
   history?: Array<{ role: 'user' | 'assistant'; content: string }>;
 }
 

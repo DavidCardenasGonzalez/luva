@@ -1,6 +1,7 @@
 import type { APIGatewayProxyResultV2 as Result } from 'aws-lambda';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
+  DeleteCommand,
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
@@ -66,6 +67,7 @@ type UserRecord = {
   displayName?: string;
   bio?: string;
   goal?: string;
+  englishDifficulty?: 'easy' | 'medium' | 'hard';
   givenName?: string;
   familyName?: string;
   pictureUrl?: string;
@@ -89,6 +91,7 @@ type UpsertUserPayload = {
   displayName?: string;
   bio?: string;
   goal?: string;
+  englishDifficulty?: string;
   pictureUrl?: string;
   authProvider?: string;
   promoCode?: string;
@@ -99,6 +102,39 @@ type UpsertUserPayload = {
     entitlementId?: string;
     appUserId?: string;
   };
+};
+
+type RegisterDevicePayload = {
+  deviceId?: unknown;
+  expoPushToken?: unknown;
+  platform?: unknown;
+  appVersion?: unknown;
+  buildVersion?: unknown;
+  deviceName?: unknown;
+  osName?: unknown;
+  osVersion?: unknown;
+  permissionStatus?: unknown;
+};
+
+type DeviceRecord = {
+  deviceId: string;
+  userId: string;
+  email: string;
+  cognitoSub?: string;
+  expoPushToken?: string;
+  tokenType?: 'expo';
+  platform: 'ios' | 'android' | 'web' | 'unknown';
+  appVersion?: string;
+  buildVersion?: string;
+  deviceName?: string;
+  osName?: string;
+  osVersion?: string;
+  permissionStatus?: string;
+  isActive: boolean;
+  pushEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lastRegisteredAt: string;
 };
 
 export const handler = async (event: any): Promise<Result> => {
@@ -123,6 +159,40 @@ export const handler = async (event: any): Promise<Result> => {
       const payload = method === 'POST' ? parseBody(event.body) as UpsertUserPayload | undefined : undefined;
       const record = await upsertCurrentUser(email, claims, payload);
       return json(200, record);
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/users/me/devices`) {
+      const claims = getClaims(event);
+      const email = normalizeEmail(claims.email || claims['cognito:username']);
+      if (!email) {
+        return json(401, { code: 'UNAUTHORIZED', message: 'Missing email claim' });
+      }
+
+      const payload = parseBody(event.body) as RegisterDevicePayload | undefined;
+      const device = await registerCurrentUserDevice(email, claims, payload);
+      if (!device) {
+        return json(400, {
+          code: 'INVALID_DEVICE',
+          message: 'Missing or invalid push device payload',
+        });
+      }
+      return json(200, { device });
+    }
+
+    if (method === 'DELETE' && path.startsWith(`${ROUTE_PREFIX}/users/me/devices/`)) {
+      const claims = getClaims(event);
+      const email = normalizeEmail(claims.email || claims['cognito:username']);
+      if (!email) {
+        return json(401, { code: 'UNAUTHORIZED', message: 'Missing email claim' });
+      }
+
+      const encodedDeviceId = path.slice(`${ROUTE_PREFIX}/users/me/devices/`.length);
+      const deviceId = sanitizeDeviceId(safeDecodeURIComponent(encodedDeviceId));
+      if (!deviceId) {
+        return json(400, { code: 'INVALID_DEVICE_ID', message: 'Missing device id' });
+      }
+      const deleted = await unregisterCurrentUserDevice(email, deviceId);
+      return json(200, { deleted });
     }
 
     if (method === 'GET' && path === `${ROUTE_PREFIX}/users/me/progress`) {
@@ -458,6 +528,13 @@ async function upsertCurrentUser(
   const summarizedProAccess = summarizeProAccess(nextProAccess, now);
   const bio = resolveEditableProfileField(payload, previous, 'bio');
   const goal = resolveEditableProfileField(payload, previous, 'goal');
+  const rawDifficulty = payload && hasOwn(payload, 'englishDifficulty')
+    ? asString(payload.englishDifficulty)?.trim().toLowerCase()
+    : previous?.englishDifficulty;
+  const englishDifficulty: 'easy' | 'medium' | 'hard' | undefined =
+    rawDifficulty === 'easy' || rawDifficulty === 'medium' || rawDifficulty === 'hard'
+      ? rawDifficulty
+      : undefined;
   const user: UserRecord = {
     email,
     cognitoSub: firstNonEmpty(claims.sub, previous?.cognitoSub),
@@ -468,6 +545,7 @@ async function upsertCurrentUser(
     ),
     ...(bio ? { bio } : {}),
     ...(goal ? { goal } : {}),
+    ...(englishDifficulty ? { englishDifficulty } : {}),
     givenName: firstNonEmpty(claims.given_name, previous?.givenName),
     familyName: firstNonEmpty(claims.family_name, previous?.familyName),
     pictureUrl: firstNonEmpty(
@@ -546,6 +624,121 @@ async function mergeCurrentUserProgress(
   return progress;
 }
 
+async function registerCurrentUserDevice(
+  email: string,
+  claims: CognitoClaims,
+  payload?: RegisterDevicePayload
+): Promise<DeviceRecord | undefined> {
+  const deviceId = sanitizeDeviceId(payload?.deviceId);
+  const submittedExpoPushToken = asString(payload?.expoPushToken)?.trim();
+  const expoPushToken = sanitizeExpoPushToken(payload?.expoPushToken);
+  if (!deviceId || (submittedExpoPushToken && !expoPushToken)) {
+    return undefined;
+  }
+
+  const now = new Date().toISOString();
+  const platform = normalizeDevicePlatform(payload?.platform);
+  const values: Record<string, unknown> = {
+    ':deviceId': deviceId,
+    ':userId': email,
+    ':email': email,
+    ':platform': platform,
+    ':isActive': true,
+    ':pushEnabled': Boolean(expoPushToken),
+    ':now': now,
+  };
+  const names: Record<string, string> = {
+    '#platform': 'platform',
+  };
+  const setParts = [
+    'deviceId = :deviceId',
+    'userId = :userId',
+    'email = :email',
+    '#platform = :platform',
+    'isActive = :isActive',
+    'pushEnabled = :pushEnabled',
+    'createdAt = if_not_exists(createdAt, :now)',
+    'updatedAt = :now',
+    'lastRegisteredAt = :now',
+  ];
+  const removeParts: string[] = [];
+
+  if (expoPushToken) {
+    values[':expoPushToken'] = expoPushToken;
+    values[':tokenType'] = 'expo';
+    setParts.push('expoPushToken = :expoPushToken', 'tokenType = :tokenType');
+  } else {
+    removeParts.push('expoPushToken', 'tokenType');
+  }
+
+  const optionalFields: Array<keyof Pick<
+    DeviceRecord,
+    'cognitoSub' | 'appVersion' | 'buildVersion' | 'deviceName' | 'osName' | 'osVersion' | 'permissionStatus'
+  >> = [
+    'cognitoSub',
+    'appVersion',
+    'buildVersion',
+    'deviceName',
+    'osName',
+    'osVersion',
+    'permissionStatus',
+  ];
+  const sanitizedOptional: Partial<DeviceRecord> = {
+    cognitoSub: firstNonEmpty(claims.sub),
+    appVersion: sanitizeDeviceText(payload?.appVersion, 40),
+    buildVersion: sanitizeDeviceText(payload?.buildVersion, 40),
+    deviceName: sanitizeDeviceText(payload?.deviceName, 120),
+    osName: sanitizeDeviceText(payload?.osName, 80),
+    osVersion: sanitizeDeviceText(payload?.osVersion, 80),
+    permissionStatus: sanitizeDeviceText(payload?.permissionStatus, 40),
+  };
+
+  for (const field of optionalFields) {
+    const value = sanitizedOptional[field];
+    if (!value) continue;
+    const placeholder = `:${field}`;
+    values[placeholder] = value;
+    setParts.push(`${field} = ${placeholder}`);
+  }
+
+  const out = await dynamo.send(
+    new UpdateCommand({
+      TableName: getDevicesTableName(),
+      Key: { deviceId },
+      UpdateExpression: [
+        `SET ${setParts.join(', ')}`,
+        removeParts.length ? `REMOVE ${removeParts.join(', ')}` : '',
+      ].filter(Boolean).join(' '),
+      ExpressionAttributeNames: names,
+      ExpressionAttributeValues: values,
+      ReturnValues: 'ALL_NEW',
+    })
+  );
+
+  return out.Attributes as DeviceRecord | undefined;
+}
+
+async function unregisterCurrentUserDevice(email: string, deviceId: string): Promise<boolean> {
+  try {
+    await dynamo.send(
+      new DeleteCommand({
+        TableName: getDevicesTableName(),
+        Key: { deviceId },
+        ConditionExpression: 'userId = :userId',
+        ExpressionAttributeValues: {
+          ':userId': email,
+        },
+      })
+    );
+    return true;
+  } catch (err: any) {
+    if (err?.name === 'ConditionalCheckFailedException') {
+      return false;
+    }
+    throw err;
+  }
+}
+
 function progressApiPayload(progress: UserProgressRecord) {
   // Emit both the canonical `characters` shape and the legacy `stories` shape so
   // existing mobile clients (which read `stories.items[storyId].completedMissions`)
@@ -560,6 +753,14 @@ function getUsersTableName(): string {
   const tableName = process.env.USERS_TABLE_NAME;
   if (!tableName) {
     throw new Error('USERS_TABLE_NAME not set');
+  }
+  return tableName;
+}
+
+function getDevicesTableName(): string {
+  const tableName = process.env.DEVICES_TABLE_NAME;
+  if (!tableName) {
+    throw new Error('DEVICES_TABLE_NAME not set');
   }
   return tableName;
 }
@@ -589,6 +790,52 @@ function asTimestamp(value: unknown): string | undefined {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return undefined;
   return parsed.toISOString();
+}
+
+function sanitizeDeviceId(value: unknown): string | undefined {
+  const normalized = asString(value)?.trim();
+  if (!normalized || normalized.length > 120) {
+    return undefined;
+  }
+  if (!/^[A-Za-z0-9._:-]+$/.test(normalized)) {
+    return undefined;
+  }
+  return normalized;
+}
+
+function safeDecodeURIComponent(value: string): string | undefined {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return undefined;
+  }
+}
+
+function sanitizeExpoPushToken(value: unknown): string | undefined {
+  const normalized = asString(value)?.trim();
+  if (!normalized || normalized.length > 140) {
+    return undefined;
+  }
+  if (!/^(ExpoPushToken|ExponentPushToken)\[[A-Za-z0-9_-]+\]$/.test(normalized)) {
+    return undefined;
+  }
+  return normalized;
+}
+
+function sanitizeDeviceText(value: unknown, maxLength: number): string | undefined {
+  const normalized = asString(value)?.replace(/\s+/g, ' ').trim();
+  if (!normalized) {
+    return undefined;
+  }
+  return normalized.slice(0, maxLength);
+}
+
+function normalizeDevicePlatform(value: unknown): DeviceRecord['platform'] {
+  const normalized = asString(value)?.trim().toLowerCase();
+  if (normalized === 'ios' || normalized === 'android' || normalized === 'web') {
+    return normalized;
+  }
+  return 'unknown';
 }
 
 function hasOwn(value: object, key: string): boolean {

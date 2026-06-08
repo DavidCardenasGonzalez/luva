@@ -29,6 +29,7 @@ import EmailSignUpScreen from '../screens/EmailSignUpScreen';
 import AccountAccessScreen from '../screens/AccountAccessScreen';
 import OnboardingScreen from '../onboarding/OnboardingScreen';
 import * as Linking from 'expo-linking';
+import * as Notifications from 'expo-notifications';
 import { trackScreenViewed } from '../marketing/mixpanelEvents';
 import { hasCompletedOnboarding } from '../onboarding/model/progress';
 
@@ -94,12 +95,41 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const prefix = Linking.createURL('/');
+function getNotificationUrl(response: Notifications.NotificationResponse | null | undefined) {
+  const url = response?.notification.request.content.data?.url;
+  return typeof url === 'string' ? url : undefined;
+}
+
 const linking = {
   prefixes: [prefix, 'myapp://'],
   config: {
     screens: {
       AuthCallback: 'callback',
     },
+  },
+  async getInitialURL() {
+    const url = await Linking.getInitialURL();
+    if (url) {
+      return url;
+    }
+
+    return getNotificationUrl(Notifications.getLastNotificationResponse());
+  },
+  subscribe(listener: (url: string) => void) {
+    const linkingSubscription = Linking.addEventListener('url', ({ url }) => {
+      listener(url);
+    });
+    const notificationSubscription = Notifications.addNotificationResponseReceivedListener((response) => {
+      const url = getNotificationUrl(response);
+      if (url) {
+        listener(url);
+      }
+    });
+
+    return () => {
+      linkingSubscription.remove();
+      notificationSubscription.remove();
+    };
   },
 };
 

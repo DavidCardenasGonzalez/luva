@@ -10,6 +10,11 @@ import {
   setMixpanelUserIdentity,
   trackMixpanelEvent,
 } from '../marketing/mixpanelEvents';
+import {
+  ensureLocalPushDeviceAsync,
+  syncRegisteredPushDeviceAsync,
+  unregisterRegisteredPushDeviceAsync,
+} from '../notifications/pushNotifications';
 
 type AuthProviderName = 'google' | 'apple' | 'email';
 type AuthEventName = 'login_completed' | 'signup_completed';
@@ -31,12 +36,15 @@ type AuthProAccess = {
   code?: AuthProGrant;
 };
 
+export type EnglishDifficulty = 'easy' | 'medium' | 'hard';
+
 type AuthUser = {
   email: string;
   cognitoSub?: string;
   displayName?: string;
   bio?: string;
   goal?: string;
+  englishDifficulty?: EnglishDifficulty;
   givenName?: string;
   familyName?: string;
   pictureUrl?: string;
@@ -59,6 +67,7 @@ type CurrentUserUpdatePayload = {
   displayName?: string;
   bio?: string;
   goal?: string;
+  englishDifficulty?: EnglishDifficulty;
   pictureUrl?: string;
   authProvider?: AuthProviderName;
   promoCode?: string;
@@ -391,6 +400,7 @@ async function syncCurrentUser(
       };
     }
     await storeUser(response.user);
+    await syncPushDeviceForUser(response.user);
     return {
       user: response.user,
       ...(response.promoCode ? { promoCode: response.promoCode } : {}),
@@ -398,6 +408,30 @@ async function syncCurrentUser(
   } catch (err: any) {
     console.warn('user.sync.failed', err?.message || err);
     return {};
+  }
+}
+
+async function syncPushDeviceForUser(user?: AuthUser) {
+  try {
+    await syncRegisteredPushDeviceAsync(user?.email);
+  } catch (err: any) {
+    console.warn('push.device.sync.failed', err?.message || err);
+  }
+}
+
+async function ensureLocalPushDeviceSafely() {
+  try {
+    await ensureLocalPushDeviceAsync();
+  } catch (err: any) {
+    console.warn('push.device.local.failed', err?.message || err);
+  }
+}
+
+async function unregisterPushDeviceSafely() {
+  try {
+    await unregisterRegisteredPushDeviceAsync();
+  } catch (err: any) {
+    console.warn('push.device.unregister.failed', err?.message || err);
   }
 }
 
@@ -735,6 +769,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [ensureValidSession, refreshSession]);
 
+  useEffect(() => {
+    if (isHydrating || authToken) {
+      return;
+    }
+
+    void ensureLocalPushDeviceSafely();
+  }, [authToken, isHydrating]);
+
   const signInWithProvider = useCallback(async (provider: AuthProviderName) => {
     if (!isHostedUiConfigured) {
       setError('Falta configurar COGNITO_DOMAIN, COGNITO_CLIENT_ID o REDIRECT_URI en el app.');
@@ -1015,6 +1057,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await trackMixpanelEvent('logout_completed', {
         event_category: 'auth',
       });
+      await unregisterPushDeviceSafely();
       await clearSession();
       await resetMixpanelUserIdentity();
       setIsBusy(false);

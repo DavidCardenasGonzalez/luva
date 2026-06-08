@@ -135,6 +135,18 @@ export class LuvaStack extends Stack {
       removalPolicy: RemovalPolicy.RETAIN,
     });
 
+    const devicesTable = new Table(this, 'DevicesTable', {
+      partitionKey: { name: 'deviceId', type: AttributeType.STRING },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.RETAIN,
+    });
+    devicesTable.addGlobalSecondaryIndex({
+      indexName: 'UserDevicesIndex',
+      partitionKey: { name: 'userId', type: AttributeType.STRING },
+      sortKey: { name: 'updatedAt', type: AttributeType.STRING },
+      projectionType: ProjectionType.ALL,
+    });
+
     const generatedVideosTable = new Table(this, 'GeneratedVideosTable', {
       partitionKey: { name: 'storyId', type: AttributeType.STRING },
       sortKey: { name: 'videoId', type: AttributeType.STRING },
@@ -473,10 +485,12 @@ export class LuvaStack extends Stack {
       logGroup: usersFnLogGroup,
       environment: {
         USERS_TABLE_NAME: usersTable.tableName,
+        DEVICES_TABLE_NAME: devicesTable.tableName,
         STAGE: 'prod',
       },
     });
     usersTable.grantReadWriteData(usersFn);
+    devicesTable.grantReadWriteData(usersFn);
 
     const onboardingFnLogGroup = new LogGroup(this, 'OnboardingFnLogs', { retention: RetentionDays.ONE_WEEK });
     const onboardingFn = new NodejsFunction(this, 'OnboardingFunction', {
@@ -641,6 +655,8 @@ export class LuvaStack extends Stack {
     });
     const users = v1.addResource('users');
     const usersMe = users.addResource('me');
+    const usersMeDevices = usersMe.addResource('devices');
+    const usersMeDeviceById = usersMeDevices.addResource('{deviceId}');
     const usersMeProgress = usersMe.addResource('progress');
     const onboarding = v1.addResource('onboarding');
     const onboardingChat = onboarding.addResource('chat');
@@ -664,6 +680,14 @@ export class LuvaStack extends Stack {
       authorizationType: AuthorizationType.COGNITO,
     });
     usersMe.addMethod('POST', usersLambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    usersMeDevices.addMethod('POST', usersLambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    usersMeDeviceById.addMethod('DELETE', usersLambdaIntegration, {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
     });
@@ -709,12 +733,14 @@ export class LuvaStack extends Stack {
 
     const deployment = new Deployment(this, 'Deployment', { api });
     deployment.addToLogicalId({
-      routeManifestVersion: '2026-05-13-public-friend-profiles-v1',
+      routeManifestVersion: '2026-06-04-user-devices-v1',
       routes: {
         apiRoot: ['ANY /v1', 'ANY /v1/{proxy+}'],
         users: [
           'GET /v1/users/me',
           'POST /v1/users/me',
+          'POST /v1/users/me/devices',
+          'DELETE /v1/users/me/devices/{deviceId}',
           'GET /v1/users/me/progress',
           'POST /v1/users/me/progress',
         ],

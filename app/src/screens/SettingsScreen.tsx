@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable, Linking, Modal, TextInput, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -13,7 +13,14 @@ import { useStoryProgress } from '../progress/StoryProgressProvider';
 import { getRuntimeAppVersion } from '../version/appVersion';
 import { trackMixpanelPremiumActivated } from '../marketing/mixpanelEvents';
 import AccountProgressCard from '../components/AccountProgressCard';
-import { useAuth } from '../auth/AuthProvider';
+import { useAuth, type EnglishDifficulty } from '../auth/AuthProvider';
+import { readStoredEnglishDifficulty, writeStoredEnglishDifficulty } from '../auth/englishDifficulty';
+
+const DIFFICULTY_OPTIONS: Array<{ value: EnglishDifficulty; label: string; description: string }> = [
+  { value: 'easy', label: 'Fácil', description: 'Inglés claro A1-B1' },
+  { value: 'medium', label: 'Medio', description: 'Inglés claro B1-B2' },
+  { value: 'hard', label: 'Difícil', description: 'Inglés nativo, lenguaje natural' },
+];
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
@@ -46,6 +53,18 @@ export default function SettingsScreen({ navigation }: Props) {
   const [confirmText, setConfirmText] = useState('');
   const [resetting, setResetting] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [savingDifficulty, setSavingDifficulty] = useState<EnglishDifficulty | null>(null);
+  const [localDifficulty, setLocalDifficulty] = useState<EnglishDifficulty | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void readStoredEnglishDifficulty().then((value) => {
+      if (!cancelled) setLocalDifficulty(value);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [profileName, setProfileName] = useState('');
   const [profileBio, setProfileBio] = useState('');
   const [profileGoal, setProfileGoal] = useState('');
@@ -108,6 +127,29 @@ export default function SettingsScreen({ navigation }: Props) {
     setProfileGoal(user?.goal || '');
     setShowProfileModal(true);
   }, [user?.bio, user?.displayName, user?.goal]);
+
+  const currentDifficulty: EnglishDifficulty =
+    user?.englishDifficulty || localDifficulty || 'medium';
+
+  const handleSelectDifficulty = useCallback(async (value: EnglishDifficulty) => {
+    if (savingDifficulty || value === currentDifficulty) return;
+    try {
+      setSavingDifficulty(value);
+      await writeStoredEnglishDifficulty(value);
+      setLocalDifficulty(value);
+      if (isSignedIn) {
+        const result = await updateCurrentUser({ englishDifficulty: value });
+        if (!result.user) {
+          throw new Error('DIFFICULTY_UPDATE_FAILED');
+        }
+      }
+    } catch (err) {
+      console.warn('[Settings] Error al guardar dificultad', err);
+      Alert.alert('Error', 'No pudimos guardar la dificultad. Inténtalo de nuevo.');
+    } finally {
+      setSavingDifficulty(null);
+    }
+  }, [currentDifficulty, isSignedIn, savingDifficulty, updateCurrentUser]);
 
   const handleSaveProfile = useCallback(async () => {
     if (savingProfile) return;
@@ -291,6 +333,56 @@ export default function SettingsScreen({ navigation }: Props) {
             </Pressable>
           </View>
         ) : null}
+
+        <View
+          style={{
+            marginBottom: 16,
+            borderRadius: 20,
+            padding: 18,
+            backgroundColor: '#0b172a',
+            borderWidth: 1,
+            borderColor: '#1f2937',
+          }}
+        >
+          <Text style={{ color: '#a5f3fc', fontSize: 12, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' }}>
+            Dificultad
+          </Text>
+          <Text style={{ color: '#e2e8f0', fontSize: 18, fontWeight: '800', marginTop: 6 }}>
+            Nivel de inglés
+          </Text>
+          <Text style={{ color: '#94a3b8', marginTop: 6, lineHeight: 20 }}>
+            Define cómo te hablarán tus amigos de IA. Afecta el nivel de inglés que usarán.
+          </Text>
+          <View style={{ flexDirection: 'row', marginTop: 12, gap: 8 }}>
+            {DIFFICULTY_OPTIONS.map((opt) => {
+              const selected = currentDifficulty === opt.value;
+              const busy = savingDifficulty === opt.value;
+              return (
+                <Pressable
+                  key={opt.value}
+                  onPress={() => handleSelectDifficulty(opt.value)}
+                  disabled={savingDifficulty !== null}
+                  style={({ pressed }) => ({
+                    flex: 1,
+                    padding: 10,
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: selected ? '#22d3ee' : '#1e293b',
+                    backgroundColor: selected ? '#0e7490' : pressed ? '#0b152b' : '#0b172b',
+                    opacity: savingDifficulty && !busy ? 0.5 : 1,
+                  })}
+                >
+                  <Text style={{ color: selected ? 'white' : '#e2e8f0', fontWeight: '800', textAlign: 'center' }}>
+                    {busy ? '...' : opt.label}
+                  </Text>
+                  <Text style={{ color: selected ? '#cffafe' : '#94a3b8', fontSize: 11, textAlign: 'center', marginTop: 4 }}>
+                    {opt.description}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
 
         <View
           style={{

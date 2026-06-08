@@ -52,6 +52,7 @@ import {
   recordLocalFriendMessageSent,
 } from '../friends/localFriends';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
+import { readStoredEnglishDifficulty } from '../auth/englishDifficulty';
 import {
   getOnboardingDraftProgress,
   hasCompletedOnboarding,
@@ -1023,9 +1024,11 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       });
 
       try {
+        const englishDifficulty = await readStoredEnglishDifficulty();
         const payload = await sendFriendChatMessage(friendId, {
           sessionId,
           transcript: trimmed,
+          englishDifficulty,
           ...(sourcePost?.postId ? { postId: sourcePost.postId } : {}),
           ...(sourcePost?.context ? { postContext: sourcePost.context } : {}),
           ...(sourcePost?.caption ? { postCaption: sourcePost.caption } : {}),
