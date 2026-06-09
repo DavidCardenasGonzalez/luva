@@ -28,6 +28,7 @@ import {
 } from './model/types';
 import Step1 from './step-1/Step1';
 import Step2 from './step-2/Step2';
+import Step2B from './step-2B/Step2B';
 import Step3 from './step-3/Step3';
 import Step4 from './step-4/Step4';
 import Step5 from './step-5/Step5';
@@ -52,6 +53,20 @@ function getStepIndexForStepNumber(steps: OnboardingStepContent[], stepNumber?: 
   return Math.max(0, Math.min(stepNumber - 1, steps.length - 1));
 }
 
+function getStepIndexForDraft(steps: OnboardingStepContent[], step?: {
+  stepNumber?: number;
+  stepKey?: string;
+}) {
+  if (!step?.stepNumber) return 0;
+
+  const stepIndex = steps.findIndex((item) => (
+    item.stepNumber === step.stepNumber && item.stepKey === step.stepKey
+  ));
+  if (stepIndex >= 0) return stepIndex;
+
+  return getStepIndexForStepNumber(steps, step.stepNumber);
+}
+
 function renderStep(
   step: OnboardingStepContent,
   onNext: () => void,
@@ -66,6 +81,9 @@ function renderStep(
   onSkipToFeed: () => void,
 ) {
   if (step.stepNumber === 1) return <Step1 content={step} />;
+  if (step.stepKey === 'step2B') {
+    return <Step2B content={step} onNext={onNext} />;
+  }
   if (step.stepNumber === 2) {
     return (
       <Step2
@@ -127,10 +145,12 @@ export default function OnboardingScreen({ navigation, route }: Props) {
     completedRequirementIds: [],
   });
   const [onboardingPlan, setOnboardingPlan] = useState<OnboardingPlanResponse | null>(null);
-  const trackedStepsRef = useRef<Set<number>>(new Set());
+  const trackedStepsRef = useRef<Set<string>>(new Set());
   const activeStep = steps[stepIndex] || DEFAULT_ONBOARDING_STEPS[0];
   const isLastStep = stepIndex >= steps.length - 1;
-  const visibleStepCount = activeStep.stepNumber <= 3 ? Math.min(3, steps.length) : steps.length;
+  const visibleStepCount = activeStep.stepNumber <= 3
+    ? steps.filter((step) => step.stepNumber <= 3).length
+    : steps.length;
   const visibleStepPosition = activeStep.stepNumber <= 3
     ? Math.min(stepIndex + 1, visibleStepCount)
     : stepIndex + 1;
@@ -160,7 +180,10 @@ export default function OnboardingScreen({ navigation, route }: Props) {
 
         const initialStepNumber = startAtStep ?? draftProgress?.stepNumber;
         if (initialStepNumber) {
-          setStepIndex(getStepIndexForStepNumber(nextSteps, initialStepNumber));
+          setStepIndex(getStepIndexForDraft(nextSteps, {
+            stepNumber: initialStepNumber,
+            stepKey: draftProgress?.stepKey,
+          }));
         }
       })
       .finally(() => {
@@ -174,8 +197,9 @@ export default function OnboardingScreen({ navigation, route }: Props) {
 
   useEffect(() => {
     if (loadingContent) return;
-    if (trackedStepsRef.current.has(activeStep.stepNumber)) return;
-    trackedStepsRef.current.add(activeStep.stepNumber);
+    const trackingKey = activeStep.stepKey || String(activeStep.stepNumber);
+    if (trackedStepsRef.current.has(trackingKey)) return;
+    trackedStepsRef.current.add(trackingKey);
     void trackOnboardingStepViewed(activeStep);
   }, [activeStep, loadingContent]);
 
@@ -193,6 +217,7 @@ export default function OnboardingScreen({ navigation, route }: Props) {
 
     void saveOnboardingDraftProgress({
       stepNumber: activeStep.stepNumber,
+      stepKey: activeStep.stepKey,
       selectedCharacter,
       phraseSelections,
       speakingSummary,
@@ -399,6 +424,7 @@ export default function OnboardingScreen({ navigation, route }: Props) {
         {/* ── CTA button (hidden for steps that provide their own controls) ── */}
         {!loadingContent &&
         activeStep.primaryCta &&
+        activeStep.stepKey !== 'step2B' &&
         activeStep.stepNumber !== 3 &&
         activeStep.stepNumber !== 4 &&
         activeStep.stepNumber !== 6 ? (

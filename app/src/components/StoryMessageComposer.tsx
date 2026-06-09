@@ -64,7 +64,7 @@ export default function StoryMessageComposer({
         borderTopColor: '#e2e8f0',
       }}
     >
-      {statusLabel ? <Text style={{ color: '#475569', marginBottom: 8 }}>{statusLabel}</Text> : null}
+      {/* {statusLabel ? <Text style={{ color: '#475569', marginBottom: 8 }}>{statusLabel}</Text> : null} */}
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View
           style={{

@@ -17,18 +17,20 @@ import {
 
 const STORAGE_KEY = '@luva/coins/state';
 const MAX_FREE_COINS = 10;
-const FIRST_LAUNCH_BONUS_COINS = 10;
-const INITIAL_COIN_BALANCE = MAX_FREE_COINS + FIRST_LAUNCH_BONUS_COINS;
+const INITIAL_COIN_BALANCE = MAX_FREE_COINS;
 const REGEN_INTERVAL_MS = 60 * 60 * 1000;
 
 export const CHAT_MISSION_COST = 5;
 export const CARD_OPEN_COST = 1;
 export const RECORDING_COST = 1;
 export const SHADOWING_CHAPTER_COST = 3;
+export const REVIEW_REWARD_COINS = 20;
 
 type CoinsState = {
   balance: number;
   lastUpdated: number;
+  reviewRewardPromptedAt?: number;
+  reviewRewardClaimedAt?: number;
 };
 
 type CoinsContextValue = {
@@ -36,11 +38,15 @@ type CoinsContextValue = {
   balance: number;
   maxCoins: number;
   isUnlimited: boolean;
+  canShowReviewReward: boolean;
+  reviewRewardCoins: number;
   nextRegenAt: number | null;
   refreshBalance: () => Promise<void>;
   canSpend: (amount: number) => Promise<boolean>;
   spendCoins: (amount: number, reason?: string) => Promise<boolean>;
   addCoins: (amount: number, reason?: string) => Promise<boolean>;
+  markReviewRewardPrompted: () => Promise<void>;
+  claimReviewReward: (reason?: string) => Promise<boolean>;
   resetCoins: () => Promise<void>;
 };
 
@@ -51,20 +57,29 @@ const sanitizeState = (raw: any): CoinsState => {
   if (!raw || typeof raw !== 'object') return fallback;
   const balance = Number.isFinite(raw.balance) ? Math.max(0, Number(raw.balance)) : MAX_FREE_COINS;
   const lastUpdated = Number.isFinite(raw.lastUpdated) ? Number(raw.lastUpdated) : Date.now();
-  return { balance, lastUpdated };
+  return {
+    balance,
+    lastUpdated,
+    ...(Number.isFinite(raw.reviewRewardPromptedAt)
+      ? { reviewRewardPromptedAt: Number(raw.reviewRewardPromptedAt) }
+      : {}),
+    ...(Number.isFinite(raw.reviewRewardClaimedAt)
+      ? { reviewRewardClaimedAt: Number(raw.reviewRewardClaimedAt) }
+      : {}),
+  };
 };
 
 const applyRegen = (state: CoinsState, now: number): CoinsState => {
   if (state.balance >= MAX_FREE_COINS) {
     if (state.lastUpdated === now) return state;
-    return { balance: state.balance, lastUpdated: now };
+    return { ...state, balance: state.balance, lastUpdated: now };
   }
   const elapsed = now - state.lastUpdated;
   const steps = Math.floor(elapsed / REGEN_INTERVAL_MS);
   if (steps <= 0) return state;
   const nextBalance = Math.min(MAX_FREE_COINS, state.balance + steps);
   const nextUpdated = state.lastUpdated + steps * REGEN_INTERVAL_MS;
-  return { balance: nextBalance, lastUpdated: nextUpdated };
+  return { ...state, balance: nextBalance, lastUpdated: nextUpdated };
 };
 
 export function CoinBalanceProvider({ children }: { children: React.ReactNode }) {
@@ -150,6 +165,7 @@ export function CoinBalanceProvider({ children }: { children: React.ReactNode })
         return false;
       }
       const next: CoinsState = {
+        ...current,
         balance: current.balance - amount,
         lastUpdated: now,
       };
@@ -185,6 +201,7 @@ export function CoinBalanceProvider({ children }: { children: React.ReactNode })
       const now = Date.now();
       const current = applyRegen(stateRef.current, now);
       const next: CoinsState = {
+        ...current,
         balance: current.balance + Math.floor(amount),
         lastUpdated: now,
       };
@@ -200,6 +217,50 @@ export function CoinBalanceProvider({ children }: { children: React.ReactNode })
       if (__DEV__) {
         console.log('[Coins] Credito registrado', { amount, reason, balance: next.balance });
       }
+      return true;
+    },
+    [isPro, persist]
+  );
+
+  const markReviewRewardPrompted = useCallback(async () => {
+    const now = Date.now();
+    const current = stateRef.current;
+    if (current.reviewRewardPromptedAt || current.reviewRewardClaimedAt) {
+      return;
+    }
+    const next: CoinsState = {
+      ...current,
+      reviewRewardPromptedAt: now,
+    };
+    setState(next);
+    stateRef.current = next;
+    await persist(next);
+  }, [persist]);
+
+  const claimReviewReward = useCallback(
+    async (reason?: string) => {
+      if (isPro) return true;
+      const now = Date.now();
+      const current = applyRegen(stateRef.current, now);
+      if (current.reviewRewardClaimedAt) {
+        return true;
+      }
+      const next: CoinsState = {
+        ...current,
+        balance: current.balance + REVIEW_REWARD_COINS,
+        lastUpdated: now,
+        reviewRewardPromptedAt: current.reviewRewardPromptedAt || now,
+        reviewRewardClaimedAt: now,
+      };
+      setState(next);
+      stateRef.current = next;
+      await persist(next);
+      void trackMixpanelCoinAdded({
+        amount: REVIEW_REWARD_COINS,
+        reason: reason || 'review-reward',
+        balanceBefore: current.balance,
+        balanceAfter: next.balance,
+      });
       return true;
     },
     [isPro, persist]
@@ -226,20 +287,43 @@ export function CoinBalanceProvider({ children }: { children: React.ReactNode })
     return state.lastUpdated + REGEN_INTERVAL_MS;
   }, [isPro, state.balance, state.lastUpdated]);
 
+  const canShowReviewReward = useMemo(
+    () => !isPro && !state.reviewRewardPromptedAt && !state.reviewRewardClaimedAt,
+    [isPro, state.reviewRewardClaimedAt, state.reviewRewardPromptedAt]
+  );
+
   const value = useMemo<CoinsContextValue>(
     () => ({
       loading: loading || revenueLoading,
       balance: isPro ? MAX_FREE_COINS : state.balance,
       maxCoins: MAX_FREE_COINS,
       isUnlimited: isPro,
+      canShowReviewReward,
+      reviewRewardCoins: REVIEW_REWARD_COINS,
       nextRegenAt,
       refreshBalance,
       canSpend,
       spendCoins,
       addCoins,
+      markReviewRewardPrompted,
+      claimReviewReward,
       resetCoins,
     }),
-    [addCoins, canSpend, isPro, loading, nextRegenAt, refreshBalance, resetCoins, revenueLoading, spendCoins, state.balance]
+    [
+      addCoins,
+      canShowReviewReward,
+      canSpend,
+      claimReviewReward,
+      isPro,
+      loading,
+      markReviewRewardPrompted,
+      nextRegenAt,
+      refreshBalance,
+      resetCoins,
+      revenueLoading,
+      spendCoins,
+      state.balance,
+    ]
   );
 
   return <CoinsContext.Provider value={value}>{children}</CoinsContext.Provider>;

@@ -2,7 +2,7 @@ import { trackMixpanelOnboardingStepViewed } from '../../marketing/mixpanelEvent
 import { OnboardingStepContent } from './types';
 
 export async function trackOnboardingStepViewed(step: OnboardingStepContent) {
-  const stepId = `onboarding-step-${step.stepNumber}`;
+  const stepId = step.stepKey ? `onboarding-${step.stepKey}` : `onboarding-step-${step.stepNumber}`;
 
   await trackMixpanelOnboardingStepViewed({
     stepNumber: step.stepNumber,

@@ -1,4 +1,5 @@
 export type OnboardingStepNumber = 1 | 2 | 3 | 4 | 5 | 6;
+export type OnboardingStepKey = "step2B";
 
 export type OnboardingCharacterId = "zoe" | "mateo";
 export type OnboardingRequirementId = "name" | "why" | "about";
@@ -12,6 +13,7 @@ export type OnboardingConversationMessage = {
 
 export type OnboardingStepContent = {
   stepNumber: OnboardingStepNumber;
+  stepKey?: OnboardingStepKey;
   eyebrow: string;
   title: string;
   subtitle: string;
@@ -139,6 +141,14 @@ export const DEFAULT_ONBOARDING_STEPS: OnboardingStepContent[] = [
     eyebrow: "Personalización",
     title: "Creamos un plan para ti",
     subtitle: "Selecciona las frases que más se parecen a ti para personalizar tu ruta de aprendizaje.",
+    primaryCta: "Continuar",
+  },
+  {
+    stepNumber: 2,
+    stepKey: "step2B",
+    eyebrow: "Nivel",
+    title: "Elige tu nivel de inglés",
+    subtitle: "Ajustaré la dificultad de las conversaciones para que practiques a tu ritmo.",
     primaryCta: "Continuar",
   },
   {

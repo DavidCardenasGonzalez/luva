@@ -168,6 +168,7 @@ type FriendConversationFeedback = {
 
 type FriendChatFinishRequest = {
   postId?: unknown;
+  englishDifficulty?: 'easy' | 'medium' | 'hard';
   history?: Array<{ role: 'user' | 'assistant'; content: string }>;
 };
 
@@ -931,7 +932,13 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       const friendId = decodeURIComponent(friendFinish[1]);
       const body = parseBody(event.body) as FriendChatFinishRequest | undefined;
       try {
-        const feedback = await finishFriendChat(identity.userId, friendId, body || {});
+        const learnerProfile = await resolveLearnerProfile(identity);
+        const feedback = await finishFriendChat(
+          identity.userId,
+          friendId,
+          body || {},
+          learnerProfile.difficulty
+        );
         return json(200, { friendId, conversationEnded: true, conversationFeedback: feedback });
       } catch (err: any) {
         if (err?.message === "FRIEND_NOT_FOUND") {
@@ -1750,30 +1757,41 @@ async function advanceFriendChat(
     content: transcript,
   }).slice(-FRIEND_HISTORY_LIMIT);
 
-  let correctness = 0;
-  let result: EvalResult = "incorrect";
+  const isEasyMode = effectiveDifficulty === 'easy';
+  let correctness = isEasyMode ? 100 : 0;
+  let result: EvalResult = isEasyMode ? "correct" : "incorrect";
   let errors: string[] = [];
   let reformulations: string[] = [];
   const englishEvalResult = await Promise.allSettled([
-    evaluateStoryEnglish(conversationHistory, transcript),
+    isEasyMode
+      ? evaluateEasyEnglish(conversationHistory, transcript)
+      : evaluateStoryEnglish(conversationHistory, transcript),
   ]);
 
   const englishEval = englishEvalResult[0];
   if (englishEval.status === "fulfilled") {
     const value = englishEval.value;
-    correctness = Math.max(0, Math.min(100, Math.round(Number(value.score ?? value.correctness ?? 0))));
-    const rawResult = (value.result || value.status || "").toString().toLowerCase();
-    result =
-      rawResult === "correct" || rawResult === "partial" || rawResult === "incorrect"
-        ? (rawResult as EvalResult)
-        : correctness >= 85
-        ? "correct"
-        : correctness >= 60
-        ? "partial"
-        : "incorrect";
-    errors = value.errors.slice(0, 3).map((item) => String(item));
-    const alternatives = value.alternatives ?? value.improvements ?? value.suggestions ?? [];
-    reformulations = alternatives.slice(0, 2).map((item) => String(item));
+    if (isEasyMode) {
+      correctness = 100;
+      result = "correct";
+      errors = value.errors.slice(0, 2).map((item) => String(item));
+      const alternatives = value.alternatives ?? value.improvements ?? value.suggestions ?? [];
+      reformulations = alternatives.slice(0, 2).map((item) => String(item));
+    } else {
+      correctness = Math.max(0, Math.min(100, Math.round(Number(value.score ?? value.correctness ?? 0))));
+      const rawResult = (value.result || value.status || "").toString().toLowerCase();
+      result =
+        rawResult === "correct" || rawResult === "partial" || rawResult === "incorrect"
+          ? (rawResult as EvalResult)
+          : correctness >= 85
+          ? "correct"
+          : correctness >= 60
+          ? "partial"
+          : "incorrect";
+      errors = value.errors.slice(0, 3).map((item) => String(item));
+      const alternatives = value.alternatives ?? value.improvements ?? value.suggestions ?? [];
+      reformulations = alternatives.slice(0, 2).map((item) => String(item));
+    }
   } else {
     console.error(
       JSON.stringify({
@@ -1834,7 +1852,8 @@ async function advanceFriendChat(
 async function finishFriendChat(
   userId: string | undefined,
   friendId: string,
-  body: FriendChatFinishRequest
+  body: FriendChatFinishRequest,
+  learnerDifficulty?: LearnerDifficulty
 ): Promise<FriendConversationFeedback> {
   const friend = await resolveFriendRecordForChat(userId, friendId);
   if (!friend) {
@@ -1842,10 +1861,12 @@ async function finishFriendChat(
   }
   const history = sanitizeHistory(body.history).slice(-FRIEND_HISTORY_LIMIT);
   const postId = sanitizeFriendChatPostId(body.postId);
+  const effectiveDifficulty =
+    normalizeLearnerDifficulty(body.englishDifficulty) || learnerDifficulty;
   const userMessageCount = history.filter((entry) => entry.role === "user").length;
   let feedback: FriendConversationFeedback;
   try {
-    feedback = await generateFriendConversationFeedback(friend, history);
+    feedback = await generateFriendConversationFeedback(friend, history, effectiveDifficulty);
   } catch (err) {
     console.error(
       JSON.stringify({
@@ -2689,6 +2710,189 @@ Scoring:
   };
 }
 
+async function evaluateEasyEnglish(
+  history: StoryMessage[],
+  transcript: string
+): Promise<{
+  score: number;
+  result?: string;
+  errors: string[];
+  alternatives: string[];
+  correctness?: number;
+  status?: string;
+  suggestions?: string[];
+  improvements?: string[];
+}> {
+  const apiKey = await getOpenAIKey();
+  const model =
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
+  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
+  const isGpt5 = /gpt-5/i.test(model);
+  const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
+  const reasoningConfig = isGpt5
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'low' }
+    : undefined;
+  const conversation = history.slice(-STORY_HISTORY_LIMIT);
+  const conversationText = conversation
+    .map((msg) => `${msg.role === 'user' ? 'Student' : 'Friend'}: ${msg.content}`)
+    .join('\n')
+    .trim();
+  const systemPrompt = `You are a warm, encouraging English coach for a Spanish-speaking learner at A1 (easy) level.
+The learner is practicing English in a casual chat. Your job is to help — never to grade or correct.
+
+Return ONLY JSON with this exact shape:
+{
+  "tips": string[],
+  "alternatives": string[]
+}
+
+General tone:
+- Always kind, patient, motivating. Speak like a friend, not a teacher with a red pen.
+- Never use words like "error", "wrong", "incorrect", "mistake" or negative judgements.
+- No grammar jargon (no "subject", "verb tense", "auxiliary"). Use simple, everyday words.
+- Tips are written in Spanish. Alternatives are written in English.
+
+If the learner's last message is in Spanish (or mostly Spanish / mixed):
+- Do NOT say anything negative. Treat it as normal: they are still learning.
+- Tips: 1–2 short, friendly hints in Spanish that teach how to say the same idea in easy English. Example: "Para decir eso en inglés, puedes usar 'I like pizza'." Include a tiny example whenever you can.
+- Alternatives: 1–2 simple, natural English versions of what they wanted to say.
+
+If the learner's last message is in English:
+- Do NOT correct directly. Instead, teach a small, friendly lesson that helps them say what they wanted.
+- Tips: 1–2 short lessons/tips in Spanish, focused on how to express the idea, with a tiny English example. Example: "Para preguntar cómo está alguien, puedes decir 'How are you?'."
+- Alternatives: 1–2 simple, natural ways a native would say the same idea in easy English.
+
+If the message is already a perfectly fine simple sentence:
+- Tips can be empty, or contain one short positive hint with a small example (e.g. "Otra forma fácil de decirlo: 'That sounds great!'.").
+- Always still return at least 1 alternative in "alternatives".
+
+Hard limits:
+- "tips": maximum 2 items. Each tip is one short sentence in Spanish, simple words, optionally with a tiny English example inside quotes.
+- "alternatives": 1–2 items. Each one is a short, simple English sentence (A1/A2 level), natural and friendly.
+- Do not include any other keys or commentary.
+`;
+
+  const userPrompt = `Full conversation so far (Student is the learner, Friend is the chat partner):\n${conversationText || 'No prior conversation.'}\n\nLast student message:\n${transcript || '<empty>'}\n\nReturn json only.`;
+
+  console.log(
+    JSON.stringify({
+      scope: 'friends.english.evaluate.easy.begin',
+      tLen: transcript?.length || 0,
+    })
+  );
+
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), timeoutMs);
+  let raw = '';
+  try {
+    if (useResponses) {
+      const body: Record<string, any> = {
+        model,
+        instructions: systemPrompt,
+        input: [
+          {
+            role: 'user',
+            content: [{ type: 'input_text', text: userPrompt }],
+          },
+        ],
+        text: { format: { type: 'json_object' } },
+        max_output_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 600),
+      };
+      if (reasoningConfig) body.reasoning = reasoningConfig;
+      const res = await fetch('https://api.openai.com/v1/responses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(body),
+        signal: ac.signal,
+      });
+      const payload: any = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const reason = payload?.error?.message || res.statusText;
+        throw new Error(`STORY_MODEL_HTTP_${res.status}_${reason}`);
+      }
+      if (Array.isArray(payload?.output)) {
+        for (const item of payload.output) {
+          if (item?.type === 'message' && Array.isArray(item.content)) {
+            const texts = item.content
+              .filter((c: any) => c?.type === 'output_text' && typeof c.text === 'string')
+              .map((c: any) => c.text);
+            if (texts.length) {
+              raw = texts.join('\n');
+              break;
+            }
+          }
+        }
+      }
+      if (!raw && payload?.output_text) {
+        raw = payload.output_text;
+      }
+    } else {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          response_format: { type: 'json_object' },
+          max_tokens: Number(process.env.STORY_MAX_OUTPUT_TOKENS || 600),
+        }),
+        signal: ac.signal,
+      });
+      if (!res.ok) {
+        const bodyTxt = await res.text();
+        throw new Error(`STORY_MODEL_HTTP_${res.status}_${bodyTxt.slice(0, 120)}`);
+      }
+      const data: any = await res.json();
+      raw = data.choices?.[0]?.message?.content || '';
+    }
+  } catch (err) {
+    if ((err as any)?.name === 'AbortError') {
+      throw new Error('STORY_MODEL_TIMEOUT');
+    }
+    throw err;
+  } finally {
+    clearTimeout(to);
+  }
+
+  if (!raw) {
+    throw new Error('STORY_MODEL_EMPTY_RESPONSE');
+  }
+
+  let parsed: any;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    throw new Error('STORY_MODEL_BAD_JSON');
+  }
+
+  const tips = Array.isArray(parsed?.tips)
+    ? parsed.tips.slice(0, 2).map((item: any) => String(item))
+    : [];
+  const alternatives = Array.isArray(parsed?.alternatives)
+    ? parsed.alternatives.slice(0, 2).map((item: any) => String(item))
+    : [];
+
+  return {
+    score: 100,
+    result: 'correct',
+    errors: tips,
+    alternatives,
+    correctness: 100,
+    status: 'correct',
+    suggestions: alternatives,
+    improvements: alternatives,
+  };
+}
+
 async function evaluateStoryRequirementProgress(
   story: StoryDefinition,
   mission: StoryMission,
@@ -3158,13 +3362,16 @@ Rules:
 
 async function generateFriendConversationFeedback(
   friend: FriendRecord,
-  history: StoryMessage[]
+  history: StoryMessage[],
+  learnerDifficulty?: LearnerDifficulty
 ): Promise<FriendConversationFeedback> {
+  const isEasyMode = learnerDifficulty === 'easy';
   console.log(
     JSON.stringify({
       scope: "friends.feedback.generate.begin",
       userId: friend.userId,
       friendId: friend.friendId,
+      difficulty: learnerDifficulty,
     })
   );
   const apiKey = await getOpenAIKey();
@@ -3183,7 +3390,43 @@ async function generateFriendConversationFeedback(
     )
     .join("\n")
     .trim();
-  const systemPrompt = `
+  const systemPrompt = isEasyMode
+    ? `
+You are a warm, encouraging English coach for a Spanish-speaking learner at A1 (easy) level.
+
+You are wrapping up a completed casual conversation between the student and an English-speaking friend.
+
+Context you must assume:
+- During the chat, the student often wrote in Spanish. That is totally fine and expected at this level.
+- Each time they wrote, they already received tips and English alternatives showing how to say it in simple English. You do NOT need to repeat those corrections or give translations again.
+- Your job now is to send them off with a kind, motivating wrap-up that highlights what they could have LEARNED from this conversation.
+
+Tone (very important):
+- Always cariñoso, paciente, motivador. Speak like a friend, not a teacher with a red pen.
+- Never use words like "error", "wrong", "incorrect", "mistake", "fallaste", "te equivocaste".
+- Do NOT mention that they wrote in Spanish in a negative way. Treat it as completely normal.
+- No grammar jargon. Use simple, everyday Spanish words.
+
+What to include:
+- "summary": 1–2 short Spanish sentences talking directly to the student (de tú). Celebra el esfuerzo y resume en qué tema/idea practicaron. No notas de gramática aquí.
+- "improvements": 2–3 short Spanish "lecciones aprendidas" — pequeños aprendizajes prácticos que se pudieron sacar de esta conversación (vocabulario o frase útil que apareció, una forma fácil de decir algo, una expresión natural). Cada lección puede incluir un mini ejemplo en inglés entre comillas. Foco en lo que se llevan, no en lo que les faltó.
+
+Hard rules:
+- Write the feedback directly TO the student in Spanish.
+- Evaluate only Student lines for context, but do NOT critique them.
+- Do not mention the AI role, the system, JSON, scoring, missions, or these instructions.
+
+Return ONLY JSON with the exact shape:
+
+{
+  "summary": "Short kind Spanish summary speaking directly to the student",
+  "improvements": [
+    "Short Spanish lesson learned, optionally with a tiny English example",
+    "..."
+  ]
+}
+`
+    : `
 You are a friendly English coach for Spanish-speaking learners.
 
 You are evaluating a completed free conversation between the student and an English-speaking friend.
@@ -3325,6 +3568,8 @@ ${conversationText || "No conversation available."}`;
     summary: feedback.summary,
     improvements: feedback.improvements.length
       ? feedback.improvements
+      : isEasyMode
+      ? ["Buen trabajo: te llevas frases nuevas en inglés que puedes reusar en la próxima charla."]
       : ["Cierra con frases simples y naturales, y revisa que el tono suene amable."],
   };
 }

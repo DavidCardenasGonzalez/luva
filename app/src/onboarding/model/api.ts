@@ -5,6 +5,7 @@ import {
   OnboardingCharacterId,
   OnboardingContentResponse,
   OnboardingConversationMessage,
+  OnboardingStepKey,
   OnboardingPlanRequest,
   OnboardingPlanResponse,
   OnboardingStepContent,
@@ -31,6 +32,10 @@ function asStepNumber(value: unknown): OnboardingStepNumber | undefined {
     numberValue === 6
     ? numberValue
     : undefined;
+}
+
+function asStepKey(value: unknown): OnboardingStepKey | undefined {
+  return value === 'step2B' ? value : undefined;
 }
 
 function sanitizeConversationMessage(input: unknown): OnboardingConversationMessage | null {
@@ -73,6 +78,7 @@ function sanitizeStep(input: unknown): OnboardingStepContent | null {
 
   return {
     stepNumber,
+    stepKey: asStepKey(raw.stepKey),
     eyebrow: asString(raw.eyebrow) || `Paso ${stepNumber}`,
     title,
     subtitle,
@@ -87,7 +93,11 @@ function sanitizeStep(input: unknown): OnboardingStepContent | null {
 
 function mergeWithDefaults(steps: OnboardingStepContent[]) {
   return DEFAULT_ONBOARDING_STEPS.map((fallback) => {
-    const remote = steps.find((step) => step.stepNumber === fallback.stepNumber);
+    const remote = steps.find((step) => (
+      fallback.stepKey
+        ? step.stepKey === fallback.stepKey
+        : step.stepNumber === fallback.stepNumber && !step.stepKey
+    ));
     return remote ? { ...fallback, ...remote } : fallback;
   });
 }

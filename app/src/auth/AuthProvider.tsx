@@ -5,6 +5,7 @@ import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 import { api } from '../api/api';
 import { syncLocalFriendsToRemote } from '../friends/localFriends';
+import { syncPendingReviewFeedbackToRemote } from '../reviews/reviewFeedback';
 import {
   resetMixpanelUserIdentity,
   setMixpanelUserIdentity,
@@ -38,6 +39,14 @@ type AuthProAccess = {
 
 export type EnglishDifficulty = 'easy' | 'medium' | 'hard';
 
+type AuthReviewFeedback = {
+  sentiment: 'positive' | 'negative';
+  message?: string;
+  source?: string;
+  rewardCoins?: number;
+  submittedAt: string;
+};
+
 type AuthUser = {
   email: string;
   cognitoSub?: string;
@@ -54,6 +63,7 @@ type AuthUser = {
   lastLoginAt?: string;
   isPro?: boolean;
   proAccess?: AuthProAccess;
+  reviewFeedback?: AuthReviewFeedback;
 };
 
 type PromoCodeRedemptionResult = {
@@ -77,6 +87,12 @@ type CurrentUserUpdatePayload = {
     productId?: string;
     entitlementId?: string;
     appUserId?: string;
+  };
+  reviewFeedback?: {
+    sentiment?: 'positive' | 'negative';
+    message?: string;
+    source?: string;
+    rewardCoins?: number;
   };
 };
 
@@ -454,6 +470,11 @@ async function syncLocalDataAfterAuth() {
     await syncLocalFriendsToRemote();
   } catch (err: any) {
     console.warn('auth.local_friends_sync.failed', err?.message || err);
+  }
+  try {
+    await syncPendingReviewFeedbackToRemote();
+  } catch (err: any) {
+    console.warn('auth.review_feedback_sync.failed', err?.message || err);
   }
 }
 

@@ -16,6 +16,8 @@ import Purchases, {
 import { useRevenueCat } from "../purchases/RevenueCatProvider";
 import { useCoins } from "../purchases/CoinBalanceProvider";
 import { RootStackParamList } from "../navigation/AppNavigator";
+import { useAuth } from "../auth/AuthProvider";
+import CoinReviewRewardModal from "../components/CoinReviewRewardModal";
 import {
   requestMetaTrackingPermissionIfNeeded,
   trackCheckoutInitiated,
@@ -35,6 +37,8 @@ import {
   LITE_PROMO_PACKAGE_ID,
   LITE_PROMO_PRODUCT_ID,
 } from "../purchases/litePromo";
+import { openStoreReview } from "../reviews/storeReview";
+import { saveAnonymousReviewFeedback } from "../reviews/reviewFeedback";
 
 const COLORS = {
   bg: "#050b1a",
@@ -56,6 +60,15 @@ type PackageInfo = {
   cadenceLabel?: string;
   isRecommended: boolean;
 };
+
+const COIN_DEPLETION_PAYWALL_SOURCES = new Set<string>([
+  "deck_card_unlock",
+  "friend_chat_message",
+  "friend_chat_recording",
+  "practice_card_unlock",
+  "practice_recording",
+  "shadowing_chapter_unlock",
+]);
 
 function compactPriceString(price: string) {
   return price.replace(/([.,]00)(?!\d)/, "");
@@ -131,11 +144,16 @@ export default function PaywallScreen() {
   const requestedPaywallVariant = route.params?.variant || "pro";
   const closeTarget = route.params?.closeTarget;
   const { isPro, refreshCustomerInfo, loading: rcLoading } = useRevenueCat();
+  const { isSignedIn, user, updateCurrentUser } = useAuth();
   const {
     balance: coinBalance,
     maxCoins,
     isUnlimited,
     loading: coinsLoading,
+    canShowReviewReward,
+    reviewRewardCoins,
+    markReviewRewardPrompted,
+    claimReviewReward,
   } = useCoins();
   const [offerings, setOfferings] = useState<PurchasesOfferings | null>(null);
   const [loading, setLoading] = useState(true);
@@ -147,8 +165,15 @@ export default function PaywallScreen() {
   const [useLitePromoOverride, setUseLitePromoOverride] = useState(false);
   const [timerNow, setTimerNow] = useState(Date.now());
   const [selectedBillingPeriod, setSelectedBillingPeriod] = useState<"annual" | "monthly">("annual");
+  const [showCoinReviewReward, setShowCoinReviewReward] = useState(false);
+  const [reviewFeedbackSubmitting, setReviewFeedbackSubmitting] = useState(false);
+  const [reviewFeedbackError, setReviewFeedbackError] = useState<string | null>(null);
   const trackedPaywallRef = useRef(false);
+  const checkedCoinReviewRewardRef = useRef(false);
   const isLitePaywall = requestedPaywallVariant === "lite" || useLitePromoOverride;
+  const isCoinDepletionPaywall = COIN_DEPLETION_PAYWALL_SOURCES.has(paywallSource);
+  const coinReviewRewardEligibleNow =
+    isCoinDepletionPaywall && !isLitePaywall && !coinsLoading && canShowReviewReward;
 
   const dismissPaywall = useCallback(() => {
     if (closeTarget === "Feed") {
@@ -202,6 +227,15 @@ export default function PaywallScreen() {
       dismissPaywall();
     }
   }, [dismissPaywall, isPro, rcLoading]);
+
+  useEffect(() => {
+    if (checkedCoinReviewRewardRef.current || !coinReviewRewardEligibleNow) {
+      return;
+    }
+    checkedCoinReviewRewardRef.current = true;
+    setShowCoinReviewReward(true);
+    void markReviewRewardPrompted();
+  }, [coinReviewRewardEligibleNow, markReviewRewardPrompted]);
 
   useEffect(() => {
     let mounted = true;
@@ -305,7 +339,14 @@ export default function PaywallScreen() {
   }, [isLitePaywall, litePromoExpiresAt]);
 
   useEffect(() => {
-    if (trackedPaywallRef.current || !litePromoCheckComplete || (!isLitePaywall && isPro) || coinsLoading) {
+    if (
+      trackedPaywallRef.current ||
+      !litePromoCheckComplete ||
+      (!isLitePaywall && isPro) ||
+      coinsLoading ||
+      showCoinReviewReward ||
+      coinReviewRewardEligibleNow
+    ) {
       return;
     }
     trackedPaywallRef.current = true;
@@ -328,6 +369,8 @@ export default function PaywallScreen() {
     litePromoCheckComplete,
     maxCoins,
     paywallSource,
+    showCoinReviewReward,
+    coinReviewRewardEligibleNow,
   ]);
 
   const activeOffering = useMemo(() => {
@@ -574,7 +617,62 @@ export default function PaywallScreen() {
     }
   };
 
-  const content = !litePromoCheckComplete ? (
+  const handlePositiveReviewReward = useCallback(async () => {
+    setReviewFeedbackError(null);
+    await openStoreReview();
+    await claimReviewReward("store-review-reward");
+  }, [claimReviewReward]);
+
+  const handlePrivateReviewFeedback = useCallback(
+    async (message: string) => {
+      if (reviewFeedbackSubmitting) return;
+      setReviewFeedbackSubmitting(true);
+      setReviewFeedbackError(null);
+      try {
+        if (!isSignedIn || !user?.email) {
+          await saveAnonymousReviewFeedback({
+            sentiment: "negative",
+            message,
+            source: paywallSource,
+            rewardCoins: reviewRewardCoins,
+          });
+          await claimReviewReward("anonymous-private-review-feedback");
+          return;
+        }
+
+        const result = await updateCurrentUser({
+          reviewFeedback: {
+            sentiment: "negative",
+            message,
+            source: paywallSource,
+            rewardCoins: reviewRewardCoins,
+          },
+        });
+        if (!result.user) {
+          throw new Error("No pudimos guardar tu feedback. Intenta iniciar sesión de nuevo.");
+        }
+        await claimReviewReward("private-review-feedback");
+      } catch (err: any) {
+        const messageText = err?.message || "No pudimos guardar tu feedback.";
+        setReviewFeedbackError(messageText);
+        throw err;
+      } finally {
+        setReviewFeedbackSubmitting(false);
+      }
+    },
+    [claimReviewReward, isSignedIn, paywallSource, reviewFeedbackSubmitting, reviewRewardCoins, updateCurrentUser, user?.email]
+  );
+
+  const content = showCoinReviewReward ? (
+    <CoinReviewRewardModal
+      rewardCoins={reviewRewardCoins}
+      submitting={reviewFeedbackSubmitting}
+      error={reviewFeedbackError}
+      onClose={dismissPaywall}
+      onPositiveReview={handlePositiveReviewReward}
+      onSubmitPrivateFeedback={handlePrivateReviewFeedback}
+    />
+  ) : !litePromoCheckComplete ? (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.bg }}>
       <ActivityIndicator color="#22d3ee" />
     </View>

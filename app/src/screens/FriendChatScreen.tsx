@@ -53,6 +53,7 @@ import {
 } from '../friends/localFriends';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
 import { readStoredEnglishDifficulty } from '../auth/englishDifficulty';
+import type { EnglishDifficulty } from '../auth/AuthProvider';
 import {
   getOnboardingDraftProgress,
   hasCompletedOnboarding,
@@ -88,6 +89,12 @@ function messagesFromRemoteConversation(snapshot?: FriendConversationSnapshot | 
       };
     })
     .filter((message): message is ChatMessage => !!message);
+}
+
+function isFinishedConversationWithFeedback(
+  snapshot?: Pick<FriendConversationSnapshot, 'conversationEnded' | 'conversationFeedback'> | null,
+) {
+  return Boolean(snapshot?.conversationEnded && snapshot.conversationFeedback);
 }
 
 type TranslationResponse = {
@@ -156,12 +163,16 @@ function AnalysisCard({
   analysis,
   onRetry,
   retryDisabled,
+  englishDifficulty,
 }: {
   analysis: FriendChatPayload;
   onRetry?: () => void | Promise<void>;
   retryDisabled?: boolean;
+  englishDifficulty?: EnglishDifficulty;
 }) {
-  const canRetry = analysis.result !== 'correct' && !!onRetry;
+  console.log('Rendering AnalysisCard with analysis:', englishDifficulty);
+  const isEasy = englishDifficulty === 'easy';
+  const canRetry = !isEasy && analysis.result !== 'correct' && !!onRetry;
   return (
     <View
       style={{
@@ -173,19 +184,32 @@ function AnalysisCard({
         borderColor: COLORS.border,
       }}
     >
-      <Text style={{ fontWeight: '700', color: '#1e293b' }}>
-        Correctness: {analysis.correctness}% ({analysis.result === 'correct' ? 'Correcto' : analysis.result === 'partial' ? 'Parcial' : 'Incorrecto'})
-      </Text>
+      {isEasy ? null : (
+        <Text style={{ fontWeight: '700', color: '#1e293b' }}>
+          Correctness: {analysis.correctness}% ({analysis.result === 'correct' ? 'Correcto' : analysis.result === 'partial' ? 'Parcial' : 'Incorrecto'})
+        </Text>
+      )}
       {analysis.errors.length ? (
-        <View style={{ marginTop: 10 }}>
-          <Text style={{ fontWeight: '600', color: '#dc2626', marginBottom: 4 }}>Errores detectados</Text>
+        <View style={{ marginTop: isEasy ? 0 : 10 }}>
+          <Text
+            style={{
+              fontWeight: '600',
+              color: isEasy ? '#2563eb' : '#dc2626',
+              marginBottom: 4,
+            }}
+          >
+            {isEasy ? 'Tip para decirlo en inglés' : 'Errores detectados'}
+          </Text>
           {analysis.errors.map((errText, index) => (
-            <Text key={`${errText}-${index}`} style={{ color: '#dc2626', marginBottom: 2 }}>
+            <Text
+              key={`${errText}-${index}`}
+              style={{ color: isEasy ? '#1f2937' : '#dc2626', marginBottom: 2 }}
+            >
               - {errText}
             </Text>
           ))}
         </View>
-      ) : (
+      ) : isEasy ? null : (
         <Text style={{ color: '#15803d', marginTop: 8 }}>Tu mensaje sonó natural.</Text>
       )}
       {analysis.reformulations.length ? (
@@ -396,6 +420,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messageTranslations, setMessageTranslations] = useState<Record<string, MessageTranslationState>>({});
   const [analysis, setAnalysis] = useState<FriendChatPayload | null>(null);
+  const [englishDifficulty, setEnglishDifficulty] = useState<EnglishDifficulty | undefined>(undefined);
   const [conversationEnded, setConversationEnded] = useState(false);
   const [conversationFeedback, setConversationFeedback] = useState<FriendConversationFeedback | null>(null);
   const [completionConfettiKey, setCompletionConfettiKey] = useState<number | null>(null);
@@ -453,6 +478,16 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   }, [navigation]);
 
   useEffect(() => {
+    let mounted = true;
+    void readStoredEnglishDifficulty().then((value) => {
+      if (mounted) setEnglishDifficulty(value);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
     if (friendId) {
       void reload();
     }
@@ -490,6 +525,10 @@ export default function FriendChatScreen({ navigation, route }: Props) {
 
     void loadLocalFriendConversation(localConversationKey).then((snapshot) => {
       if (!mounted || !snapshot) return;
+      if (isFinishedConversationWithFeedback(snapshot)) {
+        void deleteLocalFriendConversation(localConversationKey);
+        return;
+      }
       setMessages(snapshot.messages);
       setAnalysis(snapshot.analysis ?? null);
       setConversationEnded(Boolean(snapshot.conversationEnded));
@@ -504,6 +543,10 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   useEffect(() => {
     if (remoteHydratedKeyRef.current === localConversationKey) return;
     if (messages.length > 0) {
+      remoteHydratedKeyRef.current = localConversationKey;
+      return;
+    }
+    if (isFinishedConversationWithFeedback(friend?.conversationSnapshot)) {
       remoteHydratedKeyRef.current = localConversationKey;
       return;
     }
@@ -725,10 +768,13 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         history_message_count: messages.length,
       });
       const historyPayload = messages.map(({ role, text }) => ({ role, content: text }));
+      const currentDifficulty = await readStoredEnglishDifficulty();
+      setEnglishDifficulty(currentDifficulty);
       const payload = await finishFriendChat(
         friendId,
         {
           ...(sourcePost?.postId ? { postId: sourcePost.postId } : {}),
+          englishDifficulty: currentDifficulty,
           history: historyPayload,
         },
         { anonymous: !isSignedIn },
@@ -1024,11 +1070,12 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       });
 
       try {
-        const englishDifficulty = await readStoredEnglishDifficulty();
+        const currentDifficulty = await readStoredEnglishDifficulty();
+        setEnglishDifficulty(currentDifficulty);
         const payload = await sendFriendChatMessage(friendId, {
           sessionId,
           transcript: trimmed,
-          englishDifficulty,
+          englishDifficulty: currentDifficulty,
           ...(sourcePost?.postId ? { postId: sourcePost.postId } : {}),
           ...(sourcePost?.context ? { postContext: sourcePost.context } : {}),
           ...(sourcePost?.caption ? { postCaption: sourcePost.caption } : {}),
@@ -1227,6 +1274,22 @@ export default function FriendChatScreen({ navigation, route }: Props) {
 
   const textCoinLocked = !isUnlimited && balance < FRIEND_CHAT_MESSAGE_COST;
   const voiceCoinLocked = !isUnlimited && balance < FRIEND_CHAT_VOICE_TOTAL_COST;
+
+  useEffect(() => {
+    if (!errorMessage || coinsLoading || !/Necesitas .*moneda/.test(errorMessage)) {
+      return;
+    }
+    if (isUnlimited) {
+      setErrorMessage(null);
+      return;
+    }
+    const requiredCoins = errorMessage.includes('2 monedas')
+      ? FRIEND_CHAT_VOICE_TOTAL_COST
+      : FRIEND_CHAT_MESSAGE_COST;
+    if (balance >= requiredCoins) {
+      setErrorMessage(null);
+    }
+  }, [balance, coinsLoading, errorMessage, isUnlimited]);
 
   const statusLabel = useMemo(() => {
     switch (flowState) {
@@ -1528,6 +1591,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
               analysis={analysis}
               onRetry={handleRetryLastExchange}
               retryDisabled={flowState !== 'idle' || retryingLastExchange}
+              englishDifficulty={englishDifficulty}
             />
           ) : null}
           {conversationEnded ? (

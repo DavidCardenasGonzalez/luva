@@ -133,6 +133,7 @@ export async function finishFriendChat(
   friendId: string,
   payload: {
     postId?: string;
+    englishDifficulty?: 'easy' | 'medium' | 'hard';
     history?: Array<{ role: 'user' | 'assistant'; content: string }>;
   },
   options?: FriendChatRequestOptions,

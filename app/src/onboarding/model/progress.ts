@@ -4,6 +4,7 @@ import {
   OnboardingPhraseSelection,
   OnboardingRequirementId,
   OnboardingSpeakingSummary,
+  OnboardingStepKey,
   OnboardingStepNumber,
 } from './types';
 
@@ -14,6 +15,7 @@ export const ALWAYS_SHOW_ONBOARDING_FOR_TESTS = false;
 export type OnboardingDraftProgress = {
   version: 1;
   stepNumber: OnboardingStepNumber;
+  stepKey?: OnboardingStepKey;
   selectedCharacter: OnboardingCharacterId | null;
   phraseSelections: OnboardingPhraseSelection[];
   speakingSummary: OnboardingSpeakingSummary;
@@ -28,6 +30,10 @@ function toStepNumber(value: unknown): OnboardingStepNumber | null {
     return numberValue;
   }
   return null;
+}
+
+function toStepKey(value: unknown): OnboardingStepKey | undefined {
+  return value === 'step2B' ? value : undefined;
 }
 
 function toCharacterId(value: unknown): OnboardingCharacterId | null {
@@ -107,6 +113,7 @@ export async function getOnboardingDraftProgress(): Promise<OnboardingDraftProgr
     return {
       version: 1,
       stepNumber,
+      stepKey: toStepKey(parsed.stepKey),
       selectedCharacter: toCharacterId(parsed.selectedCharacter),
       phraseSelections: sanitizePhraseSelections(parsed.phraseSelections),
       speakingSummary: sanitizeSpeakingSummary(parsed.speakingSummary),

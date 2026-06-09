@@ -57,6 +57,14 @@ type UserProAccess = {
   code?: Omit<StoredCodeAccess, 'redeemedCode'>;
 };
 
+type UserReviewFeedback = {
+  sentiment: 'positive' | 'negative';
+  submittedAt: string;
+  message?: string;
+  source?: string;
+  rewardCoins?: number;
+};
+
 type PromoCodeRedemptionResult = PromoCodeValidationResult & {
   expiresAt?: string;
 };
@@ -79,6 +87,7 @@ type UserRecord = {
   lastLoginAt: string;
   isPro: boolean;
   proAccess?: UserProAccess;
+  reviewFeedback?: UserReviewFeedback;
 };
 
 type StoredUserRecord = Omit<UserRecord, 'proAccess'> & {
@@ -101,6 +110,12 @@ type UpsertUserPayload = {
     productId?: string;
     entitlementId?: string;
     appUserId?: string;
+  };
+  reviewFeedback?: {
+    sentiment?: string;
+    message?: string;
+    source?: string;
+    rewardCoins?: number;
   };
 };
 
@@ -471,6 +486,41 @@ function applySubscriptionAccess(
   };
 }
 
+function normalizeReviewFeedback(
+  input: unknown,
+  previous: UserReviewFeedback | undefined,
+  now: string,
+): UserReviewFeedback | undefined {
+  const raw = asRecord(input);
+  if (!raw) {
+    return previous;
+  }
+
+  const sentiment = asString(raw.sentiment)?.trim().toLowerCase();
+  if (sentiment !== 'positive' && sentiment !== 'negative') {
+    return previous;
+  }
+
+  const message = sanitizeUserText(raw.message, 1200);
+  if (sentiment === 'negative' && !message) {
+    return previous;
+  }
+
+  const source = sanitizeUserText(raw.source, 80);
+  const rewardCoins =
+    typeof raw.rewardCoins === 'number' && Number.isFinite(raw.rewardCoins) && raw.rewardCoins > 0
+      ? Math.floor(raw.rewardCoins)
+      : undefined;
+
+  return {
+    sentiment,
+    submittedAt: now,
+    ...(message ? { message } : {}),
+    ...(source ? { source } : {}),
+    ...(rewardCoins ? { rewardCoins } : {}),
+  };
+}
+
 function redeemPromoCode(
   current: StoredProAccess | undefined,
   submittedCode: string
@@ -528,6 +578,10 @@ async function upsertCurrentUser(
   const summarizedProAccess = summarizeProAccess(nextProAccess, now);
   const bio = resolveEditableProfileField(payload, previous, 'bio');
   const goal = resolveEditableProfileField(payload, previous, 'goal');
+  const reviewFeedback =
+    payload && hasOwn(payload, 'reviewFeedback')
+      ? normalizeReviewFeedback(payload.reviewFeedback, previous?.reviewFeedback, now)
+      : previous?.reviewFeedback;
   const rawDifficulty = payload && hasOwn(payload, 'englishDifficulty')
     ? asString(payload.englishDifficulty)?.trim().toLowerCase()
     : previous?.englishDifficulty;
@@ -564,6 +618,7 @@ async function upsertCurrentUser(
     lastLoginAt: now,
     isPro: summarizedProAccess?.isActive ?? false,
     ...(summarizedProAccess ? { proAccess: summarizedProAccess } : {}),
+    ...(reviewFeedback ? { reviewFeedback } : {}),
   };
   const storedUser: StoredUserRecord = {
     ...user,
@@ -823,6 +878,14 @@ function sanitizeExpoPushToken(value: unknown): string | undefined {
 }
 
 function sanitizeDeviceText(value: unknown, maxLength: number): string | undefined {
+  const normalized = asString(value)?.replace(/\s+/g, ' ').trim();
+  if (!normalized) {
+    return undefined;
+  }
+  return normalized.slice(0, maxLength);
+}
+
+function sanitizeUserText(value: unknown, maxLength: number): string | undefined {
   const normalized = asString(value)?.replace(/\s+/g, ' ').trim();
   if (!normalized) {
     return undefined;
