@@ -3,4 +3,7 @@ cdk.out/
 cdk.context.json
 dist/
 *.tsbuildinfo
-
+.env
+.env.*
+!.env.*.example
+AuthKey_*.p8

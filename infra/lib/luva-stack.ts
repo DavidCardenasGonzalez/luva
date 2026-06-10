@@ -38,9 +38,26 @@ import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import * as path from 'path';
 
+function sanitizeStageName(value: string) {
+  const normalized = value
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, '-')
+    .replace(/--+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return normalized || 'prod';
+}
+
+export interface LuvaStackProps extends StackProps {
+  stage?: string;
+}
+
 export class LuvaStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, props?: LuvaStackProps) {
     super(scope, id, props);
+    const stage = sanitizeStageName(props?.stage || process.env.LUVA_STAGE || 'prod');
+    const isProd = stage === 'prod';
+    const resourceName = (base: string) => (isProd ? base : `${base}-${stage}`);
+    const ssmPath = (suffix: string) => (isProd ? `/luva/${suffix}` : `/luva/${stage}/${suffix}`);
 
     const splitCsv = (value: string | undefined, fallback: string[]): string[] => {
       const items = (value || '')
@@ -58,12 +75,16 @@ export class LuvaStack extends Stack {
         .slice(0, 63);
     const ensureTrailingSlash = (value: string) => (value.endsWith('/') ? value : `${value}/`);
     const uniqueStrings = (values: string[]) => [...new Set(values.filter(Boolean))];
-    const configuredBrowserOrigins = splitCsv(process.env.COGNITO_CALLBACK_URLS, [
-      'http://localhost:5173/',
-      'http://localhost:5174/',
-      'https://www.luvaenglish.com/',
-      'https://d3i98h9bcz5u45.cloudfront.net/'
-    ])
+    const appCallbackUrl = isProd ? 'myapp://callback' : `${stage === 'dev' ? 'luvadev' : `luva${stage}`}://callback`;
+    const defaultBrowserOrigins = isProd
+      ? [
+          'http://localhost:5173/',
+          'http://localhost:5174/',
+          'https://www.luvaenglish.com/',
+          'https://d3i98h9bcz5u45.cloudfront.net/',
+        ]
+      : ['http://localhost:5173/', 'http://localhost:5174/'];
+    const configuredBrowserOrigins = splitCsv(process.env.COGNITO_CALLBACK_URLS, defaultBrowserOrigins)
       .filter((origin) => /^https?:\/\//.test(origin))
       .map((origin) => origin.replace(/\/$/, ''));
 
@@ -106,7 +127,7 @@ export class LuvaStack extends Stack {
 
     // DynamoDB single-table
     const table = new Table(this, 'LuvaTable', {
-      tableName: 'Luva',
+      tableName: resourceName('Luva'),
       partitionKey: { name: 'pk', type: AttributeType.STRING },
       sortKey: { name: 'sk', type: AttributeType.STRING },
       billingMode: BillingMode.PAY_PER_REQUEST,
@@ -301,9 +322,9 @@ export class LuvaStack extends Stack {
     });
 
     const defaultCallbackUrls = [
-      'myapp://callback',
+      appCallbackUrl,
       'http://localhost:5173/',
-      'https://www.luvaenglish.com/',
+      ...(isProd ? ['https://www.luvaenglish.com/'] : []),
     ];
     const callbackUrls = uniqueStrings([
       ...splitCsv(process.env.COGNITO_CALLBACK_URLS, defaultCallbackUrls),
@@ -397,34 +418,34 @@ export class LuvaStack extends Stack {
 
     // SSM Parameters (names only; values set outside CDK)
     const openAiKeyParam = new StringParameter(this, 'OpenAIKeyParam', {
-      parameterName: '/luva/openai/apiKey',
+      parameterName: ssmPath('openai/apiKey'),
       stringValue: 'SET_IN_SSM',
       description: 'OpenAI API key (placeholder, override in SSM)',
     });
-    const googleTranslateKeyParamName = '/luva/google/translateApiKey';
+    const googleTranslateKeyParamName = ssmPath('google/translateApiKey');
     const googleTranslateKeyParamArn = `arn:aws:ssm:${this.region}:${this.account}:parameter${googleTranslateKeyParamName}`;
     const geminiKeyParam = new StringParameter(this, 'GeminiKeyParam', {
-      parameterName: '/luva/gemini/apiKey',
+      parameterName: ssmPath('gemini/apiKey'),
       stringValue: 'SET_IN_SSM',
       description: 'Gemini API key for lesson text-to-speech (placeholder, override in SSM)',
     });
     const instagramAccessTokenParam = new StringParameter(this, 'InstagramAccessTokenParam', {
-      parameterName: '/luva/social/instagram/accessToken',
+      parameterName: ssmPath('social/instagram/accessToken'),
       stringValue: 'SET_IN_SSM',
       description: 'Instagram Graph API access token for automated publishing',
     });
     const tiktokAccessTokenParam = new StringParameter(this, 'TikTokAccessTokenParam', {
-      parameterName: '/luva/social/tiktok/accessToken',
+      parameterName: ssmPath('social/tiktok/accessToken'),
       stringValue: 'SET_IN_SSM',
       description: 'TikTok Content Posting API access token for automated publishing',
     });
     const tiktokRefreshTokenParam = new StringParameter(this, 'TikTokRefreshTokenParam', {
-      parameterName: '/luva/social/tiktok/refreshToken',
+      parameterName: ssmPath('social/tiktok/refreshToken'),
       stringValue: 'SET_IN_SSM',
       description: 'TikTok OAuth refresh token for administrative publishing',
     });
     const tiktokTokenMetaParam = new StringParameter(this, 'TikTokTokenMetaParam', {
-      parameterName: '/luva/social/tiktok/tokenMeta',
+      parameterName: ssmPath('social/tiktok/tokenMeta'),
       stringValue: 'SET_IN_SSM',
       description: 'TikTok OAuth token metadata stored by the admin portal',
     });
@@ -456,7 +477,7 @@ export class LuvaStack extends Stack {
         GOOGLE_TRANSLATE_API_KEY_PARAM: googleTranslateKeyParamName,
         OPENAI_CHAT_MODEL: 'gpt-5.4-nano',
         EVAL_TIMEOUT_MS: '20000',
-        STAGE: 'prod',
+        STAGE: stage,
       },
     });
 
@@ -486,7 +507,7 @@ export class LuvaStack extends Stack {
       environment: {
         USERS_TABLE_NAME: usersTable.tableName,
         DEVICES_TABLE_NAME: devicesTable.tableName,
-        STAGE: 'prod',
+        STAGE: stage,
       },
     });
     usersTable.grantReadWriteData(usersFn);
@@ -503,7 +524,7 @@ export class LuvaStack extends Stack {
       environment: {
         OPENAI_KEY_PARAM: openAiKeyParam.parameterName,
         OPENAI_CHAT_MODEL: 'gpt-5.4-nano',
-        STAGE: 'prod',
+        STAGE: stage,
       },
     });
     onboardingFn.addToRolePolicy(new PolicyStatement({
@@ -557,7 +578,7 @@ export class LuvaStack extends Stack {
         ASSETS_BUCKET_NAME: assetsBucket.bucketName,
         ASSETS_CLOUDFRONT_DOMAIN_NAME: assetsDistribution.domainName,
         ASSETS_CLOUDFRONT_URL: assetsCloudFrontUrl,
-        STAGE: 'prod',
+        STAGE: stage,
       },
     });
     usersTable.grantReadWriteData(adminFn);
@@ -612,7 +633,7 @@ export class LuvaStack extends Stack {
         TIKTOK_DISABLE_DUET: process.env.TIKTOK_DISABLE_DUET || 'false',
         TIKTOK_DISABLE_STITCH: process.env.TIKTOK_DISABLE_STITCH || 'false',
         SOCIAL_POST_CAPTION_SUFFIX: process.env.SOCIAL_POST_CAPTION_SUFFIX || '',
-        STAGE: 'prod',
+        STAGE: stage,
       },
     });
     generatedVideosTable.grantReadWriteData(videoPublisherFn);
@@ -764,13 +785,13 @@ export class LuvaStack extends Stack {
       },
       authorizer: 'cognito-user-pool-v2',
     });
-    const prodStage = new Stage(this, 'ProdStage', { deployment, stageName: 'prod' });
+    const apiStage = new Stage(this, isProd ? 'ProdStage' : 'ApiStage', { deployment, stageName: stage });
 
     new CfnOutput(this, 'ApiBaseUrl', {
-      value: prodStage.urlForPath('/v1'),
+      value: apiStage.urlForPath('/v1'),
     });
     new CfnOutput(this, 'AdminApiBaseUrl', {
-      value: prodStage.urlForPath('/v1/admin'),
+      value: apiStage.urlForPath('/v1/admin'),
     });
     new CfnOutput(this, 'AdminPortalBucketName', {
       value: adminPortalBucket.bucketName,

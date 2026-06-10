@@ -10,7 +10,9 @@
     "watch": "tsc -w",
     "cdk": "cdk",
     "synth": "zsh -lc 'export PATH=/Users/cardenas/.nvm/versions/node/v20.19.0/bin:$PATH && set -a && [ -f .env ] && source .env && set +a && node_modules/.bin/cdk synth'",
-    "deploy": "zsh -lc 'export PATH=/Users/cardenas/.nvm/versions/node/v20.19.0/bin:$PATH && set -a && [ -f .env ] && source .env && set +a && node_modules/.bin/cdk deploy --profile david'"
+    "synth:dev": "zsh -lc 'export PATH=/Users/cardenas/.nvm/versions/node/v20.19.0/bin:$PATH && if [ -f .env.dev ]; then set -a && source .env.dev && set +a; fi && LUVA_STAGE=dev node_modules/.bin/cdk synth'",
+    "deploy": "zsh -lc 'export PATH=/Users/cardenas/.nvm/versions/node/v20.19.0/bin:$PATH && set -a && [ -f .env ] && source .env && set +a && node_modules/.bin/cdk deploy --profile david'",
+    "deploy:dev": "zsh -lc 'export PATH=/Users/cardenas/.nvm/versions/node/v20.19.0/bin:$PATH && if [ -f .env.dev ]; then set -a && source .env.dev && set +a; fi && LUVA_STAGE=dev node_modules/.bin/cdk deploy --profile david'"
   },
   "devDependencies": {
     "@types/node": "^18",

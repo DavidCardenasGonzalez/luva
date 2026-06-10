@@ -13,9 +13,27 @@ cp .env.example .env
 npm run dev
 ```
 
+Para el ambiente dev del backend:
+
+```bash
+cp .env.example .env.development
+# edita .env.development con los outputs de LuvaDevStack
+nvm use 20.19.0 # o cualquier Node 20.19+/22.12+
+npm run dev:dev
+```
+
+El servidor local usa `http://localhost:5174/`, que debe existir en callback/logout URLs de Cognito.
+
 ## Publicación
 ```bash
 npm run publish
+```
+
+Para publicar contra `LuvaDevStack`:
+
+```bash
+nvm use 20.19.0
+npm run publish:dev
 ```
 
 El publish del admin compila `dist/`, sincroniza contra un bucket S3 propio del portal e invalida su distribución CloudFront. Por defecto resuelve ambos recursos desde los outputs del stack `LuvaStack`.

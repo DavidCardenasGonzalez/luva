@@ -5,8 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:dev": "vite --mode development",
     "build": "tsc -b && vite build",
+    "build:dev": "tsc -b && vite build --mode development",
     "publish": "npm run build && node ./scripts/publish.mjs",
+    "publish:dev": "VITE_REDIRECT_URI=https://d2y8wpnkj90e8w.cloudfront.net/ npm run build:dev && LUVA_INFRA_STACK_NAME=LuvaDevStack LUVA_ADMIN_PORTAL_BUCKET=luvadevstack-adminportalbucket11b7abcd-6nrlij7vdjxm LUVA_ADMIN_PORTAL_DISTRIBUTION_ID=EUK7E5KLK5K12 LUVA_ADMIN_PORTAL_URL=https://d2y8wpnkj90e8w.cloudfront.net node ./scripts/publish.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

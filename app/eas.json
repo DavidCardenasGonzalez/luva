@@ -7,6 +7,9 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "env": {
+        "APP_ENV": "development"
+      },
       "ios": {
         "simulator": true
       }
@@ -14,6 +17,9 @@
     "phone": {
       "developmentClient": true,
       "distribution": "internal",
+      "env": {
+        "APP_ENV": "development"
+      },
       "ios": {
         "simulator": false
       },
@@ -22,10 +28,16 @@
       }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "APP_ENV": "development"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "APP_ENV": "production"
+      }
     }
   },
   "submit": {

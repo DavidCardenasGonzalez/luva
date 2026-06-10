@@ -6,6 +6,10 @@ import { VitePWA } from 'vite-plugin-pwa'
 const pwaThemeColor = '#f7f3ea'
 
 export default defineConfig({
+  server: {
+    port: 5174,
+    strictPort: true,
+  },
   plugins: [
     react(),
     VitePWA({

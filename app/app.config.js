@@ -1,5 +1,19 @@
 // Dynamic Expo config to inject env vars into Constants.expoConfig.extra
-require("dotenv").config();
+const fs = require("fs");
+const path = require("path");
+const dotenv = require("dotenv");
+
+const appEnv = (process.env.APP_ENV || process.env.NODE_ENV || "development")
+  .trim()
+  .toLowerCase();
+const isProduction = appEnv === "production";
+const envFile = path.join(__dirname, `.env.${appEnv}`);
+
+if (fs.existsSync(envFile)) {
+  dotenv.config({ path: envFile });
+} else if (isProduction || !process.env.APP_ENV) {
+  dotenv.config();
+}
 
 const metaAppId = process.env.META_APP_ID?.trim();
 const metaClientToken = process.env.META_CLIENT_TOKEN?.trim();
@@ -16,6 +30,14 @@ const mixpanelTrackAutomaticEvents =
 const mixpanelConfigured = Boolean(mixpanelProjectToken);
 const analyticsEnabledInDev =
   process.env.ANALYTICS_ENABLED_IN_DEV?.trim().toLowerCase() === "true";
+const appName = process.env.APP_DISPLAY_NAME?.trim() || (isProduction ? "Luva" : "Luva Dev");
+const appScheme = process.env.APP_SCHEME?.trim() || (isProduction ? "myapp" : "luvadev");
+const iosBundleIdentifier =
+  process.env.IOS_BUNDLE_IDENTIFIER?.trim() ||
+  (isProduction ? "com.cardi7.luva" : "com.cardi7.luva.dev");
+const androidPackage =
+  process.env.ANDROID_PACKAGE?.trim() ||
+  (isProduction ? "com.cardi7.luva" : "com.cardi7.luva.dev");
 
 const plugins = [
   "expo-dev-client",
@@ -61,9 +83,9 @@ if (metaConfigured) {
 
 module.exports = {
   expo: {
-    name: "Luva",
+    name: appName,
     slug: "luva",
-    scheme: "myapp",
+    scheme: appScheme,
     version: "1.2.2",
     orientation: "portrait",
     updates: { fallbackToCacheTimeout: 0 },
@@ -76,7 +98,7 @@ module.exports = {
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.cardi7.luva",
+      bundleIdentifier: iosBundleIdentifier,
       buildNumber: "1.2.2",
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
@@ -98,7 +120,7 @@ module.exports = {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#0b1224",
       },
-      package: "com.cardi7.luva",
+      package: androidPackage,
       versionCode: 12,
       intentFilters: [
         {
@@ -118,10 +140,11 @@ module.exports = {
     plugins,
     extra: {
       API_BASE_URL: process.env.API_BASE_URL,
+      APP_ENV: appEnv,
       COGNITO_DOMAIN: process.env.COGNITO_DOMAIN,
       COGNITO_CLIENT_ID: process.env.COGNITO_CLIENT_ID,
       COGNITO_REGION: process.env.COGNITO_REGION,
-      REDIRECT_URI: process.env.REDIRECT_URI || "myapp://callback",
+      REDIRECT_URI: process.env.REDIRECT_URI || `${appScheme}://callback`,
       REVENUECAT_IOS_API_KEY:
         process.env.REVENUECAT_IOS_API_KEY ||
         "test_McxcjSSwciXGjgWNQzomMYBDQXe",

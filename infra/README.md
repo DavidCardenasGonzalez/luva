@@ -17,6 +17,7 @@ Stacks
 Uso
 1) `npm install`
 2) Exporta variables de entorno para auth según necesites:
+   `LUVA_STAGE`, `LUVA_STACK_NAME`
    `COGNITO_CALLBACK_URLS`, `COGNITO_LOGOUT_URLS`, `COGNITO_DOMAIN_PREFIX`
    `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
    `APPLE_SERVICE_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY`
@@ -29,6 +30,33 @@ Uso
    Si usas `infra/.env`, los scripts `npm run synth` y `npm run deploy` ya lo cargan automáticamente.
 3) `npx cdk bootstrap` (primera vez en la cuenta)
 4) `npx cdk deploy` (usa `cdk.json` → no requiere `--app`)
+
+Deploy de ambiente dev
+1) Crea `infra/.env.dev` a partir de `.env.dev.example`.
+2) Usa valores dev:
+   `LUVA_STAGE=dev`
+   `LUVA_STACK_NAME=LuvaDevStack`
+   `COGNITO_CALLBACK_URLS=luvadev://callback,http://localhost:5173/,http://localhost:5174/`
+   `COGNITO_LOGOUT_URLS=luvadev://callback,http://localhost:5173/,http://localhost:5174/`
+   `COGNITO_DOMAIN_PREFIX=luva-dev-<algo-unico>`
+3) Revisa el template:
+   `npm run synth:dev`
+4) Despliega:
+   `npm run deploy:dev`
+5) Copia los outputs del deploy a `app/.env.development`:
+   `ApiBaseUrl` → `API_BASE_URL`
+   `HostedUiDomain` → `COGNITO_DOMAIN`
+   `UserPoolClientId` → `COGNITO_CLIENT_ID`
+   `us-east-1` → `COGNITO_REGION`, salvo que cambies la region
+   `luvadev://callback` → `REDIRECT_URI`
+6) Si usas endpoints con IA, guarda las claves dev en SSM:
+   `aws ssm put-parameter --name /luva/dev/openai/apiKey --type SecureString --value 'sk-...' --overwrite --profile david --region us-east-1`
+   `aws ssm put-parameter --name /luva/dev/gemini/apiKey --type SecureString --value '...' --overwrite --profile david --region us-east-1`
+   `aws ssm put-parameter --name /luva/dev/google/translateApiKey --type SecureString --value '...' --overwrite --profile david --region us-east-1`
+
+Con `LUVA_STAGE=dev`, el stack usa tabla `Luva-dev`, stage de API `/dev`, SSM bajo `/luva/dev/...`, Cognito propio y buckets/CloudFront generados por CloudFormation. Produccion permanece en `LuvaStack`, tabla `Luva`, API `/prod` y SSM `/luva/...`.
+
+Evita copiar `infra/.env` a `infra/.env.dev`: ese archivo es el ambiente productivo/local actual y puede traer callbacks, tokens sociales y OAuth clients de produccion. Para dev, empieza desde `.env.dev.example` y deja vacias las integraciones externas que no necesites.
 
 Notas
 - La Lambda `api` usa `NodejsFunction` y referencia `backend/src/handlers/api.ts`. Requiere `esbuild` (CDK lo maneja automáticamente).
