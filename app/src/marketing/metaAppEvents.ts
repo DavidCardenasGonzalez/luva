@@ -46,6 +46,13 @@ type MetaPracticeEvent = {
   label?: string;
 };
 
+type MetaCoinDepletedEvent = {
+  amount: number;
+  reason?: string;
+  balanceBefore: number;
+  balanceAfter: number;
+};
+
 type MetaViewedContentEvent = {
   contentId: string;
   contentType: string;
@@ -98,6 +105,7 @@ const CUSTOM_EVENTS = {
   MissionStarted: "luva_mission_start",
   MissionCompleted: "luva_mission_complete",
   PracticeStarted: "luva_practice_start",
+  CoinDepleted: "coin_depleted",
 } as const;
 
 let initializePromise: Promise<boolean> | null = null;
@@ -501,6 +509,33 @@ export async function trackPracticeStarted({
     );
   } catch (err) {
     console.warn("[Meta] No se pudo registrar practice_start", err);
+  }
+}
+
+export async function trackMetaCoinDepleted({
+  amount,
+  reason,
+  balanceBefore,
+  balanceAfter,
+}: MetaCoinDepletedEvent) {
+  const initialized = await initializeMetaSdk();
+  if (!initialized) {
+    return;
+  }
+
+  try {
+    AppEventsLogger.logEvent(
+      CUSTOM_EVENTS.CoinDepleted,
+      normalizeParams({
+        amount,
+        reason: reason?.trim() || undefined,
+        balance_before: balanceBefore,
+        balance_after: balanceAfter,
+      })
+    );
+    AppEventsLogger.flush();
+  } catch (err) {
+    console.warn("[Meta] No se pudo registrar coin_depleted", err);
   }
 }
 

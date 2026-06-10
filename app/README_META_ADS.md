@@ -8,6 +8,7 @@ Medir con Meta el funnel que realmente mueve revenue en la app:
 - inicio de practica
 - inicio de mision
 - fin de mision
+- monedas agotadas
 - vista de paywall
 - checkout iniciado
 - suscripcion comprada
@@ -42,6 +43,7 @@ La implementacion actual prioriza atribucion y optimizacion de revenue para un p
 | `luva_practice_start` | Cuando se abre una sesion de practica | Medir activacion de aprendizaje |
 | `luva_mission_start` | Cuando el usuario entra a una mision narrativa | Medir engagement temprano |
 | `luva_mission_complete` | Cuando backend confirma `missionCompleted` | Medir progreso de alto valor |
+| `coin_depleted` | Cuando un gasto exitoso deja el saldo de monedas en `0` | Medir agotamiento de monedas antes del paywall |
 | `ViewedContent` | Cuando se abre el paywall | Diagnostico de funnel de monetizacion |
 | `InitiatedCheckout` | Cuando el usuario toca un plan | Senal temprana de intencion |
 | `Subscribe` | Cuando `RevenueCat` confirma la compra | Revenue / optimizacion final |

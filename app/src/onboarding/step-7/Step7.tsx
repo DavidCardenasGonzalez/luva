@@ -54,8 +54,13 @@ type Props = {
   subtitle?: string;
   ctaLabel?: string;
   helperText?: string;
+  rewardAdLabel?: string;
+  rewardAdHelperText?: string;
+  rewardAdProcessing?: boolean;
+  rewardAdError?: string | null;
   onClose: () => void;
   onPurchase: () => void;
+  onRewardAdPress?: () => void;
   onSelectProduct?: (productId: string) => void;
   onRestore: () => void;
   onOpenPrivacy: () => void;
@@ -97,8 +102,13 @@ export default function Step7({
   subtitle,
   ctaLabel,
   helperText,
+  rewardAdLabel,
+  rewardAdHelperText,
+  rewardAdProcessing,
+  rewardAdError,
   onClose,
   onPurchase,
+  onRewardAdPress,
   onSelectProduct,
   onRestore,
   onOpenPrivacy,
@@ -118,6 +128,7 @@ export default function Step7({
     helperText ||
     (isPromo ? '7 días de garantía · Cancela cuando quieras' : 'Suscripción autorrenovable · Cancela cuando quieras');
   const showProductSwitch = !isPromo && products.length > 1 && Boolean(selectedProductId && onSelectProduct);
+  const showRewardAd = !isPromo && Boolean(onRewardAdPress && rewardAdLabel);
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.background }}>
@@ -436,6 +447,49 @@ export default function Step7({
             {footerText}
           </Text>
         </View>
+
+        {showRewardAd ? (
+          <View style={{ marginTop: 14 }}>
+            <Pressable
+              onPress={onRewardAdPress}
+              disabled={Boolean(rewardAdProcessing)}
+              accessibilityRole="button"
+              accessibilityLabel={rewardAdLabel}
+              style={({ pressed }) => ({
+                minHeight: 52,
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: 'rgba(34, 211, 238, 0.42)',
+                backgroundColor: pressed
+                  ? 'rgba(8, 145, 178, 0.26)'
+                  : 'rgba(8, 47, 73, 0.52)',
+                opacity: pressed || rewardAdProcessing ? 0.82 : 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'row',
+                gap: 9,
+              })}
+            >
+              {rewardAdProcessing ? (
+                <ActivityIndicator color={COLORS.cyan} />
+              ) : (
+                <MaterialIcons name="play-circle-outline" size={22} color={COLORS.cyan} />
+              )}
+              <Text style={{ color: '#e0faff', fontSize: 15, fontWeight: '900' }}>
+                {rewardAdProcessing ? 'Cargando anuncio...' : rewardAdLabel}
+              </Text>
+            </Pressable>
+            {rewardAdError ? (
+              <Text style={{ color: '#fca5a5', fontSize: 12, lineHeight: 17, marginTop: 8, textAlign: 'center' }}>
+                {rewardAdError}
+              </Text>
+            ) : rewardAdHelperText ? (
+              <Text style={{ color: COLORS.soft, fontSize: 11, lineHeight: 16, marginTop: 8, textAlign: 'center' }}>
+                {rewardAdHelperText}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
 
         <View style={{ alignItems: 'center', marginTop: 18 }}>
           <Text style={{ color: COLORS.soft, fontSize: 11 }}>

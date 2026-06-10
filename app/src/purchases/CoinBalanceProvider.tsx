@@ -14,6 +14,7 @@ import {
   trackMixpanelCoinSpendFailed,
   trackMixpanelCoinSpent,
 } from '../marketing/mixpanelEvents';
+import { trackMetaCoinDepleted } from '../marketing/metaAppEvents';
 
 const STORAGE_KEY = '@luva/coins/state';
 const MAX_FREE_COINS = 10;
@@ -178,6 +179,14 @@ export function CoinBalanceProvider({ children }: { children: React.ReactNode })
         balanceBefore: current.balance,
         balanceAfter: next.balance,
       });
+      if (current.balance > 0 && next.balance === 0) {
+        void trackMetaCoinDepleted({
+          amount,
+          reason,
+          balanceBefore: current.balance,
+          balanceAfter: next.balance,
+        });
+      }
       if (__DEV__) {
         console.log('[Coins] Gasto registrado', { amount, reason, balance: next.balance });
       }

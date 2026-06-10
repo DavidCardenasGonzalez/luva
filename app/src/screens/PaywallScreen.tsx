@@ -39,6 +39,7 @@ import {
 } from "../purchases/litePromo";
 import { openStoreReview } from "../reviews/storeReview";
 import { saveAnonymousReviewFeedback } from "../reviews/reviewFeedback";
+import { showRewardedAd } from "../shared/rewardedAds";
 
 const COLORS = {
   bg: "#050b1a",
@@ -47,6 +48,7 @@ const COLORS = {
 
 const PRIVACY_URL = "https://www.luvaenglish.com/#privacidad";
 const TERMS_URL = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/";
+const PAYWALL_REWARDED_AD_COINS = 5;
 
 type PackageInfo = {
   pkg: PurchasesPackage;
@@ -152,6 +154,7 @@ export default function PaywallScreen() {
     loading: coinsLoading,
     canShowReviewReward,
     reviewRewardCoins,
+    addCoins,
     markReviewRewardPrompted,
     claimReviewReward,
   } = useCoins();
@@ -168,6 +171,8 @@ export default function PaywallScreen() {
   const [showCoinReviewReward, setShowCoinReviewReward] = useState(false);
   const [reviewFeedbackSubmitting, setReviewFeedbackSubmitting] = useState(false);
   const [reviewFeedbackError, setReviewFeedbackError] = useState<string | null>(null);
+  const [rewardedAdProcessing, setRewardedAdProcessing] = useState(false);
+  const [rewardedAdError, setRewardedAdError] = useState<string | null>(null);
   const trackedPaywallRef = useRef(false);
   const checkedCoinReviewRewardRef = useRef(false);
   const isLitePaywall = requestedPaywallVariant === "lite" || useLitePromoOverride;
@@ -617,6 +622,48 @@ export default function PaywallScreen() {
     }
   };
 
+  const handleRewardedAdCoins = useCallback(async () => {
+    if (rewardedAdProcessing) return;
+    setRewardedAdProcessing(true);
+    setRewardedAdError(null);
+    try {
+      void trackMixpanelEvent("paywall_rewarded_ad_started", {
+        event_category: "monetization",
+        paywall_source: paywallSource || "unknown",
+        reward_coins: PAYWALL_REWARDED_AD_COINS,
+      });
+
+      const earnedReward = await showRewardedAd();
+      if (!earnedReward) {
+        setRewardedAdError("Completa el anuncio para recibir las monedas.");
+        void trackMixpanelEvent("paywall_rewarded_ad_not_earned", {
+          event_category: "monetization",
+          paywall_source: paywallSource || "unknown",
+          reward_coins: PAYWALL_REWARDED_AD_COINS,
+        });
+        return;
+      }
+
+      const credited = await addCoins(PAYWALL_REWARDED_AD_COINS, "paywall-rewarded-ad");
+      if (!credited) {
+        setRewardedAdError("No pudimos agregar las monedas. Intenta de nuevo.");
+        return;
+      }
+
+      void trackMixpanelEvent("paywall_rewarded_ad_earned", {
+        event_category: "monetization",
+        paywall_source: paywallSource || "unknown",
+        reward_coins: PAYWALL_REWARDED_AD_COINS,
+      });
+      dismissPaywall();
+    } catch (err: any) {
+      console.warn("[Paywall] No se pudo completar el anuncio recompensado", err);
+      setRewardedAdError(err?.message || "No pudimos cargar el anuncio. Intenta de nuevo.");
+    } finally {
+      setRewardedAdProcessing(false);
+    }
+  }, [addCoins, dismissPaywall, paywallSource, rewardedAdProcessing]);
+
   const handlePositiveReviewReward = useCallback(async () => {
     setReviewFeedbackError(null);
     await openStoreReview();
@@ -722,6 +769,11 @@ export default function PaywallScreen() {
       onPurchase={() => {
         if (selectedProPackageInfo) void handlePurchase(selectedProPackageInfo);
       }}
+      rewardAdLabel={`Ver anuncio +${PAYWALL_REWARDED_AD_COINS} monedas`}
+      rewardAdHelperText="Mira un anuncio completo para volver con monedas extra."
+      rewardAdProcessing={rewardedAdProcessing}
+      rewardAdError={rewardedAdError}
+      onRewardAdPress={handleRewardedAdCoins}
       onSelectProduct={handleSelectProProduct}
       onRestore={handleRestore}
       onOpenPrivacy={() => openExternal(PRIVACY_URL)}
