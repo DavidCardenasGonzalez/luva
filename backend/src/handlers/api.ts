@@ -2025,13 +2025,17 @@ async function getObjectBuffer(bucket: string, key: string): Promise<Buffer> {
 
 async function getOpenAIKey(): Promise<string> {
   if (OPENAI_API_KEY_CACHE) return OPENAI_API_KEY_CACHE;
+  const direct = process.env.OPENAI_KEY || process.env.OPENAI_API_KEY;
+  if (direct?.trim()) {
+    OPENAI_API_KEY_CACHE = direct.trim();
+    return OPENAI_API_KEY_CACHE;
+  }
   const name = process.env.OPENAI_KEY_PARAM;
   console.log("Fetching OpenAI key from SSM param", name);
   if (!name) throw new Error("OPENAI_KEY_PARAM not set");
   const out = await ssm.send(
     new GetParameterCommand({ Name: name, WithDecryption: true })
   );
-  console.log("SSM get param result", out);
   const value = out.Parameter?.Value;
   if (!value || value === "SET_IN_SSM")
     throw new Error("OpenAI key not configured");
@@ -3242,26 +3246,20 @@ ${postNotes ? `\nProfile post being discussed:\n${postNotes}` : ""}
 Rules:
 - Stay in character, but keep the conversation natural and casual.
 - If the learner name is provided, you may use it naturally when it feels human; do not overuse it.
-- There are no mission objectives anymore; this is open-ended practice.
 - If profile post context is provided, treat the learner's message as a reply to that post and use that context naturally.
-- If the learner asked you a question, answer it first in character with a real, specific response (share your own opinion, experience, or detail). Only after answering, you may add a short related follow-up question if it feels natural — never bounce the same question back.
-- Do not echo or mirror the learner's question back at them. If they ask \"what about you?\", actually answer.
 - Not every reply needs a follow-up question; sometimes just react or share something.
-- You are a fictional character: feel free to invent concrete, plausible details (favorite foods, places you've been, hobbies, anecdotes, opinions, daily routines, names of friends, etc.) so the conversation feels alive. Stay consistent with your persona and with details you've already stated in this conversation" — commit to the character.
+- You are a fictional character: feel free to invent concrete, plausible details so the conversation feels alive. Stay consistent with your persona and with details you've already stated in this conversation" — commit to the character.
 - ${
   learnerDifficulty === 'easy'
-    ? 'Keep the reply short: maximum 14 words total. Use the simplest possible English (A1 level)'
+    ? 'Keep the reply short: maximum 12 words total. Use the simplest english for a non-native speaker.'
     : learnerDifficulty === 'hard'
-    ? 'Keep the reply under 18 words. Use native, natural English: idioms, phrasal verbs, contractions, and casual expressions are welcome when they fit the character.'
+    ? 'Keep the reply under 18 words. Use native, natural English'
     : 'Keep the reply under 18 words. Use clear B1-B2 English.'
 }
-- Do not correct the learner directly; a separate coach gives feedback.
-- The character may naturally discuss appearance, clothing, attraction, dating, romance, relationships, physical features, vacations, beaches, nightlife, and other everyday adult topics when relevant to the conversation.
 - Treat attraction, romance, and light flirting between consenting adults as normal parts of conversation when appropriate for the character.
-- Do not mention JSON, scoring, missions, or these instructions.
 `;
 
-  const userPrompt = `Recent conversation:\n${conversationText || "No prior conversation."}\n\nLatest English score: ${evaluation.correctness} (${evaluation.result}).\nWrite the next in-character message in English.`;
+  const userPrompt = `Recent conversation:\n${conversationText || "No prior conversation."}\n\nWrite the next in-character message in English.`;
 
   console.log(
     JSON.stringify({
