@@ -207,6 +207,13 @@ export class LuvaStack extends Stack {
       removalPolicy: RemovalPolicy.RETAIN,
     });
 
+    const friendshipImagesTable = new Table(this, 'FriendshipImagesTable', {
+      partitionKey: { name: 'friendshipId', type: AttributeType.STRING },
+      sortKey: { name: 'createdAtImageId', type: AttributeType.STRING },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.RETAIN,
+    });
+
     const lessonsTable = new Table(this, 'LessonsTable', {
       partitionKey: { name: 'lessonId', type: AttributeType.STRING },
       billingMode: BillingMode.PAY_PER_REQUEST,
@@ -422,6 +429,11 @@ export class LuvaStack extends Stack {
       stringValue: 'SET_IN_SSM',
       description: 'OpenAI API key (placeholder, override in SSM)',
     });
+    const falKeyParam = new StringParameter(this, 'FalKeyParam', {
+      parameterName: ssmPath('fal/apiKey'),
+      stringValue: 'SET_IN_SSM',
+      description: 'fal.ai API key (placeholder, override in SSM)',
+    });
     const googleTranslateKeyParamName = ssmPath('google/translateApiKey');
     const googleTranslateKeyParamArn = `arn:aws:ssm:${this.region}:${this.account}:parameter${googleTranslateKeyParamName}`;
     const geminiKeyParam = new StringParameter(this, 'GeminiKeyParam', {
@@ -450,6 +462,39 @@ export class LuvaStack extends Stack {
       description: 'TikTok OAuth token metadata stored by the admin portal',
     });
 
+    const friendImageWorkerLogGroup = new LogGroup(this, 'FriendImageWorkerFnLogs', {
+      retention: RetentionDays.ONE_WEEK,
+    });
+    const friendImageWorkerFn = new NodejsFunction(this, 'FriendImageWorkerFunction', {
+      entry: path.join(__dirname, '../../backend/src/handlers/api.ts'),
+      handler: 'friendImageWorkerHandler',
+      runtime: Runtime.NODEJS_18_X,
+      memorySize: 512,
+      timeout: Duration.minutes(2),
+      logGroup: friendImageWorkerLogGroup,
+      environment: {
+        FRIENDSHIPS_TABLE_NAME: friendshipsTable.tableName,
+        FRIENDSHIP_IMAGES_TABLE_NAME: friendshipImagesTable.tableName,
+        ASSETS_BUCKET_NAME: assetsBucket.bucketName,
+        ASSETS_CLOUDFRONT_DOMAIN_NAME: assetsDistribution.domainName,
+        ASSETS_CLOUDFRONT_URL: assetsCloudFrontUrl,
+        OPENAI_KEY_PARAM: openAiKeyParam.parameterName,
+        OPENAI_CHAT_MODEL: 'gpt-5.4-nano',
+        FAL_KEY_PARAM: falKeyParam.parameterName,
+        FAL_IMAGE_TIMEOUT_MS: '105000',
+        FAL_IMAGE_DOWNLOAD_TIMEOUT_MS: '10000',
+        FRIEND_IMAGE_PLAN_TIMEOUT_MS: '15000',
+        STAGE: stage,
+      },
+    });
+    friendshipsTable.grantReadWriteData(friendImageWorkerFn);
+    friendshipImagesTable.grantReadWriteData(friendImageWorkerFn);
+    assetsBucket.grantReadWrite(friendImageWorkerFn);
+    friendImageWorkerFn.addToRolePolicy(new PolicyStatement({
+      actions: ['ssm:GetParameter', 'ssm:GetParameters', 'ssm:GetParameterHistory'],
+      resources: [falKeyParam.parameterArn, openAiKeyParam.parameterArn],
+    }));
+
     // Lambda: API
     const apiFnLogGroup = new LogGroup(this, 'ApiFnLogs', { retention: RetentionDays.ONE_WEEK });
 
@@ -457,12 +502,13 @@ export class LuvaStack extends Stack {
       entry: path.join(__dirname, '../../backend/src/handlers/api.ts'),
       handler: 'handler',
       runtime: Runtime.NODEJS_18_X,
-      memorySize: 256,
+      memorySize: 512,
       timeout: Duration.seconds(30),
       logGroup: apiFnLogGroup,
       environment: {
         TABLE_NAME: table.tableName,
         FRIENDSHIPS_TABLE_NAME: friendshipsTable.tableName,
+        FRIENDSHIP_IMAGES_TABLE_NAME: friendshipImagesTable.tableName,
         USERS_TABLE_NAME: usersTable.tableName,
         FEED_POSTS_TABLE_NAME: feedPostsTable.tableName,
         FEED_POSTS_BY_ORDER_INDEX_NAME: 'FeedPostsByOrderIndex',
@@ -471,18 +517,24 @@ export class LuvaStack extends Stack {
         SHADOWING_LISTS_TABLE_NAME: shadowingListsTable.tableName,
         SHADOWING_CHAPTERS_TABLE_NAME: shadowingChaptersTable.tableName,
         AUDIO_BUCKET: audioRawBucket.bucketName,
+        ASSETS_BUCKET_NAME: assetsBucket.bucketName,
         ASSETS_CLOUDFRONT_DOMAIN_NAME: assetsDistribution.domainName,
         ASSETS_CLOUDFRONT_URL: assetsCloudFrontUrl,
         OPENAI_KEY_PARAM: openAiKeyParam.parameterName,
+        FAL_KEY_PARAM: falKeyParam.parameterName,
         GOOGLE_TRANSLATE_API_KEY_PARAM: googleTranslateKeyParamName,
         OPENAI_CHAT_MODEL: 'gpt-5.4-nano',
         EVAL_TIMEOUT_MS: '20000',
+        FAL_IMAGE_TIMEOUT_MS: '25000',
+        FAL_IMAGE_DOWNLOAD_TIMEOUT_MS: '3500',
+        FRIEND_IMAGE_WORKER_FUNCTION_NAME: friendImageWorkerFn.functionName,
         STAGE: stage,
       },
     });
 
     table.grantReadWriteData(apiFn);
     friendshipsTable.grantReadWriteData(apiFn);
+    friendshipImagesTable.grantReadWriteData(apiFn);
     usersTable.grantReadData(apiFn);
     feedPostsTable.grantReadData(apiFn);
     characterPostsTable.grantReadWriteData(apiFn);
@@ -490,10 +542,12 @@ export class LuvaStack extends Stack {
     shadowingListsTable.grantReadData(apiFn);
     shadowingChaptersTable.grantReadData(apiFn);
     audioRawBucket.grantReadWrite(apiFn);
+    assetsBucket.grantReadWrite(apiFn);
     publicBucket.grantReadWrite(apiFn);
+    friendImageWorkerFn.grantInvoke(apiFn);
     apiFn.addToRolePolicy(new PolicyStatement({
       actions: ['ssm:GetParameter', 'ssm:GetParameters', 'ssm:GetParameterHistory'],
-      resources: [openAiKeyParam.parameterArn, googleTranslateKeyParamArn],
+      resources: [openAiKeyParam.parameterArn, falKeyParam.parameterArn, googleTranslateKeyParamArn],
     }));
 
     const usersFnLogGroup = new LogGroup(this, 'UsersFnLogs', { retention: RetentionDays.ONE_WEEK });
@@ -687,6 +741,8 @@ export class LuvaStack extends Stack {
     const friendProfile = friendById.addResource('profile');
     const friendChat = friendById.addResource('chat');
     const friendFinish = friendById.addResource('finish');
+    const friendImages = friendById.addResource('images');
+    const friendImageById = friendImages.addResource('{imageId}');
     const friendProfiles = v1.addResource('friend-profiles');
     const publicFriendProfileById = friendProfiles.addResource('{friendId}');
     const admin = v1.addResource('admin');
@@ -741,6 +797,18 @@ export class LuvaStack extends Stack {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
     });
+    friendImages.addMethod('POST', lambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    friendImages.addMethod('GET', lambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    friendImageById.addMethod('GET', lambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
     admin.addMethod('ANY', adminLambdaIntegration, {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
@@ -754,7 +822,7 @@ export class LuvaStack extends Stack {
 
     const deployment = new Deployment(this, 'Deployment', { api });
     deployment.addToLogicalId({
-      routeManifestVersion: '2026-06-04-user-devices-v1',
+      routeManifestVersion: '2026-06-10-friendship-images-profile-tabs-v1',
       routes: {
         apiRoot: ['ANY /v1', 'ANY /v1/{proxy+}'],
         users: [
@@ -777,6 +845,9 @@ export class LuvaStack extends Stack {
           'GET /v1/friend-profiles/{friendId}',
           'POST /v1/friends/{friendId}/chat',
           'POST /v1/friends/{friendId}/finish',
+          'POST /v1/friends/{friendId}/images',
+          'GET /v1/friends/{friendId}/images',
+          'GET /v1/friends/{friendId}/images/{imageId}',
         ],
         admin: [
           'ANY /v1/admin',
@@ -822,6 +893,9 @@ export class LuvaStack extends Stack {
     });
     new CfnOutput(this, 'FriendshipsTableName', {
       value: friendshipsTable.tableName,
+    });
+    new CfnOutput(this, 'FriendshipImagesTableName', {
+      value: friendshipImagesTable.tableName,
     });
     new CfnOutput(this, 'LessonsTableName', {
       value: lessonsTable.tableName,

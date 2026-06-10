@@ -10,6 +10,7 @@ export type LocalFriendCharacter = {
   characterName: string;
   aiRole: string;
   characterPrompt?: string;
+  characterSheetImageUrl?: string;
   avatarImageUrl?: string;
   avatarImageXsUrl?: string;
   avatarImageMdUrl?: string;
@@ -26,6 +27,7 @@ export type LocalAddFriendPayload = {
   characterName?: string;
   aiRole?: string;
   characterPrompt?: string;
+  characterSheetImageUrl?: string;
   avatarImageUrl?: string;
   avatarImageXsUrl?: string;
   avatarImageMdUrl?: string;
@@ -34,7 +36,7 @@ export type LocalAddFriendPayload = {
   messageCount?: number;
   conversationCount?: number;
   conversationSnapshot?: {
-    messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+    messages: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
     conversationEnded: boolean;
     conversationFeedback?: {
       summary: string;
@@ -96,6 +98,7 @@ function sanitizeLocalFriend(input: unknown): LocalFriendCharacter | null {
     characterName,
     aiRole,
     ...(asString(raw.characterPrompt) ? { characterPrompt: asString(raw.characterPrompt) } : {}),
+    ...(asString(raw.characterSheetImageUrl) ? { characterSheetImageUrl: asString(raw.characterSheetImageUrl) } : {}),
     ...(asString(raw.avatarImageUrl) ? { avatarImageUrl: asString(raw.avatarImageUrl) } : {}),
     ...(asString(raw.avatarImageXsUrl) ? { avatarImageXsUrl: asString(raw.avatarImageXsUrl) } : {}),
     ...(asString(raw.avatarImageMdUrl) ? { avatarImageMdUrl: asString(raw.avatarImageMdUrl) } : {}),
@@ -153,12 +156,15 @@ function buildLocalFriendFromPayload(
 
   const now = new Date().toISOString();
   const characterPrompt = asString(payload.characterPrompt) || existing?.characterPrompt;
+  const characterSheetImageUrl =
+    asString(payload.characterSheetImageUrl) || existing?.characterSheetImageUrl;
 
   return {
     friendId: characterId,
     characterName,
     aiRole,
     ...(characterPrompt ? { characterPrompt } : {}),
+    ...(characterSheetImageUrl ? { characterSheetImageUrl } : {}),
     ...(asString(payload.avatarImageUrl) || existing?.avatarImageUrl
       ? { avatarImageUrl: asString(payload.avatarImageUrl) || existing?.avatarImageUrl }
       : {}),

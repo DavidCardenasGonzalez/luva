@@ -3,7 +3,7 @@ import { View, Text, TextInput, Pressable, Keyboard } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 
-export type StoryFlowState = 'idle' | 'recording' | 'uploading' | 'transcribing' | 'evaluating';
+export type StoryFlowState = 'idle' | 'recording' | 'uploading' | 'transcribing' | 'evaluating' | 'generatingImage';
 
 type Props = {
   flowState: StoryFlowState;
@@ -13,6 +13,8 @@ type Props = {
   onSendText: (text: string) => Promise<boolean>;
   onRecordPressIn: () => void | Promise<void>;
   onRecordRelease: () => void | Promise<void>;
+  onPlusPress?: () => void;
+  photoRequestMode?: boolean;
 };
 
 export default function StoryMessageComposer({
@@ -23,6 +25,8 @@ export default function StoryMessageComposer({
   onSendText,
   onRecordPressIn,
   onRecordRelease,
+  onPlusPress,
+  photoRequestMode,
 }: Props) {
   const [text, setText] = useState('');
   const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -66,6 +70,21 @@ export default function StoryMessageComposer({
     >
       {/* {statusLabel ? <Text style={{ color: '#475569', marginBottom: 8 }}>{statusLabel}</Text> : null} */}
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Pressable
+          onPress={onPlusPress}
+          hitSlop={8}
+          style={({ pressed }) => ({
+            width: 38,
+            height: 38,
+            borderRadius: 999,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: 8,
+            backgroundColor: pressed ? '#e2e8f0' : '#f1f5f9',
+          })}
+        >
+          <MaterialIcons name="add" size={22} color="#475569" />
+        </Pressable>
         <View
           style={{
             flex: 1,
@@ -74,15 +93,23 @@ export default function StoryMessageComposer({
             backgroundColor: 'white',
             borderRadius: 999,
             borderWidth: 1,
-            borderColor: '#dbeafe',
+            borderColor: photoRequestMode ? '#93c5fd' : '#dbeafe',
             paddingHorizontal: 14,
             paddingVertical: 8,
           }}
         >
+          {photoRequestMode ? (
+            <MaterialIcons
+              name="photo-camera"
+              size={19}
+              color="#2563eb"
+              style={{ marginRight: 8 }}
+            />
+          ) : null}
           <TextInput
             value={text}
             onChangeText={setText}
-            placeholder="Escribe tu mensaje..."
+            placeholder={photoRequestMode ? 'Describe la foto...' : 'Escribe tu mensaje...'}
             placeholderTextColor="#94a3b8"
             multiline
             style={{

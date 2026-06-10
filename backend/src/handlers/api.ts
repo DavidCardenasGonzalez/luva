@@ -10,6 +10,7 @@ import {
   PutObjectCommand,
   GetObjectCommand,
 } from "@aws-sdk/client-s3";
+import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient,
@@ -46,6 +47,9 @@ import {
   FriendCharacter,
   FriendChatRequest,
   FriendChatPayload,
+  FriendImagePayload,
+  FriendImageRequest,
+  FriendshipImage,
   FriendConversationSnapshot,
   FriendsListResponse,
 } from "../types";
@@ -69,6 +73,7 @@ import { validatePromoCode } from "../promo-codes";
 
 const s3 = new S3Client({});
 const ssm = new SSMClient({});
+const lambda = new LambdaClient({});
 const dynamo = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
   marshallOptions: {
     removeUndefinedValues: true,
@@ -76,7 +81,10 @@ const dynamo = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
 });
 let OPENAI_API_KEY_CACHE: string | undefined;
 let GOOGLE_TRANSLATE_API_KEY_CACHE: string | undefined;
+let FAL_API_KEY_CACHE: string | undefined;
 const DEFAULT_OPENAI_CHAT_MODEL = "gpt-5.4-nano";
+const FAL_SEEDREAM_LITE_EDIT_MODEL =
+  "fal-ai/bytedance/seedream/v5/lite/edit";
 const STORIES_PATH_CANDIDATES: (string | undefined)[] = [
   // Only allow override via explicit env var; default source is CHARACTERS.
   process.env.STORIES_PATH,
@@ -137,9 +145,11 @@ function getStory(storyId: string): StoryDefinition | undefined {
   return loadStories().find((s) => s.storyId === storyId);
 }
 
-type StoryMessage = { role: 'user' | 'assistant'; content: string };
+type StoryMessage = { role: 'user' | 'assistant'; content: string; imageUrl?: string };
 const STORY_HISTORY_LIMIT = 20;
 const FRIEND_HISTORY_LIMIT = 24;
+const FRIEND_RECENT_MESSAGES = 10;
+const FRIEND_SUMMARY_THRESHOLD = 20;
 
 type StorySessionState = {
   storyId?: string;
@@ -169,11 +179,11 @@ type FriendConversationFeedback = {
 type FriendChatFinishRequest = {
   postId?: unknown;
   englishDifficulty?: 'easy' | 'medium' | 'hard';
-  history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+  history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
 };
 
 type FriendChatRetryRequest = {
-  history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+  history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
 };
 
 type FriendChatPostContext = {
@@ -212,13 +222,26 @@ function mergeHistory(base: StoryMessage[] = [], additions: StoryMessage[] = [])
   for (const message of additions) {
     if (!message) continue;
     const trimmed = (message.content || '').trim();
-    if (!trimmed) continue;
-    const normalized: StoryMessage = { role: message.role, content: trimmed };
+    const imageUrl =
+      typeof message.imageUrl === "string" && /^https?:\/\//i.test(message.imageUrl.trim())
+        ? message.imageUrl.trim().slice(0, 2048)
+        : undefined;
+    if (!trimmed && !imageUrl) continue;
+    const normalized: StoryMessage = {
+      role: message.role,
+      content: trimmed || (imageUrl ? "[Photo]" : ""),
+      ...(imageUrl ? { imageUrl } : {}),
+    };
     if (normalized.role !== 'user' && normalized.role !== 'assistant') {
       continue;
     }
     const last = merged[merged.length - 1];
-    if (!last || last.role !== normalized.role || last.content !== normalized.content) {
+    if (
+      !last ||
+      last.role !== normalized.role ||
+      last.content !== normalized.content ||
+      last.imageUrl !== normalized.imageUrl
+    ) {
       merged.push(normalized);
       if (merged.length > STORY_HISTORY_LIMIT) {
         merged.splice(0, merged.length - STORY_HISTORY_LIMIT);
@@ -249,11 +272,24 @@ function sanitizeSessionContext(input: any): { storyId?: string; sceneIndex?: nu
     story: storyFromBody,
   };
 }
-function sanitizeHistory(history?: StoryAdvanceRequest['history']): StoryMessage[] {
+function sanitizeHistory(history?: Array<{ role?: unknown; content?: unknown; imageUrl?: unknown }>): StoryMessage[] {
   if (!Array.isArray(history)) return [];
   return history
-    .filter((msg): msg is StoryMessage => !!msg && (msg.role === 'user' || msg.role === 'assistant') && typeof msg.content === 'string')
-    .map((msg) => ({ role: msg.role, content: msg.content.trim() }));
+    .map((msg) => {
+      if (!msg || (msg.role !== 'user' && msg.role !== 'assistant')) return null;
+      const content = typeof msg.content === 'string' ? msg.content.trim() : '';
+      const imageUrl =
+        typeof msg.imageUrl === "string" && /^https?:\/\//i.test(msg.imageUrl.trim())
+          ? msg.imageUrl.trim().slice(0, 2048)
+          : undefined;
+      if (!content && !imageUrl) return null;
+      return {
+        role: msg.role,
+        content: content || (imageUrl ? "[Photo]" : ""),
+        ...(imageUrl ? { imageUrl } : {}),
+      } satisfies StoryMessage;
+    })
+    .filter((msg): msg is StoryMessage => !!msg);
 }
 
 function sanitizeStoryRequirement(input: any): StoryRequirement | undefined {
@@ -967,6 +1003,120 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       }
     }
 
+    const friendImageDetail = path.match(/^\/v1\/friends\/([^/]+)\/images\/([^/]+)$/);
+    if (method === "GET" && friendImageDetail) {
+      const identity = getUserIdentity(event);
+      if (!identity) {
+        return unauthorized("Missing user identity");
+      }
+      const friendId = decodeURIComponent(friendImageDetail[1]);
+      const imageId = decodeURIComponent(friendImageDetail[2]);
+      try {
+        const payload = await getFriendImageJob(identity.userId, friendId, imageId);
+        if (!payload) {
+          return notFound();
+        }
+        return json(200, payload);
+      } catch (err: any) {
+        if (err?.message === "FRIENDSHIP_IMAGES_TABLE_NAME not set") {
+          console.error(
+            JSON.stringify({
+              scope: "friends.images.config_error",
+              friendId,
+              imageId,
+              code: err.message,
+            })
+          );
+          return json(500, { message: "No pudimos consultar la foto.", code: err.message });
+        }
+        throw err;
+      }
+    }
+
+    const friendImages = path.match(/^\/v1\/friends\/([^/]+)\/images$/);
+    if (method === "GET" && friendImages) {
+      const identity = getUserIdentity(event);
+      if (!identity) {
+        return unauthorized("Missing user identity");
+      }
+      const friendId = decodeURIComponent(friendImages[1]);
+      try {
+        return json(200, { items: await listFriendImages(identity.userId, friendId) });
+      } catch (err: any) {
+        if (err?.message === "FRIENDSHIP_IMAGES_TABLE_NAME not set") {
+          console.error(
+            JSON.stringify({
+              scope: "friends.images.config_error",
+              friendId,
+              code: err.message,
+            })
+          );
+          return json(500, { message: "No pudimos cargar las fotos.", code: err.message });
+        }
+        throw err;
+      }
+    }
+
+    if (method === "POST" && friendImages) {
+      const identity = getUserIdentity(event);
+      if (!identity) {
+        return unauthorized("Missing user identity");
+      }
+      const friendId = decodeURIComponent(friendImages[1]);
+      const body = parseBody(event.body) as FriendImageRequest | undefined;
+      try {
+        console.log(
+          JSON.stringify({
+            scope: "friends.images.request.begin",
+            userId: identity.userId,
+            friendId,
+          })
+        );
+        const learnerProfile = await resolveLearnerProfile(identity);
+        const payload = await createFriendImageJob(
+          identity.userId,
+          friendId,
+          body || {},
+          learnerProfile.name
+        );
+        await invokeFriendImageWorker({
+          userId: identity.userId,
+          friendId,
+          imageId: payload.imageId,
+        });
+        return json(200, payload);
+      } catch (err: any) {
+        if (err?.message === "FRIEND_NOT_FOUND") {
+          return notFound();
+        }
+        if (
+          err?.message === "FRIEND_CHARACTER_SHEET_NOT_FOUND" ||
+          err?.message === "FAL_KEY not set" ||
+          err?.message === "FRIENDSHIP_IMAGES_TABLE_NAME not set" ||
+          err?.message === "ASSETS_BUCKET_NAME not set" ||
+          err?.message === "ASSETS_CLOUDFRONT_DOMAIN_NAME not set" ||
+          err?.message === "FRIEND_IMAGE_WORKER_FUNCTION_NAME not set"
+        ) {
+          console.error(
+            JSON.stringify({
+              scope: "friends.images.config_error",
+              friendId,
+              code: err.message,
+            })
+          );
+          return json(500, { message: "No pudimos generar la foto.", code: err.message });
+        }
+        console.error(
+          JSON.stringify({
+            scope: "friends.images.error",
+            friendId,
+            message: err?.message || "unknown",
+          })
+        );
+        return json(500, { message: "No pudimos generar la foto.", code: "FRIEND_IMAGE_FAILED" });
+      }
+    }
+
     const friendChat = path.match(/^\/v1\/friends\/([^/]+)\/chat$/);
     if (method === "POST" && friendChat) {
       const identity = getUserIdentity(event);
@@ -1144,6 +1294,47 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
   }
 };
 
+export const friendImageWorkerHandler = async (
+  event: FriendImageWorkerEvent
+): Promise<void> => {
+  const userId = typeof event?.userId === "string" ? event.userId.trim() : "";
+  const friendId = typeof event?.friendId === "string" ? event.friendId.trim() : "";
+  const imageId = typeof event?.imageId === "string" ? event.imageId.trim() : "";
+  console.log(
+    JSON.stringify({
+      scope: "friends.images.worker.begin",
+      userId,
+      friendId,
+      imageId,
+    })
+  );
+  if (!userId || !friendId || !imageId) {
+    throw new Error("FRIEND_IMAGE_WORKER_INVALID_EVENT");
+  }
+  try {
+    await processFriendImageJob(userId, friendId, imageId);
+    console.log(
+      JSON.stringify({
+        scope: "friends.images.worker.completed",
+        userId,
+        friendId,
+        imageId,
+      })
+    );
+  } catch (err) {
+    console.error(
+      JSON.stringify({
+        scope: "friends.images.worker.error",
+        userId,
+        friendId,
+        imageId,
+        message: (err as Error)?.message || "unknown",
+      })
+    );
+    throw err;
+  }
+};
+
 function parseBody(body: any): any {
   if (!body) return undefined;
   try {
@@ -1159,6 +1350,63 @@ function getFriendshipsTableName(): string {
     throw new Error("FRIENDSHIPS_TABLE_NAME not set");
   }
   return tableName;
+}
+
+function getFriendshipImagesTableName(): string {
+  const tableName = process.env.FRIENDSHIP_IMAGES_TABLE_NAME?.trim();
+  if (!tableName) {
+    throw new Error("FRIENDSHIP_IMAGES_TABLE_NAME not set");
+  }
+  return tableName;
+}
+
+function getAssetsBucketName(): string {
+  const bucketName = process.env.ASSETS_BUCKET_NAME?.trim();
+  if (!bucketName) {
+    throw new Error("ASSETS_BUCKET_NAME not set");
+  }
+  return bucketName;
+}
+
+function getAssetsCloudFrontUrl(): string {
+  const raw =
+    process.env.ASSETS_CLOUDFRONT_URL?.trim() ||
+    process.env.ASSETS_CLOUDFRONT_DOMAIN_NAME?.trim();
+  if (!raw) {
+    throw new Error("ASSETS_CLOUDFRONT_DOMAIN_NAME not set");
+  }
+  return raw.startsWith("http") ? raw.replace(/\/$/, "") : `https://${raw.replace(/\/$/, "")}`;
+}
+
+async function getFalKey(): Promise<string> {
+  const direct = process.env.FAL_KEY?.trim() || process.env.FAL_API_KEY?.trim();
+  if (direct) return direct;
+  if (FAL_API_KEY_CACHE) return FAL_API_KEY_CACHE;
+  const paramName = process.env.FAL_KEY_PARAM?.trim() || process.env.FAL_API_KEY_PARAM?.trim();
+  if (!paramName) {
+    throw new Error("FAL_KEY not set");
+  }
+  const out = await ssm.send(new GetParameterCommand({ Name: paramName, WithDecryption: true }));
+  const value = out.Parameter?.Value?.trim();
+  if (!value || value === "SET_IN_SSM") {
+    throw new Error("FAL_KEY not set");
+  }
+  FAL_API_KEY_CACHE = value;
+  return value;
+}
+
+function publicAssetUrlForKey(key: string): string {
+  const encodedKey = key.split("/").map(encodeURIComponent).join("/");
+  return `${getAssetsCloudFrontUrl()}/${encodedKey}`;
+}
+
+function safeAssetPathSegment(value: string): string {
+  return value
+    .trim()
+    .replace(/[^a-zA-Z0-9._=-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 120) || "unknown";
 }
 
 function sanitizeFriendConversationFeedback(input: any): FriendConversationFeedback | undefined {
@@ -1179,10 +1427,18 @@ function sanitizeFriendConversationSnapshot(input: any): FriendConversationSnaps
   const messages = sanitizeHistory(input.messages).slice(-FRIEND_HISTORY_LIMIT);
   if (!messages.length) return undefined;
   const updatedAt = sanitizeSyncTimestamp(input.updatedAt) || new Date().toISOString();
+  const conversationSummary =
+    typeof input.conversationSummary === "string" ? input.conversationSummary.trim() : "";
+  const summaryUpToCount =
+    typeof input.summaryUpToCount === "number" && Number.isFinite(input.summaryUpToCount)
+      ? Math.max(0, Math.floor(input.summaryUpToCount))
+      : undefined;
   return {
     messages,
     conversationEnded: Boolean(input.conversationEnded),
     conversationFeedback: sanitizeFriendConversationFeedback(input.conversationFeedback) || null,
+    ...(conversationSummary ? { conversationSummary } : {}),
+    ...(summaryUpToCount !== undefined ? { summaryUpToCount } : {}),
     updatedAt,
   };
 }
@@ -1203,6 +1459,7 @@ function publicFriend(record: FriendRecord): FriendCharacter {
     aiRole: record.aiRole,
     ...(record.characterPrompt ? { characterPrompt: record.characterPrompt } : {}),
     ...(record.characterBio ? { characterBio: record.characterBio } : {}),
+    ...(record.characterSheetImageUrl ? { characterSheetImageUrl: record.characterSheetImageUrl } : {}),
     ...(record.avatarImageUrl ? { avatarImageUrl: record.avatarImageUrl } : {}),
     ...(record.avatarImageXsUrl ? { avatarImageXsUrl: record.avatarImageXsUrl } : {}),
     ...(record.avatarImageMdUrl ? { avatarImageMdUrl: record.avatarImageMdUrl } : {}),
@@ -1222,6 +1479,7 @@ function friendFromCharacter(character: CharacterDefinition): FriendCharacter {
     aiRole: character.aiRole,
     ...(character.caracterPrompt ? { characterPrompt: character.caracterPrompt } : {}),
     ...(character.characterBio ? { characterBio: character.characterBio } : {}),
+    ...(character.characterSheetImageUrl ? { characterSheetImageUrl: character.characterSheetImageUrl } : {}),
     ...(character.avatarImageUrl ? { avatarImageUrl: character.avatarImageUrl } : {}),
     ...(character.avatarImageXsUrl ? { avatarImageXsUrl: character.avatarImageXsUrl } : {}),
     ...(character.avatarImageMdUrl ? { avatarImageMdUrl: character.avatarImageMdUrl } : {}),
@@ -1311,6 +1569,7 @@ function sanitizeFriendRecord(input: any): FriendRecord | undefined {
     aiRole,
     ...(typeof input.characterPrompt === "string" ? { characterPrompt: input.characterPrompt } : {}),
     ...(typeof input.characterBio === "string" ? { characterBio: input.characterBio } : {}),
+    ...(typeof input.characterSheetImageUrl === "string" ? { characterSheetImageUrl: input.characterSheetImageUrl } : {}),
     ...(typeof input.avatarImageUrl === "string" ? { avatarImageUrl: input.avatarImageUrl } : {}),
     ...(typeof input.avatarImageXsUrl === "string" ? { avatarImageXsUrl: input.avatarImageXsUrl } : {}),
     ...(typeof input.avatarImageMdUrl === "string" ? { avatarImageMdUrl: input.avatarImageMdUrl } : {}),
@@ -1418,6 +1677,7 @@ async function createFriendFromMission(
     aiRole: character.aiRole,
     ...(character.caracterPrompt ? { characterPrompt: character.caracterPrompt } : {}),
     ...(character.characterBio ? { characterBio: character.characterBio } : {}),
+    ...(character.characterSheetImageUrl ? { characterSheetImageUrl: character.characterSheetImageUrl } : {}),
     ...(character.avatarImageUrl ? { avatarImageUrl: character.avatarImageUrl } : {}),
     ...(character.avatarImageXsUrl ? { avatarImageXsUrl: character.avatarImageXsUrl } : {}),
     ...(character.avatarImageMdUrl ? { avatarImageMdUrl: character.avatarImageMdUrl } : {}),
@@ -1464,6 +1724,8 @@ function publicFriendRecord(friend: FriendCharacter, userId = "anonymous"): Frie
     characterName: friend.characterName,
     aiRole: friend.aiRole,
     ...(friend.characterPrompt ? { characterPrompt: friend.characterPrompt } : {}),
+    ...(friend.characterBio ? { characterBio: friend.characterBio } : {}),
+    ...(friend.characterSheetImageUrl ? { characterSheetImageUrl: friend.characterSheetImageUrl } : {}),
     ...(friend.avatarImageUrl ? { avatarImageUrl: friend.avatarImageUrl } : {}),
     ...(friend.avatarImageXsUrl ? { avatarImageXsUrl: friend.avatarImageXsUrl } : {}),
     ...(friend.avatarImageMdUrl ? { avatarImageMdUrl: friend.avatarImageMdUrl } : {}),
@@ -1735,6 +1997,90 @@ async function resolveFriendChatPostContext(
   };
 }
 
+async function describeUserImage(imageBase64: string): Promise<string> {
+  const apiKey = await getOpenAIKey();
+  const model = process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
+  const isGpt5 = /gpt-5/i.test(model);
+  const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
+  const imageDataUrl = `data:image/jpeg;base64,${imageBase64}`;
+  const prompt = "Briefly describe what is in this image in 1-2 sentences in English.";
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), 15000);
+  try {
+    let description = "";
+    if (useResponses) {
+      const res = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          input: [
+            {
+              role: "user",
+              content: [
+                { type: "input_image", image_url: imageDataUrl },
+                { type: "input_text", text: prompt },
+              ],
+            },
+          ],
+          max_output_tokens: 150,
+        }),
+        signal: ac.signal,
+      });
+      const data: any = await res.json().catch(() => ({}));
+      if (Array.isArray(data?.output)) {
+        for (const item of data.output) {
+          if (item?.type === "message" && Array.isArray(item.content)) {
+            const texts = item.content
+              .filter((c: any) => c?.type === "output_text" && typeof c.text === "string")
+              .map((c: any) => c.text as string);
+            if (texts.length) { description = texts.join(" "); break; }
+          }
+        }
+      }
+      if (!description) description = data?.output_text?.trim() || "";
+    } else {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "image_url", image_url: { url: imageDataUrl, detail: "low" } },
+                { type: "text", text: prompt },
+              ],
+            },
+          ],
+          max_tokens: 150,
+        }),
+        signal: ac.signal,
+      });
+      const data: any = await res.json().catch(() => ({}));
+      description = data?.choices?.[0]?.message?.content?.trim() || "";
+    }
+    clearTimeout(to);
+    return description || "A photo shared by the user.";
+  } catch (err) {
+    clearTimeout(to);
+    console.error(
+      JSON.stringify({
+        scope: "friends.chat.vision_error",
+        message: (err as Error)?.message || "unknown",
+      })
+    );
+    return "A photo shared by the user.";
+  }
+}
+
 async function advanceFriendChat(
   userId: string | undefined,
   friendId: string,
@@ -1747,29 +2093,69 @@ async function advanceFriendChat(
     throw new Error("FRIEND_NOT_FOUND");
   }
 
-  const transcript = body.transcript.trim();
+  const hasBase64 = typeof body.userImageBase64 === "string" && body.userImageBase64.length > 0;
+  // Also treat transcript === '[Photo]' as an image message — fallback when base64 doesn't arrive.
+  const isImageMessage = hasBase64 || body.transcript === "[Photo]";
+  let imageDescription = "";
+  if (hasBase64) {
+    imageDescription = await describeUserImage(body.userImageBase64!);
+  }
+
+  const transcript = isImageMessage
+    ? `[The user shared a photo${imageDescription ? `: ${imageDescription}` : "."}]`
+    : body.transcript.trim();
   const effectiveDifficulty =
     normalizeLearnerDifficulty(body.englishDifficulty) || learnerDifficulty;
   const postContext = await resolveFriendChatPostContext(friend, body);
-  let conversationHistory = sanitizeHistory(body.history).slice(-FRIEND_HISTORY_LIMIT);
-  conversationHistory = appendHistoryEntry(conversationHistory, {
+  const fullHistory = appendHistoryEntry(sanitizeHistory(body.history), {
     role: "user",
     content: transcript,
-  }).slice(-FRIEND_HISTORY_LIMIT);
+  });
+
+  let conversationSummary = (friend.conversationSnapshot?.conversationSummary || "").trim();
+  let summaryUpToCount = friend.conversationSnapshot?.summaryUpToCount ?? 0;
+  if (summaryUpToCount > fullHistory.length) {
+    summaryUpToCount = 0;
+    conversationSummary = "";
+  }
+  if (fullHistory.length - summaryUpToCount >= FRIEND_SUMMARY_THRESHOLD) {
+    const toSummarize = fullHistory.slice(summaryUpToCount, fullHistory.length - FRIEND_RECENT_MESSAGES);
+    if (toSummarize.length) {
+      try {
+        conversationSummary = await summarizeFriendConversation(
+          friend,
+          conversationSummary,
+          toSummarize
+        );
+        summaryUpToCount = fullHistory.length - FRIEND_RECENT_MESSAGES;
+      } catch (err) {
+        console.error(
+          JSON.stringify({
+            scope: "friends.chat.summary_error",
+            message: (err as Error)?.message || "unknown",
+          })
+        );
+      }
+    }
+  }
+
+  const conversationHistory = fullHistory.slice(-FRIEND_HISTORY_LIMIT);
 
   const isEasyMode = effectiveDifficulty === 'easy';
-  let correctness = isEasyMode ? 100 : 0;
-  let result: EvalResult = isEasyMode ? "correct" : "incorrect";
+  let correctness = isEasyMode || isImageMessage ? 100 : 0;
+  let result: EvalResult = isEasyMode || isImageMessage ? "correct" : "incorrect";
   let errors: string[] = [];
   let reformulations: string[] = [];
-  const englishEvalResult = await Promise.allSettled([
-    isEasyMode
-      ? evaluateEasyEnglish(conversationHistory, transcript)
-      : evaluateStoryEnglish(conversationHistory, transcript),
-  ]);
+  const englishEvalResult = isImageMessage
+    ? []
+    : await Promise.allSettled([
+        isEasyMode
+          ? evaluateEasyEnglish(conversationHistory, transcript)
+          : evaluateStoryEnglish(conversationHistory, transcript),
+      ]);
 
   const englishEval = englishEvalResult[0];
-  if (englishEval.status === "fulfilled") {
+  if (englishEval && englishEval.status === "fulfilled") {
     const value = englishEval.value;
     if (isEasyMode) {
       correctness = 100;
@@ -1792,7 +2178,7 @@ async function advanceFriendChat(
       const alternatives = value.alternatives ?? value.improvements ?? value.suggestions ?? [];
       reformulations = alternatives.slice(0, 2).map((item) => String(item));
     }
-  } else {
+  } else if (englishEval && englishEval.status === "rejected") {
     console.error(
       JSON.stringify({
         scope: "friends.chat.english_error",
@@ -1812,7 +2198,8 @@ async function advanceFriendChat(
       },
       learnerName,
       postContext,
-      effectiveDifficulty
+      effectiveDifficulty,
+      conversationSummary
     );
   } catch (err) {
     console.error(
@@ -1833,6 +2220,8 @@ async function advanceFriendChat(
       messages: conversationWithReply,
       conversationEnded: false,
       conversationFeedback: null,
+      ...(conversationSummary ? { conversationSummary } : {}),
+      ...(summaryUpToCount ? { summaryUpToCount } : {}),
       updatedAt: new Date().toISOString(),
     });
   }
@@ -1912,6 +2301,790 @@ async function recordFinishedPostConversation(
         message: err?.message || "unknown",
       })
     );
+  }
+}
+
+type FalGeneratedImage = {
+  url: string;
+  content_type?: string | null;
+  file_name?: string | null;
+  file_size?: number | null;
+  width?: number | null;
+  height?: number | null;
+};
+
+type FalSeedreamResult = {
+  image: FalGeneratedImage;
+  seed?: number;
+  requestId?: string;
+};
+
+type FriendshipImageJobStatus = "pending" | "processing" | "completed" | "failed";
+
+type FriendshipImageJobRecord = {
+  friendshipId: string;
+  createdAtImageId: string;
+  userId: string;
+  friendId: string;
+  imageId: string;
+  status: FriendshipImageJobStatus;
+  userMessage: string;
+  aiReply: string;
+  prompt: string;
+  referenceImageUrl: string;
+  model: string;
+  historyWithRequest?: StoryMessage[];
+  createdAt: string;
+  updatedAt: string;
+  imageUrl?: string;
+  bucketName?: string;
+  bucketKey?: string;
+  contentType?: string;
+  width?: number;
+  height?: number;
+  falRequestId?: string;
+  falSeed?: number;
+  errorMessage?: string;
+};
+
+type FriendImageWorkerEvent = {
+  userId?: unknown;
+  friendId?: unknown;
+  imageId?: unknown;
+};
+
+type FriendImagePlan = {
+  imagePrompt: string;
+  aiReply: string;
+};
+
+function resolveFriendCharacterSheetUrl(friend: FriendRecord): string | undefined {
+  const character = findCharacter(friend.friendId);
+  return (
+    character?.characterSheetImageUrl ||
+    friend.characterSheetImageUrl ||
+    character?.avatarImageUrl ||
+    character?.avatarImageMdUrl ||
+    friend.avatarImageUrl ||
+    friend.avatarImageMdUrl ||
+    character?.avatarImageXsUrl ||
+    friend.avatarImageXsUrl
+  )?.trim();
+}
+
+function buildFriendImagePrompt(args: {
+  friend: FriendRecord;
+  requestText: string;
+  history: StoryMessage[];
+  learnerName?: string;
+}): string {
+  const recentConversation = args.history
+    .slice(-8)
+    .map((message) => {
+      const speaker = message.role === "user" ? "Student" : args.friend.characterName;
+      return `${speaker}: ${message.content}`;
+    })
+    .join("\n")
+    .trim();
+  return [
+    "Use the reference image as the identity source for the same fictional character.",
+    `Character name: ${args.friend.characterName}.`,
+    `Photo request: ${args.requestText}.`,
+    args.learnerName ? `This is a photo the character is sending to ${args.learnerName}.` : "",
+    recentConversation ? `Recent chat context:\n${recentConversation}` : "",
+    "Create a natural, photorealistic vertical smartphone photo or selfie that feels like it belongs in a private chat.",
+    "Use the reference image for identity. Do not describe physical traits, face, hair, eyes, body type, ethnicity, or age.",
+    "Describe the outfit/clothing, location, pose, activity, lighting, camera framing, mood, and small props in concrete detail.",
+    "No text, no captions, no watermark, no logos, no extra people, no nudity, and no explicit content.",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function buildFriendImagePlanFallback(args: {
+  friend: FriendRecord;
+  requestText: string;
+  history: StoryMessage[];
+  learnerName?: string;
+}): FriendImagePlan {
+  return {
+    imagePrompt: buildFriendImagePrompt(args),
+    aiReply: "I took this one for you.",
+  };
+}
+
+async function generateFriendImagePlan(args: {
+  friend: FriendRecord;
+  requestText: string;
+  history: StoryMessage[];
+  learnerName?: string;
+}): Promise<FriendImagePlan> {
+  const fallback = buildFriendImagePlanFallback(args);
+  const apiKey = await getOpenAIKey();
+  const model =
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
+  const timeoutMs = Number(process.env.FRIEND_IMAGE_PLAN_TIMEOUT_MS || 15000);
+  const isGpt5 = /gpt-5/i.test(model);
+  const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
+  const reasoningConfig = isGpt5
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || "low" }
+    : undefined;
+  const recentConversation = args.history
+    .slice(-10)
+    .map((message) => `${message.role === "user" ? "Student" : args.friend.characterName}: ${message.content}`)
+    .join("\n")
+    .trim();
+  const systemPrompt = `You prepare a private-chat image generation request for a fictional character.
+
+Return JSON only with:
+{
+  "imagePrompt": "English prompt for image generation",
+  "aiReply": "short natural in-character English reply that will accompany the photo"
+}
+
+Rules:
+- Analyze the user's photo request and recent conversation.
+- The image model will receive a reference image for character identity.
+- Do not describe physical identity traits: no face shape, hair, eye color, skin tone, body type, ethnicity, beauty, age, or resemblance.
+- Do describe outfit/clothing in concrete detail, location, pose, activity, lighting, camera framing, mood, and props.
+- Keep the image safe: no nudity, no explicit content, no minors in sexualized context, no text, no logos, no watermark.
+- Make the photo feel like a natural smartphone photo or selfie sent in a chat.
+- aiReply should be in character, casual, and under 16 words.`;
+  const userPrompt = [
+    `Character name: ${args.friend.characterName}`,
+    `Character role/persona: ${args.friend.aiRole}`,
+    args.learnerName ? `Learner name: ${args.learnerName}` : "",
+    recentConversation ? `Recent conversation:\n${recentConversation}` : "",
+    `Photo request from learner:\n${args.requestText}`,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), timeoutMs);
+  let raw = "";
+  try {
+    if (useResponses) {
+      const body: Record<string, any> = {
+        model,
+        instructions: systemPrompt,
+        input: [
+          {
+            role: "user",
+            content: [{ type: "input_text", text: userPrompt }],
+          },
+        ],
+        max_output_tokens: 700,
+      };
+      if (reasoningConfig) body.reasoning = reasoningConfig;
+      const res = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(body),
+        signal: ac.signal,
+      });
+      const payload: any = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const reason = payload?.error?.message || res.statusText;
+        throw new Error(`FRIEND_IMAGE_PLAN_HTTP_${res.status}_${reason}`);
+      }
+      if (Array.isArray(payload?.output)) {
+        for (const item of payload.output) {
+          if (item?.type === "message" && Array.isArray(item.content)) {
+            const texts = item.content
+              .filter((c: any) => c?.type === "output_text" && typeof c.text === "string")
+              .map((c: any) => c.text);
+            if (texts.length) {
+              raw = texts.join("\n");
+              break;
+            }
+          }
+        }
+      }
+      if (!raw && payload?.output_text) {
+        raw = payload.output_text;
+      }
+    } else {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          max_tokens: 700,
+        }),
+        signal: ac.signal,
+      });
+      if (!res.ok) {
+        const bodyTxt = await res.text();
+        throw new Error(`FRIEND_IMAGE_PLAN_HTTP_${res.status}_${bodyTxt.slice(0, 120)}`);
+      }
+      const data: any = await res.json();
+      raw = data.choices?.[0]?.message?.content || "";
+    }
+  } catch (err) {
+    if ((err as any)?.name === "AbortError") {
+      throw new Error("FRIEND_IMAGE_PLAN_TIMEOUT");
+    }
+    throw err;
+  } finally {
+    clearTimeout(to);
+  }
+
+  const cleaned = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+  const parsed = JSON.parse(cleaned);
+  const imagePrompt =
+    typeof parsed?.imagePrompt === "string" ? parsed.imagePrompt.trim() : "";
+  const aiReply =
+    typeof parsed?.aiReply === "string" ? parsed.aiReply.trim() : "";
+  if (!imagePrompt) {
+    return fallback;
+  }
+  return {
+    imagePrompt: imagePrompt.slice(0, 4000),
+    aiReply: (aiReply || fallback.aiReply).slice(0, 180),
+  };
+}
+
+async function callFalSeedreamLiteEdit(args: {
+  prompt: string;
+  referenceImageUrl: string;
+}): Promise<FalSeedreamResult> {
+  const apiKey = await getFalKey();
+  const timeoutMs = Number(process.env.FAL_IMAGE_TIMEOUT_MS || 25000);
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), timeoutMs);
+  try {
+    console.log(
+      JSON.stringify({
+        scope: "friends.images.fal.begin",
+        model: FAL_SEEDREAM_LITE_EDIT_MODEL,
+        referenceImageUrl: args.referenceImageUrl,
+        promptChars: args.prompt.length,
+      })
+    );
+    const response = await fetch(`https://fal.run/${FAL_SEEDREAM_LITE_EDIT_MODEL}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Key ${apiKey}`,
+      },
+      body: JSON.stringify({
+        prompt: args.prompt,
+        image_urls: [args.referenceImageUrl],
+        image_size: "portrait_4_3",
+        num_images: 1,
+        max_images: 1,
+        enable_safety_checker: true,
+      }),
+      signal: ac.signal,
+    });
+    const payload: any = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const detail =
+        payload?.detail ||
+        payload?.error?.message ||
+        payload?.message ||
+        response.statusText;
+      throw new Error(`FAL_IMAGE_HTTP_${response.status}_${String(detail).slice(0, 160)}`);
+    }
+    const image = Array.isArray(payload?.images) ? payload.images[0] : undefined;
+    if (!image?.url || typeof image.url !== "string") {
+      throw new Error("FAL_IMAGE_EMPTY_RESPONSE");
+    }
+    console.log(
+      JSON.stringify({
+        scope: "friends.images.fal.success",
+        model: FAL_SEEDREAM_LITE_EDIT_MODEL,
+        requestId: payload?.request_id || payload?.requestId,
+        imageCount: Array.isArray(payload?.images) ? payload.images.length : 0,
+      })
+    );
+    return {
+      image,
+      ...(typeof payload.seed === "number" ? { seed: payload.seed } : {}),
+      ...(typeof payload.request_id === "string"
+        ? { requestId: payload.request_id }
+        : typeof payload.requestId === "string"
+        ? { requestId: payload.requestId }
+        : {}),
+    };
+  } catch (err) {
+    if ((err as any)?.name === "AbortError") {
+      throw new Error("FAL_IMAGE_TIMEOUT");
+    }
+    console.error(
+      JSON.stringify({
+        scope: "friends.images.fal.error",
+        model: FAL_SEEDREAM_LITE_EDIT_MODEL,
+        message: (err as Error)?.message || "unknown",
+      })
+    );
+    throw err;
+  } finally {
+    clearTimeout(to);
+  }
+}
+
+function extensionForImageContentType(contentType: string): string {
+  const normalized = contentType.toLowerCase();
+  if (normalized.includes("jpeg") || normalized.includes("jpg")) return "jpg";
+  if (normalized.includes("webp")) return "webp";
+  if (normalized.includes("png")) return "png";
+  return "png";
+}
+
+async function downloadGeneratedImage(url: string): Promise<{ body: Buffer; contentType: string }> {
+  const timeoutMs = Number(process.env.FAL_IMAGE_DOWNLOAD_TIMEOUT_MS || 3500);
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { signal: ac.signal });
+    if (!response.ok) {
+      throw new Error(`FAL_IMAGE_DOWNLOAD_HTTP_${response.status}`);
+    }
+    const contentType = response.headers.get("content-type") || "image/png";
+    if (!contentType.toLowerCase().startsWith("image/")) {
+      throw new Error("FAL_IMAGE_DOWNLOAD_INVALID_CONTENT_TYPE");
+    }
+    const arrayBuffer = await response.arrayBuffer();
+    const body = Buffer.from(arrayBuffer);
+    const maxBytes = Number(process.env.FAL_IMAGE_MAX_BYTES || 12 * 1024 * 1024);
+    if (body.byteLength > maxBytes) {
+      throw new Error("FAL_IMAGE_DOWNLOAD_TOO_LARGE");
+    }
+    return { body, contentType };
+  } catch (err) {
+    if ((err as any)?.name === "AbortError") {
+      throw new Error("FAL_IMAGE_DOWNLOAD_TIMEOUT");
+    }
+    throw err;
+  } finally {
+    clearTimeout(to);
+  }
+}
+
+async function saveGeneratedFriendImage(args: {
+  userId: string;
+  friendId: string;
+  imageId: string;
+  createdAt: string;
+  userMessage: string;
+  aiReply: string;
+  historyWithRequest?: StoryMessage[];
+  prompt: string;
+  referenceImageUrl: string;
+  falResult: FalSeedreamResult;
+}): Promise<FriendshipImage> {
+  const downloaded = await downloadGeneratedImage(args.falResult.image.url);
+  const bucketName = getAssetsBucketName();
+  const extension = extensionForImageContentType(downloaded.contentType);
+  const bucketKey = [
+    "friendships",
+    safeAssetPathSegment(args.userId),
+    safeAssetPathSegment(args.friendId),
+    "images",
+    `${args.createdAt.replace(/[:.]/g, "-")}-${args.imageId}.${extension}`,
+  ].join("/");
+
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: bucketName,
+      Key: bucketKey,
+      Body: downloaded.body,
+      ContentType: downloaded.contentType,
+      CacheControl: "public, max-age=31536000, immutable",
+    })
+  );
+  console.log(
+    JSON.stringify({
+      scope: "friends.images.s3.saved",
+      bucketName,
+      bucketKey,
+      contentType: downloaded.contentType,
+      bytes: downloaded.body.byteLength,
+    })
+  );
+
+  const image: FriendshipImage = {
+    imageId: args.imageId,
+    friendId: args.friendId,
+    status: "completed",
+    imageUrl: publicAssetUrlForKey(bucketKey),
+    prompt: args.prompt,
+    referenceImageUrl: args.referenceImageUrl,
+    model: FAL_SEEDREAM_LITE_EDIT_MODEL,
+    bucketName,
+    bucketKey,
+    contentType: downloaded.contentType,
+    createdAt: args.createdAt,
+    ...(typeof args.falResult.image.width === "number" ? { width: args.falResult.image.width } : {}),
+    ...(typeof args.falResult.image.height === "number" ? { height: args.falResult.image.height } : {}),
+    ...(args.falResult.requestId ? { falRequestId: args.falResult.requestId } : {}),
+    ...(typeof args.falResult.seed === "number" ? { falSeed: args.falResult.seed } : {}),
+  };
+
+  await dynamo.send(
+    new PutCommand({
+      TableName: getFriendshipImagesTableName(),
+      Item: {
+        friendshipId: `${args.userId}#${args.friendId}`,
+        createdAtImageId: args.imageId,
+        userId: args.userId,
+        userMessage: args.userMessage,
+        aiReply: args.aiReply,
+        historyWithRequest: args.historyWithRequest || [],
+        status: "completed",
+        updatedAt: new Date().toISOString(),
+        sourceImageUrl: args.falResult.image.url,
+        ...image,
+      },
+    })
+  );
+  console.log(
+    JSON.stringify({
+      scope: "friends.images.record.saved",
+      imageId: args.imageId,
+      friendId: args.friendId,
+      imageUrl: image.imageUrl,
+    })
+  );
+
+  return image;
+}
+
+function publicFriendImageJob(record: FriendshipImageJobRecord): FriendImagePayload {
+  const image =
+    record.status === "completed" && record.imageUrl
+      ? {
+          imageId: record.imageId,
+          friendId: record.friendId,
+          status: record.status,
+          imageUrl: record.imageUrl,
+          prompt: record.prompt,
+          referenceImageUrl: record.referenceImageUrl,
+          model: record.model,
+          bucketName: record.bucketName || "",
+          bucketKey: record.bucketKey || "",
+          contentType: record.contentType || "image/png",
+          createdAt: record.createdAt,
+          ...(typeof record.width === "number" ? { width: record.width } : {}),
+          ...(typeof record.height === "number" ? { height: record.height } : {}),
+          ...(record.falRequestId ? { falRequestId: record.falRequestId } : {}),
+          ...(typeof record.falSeed === "number" ? { falSeed: record.falSeed } : {}),
+        }
+      : undefined;
+  return {
+    friendId: record.friendId,
+    imageId: record.imageId,
+    status: record.status,
+    userMessage: record.userMessage,
+    aiReply: record.aiReply,
+    ...(image ? { image } : {}),
+    ...(record.errorMessage ? { errorMessage: record.errorMessage } : {}),
+  };
+}
+
+function sanitizeFriendImageJobRecord(input: any): FriendshipImageJobRecord | undefined {
+  if (!input || typeof input !== "object") return undefined;
+  const status =
+    input.status === "pending" ||
+    input.status === "processing" ||
+    input.status === "completed" ||
+    input.status === "failed"
+      ? input.status
+      : undefined;
+  if (
+    typeof input.friendshipId !== "string" ||
+    typeof input.createdAtImageId !== "string" ||
+    typeof input.userId !== "string" ||
+    typeof input.friendId !== "string" ||
+    typeof input.imageId !== "string" ||
+    !status ||
+    typeof input.userMessage !== "string" ||
+    typeof input.aiReply !== "string" ||
+    typeof input.prompt !== "string" ||
+    typeof input.referenceImageUrl !== "string" ||
+    typeof input.model !== "string" ||
+    typeof input.createdAt !== "string" ||
+    typeof input.updatedAt !== "string"
+  ) {
+    return undefined;
+  }
+
+  return {
+    friendshipId: input.friendshipId,
+    createdAtImageId: input.createdAtImageId,
+    userId: input.userId,
+    friendId: input.friendId,
+    imageId: input.imageId,
+    status,
+    userMessage: input.userMessage,
+    aiReply: input.aiReply,
+    prompt: input.prompt,
+    referenceImageUrl: input.referenceImageUrl,
+    model: input.model,
+    historyWithRequest: sanitizeHistory(input.historyWithRequest),
+    createdAt: input.createdAt,
+    updatedAt: input.updatedAt,
+    ...(typeof input.imageUrl === "string" ? { imageUrl: input.imageUrl } : {}),
+    ...(typeof input.bucketName === "string" ? { bucketName: input.bucketName } : {}),
+    ...(typeof input.bucketKey === "string" ? { bucketKey: input.bucketKey } : {}),
+    ...(typeof input.contentType === "string" ? { contentType: input.contentType } : {}),
+    ...(typeof input.width === "number" ? { width: input.width } : {}),
+    ...(typeof input.height === "number" ? { height: input.height } : {}),
+    ...(typeof input.falRequestId === "string" ? { falRequestId: input.falRequestId } : {}),
+    ...(typeof input.falSeed === "number" ? { falSeed: input.falSeed } : {}),
+    ...(typeof input.errorMessage === "string" ? { errorMessage: input.errorMessage } : {}),
+  };
+}
+
+async function getFriendImageJobRecord(
+  userId: string,
+  friendId: string,
+  imageId: string
+): Promise<FriendshipImageJobRecord | undefined> {
+  const out = await dynamo.send(
+    new GetCommand({
+      TableName: getFriendshipImagesTableName(),
+      Key: {
+        friendshipId: `${userId}#${friendId}`,
+        createdAtImageId: imageId,
+      },
+    })
+  );
+  return sanitizeFriendImageJobRecord(out.Item);
+}
+
+async function getFriendImageJob(
+  userId: string,
+  friendId: string,
+  imageId: string
+): Promise<FriendImagePayload | undefined> {
+  const record = await getFriendImageJobRecord(userId, friendId, imageId);
+  return record ? publicFriendImageJob(record) : undefined;
+}
+
+async function listFriendImages(
+  userId: string,
+  friendId: string
+): Promise<FriendshipImage[]> {
+  const out = await dynamo.send(
+    new QueryCommand({
+      TableName: getFriendshipImagesTableName(),
+      KeyConditionExpression: "friendshipId = :friendshipId",
+      ExpressionAttributeValues: {
+        ":friendshipId": `${userId}#${friendId}`,
+      },
+    })
+  );
+  return (out.Items || [])
+    .map((item) => sanitizeFriendImageJobRecord(item))
+    .filter((record): record is FriendshipImageJobRecord =>
+      Boolean(record?.status === "completed" && record.imageUrl)
+    )
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
+    .map((record) => publicFriendImageJob(record).image)
+    .filter((image): image is FriendshipImage => !!image);
+}
+
+async function invokeFriendImageWorker(payload: {
+  userId: string;
+  friendId: string;
+  imageId: string;
+}): Promise<void> {
+  const functionName = process.env.FRIEND_IMAGE_WORKER_FUNCTION_NAME?.trim();
+  if (!functionName) {
+    throw new Error("FRIEND_IMAGE_WORKER_FUNCTION_NAME not set");
+  }
+  await lambda.send(
+    new InvokeCommand({
+      FunctionName: functionName,
+      InvocationType: "Event",
+      Payload: Buffer.from(JSON.stringify(payload)),
+    })
+  );
+}
+
+async function createFriendImageJob(
+  userId: string,
+  friendId: string,
+  body: FriendImageRequest,
+  learnerName?: string
+): Promise<FriendImagePayload> {
+  const friend = await resolveFriendRecord(userId, friendId);
+  if (!friend) {
+    throw new Error("FRIEND_NOT_FOUND");
+  }
+
+  const referenceImageUrl = resolveFriendCharacterSheetUrl(friend);
+  if (!referenceImageUrl) {
+    throw new Error("FRIEND_CHARACTER_SHEET_NOT_FOUND");
+  }
+
+  const requestedPrompt = sanitizeFriendChatText(body.prompt, 500);
+  const userMessage = requestedPrompt || "Can you send me a photo?";
+  const history = sanitizeHistory(body.history).slice(-FRIEND_HISTORY_LIMIT);
+  const historyWithRequest = appendHistoryEntry(history, {
+    role: "user",
+    content: userMessage,
+  }).slice(-FRIEND_HISTORY_LIMIT);
+  const prompt = buildFriendImagePrompt({
+    friend,
+    requestText: userMessage,
+    history,
+    learnerName,
+  });
+  const imageId = randomUUID();
+  const now = new Date().toISOString();
+  const aiReply = "Here, I took this for you.";
+
+  const record: FriendshipImageJobRecord = {
+    friendshipId: `${userId}#${friendId}`,
+    createdAtImageId: imageId,
+    userId,
+    friendId,
+    imageId,
+    status: "pending",
+    userMessage,
+    aiReply,
+    prompt,
+    referenceImageUrl,
+    model: FAL_SEEDREAM_LITE_EDIT_MODEL,
+    historyWithRequest,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await dynamo.send(
+    new PutCommand({
+      TableName: getFriendshipImagesTableName(),
+      Item: record,
+    })
+  );
+
+  return publicFriendImageJob(record);
+}
+
+async function markFriendImageJobFailed(
+  record: FriendshipImageJobRecord,
+  errorMessage: string
+): Promise<void> {
+  await dynamo.send(
+    new UpdateCommand({
+      TableName: getFriendshipImagesTableName(),
+      Key: {
+        friendshipId: record.friendshipId,
+        createdAtImageId: record.createdAtImageId,
+      },
+      UpdateExpression: "SET #status = :status, errorMessage = :errorMessage, updatedAt = :updatedAt",
+      ExpressionAttributeNames: {
+        "#status": "status",
+      },
+      ExpressionAttributeValues: {
+        ":status": "failed",
+        ":errorMessage": errorMessage.slice(0, 500),
+        ":updatedAt": new Date().toISOString(),
+      },
+    })
+  );
+}
+
+async function processFriendImageJob(
+  userId: string,
+  friendId: string,
+  imageId: string
+): Promise<void> {
+  const record = await getFriendImageJobRecord(userId, friendId, imageId);
+  if (!record) {
+    throw new Error("FRIEND_IMAGE_JOB_NOT_FOUND");
+  }
+  if (record.status === "completed") {
+    return;
+  }
+  try {
+    await dynamo.send(
+      new UpdateCommand({
+        TableName: getFriendshipImagesTableName(),
+        Key: {
+          friendshipId: record.friendshipId,
+          createdAtImageId: record.createdAtImageId,
+        },
+        UpdateExpression: "SET #status = :status, updatedAt = :updatedAt",
+        ExpressionAttributeNames: {
+          "#status": "status",
+        },
+        ExpressionAttributeValues: {
+          ":status": "processing",
+          ":updatedAt": new Date().toISOString(),
+        },
+      })
+    );
+    let plan: FriendImagePlan;
+    try {
+      const friend = await resolveFriendRecord(userId, friendId);
+      plan = friend
+        ? await generateFriendImagePlan({
+            friend,
+            requestText: record.userMessage,
+            history: record.historyWithRequest || [],
+          })
+        : { imagePrompt: record.prompt, aiReply: record.aiReply };
+    } catch (err) {
+      console.warn(
+        JSON.stringify({
+          scope: "friends.images.plan.fallback",
+          friendId,
+          imageId,
+          message: (err as Error)?.message || "unknown",
+        })
+      );
+      plan = {
+        imagePrompt: record.prompt,
+        aiReply: record.aiReply,
+      };
+    }
+
+    const falResult = await callFalSeedreamLiteEdit({
+      prompt: plan.imagePrompt,
+      referenceImageUrl: record.referenceImageUrl,
+    });
+    const image = await saveGeneratedFriendImage({
+      userId,
+      friendId,
+      imageId: record.imageId,
+      createdAt: record.createdAt,
+      userMessage: record.userMessage,
+      aiReply: plan.aiReply,
+      historyWithRequest: record.historyWithRequest,
+      prompt: plan.imagePrompt,
+      referenceImageUrl: record.referenceImageUrl,
+      falResult,
+    });
+    const conversationSnapshot: FriendConversationSnapshot = {
+      messages: appendHistoryEntry(record.historyWithRequest || [], {
+        role: "assistant",
+        content: plan.aiReply,
+        imageUrl: image.imageUrl,
+      }).slice(-FRIEND_HISTORY_LIMIT),
+      conversationEnded: false,
+      conversationFeedback: null,
+      updatedAt: new Date().toISOString(),
+    };
+
+    await touchFriendChat(userId, friendId, record.userMessage, false, conversationSnapshot);
+  } catch (err: any) {
+    await markFriendImageJobFailed(record, err?.message || "FRIEND_IMAGE_FAILED");
+    throw err;
   }
 }
 
@@ -3192,13 +4365,120 @@ Use B2 English.
   return raw.trim();
 }
 
+async function summarizeFriendConversation(
+  friend: FriendRecord,
+  priorSummary: string,
+  messages: StoryMessage[]
+): Promise<string> {
+  if (!messages.length) return priorSummary.trim();
+  const apiKey = await getOpenAIKey();
+  const model =
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
+  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
+  const isGpt5 = /gpt-5/i.test(model);
+  const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
+  const reasoningConfig = isGpt5
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || "low" }
+    : undefined;
+
+  const messagesText = messages
+    .map((m) => `${m.role === "user" ? "Student" : friend.characterName}: ${m.content}`)
+    .join("\n");
+
+  const systemPrompt = `You compress chat history into a concise running summary in English so a chat model can preserve long-term context across many turns. Keep concrete facts, names, decisions, ongoing topics, emotional tone, and any commitments either party made. Be neutral and factual. 140 words max. Output only the summary text.`;
+  const userPrompt = `Existing summary (may be empty):\n${priorSummary || "(none)"}\n\nNew messages to fold into the summary:\n${messagesText}\n\nReturn the updated summary as plain text.`;
+
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), timeoutMs);
+  let raw = "";
+  try {
+    if (useResponses) {
+      const body: Record<string, any> = {
+        model,
+        instructions: systemPrompt,
+        input: [
+          {
+            role: "user",
+            content: [{ type: "input_text", text: userPrompt }],
+          },
+        ],
+        max_output_tokens: Number(process.env.FRIEND_SUMMARY_MAX_TOKENS || 300),
+      };
+      if (reasoningConfig) body.reasoning = reasoningConfig;
+      const res = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(body),
+        signal: ac.signal,
+      });
+      const payload: any = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const reason = payload?.error?.message || res.statusText;
+        throw new Error(`FRIEND_SUMMARY_HTTP_${res.status}_${reason}`);
+      }
+      if (Array.isArray(payload?.output)) {
+        for (const item of payload.output) {
+          if (item?.type === "message" && Array.isArray(item.content)) {
+            const texts = item.content
+              .filter((c: any) => c?.type === "output_text" && typeof c.text === "string")
+              .map((c: any) => c.text);
+            if (texts.length) {
+              raw = texts.join("\n");
+              break;
+            }
+          }
+        }
+      }
+      if (!raw && payload?.output_text) {
+        raw = payload.output_text;
+      }
+    } else {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          max_tokens: Number(process.env.FRIEND_SUMMARY_MAX_TOKENS || 300),
+        }),
+        signal: ac.signal,
+      });
+      if (!res.ok) {
+        const bodyTxt = await res.text();
+        throw new Error(`FRIEND_SUMMARY_HTTP_${res.status}_${bodyTxt.slice(0, 120)}`);
+      }
+      const data: any = await res.json();
+      raw = data.choices?.[0]?.message?.content || "";
+    }
+  } catch (err) {
+    if ((err as any)?.name === "AbortError") {
+      throw new Error("FRIEND_SUMMARY_TIMEOUT");
+    }
+    throw err;
+  } finally {
+    clearTimeout(to);
+  }
+
+  return (raw || "").trim() || priorSummary.trim();
+}
+
 async function generateFriendReply(
   friend: FriendRecord,
   history: StoryMessage[],
   evaluation: { result: EvalResult; correctness: number },
   learnerName?: string,
   postContext?: FriendChatPostContext,
-  learnerDifficulty?: LearnerDifficulty
+  learnerDifficulty?: LearnerDifficulty,
+  conversationSummary?: string
 ): Promise<string> {
   const apiKey = await getOpenAIKey();
   const model =
@@ -3209,11 +4489,12 @@ async function generateFriendReply(
   const reasoningConfig = isGpt5
     ? { effort: process.env.OPENAI_REASONING_EFFORT || "low" }
     : undefined;
-  const conversation = history.slice(-FRIEND_HISTORY_LIMIT);
+  const conversation = history.slice(-FRIEND_RECENT_MESSAGES);
   const conversationText = conversation
     .map((msg) => `${msg.role === "user" ? "Student" : friend.characterName}: ${msg.content}`)
     .join("\n")
     .trim();
+  const summaryText = (conversationSummary || "").trim();
   const characterNotes = [
     `Character name: ${friend.characterName}`,
     `Original role: ${friend.aiRole}`,
@@ -3259,7 +4540,10 @@ Rules:
 - Treat attraction, romance, and light flirting between consenting adults as normal parts of conversation when appropriate for the character.
 `;
 
-  const userPrompt = `Recent conversation:\n${conversationText || "No prior conversation."}\n\nWrite the next in-character message in English.`;
+  const summarySection = summaryText
+    ? `Earlier conversation summary (older messages, condensed):\n${summaryText}\n\n`
+    : "";
+  const userPrompt = `${summarySection}Recent conversation:\n${conversationText || "No prior conversation."}\n\nWrite the next in-character message in English.`;
 
   console.log(
     JSON.stringify({
@@ -3268,6 +4552,7 @@ Rules:
       friendId: friend.friendId,
       postId: postContext?.postId,
       historyCount: conversation.length,
+      summaryChars: summaryText.length,
     })
   );
 

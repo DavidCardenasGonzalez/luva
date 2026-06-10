@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api/api';
+import { useAuth } from '../auth/AuthProvider';
 import { getLocalFriend } from '../friends/localFriends';
 import type { FriendCharacter } from './useFriends';
 
@@ -20,9 +21,23 @@ export type CharacterProfilePost = {
   updatedAt?: string;
 };
 
+export type FriendProfileImage = {
+  imageId: string;
+  friendId: string;
+  imageUrl: string;
+  prompt: string;
+  createdAt: string;
+  width?: number;
+  height?: number;
+};
+
 type FriendProfileResponse = {
   friend?: FriendCharacter;
   posts?: unknown[];
+};
+
+type FriendImagesResponse = {
+  items?: unknown[];
 };
 
 function asString(value: unknown): string | undefined {
@@ -101,9 +116,39 @@ function sanitizeProfilePosts(input: unknown): CharacterProfilePost[] {
     .sort((left, right) => left.order - right.order || left.postId.localeCompare(right.postId));
 }
 
+function sanitizeProfileImage(input: unknown): FriendProfileImage | null {
+  if (!input || typeof input !== 'object') return null;
+  const raw = input as Record<string, unknown>;
+  const imageId = asString(raw.imageId);
+  const friendId = asString(raw.friendId);
+  const imageUrl = normalizeUrl(raw.imageUrl);
+  const prompt = asString(raw.prompt) || '';
+  const createdAt = asString(raw.createdAt);
+  if (!imageId || !friendId || !imageUrl || !createdAt) return null;
+  return {
+    imageId,
+    friendId,
+    imageUrl,
+    prompt,
+    createdAt,
+    ...(typeof raw.width === 'number' ? { width: raw.width } : {}),
+    ...(typeof raw.height === 'number' ? { height: raw.height } : {}),
+  };
+}
+
+function sanitizeProfileImages(input: unknown): FriendProfileImage[] {
+  const rawItems = Array.isArray(input) ? input : [];
+  return rawItems
+    .map(sanitizeProfileImage)
+    .filter((image): image is FriendProfileImage => !!image)
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+}
+
 export function useFriendProfile(friendId?: string) {
+  const { isSignedIn, isLoading: authLoading } = useAuth();
   const [friend, setFriend] = useState<FriendCharacter>();
   const [posts, setPosts] = useState<CharacterProfilePost[]>([]);
+  const [images, setImages] = useState<FriendProfileImage[]>([]);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -112,6 +157,7 @@ export function useFriendProfile(friendId?: string) {
     if (!friendId) {
       setFriend(undefined);
       setPosts([]);
+      setImages([]);
       setLoading(false);
       setLoaded(true);
       setError(undefined);
@@ -127,24 +173,39 @@ export function useFriendProfile(friendId?: string) {
       );
       setFriend(response?.friend);
       setPosts(sanitizeProfilePosts(response?.posts));
+      if (isSignedIn) {
+        try {
+          const imagesResponse = await api.get<FriendImagesResponse>(
+            `/friends/${encodeURIComponent(friendId)}/images`
+          );
+          setImages(sanitizeProfileImages(imagesResponse?.items));
+        } catch {
+          setImages([]);
+        }
+      } else {
+        setImages([]);
+      }
     } catch (err: any) {
       const localFriend = await getLocalFriend(friendId);
       setFriend(localFriend);
       setPosts([]);
+      setImages([]);
       setError(localFriend ? undefined : err?.message || 'No pudimos cargar el perfil.');
     } finally {
       setLoading(false);
       setLoaded(true);
     }
-  }, [friendId]);
+  }, [friendId, isSignedIn]);
 
   useEffect(() => {
+    if (authLoading) return;
     void reload();
-  }, [reload]);
+  }, [authLoading, reload]);
 
   return {
     friend,
     posts,
+    images,
     loading,
     loaded,
     error,

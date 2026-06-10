@@ -9,6 +9,8 @@ export type LocalFriendChatMessage = {
   id: string;
   role: 'user' | 'assistant';
   text: string;
+  imageUri?: string;
+  imageUrl?: string;
 };
 
 export type LocalFriendConversationSourcePost = {
@@ -53,9 +55,17 @@ function sanitizeMessage(input: unknown): LocalFriendChatMessage | null {
   const raw = input as Record<string, unknown>;
   const id = asString(raw.id);
   const role = raw.role === 'user' || raw.role === 'assistant' ? raw.role : undefined;
-  const text = asString(raw.text);
-  if (!id || !role || !text) return null;
-  return { id, role, text };
+  const text = asString(raw.text) || '';
+  const imageUri = asString(raw.imageUri);
+  const imageUrl = asString(raw.imageUrl);
+  if (!id || !role || (!text && !imageUri && !imageUrl)) return null;
+  return {
+    id,
+    role,
+    text,
+    ...(imageUri ? { imageUri } : {}),
+    ...(imageUrl ? { imageUrl } : {}),
+  };
 }
 
 function sanitizeSourcePost(input: unknown): LocalFriendConversationSourcePost | undefined {
@@ -152,7 +162,8 @@ export function toFriendConversationSnapshot(
   return {
     messages: snapshot.messages.map((message) => ({
       role: message.role,
-      content: message.text,
+      content: message.text || (message.imageUri || message.imageUrl ? '[Photo]' : ''),
+      ...(message.imageUrl ? { imageUrl: message.imageUrl } : {}),
     })),
     conversationEnded: snapshot.conversationEnded,
     conversationFeedback: snapshot.conversationFeedback ?? null,

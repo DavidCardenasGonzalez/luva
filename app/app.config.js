@@ -105,6 +105,10 @@ module.exports = {
         UIBackgroundModes: ["audio"],
         NSMicrophoneUsageDescription:
           "Luva usa el micrófono para que puedas grabar tu voz mientras practicas ejercicios de habla inglesa y recibir comentarios sobre tu pronunciación.",
+        NSPhotoLibraryUsageDescription:
+          "Luva accede a tu galería para que puedas compartir fotos en la conversación con tu amigo virtual.",
+        NSCameraUsageDescription:
+          "Luva usa la cámara para que puedas tomar y compartir fotos en la conversación.",
         ...(metaConfigured
           ? {
               NSUserTrackingUsageDescription: metaTrackingPermission,
@@ -122,6 +126,7 @@ module.exports = {
       },
       package: androidPackage,
       versionCode: 12,
+      permissions: ["android.permission.READ_MEDIA_IMAGES", "android.permission.CAMERA"],
       intentFilters: [
         {
           action: "VIEW",

@@ -6,6 +6,8 @@ import {
   Image,
   KeyboardAvoidingView,
   Modal,
+  NativeTouchEvent,
+  PanResponder,
   Platform,
   Pressable,
   ScrollView,
@@ -15,6 +17,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useIsFocused } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -36,6 +39,8 @@ import {
   FriendChatPayload,
   FriendConversationFeedback,
   FriendConversationSnapshot,
+  getFriendPhoto,
+  requestFriendPhoto,
   retryFriendChatMessage,
   sendFriendChatMessage,
   useFriends,
@@ -72,6 +77,8 @@ type ChatMessage = {
   id: string;
   role: 'user' | 'assistant';
   text: string;
+  imageUri?: string;
+  imageUrl?: string;
 };
 
 function messagesFromRemoteConversation(snapshot?: FriendConversationSnapshot | null): ChatMessage[] {
@@ -79,13 +86,15 @@ function messagesFromRemoteConversation(snapshot?: FriendConversationSnapshot | 
   return messages
     .map((message, index) => {
       const text = typeof message.content === 'string' ? message.content.trim() : '';
-      if (!text || (message.role !== 'user' && message.role !== 'assistant')) {
+      const imageUrl = typeof message.imageUrl === 'string' ? message.imageUrl.trim() : '';
+      if ((!text && !imageUrl) || (message.role !== 'user' && message.role !== 'assistant')) {
         return null;
       }
       return {
         id: `remote-${index}-${message.role}`,
         role: message.role,
         text,
+        ...(imageUrl ? { imageUrl } : {}),
       };
     })
     .filter((message): message is ChatMessage => !!message);
@@ -123,6 +132,8 @@ type FriendChatSourcePost = {
 
 const FRIEND_CHAT_MESSAGE_COST = 1;
 const FRIEND_CHAT_VOICE_TOTAL_COST = FRIEND_CHAT_MESSAGE_COST + RECORDING_COST;
+const FRIEND_IMAGE_POLL_INTERVAL_MS = 2500;
+const FRIEND_IMAGE_POLL_TIMEOUT_MS = 120000;
 
 function formatJourneyPoints(points: number) {
   return Number.isInteger(points) ? String(points) : points.toFixed(1);
@@ -145,6 +156,128 @@ function removeLastUserExchange(currentMessages: ChatMessage[]): {
     ],
     removedMessages: currentMessages.slice(lastUserIndex, removeThroughIndex),
   };
+}
+
+function messagesToHistoryPayload(currentMessages: ChatMessage[]) {
+  return currentMessages
+    .map((message) => {
+      const content = message.text.trim() || (message.imageUri || message.imageUrl ? '[Photo]' : '');
+      if (!content && !message.imageUrl) return null;
+      return {
+        role: message.role,
+        content,
+        ...(message.imageUrl ? { imageUrl: message.imageUrl } : {}),
+      };
+    })
+    .filter(
+      (message): message is { role: 'user' | 'assistant'; content: string; imageUrl?: string } =>
+        Boolean(message)
+    );
+}
+
+function wait(ms: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+function getTouchDistance(touches: NativeTouchEvent[]) {
+  if (touches.length < 2) {
+    return 0;
+  }
+
+  const [first, second] = touches;
+  const dx = first.pageX - second.pageX;
+  const dy = first.pageY - second.pageY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function clampImageScale(value: number) {
+  return Math.max(1, Math.min(6, value));
+}
+
+function ZoomableChatImage({ uri }: { uri: string }) {
+  const [scale, setScale] = useState(1);
+  const baseScaleRef = useRef(1);
+  const startDistanceRef = useRef(0);
+
+  useEffect(() => {
+    setScale(1);
+    baseScaleRef.current = 1;
+    startDistanceRef.current = 0;
+  }, [uri]);
+
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: (event) => event.nativeEvent.touches.length > 1,
+        onMoveShouldSetPanResponder: (event) => event.nativeEvent.touches.length > 1,
+        onPanResponderGrant: (event) => {
+          startDistanceRef.current = getTouchDistance(event.nativeEvent.touches);
+          baseScaleRef.current = scale;
+        },
+        onPanResponderMove: (event) => {
+          const distance = getTouchDistance(event.nativeEvent.touches);
+          if (!distance || !startDistanceRef.current) {
+            return;
+          }
+
+          setScale(clampImageScale(baseScaleRef.current * (distance / startDistanceRef.current)));
+        },
+        onPanResponderRelease: () => {
+          baseScaleRef.current = scale;
+          startDistanceRef.current = 0;
+        },
+        onPanResponderTerminate: () => {
+          baseScaleRef.current = scale;
+          startDistanceRef.current = 0;
+        },
+      }),
+    [scale]
+  );
+
+  return (
+    <View
+      {...panResponder.panHandlers}
+      style={{
+        flex: 1,
+        overflow: 'hidden',
+        backgroundColor: '#020617',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Image
+        source={{ uri }}
+        style={{ width: '100%', height: '100%', transform: [{ scale }] }}
+        resizeMode="contain"
+      />
+      {scale > 1 ? (
+        <Pressable
+          onPress={() => {
+            setScale(1);
+            baseScaleRef.current = 1;
+            startDistanceRef.current = 0;
+          }}
+          style={({ pressed }) => ({
+            position: 'absolute',
+            left: 16,
+            top: 16,
+            width: 40,
+            height: 40,
+            borderRadius: 999,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: pressed ? 'rgba(15, 23, 42, 0.94)' : 'rgba(15, 23, 42, 0.78)',
+            borderWidth: 1,
+            borderColor: 'rgba(226, 232, 240, 0.18)',
+          })}
+        >
+          <MaterialIcons name="zoom-out-map" size={18} color="white" />
+        </Pressable>
+      ) : null}
+    </View>
+  );
 }
 
 const COLORS = {
@@ -430,6 +563,9 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const [retryingLastExchange, setRetryingLastExchange] = useState(false);
   const [showAssistanceModal, setShowAssistanceModal] = useState(false);
   const [showProfilePreview, setShowProfilePreview] = useState(false);
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const [photoRequestMode, setPhotoRequestMode] = useState(false);
+  const [selectedChatImageUri, setSelectedChatImageUri] = useState<string | null>(null);
   const [assistanceQuestion, setAssistanceQuestion] = useState('');
   const [assistanceAnswer, setAssistanceAnswer] = useState('');
   const [assistanceLoading, setAssistanceLoading] = useState(false);
@@ -635,7 +771,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         await deleteLocalFriendConversation(localConversationKey);
       }
 
-      const historyPayload = nextMessages.map(({ role, text }) => ({ role, content: text }));
+      const historyPayload = messagesToHistoryPayload(nextMessages);
       if (isSignedIn) {
         await retryFriendChatMessage(friendId, { history: historyPayload });
         await reload();
@@ -767,7 +903,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         post_id: sourcePost?.postId,
         history_message_count: messages.length,
       });
-      const historyPayload = messages.map(({ role, text }) => ({ role, content: text }));
+      const historyPayload = messagesToHistoryPayload(messages);
       const currentDifficulty = await readStoredEnglishDifficulty();
       setEnglishDifficulty(currentDifficulty);
       const payload = await finishFriendChat(
@@ -847,7 +983,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         selectedCharacter: existingDraft?.selectedCharacter ?? null,
         phraseSelections: existingDraft?.phraseSelections ?? [],
         speakingSummary: {
-          messages: messages.map(({ role, text }) => ({ role, content: text })),
+          messages: messagesToHistoryPayload(messages),
           completedRequirementIds: [],
         },
       });
@@ -889,7 +1025,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         question_word_count: trimmed.split(/\s+/).filter(Boolean).length,
         history_message_count: messages.length,
       });
-      const historyPayload = messages.map(({ role, text }) => ({ role, content: text }));
+      const historyPayload = messagesToHistoryPayload(messages);
       const assistanceBasePath = isSignedIn ? '/friends' : '/public/friends';
       const payload = await api.post<FriendAssistanceResponse>(
         `${assistanceBasePath}/${encodeURIComponent(friend.friendId)}/assist`,
@@ -973,32 +1109,38 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   }, [friend, messageTranslations]);
 
   const handleAdvance = useCallback(
-    async (transcript: string, sessionId?: string, inputMethod: 'text' | 'audio' = 'text') => {
+    async (
+      transcript: string,
+      sessionId?: string,
+      inputMethod: 'text' | 'audio' | 'image' = 'text',
+      imageData?: { uri: string; base64: string },
+    ) => {
       const trimmed = transcript.trim();
-      if (!trimmed) {
+      let messageSubmitted = false;
+      if (!trimmed && !imageData) {
         setErrorMessage('La transcripción llegó vacía. Intenta de nuevo.');
         setFlowState('idle');
-        return;
+        return false;
       }
       if (!friendId) {
         setErrorMessage('No encontramos este amigo.');
         setFlowState('idle');
-        return;
+        return false;
       }
       if (conversationEnded) {
         setErrorMessage('Esta conversación ya terminó.');
         setFlowState('idle');
-        return;
+        return false;
       }
       if (retryingLastExchange) {
         setErrorMessage('Espera a que termine el retry.');
         setFlowState('idle');
-        return;
+        return false;
       }
       if (coinsLoading) {
         setErrorMessage('Cargando tus monedas...');
         setFlowState('idle');
-        return;
+        return false;
       }
       if (!isUnlimited) {
         const ok = await spendCoins(
@@ -1009,24 +1151,28 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           setErrorMessage('Necesitas 1 moneda para enviar este mensaje.');
           navigation.navigate('Paywall', { source: 'friend_chat_message' });
           setFlowState('idle');
-          return;
+          return false;
         }
       }
 
       setErrorMessage(null);
       setAnalysis(null);
       setFlowState('evaluating');
+      const messageText = imageData ? '' : trimmed;
       const pendingUserMessage: ChatMessage = {
         id: `user-${Date.now()}`,
         role: 'user',
-        text: trimmed,
+        text: messageText,
+        ...(imageData ? { imageUri: imageData.uri } : {}),
       };
-      const historyPayload = [...messages, pendingUserMessage].map(({ role, text }) => ({
-        role,
-        content: text,
-      }));
+      // For images, exclude the current message from history — the backend adds it
+      // with the vision description. For text/audio, include it (backend deduplicates).
+      const historyPayload = imageData
+        ? messagesToHistoryPayload(messages)
+        : messagesToHistoryPayload([...messages, pendingUserMessage]);
       const messagesWithPendingUser = [...messages, pendingUserMessage];
       setMessages(messagesWithPendingUser);
+      messageSubmitted = true;
       void persistConversationSnapshot({
         nextMessages: messagesWithPendingUser,
         nextAnalysis: null,
@@ -1074,8 +1220,9 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         setEnglishDifficulty(currentDifficulty);
         const payload = await sendFriendChatMessage(friendId, {
           sessionId,
-          transcript: trimmed,
+          transcript: imageData ? '[Photo]' : trimmed,
           englishDifficulty: currentDifficulty,
+          ...(imageData ? { userImageBase64: imageData.base64 } : {}),
           ...(sourcePost?.postId ? { postId: sourcePost.postId } : {}),
           ...(sourcePost?.context ? { postContext: sourcePost.context } : {}),
           ...(sourcePost?.caption ? { postCaption: sourcePost.caption } : {}),
@@ -1105,7 +1252,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
             characterName: friend?.characterName,
             characterId: friend?.friendId,
             postId: sourcePost?.postId,
-            inputMethod,
+            inputMethod: inputMethod === 'image' ? undefined : inputMethod,
           });
         }
         const assistantMessage: ChatMessage = {
@@ -1127,8 +1274,10 @@ export default function FriendChatScreen({ navigation, route }: Props) {
             console.warn('[FriendChat] No se pudo guardar el mensaje local:', err?.message || err);
           });
         }
+        return true;
       } catch (err: any) {
         setErrorMessage(err?.message || 'No pudimos continuar la conversación.');
+        return messageSubmitted;
       } finally {
         setFlowState('idle');
       }
@@ -1149,9 +1298,172 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     ]
   );
 
+  const handlePickPhoto = useCallback(async () => {
+    setShowAttachMenu(false);
+    setPhotoRequestMode(false);
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      setErrorMessage('Necesitas permitir el acceso a la galería para enviar fotos.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.25,
+      base64: true,
+      allowsEditing: false,
+    });
+    if (result.canceled) return;
+    const asset = result.assets[0];
+    if (!asset.base64) {
+      setErrorMessage('No pudimos leer la imagen seleccionada.');
+      return;
+    }
+    await handleAdvance('', undefined, 'image', { uri: asset.uri, base64: asset.base64 });
+  }, [handleAdvance]);
+
+  const handleRequestPhoto = useCallback(async (photoPrompt: string): Promise<boolean> => {
+    setShowAttachMenu(false);
+    const trimmedPrompt = photoPrompt.trim();
+    if (!trimmedPrompt) {
+      setErrorMessage('Describe la foto que quieres pedir.');
+      return false;
+    }
+    if (!friendId) {
+      setErrorMessage('No encontramos este amigo.');
+      return false;
+    }
+    if (!isSignedIn) {
+      setErrorMessage('Inicia sesión para pedir fotos.');
+      return false;
+    }
+    if (conversationEnded) {
+      setErrorMessage('Esta conversación ya terminó.');
+      return false;
+    }
+    if (flowState !== 'idle' || retryingLastExchange) {
+      setErrorMessage('Espera a que termine la acción actual.');
+      return false;
+    }
+    if (coinsLoading) {
+      setErrorMessage('Cargando tus monedas...');
+      return false;
+    }
+    if (!isUnlimited) {
+      const ok = await spendCoins(
+        FRIEND_CHAT_MESSAGE_COST,
+        `friend-photo:${friendId}:${Date.now()}`
+      );
+      if (!ok) {
+        setErrorMessage('Necesitas 1 moneda para pedir una foto.');
+        navigation.navigate('Paywall', { source: 'friend_chat_message' });
+        return false;
+      }
+    }
+
+    const userMessage = trimmedPrompt;
+    const pendingUserMessage: ChatMessage = {
+      id: `user-photo-${Date.now()}`,
+      role: 'user',
+      text: userMessage,
+    };
+    const messagesWithRequest = [...messages, pendingUserMessage];
+    const userMessageIndex = messages.filter((message) => message.role === 'user').length + 1;
+
+    setErrorMessage(null);
+    setAnalysis(null);
+    setFlowState('generatingImage');
+    setMessages(messagesWithRequest);
+    void persistConversationSnapshot({
+      nextMessages: messagesWithRequest,
+      nextAnalysis: null,
+      nextConversationEnded: false,
+      nextConversationFeedback: null,
+    });
+    void trackMixpanelFriendEvent('friend_chat_photo_requested', {
+      friend_id: friendId,
+      character_name: friend?.characterName,
+      character_id: friend?.friendId,
+      post_id: sourcePost?.postId,
+      message_index: userMessageIndex,
+      history_message_count: messagesWithRequest.length,
+    });
+
+    try {
+      const startedJob = await requestFriendPhoto(friendId, {
+        prompt: userMessage,
+        history: messagesToHistoryPayload(messagesWithRequest),
+      });
+      let payload = startedJob;
+      const startedAt = Date.now();
+      while (payload.status !== 'completed' && payload.status !== 'failed') {
+        if (Date.now() - startedAt > FRIEND_IMAGE_POLL_TIMEOUT_MS) {
+          throw new Error('La foto sigue generándose. Intenta abrir el chat de nuevo en un momento.');
+        }
+        await wait(FRIEND_IMAGE_POLL_INTERVAL_MS);
+        payload = await getFriendPhoto(friendId, startedJob.imageId);
+      }
+      if (payload.status === 'failed') {
+        throw new Error(payload.errorMessage || 'No pudimos generar la foto.');
+      }
+      if (!payload.image?.imageUrl) {
+        throw new Error('La foto terminó sin una imagen válida.');
+      }
+      const assistantMessage: ChatMessage = {
+        id: `ai-photo-${Date.now()}`,
+        role: 'assistant',
+        text: payload.aiReply,
+        imageUrl: payload.image.imageUrl,
+      };
+      const messagesWithPhoto = [...messagesWithRequest, assistantMessage];
+      setMessages(messagesWithPhoto);
+      void persistConversationSnapshot({
+        nextMessages: messagesWithPhoto,
+        nextAnalysis: null,
+        nextConversationEnded: false,
+        nextConversationFeedback: null,
+      });
+      void trackMixpanelFriendEvent('friend_chat_photo_received', {
+        friend_id: friendId,
+        character_name: friend?.characterName,
+        character_id: friend?.friendId,
+        image_id: payload.image.imageId,
+        model: payload.image.model,
+      });
+      void reload();
+      return true;
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'No pudimos generar la foto.');
+      return false;
+    } finally {
+      setFlowState('idle');
+    }
+  }, [
+    coinsLoading,
+    conversationEnded,
+    flowState,
+    friend,
+    friendId,
+    isSignedIn,
+    isUnlimited,
+    messages,
+    navigation,
+    persistConversationSnapshot,
+    reload,
+    retryingLastExchange,
+    sourcePost?.postId,
+    spendCoins,
+  ]);
+
   const handleSendText = useCallback(
     async (textToSend: string) => {
       try {
+        if (photoRequestMode) {
+          const success = await handleRequestPhoto(textToSend);
+          if (success) {
+            setPhotoRequestMode(false);
+          }
+          return success;
+        }
         await handleAdvance(textToSend);
         return true;
       } catch (err: any) {
@@ -1160,7 +1472,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         return false;
       }
     },
-    [handleAdvance]
+    [handleAdvance, handleRequestPhoto, photoRequestMode]
   );
 
   useEffect(() => {
@@ -1301,6 +1613,8 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         return 'Transcribiendo...';
       case 'evaluating':
         return 'Analizando tu inglés...';
+      case 'generatingImage':
+        return 'Generando foto...';
       default:
         if (retryingLastExchange) {
           return 'Preparando reintento...';
@@ -1482,22 +1796,54 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                 {messages.map((msg) => {
                   const translationState = messageTranslations[msg.id];
                   const isAssistant = msg.role === 'assistant';
+                  const messageImageUri = msg.imageUrl || msg.imageUri;
+                  const canUseTextActions = isAssistant && msg.text.trim().length > 0;
                   return (
                     <View key={msg.id} style={{ alignSelf: isAssistant ? 'flex-start' : 'flex-end' }}>
                       <View
                         style={{
                           backgroundColor: isAssistant ? 'white' : COLORS.userBubble,
                           borderRadius: 16,
-                          paddingVertical: 10,
-                          paddingHorizontal: 14,
+                          paddingVertical: messageImageUri ? 8 : 10,
+                          paddingHorizontal: messageImageUri ? 8 : 14,
                           maxWidth: '80%',
                           borderWidth: isAssistant ? 1 : 0,
                           borderColor: COLORS.border,
                         }}
                       >
-                        <Text style={{ color: isAssistant ? COLORS.assistantText : 'white', lineHeight: 20 }}>
-                          {msg.text}
-                        </Text>
+                        {messageImageUri ? (
+                          <Pressable
+                            onPress={() => setSelectedChatImageUri(messageImageUri)}
+                            accessibilityRole="imagebutton"
+                            accessibilityLabel="Ver foto en pantalla completa"
+                            style={({ pressed }) => ({
+                              opacity: pressed ? 0.88 : 1,
+                            })}
+                          >
+                            <Image
+                              source={{ uri: messageImageUri }}
+                              style={{
+                                width: 220,
+                                height: 280,
+                                borderRadius: 12,
+                                backgroundColor: '#e2e8f0',
+                              }}
+                              resizeMode="cover"
+                            />
+                          </Pressable>
+                        ) : null}
+                        {msg.text.trim() ? (
+                          <Text
+                            style={{
+                              color: isAssistant ? COLORS.assistantText : 'white',
+                              lineHeight: 20,
+                              marginTop: messageImageUri ? 8 : 0,
+                              paddingHorizontal: messageImageUri ? 4 : 0,
+                            }}
+                          >
+                            {msg.text}
+                          </Text>
+                        ) : null}
                         {isAssistant && translationState?.text ? (
                           <>
                             <View style={{ height: 1, backgroundColor: COLORS.border, marginVertical: 10 }} />
@@ -1507,7 +1853,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                         {isAssistant && translationState?.error ? (
                           <Text style={{ marginTop: 8, color: '#dc2626', fontSize: 12 }}>{translationState.error}</Text>
                         ) : null}
-                        {isAssistant ? (
+                        {canUseTextActions ? (
                           <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 10 }}>
                             <Pressable
                               accessibilityLabel="Reproducir mensaje"
@@ -1563,7 +1909,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
             )}
           </View>
 
-          {flowState === 'evaluating' ? (
+          {flowState === 'evaluating' || flowState === 'generatingImage' ? (
             <View
               style={{
                 marginTop: 16,
@@ -1581,7 +1927,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                 resizeMode="contain"
               />
               <Text style={{ marginTop: 8, fontWeight: '700', color: '#1e293b' }}>
-                Analizando tu inglés...
+                {flowState === 'generatingImage' ? 'Generando foto...' : 'Analizando tu inglés...'}
               </Text>
             </View>
           ) : null}
@@ -1670,6 +2016,60 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                 </Pressable>
               </View>
             ) : null}
+            {showAttachMenu ? (
+              <View
+                style={{
+                  marginHorizontal: 12,
+                  marginBottom: 6,
+                  backgroundColor: 'white',
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: '#e2e8f0',
+                  overflow: 'hidden',
+                  alignSelf: 'flex-start',
+                  shadowColor: '#0f172a',
+                  shadowOpacity: 0.08,
+                  shadowRadius: 8,
+                  elevation: 3,
+                }}
+              >
+                <Pressable
+                  onPress={handlePickPhoto}
+                  style={({ pressed }) => ({
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 10,
+                    paddingHorizontal: 16,
+                    paddingVertical: 12,
+                    backgroundColor: pressed ? '#f1f5f9' : 'white',
+                  })}
+                >
+                  <MaterialIcons name="photo" size={20} color="#475569" />
+                  <Text style={{ color: '#1e293b', fontWeight: '600', fontSize: 14 }}>Enviar foto</Text>
+                </Pressable>
+                <View style={{ height: 1, backgroundColor: '#e2e8f0' }} />
+                <Pressable
+                  onPress={() => {
+                    setShowAttachMenu(false);
+                    setPhotoRequestMode(true);
+                    setErrorMessage(null);
+                  }}
+                  disabled={flowState !== 'idle' || retryingLastExchange}
+                  style={({ pressed }) => ({
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 10,
+                    paddingHorizontal: 16,
+                    paddingVertical: 12,
+                    backgroundColor: pressed ? '#f1f5f9' : 'white',
+                    opacity: flowState !== 'idle' || retryingLastExchange ? 0.6 : 1,
+                  })}
+                >
+                  <MaterialIcons name="add-photo-alternate" size={20} color="#475569" />
+                  <Text style={{ color: '#1e293b', fontWeight: '600', fontSize: 14 }}>Pedir foto</Text>
+                </Pressable>
+              </View>
+            ) : null}
             <StoryMessageComposer
               flowState={flowState}
               retryBlocked={retryingLastExchange}
@@ -1678,6 +2078,8 @@ export default function FriendChatScreen({ navigation, route }: Props) {
               onSendText={handleSendText}
               onRecordPressIn={handleRecordPressIn}
               onRecordRelease={handleRecordRelease}
+              onPlusPress={() => setShowAttachMenu((v) => !v)}
+              photoRequestMode={photoRequestMode}
             />
           </View>
         )}
@@ -1764,6 +2166,37 @@ export default function FriendChatScreen({ navigation, route }: Props) {
               </Pressable>
             </Pressable>
           </Pressable>
+        </Modal>
+
+        <Modal
+          visible={!!selectedChatImageUri}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setSelectedChatImageUri(null)}
+        >
+          <View style={{ flex: 1, backgroundColor: 'rgba(2, 6, 23, 0.96)' }}>
+            {selectedChatImageUri ? <ZoomableChatImage uri={selectedChatImageUri} /> : null}
+            <Pressable
+              onPress={() => setSelectedChatImageUri(null)}
+              accessibilityRole="button"
+              accessibilityLabel="Cerrar foto"
+              style={({ pressed }) => ({
+                position: 'absolute',
+                top: Math.max(insets.top, 16),
+                right: 16,
+                width: 46,
+                height: 46,
+                borderRadius: 999,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: pressed ? 'rgba(15, 23, 42, 0.96)' : 'rgba(15, 23, 42, 0.82)',
+                borderWidth: 1,
+                borderColor: 'rgba(226, 232, 240, 0.18)',
+              })}
+            >
+              <MaterialIcons name="close" size={22} color="white" />
+            </Pressable>
+          </View>
         </Modal>
 
         <Modal

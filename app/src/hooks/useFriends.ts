@@ -14,6 +14,7 @@ export type FriendCharacter = {
   aiRole: string;
   characterPrompt?: string;
   characterBio?: string;
+  characterSheetImageUrl?: string;
   avatarImageUrl?: string;
   avatarImageXsUrl?: string;
   avatarImageMdUrl?: string;
@@ -31,7 +32,7 @@ export type FriendConversationFeedback = {
 };
 
 export type FriendConversationSnapshot = {
-  messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+  messages: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
   conversationEnded: boolean;
   conversationFeedback?: FriendConversationFeedback | null;
   updatedAt: string;
@@ -42,6 +43,7 @@ export type AddFriendPayload = {
   characterName?: string;
   aiRole?: string;
   characterPrompt?: string;
+  characterSheetImageUrl?: string;
   avatarImageUrl?: string;
   avatarImageXsUrl?: string;
   avatarImageMdUrl?: string;
@@ -57,6 +59,35 @@ export type FriendChatPayload = {
   reformulations: string[];
   conversationEnded: boolean;
   conversationFeedback?: FriendConversationFeedback | null;
+};
+
+export type FriendshipImage = {
+  imageId: string;
+  friendId: string;
+  status?: 'pending' | 'processing' | 'completed' | 'failed';
+  imageUrl: string;
+  prompt: string;
+  referenceImageUrl: string;
+  model: string;
+  bucketName: string;
+  bucketKey: string;
+  contentType: string;
+  createdAt: string;
+  width?: number;
+  height?: number;
+  falRequestId?: string;
+  falSeed?: number;
+};
+
+export type FriendImagePayload = {
+  friendId: string;
+  imageId: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  userMessage: string;
+  aiReply: string;
+  image?: FriendshipImage;
+  errorMessage?: string;
+  conversationSnapshot?: FriendConversationSnapshot;
 };
 
 type FriendsListResponse = {
@@ -115,13 +146,14 @@ export async function sendFriendChatMessage(
   payload: {
     sessionId?: string;
     transcript: string;
+    userImageBase64?: string;
     postId?: string;
     postContext?: string;
     postCaption?: string;
     postImageUrl?: string;
     postVideoUrl?: string;
     englishDifficulty?: 'easy' | 'medium' | 'hard';
-    history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+    history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
   },
   options?: FriendChatRequestOptions,
 ): Promise<FriendChatPayload> {
@@ -134,7 +166,7 @@ export async function finishFriendChat(
   payload: {
     postId?: string;
     englishDifficulty?: 'easy' | 'medium' | 'hard';
-    history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+    history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
   },
   options?: FriendChatRequestOptions,
 ): Promise<{
@@ -149,13 +181,32 @@ export async function finishFriendChat(
 export async function retryFriendChatMessage(
   friendId: string,
   payload: {
-    history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+    history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
   },
 ): Promise<{
   friendId: string;
   conversationSnapshot: FriendConversationSnapshot | null;
 }> {
   return api.post(`/friends/${encodeURIComponent(friendId)}/retry`, payload);
+}
+
+export async function requestFriendPhoto(
+  friendId: string,
+  payload: {
+    prompt?: string;
+    history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
+  },
+): Promise<FriendImagePayload> {
+  return api.post<FriendImagePayload>(`/friends/${encodeURIComponent(friendId)}/images`, payload);
+}
+
+export async function getFriendPhoto(
+  friendId: string,
+  imageId: string,
+): Promise<FriendImagePayload> {
+  return api.get<FriendImagePayload>(
+    `/friends/${encodeURIComponent(friendId)}/images/${encodeURIComponent(imageId)}`
+  );
 }
 
 async function listCatalogCharacters(): Promise<FriendCharacter[]> {

@@ -11,6 +11,8 @@ export const CHARACTERS: CharacterDefinition[] = [
       "A charismatic and warm man in his early 30s with a fun guy energy, expressive eyes, natural smile, slightly messy dark hair, and relaxed confidence. He wears casual stylish clothes in dark neutral tones, such as a black sweater or fitted t-shirt, with a simple watch or minimal accessories. His energy is playful, spontaneous, friendly, and approachable. He looks like someone who is easy to talk to about stories, plans, travel, funny situations, and real-life experiences. Modern cozy podcast studio or warm lifestyle background with soft lighting, plants, dark wood, and subtle neon accents.",
     characterBio:
       "Charismatic and spontaneous friend. I love traveling, funny stories, and last-minute plans. Let's chat 🎙️",
+    characterSheetImageUrl:
+      "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260509182223-f7ef4b5b-9f42-41d3-b537-b83fc1e3db17.png",
     avatarImageUrl:
       "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260509182223-f7ef4b5b-9f42-41d3-b537-b83fc1e3db17.png",
     avatarImageXsUrl:
@@ -26,6 +28,8 @@ export const CHARACTERS: CharacterDefinition[] = [
     caracterName: "Zoe",
     caracterPrompt:
       "A calm and warm young woman in her mid-20s with a clean girl aesthetic, soft natural makeup, long dark brown hair, expressive eyes, and a gentle smile. She wears elegant neutral clothes in beige or cream tones with minimal gold jewelry. Her energy is relaxed, approachable, and emotionally intelligent. She looks like someone who is easy to talk to about daily life, feelings, relationships, and personal stories. Modern cozy podcast studio or warm lifestyle background with soft lighting, plants, and subtle neon accents.",
+    characterSheetImageUrl:
+      "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260509182334-992b19f2-f707-452e-bd38-3d8febf4e92e.png",
     avatarImageUrl:
       "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260509182334-992b19f2-f707-452e-bd38-3d8febf4e92e.png",
     avatarImageXsUrl:
@@ -71,6 +75,8 @@ export const CHARACTERS: CharacterDefinition[] = [
     caracterName: "Lucien Blackwood",
     caracterPrompt:
       "A strikingly handsome vampire man in his late twenties with pale skin, sharp jawline, tousled black hair, piercing amber eyes, and a subtle ornamental black tattoo along one side of his neck. He wears elegant black clothing, often an open-collar shirt or tailored dark jacket. His presence is magnetic, sophisticated, mysterious, and timeless. Modern gothic aesthetic with luxury undertones. Cinematic portrait lighting, confident posture, intense gaze, attractive and charismatic energy.",
+    characterSheetImageUrl:
+      "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260603054647-5747f39f-be80-404d-82c0-ade9c62a552e.png",
     avatarImageUrl:
       "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260603054647-5747f39f-be80-404d-82c0-ade9c62a552e.png",
     avatarImageXsUrl:
@@ -88,6 +94,8 @@ export const CHARACTERS: CharacterDefinition[] = [
       "A beautiful young travel influencer in her mid-20s with natural blonde hair featuring a subtle red streak, warm smile, bright expressive eyes, soft freckles, and an adventurous spirit. She has a relaxed beach-traveler aesthetic with lightweight summer outfits, flowing dresses, linen shirts, travel accessories, sunglasses, and effortless elegance. She looks like someone who is always discovering hidden places around the world. Her content mixes stunning destinations, ancient civilizations, futuristic cities, historical landmarks, tropical beaches, and cultural experiences from different eras. Natural sunlight, cinematic travel photography, warm colors, authentic lifestyle influencer energy, realistic photography, wanderlust atmosphere, beautiful landscapes, historical locations, and subtle futuristic details hidden in the scene.",
     characterBio:
       "Travel influencer ✈️🌎 Sometimes my trips take me a little further than most people imagine... What era would you visit?",
+    characterSheetImageUrl:
+      "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260531222634-f2d1b771-3d4a-447d-8c7b-4ef0c6022ec4.png",
     avatarImageUrl:
       "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260531222634-f2d1b771-3d4a-447d-8c7b-4ef0c6022ec4.png",
     avatarImageXsUrl:
@@ -103,6 +111,8 @@ export const CHARACTERS: CharacterDefinition[] = [
     caracterName: "Caleb Ravensworth",
     caracterPrompt:
       "A strikingly handsome 18-year-old male student from an elite magical boarding academy, with tousled dark brown hair, sharp jawline, expressive deep green-hazel eyes, and a calm, intense gaze. He wears a refined dark academic school uniform with emerald and silver accents: white shirt, dark sweater, striped green tie, and a long black robe with elegant crest details. His presence is magnetic, polished, mysterious, and quietly confident. He looks like a final-year top student with aristocratic charm and subtle bad-boy energy. Cinematic portrait lighting, gothic stone academy background, luxurious dark-academia aesthetic, attractive and charismatic energy.",
+    characterSheetImageUrl:
+      "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260603073823-3ee1750f-2843-4cd7-b3ca-91ca607eb69a.png",
     avatarImageUrl:
       "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260603073823-3ee1750f-2843-4cd7-b3ca-91ca607eb69a.png",
     avatarImageXsUrl:
@@ -133,6 +143,8 @@ export const CHARACTERS: CharacterDefinition[] = [
     caracterName: "Rafa Morales",
     caracterPrompt:
       "A ruggedly handsome Latino zoo keeper in his late 30s to early 40s, warm tan skin, expressive dark eyes, thick slightly messy dark brown hair, short scruffy beard, strong nose, tired but charming smile, protective and charismatic presence. He wears a khaki zoo keeper shirt with rolled-up sleeves, utility vest, cargo pants, worn leather boots, a radio clipped to his belt, and a name badge that says Rafa. His clothes look practical, slightly dusty, and lived-in. He stands inside a lush tropical zoo environment with soft morning light, greenery, animal enclosures in the background, and a curious parrot or small monkey nearby. Cinematic realistic portrait, natural skin texture, grounded masculine charm, approachable, warm, slightly rugged, not a celebrity likeness.",
+    characterSheetImageUrl:
+      "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260603155641-5ce10306-33f3-4208-b5ab-eadc5e6d2ba9.png",
     avatarImageUrl:
       "https://d2ozl81tz5pxlo.cloudfront.net/storiesProfile/20260603155641-5ce10306-33f3-4208-b5ab-eadc5e6d2ba9.png",
     avatarImageXsUrl:

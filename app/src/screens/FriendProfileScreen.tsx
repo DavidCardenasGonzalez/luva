@@ -18,11 +18,12 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { ResizeMode, Video } from 'expo-av';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { CharacterProfilePost, useFriendProfile } from '../hooks/useFriendProfile';
+import { CharacterProfilePost, FriendProfileImage, useFriendProfile } from '../hooks/useFriendProfile';
 import { getChatAvatar } from '../chatimages/chatAvatarMap';
 import { trackMixpanelFriendEvent } from '../marketing/mixpanelEvents';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FriendProfile'>;
+type ProfileTab = 'posts' | 'photos';
 
 const COLORS = {
   background: '#0b1224',
@@ -338,8 +339,10 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
   const { width } = useWindowDimensions();
-  const { friend, posts, loading, loaded, error, reload } = useFriendProfile(friendId);
+  const { friend, posts, images, loading, loaded, error, reload } = useFriendProfile(friendId);
   const [selectedPost, setSelectedPost] = useState<CharacterProfilePost | null>(null);
+  const [selectedImage, setSelectedImage] = useState<FriendProfileImage | null>(null);
+  const [activeTab, setActiveTab] = useState<ProfileTab>('posts');
   const [focusedPostId, setFocusedPostId] = useState<string | undefined>();
   const [avatarModalVisible, setAvatarModalVisible] = useState(false);
   const focusedFeedListRef = useRef<FlatList<CharacterProfilePost> | null>(null);
@@ -356,6 +359,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
     () => posts.reduce((sum, post) => sum + post.messageCount, 0),
     [posts],
   );
+  const profileGridItems = activeTab === 'posts' ? posts : images;
   const handleFocusedViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: Array<{ item?: CharacterProfilePost }> }) => {
       const post = viewableItems.find((viewableItem) => !!viewableItem.item)?.item;
@@ -601,9 +605,13 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
       </View>
 
       <FlatList
-        key="friend-profile-grid"
-        data={posts}
-        keyExtractor={(item) => item.postId}
+        key={`friend-profile-grid:${activeTab}`}
+        data={profileGridItems as Array<CharacterProfilePost | FriendProfileImage>}
+        keyExtractor={(item) =>
+          activeTab === 'posts'
+            ? (item as CharacterProfilePost).postId
+            : (item as FriendProfileImage).imageId
+        }
         numColumns={3}
         contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 18) + 20 }}
         ListHeaderComponent={
@@ -641,6 +649,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
 
                 <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-around', marginLeft: 18 }}>
                   <StatBlock label="posts" value={posts.length} />
+                  <StatBlock label="fotos" value={images.length} />
                   <StatBlock label="mensajes" value={totalPostMessages} />
                 </View>
               </View>
@@ -697,69 +706,126 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
 
             <View
               style={{
+                flexDirection: 'row',
                 borderTopWidth: 1,
                 borderBottomWidth: 1,
                 borderColor: COLORS.border,
-                paddingVertical: 12,
-                alignItems: 'center',
+                alignItems: 'stretch',
               }}
             >
-              <MaterialIcons name="grid-on" size={20} color={COLORS.accent} />
+              <Pressable
+                onPress={() => setActiveTab('posts')}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  paddingVertical: 12,
+                  alignItems: 'center',
+                  backgroundColor: pressed ? '#111827' : 'transparent',
+                  borderBottomWidth: activeTab === 'posts' ? 2 : 0,
+                  borderBottomColor: COLORS.accent,
+                })}
+              >
+                <MaterialIcons name="grid-on" size={20} color={activeTab === 'posts' ? COLORS.accent : COLORS.muted} />
+              </Pressable>
+              <Pressable
+                onPress={() => setActiveTab('photos')}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  paddingVertical: 12,
+                  alignItems: 'center',
+                  backgroundColor: pressed ? '#111827' : 'transparent',
+                  borderBottomWidth: activeTab === 'photos' ? 2 : 0,
+                  borderBottomColor: COLORS.accent,
+                })}
+              >
+                <MaterialIcons name="photo-camera" size={20} color={activeTab === 'photos' ? COLORS.accent : COLORS.muted} />
+              </Pressable>
             </View>
           </View>
         }
         renderItem={({ item, index }) => (
-          <Pressable
-            onPress={() => {
-              void trackMixpanelFriendEvent('friend_profile_post_opened', {
-                friend_id: friend.friendId,
-                character_name: friend.characterName,
-                post_id: item.postId,
-              });
-              setFocusedPostId(item.postId);
-              setSelectedPost(item);
-            }}
-            style={({ pressed }) => ({
-              width: tileSize,
-              height: tileSize,
-              marginRight: index % 3 === 2 ? 0 : tileGap,
-              marginBottom: tileGap,
-              opacity: pressed ? 0.82 : 1,
-              backgroundColor: COLORS.surface,
-            })}
-          >
-            <Image
-              source={{ uri: item.thumbnailUrl || item.imageUrl }}
-              style={{ width: '100%', height: '100%' }}
-              resizeMode="cover"
-            />
-            {item.videoUrl ? (
-              <View
-                pointerEvents="none"
-                style={{
-                  position: 'absolute',
-                  right: 8,
-                  bottom: 8,
-                  width: 28,
-                  height: 28,
-                  borderRadius: 999,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: 'rgba(2, 6, 23, 0.68)',
-                }}
-              >
-                <MaterialIcons name="play-arrow" size={20} color="white" />
-              </View>
-            ) : null}
-          </Pressable>
+          activeTab === 'posts' ? (
+            <Pressable
+              onPress={() => {
+                const post = item as CharacterProfilePost;
+                void trackMixpanelFriendEvent('friend_profile_post_opened', {
+                  friend_id: friend.friendId,
+                  character_name: friend.characterName,
+                  post_id: post.postId,
+                });
+                setFocusedPostId(post.postId);
+                setSelectedPost(post);
+              }}
+              style={({ pressed }) => ({
+                width: tileSize,
+                height: tileSize,
+                marginRight: index % 3 === 2 ? 0 : tileGap,
+                marginBottom: tileGap,
+                opacity: pressed ? 0.82 : 1,
+                backgroundColor: COLORS.surface,
+              })}
+            >
+              <Image
+                source={{ uri: (item as CharacterProfilePost).thumbnailUrl || (item as CharacterProfilePost).imageUrl }}
+                style={{ width: '100%', height: '100%' }}
+                resizeMode="cover"
+              />
+              {(item as CharacterProfilePost).videoUrl ? (
+                <View
+                  pointerEvents="none"
+                  style={{
+                    position: 'absolute',
+                    right: 8,
+                    bottom: 8,
+                    width: 28,
+                    height: 28,
+                    borderRadius: 999,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'rgba(2, 6, 23, 0.68)',
+                  }}
+                >
+                  <MaterialIcons name="play-arrow" size={20} color="white" />
+                </View>
+              ) : null}
+            </Pressable>
+          ) : (
+            <Pressable
+              onPress={() => {
+                const image = item as FriendProfileImage;
+                void trackMixpanelFriendEvent('friend_profile_photo_opened', {
+                  friend_id: friend.friendId,
+                  character_name: friend.characterName,
+                  image_id: image.imageId,
+                });
+                setSelectedImage(image);
+              }}
+              style={({ pressed }) => ({
+                width: tileSize,
+                height: tileSize,
+                marginRight: index % 3 === 2 ? 0 : tileGap,
+                marginBottom: tileGap,
+                opacity: pressed ? 0.82 : 1,
+                backgroundColor: COLORS.surface,
+              })}
+            >
+              <Image
+                source={{ uri: (item as FriendProfileImage).imageUrl }}
+                style={{ width: '100%', height: '100%' }}
+                resizeMode="cover"
+              />
+            </Pressable>
+          )
         )}
         ListEmptyComponent={
           <View style={{ padding: 24, alignItems: 'center' }}>
-            <MaterialIcons name="photo-library" size={34} color={COLORS.muted} />
-            <Text style={{ color: COLORS.text, fontWeight: '900', marginTop: 12 }}>Sin posts todavía</Text>
-            {/* <Text style={{ color: COLORS.muted, textAlign: 'center', marginTop: 6, lineHeight: 20 }}>
-              Cuando subas imagenes desde el admin, apareceran aqui como un perfil.
-            </Text> */}
+            <MaterialIcons
+              name={activeTab === 'posts' ? 'photo-library' : 'photo-camera'}
+              size={34}
+              color={COLORS.muted}
+            />
+            <Text style={{ color: COLORS.text, fontWeight: '900', marginTop: 12 }}>
+              {activeTab === 'posts' ? 'Sin posts todavía' : 'Sin fotos todavía'}
+            </Text>
           </View>
         }
       />
@@ -789,6 +855,51 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
           </Text>
           <Pressable
             onPress={() => setAvatarModalVisible(false)}
+            style={({ pressed }) => ({
+              position: 'absolute',
+              top: Math.max(insets.top, 16),
+              right: 16,
+              width: 46,
+              height: 46,
+              borderRadius: 999,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: pressed ? '#111827' : COLORS.surface,
+              borderWidth: 1,
+              borderColor: COLORS.border,
+            })}
+          >
+            <MaterialIcons name="close" size={22} color={COLORS.text} />
+          </Pressable>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={!!selectedImage}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSelectedImage(null)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(2, 6, 23, 0.94)' }}>
+          {selectedImage ? (
+            <ZoomableImage uri={selectedImage.imageUrl} fullScreen resizeMode="contain" />
+          ) : null}
+          <Text
+            style={{
+              position: 'absolute',
+              left: 18,
+              right: 18,
+              bottom: Math.max(insets.bottom, 18),
+              color: COLORS.text,
+              fontWeight: '900',
+              textAlign: 'center',
+            }}
+            numberOfLines={2}
+          >
+            {selectedImage?.prompt || friend.characterName}
+          </Text>
+          <Pressable
+            onPress={() => setSelectedImage(null)}
             style={({ pressed }) => ({
               position: 'absolute',
               top: Math.max(insets.top, 16),

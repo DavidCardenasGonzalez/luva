@@ -78,6 +78,7 @@ export interface CharacterDefinition {
   caracterName?: string;
   caracterPrompt?: string;
   characterBio?: string;
+  characterSheetImageUrl?: string;
   avatarImageUrl?: string;
   avatarImageXsUrl?: string;
   avatarImageMdUrl?: string;
@@ -153,6 +154,7 @@ export interface FriendCharacter {
   aiRole: string;
   characterPrompt?: string;
   characterBio?: string;
+  characterSheetImageUrl?: string;
   avatarImageUrl?: string;
   avatarImageXsUrl?: string;
   avatarImageMdUrl?: string;
@@ -165,12 +167,14 @@ export interface FriendCharacter {
 }
 
 export interface FriendConversationSnapshot {
-  messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+  messages: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
   conversationEnded: boolean;
   conversationFeedback?: {
     summary: string;
     improvements: string[];
   } | null;
+  conversationSummary?: string;
+  summaryUpToCount?: number;
   updatedAt: string;
 }
 
@@ -192,13 +196,14 @@ export interface FriendsListResponse {
 export interface FriendChatRequest {
   sessionId?: string;
   transcript: string;
+  userImageBase64?: string;
   postId?: string;
   postContext?: string;
   postCaption?: string;
   postImageUrl?: string;
   postVideoUrl?: string;
   englishDifficulty?: 'easy' | 'medium' | 'hard';
-  history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+  history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
 }
 
 export interface FriendChatPayload {
@@ -213,6 +218,40 @@ export interface FriendChatPayload {
     summary: string;
     improvements: string[];
   } | null;
+}
+
+export interface FriendImageRequest {
+  prompt?: string;
+  history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
+}
+
+export interface FriendshipImage {
+  imageId: string;
+  friendId: string;
+  status?: 'pending' | 'processing' | 'completed' | 'failed';
+  imageUrl: string;
+  prompt: string;
+  referenceImageUrl: string;
+  model: string;
+  bucketName: string;
+  bucketKey: string;
+  contentType: string;
+  createdAt: string;
+  width?: number;
+  height?: number;
+  falRequestId?: string;
+  falSeed?: number;
+}
+
+export interface FriendImagePayload {
+  friendId: string;
+  imageId: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  userMessage: string;
+  aiReply: string;
+  image?: FriendshipImage;
+  errorMessage?: string;
+  conversationSnapshot?: FriendConversationSnapshot;
 }
 
 export interface TranslationRequest {
