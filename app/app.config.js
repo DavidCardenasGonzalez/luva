@@ -8,12 +8,16 @@ const appEnv = (process.env.APP_ENV || process.env.NODE_ENV || "development")
   .toLowerCase();
 const isProduction = appEnv === "production";
 const envFile = path.join(__dirname, `.env.${appEnv}`);
+const baseEnvFile = path.join(__dirname, ".env");
+const baseEnv = fs.existsSync(baseEnvFile) ? dotenv.parse(fs.readFileSync(baseEnvFile)) : {};
 
 if (fs.existsSync(envFile)) {
   dotenv.config({ path: envFile });
 } else if (isProduction || !process.env.APP_ENV) {
   dotenv.config();
 }
+
+const getRevenueCatEnv = (key) => process.env[key] || baseEnv[key];
 
 const metaAppId = process.env.META_APP_ID?.trim();
 const metaClientToken = process.env.META_CLIENT_TOKEN?.trim();
@@ -151,13 +155,13 @@ module.exports = {
       COGNITO_REGION: process.env.COGNITO_REGION,
       REDIRECT_URI: process.env.REDIRECT_URI || `${appScheme}://callback`,
       REVENUECAT_IOS_API_KEY:
-        process.env.REVENUECAT_IOS_API_KEY ||
+        getRevenueCatEnv("REVENUECAT_IOS_API_KEY") ||
         "test_McxcjSSwciXGjgWNQzomMYBDQXe",
       REVENUECAT_ANDROID_API_KEY:
-        process.env.REVENUECAT_ANDROID_API_KEY ||
+        getRevenueCatEnv("REVENUECAT_ANDROID_API_KEY") ||
         "test_McxcjSSwciXGjgWNQzomMYBDQXe",
       REVENUECAT_ENTITLEMENT_ID:
-        process.env.REVENUECAT_ENTITLEMENT_ID || "Luva Pro",
+        getRevenueCatEnv("REVENUECAT_ENTITLEMENT_ID") || "Luva Pro",
       META_ENABLED: metaConfigured,
       META_APP_ID: metaAppId,
       META_DISPLAY_NAME: metaDisplayName,

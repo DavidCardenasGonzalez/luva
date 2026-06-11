@@ -1,9 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../api/api';
-import {
-  getLatestLocalFriendConversationForFriend,
-  toFriendConversationSnapshot,
-} from './localFriendConversations';
 
 export type LocalFriendCharacter = {
   friendId: string;
@@ -20,6 +16,8 @@ export type LocalFriendCharacter = {
   lastUserMessage?: string;
   messageCount?: number;
   conversationCount?: number;
+  affinityPoints?: number;
+  friendshipContext?: string;
 };
 
 export type LocalAddFriendPayload = {
@@ -31,6 +29,7 @@ export type LocalAddFriendPayload = {
   avatarImageUrl?: string;
   avatarImageXsUrl?: string;
   avatarImageMdUrl?: string;
+  friendshipContext?: string;
   lastMessageAt?: string;
   lastUserMessage?: string;
   messageCount?: number;
@@ -46,11 +45,13 @@ export type LocalAddFriendPayload = {
   };
 };
 
-type FriendsListResponse = {
-  items?: LocalFriendCharacter[];
+type SyncFriendResponse = {
+  friend?: LocalFriendCharacter;
 };
 
 const LOCAL_FRIENDS_STORAGE_KEY = '@luva/local-friends';
+const FRIENDSHIP_CONTEXT_MAX_CHARS = 1200;
+const FRIENDSHIP_CONTEXT_MAX_PARAGRAPHS = 2;
 
 function asString(value: unknown): string | undefined {
   return typeof value === 'string' ? value.trim() || undefined : undefined;
@@ -64,6 +65,18 @@ function asFiniteNumber(value: unknown): number | undefined {
       ? Number(value.trim())
       : Number.NaN;
   return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function normalizeFriendshipContext(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const paragraphs = value
+    .replace(/\r/g, '\n')
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.replace(/\s*\n\s*/g, ' ').replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .slice(0, FRIENDSHIP_CONTEXT_MAX_PARAGRAPHS);
+  const normalized = paragraphs.join('\n\n').slice(0, FRIENDSHIP_CONTEXT_MAX_CHARS).trim();
+  return normalized || undefined;
 }
 
 /**
@@ -93,6 +106,8 @@ function sanitizeLocalFriend(input: unknown): LocalFriendCharacter | null {
     return null;
   }
 
+  const friendshipContext = normalizeFriendshipContext(raw.friendshipContext);
+
   return {
     friendId,
     characterName,
@@ -112,6 +127,10 @@ function sanitizeLocalFriend(input: unknown): LocalFriendCharacter | null {
     ...(asFiniteNumber(raw.conversationCount) !== undefined
       ? { conversationCount: Math.max(0, Math.floor(asFiniteNumber(raw.conversationCount)!)) }
       : {}),
+    ...(asFiniteNumber(raw.affinityPoints) !== undefined
+      ? { affinityPoints: Math.max(0, Math.floor(asFiniteNumber(raw.affinityPoints)!)) }
+      : {}),
+    ...(friendshipContext ? { friendshipContext } : {}),
   };
 }
 
@@ -158,6 +177,7 @@ function buildLocalFriendFromPayload(
   const characterPrompt = asString(payload.characterPrompt) || existing?.characterPrompt;
   const characterSheetImageUrl =
     asString(payload.characterSheetImageUrl) || existing?.characterSheetImageUrl;
+  const friendshipContext = normalizeFriendshipContext(payload.friendshipContext) || existing?.friendshipContext;
 
   return {
     friendId: characterId,
@@ -180,18 +200,20 @@ function buildLocalFriendFromPayload(
     ...(existing?.lastUserMessage ? { lastUserMessage: existing.lastUserMessage } : {}),
     ...(typeof existing?.messageCount === 'number' ? { messageCount: existing.messageCount } : {}),
     ...(typeof existing?.conversationCount === 'number' ? { conversationCount: existing.conversationCount } : {}),
+    ...(typeof existing?.affinityPoints === 'number' ? { affinityPoints: existing.affinityPoints } : {}),
+    ...(friendshipContext ? { friendshipContext } : {}),
   };
 }
 
-async function buildSyncPayload(friend: LocalFriendCharacter): Promise<Record<string, unknown>> {
-  const latestConversation = await getLatestLocalFriendConversationForFriend(friend.friendId);
+function buildSyncPayload(friend: LocalFriendCharacter): Record<string, unknown> {
   return {
     characterId: friend.friendId,
     ...(friend.lastMessageAt ? { lastMessageAt: friend.lastMessageAt } : {}),
     ...(friend.lastUserMessage ? { lastUserMessage: friend.lastUserMessage } : {}),
     ...(typeof friend.messageCount === 'number' ? { messageCount: friend.messageCount } : {}),
     ...(typeof friend.conversationCount === 'number' ? { conversationCount: friend.conversationCount } : {}),
-    ...(latestConversation ? { conversationSnapshot: toFriendConversationSnapshot(latestConversation) } : {}),
+    ...(typeof friend.affinityPoints === 'number' ? { affinityPoints: friend.affinityPoints } : {}),
+    ...(friend.friendshipContext ? { friendshipContext: friend.friendshipContext } : {}),
   };
 }
 
@@ -217,6 +239,10 @@ function normalizeFriendForLocalStorage(
       : {}),
     messageCount: Math.max(0, Math.floor(existing?.messageCount ?? friend.messageCount ?? 0)),
     conversationCount: Math.max(0, Math.floor(existing?.conversationCount ?? friend.conversationCount ?? 0)),
+    affinityPoints: Math.max(0, Math.floor(existing?.affinityPoints ?? friend.affinityPoints ?? 0)),
+    ...(friend.friendshipContext || existing?.friendshipContext
+      ? { friendshipContext: friend.friendshipContext || existing?.friendshipContext }
+      : {}),
   };
 }
 
@@ -280,7 +306,11 @@ export async function recordLocalFriendMessageSent(
 
 export async function recordLocalFriendConversationFinished(
   friend: LocalFriendCharacter,
+  affinityPointsEarned?: number,
+  friendshipContext?: string,
 ): Promise<LocalFriendCharacter> {
+  const earnedAffinity = Math.max(0, Math.floor(affinityPointsEarned ?? 0));
+  const normalizedFriendshipContext = normalizeFriendshipContext(friendshipContext);
   return updateLocalFriend(friend, (current) => {
     const now = new Date().toISOString();
     return {
@@ -289,6 +319,23 @@ export async function recordLocalFriendConversationFinished(
       lastMessageAt: now,
       messageCount: Math.max(0, Math.floor(current.messageCount ?? 0)) + 1,
       conversationCount: Math.max(0, Math.floor(current.conversationCount ?? 0)) + 1,
+      affinityPoints: Math.max(0, Math.floor(current.affinityPoints ?? 0)) + earnedAffinity,
+      ...(normalizedFriendshipContext ? { friendshipContext: normalizedFriendshipContext } : {}),
+    };
+  });
+}
+
+export async function addLocalFriendAffinityPoints(
+  friend: LocalFriendCharacter,
+  points: number,
+): Promise<LocalFriendCharacter> {
+  const earnedAffinity = Math.max(0, Math.floor(points || 0));
+  return updateLocalFriend(friend, (current) => {
+    const now = new Date().toISOString();
+    return {
+      ...current,
+      updatedAt: now,
+      affinityPoints: Math.max(0, Math.floor(current.affinityPoints ?? 0)) + earnedAffinity,
     };
   });
 }
@@ -328,27 +375,75 @@ export function mergeFriendLists(
 ): LocalFriendCharacter[] {
   const byId = new Map<string, LocalFriendCharacter>();
   localFriends.forEach((friend) => byId.set(friend.friendId, friend));
-  remoteFriends.forEach((friend) => byId.set(friend.friendId, friend));
+  remoteFriends.forEach((friend) => {
+    const existing = byId.get(friend.friendId);
+    if (!existing) {
+      byId.set(friend.friendId, friend);
+      return;
+    }
+
+    const createdAt = isEpochTimestamp(existing.createdAt)
+      ? friend.createdAt
+      : isEpochTimestamp(friend.createdAt)
+      ? existing.createdAt
+      : existing.createdAt < friend.createdAt
+      ? existing.createdAt
+      : friend.createdAt;
+    const updatedAt = latestIsoTimestamp(existing.updatedAt, friend.updatedAt) || friend.updatedAt;
+    const lastMessageAt = latestIsoTimestamp(existing.lastMessageAt, friend.lastMessageAt);
+
+    byId.set(friend.friendId, {
+      ...existing,
+      ...friend,
+      createdAt,
+      updatedAt,
+      ...(lastMessageAt ? { lastMessageAt } : {}),
+      ...(existing.lastUserMessage || friend.lastUserMessage
+        ? { lastUserMessage: friend.lastUserMessage || existing.lastUserMessage }
+        : {}),
+      messageCount: Math.max(existing.messageCount ?? 0, friend.messageCount ?? 0),
+      conversationCount: Math.max(existing.conversationCount ?? 0, friend.conversationCount ?? 0),
+      affinityPoints: Math.max(existing.affinityPoints ?? 0, friend.affinityPoints ?? 0),
+      ...(friend.friendshipContext || existing.friendshipContext
+        ? { friendshipContext: friend.friendshipContext || existing.friendshipContext }
+        : {}),
+    });
+  });
   return [...byId.values()].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
 }
 
-export async function syncLocalFriendsToRemote(): Promise<number> {
-  const localFriends = await readLocalFriends();
+function latestIsoTimestamp(...values: Array<string | undefined>): string | undefined {
+  return values
+    .filter((value): value is string => Boolean(value && Number.isFinite(Date.parse(value))))
+    .sort((left, right) => Date.parse(right) - Date.parse(left))[0];
+}
+
+export async function syncLocalFriendsToRemote(friendIds?: string[]): Promise<number> {
+  const requestedIds = new Set((friendIds || []).map((id) => id.trim()).filter(Boolean));
+  const localFriends = (await readLocalFriends()).filter((friend) => {
+    return requestedIds.size ? requestedIds.has(friend.friendId) : true;
+  });
   if (!localFriends.length) return 0;
 
-  const syncedFriendIds: string[] = [];
+  const syncedFriends: LocalFriendCharacter[] = [];
   for (const friend of localFriends) {
     try {
-      await api.post<FriendsListResponse>('/friends', await buildSyncPayload(friend));
-      syncedFriendIds.push(friend.friendId);
+      const response = await api.post<SyncFriendResponse>('/friends', buildSyncPayload(friend));
+      syncedFriends.push(response?.friend ? mergeFriendLists([response.friend], [friend])[0] : friend);
     } catch (err: any) {
       console.warn('[Friends] No se pudo sincronizar amigo local:', err?.message || err);
     }
   }
 
-  if (syncedFriendIds.length) {
-    await removeLocalFriends(syncedFriendIds);
+  if (syncedFriends.length) {
+    const allFriends = await readLocalFriends();
+    const byId = new Map(allFriends.map((friend) => [friend.friendId, friend]));
+    syncedFriends.forEach((friend) => {
+      const existing = byId.get(friend.friendId);
+      byId.set(friend.friendId, existing ? mergeFriendLists([friend], [existing])[0] : friend);
+    });
+    await writeLocalFriends([...byId.values()]);
   }
 
-  return syncedFriendIds.length;
+  return syncedFriends.length;
 }

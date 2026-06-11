@@ -15,6 +15,8 @@ type Props = {
   onRecordRelease: () => void | Promise<void>;
   onPlusPress?: () => void;
   photoRequestMode?: boolean;
+  text?: string;
+  onTextChange?: (text: string) => void;
 };
 
 export default function StoryMessageComposer({
@@ -27,10 +29,14 @@ export default function StoryMessageComposer({
   onRecordRelease,
   onPlusPress,
   photoRequestMode,
+  text: controlledText,
+  onTextChange,
 }: Props) {
-  const [text, setText] = useState('');
+  const [internalText, setInternalText] = useState('');
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const insets = useSafeAreaInsets();
+  const text = controlledText ?? internalText;
+  const setText = onTextChange ?? setInternalText;
   
   useEffect(() => {
     const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));

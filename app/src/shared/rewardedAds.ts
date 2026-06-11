@@ -75,6 +75,7 @@ export const showRewardedAd = ({
     let done = false;
     let earnedReward = false;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let closeTimeoutId: ReturnType<typeof setTimeout> | null = null;
     let unsubscribeLoaded: (() => void) | null = null;
     let unsubscribeClosed: (() => void) | null = null;
     let unsubscribeError: (() => void) | null = null;
@@ -88,10 +89,15 @@ export const showRewardedAd = ({
       unsubscribeError?.();
       unsubscribeReward?.();
       if (timeoutId) clearTimeout(timeoutId);
+      if (closeTimeoutId) clearTimeout(closeTimeoutId);
       resolve(granted);
     };
 
     unsubscribeLoaded = rewarded.addAdEventListener(RewardedAdEventType.LOADED, () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
       rewarded.show().catch(() => finish(failOpen));
     });
 
@@ -100,7 +106,7 @@ export const showRewardedAd = ({
     });
 
     unsubscribeClosed = rewarded.addAdEventListener(AdEventType.CLOSED, () => {
-      finish(earnedReward);
+      closeTimeoutId = setTimeout(() => finish(earnedReward), 400);
     });
 
     unsubscribeError = rewarded.addAdEventListener(AdEventType.ERROR, () => {

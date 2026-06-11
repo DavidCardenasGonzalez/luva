@@ -23,12 +23,25 @@ export type FriendCharacter = {
   lastMessageAt?: string;
   messageCount?: number;
   conversationCount?: number;
+  affinityPoints?: number;
+  friendshipContext?: string;
   conversationSnapshot?: FriendConversationSnapshot;
 };
 
 export type FriendConversationFeedback = {
   summary: string;
   improvements: string[];
+};
+
+export type FriendAffinityUpdate = {
+  pointsEarned: number;
+  qualityMultiplier: number;
+  previousPoints: number;
+  totalPoints: number;
+  previousLevel: number;
+  level: number;
+  levelName: string;
+  leveledUp: boolean;
 };
 
 export type FriendConversationSnapshot = {
@@ -47,6 +60,7 @@ export type AddFriendPayload = {
   avatarImageUrl?: string;
   avatarImageXsUrl?: string;
   avatarImageMdUrl?: string;
+  friendshipContext?: string;
   conversationSnapshot?: FriendConversationSnapshot;
 };
 
@@ -57,6 +71,7 @@ export type FriendChatPayload = {
   result: 'correct' | 'partial' | 'incorrect';
   errors: string[];
   reformulations: string[];
+  feedbackType?: 'correction' | 'translation_help';
   conversationEnded: boolean;
   conversationFeedback?: FriendConversationFeedback | null;
 };
@@ -153,6 +168,7 @@ export async function sendFriendChatMessage(
     postImageUrl?: string;
     postVideoUrl?: string;
     englishDifficulty?: 'easy' | 'medium' | 'hard';
+    friendshipContext?: string;
     history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
   },
   options?: FriendChatRequestOptions,
@@ -166,6 +182,7 @@ export async function finishFriendChat(
   payload: {
     postId?: string;
     englishDifficulty?: 'easy' | 'medium' | 'hard';
+    friendshipContext?: string;
     history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
   },
   options?: FriendChatRequestOptions,
@@ -173,6 +190,8 @@ export async function finishFriendChat(
   friendId: string;
   conversationEnded: boolean;
   conversationFeedback: FriendConversationFeedback | null;
+  affinity?: FriendAffinityUpdate | null;
+  friendshipContext?: string;
 }> {
   const basePath = options?.anonymous ? '/public/friends' : '/friends';
   return api.post(`${basePath}/${encodeURIComponent(friendId)}/finish`, payload);

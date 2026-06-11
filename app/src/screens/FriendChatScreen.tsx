@@ -17,6 +17,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useIsFocused } from '@react-navigation/native';
@@ -36,6 +37,7 @@ import useAudioRecorder from '../shared/useAudioRecorder';
 import useUploadToS3 from '../shared/useUploadToS3';
 import {
   finishFriendChat,
+  FriendAffinityUpdate,
   FriendChatPayload,
   FriendConversationFeedback,
   FriendConversationSnapshot,
@@ -45,13 +47,18 @@ import {
   sendFriendChatMessage,
   useFriends,
 } from '../hooks/useFriends';
+import { buildAffinityUpdate, getAffinityProgress } from '../friends/affinity';
+import { AffinityGainBar } from '../components/AffinityBar';
 import {
+  archiveLocalFriendConversation,
+  buildLocalFriendConversationTitle,
   buildLocalFriendConversationKey,
   deleteLocalFriendConversation,
   loadLocalFriendConversation,
   saveLocalFriendConversation,
 } from '../friends/localFriendConversations';
 import {
+  getLocalFriend,
   recordLocalFriendConversationFinished,
   recordLocalFriendMessageRetried,
   recordLocalFriendMessageSent,
@@ -134,6 +141,11 @@ const FRIEND_CHAT_MESSAGE_COST = 1;
 const FRIEND_CHAT_VOICE_TOTAL_COST = FRIEND_CHAT_MESSAGE_COST + RECORDING_COST;
 const FRIEND_IMAGE_POLL_INTERVAL_MS = 2500;
 const FRIEND_IMAGE_POLL_TIMEOUT_MS = 120000;
+const FRIEND_CHAT_DRAFT_STORAGE_PREFIX = '@luva/friend-chat/draft';
+
+function friendChatDraftStorageKey(conversationKey: string) {
+  return `${FRIEND_CHAT_DRAFT_STORAGE_PREFIX}:${conversationKey}`;
+}
 
 function formatJourneyPoints(points: number) {
   return Number.isInteger(points) ? String(points) : points.toFixed(1);
@@ -287,6 +299,7 @@ const COLORS = {
   userBubble: '#4f46e5',
   assistantText: '#0f172a',
   muted: '#475569',
+  helpAccent: '#a5f3fc',
 };
 
 const luviImage = require('../image/luvi.png');
@@ -305,6 +318,7 @@ function AnalysisCard({
 }) {
   console.log('Rendering AnalysisCard with analysis:', englishDifficulty);
   const isEasy = englishDifficulty === 'easy';
+  const isTranslationHelp = analysis.feedbackType === 'translation_help';
   const canRetry = !isEasy && analysis.result !== 'correct' && !!onRetry;
   return (
     <View
@@ -327,16 +341,16 @@ function AnalysisCard({
           <Text
             style={{
               fontWeight: '600',
-              color: isEasy ? '#2563eb' : '#dc2626',
+              color: isEasy || isTranslationHelp ? '#2563eb' : '#dc2626',
               marginBottom: 4,
             }}
           >
-            {isEasy ? 'Tip para decirlo en inglés' : 'Errores detectados'}
+            {isEasy || isTranslationHelp ? 'Cómo decirlo en inglés' : 'Errores detectados'}
           </Text>
           {analysis.errors.map((errText, index) => (
             <Text
               key={`${errText}-${index}`}
-              style={{ color: isEasy ? '#1f2937' : '#dc2626', marginBottom: 2 }}
+              style={{ color: isEasy || isTranslationHelp ? '#1f2937' : '#dc2626', marginBottom: 2 }}
             >
               - {errText}
             </Text>
@@ -390,10 +404,12 @@ function CompletionCard({
   feedback,
   friendName,
   pointsEarned,
+  affinity,
 }: {
   feedback: FriendConversationFeedback | null;
   friendName: string;
   pointsEarned: number;
+  affinity: FriendAffinityUpdate | null;
 }) {
   return (
     <View
@@ -426,6 +442,23 @@ function CompletionCard({
           +{formatJourneyPoints(pointsEarned)} punto{pointsEarned === 1 ? '' : 's'} de Conversación AI
         </Text>
       </View>
+      {affinity ? (
+        <View
+          style={{
+            marginTop: 12,
+            padding: 12,
+            borderRadius: 12,
+            backgroundColor: 'white',
+            borderWidth: 1,
+            borderColor: '#fbcfe8',
+          }}
+        >
+          <Text style={{ fontWeight: '800', color: '#9d174d', marginBottom: 8 }}>
+            Tu amistad con {friendName}
+          </Text>
+          <AffinityGainBar affinity={affinity} variant="light" />
+        </View>
+      ) : null}
       {feedback ? (
         <View style={{ marginTop: 12 }}>
           <Text style={{ fontWeight: '700', color: '#14532d' }}>Feedback general</Text>
@@ -452,7 +485,15 @@ function CompletionCard({
   );
 }
 
-function SourcePostCard({ post, friendName }: { post: FriendChatSourcePost; friendName: string }) {
+function SourcePostCard({
+  post,
+  friendName,
+  affinityLabel,
+}: {
+  post: FriendChatSourcePost;
+  friendName: string;
+  affinityLabel: string;
+}) {
   return (
     <View
       style={{
@@ -463,8 +504,8 @@ function SourcePostCard({ post, friendName }: { post: FriendChatSourcePost; frie
         borderColor: COLORS.border,
       }}
     >
-      <Text style={{ color: '#2563eb', fontSize: 12, fontWeight: '900', textTransform: 'uppercase' }}>
-        Respondiendo a un post
+      <Text style={{ color: COLORS.helpAccent, fontSize: 12, fontWeight: '900', textTransform: 'uppercase' }}>
+        {affinityLabel}
       </Text>
       <Text style={{ color: '#1e293b', fontWeight: '800', marginTop: 4 }} numberOfLines={1}>
         {friendName}
@@ -549,6 +590,10 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     () => buildLocalFriendConversationKey(friendId, sourcePost),
     [friendId, sourcePost]
   );
+  const draftStorageKey = useMemo(
+    () => friendChatDraftStorageKey(localConversationKey),
+    [localConversationKey]
+  );
   const trackedFriendFocusKeyRef = useRef<string | undefined>(undefined);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messageTranslations, setMessageTranslations] = useState<Record<string, MessageTranslationState>>({});
@@ -556,6 +601,12 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const [englishDifficulty, setEnglishDifficulty] = useState<EnglishDifficulty | undefined>(undefined);
   const [conversationEnded, setConversationEnded] = useState(false);
   const [conversationFeedback, setConversationFeedback] = useState<FriendConversationFeedback | null>(null);
+  const [conversationStartedAt, setConversationStartedAt] = useState(() => new Date().toISOString());
+  const [affinityUpdate, setAffinityUpdate] = useState<FriendAffinityUpdate | null>(null);
+  const affinityStatusLabel = useMemo(() => {
+    const affinity = getAffinityProgress(affinityUpdate?.totalPoints ?? friend?.affinityPoints);
+    return `${affinity.levelName}`;
+  }, [affinityUpdate?.totalPoints, friend?.affinityPoints]);
   const [completionConfettiKey, setCompletionConfettiKey] = useState<number | null>(null);
   const [flowState, setFlowState] = useState<StoryFlowState>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -565,6 +616,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const [showProfilePreview, setShowProfilePreview] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [photoRequestMode, setPhotoRequestMode] = useState(false);
+  const [composerText, setComposerText] = useState('');
   const [selectedChatImageUri, setSelectedChatImageUri] = useState<string | null>(null);
   const [assistanceQuestion, setAssistanceQuestion] = useState('');
   const [assistanceAnswer, setAssistanceAnswer] = useState('');
@@ -600,6 +652,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       : getChatAvatar(friend.friendId);
   }, [friend]);
   const avatarInitial = (friend?.characterName.trim().charAt(0) || '?').toUpperCase();
+  const headerTopPadding = Math.max(insets.top, 48) + 10;
   const hasStartedConversation = useMemo(
     () => messages.some((message) => message.role === 'user'),
     [messages]
@@ -608,10 +661,52 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     () => messages.filter((message) => message.role === 'user').length * AI_CONVERSATION_POINTS_PER_MESSAGE,
     [messages]
   );
+  const scrollChatToEnd = useCallback((animated = true) => {
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollToEnd({ animated });
+    });
+  }, []);
+
+  const updateComposerText = useCallback(
+    (nextText: string) => {
+      setComposerText(nextText);
+      const trimmed = nextText.trim();
+      const write = trimmed
+        ? AsyncStorage.setItem(draftStorageKey, nextText)
+        : AsyncStorage.removeItem(draftStorageKey);
+      void write.catch((err: any) => {
+        console.warn('[FriendChat] No se pudo guardar el borrador:', err?.message || err);
+      });
+    },
+    [draftStorageKey]
+  );
+
+  const clearComposerDraft = useCallback(() => {
+    setComposerText('');
+    void AsyncStorage.removeItem(draftStorageKey).catch((err: any) => {
+      console.warn('[FriendChat] No se pudo borrar el borrador:', err?.message || err);
+    });
+  }, [draftStorageKey]);
 
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
   }, [navigation]);
+
+  useEffect(() => {
+    let mounted = true;
+    setComposerText('');
+    void AsyncStorage.getItem(draftStorageKey)
+      .then((storedDraft) => {
+        if (!mounted || !storedDraft) return;
+        setComposerText(storedDraft);
+      })
+      .catch((err: any) => {
+        console.warn('[FriendChat] No se pudo cargar el borrador:', err?.message || err);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [draftStorageKey]);
 
   useEffect(() => {
     let mounted = true;
@@ -656,15 +751,18 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     setAnalysis(null);
     setConversationEnded(false);
     setConversationFeedback(null);
+    setConversationStartedAt(new Date().toISOString());
+    setAffinityUpdate(null);
     setCompletionConfettiKey(null);
     setErrorMessage(null);
 
     void loadLocalFriendConversation(localConversationKey).then((snapshot) => {
       if (!mounted || !snapshot) return;
       if (isFinishedConversationWithFeedback(snapshot)) {
-        void deleteLocalFriendConversation(localConversationKey);
+        void archiveLocalFriendConversation(snapshot);
         return;
       }
+      setConversationStartedAt(snapshot.startedAt || snapshot.updatedAt);
       setMessages(snapshot.messages);
       setAnalysis(snapshot.analysis ?? null);
       setConversationEnded(Boolean(snapshot.conversationEnded));
@@ -708,21 +806,41 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     }) => {
       if (!friendId || !nextMessages.length) return;
       try {
+        const endedAt = nextConversationEnded ? new Date().toISOString() : undefined;
+        const title = buildLocalFriendConversationTitle(
+          {
+            sourcePost,
+            messages: nextMessages,
+          },
+          friend?.characterName,
+        );
         await saveLocalFriendConversation({
           conversationKey: localConversationKey,
           friendId,
+          title,
           sourcePost,
           messages: nextMessages,
           analysis: nextAnalysis,
           conversationEnded: Boolean(nextConversationEnded),
           conversationFeedback: nextConversationFeedback ?? null,
-          updatedAt: new Date().toISOString(),
+          startedAt: conversationStartedAt,
+          ...(endedAt ? { endedAt } : {}),
+          updatedAt: endedAt || new Date().toISOString(),
         });
       } catch (err: any) {
         console.warn('[FriendChat] No se pudo guardar la conversación local:', err?.message || err);
       }
     },
-    [analysis, conversationEnded, conversationFeedback, friendId, localConversationKey, sourcePost]
+    [
+      analysis,
+      conversationEnded,
+      conversationFeedback,
+      conversationStartedAt,
+      friend?.characterName,
+      friendId,
+      localConversationKey,
+      sourcePost,
+    ]
   );
 
   const handleRetryLastExchange = useCallback(async () => {
@@ -749,6 +867,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     setAnalysis(null);
     setConversationEnded(false);
     setConversationFeedback(null);
+    setAffinityUpdate(null);
     setMessages(nextMessages);
     setRetryingLastExchange(true);
     setMessageTranslations((current) => {
@@ -774,11 +893,11 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       const historyPayload = messagesToHistoryPayload(nextMessages);
       if (isSignedIn) {
         await retryFriendChatMessage(friendId, { history: historyPayload });
-        await reload();
-      } else if (friend) {
-        await recordLocalFriendMessageRetried(friend, lastUserMessage);
-        await reload();
       }
+      if (friend) {
+        await recordLocalFriendMessageRetried(friend, lastUserMessage);
+      }
+      await reload();
     } catch (err: any) {
       console.warn('[FriendChat] No se pudo sincronizar el retry:', err?.message || err);
     } finally {
@@ -809,9 +928,14 @@ export default function FriendChatScreen({ navigation, route }: Props) {
 
   useEffect(() => {
     if (messages.length > 0) {
-      scrollRef.current?.scrollToEnd({ animated: true });
+      scrollChatToEnd();
     }
-  }, [messages.length]);
+  }, [messages.length, scrollChatToEnd]);
+
+  useEffect(() => {
+    if (!conversationEnded) return;
+    scrollChatToEnd();
+  }, [conversationEnded, conversationFeedback, affinityUpdate, scrollChatToEnd]);
 
   useEffect(() => {
     return () => {
@@ -911,22 +1035,58 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         {
           ...(sourcePost?.postId ? { postId: sourcePost.postId } : {}),
           englishDifficulty: currentDifficulty,
+          ...(friend?.friendshipContext ? { friendshipContext: friend.friendshipContext } : {}),
           history: historyPayload,
         },
         { anonymous: !isSignedIn },
       );
       setConversationEnded(true);
       setConversationFeedback(payload.conversationFeedback ?? null);
+      let affinity = payload.affinity ?? null;
+      if (affinity && !isSignedIn) {
+        // Anonymous users accumulate affinity locally; rebuild totals from local points.
+        affinity = buildAffinityUpdate(
+          friend?.affinityPoints ?? 0,
+          affinity.pointsEarned,
+          affinity.qualityMultiplier,
+        );
+      } else if (affinity && isSignedIn && friendId) {
+        // Signed-in: the backend provides totalPoints, but may not be deployed yet.
+        // Use local cache as a floor so the animation reflects accumulated progress.
+        const localFriend = await getLocalFriend(friendId);
+        const localPrev = localFriend?.affinityPoints ?? 0;
+        if (localPrev + affinity.pointsEarned > affinity.totalPoints) {
+          affinity = buildAffinityUpdate(localPrev, affinity.pointsEarned, affinity.qualityMultiplier);
+        }
+      }
+      setAffinityUpdate(affinity);
       setCompletionConfettiKey(Date.now());
-      void persistConversationSnapshot({
+      await persistConversationSnapshot({
         nextMessages: messages,
         nextConversationEnded: true,
         nextConversationFeedback: payload.conversationFeedback ?? null,
       });
-      if (!isSignedIn && friend) {
-        void recordLocalFriendConversationFinished(friend).then(() => reload()).catch((err: any) => {
+      try {
+        const savedSnapshot = await loadLocalFriendConversation(localConversationKey);
+        if (savedSnapshot) {
+          await archiveLocalFriendConversation(savedSnapshot);
+        }
+      } catch (archiveErr: any) {
+        console.warn('[FriendChat] No se pudo archivar la conversación local:', archiveErr?.message || archiveErr);
+      }
+      // Always persist affinity locally so the profile shows correctly even
+      // when the backend hasn't been deployed or DynamoDB update fails.
+      if (friend) {
+        try {
+          await recordLocalFriendConversationFinished(
+            friend,
+            affinity?.pointsEarned,
+            payload.friendshipContext,
+          );
+          if (!isSignedIn) void reload();
+        } catch (err: any) {
           console.warn('[FriendChat] No se pudo guardar el cierre local:', err?.message || err);
-        });
+        }
       }
       void trackMixpanelFriendEvent('friend_chat_completed', {
         friend_id: friendId,
@@ -937,6 +1097,10 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         history_message_count: messages.length,
         correctness: 0,
         points_earned: AI_CONVERSATION_POINTS_PER_MESSAGE,
+        affinity_points_earned: affinity?.pointsEarned ?? 0,
+        affinity_total_points: affinity?.totalPoints ?? 0,
+        affinity_level: affinity?.level ?? 1,
+        affinity_leveled_up: affinity?.leveledUp ?? false,
       });
       void reload();
     } catch (err: any) {
@@ -952,6 +1116,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     friend,
     friendId,
     isSignedIn,
+    localConversationKey,
     messages,
     persistConversationSnapshot,
     reload,
@@ -1149,6 +1314,9 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         );
         if (!ok) {
           setErrorMessage('Necesitas 1 moneda para enviar este mensaje.');
+          if (inputMethod === 'text' && trimmed) {
+            updateComposerText(trimmed);
+          }
           navigation.navigate('Paywall', { source: 'friend_chat_message' });
           setFlowState('idle');
           return false;
@@ -1228,6 +1396,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           ...(sourcePost?.caption ? { postCaption: sourcePost.caption } : {}),
           ...(sourcePost?.imageUrl ? { postImageUrl: sourcePost.imageUrl } : {}),
           ...(sourcePost?.videoUrl ? { postVideoUrl: sourcePost.videoUrl } : {}),
+          ...(friend?.friendshipContext ? { friendshipContext: friend.friendshipContext } : {}),
           history: historyPayload,
         }, { anonymous: !isSignedIn });
         void recordJourneyAiConversationMessageSent();
@@ -1269,8 +1438,8 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           nextConversationEnded: false,
           nextConversationFeedback: null,
         });
-        if (!isSignedIn && friend) {
-          void recordLocalFriendMessageSent(friend, trimmed).catch((err: any) => {
+        if (friend) {
+          void recordLocalFriendMessageSent(friend, imageData ? '[Photo]' : trimmed).catch((err: any) => {
             console.warn('[FriendChat] No se pudo guardar el mensaje local:', err?.message || err);
           });
         }
@@ -1295,6 +1464,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       retryingLastExchange,
       sourcePost,
       spendCoins,
+      updateComposerText,
     ]
   );
 
@@ -1355,6 +1525,8 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       );
       if (!ok) {
         setErrorMessage('Necesitas 1 moneda para pedir una foto.');
+        setPhotoRequestMode(true);
+        updateComposerText(trimmedPrompt);
         navigation.navigate('Paywall', { source: 'friend_chat_message' });
         return false;
       }
@@ -1452,6 +1624,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     retryingLastExchange,
     sourcePost?.postId,
     spendCoins,
+    updateComposerText,
   ]);
 
   const handleSendText = useCallback(
@@ -1461,18 +1634,22 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           const success = await handleRequestPhoto(textToSend);
           if (success) {
             setPhotoRequestMode(false);
+            clearComposerDraft();
           }
           return success;
         }
-        await handleAdvance(textToSend);
-        return true;
+        const success = await handleAdvance(textToSend);
+        if (success) {
+          clearComposerDraft();
+        }
+        return success;
       } catch (err: any) {
         setErrorMessage(err?.message || 'No pudimos enviar tu mensaje.');
         setFlowState('idle');
         return false;
       }
     },
-    [handleAdvance, handleRequestPhoto, photoRequestMode]
+    [clearComposerDraft, handleAdvance, handleRequestPhoto, photoRequestMode]
   );
 
   useEffect(() => {
@@ -1693,14 +1870,16 @@ export default function FriendChatScreen({ navigation, route }: Props) {
             />
           </View>
         ) : null}
-        <View style={{ backgroundColor: COLORS.header, paddingTop: insets.top + 8, paddingBottom: 12, paddingHorizontal: 16 }}>
+        <View style={{ backgroundColor: COLORS.header, paddingTop: headerTopPadding, paddingBottom: 12, paddingHorizontal: 16 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Pressable
               onPress={() => navigation.goBack()}
-              hitSlop={12}
+              hitSlop={16}
               style={({ pressed }) => ({
-                paddingHorizontal: 4,
-                paddingVertical: 6,
+                width: 44,
+                height: 44,
+                alignItems: 'center',
+                justifyContent: 'center',
                 marginRight: 12,
                 opacity: pressed ? 0.6 : 1,
               })}
@@ -1734,8 +1913,8 @@ export default function FriendChatScreen({ navigation, route }: Props) {
               <Text style={{ fontSize: 16, fontWeight: '800', color: 'white' }} numberOfLines={1}>
                 {friend.characterName}
               </Text>
-              <Text style={{ fontSize: 12, color: '#e2e8f0' }} numberOfLines={1}>
-                {conversationEnded ? 'Conversación terminada' : sourcePost ? 'Respondiendo un post' : 'Conversación libre'}
+              <Text style={{ fontSize: 12, color: COLORS.helpAccent }} numberOfLines={1}>
+                {affinityStatusLabel}
               </Text>
             </View>
             <CoinCountChip />
@@ -1755,7 +1934,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                 opacity: pressed ? 0.75 : 1,
               })}
             >
-              <MaterialIcons name="help-outline" size={24} color="#a5f3fc" />
+              <MaterialIcons name="help-outline" size={24} color={COLORS.helpAccent} />
             </Pressable>
           </View>
         </View>
@@ -1766,7 +1945,13 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
           keyboardShouldPersistTaps="handled"
         >
-          {sourcePost ? <SourcePostCard post={sourcePost} friendName={friend.characterName} /> : null}
+          {sourcePost ? (
+            <SourcePostCard
+              post={sourcePost}
+              friendName={friend.characterName}
+              affinityLabel={affinityStatusLabel}
+            />
+          ) : null}
 
           <View style={{ padding: 14, borderRadius: 12, backgroundColor: 'white', borderWidth: 1, borderColor: COLORS.border, marginTop: sourcePost ? 12 : 0 }}>
             <Text style={{ fontWeight: '800', color: '#1e293b' }}>{friend.characterName}</Text>
@@ -1945,6 +2130,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
               feedback={conversationFeedback}
               friendName={friend.characterName}
               pointsEarned={aiConversationPoints}
+              affinity={affinityUpdate}
             />
           ) : null}
         </ScrollView>
@@ -2075,6 +2261,8 @@ export default function FriendChatScreen({ navigation, route }: Props) {
               retryBlocked={retryingLastExchange}
               recordBlocked={retryingLastExchange || (!isUnlimited && coinsLoading) || voiceCoinLocked}
               statusLabel={statusLabel}
+              text={composerText}
+              onTextChange={updateComposerText}
               onSendText={handleSendText}
               onRecordPressIn={handleRecordPressIn}
               onRecordRelease={handleRecordRelease}

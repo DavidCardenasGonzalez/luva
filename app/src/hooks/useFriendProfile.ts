@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api/api';
 import { useAuth } from '../auth/AuthProvider';
-import { getLocalFriend } from '../friends/localFriends';
+import { getLocalFriend, syncLocalFriendsToRemote } from '../friends/localFriends';
 import type { FriendCharacter } from './useFriends';
 
 export type CharacterProfilePost = {
@@ -168,10 +168,41 @@ export function useFriendProfile(friendId?: string) {
     setError(undefined);
 
     try {
+      if (isSignedIn) {
+        try {
+          await syncLocalFriendsToRemote([friendId]);
+        } catch (syncErr: any) {
+          console.warn('[FriendProfile] No se pudo sincronizar el amigo local:', syncErr?.message || syncErr);
+        }
+      }
+
       const response = await api.get<FriendProfileResponse>(
         `/friend-profiles/${encodeURIComponent(friendId)}`
       );
-      setFriend(response?.friend);
+      let nextFriend = response?.friend;
+      if (nextFriend) {
+        // Friend stats are always cached locally for resilience. Anonymous users
+        // only ever have local data; for signed-in users the local cache acts as
+        // a floor in case the backend hasn't caught up (deploy lag, failed sync,
+        // or DynamoDB update dropped silently).
+        const localFriend = await getLocalFriend(friendId);
+        if (localFriend) {
+          const floored = { ...nextFriend };
+          (['affinityPoints', 'messageCount', 'conversationCount'] as const).forEach((key) => {
+            const localValue = localFriend[key];
+            if (typeof localValue !== 'number') return;
+            const apiValue = typeof floored[key] === 'number' ? (floored[key] as number) : 0;
+            if (localValue > apiValue) {
+              floored[key] = localValue;
+            }
+          });
+          if (localFriend.friendshipContext && !floored.friendshipContext) {
+            floored.friendshipContext = localFriend.friendshipContext;
+          }
+          nextFriend = floored;
+        }
+      }
+      setFriend(nextFriend);
       setPosts(sanitizeProfilePosts(response?.posts));
       if (isSignedIn) {
         try {

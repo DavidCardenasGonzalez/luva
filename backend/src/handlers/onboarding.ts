@@ -1070,7 +1070,6 @@ async function generateCompanionReply(
 Persona:
 Character name: ${profile.characterName}
 Original role: ${profile.aiRole}
-Character notes: ${profile.characterPrompt}
 How you met: First meeting during onboarding. The learner is introducing themselves in English to the companion they selected.
 
 Rules:

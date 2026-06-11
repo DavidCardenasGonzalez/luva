@@ -51,6 +51,7 @@ import {
   FriendImageRequest,
   FriendshipImage,
   FriendConversationSnapshot,
+  FriendAffinityUpdate,
   FriendsListResponse,
 } from "../types";
 import { CHARACTERS } from "../data/characters";
@@ -150,6 +151,8 @@ const STORY_HISTORY_LIMIT = 20;
 const FRIEND_HISTORY_LIMIT = 24;
 const FRIEND_RECENT_MESSAGES = 10;
 const FRIEND_SUMMARY_THRESHOLD = 20;
+const FRIENDSHIP_CONTEXT_MAX_CHARS = 1200;
+const FRIENDSHIP_CONTEXT_MAX_PARAGRAPHS = 2;
 
 type StorySessionState = {
   storyId?: string;
@@ -179,6 +182,7 @@ type FriendConversationFeedback = {
 type FriendChatFinishRequest = {
   postId?: unknown;
   englishDifficulty?: 'easy' | 'medium' | 'hard';
+  friendshipContext?: unknown;
   history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
 };
 
@@ -199,7 +203,107 @@ type FriendRecord = FriendCharacter & {
   lastUserMessage?: string;
   messageCount?: number;
   conversationCount?: number;
+  friendshipContext?: string;
 };
+
+type AffinityLevelDefinition = {
+  level: number;
+  name: string;
+  minPoints: number;
+  /** How the character should treat the learner at this stage (used in prompts). */
+  tone: string;
+};
+
+const AFFINITY_LEVELS: AffinityLevelDefinition[] = [
+  {
+    level: 1,
+    name: "Stranger",
+    minPoints: 0,
+    tone: "You just met the learner. Be friendly but polite and a bit reserved; you are still getting to know each other.",
+  },
+  {
+    level: 2,
+    name: "Friend",
+    minPoints: 50,
+    tone: "You are friends. Be warm and relaxed, reference shared interests, and joke casually.",
+  },
+  {
+    level: 3,
+    name: "Close Friend",
+    minPoints: 150,
+    tone: "You are close friends. Be open and personal, recall past conversations, tease affectionately, and share private thoughts.",
+  },
+  {
+    level: 4,
+    name: "Companion",
+    minPoints: 400,
+    tone: "You share a strong bond. Be caring, supportive, and genuinely interested in the learner's life. Speak with familiarity and warmth, and remember important details about them.",
+  },
+  {
+    level: 5,
+    name: "Soulmate",
+    minPoints: 1000,
+    tone: "You are soulmates. Speak with complete trust, deep intimacy, and emotional closeness, like someone who knows the learner by heart.",
+  },
+];
+
+const MAX_AFFINITY_QUALITY_MULTIPLIER = 2;
+
+function getAffinityLevel(points: number): AffinityLevelDefinition {
+  const safePoints = Number.isFinite(points) ? Math.max(0, points) : 0;
+  let current = AFFINITY_LEVELS[0];
+  for (const level of AFFINITY_LEVELS) {
+    if (safePoints >= level.minPoints) {
+      current = level;
+    }
+  }
+  return current;
+}
+
+function sanitizeAffinityPoints(value: unknown): number | undefined {
+  const parsed =
+    typeof value === "number"
+      ? value
+      : typeof value === "string"
+      ? Number(value.trim())
+      : Number.NaN;
+  if (!Number.isFinite(parsed)) return undefined;
+  return Math.max(0, Math.floor(parsed));
+}
+
+function sanitizeAffinityQualityMultiplier(value: unknown): number | undefined {
+  const parsed =
+    typeof value === "number"
+      ? value
+      : typeof value === "string"
+      ? Number(value.trim())
+      : Number.NaN;
+  if (!Number.isFinite(parsed)) return undefined;
+  const clamped = Math.max(0, Math.min(MAX_AFFINITY_QUALITY_MULTIPLIER, parsed));
+  return Math.round(clamped * 10) / 10;
+}
+
+function buildFriendAffinityUpdate(
+  previousPoints: number,
+  userMessageCount: number,
+  qualityMultiplier: number
+): FriendAffinityUpdate {
+  const safePrevious = Math.max(0, Math.floor(previousPoints));
+  const pointsEarned = Math.max(0, Math.round(userMessageCount * qualityMultiplier));
+  const totalPoints = safePrevious + pointsEarned;
+  const previousLevel = getAffinityLevel(safePrevious);
+  const level = getAffinityLevel(totalPoints);
+  return {
+    pointsEarned,
+    qualityMultiplier,
+    previousPoints: safePrevious,
+    totalPoints,
+    previousLevel: previousLevel.level,
+    level: level.level,
+    levelName: level.name,
+    leveledUp: level.level > previousLevel.level,
+  };
+}
 
 const STORY_SESSIONS = new Map<string, StorySessionState>();
 function pruneStorySessions(maxEntries: number = 200, ttlMs: number = 1000 * 60 * 30) {
@@ -895,8 +999,14 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       const friendId = decodeURIComponent(publicFriendFinish[1]);
       const body = parseBody(event.body) as FriendChatFinishRequest | undefined;
       try {
-        const feedback = await finishFriendChat(undefined, friendId, body || {});
-        return json(200, { friendId, conversationEnded: true, conversationFeedback: feedback });
+        const { feedback, affinity, friendshipContext } = await finishFriendChat(undefined, friendId, body || {});
+        return json(200, {
+          friendId,
+          conversationEnded: true,
+          conversationFeedback: feedback,
+          affinity,
+          ...(friendshipContext ? { friendshipContext } : {}),
+        });
       } catch (err: any) {
         if (err?.message === "FRIEND_NOT_FOUND") {
           return notFound();
@@ -969,13 +1079,19 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       const body = parseBody(event.body) as FriendChatFinishRequest | undefined;
       try {
         const learnerProfile = await resolveLearnerProfile(identity);
-        const feedback = await finishFriendChat(
+        const { feedback, affinity, friendshipContext } = await finishFriendChat(
           identity.userId,
           friendId,
           body || {},
           learnerProfile.difficulty
         );
-        return json(200, { friendId, conversationEnded: true, conversationFeedback: feedback });
+        return json(200, {
+          friendId,
+          conversationEnded: true,
+          conversationFeedback: feedback,
+          affinity,
+          ...(friendshipContext ? { friendshipContext } : {}),
+        });
       } catch (err: any) {
         if (err?.message === "FRIEND_NOT_FOUND") {
           return notFound();
@@ -1443,13 +1559,20 @@ function sanitizeFriendConversationSnapshot(input: any): FriendConversationSnaps
   };
 }
 
-function latestConversationSnapshot(
-  left?: FriendConversationSnapshot,
-  right?: FriendConversationSnapshot
-): FriendConversationSnapshot | undefined {
-  if (!left) return right;
-  if (!right) return left;
-  return Date.parse(right.updatedAt) > Date.parse(left.updatedAt) ? right : left;
+function splitFriendshipContextParagraphs(value: unknown): string[] {
+  if (typeof value !== "string") return [];
+  return value
+    .replace(/\r/g, "\n")
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.replace(/\s*\n\s*/g, " ").replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, FRIENDSHIP_CONTEXT_MAX_PARAGRAPHS);
+}
+
+function sanitizeFriendshipContext(value: unknown): string | undefined {
+  const paragraphs = splitFriendshipContextParagraphs(value);
+  if (!paragraphs.length) return undefined;
+  return paragraphs.join("\n\n").slice(0, FRIENDSHIP_CONTEXT_MAX_CHARS).trim() || undefined;
 }
 
 function publicFriend(record: FriendRecord): FriendCharacter {
@@ -1468,6 +1591,8 @@ function publicFriend(record: FriendRecord): FriendCharacter {
     ...(record.lastMessageAt ? { lastMessageAt: record.lastMessageAt } : {}),
     ...(typeof record.messageCount === "number" ? { messageCount: record.messageCount } : {}),
     ...(typeof record.conversationCount === "number" ? { conversationCount: record.conversationCount } : {}),
+    ...(typeof record.affinityPoints === "number" ? { affinityPoints: record.affinityPoints } : {}),
+    ...(record.friendshipContext ? { friendshipContext: record.friendshipContext } : {}),
     ...(record.conversationSnapshot ? { conversationSnapshot: record.conversationSnapshot } : {}),
   };
 }
@@ -1561,6 +1686,7 @@ function sanitizeFriendRecord(input: any): FriendRecord | undefined {
     return undefined;
   }
   const conversationSnapshot = sanitizeFriendConversationSnapshot(input.conversationSnapshot);
+  const friendshipContext = sanitizeFriendshipContext(input.friendshipContext);
 
   return {
     userId,
@@ -1579,6 +1705,10 @@ function sanitizeFriendRecord(input: any): FriendRecord | undefined {
     ...(typeof input.lastUserMessage === "string" ? { lastUserMessage: input.lastUserMessage } : {}),
     ...(typeof input.messageCount === "number" ? { messageCount: input.messageCount } : {}),
     ...(typeof conversationCount === "number" ? { conversationCount } : {}),
+    ...(sanitizeAffinityPoints(input.affinityPoints) !== undefined
+      ? { affinityPoints: sanitizeAffinityPoints(input.affinityPoints) }
+      : {}),
+    ...(friendshipContext ? { friendshipContext } : {}),
     ...(conversationSnapshot ? { conversationSnapshot } : {}),
   };
 }
@@ -1663,13 +1793,23 @@ async function createFriendFromMission(
       : undefined;
   const syncedMessageCount = sanitizeSyncCount(body.messageCount);
   const syncedConversationCount = sanitizeSyncCount(body.conversationCount);
+  const syncedAffinityPoints = sanitizeAffinityPoints(body.affinityPoints);
+  const syncedFriendshipContext = sanitizeFriendshipContext(body.friendshipContext);
   const messageCount = Math.max(existing?.messageCount ?? 0, syncedMessageCount ?? 0);
   const conversationCount = Math.max(existing?.conversationCount ?? 0, syncedConversationCount ?? 0);
+  const affinityPoints = Math.max(existing?.affinityPoints ?? 0, syncedAffinityPoints ?? 0);
   const lastMessageAt = latestTimestamp(existing?.lastMessageAt, syncedLastMessageAt);
-  const conversationSnapshot = latestConversationSnapshot(
-    existing?.conversationSnapshot,
-    sanitizeFriendConversationSnapshot(body.conversationSnapshot)
-  );
+  const existingMemoryTimestamp = Date.parse(existing?.lastMessageAt || existing?.updatedAt || "");
+  const syncedMemoryTimestamp = Date.parse(syncedLastMessageAt || "");
+  const shouldUseSyncedFriendshipContext =
+    Boolean(syncedFriendshipContext) &&
+    (!existing?.friendshipContext ||
+      (Number.isFinite(syncedMemoryTimestamp) &&
+        (!Number.isFinite(existingMemoryTimestamp) || syncedMemoryTimestamp >= existingMemoryTimestamp)));
+  const friendshipContext =
+    shouldUseSyncedFriendshipContext
+      ? syncedFriendshipContext
+      : existing?.friendshipContext || syncedFriendshipContext;
   const item: FriendRecord = {
     userId,
     friendId,
@@ -1689,7 +1829,8 @@ async function createFriendFromMission(
       : {}),
     ...(messageCount > 0 ? { messageCount } : {}),
     ...(conversationCount > 0 ? { conversationCount } : {}),
-    ...(conversationSnapshot ? { conversationSnapshot } : {}),
+    ...(affinityPoints > 0 ? { affinityPoints } : {}),
+    ...(friendshipContext ? { friendshipContext } : {}),
   };
 
   await dynamo.send(
@@ -1734,6 +1875,8 @@ function publicFriendRecord(friend: FriendCharacter, userId = "anonymous"): Frie
     ...(friend.lastMessageAt ? { lastMessageAt: friend.lastMessageAt } : {}),
     ...(typeof friend.messageCount === "number" ? { messageCount: friend.messageCount } : {}),
     ...(typeof friend.conversationCount === "number" ? { conversationCount: friend.conversationCount } : {}),
+    ...(typeof friend.affinityPoints === "number" ? { affinityPoints: friend.affinityPoints } : {}),
+    ...(friend.friendshipContext ? { friendshipContext: friend.friendshipContext } : {}),
     ...(friend.conversationSnapshot ? { conversationSnapshot: friend.conversationSnapshot } : {}),
   };
 }
@@ -1766,10 +1909,16 @@ async function answerFriendAssistance(
     throw new Error("FRIEND_NOT_FOUND");
   }
 
-  const sceneSummary =
+  const friendshipContext = sanitizeFriendshipContext(friend.friendshipContext);
+  const sceneSummaryText = [
     typeof body.postContext === "string" && body.postContext.trim()
       ? `The learner is replying to a profile post from ${friend.characterName}: ${body.postContext.trim()}`
-      : undefined;
+      : "",
+    friendshipContext ? `Persistent friendship memory: ${friendshipContext}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+  const sceneSummary = sceneSummaryText || undefined;
   const mission: StoryMission = {
     missionId: friend.friendId,
     title: friend.characterName,
@@ -1804,9 +1953,13 @@ async function touchFriendChat(
   friendId: string,
   transcript: string,
   conversationEnded: boolean,
-  conversationSnapshot?: FriendConversationSnapshot
+  conversationSnapshot?: FriendConversationSnapshot,
+  affinityPointsEarned?: number,
+  friendshipContext?: string
 ): Promise<void> {
   try {
+    const snapshot = conversationEnded ? undefined : sanitizeFriendConversationSnapshot(conversationSnapshot);
+    const nextFriendshipContext = sanitizeFriendshipContext(friendshipContext);
     const setExpressions = [
       "lastMessageAt = :now",
       "lastUserMessage = :message",
@@ -1817,22 +1970,36 @@ async function touchFriendChat(
       ":message": transcript.slice(0, 500),
       ":one": 1,
     };
-    if (conversationSnapshot) {
-      setExpressions.push("conversationSnapshot = :conversationSnapshot");
-      expressionAttributeValues[":conversationSnapshot"] = {
-        ...conversationSnapshot,
-        updatedAt: conversationSnapshot.updatedAt || expressionAttributeValues[":now"],
-      };
-    }
+    const removeExpressions: string[] = [];
     const addExpressions = ["messageCount :one"];
+    if (snapshot) {
+      setExpressions.push("conversationSnapshot = :conversationSnapshot");
+      expressionAttributeValues[":conversationSnapshot"] = snapshot;
+    } else {
+      removeExpressions.push("conversationSnapshot");
+    }
+    if (nextFriendshipContext) {
+      setExpressions.push("friendshipContext = :friendshipContext");
+      expressionAttributeValues[":friendshipContext"] = nextFriendshipContext;
+    }
     if (conversationEnded) {
       addExpressions.push("conversationCount :one");
+    }
+    if (typeof affinityPointsEarned === "number" && affinityPointsEarned > 0) {
+      addExpressions.push("affinityPoints :affinityPoints");
+      expressionAttributeValues[":affinityPoints"] = Math.floor(affinityPointsEarned);
     }
     await dynamo.send(
       new UpdateCommand({
         TableName: getFriendshipsTableName(),
         Key: { userId, friendId },
-        UpdateExpression: `SET ${setExpressions.join(", ")} ADD ${addExpressions.join(", ")}`,
+        UpdateExpression: [
+          `SET ${setExpressions.join(", ")}`,
+          removeExpressions.length ? `REMOVE ${removeExpressions.join(", ")}` : "",
+          `ADD ${addExpressions.join(", ")}`,
+        ]
+          .filter(Boolean)
+          .join(" "),
         ExpressionAttributeValues: expressionAttributeValues,
       })
     );
@@ -1859,28 +2026,13 @@ async function retryFriendChat(
   const history = sanitizeHistory(body.history).slice(-FRIEND_HISTORY_LIMIT);
   const now = new Date().toISOString();
   const lastUserMessage = [...history].reverse().find((entry) => entry.role === "user")?.content;
-  const conversationSnapshot: FriendConversationSnapshot | undefined = history.length
-    ? {
-        messages: history,
-        conversationEnded: false,
-        conversationFeedback: null,
-        updatedAt: now,
-      }
-    : undefined;
   const messageCount = Math.max(0, Math.floor(friend.messageCount ?? 0) - 1);
   const setExpressions = ["updatedAt = :now", "messageCount = :messageCount"];
-  const removeExpressions: string[] = [];
+  const removeExpressions = ["conversationSnapshot"];
   const expressionAttributeValues: Record<string, any> = {
     ":now": now,
     ":messageCount": messageCount,
   };
-
-  if (conversationSnapshot) {
-    setExpressions.push("conversationSnapshot = :conversationSnapshot");
-    expressionAttributeValues[":conversationSnapshot"] = conversationSnapshot;
-  } else {
-    removeExpressions.push("conversationSnapshot");
-  }
 
   if (lastUserMessage) {
     setExpressions.push("lastMessageAt = :now", "lastUserMessage = :message");
@@ -1895,7 +2047,7 @@ async function retryFriendChat(
       Key: { userId, friendId },
       UpdateExpression: [
         `SET ${setExpressions.join(", ")}`,
-        removeExpressions.length ? `REMOVE ${removeExpressions.join(", ")}` : "",
+        `REMOVE ${removeExpressions.join(", ")}`,
       ]
         .filter(Boolean)
         .join(" "),
@@ -1903,7 +2055,7 @@ async function retryFriendChat(
     })
   );
 
-  return conversationSnapshot;
+  return undefined;
 }
 
 function buildFriendConversationFeedbackFallback(args: {
@@ -1928,6 +2080,202 @@ function buildFriendConversationFeedbackFallback(args: {
     summary,
     improvements: improvements.slice(0, 3),
   };
+}
+
+function normalizeFriendshipContextFilterText(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function isEnglishLearningContextLine(value: string): boolean {
+  const normalized = normalizeFriendshipContextFilterText(value);
+  const languageLearningDetail =
+    /\b(?:grammar|vocab(?:ulary)?|pronunciation|spelling|translation|translate|correction|correct|score|feedback|mistakes?|tense|prepositions?|lesson|homework|exam|quiz|gramatica|vocabulario|pronunciacion|traduccion|traducir|corrige|corregir|correccion|puntaje|calificacion|errores?|preposiciones?|leccion|tarea|examen)\b/.test(
+      normalized
+    ) ||
+    /\b(?:how do i say|what does .+ mean|como se dice|que significa)\b/.test(normalized);
+  const englishStudy =
+    /\b(?:english|ingles)\b/.test(normalized) &&
+    /\b(?:learn|learning|practice|practicing|study|studying|speak|speaking|write|writing|read|reading|understand|aprend\w*|practic\w*|estudi\w*|habl\w*|escrib\w*|leer|entiend\w*)\b/.test(
+      normalized
+    );
+  return languageLearningDetail || englishStudy;
+}
+
+function buildFriendshipContextFallback(args: {
+  priorContext?: string;
+  history: StoryMessage[];
+}): string {
+  const priorParagraphs = splitFriendshipContextParagraphs(args.priorContext);
+  const userLines = args.history
+    .filter((entry) => entry.role === "user")
+    .map((entry) => entry.content.replace(/\s+/g, " ").trim())
+    .filter((line) => line && line !== "[Photo]")
+    .filter((line) => !isEnglishLearningContextLine(line))
+    .slice(-3);
+  if (!userLines.length) {
+    return sanitizeFriendshipContext(priorParagraphs.join("\n\n")) || "";
+  }
+  const recentContext = `In the latest completed chat, the learner shared personal context with the avatar: ${userLines
+    .map((line) => `"${line.slice(0, 160)}"`)
+    .join("; ")}.`;
+
+  if (!priorParagraphs.length) {
+    return sanitizeFriendshipContext(recentContext) || "";
+  }
+  if (priorParagraphs.length === 1) {
+    return sanitizeFriendshipContext(`${priorParagraphs[0]}\n\n${recentContext}`) || priorParagraphs[0];
+  }
+  return (
+    sanitizeFriendshipContext(`${priorParagraphs[0]}\n\n${priorParagraphs[1]} ${recentContext}`) ||
+    priorParagraphs.join("\n\n")
+  );
+}
+
+async function generateFriendshipContext(args: {
+  friend: FriendRecord;
+  priorContext?: string;
+  history: StoryMessage[];
+}): Promise<string> {
+  const priorContext = sanitizeFriendshipContext(args.priorContext) || "";
+  const fallback = buildFriendshipContextFallback({
+    priorContext,
+    history: args.history,
+  });
+  const apiKey = await getOpenAIKey();
+  const model =
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
+  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
+  const isGpt5 = /gpt-5/i.test(model);
+  const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
+  const reasoningConfig = isGpt5
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || "low" }
+    : undefined;
+  const conversationText = args.history
+    .slice(-FRIEND_HISTORY_LIMIT)
+    .map((message) => `${message.role === "user" ? "Learner" : args.friend.characterName}: ${message.content}`)
+    .join("\n")
+    .trim();
+  const systemPrompt = `You update persistent friendship memory for a fictional chat avatar.
+
+This memory will be inserted into future prompts so the avatar can remember the learner across completed conversations.
+
+Rules:
+- Output ONLY JSON with this exact shape: { "friendshipContext": "..." }
+- Write the friendshipContext in English, third person, as plain prose.
+- If there is no prior memory, write exactly one compact paragraph.
+- If prior memory exists, update it into at most two compact paragraphs.
+- Preserve durable, useful facts: learner name if known, interests, preferences, recurring topics, plans, commitments, boundaries, inside references, emotional tone, and meaningful moments between the learner and avatar.
+- Add new relevant information from this completed conversation, but compress or remove low-value details.
+- Store only friendship and relationship context that helps the avatar build a better bond with the learner.
+- Exclude anything whose purpose is English learning, tutoring, studying, practice, grammar, vocabulary, pronunciation, translations, corrections, scores, or feedback.
+- Remove any prior memory details about English learning or study preferences unless the detail is also meaningful personal relationship context.
+- Do not store routine re-introductions, greetings, or the avatar saying their own name.
+- Do not include the avatar's name unless it is needed to disambiguate a specific memory; the prompt already knows who the avatar is.
+- Do not invent facts. Do not infer sensitive traits. Only keep sensitive details if the learner explicitly stated them and they are clearly relevant.
+- No bullets, headings, lists, or timestamps.
+- Keep the full result under ${FRIENDSHIP_CONTEXT_MAX_CHARS} characters.`;
+  const userPrompt = `Avatar: ${args.friend.characterName}
+
+Prior friendship memory:
+${priorContext || "(none yet)"}
+
+Completed conversation:
+${conversationText || "(no transcript)"}
+
+Return the updated friendshipContext.`;
+
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), timeoutMs);
+  let raw = "";
+  try {
+    if (useResponses) {
+      const body: Record<string, any> = {
+        model,
+        instructions: systemPrompt,
+        input: [
+          {
+            role: "user",
+            content: [{ type: "input_text", text: userPrompt }],
+          },
+        ],
+        max_output_tokens: Number(process.env.FRIENDSHIP_CONTEXT_MAX_OUTPUT_TOKENS || 500),
+      };
+      if (reasoningConfig) body.reasoning = reasoningConfig;
+      const res = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(body),
+        signal: ac.signal,
+      });
+      const payload: any = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const reason = payload?.error?.message || res.statusText;
+        throw new Error(`FRIENDSHIP_CONTEXT_HTTP_${res.status}_${reason}`);
+      }
+      if (Array.isArray(payload?.output)) {
+        for (const item of payload.output) {
+          if (item?.type === "message" && Array.isArray(item.content)) {
+            const texts = item.content
+              .filter((c: any) => c?.type === "output_text" && typeof c.text === "string")
+              .map((c: any) => c.text);
+            if (texts.length) {
+              raw = texts.join("\n");
+              break;
+            }
+          }
+        }
+      }
+      if (!raw && typeof payload?.output_text === "string") {
+        raw = payload.output_text;
+      }
+    } else {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          max_tokens: Number(process.env.FRIENDSHIP_CONTEXT_MAX_OUTPUT_TOKENS || 500),
+        }),
+        signal: ac.signal,
+      });
+      if (!res.ok) {
+        const bodyTxt = await res.text();
+        throw new Error(`FRIENDSHIP_CONTEXT_HTTP_${res.status}_${bodyTxt.slice(0, 120)}`);
+      }
+      const data: any = await res.json();
+      raw = data.choices?.[0]?.message?.content || "";
+    }
+  } catch (err) {
+    if ((err as any)?.name === "AbortError") {
+      throw new Error("FRIENDSHIP_CONTEXT_TIMEOUT");
+    }
+    throw err;
+  } finally {
+    clearTimeout(to);
+  }
+
+  const cleaned = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+  let nextContext = "";
+  try {
+    const parsed = JSON.parse(cleaned);
+    nextContext = typeof parsed?.friendshipContext === "string" ? parsed.friendshipContext : "";
+  } catch {
+    nextContext = cleaned;
+  }
+  return sanitizeFriendshipContext(nextContext) || fallback;
 }
 
 function sanitizeFriendChatText(value: unknown, maxLength: number): string | undefined {
@@ -2106,6 +2454,8 @@ async function advanceFriendChat(
     : body.transcript.trim();
   const effectiveDifficulty =
     normalizeLearnerDifficulty(body.englishDifficulty) || learnerDifficulty;
+  const friendshipContext =
+    sanitizeFriendshipContext(body.friendshipContext) || friend.friendshipContext || "";
   const postContext = await resolveFriendChatPostContext(friend, body);
   const fullHistory = appendHistoryEntry(sanitizeHistory(body.history), {
     role: "user",
@@ -2146,6 +2496,7 @@ async function advanceFriendChat(
   let result: EvalResult = isEasyMode || isImageMessage ? "correct" : "incorrect";
   let errors: string[] = [];
   let reformulations: string[] = [];
+  let feedbackType: 'correction' | 'translation_help' | undefined;
   const englishEvalResult = isImageMessage
     ? []
     : await Promise.allSettled([
@@ -2177,6 +2528,7 @@ async function advanceFriendChat(
       errors = value.errors.slice(0, 3).map((item) => String(item));
       const alternatives = value.alternatives ?? value.improvements ?? value.suggestions ?? [];
       reformulations = alternatives.slice(0, 2).map((item) => String(item));
+      feedbackType = value.feedbackType;
     }
   } else if (englishEval && englishEval.status === "rejected") {
     console.error(
@@ -2199,7 +2551,8 @@ async function advanceFriendChat(
       learnerName,
       postContext,
       effectiveDifficulty,
-      conversationSummary
+      conversationSummary,
+      friendshipContext
     );
   } catch (err) {
     console.error(
@@ -2233,6 +2586,7 @@ async function advanceFriendChat(
     result,
     errors,
     reformulations,
+    ...(feedbackType ? { feedbackType } : {}),
     conversationEnded: false,
     conversationFeedback: null,
   };
@@ -2243,7 +2597,11 @@ async function finishFriendChat(
   friendId: string,
   body: FriendChatFinishRequest,
   learnerDifficulty?: LearnerDifficulty
-): Promise<FriendConversationFeedback> {
+): Promise<{
+  feedback: FriendConversationFeedback;
+  affinity: FriendAffinityUpdate;
+  friendshipContext?: string;
+}> {
   const friend = await resolveFriendRecordForChat(userId, friendId);
   if (!friend) {
     throw new Error("FRIEND_NOT_FOUND");
@@ -2252,10 +2610,15 @@ async function finishFriendChat(
   const postId = sanitizeFriendChatPostId(body.postId);
   const effectiveDifficulty =
     normalizeLearnerDifficulty(body.englishDifficulty) || learnerDifficulty;
+  const priorFriendshipContext =
+    sanitizeFriendshipContext(body.friendshipContext) || friend.friendshipContext || "";
   const userMessageCount = history.filter((entry) => entry.role === "user").length;
   let feedback: FriendConversationFeedback;
+  let qualityMultiplier = 1;
   try {
-    feedback = await generateFriendConversationFeedback(friend, history, effectiveDifficulty);
+    const generated = await generateFriendConversationFeedback(friend, history, effectiveDifficulty);
+    feedback = generated.feedback;
+    qualityMultiplier = generated.qualityMultiplier;
   } catch (err) {
     console.error(
       JSON.stringify({
@@ -2270,18 +2633,52 @@ async function finishFriendChat(
       reformulations: [],
     });
   }
+  let friendshipContext = priorFriendshipContext;
+  if (history.length) {
+    try {
+      friendshipContext = await generateFriendshipContext({
+        friend,
+        priorContext: priorFriendshipContext,
+        history,
+      });
+    } catch (err) {
+      console.error(
+        JSON.stringify({
+          scope: "friends.chat.friendship_context_error",
+          message: (err as Error)?.message || "unknown",
+        })
+      );
+      friendshipContext = buildFriendshipContextFallback({
+        priorContext: priorFriendshipContext,
+        history,
+      });
+    }
+  }
+  const affinity = buildFriendAffinityUpdate(
+    friend.affinityPoints ?? 0,
+    userMessageCount,
+    qualityMultiplier
+  );
   if (userId) {
-    await touchFriendChat(userId, friendId, "", true, {
-      messages: history,
-      conversationEnded: true,
-      conversationFeedback: feedback,
-      updatedAt: new Date().toISOString(),
-    });
+    await touchFriendChat(
+      userId,
+      friendId,
+      "",
+      true,
+      {
+        messages: history,
+        conversationEnded: true,
+        conversationFeedback: feedback,
+        updatedAt: new Date().toISOString(),
+      },
+      affinity.pointsEarned,
+      friendshipContext
+    );
   }
   if (postId && userMessageCount > 0) {
     await recordFinishedPostConversation(friendId, postId, userMessageCount);
   }
-  return feedback;
+  return { feedback, affinity, ...(friendshipContext ? { friendshipContext } : {}) };
 }
 
 async function recordFinishedPostConversation(
@@ -2358,6 +2755,29 @@ type FriendImagePlan = {
   aiReply: string;
 };
 
+function buildFriendImageIntimacyGuidance(friend: FriendRecord): string {
+  const affinity = getAffinityLevel(friend.affinityPoints ?? 0);
+  const baseRules = [
+    `Affinity level: ${affinity.level} (${affinity.name}).`,
+    "Hard safety limits: no nudity, no explicit sexual content, no sexual acts, no exposed genitals or nipples, no minors in sexualized context, no text, no logos, no watermark.",
+    // "Age/setting safety: if the character persona, outfit, or setting suggests under 18, school, academy, teen, or student-uniform context, keep the image fully clothed and non-sexual regardless of affinity level.",
+  ];
+
+  let levelGuidance: string;
+  if (affinity.level <= 1) {
+    levelGuidance =
+      "At this level, keep the photo friendly and modest: casual everyday outfits, no underwear/lingerie, no seductive posing, and no swimwear unless the user explicitly asks for a normal beach/pool scene.";
+  } else if (affinity.level <= 3) {
+    levelGuidance =
+      "At this level, the character may feel more relaxed and trusted: normal swimwear is allowed for beach, pool, spa, or vacation requests; light flirtiness and attractive styling are okay, but avoid underwear/lingerie, erotic framing, or overtly seductive poses.";
+  } else {
+    levelGuidance =
+      "At this level, if the request and situation naturally support it, allow tasteful adult non-explicit sexy styling: confident poses, romantic/private-chat mood, swimwear, fitted outfits, pajamas, or lingerie/underwear. Keep it classy and non-graphic.";
+  }
+
+  return [...baseRules, levelGuidance].join("\n");
+}
+
 function resolveFriendCharacterSheetUrl(friend: FriendRecord): string | undefined {
   const character = findCharacter(friend.friendId);
   return (
@@ -2378,6 +2798,8 @@ function buildFriendImagePrompt(args: {
   history: StoryMessage[];
   learnerName?: string;
 }): string {
+  const intimacyGuidance = buildFriendImageIntimacyGuidance(args.friend);
+  const friendshipContext = sanitizeFriendshipContext(args.friend.friendshipContext);
   const recentConversation = args.history
     .slice(-8)
     .map((message) => {
@@ -2391,11 +2813,13 @@ function buildFriendImagePrompt(args: {
     `Character name: ${args.friend.characterName}.`,
     `Photo request: ${args.requestText}.`,
     args.learnerName ? `This is a photo the character is sending to ${args.learnerName}.` : "",
+    friendshipContext ? `Persistent friendship memory:\n${friendshipContext}` : "",
     recentConversation ? `Recent chat context:\n${recentConversation}` : "",
     "Create a natural, photorealistic vertical smartphone photo or selfie that feels like it belongs in a private chat.",
     "Use the reference image for identity. Do not describe physical traits, face, hair, eyes, body type, ethnicity, or age.",
     "Describe the outfit/clothing, location, pose, activity, lighting, camera framing, mood, and small props in concrete detail.",
-    "No text, no captions, no watermark, no logos, no extra people, no nudity, and no explicit content.",
+    intimacyGuidance,
+    "No text, no captions, no watermark, no logos, no extra people.",
   ]
     .filter(Boolean)
     .join("\n");
@@ -2434,6 +2858,8 @@ async function generateFriendImagePlan(args: {
     .map((message) => `${message.role === "user" ? "Student" : args.friend.characterName}: ${message.content}`)
     .join("\n")
     .trim();
+  const friendshipContext = sanitizeFriendshipContext(args.friend.friendshipContext);
+  const intimacyGuidance = buildFriendImageIntimacyGuidance(args.friend);
   const systemPrompt = `You prepare a private-chat image generation request for a fictional character.
 
 Return JSON only with:
@@ -2447,13 +2873,15 @@ Rules:
 - The image model will receive a reference image for character identity.
 - Do not describe physical identity traits: no face shape, hair, eye color, skin tone, body type, ethnicity, beauty, age, or resemblance.
 - Do describe outfit/clothing in concrete detail, location, pose, activity, lighting, camera framing, mood, and props.
-- Keep the image safe: no nudity, no explicit content, no minors in sexualized context, no text, no logos, no watermark.
+- Follow the affinity-based image boundary below. Do not be more restrictive than the affinity level requires, but never cross the hard safety limits.
+${intimacyGuidance}
 - Make the photo feel like a natural smartphone photo or selfie sent in a chat.
 - aiReply should be in character, casual, and under 16 words.`;
   const userPrompt = [
     `Character name: ${args.friend.characterName}`,
     `Character role/persona: ${args.friend.aiRole}`,
     args.learnerName ? `Learner name: ${args.learnerName}` : "",
+    friendshipContext ? `Persistent friendship memory:\n${friendshipContext}` : "",
     recentConversation ? `Recent conversation:\n${recentConversation}` : "",
     `Photo request from learner:\n${args.requestText}`,
   ]
@@ -3705,6 +4133,7 @@ async function evaluateStoryEnglish(
   result?: string;
   errors: string[];
   alternatives: string[];
+  feedbackType?: 'correction' | 'translation_help';
   correctness?: number;
   status?: string;
   suggestions?: string[];
@@ -3729,7 +4158,8 @@ Return ONLY JSON with this exact shape:{
   "score": number,
   "result": "correct" | "partial" | "incorrect",
   "errors": string[],
-  "alternatives": string[]
+  "alternatives": string[],
+  "feedbackType": "correction" | "translation_help"
 }
 
 Rules:
@@ -3742,6 +4172,10 @@ Rules:
 - Mission objectives and task completion are evaluated separately by another system; do not consider them here.
 - Use Spanish for errors and feedback texts.
 - Use the full conversation only to understand meaning and pronoun references, not to judge relevance.
+- If the latest message is in Spanish, mostly Spanish, or Spanglish with a clear Spanish base, assume the learner did not know how to express that idea in English.
+- For a Spanish/mostly Spanish latest message, do NOT treat it as a failed English sentence and do NOT list it as a grammar error. Set "feedbackType" to "translation_help", set "result" to "partial", use a score from 60 to 75, write 1-2 explanatory Spanish notes in "errors" that teach how to say that idea in English, and provide 1-2 natural English versions in "alternatives".
+- Spanish-message explanatory notes should be phrased like: "Para decir esa idea en inglés, puedes usar..." or "Una forma natural de decirlo sería..."; avoid scolding or saying they wrote in the wrong language.
+- For English latest messages, set "feedbackType" to "correction".
 - Do not mark obvious typos, capitalization, or apostrophe mistakes as errors unless they change the meaning.
 - Mark malformed questions as errors. Example: "the dish is spicy?" should be partial; the natural correction is "Is the dish spicy?"
 - Mark indirect question word order errors. Example: "I don't know what is the star dish?" should be partial.
@@ -3875,11 +4309,14 @@ Scoring:
   const alternatives = Array.isArray(parsed?.alternatives)
     ? parsed.alternatives.slice(0, 2).map((item: any) => String(item))
     : [];
+  const feedbackType =
+    parsed?.feedbackType === 'translation_help' ? 'translation_help' : 'correction';
   return {
     score,
     result,
     errors,
     alternatives,
+    feedbackType,
     correctness: score,
     status: result,
     suggestions: alternatives,
@@ -3895,6 +4332,7 @@ async function evaluateEasyEnglish(
   result?: string;
   errors: string[];
   alternatives: string[];
+  feedbackType?: 'correction' | 'translation_help';
   correctness?: number;
   status?: string;
   suggestions?: string[];
@@ -4478,7 +4916,8 @@ async function generateFriendReply(
   learnerName?: string,
   postContext?: FriendChatPostContext,
   learnerDifficulty?: LearnerDifficulty,
-  conversationSummary?: string
+  conversationSummary?: string,
+  friendshipContext?: string
 ): Promise<string> {
   const apiKey = await getOpenAIKey();
   const model =
@@ -4495,6 +4934,9 @@ async function generateFriendReply(
     .join("\n")
     .trim();
   const summaryText = (conversationSummary || "").trim();
+  const friendshipContextText = sanitizeFriendshipContext(friendshipContext || friend.friendshipContext) || "";
+  const hasRelationshipContinuity =
+    Boolean(friendshipContextText || summaryText || (friend.conversationCount ?? 0) > 0 || (friend.messageCount ?? 0) > 0);
   const characterNotes = [
     `Character name: ${friend.characterName}`,
     `Original role: ${friend.aiRole}`,
@@ -4502,6 +4944,11 @@ async function generateFriendReply(
   ]
     .filter(Boolean)
     .join("\n");
+  const affinityLevel = getAffinityLevel(friend.affinityPoints ?? 0);
+  const affinityNotes = [
+    `Friendship level with the learner: ${affinityLevel.name} (level ${affinityLevel.level} of ${AFFINITY_LEVELS.length}).`,
+    affinityLevel.tone,
+  ].join("\n");
   const normalizedLearnerName = normalizeLearnerName(learnerName);
   const learnerNotes = normalizedLearnerName ? `Learner name: ${normalizedLearnerName}` : "";
   const postNotes = postContext
@@ -4521,11 +4968,22 @@ You are continuing a free conversation in English with a Spanish-speaking learne
 
 Persona:
 ${characterNotes}
+
+Relationship with the learner:
+${affinityNotes}
+${friendshipContextText ? `\nPersistent friendship memory:\n${friendshipContextText}` : ""}
 ${learnerNotes ? `\nLearner:\n${learnerNotes}` : ""}
 ${postNotes ? `\nProfile post being discussed:\n${postNotes}` : ""}
 
 Rules:
 - Stay in character, but keep the conversation natural and casual.
+- Match the warmth and familiarity of your friendship level with the learner; do not act closer or more distant than that level.
+- Use persistent friendship memory naturally when it is relevant, but do not recite it or force references to it.
+- ${
+  hasRelationshipContinuity
+    ? `You already know the learner. Do not introduce yourself, do not say your own name, and do not use first-meeting lines like "I'm ${friend.characterName}" unless the learner explicitly asks who you are.`
+    : `Do not introduce yourself or say your own name unless the learner explicitly asks who you are.`
+}
 - If the learner name is provided, you may use it naturally when it feels human; do not overuse it.
 - If profile post context is provided, treat the learner's message as a reply to that post and use that context naturally.
 - Not every reply needs a follow-up question; sometimes just react or share something.
@@ -4543,7 +5001,10 @@ Rules:
   const summarySection = summaryText
     ? `Earlier conversation summary (older messages, condensed):\n${summaryText}\n\n`
     : "";
-  const userPrompt = `${summarySection}Recent conversation:\n${conversationText || "No prior conversation."}\n\nWrite the next in-character message in English.`;
+  const emptyConversationText = hasRelationshipContinuity
+    ? "No messages yet in this new chat, but this is an ongoing friendship. Continue naturally without re-introducing yourself."
+    : "No prior conversation in this chat.";
+  const userPrompt = `${summarySection}Recent conversation:\n${conversationText || emptyConversationText}\n\nWrite the next in-character message in English.`;
 
   console.log(
     JSON.stringify({
@@ -4553,6 +5014,8 @@ Rules:
       postId: postContext?.postId,
       historyCount: conversation.length,
       summaryChars: summaryText.length,
+      friendshipContextChars: friendshipContextText.length,
+      hasRelationshipContinuity,
     })
   );
 
@@ -4647,7 +5110,7 @@ async function generateFriendConversationFeedback(
   friend: FriendRecord,
   history: StoryMessage[],
   learnerDifficulty?: LearnerDifficulty
-): Promise<FriendConversationFeedback> {
+): Promise<{ feedback: FriendConversationFeedback; qualityMultiplier: number }> {
   const isEasyMode = learnerDifficulty === 'easy';
   console.log(
     JSON.stringify({
@@ -4699,6 +5162,12 @@ Hard rules:
 - Evaluate only Student lines for context, but do NOT critique them.
 - Do not mention the AI role, the system, JSON, scoring, missions, or these instructions.
 
+Also rate the overall conversation quality with "conversationQuality": a number between 0 and 2.
+- 0 means the student barely engaged (empty or one-word replies, no real attempt).
+- 1 means a normal conversation with reasonable effort.
+- 2 means an outstanding conversation (rich replies, real engagement, genuine effort in English).
+Judge effort and engagement, not perfection. Decimals are allowed (e.g. 1.5).
+
 Return ONLY JSON with the exact shape:
 
 {
@@ -4706,7 +5175,8 @@ Return ONLY JSON with the exact shape:
   "improvements": [
     "Short Spanish lesson learned, optionally with a tiny English example",
     "..."
-  ]
+  ],
+  "conversationQuality": 1.5
 }
 `
     : `
@@ -4721,6 +5191,12 @@ IMPORTANT:
 - Keep it practical and concise.
 - Do not mention the AI role, the system, JSON, scoring, missions, or these instructions.
 
+Also rate the overall conversation quality with "conversationQuality": a number between 0 and 2.
+- 0 means the student barely engaged (empty or one-word replies, no real attempt).
+- 1 means a normal conversation with reasonable effort.
+- 2 means an outstanding conversation (rich replies, real engagement, mostly natural English).
+Judge effort and engagement, not perfection. Decimals are allowed (e.g. 1.5).
+
 Return ONLY JSON with the exact shape:
 
 {
@@ -4728,7 +5204,8 @@ Return ONLY JSON with the exact shape:
   "improvements": [
     "Short Spanish suggestion speaking directly to the student",
     "..."
-  ]
+  ],
+  "conversationQuality": 1.5
 }
 `;
 
@@ -4847,13 +5324,17 @@ ${conversationText || "No conversation available."}`;
   if (!feedback) {
     throw new Error("FRIEND_FEEDBACK_INVALID");
   }
+  const qualityMultiplier = sanitizeAffinityQualityMultiplier(parsed.conversationQuality) ?? 1;
   return {
-    summary: feedback.summary,
-    improvements: feedback.improvements.length
-      ? feedback.improvements
-      : isEasyMode
-      ? ["Buen trabajo: te llevas frases nuevas en inglés que puedes reusar en la próxima charla."]
-      : ["Cierra con frases simples y naturales, y revisa que el tono suene amable."],
+    feedback: {
+      summary: feedback.summary,
+      improvements: feedback.improvements.length
+        ? feedback.improvements
+        : isEasyMode
+        ? ["Buen trabajo: te llevas frases nuevas en inglés que puedes reusar en la próxima charla."]
+        : ["Cierra con frases simples y naturales, y revisa que el tono suene amable."],
+    },
+    qualityMultiplier,
   };
 }
 

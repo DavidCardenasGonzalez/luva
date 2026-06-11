@@ -163,7 +163,20 @@ export interface FriendCharacter {
   lastMessageAt?: string;
   messageCount?: number;
   conversationCount?: number;
+  affinityPoints?: number;
+  friendshipContext?: string;
   conversationSnapshot?: FriendConversationSnapshot;
+}
+
+export interface FriendAffinityUpdate {
+  pointsEarned: number;
+  qualityMultiplier: number;
+  previousPoints: number;
+  totalPoints: number;
+  previousLevel: number;
+  level: number;
+  levelName: string;
+  leveledUp: boolean;
 }
 
 export interface FriendConversationSnapshot {
@@ -186,6 +199,8 @@ export interface CreateFriendRequest {
   lastUserMessage?: string;
   messageCount?: number;
   conversationCount?: number;
+  affinityPoints?: number;
+  friendshipContext?: string;
   conversationSnapshot?: FriendConversationSnapshot;
 }
 
@@ -203,6 +218,7 @@ export interface FriendChatRequest {
   postImageUrl?: string;
   postVideoUrl?: string;
   englishDifficulty?: 'easy' | 'medium' | 'hard';
+  friendshipContext?: string;
   history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
 }
 
@@ -213,6 +229,7 @@ export interface FriendChatPayload {
   result: EvalResult;
   errors: string[];
   reformulations: string[];
+  feedbackType?: 'correction' | 'translation_help';
   conversationEnded: boolean;
   conversationFeedback?: {
     summary: string;

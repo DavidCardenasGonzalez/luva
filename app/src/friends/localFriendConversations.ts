@@ -24,11 +24,14 @@ export type LocalFriendConversationSourcePost = {
 export type LocalFriendConversationSnapshot = {
   conversationKey: string;
   friendId: string;
+  title?: string;
   sourcePost?: LocalFriendConversationSourcePost;
   messages: LocalFriendChatMessage[];
   analysis?: FriendChatPayload | null;
   conversationEnded: boolean;
   conversationFeedback?: FriendConversationFeedback | null;
+  startedAt?: string;
+  endedAt?: string;
   updatedAt: string;
 };
 
@@ -48,6 +51,12 @@ function storageKey(conversationKey: string) {
 
 function asString(value: unknown): string | undefined {
   return typeof value === 'string' ? value.trim() || undefined : undefined;
+}
+
+function asTimestamp(value: unknown): string | undefined {
+  const raw = asString(value);
+  if (!raw || !Number.isFinite(Date.parse(raw))) return undefined;
+  return new Date(raw).toISOString();
 }
 
 function sanitizeMessage(input: unknown): LocalFriendChatMessage | null {
@@ -96,6 +105,7 @@ function sanitizeSnapshot(input: unknown): LocalFriendConversationSnapshot | und
   return {
     conversationKey,
     friendId,
+    ...(asString(raw.title) ? { title: asString(raw.title) } : {}),
     sourcePost: sanitizeSourcePost(raw.sourcePost),
     messages,
     analysis: raw.analysis && typeof raw.analysis === 'object'
@@ -105,7 +115,9 @@ function sanitizeSnapshot(input: unknown): LocalFriendConversationSnapshot | und
     conversationFeedback: raw.conversationFeedback && typeof raw.conversationFeedback === 'object'
       ? raw.conversationFeedback as FriendConversationFeedback
       : null,
-    updatedAt: asString(raw.updatedAt) || new Date().toISOString(),
+    ...(asTimestamp(raw.startedAt) ? { startedAt: asTimestamp(raw.startedAt) } : {}),
+    ...(asTimestamp(raw.endedAt) ? { endedAt: asTimestamp(raw.endedAt) } : {}),
+    updatedAt: asTimestamp(raw.updatedAt) || new Date().toISOString(),
   };
 }
 
@@ -147,6 +159,15 @@ export async function listLocalFriendConversations(): Promise<LocalFriendConvers
   }
 }
 
+export async function listLocalFriendConversationsForFriend(
+  friendId?: string,
+): Promise<LocalFriendConversationSnapshot[]> {
+  const normalizedFriendId = friendId?.trim();
+  if (!normalizedFriendId) return [];
+  const conversations = await listLocalFriendConversations();
+  return conversations.filter((snapshot) => snapshot.friendId === normalizedFriendId);
+}
+
 export async function getLatestLocalFriendConversationForFriend(
   friendId?: string,
 ): Promise<LocalFriendConversationSnapshot | undefined> {
@@ -154,6 +175,31 @@ export async function getLatestLocalFriendConversationForFriend(
   if (!normalizedFriendId) return undefined;
   const conversations = await listLocalFriendConversations();
   return conversations.find((snapshot) => snapshot.friendId === normalizedFriendId);
+}
+
+export function buildLocalFriendConversationTitle(
+  snapshot: Pick<LocalFriendConversationSnapshot, 'title' | 'sourcePost' | 'messages'>,
+  friendName?: string,
+): string {
+  const explicitTitle = snapshot.title?.trim();
+  if (explicitTitle) return explicitTitle;
+
+  const caption = snapshot.sourcePost?.caption?.trim();
+  if (caption) {
+    return caption.length > 58 ? `${caption.slice(0, 55).trim()}...` : caption;
+  }
+
+  const firstUserMessage = snapshot.messages.find((message) => message.role === 'user');
+  const firstText = firstUserMessage?.text.trim();
+  if (firstText) {
+    return firstText.length > 58 ? `${firstText.slice(0, 55).trim()}...` : firstText;
+  }
+
+  if (firstUserMessage?.imageUri || firstUserMessage?.imageUrl) {
+    return friendName ? `Foto con ${friendName}` : 'Charla con foto';
+  }
+
+  return friendName ? `Charla con ${friendName}` : 'Charla guardada';
 }
 
 export function toFriendConversationSnapshot(
@@ -187,6 +233,26 @@ export async function saveLocalFriendConversation(
   if (!sanitized) return;
 
   await AsyncStorage.setItem(storageKey(conversationKey), JSON.stringify(sanitized));
+}
+
+export async function archiveLocalFriendConversation(
+  snapshot: LocalFriendConversationSnapshot,
+): Promise<LocalFriendConversationSnapshot | undefined> {
+  const endedAt = snapshot.endedAt || new Date().toISOString();
+  const archivedKey = `${snapshot.conversationKey}:ended:${hashText(`${endedAt}:${snapshot.messages.length}`)}`;
+  const archivedSnapshot: LocalFriendConversationSnapshot = {
+    ...snapshot,
+    conversationKey: archivedKey,
+    conversationEnded: true,
+    endedAt,
+    updatedAt: endedAt,
+  };
+
+  await saveLocalFriendConversation(archivedSnapshot);
+  if (archivedKey !== snapshot.conversationKey) {
+    await deleteLocalFriendConversation(snapshot.conversationKey);
+  }
+  return loadLocalFriendConversation(archivedKey);
 }
 
 export async function deleteLocalFriendConversation(conversationKey?: string): Promise<void> {

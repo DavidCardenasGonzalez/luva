@@ -21,6 +21,7 @@ import MyJourneyScreen from '../screens/MyJourneyScreen';
 import FriendsScreen from '../screens/FriendsScreen';
 import FriendChatScreen from '../screens/FriendChatScreen';
 import FriendProfileScreen from '../screens/FriendProfileScreen';
+import FriendConversationHistoryScreen from '../screens/FriendConversationHistoryScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import AuthCallbackScreen from '../screens/AuthCallbackScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -79,6 +80,7 @@ export type RootStackParamList = {
     initialDraft?: string;
   };
   FriendProfile: { friendId: string };
+  FriendConversationHistory: { friendId: string; friendName?: string };
   Profile: undefined;
   AuthCallback: undefined;
   Settings: undefined;
@@ -207,6 +209,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Friends" component={FriendsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FriendChat" component={FriendChatScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FriendProfile" component={FriendProfileScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="FriendConversationHistory" component={FriendConversationHistoryScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="AuthCallback" component={AuthCallbackScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
