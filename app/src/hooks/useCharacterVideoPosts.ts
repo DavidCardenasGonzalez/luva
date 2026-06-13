@@ -16,6 +16,7 @@ export type CharacterVideoPost = {
   likeCount: number;
   suggestedReplies: string[];
   avatarImageUrl?: string;
+  avatarImageXsUrl?: string;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -110,6 +111,7 @@ function sanitizeCharacterVideoPost(input: unknown): CharacterVideoPost | null {
     likeCount: normalizeLikeCount(raw.likeCount),
     suggestedReplies: normalizeSuggestedReplies(raw.suggestedReplies),
     avatarImageUrl: normalizeUrl(raw.avatarImageUrl),
+    avatarImageXsUrl: normalizeUrl(raw.avatarImageXsUrl),
     createdAt: asString(raw.createdAt),
     updatedAt: asString(raw.updatedAt),
   };

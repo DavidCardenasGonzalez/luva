@@ -67,6 +67,7 @@ export type AddFriendPayload = {
 export type FriendChatPayload = {
   friendId: string;
   aiReply: string;
+  sceneNarration?: string;
   correctness: number;
   result: 'correct' | 'partial' | 'incorrect';
   errors: string[];

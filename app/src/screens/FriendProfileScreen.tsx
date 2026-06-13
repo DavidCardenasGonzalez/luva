@@ -400,6 +400,13 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
       ? { uri: avatarUrl }
       : getChatAvatar(friend.friendId);
   }, [friend]);
+  const avatarXsSource = useMemo<ImageSourcePropType | undefined>(() => {
+    if (!friend) return undefined;
+    const avatarUrl = (friend.avatarImageXsUrl || friend.avatarImageUrl)?.trim();
+    return avatarUrl
+      ? { uri: avatarUrl }
+      : getChatAvatar(friend.friendId);
+  }, [friend]);
   const avatarInitial = (friend?.characterName.trim().charAt(0) || '?').toUpperCase();
   const avatarUri = typeof avatarSource === 'object' && avatarSource && 'uri' in avatarSource
     ? avatarSource.uri
@@ -554,7 +561,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
           renderItem={({ item }) => (
             <ProfileFeedPost
               item={item}
-              avatarSource={avatarSource}
+              avatarSource={avatarXsSource}
               avatarInitial={avatarInitial}
               playbackEnabled={(focusedPostId || selectedPost.postId) === item.postId}
               onReply={handleReplyToPost}

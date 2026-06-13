@@ -225,6 +225,7 @@ export interface FriendChatRequest {
 export interface FriendChatPayload {
   friendId: string;
   aiReply: string;
+  sceneNarration?: string;
   correctness: number;
   result: EvalResult;
   errors: string[];

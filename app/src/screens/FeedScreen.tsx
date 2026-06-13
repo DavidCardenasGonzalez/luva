@@ -199,6 +199,8 @@ const VOCABULARY_BATCH_SIZE = 3;
 const SHADOWING_BATCH_SIZE = 1;
 const LESSON_BATCH_SIZE = 1;
 const CLAIMED_EXTRA_POSTS_STORAGE_KEY = '@luva/feed/claimed-extra-posts';
+const SHOW_ONLY_CHARACTER_REELS_IN_FEED = true;
+const CHARACTER_REEL_CARD_ASPECT_RATIO = 9 / 16;
 
 function padTimerUnit(value: number) {
   return String(value).padStart(2, '0');
@@ -264,6 +266,7 @@ async function preloadOnboardingReelPreviewAssets(videos: CharacterVideoFeedItem
         .flatMap((item) => [
           item.thumbnailUrl,
           item.imageUrl,
+          item.avatarImageXsUrl,
           item.avatarImageUrl,
         ])
         .map((url) => url?.trim())
@@ -900,6 +903,7 @@ function CharacterVideoCard({
   onPress: (item: CharacterVideoFeedItem) => void;
 }) {
   const thumbnailUrl = (item.thumbnailUrl || item.imageUrl).trim();
+  const avatarImageUrl = (item.avatarImageXsUrl || item.avatarImageUrl)?.trim();
   const { userLiked, displayedLabel, toggleLike } = useCharacterPostLike(
     item.characterId,
     item.postId,
@@ -923,7 +927,7 @@ function CharacterVideoCard({
         opacity: pressed ? 0.9 : 1,
       })}
     >
-      <View style={{ aspectRatio: 9 / 11, backgroundColor: COLORS.surfaceAlt }}>
+      <View style={{ aspectRatio: CHARACTER_REEL_CARD_ASPECT_RATIO, backgroundColor: COLORS.surfaceAlt }}>
         <Image
           source={{ uri: thumbnailUrl }}
           style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
@@ -977,9 +981,9 @@ function CharacterVideoCard({
           }}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            {item.avatarImageUrl ? (
+            {avatarImageUrl ? (
               <Image
-                source={{ uri: item.avatarImageUrl }}
+                source={{ uri: avatarImageUrl }}
                 style={{ width: 26, height: 26, borderRadius: 999, marginRight: 8 }}
                 resizeMode="cover"
               />
@@ -1054,6 +1058,7 @@ function CharacterVideoPage({
   const videoRef = useRef<Video | null>(null);
   const posterUrl = (item.thumbnailUrl || item.imageUrl).trim();
   const videoUrl = item.videoUrl.trim();
+  const avatarImageUrl = (item.avatarImageXsUrl || item.avatarImageUrl)?.trim();
   const [isVideoReadyForDisplay, setIsVideoReadyForDisplay] = useState(false);
   const [paused, setPaused] = useState(false);
   const [replyText, setReplyText] = useState('');
@@ -1381,9 +1386,9 @@ function CharacterVideoPage({
                 opacity: pressed ? 0.75 : 1,
               })}
             >
-              {item.avatarImageUrl ? (
+              {avatarImageUrl ? (
                 <Image
-                  source={{ uri: item.avatarImageUrl }}
+                  source={{ uri: avatarImageUrl }}
                   style={{ width: 34, height: 34, borderRadius: 999, marginRight: 10 }}
                   resizeMode="cover"
                 />
@@ -3297,6 +3302,16 @@ export default function FeedScreen({ navigation, route }: Props) {
 
   const feedItems = useMemo(
     () => {
+      if (SHOW_ONLY_CHARACTER_REELS_IN_FEED) {
+        return buildFeedItems({
+          characterVideos: visibleCharacterVideos,
+          vocabulary: [],
+          shadowing: [],
+          lessons: [],
+          posts: [],
+        });
+      }
+
       const promo = showLitePromoTimer
         ? {
             kind: 'promo' as const,
@@ -3327,6 +3342,15 @@ export default function FeedScreen({ navigation, route }: Props) {
   );
 
   const imageUrlsToPrefetch = useMemo(() => {
+    if (SHOW_ONLY_CHARACTER_REELS_IN_FEED) {
+      return visibleCharacterVideos.flatMap((item) => [
+        item.thumbnailUrl,
+        item.imageUrl,
+        item.avatarImageXsUrl,
+        item.avatarImageUrl,
+      ]);
+    }
+
     const upcomingCharacterVideos = shuffledCharacterVideos.slice(
       0,
       Math.min(shuffledCharacterVideos.length, visibleCharacterVideoCount + CHARACTER_VIDEO_BATCH_SIZE)
@@ -3334,6 +3358,7 @@ export default function FeedScreen({ navigation, route }: Props) {
     const characterVideoUrls = upcomingCharacterVideos.flatMap((item) => [
       item.thumbnailUrl,
       item.imageUrl,
+      item.avatarImageXsUrl,
       item.avatarImageUrl,
     ]);
     const resumeMissionUrls = resumeMission
@@ -3357,6 +3382,7 @@ export default function FeedScreen({ navigation, route }: Props) {
     shuffledLessons,
     shuffledCharacterVideos,
     shuffledShadowing,
+    visibleCharacterVideos,
     visibleCharacterVideoCount,
     visibleLessonsCount,
     visibleShadowingCount,
@@ -3392,10 +3418,12 @@ export default function FeedScreen({ navigation, route }: Props) {
   const renderedFeedItems = showInitialFeedSkeleton ? [] : loading ? stableFeedItems : feedItems;
 
   const hasMoreFeedItems =
-    visibleCharacterVideoCount < shuffledCharacterVideos.length ||
-    visibleVocabularyCount < shuffledVocabulary.length ||
-    visibleShadowingCount < shuffledShadowing.length ||
-    visibleLessonsCount < shuffledLessons.length;
+    SHOW_ONLY_CHARACTER_REELS_IN_FEED
+      ? visibleCharacterVideoCount < shuffledCharacterVideos.length
+      : visibleCharacterVideoCount < shuffledCharacterVideos.length ||
+        visibleVocabularyCount < shuffledVocabulary.length ||
+        visibleShadowingCount < shuffledShadowing.length ||
+        visibleLessonsCount < shuffledLessons.length;
 
   const loadMoreFeedItems = useCallback(() => {
     if (loading || !hasMoreFeedItems) return;
@@ -3420,18 +3448,15 @@ export default function FeedScreen({ navigation, route }: Props) {
       visibleCharacterVideoCount + CHARACTER_VIDEO_BATCH_SIZE,
       shuffledCharacterVideos.length
     );
-    const nextVocabularyCount = Math.min(
-      visibleVocabularyCount + VOCABULARY_BATCH_SIZE,
-      shuffledVocabulary.length
-    );
-    const nextShadowingCount = Math.min(
-      visibleShadowingCount + SHADOWING_BATCH_SIZE,
-      shuffledShadowing.length
-    );
-    const nextLessonsCount = Math.min(
-      visibleLessonsCount + LESSON_BATCH_SIZE,
-      shuffledLessons.length
-    );
+    const nextVocabularyCount = SHOW_ONLY_CHARACTER_REELS_IN_FEED
+      ? previousVocabularyCount
+      : Math.min(visibleVocabularyCount + VOCABULARY_BATCH_SIZE, shuffledVocabulary.length);
+    const nextShadowingCount = SHOW_ONLY_CHARACTER_REELS_IN_FEED
+      ? previousShadowingCount
+      : Math.min(visibleShadowingCount + SHADOWING_BATCH_SIZE, shuffledShadowing.length);
+    const nextLessonsCount = SHOW_ONLY_CHARACTER_REELS_IN_FEED
+      ? previousLessonsCount
+      : Math.min(visibleLessonsCount + LESSON_BATCH_SIZE, shuffledLessons.length);
     const characterVideosLoadedCount = Math.max(
       nextCharacterVideosCount - previousCharacterVideosCount,
       0

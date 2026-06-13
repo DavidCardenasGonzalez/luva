@@ -86,6 +86,7 @@ type ChatMessage = {
   text: string;
   imageUri?: string;
   imageUrl?: string;
+  sceneNarration?: string;
 };
 
 function messagesFromRemoteConversation(snapshot?: FriendConversationSnapshot | null): ChatMessage[] {
@@ -874,6 +875,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       const next = { ...current };
       removedMessages.forEach((message) => {
         delete next[message.id];
+        delete next[`${message.id}:scene`];
       });
       return next;
     });
@@ -1428,6 +1430,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           id: `ai-${Date.now()}`,
           role: 'assistant',
           text: payload.aiReply,
+          ...(payload.sceneNarration ? { sceneNarration: payload.sceneNarration } : {}),
         };
         const messagesWithReply = [...messagesWithPendingUser, assistantMessage];
         setMessages(messagesWithReply);
@@ -1980,11 +1983,54 @@ export default function FriendChatScreen({ navigation, route }: Props) {
               <View style={{ gap: 12 }}>
                 {messages.map((msg) => {
                   const translationState = messageTranslations[msg.id];
+                  const narrationTranslationState = messageTranslations[`${msg.id}:scene`];
                   const isAssistant = msg.role === 'assistant';
                   const messageImageUri = msg.imageUrl || msg.imageUri;
                   const canUseTextActions = isAssistant && msg.text.trim().length > 0;
                   return (
                     <View key={msg.id} style={{ alignSelf: isAssistant ? 'flex-start' : 'flex-end' }}>
+                      {isAssistant && msg.sceneNarration ? (
+                        <Pressable
+                          onPress={() => translateAssistantMessage(`${msg.id}:scene`, msg.sceneNarration || '')}
+                          disabled={!!narrationTranslationState?.loading}
+                          accessibilityRole="button"
+                          accessibilityLabel="Traducir narración"
+                          style={({ pressed }) => ({
+                            maxWidth: '80%',
+                            marginBottom: 6,
+                            paddingHorizontal: 8,
+                            opacity: pressed ? 0.7 : 1,
+                          })}
+                        >
+                          <Text
+                            style={{
+                              color: COLORS.muted,
+                              fontSize: 13,
+                              fontStyle: 'italic',
+                              lineHeight: 18,
+                            }}
+                          >
+                            {msg.sceneNarration}
+                          </Text>
+                          {narrationTranslationState?.loading ? (
+                            <ActivityIndicator
+                              size="small"
+                              color={COLORS.muted}
+                              style={{ alignSelf: 'flex-start', marginTop: 4 }}
+                            />
+                          ) : null}
+                          {narrationTranslationState?.text ? (
+                            <Text style={{ color: COLORS.muted, fontSize: 13, lineHeight: 18, marginTop: 4 }}>
+                              {narrationTranslationState.text}
+                            </Text>
+                          ) : null}
+                          {narrationTranslationState?.error ? (
+                            <Text style={{ color: '#dc2626', fontSize: 12, marginTop: 4 }}>
+                              {narrationTranslationState.error}
+                            </Text>
+                          ) : null}
+                        </Pressable>
+                      ) : null}
                       <View
                         style={{
                           backgroundColor: isAssistant ? 'white' : COLORS.userBubble,

@@ -11,6 +11,7 @@ export type LocalFriendChatMessage = {
   text: string;
   imageUri?: string;
   imageUrl?: string;
+  sceneNarration?: string;
 };
 
 export type LocalFriendConversationSourcePost = {
@@ -67,6 +68,7 @@ function sanitizeMessage(input: unknown): LocalFriendChatMessage | null {
   const text = asString(raw.text) || '';
   const imageUri = asString(raw.imageUri);
   const imageUrl = asString(raw.imageUrl);
+  const sceneNarration = asString(raw.sceneNarration);
   if (!id || !role || (!text && !imageUri && !imageUrl)) return null;
   return {
     id,
@@ -74,6 +76,7 @@ function sanitizeMessage(input: unknown): LocalFriendChatMessage | null {
     text,
     ...(imageUri ? { imageUri } : {}),
     ...(imageUrl ? { imageUrl } : {}),
+    ...(role === 'assistant' && sceneNarration ? { sceneNarration } : {}),
   };
 }
 

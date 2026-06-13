@@ -198,6 +198,11 @@ type FriendChatPostContext = {
   videoUrl?: string;
 };
 
+type FriendReplyPlan = {
+  aiReply: string;
+  sceneNarration?: string;
+};
+
 type FriendRecord = FriendCharacter & {
   userId: string;
   lastUserMessage?: string;
@@ -848,7 +853,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
     }
 
     if (method === "GET" && path === `${ROUTE_PREFIX}/feed/character-videos`) {
-      return json(200, { posts: await listPublicCharacterVideoPosts() });
+      return json(200, { posts: await listPublicCharacterVideoPosts(80, CHARACTERS) });
     }
 
     const characterVideoMetric = path.match(
@@ -2293,6 +2298,19 @@ function sanitizeFriendChatPostId(value: unknown): string | undefined {
   return sanitizeFriendChatText(value, 120);
 }
 
+function sanitizeFriendSceneNarration(value: unknown): string | undefined {
+  const text = sanitizeFriendChatText(value, 180);
+  if (!text) return undefined;
+  const normalized = text
+    .replace(/\s+/g, " ")
+    .replace(/^["'*_]+|["'*_]+$/g, "")
+    .trim();
+  if (!normalized || /^(none|null|n\/a|no narration)[.!]?$/i.test(normalized)) {
+    return undefined;
+  }
+  return normalized.slice(0, 180).trim() || undefined;
+}
+
 function buildFriendChatPostContextFromPost(post: CharacterPost): FriendChatPostContext {
   return {
     postId: post.postId,
@@ -2539,9 +2557,9 @@ async function advanceFriendChat(
     );
   }
 
-  let aiReply = "Tell me more about that.";
+  let replyPlan: FriendReplyPlan = { aiReply: "Tell me more about that." };
   try {
-    aiReply = await generateFriendReply(
+    replyPlan = await generateFriendReply(
       friend,
       conversationHistory,
       {
@@ -2555,6 +2573,14 @@ async function advanceFriendChat(
       friendshipContext
     );
   } catch (err) {
+    console.log(
+      JSON.stringify({
+        scope: "friends.chat.reply_fallback",
+        friendId: friend.friendId,
+        message: (err as Error)?.message || "unknown",
+        name: (err as Error)?.name || "Error",
+      })
+    );
     console.error(
       JSON.stringify({
         scope: "friends.chat.reply_error",
@@ -2562,6 +2588,8 @@ async function advanceFriendChat(
       })
     );
   }
+  const aiReply = replyPlan.aiReply;
+  const sceneNarration = replyPlan.sceneNarration;
 
   const conversationWithReply = appendHistoryEntry(conversationHistory, {
     role: "assistant",
@@ -2582,6 +2610,7 @@ async function advanceFriendChat(
   return {
     friendId,
     aiReply,
+    ...(sceneNarration ? { sceneNarration } : {}),
     correctness,
     result,
     errors,
@@ -4918,7 +4947,7 @@ async function generateFriendReply(
   learnerDifficulty?: LearnerDifficulty,
   conversationSummary?: string,
   friendshipContext?: string
-): Promise<string> {
+): Promise<FriendReplyPlan> {
   const apiKey = await getOpenAIKey();
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
@@ -4988,6 +5017,7 @@ Rules:
 - If profile post context is provided, treat the learner's message as a reply to that post and use that context naturally.
 - Not every reply needs a follow-up question; sometimes just react or share something.
 - You are a fictional character: feel free to invent concrete, plausible details so the conversation feels alive. Stay consistent with your persona and with details you've already stated in this conversation" — commit to the character.
+- sceneNarration: You can add a short narration about the character's actions if that helps to understand the conversation. Only do this when its necessary to understand the context. Keep it in less than 10 words.
 - ${
   learnerDifficulty === 'easy'
     ? 'Keep the reply short: maximum 12 words total. Use the simplest english for a non-native speaker.'
@@ -4996,6 +5026,7 @@ Rules:
     : 'Keep the reply under 18 words. Use clear B1-B2 English.'
 }
 - Treat attraction, romance, and light flirting between consenting adults as normal parts of conversation when appropriate for the character.
+- Return ONLY JSON with this exact shape: { "aiReply": "the in-character English message", "sceneNarration": "" }
 `;
 
   const summarySection = summaryText
@@ -5004,7 +5035,7 @@ Rules:
   const emptyConversationText = hasRelationshipContinuity
     ? "No messages yet in this new chat, but this is an ongoing friendship. Continue naturally without re-introducing yourself."
     : "No prior conversation in this chat.";
-  const userPrompt = `${summarySection}Recent conversation:\n${conversationText || emptyConversationText}\n\nWrite the next in-character message in English.`;
+  const userPrompt = `${summarySection}Recent conversation:\n${conversationText || emptyConversationText}\n\nWrite the next in-character message in English. If a shared scene narration is natural, include it in sceneNarration; otherwise use an empty string.`;
 
   console.log(
     JSON.stringify({
@@ -5103,7 +5134,26 @@ Rules:
   if (!trimmed) {
     throw new Error("FRIEND_MODEL_EMPTY_RESPONSE");
   }
-  return trimmed;
+  const cleaned = trimmed.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+  const jsonStart = cleaned.indexOf("{");
+  const jsonEnd = cleaned.lastIndexOf("}");
+  const jsonText = jsonStart >= 0 && jsonEnd > jsonStart ? cleaned.slice(jsonStart, jsonEnd + 1) : cleaned;
+
+  try {
+    const parsed = JSON.parse(jsonText);
+    const aiReply =
+      sanitizeFriendChatText(parsed?.aiReply ?? parsed?.reply ?? parsed?.message, 600) ||
+      "Tell me more about that.";
+    const sceneNarration = sanitizeFriendSceneNarration(parsed?.sceneNarration);
+    return {
+      aiReply,
+      ...(sceneNarration ? { sceneNarration } : {}),
+    };
+  } catch {
+    return {
+      aiReply: sanitizeFriendChatText(cleaned, 600) || "Tell me more about that.",
+    };
+  }
 }
 
 async function generateFriendConversationFeedback(

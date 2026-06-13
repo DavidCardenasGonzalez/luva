@@ -47,6 +47,8 @@ export type StoredCharacterPostRecord = {
   missionTitle?: unknown;
   characterName?: unknown;
   avatarImageUrl?: unknown;
+  avatarImageXsUrl?: unknown;
+  avatarImageMdUrl?: unknown;
   caption?: unknown;
   context?: unknown;
   imageUrl?: unknown;
@@ -88,6 +90,8 @@ export type CharacterPost = {
   messageCount: number;
   suggestedReplies: string[];
   avatarImageUrl?: string;
+  avatarImageXsUrl?: string;
+  avatarImageMdUrl?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -214,15 +218,22 @@ export async function listPublicCharacterPosts(characterId: string): Promise<Cha
   }
 }
 
-export async function listPublicCharacterVideoPosts(limitInput = 80): Promise<CharacterPost[]> {
+export async function listPublicCharacterVideoPosts(
+  limitInput = 80,
+  characters: CharacterDefinition[] = [],
+): Promise<CharacterPost[]> {
   const parsedLimit = Math.floor(Number(limitInput));
   const limit = Number.isFinite(parsedLimit) ? Math.max(1, Math.min(parsedLimit, 200)) : 80;
+  const charactersById = new Map(
+    characters.map((character) => [character.characterId, buildStoryCharacterSummary(character)]),
+  );
 
   try {
     const records = await scanAllCharacterPostRecords();
     return records
       .map((record) => toCharacterPost(record))
       .filter((post): post is CharacterPost => !!post?.videoUrl?.trim())
+      .map((post) => enrichCharacterPostAvatarVariants(post, charactersById.get(post.characterId)))
       .map((post) => ({ post, rank: Math.random() }))
       .sort((left, right) => left.rank - right.rank || compareCharacterPosts(left.post, right.post))
       .map(({ post }) => post)
@@ -249,6 +260,28 @@ export function buildCharacterPostsResponse(
     character,
     posts,
     generatedAt: new Date().toISOString(),
+  };
+}
+
+function enrichCharacterPostAvatarVariants(
+  post: CharacterPost,
+  character?: StoryCharacterSummary,
+): CharacterPost {
+  if (!character) {
+    return post;
+  }
+
+  return {
+    ...post,
+    ...(post.avatarImageUrl || character.avatarImageUrl
+      ? { avatarImageUrl: post.avatarImageUrl || character.avatarImageUrl }
+      : {}),
+    ...(post.avatarImageXsUrl || character.avatarImageXsUrl
+      ? { avatarImageXsUrl: post.avatarImageXsUrl || character.avatarImageXsUrl }
+      : {}),
+    ...(post.avatarImageMdUrl || character.avatarImageMdUrl
+      ? { avatarImageMdUrl: post.avatarImageMdUrl || character.avatarImageMdUrl }
+      : {}),
   };
 }
 
@@ -496,6 +529,8 @@ export function buildCharacterPostRecord(
     postId,
     characterName: character.characterName,
     ...(character.avatarImageUrl ? { avatarImageUrl: character.avatarImageUrl } : {}),
+    ...(character.avatarImageXsUrl ? { avatarImageXsUrl: character.avatarImageXsUrl } : {}),
+    ...(character.avatarImageMdUrl ? { avatarImageMdUrl: character.avatarImageMdUrl } : {}),
     caption,
     ...(context ? { context } : {}),
     imageUrl,
@@ -543,12 +578,16 @@ export function toCharacterPost(input: unknown): CharacterPost | undefined {
   const createdAt = asTimestamp(raw?.createdAt) || MIN_TIMESTAMP;
   const updatedAt = asTimestamp(raw?.updatedAt) || createdAt;
   const avatarImageUrl = normalizeStoredOptionalUrl(raw?.avatarImageUrl);
+  const avatarImageXsUrl = normalizeStoredOptionalUrl(raw?.avatarImageXsUrl);
+  const avatarImageMdUrl = normalizeStoredOptionalUrl(raw?.avatarImageMdUrl);
 
   return {
     characterId,
     postId,
     characterName,
     ...(avatarImageUrl ? { avatarImageUrl } : {}),
+    ...(avatarImageXsUrl ? { avatarImageXsUrl } : {}),
+    ...(avatarImageMdUrl ? { avatarImageMdUrl } : {}),
     caption,
     ...(context ? { context } : {}),
     imageUrl,
