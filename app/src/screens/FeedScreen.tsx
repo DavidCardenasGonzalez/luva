@@ -33,6 +33,12 @@ import { useCharacterPostLike } from '../hooks/useCharacterPostLike';
 import { recordVideoPostMetric } from '../feed/videoPostMetrics';
 import { FeedPost, useFeedPosts } from '../hooks/useFeedPosts';
 import { FriendCharacter, useFriends } from '../hooks/useFriends';
+import {
+  archiveLocalFriendConversation,
+  buildLocalFriendConversationTitle,
+  listLocalFriendConversations,
+  LocalFriendConversationSnapshot,
+} from '../friends/localFriendConversations';
 import { Lesson, fetchSrtCaptions, useLessons } from '../hooks/useLessons';
 import { ShadowingChapter, ShadowingList, useShadowing } from '../hooks/useShadowing';
 import {
@@ -169,8 +175,23 @@ type PromoFeedItem = {
   remainingSeconds: number;
 };
 
+type PendingConversationItem = {
+  kind: 'pendingConversation';
+  feedId: string;
+  conversationKey: string;
+  friendId: string;
+  friendName: string;
+  title: string;
+  preview: string;
+  avatarImageUrl?: string;
+  userMessageCount: number;
+  updatedAt: string;
+  snapshot: LocalFriendConversationSnapshot;
+};
+
 type FeedItem =
   | PromoFeedItem
+  | PendingConversationItem
   | ResumeMission
   | PendingMission
   | CharacterVideoFeedItem
@@ -382,6 +403,17 @@ function getFeedTrackingProperties(item: FeedItem) {
       feed_item_id: item.feedId,
       feed_item_kind: item.kind,
       remaining_seconds: item.remainingSeconds,
+    };
+  }
+
+  if (item.kind === 'pendingConversation') {
+    return {
+      feed_item_id: item.feedId,
+      feed_item_kind: item.kind,
+      friend_id: item.friendId,
+      friend_name: item.friendName,
+      conversation_key: item.conversationKey,
+      user_message_count: item.userMessageCount,
     };
   }
 
@@ -808,6 +840,149 @@ function MissionCard({
             <Text style={{ color: COLORS.muted, fontWeight: '800' }}>Ver más</Text>
           </Pressable>
         </View>
+      </View>
+    </View>
+  );
+}
+
+function PendingConversationCard({
+  item,
+  onContinue,
+  onDiscard,
+}: {
+  item: PendingConversationItem;
+  onContinue: (item: PendingConversationItem) => void;
+  onDiscard: (item: PendingConversationItem) => void;
+}) {
+  const avatarSource = useMemo<ImageSourcePropType | undefined>(() => {
+    const trimmed = item.avatarImageUrl?.trim();
+    return trimmed ? { uri: trimmed } : getChatAvatar(item.friendId);
+  }, [item.avatarImageUrl, item.friendId]);
+  const avatarInitial = (item.friendName.trim().charAt(0) || '?').toUpperCase();
+  const messageLabel = `${item.userMessageCount} mensaje${item.userMessageCount === 1 ? '' : 's'}`;
+
+  return (
+    <View
+      style={{
+        borderRadius: 18,
+        backgroundColor: COLORS.surface,
+        borderWidth: 1,
+        borderColor: '#1d4ed8',
+        overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOpacity: 0.18,
+        shadowRadius: 12,
+      }}
+    >
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: 16,
+          paddingTop: 14,
+          paddingBottom: 10,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+            borderRadius: 999,
+            backgroundColor: 'rgba(37, 99, 235, 0.16)',
+            borderWidth: 1,
+            borderColor: 'rgba(96, 165, 250, 0.4)',
+          }}
+        >
+          <View
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: 999,
+              backgroundColor: '#60a5fa',
+              marginRight: 7,
+            }}
+          />
+          <Text style={{ color: '#bfdbfe', fontSize: 11, fontWeight: '800', textTransform: 'uppercase' }}>
+            Conversación sin terminar
+          </Text>
+        </View>
+      </View>
+
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16 }}>
+        <View
+          style={{
+            width: 52,
+            height: 52,
+            borderRadius: 999,
+            overflow: 'hidden',
+            backgroundColor: 'rgba(11, 18, 36, 0.78)',
+            borderWidth: 1,
+            borderColor: 'rgba(96, 165, 250, 0.45)',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {avatarSource ? (
+            <Image source={avatarSource} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+          ) : (
+            <Text style={{ color: 'white', fontSize: 20, fontWeight: '900' }}>{avatarInitial}</Text>
+          )}
+        </View>
+        <View style={{ flex: 1, marginLeft: 14, minWidth: 0 }}>
+          <Text style={{ color: 'white', fontSize: 17, fontWeight: '900' }} numberOfLines={1}>
+            {item.friendName}
+          </Text>
+          <Text style={{ color: COLORS.muted, fontSize: 12, fontWeight: '700', marginTop: 3 }} numberOfLines={1}>
+            {messageLabel}
+          </Text>
+        </View>
+      </View>
+
+      <Text style={{ color: '#cbd5e1', lineHeight: 20, marginHorizontal: 16, marginTop: 12 }} numberOfLines={2}>
+        {item.preview}
+      </Text>
+
+      <View style={{ flexDirection: 'row', gap: 8, padding: 16, paddingTop: 14 }}>
+        <Pressable
+          onPress={() => onContinue(item)}
+          accessibilityRole="button"
+          accessibilityLabel={`Continuar conversación con ${item.friendName}`}
+          style={({ pressed }) => ({
+            flex: 2,
+            flexDirection: 'row',
+            paddingVertical: 13,
+            borderRadius: 12,
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 7,
+            backgroundColor: pressed ? '#1d4ed8' : COLORS.accentStrong,
+            shadowColor: COLORS.accentStrong,
+            shadowOpacity: 0.25,
+            shadowRadius: 10,
+          })}
+        >
+          <MaterialIcons name="chat-bubble-outline" size={18} color="white" />
+          <Text style={{ color: 'white', fontWeight: '900' }}>Continuar</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => onDiscard(item)}
+          accessibilityRole="button"
+          accessibilityLabel={`Descartar conversación con ${item.friendName}`}
+          style={({ pressed }) => ({
+            flex: 1,
+            paddingVertical: 13,
+            borderRadius: 12,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: pressed ? '#1e293b' : '#0f172a',
+            borderWidth: 1,
+            borderColor: COLORS.border,
+          })}
+        >
+          <Text style={{ color: COLORS.muted, fontWeight: '800' }}>Descartar</Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -2888,6 +3063,12 @@ export default function FeedScreen({ navigation, route }: Props) {
   const [timerNow, setTimerNow] = useState(Date.now());
   const [initialFeedResolved, setInitialFeedResolved] = useState(false);
   const [stableFeedItems, setStableFeedItems] = useState<FeedItem[]>([]);
+  const [pendingConversationSnapshots, setPendingConversationSnapshots] = useState<
+    LocalFriendConversationSnapshot[]
+  >([]);
+  const [discardedConversationKeys, setDiscardedConversationKeys] = useState<Set<string>>(
+    () => new Set()
+  );
   const [characterVideoViewerVisible, setCharacterVideoViewerVisible] = useState(false);
   useEffect(() => {
     if (characterVideoViewerVisible && feedTourPending && feedTourStep === null) {
@@ -2993,6 +3174,28 @@ export default function FeedScreen({ navigation, route }: Props) {
         active = false;
       };
     }, [reloadCharacterVideos, reloadFeedPosts, reloadFriends, reloadLessons, reloadShadowing])
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      void listLocalFriendConversations()
+        .then((snapshots) => {
+          if (!active) return;
+          const unfinished = snapshots.filter(
+            (snapshot) =>
+              !snapshot.conversationEnded &&
+              snapshot.messages.some((message) => message.role === 'user')
+          );
+          setPendingConversationSnapshots(unfinished);
+        })
+        .catch((err) => {
+          console.warn('[Feed] No se pudieron cargar las conversaciones pendientes', err);
+        });
+      return () => {
+        active = false;
+      };
+    }, [])
   );
 
   useFocusEffect(
@@ -3132,6 +3335,48 @@ export default function FeedScreen({ navigation, route }: Props) {
       updatedAt: activeMission.updatedAt,
     };
   }, [activeMission, stories]);
+
+  const friendsById = useMemo(() => {
+    const map = new Map<string, FriendCharacter>();
+    friends.forEach((friend) => map.set(friend.friendId, friend));
+    return map;
+  }, [friends]);
+
+  const pendingConversationItems = useMemo<PendingConversationItem[]>(() => {
+    return pendingConversationSnapshots
+      .filter((snapshot) => !discardedConversationKeys.has(snapshot.conversationKey))
+      .map((snapshot): PendingConversationItem | undefined => {
+        const friend = friendsById.get(snapshot.friendId);
+        if (!friend) {
+          return undefined;
+        }
+        const friendName = friend.characterName || 'tu amigo';
+        const title = buildLocalFriendConversationTitle(snapshot, friendName);
+        const lastMessageWithText = [...snapshot.messages]
+          .reverse()
+          .find((message) => message.text.trim());
+        const preview = lastMessageWithText?.text.trim()
+          || (snapshot.messages.some((message) => message.imageUri || message.imageUrl)
+            ? 'Incluye una foto'
+            : 'Retoma la conversación donde la dejaste.');
+        const userMessageCount = snapshot.messages.filter((message) => message.role === 'user').length;
+        return {
+          kind: 'pendingConversation' as const,
+          feedId: `pending-conversation:${snapshot.conversationKey}`,
+          conversationKey: snapshot.conversationKey,
+          friendId: snapshot.friendId,
+          friendName,
+          title,
+          preview,
+          avatarImageUrl: friend.avatarImageXsUrl || friend.avatarImageUrl,
+          userMessageCount,
+          updatedAt: snapshot.updatedAt,
+          snapshot,
+        };
+      })
+      .filter((item): item is PendingConversationItem => !!item)
+      .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+  }, [discardedConversationKeys, friendsById, pendingConversationSnapshots]);
 
   const pendingMissions = useMemo<PendingMission[]>(() => {
     return stories.flatMap((story) =>
@@ -3303,13 +3548,14 @@ export default function FeedScreen({ navigation, route }: Props) {
   const feedItems = useMemo(
     () => {
       if (SHOW_ONLY_CHARACTER_REELS_IN_FEED) {
-        return buildFeedItems({
+        const reels = buildFeedItems({
           characterVideos: visibleCharacterVideos,
           vocabulary: [],
           shadowing: [],
           lessons: [],
           posts: [],
         });
+        return [...pendingConversationItems, ...reels];
       }
 
       const promo = showLitePromoTimer
@@ -3327,11 +3573,13 @@ export default function FeedScreen({ navigation, route }: Props) {
         lessons: visibleLessons,
         posts: feedPostItems,
       });
-      return resumeMission ? [resumeMission, ...next] : next;
+      const withResume = resumeMission ? [resumeMission, ...next] : next;
+      return [...pendingConversationItems, ...withResume];
     },
     [
       feedPostItems,
       litePromoRemainingSeconds,
+      pendingConversationItems,
       resumeMission,
       showLitePromoTimer,
       visibleCharacterVideos,
@@ -3644,6 +3892,46 @@ export default function FeedScreen({ navigation, route }: Props) {
       await openMission(item.storyId, item.sceneIndex);
     },
     [openMission]
+  );
+
+  const handleContinueConversation = useCallback(
+    (item: PendingConversationItem) => {
+      stopFeedVideos();
+      setPostActionMessage(undefined);
+      void trackMixpanelFeedItemAction({
+        ...getFeedTrackingProperties(item),
+        action: 'continue_conversation',
+      });
+      const sourcePost = item.snapshot.sourcePost;
+      navigation.navigate('FriendChat', {
+        friendId: item.friendId,
+        ...(sourcePost?.postId ? { postId: sourcePost.postId } : {}),
+        ...(sourcePost?.imageUrl ? { postImageUrl: sourcePost.imageUrl } : {}),
+        ...(sourcePost?.videoUrl ? { postVideoUrl: sourcePost.videoUrl } : {}),
+        ...(sourcePost?.caption ? { postCaption: sourcePost.caption } : {}),
+        ...(sourcePost?.context ? { postContext: sourcePost.context } : {}),
+      });
+    },
+    [navigation, stopFeedVideos]
+  );
+
+  const handleDiscardConversation = useCallback(
+    (item: PendingConversationItem) => {
+      setPostActionMessage(undefined);
+      void trackMixpanelFeedItemAction({
+        ...getFeedTrackingProperties(item),
+        action: 'discard_conversation',
+      });
+      setDiscardedConversationKeys((current) => {
+        const next = new Set(current);
+        next.add(item.conversationKey);
+        return next;
+      });
+      void archiveLocalFriendConversation(item.snapshot).catch((err) => {
+        console.warn('[Feed] No se pudo descartar la conversación', err);
+      });
+    },
+    []
   );
 
   const handlePlayShadowing = useCallback(
@@ -3990,6 +4278,12 @@ export default function FeedScreen({ navigation, route }: Props) {
                 stopFeedVideos();
                 navigation.navigate('Paywall', { source: 'promo_lite_offer', variant: 'lite' });
               }}
+            />
+          ) : item.kind === 'pendingConversation' ? (
+            <PendingConversationCard
+              item={item}
+              onContinue={handleContinueConversation}
+              onDiscard={handleDiscardConversation}
             />
           ) : item.kind === 'resumeMission' ? (
             <ResumeMissionCard item={item} onContinue={handleContinueMission} />
