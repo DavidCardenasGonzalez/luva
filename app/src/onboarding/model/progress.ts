@@ -10,6 +10,7 @@ import {
 
 const ONBOARDING_COMPLETED_KEY = 'luva_onboarding_completed_v1';
 const ONBOARDING_DRAFT_KEY = 'luva_onboarding_draft_v1';
+const ONBOARDING_AFFINITY_PAYWALL_SHOWN_KEY = 'luva_onboarding_affinity_paywall_shown_v1';
 export const ALWAYS_SHOW_ONBOARDING_FOR_TESTS = false;
 
 export type OnboardingDraftProgress = {
@@ -91,7 +92,19 @@ export async function hasCompletedOnboarding(): Promise<boolean> {
   }
 
   try {
-    return Boolean(await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY));
+    if (await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY)) {
+      return true;
+    }
+
+    const rawDraft = await AsyncStorage.getItem(ONBOARDING_DRAFT_KEY);
+    const parsedDraft = rawDraft ? JSON.parse(rawDraft) as Record<string, unknown> : undefined;
+    const draftStepNumber = parsedDraft ? toStepNumber(parsedDraft.stepNumber) : null;
+    if (draftStepNumber && draftStepNumber >= 5) {
+      await markOnboardingCompleted();
+      return true;
+    }
+
+    return false;
   } catch {
     return false;
   }
@@ -145,9 +158,29 @@ export async function markOnboardingCompleted(): Promise<void> {
   }
 }
 
+export async function hasShownOnboardingAffinityPaywall(): Promise<boolean> {
+  try {
+    return Boolean(await AsyncStorage.getItem(ONBOARDING_AFFINITY_PAYWALL_SHOWN_KEY));
+  } catch {
+    return false;
+  }
+}
+
+export async function markOnboardingAffinityPaywallShown(): Promise<void> {
+  try {
+    await AsyncStorage.setItem(ONBOARDING_AFFINITY_PAYWALL_SHOWN_KEY, new Date().toISOString());
+  } catch {
+    // The app can still continue if local persistence fails.
+  }
+}
+
 export async function resetOnboardingProgress(): Promise<void> {
   try {
-    await AsyncStorage.multiRemove([ONBOARDING_COMPLETED_KEY, ONBOARDING_DRAFT_KEY]);
+    await AsyncStorage.multiRemove([
+      ONBOARDING_COMPLETED_KEY,
+      ONBOARDING_DRAFT_KEY,
+      ONBOARDING_AFFINITY_PAYWALL_SHOWN_KEY,
+    ]);
   } catch {
     // Ignore reset failures.
   }

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, TextInput, Pressable, Keyboard } from 'react-native';
+import { View, Text, TextInput, Pressable, Keyboard, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -15,8 +15,11 @@ type Props = {
   onRecordRelease: () => void | Promise<void>;
   onPlusPress?: () => void;
   photoRequestMode?: boolean;
+  onCancelPhotoRequestMode?: () => void;
   text?: string;
   onTextChange?: (text: string) => void;
+  pendingAttachment?: { uri: string } | null;
+  onRemoveAttachment?: () => void;
 };
 
 export default function StoryMessageComposer({
@@ -29,8 +32,11 @@ export default function StoryMessageComposer({
   onRecordRelease,
   onPlusPress,
   photoRequestMode,
+  onCancelPhotoRequestMode,
   text: controlledText,
   onTextChange,
+  pendingAttachment,
+  onRemoveAttachment,
 }: Props) {
   const [internalText, setInternalText] = useState('');
   const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -49,16 +55,15 @@ export default function StoryMessageComposer({
 
   const handleSendPress = useCallback(async () => {
     const trimmed = text.trim();
-    if (!trimmed) return;
-    // Limpia el input tan pronto como intentamos enviar; si falla, restauramos el texto.
+    if (!trimmed && !pendingAttachment) return;
     setText('');
     const success = await onSendText(trimmed);
     if (!success) {
       setText(trimmed);
     }
-  }, [onSendText, text]);
+  }, [onSendText, pendingAttachment, text]);
 
-  const sendDisabled = flowState !== 'idle' || retryBlocked || !text.trim().length;
+  const sendDisabled = flowState !== 'idle' || retryBlocked || (!text.trim().length && !pendingAttachment);
   const micBlocked = recordBlocked ?? retryBlocked;
   // While actively recording we must keep release enabled to avoid a stuck recording state.
   const recordDisabled = flowState === 'recording' ? false : micBlocked || flowState !== 'idle';
@@ -74,6 +79,32 @@ export default function StoryMessageComposer({
         borderTopColor: '#e2e8f0',
       }}
     >
+      {pendingAttachment ? (
+        <View style={{ marginBottom: 8, alignSelf: 'flex-start', marginLeft: 46 }}>
+          <Image
+            source={{ uri: pendingAttachment.uri }}
+            style={{ width: 64, height: 64, borderRadius: 10, backgroundColor: '#e2e8f0' }}
+            resizeMode="cover"
+          />
+          <Pressable
+            onPress={onRemoveAttachment}
+            hitSlop={8}
+            style={{
+              position: 'absolute',
+              top: -6,
+              right: -6,
+              width: 20,
+              height: 20,
+              borderRadius: 999,
+              backgroundColor: '#0f172a',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <MaterialIcons name="close" size={12} color="white" />
+          </Pressable>
+        </View>
+      ) : null}
       {/* {statusLabel ? <Text style={{ color: '#475569', marginBottom: 8 }}>{statusLabel}</Text> : null} */}
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Pressable
@@ -105,12 +136,18 @@ export default function StoryMessageComposer({
           }}
         >
           {photoRequestMode ? (
-            <MaterialIcons
-              name="photo-camera"
-              size={19}
-              color="#2563eb"
-              style={{ marginRight: 8 }}
-            />
+            <Pressable
+              onPress={onCancelPhotoRequestMode}
+              accessibilityRole="button"
+              accessibilityLabel="Cancelar pedido de foto"
+              hitSlop={8}
+              style={({ pressed }) => ({
+                marginRight: 8,
+                opacity: pressed ? 0.65 : 1,
+              })}
+            >
+              <MaterialIcons name="photo-camera" size={19} color="#2563eb" />
+            </Pressable>
           ) : null}
           <TextInput
             value={text}

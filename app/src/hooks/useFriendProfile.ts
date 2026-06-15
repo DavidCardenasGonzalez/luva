@@ -36,6 +36,10 @@ type FriendProfileResponse = {
   posts?: unknown[];
 };
 
+type FriendsListResponse = {
+  items?: FriendCharacter[];
+};
+
 type FriendImagesResponse = {
   items?: unknown[];
 };
@@ -144,6 +148,37 @@ function sanitizeProfileImages(input: unknown): FriendProfileImage[] {
     .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
 }
 
+function latestIsoTimestamp(...values: Array<string | undefined>): string | undefined {
+  return values
+    .filter((value): value is string => Boolean(value && Number.isFinite(Date.parse(value))))
+    .sort((left, right) => Date.parse(right) - Date.parse(left))[0];
+}
+
+function mergeFriendProfileFloor(
+  profileFriend: FriendCharacter | undefined,
+  floorFriend: FriendCharacter,
+): FriendCharacter {
+  if (!profileFriend) return floorFriend;
+  const lastMessageAt = latestIsoTimestamp(profileFriend.lastMessageAt, floorFriend.lastMessageAt);
+  const merged: FriendCharacter = {
+    ...floorFriend,
+    ...profileFriend,
+    updatedAt: latestIsoTimestamp(profileFriend.updatedAt, floorFriend.updatedAt) || profileFriend.updatedAt,
+    ...(lastMessageAt ? { lastMessageAt } : {}),
+  };
+  (['affinityPoints', 'messageCount', 'conversationCount'] as const).forEach((key) => {
+    const profileValue = typeof profileFriend[key] === 'number' ? (profileFriend[key] as number) : 0;
+    const floorValue = typeof floorFriend[key] === 'number' ? (floorFriend[key] as number) : 0;
+    if (floorValue > profileValue) {
+      merged[key] = floorValue;
+    }
+  });
+  if (floorFriend.friendshipContext && !merged.friendshipContext) {
+    merged.friendshipContext = floorFriend.friendshipContext;
+  }
+  return merged;
+}
+
 export function useFriendProfile(friendId?: string) {
   const { isSignedIn, isLoading: authLoading } = useAuth();
   const [friend, setFriend] = useState<FriendCharacter>();
@@ -154,6 +189,10 @@ export function useFriendProfile(friendId?: string) {
   const [error, setError] = useState<string | undefined>();
 
   const reload = useCallback(async () => {
+    if (authLoading) {
+      return;
+    }
+
     if (!friendId) {
       setFriend(undefined);
       setPosts([]);
@@ -176,10 +215,25 @@ export function useFriendProfile(friendId?: string) {
         }
       }
 
-      const response = await api.get<FriendProfileResponse>(
-        `/friend-profiles/${encodeURIComponent(friendId)}`
-      );
+      const encodedFriendId = encodeURIComponent(friendId);
+      const profilePath = isSignedIn
+        ? `/friends/${encodedFriendId}/profile`
+        : `/friend-profiles/${encodedFriendId}`;
+      const response = await api.get<FriendProfileResponse>(profilePath);
       let nextFriend = response?.friend;
+      if (isSignedIn) {
+        try {
+          const friendsResponse = await api.get<FriendsListResponse>('/friends');
+          const remoteFriend = Array.isArray(friendsResponse?.items)
+            ? friendsResponse.items.find((item) => item.friendId === friendId)
+            : undefined;
+          if (remoteFriend) {
+            nextFriend = mergeFriendProfileFloor(nextFriend, remoteFriend);
+          }
+        } catch (friendsErr: any) {
+          console.warn('[FriendProfile] No se pudo cargar el piso de stats:', friendsErr?.message || friendsErr);
+        }
+      }
       if (nextFriend) {
         // Friend stats are always cached locally for resilience. Anonymous users
         // only ever have local data; for signed-in users the local cache acts as
@@ -226,7 +280,7 @@ export function useFriendProfile(friendId?: string) {
       setLoading(false);
       setLoaded(true);
     }
-  }, [friendId, isSignedIn]);
+  }, [authLoading, friendId, isSignedIn]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -237,7 +291,7 @@ export function useFriendProfile(friendId?: string) {
     friend,
     posts,
     images,
-    loading,
+    loading: loading || authLoading,
     loaded,
     error,
     reload,

@@ -53,6 +53,11 @@ function getStepIndexForStepNumber(steps: OnboardingStepContent[], stepNumber?: 
   return Math.max(0, Math.min(stepNumber - 1, steps.length - 1));
 }
 
+function getDisplayableOnboardingStepNumber(stepNumber?: number) {
+  if (!stepNumber) return undefined;
+  return stepNumber >= 5 ? 3 : stepNumber;
+}
+
 function getStepIndexForDraft(steps: OnboardingStepContent[], step?: {
   stepNumber?: number;
   stepKey?: string;
@@ -135,7 +140,10 @@ export default function OnboardingScreen({ navigation, route }: Props) {
   const initialStartAtStepRef = useRef(route.params?.startAtStep);
   const [steps, setSteps] = useState(DEFAULT_ONBOARDING_STEPS);
   const [stepIndex, setStepIndex] = useState(() => (
-    getStepIndexForStepNumber(DEFAULT_ONBOARDING_STEPS, initialStartAtStepRef.current)
+    getStepIndexForStepNumber(
+      DEFAULT_ONBOARDING_STEPS,
+      getDisplayableOnboardingStepNumber(initialStartAtStepRef.current),
+    )
   ));
   const [loadingContent, setLoadingContent] = useState(true);
   const [selectedCharacter, setSelectedCharacter] = useState<OnboardingCharacterId | null>(null);
@@ -178,7 +186,9 @@ export default function OnboardingScreen({ navigation, route }: Props) {
           setSpeakingSummary(draftProgress.speakingSummary);
         }
 
-        const initialStepNumber = startAtStep ?? draftProgress?.stepNumber;
+        const initialStepNumber = getDisplayableOnboardingStepNumber(
+          startAtStep ?? draftProgress?.stepNumber,
+        );
         if (initialStepNumber) {
           setStepIndex(getStepIndexForDraft(nextSteps, {
             stepNumber: initialStepNumber,
@@ -204,7 +214,7 @@ export default function OnboardingScreen({ navigation, route }: Props) {
   }, [activeStep, loadingContent]);
 
   useEffect(() => {
-    const requestedStep = route.params?.startAtStep;
+    const requestedStep = getDisplayableOnboardingStepNumber(route.params?.startAtStep);
     if (!requestedStep || loadingContent) return;
 
     const nextIndex = getStepIndexForStepNumber(steps, requestedStep);
@@ -258,18 +268,13 @@ export default function OnboardingScreen({ navigation, route }: Props) {
   }, [navigation, onboardingPlan]);
 
   const goToReelsForFirstConversation = useCallback(async () => {
-    await saveOnboardingDraftProgress({
-      stepNumber: 5,
-      selectedCharacter,
-      phraseSelections,
-      speakingSummary,
-    });
+    await markOnboardingCompleted();
 
     navigation.reset({
       index: 0,
       routes: [{ name: 'Feed', params: { openReels: true } }],
     });
-  }, [navigation, phraseSelections, selectedCharacter, speakingSummary]);
+  }, [navigation]);
 
   const handlePlanReady = useCallback((plan: OnboardingPlanResponse) => {
     setOnboardingPlan(plan);
@@ -282,8 +287,14 @@ export default function OnboardingScreen({ navigation, route }: Props) {
       return;
     }
 
+    const nextStep = steps[stepIndex + 1];
+    if (!nextStep || nextStep.stepNumber >= 5) {
+      void finishOnboarding(false);
+      return;
+    }
+
     setStepIndex((current) => Math.min(current + 1, steps.length - 1));
-  }, [activeStep.stepNumber, finishOnboarding, isLastStep, steps.length]);
+  }, [activeStep.stepNumber, finishOnboarding, isLastStep, stepIndex, steps]);
 
   const goBack = useCallback(() => {
     setStepIndex((current) => Math.max(0, current - 1));

@@ -9,6 +9,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { OnboardingStepContent } from '../model/types';
 import { GradientText } from '../components/GradientText';
+import { AvatarMarqueeBackdrop } from './AvatarMarqueeBackdrop';
 
 const luviSayingHi = require('../../image/luvi-saying-hi.gif');
 const logoImage = require('../../image/logo.png');
@@ -31,6 +32,7 @@ export default function Step1({ content }: { content: OnboardingStepContent }) {
   const [visibleMessageIds, setVisibleMessageIds] = useState<string[]>([]);
   const messages = useMemo(() => content.conversation || [], [content.conversation]);
   const showLargeScreenTitle = height >= 880 || width >= 420;
+  const showFeedbackTeaser = height >= 880;
 
   useEffect(() => {
     const animation = Animated.loop(
@@ -76,6 +78,7 @@ export default function Step1({ content }: { content: OnboardingStepContent }) {
 
   return (
     <View style={{ flex: 1, justifyContent: 'space-between' }}>
+      <AvatarMarqueeBackdrop />
       <View style={{ alignItems: 'center', paddingHorizontal: 22 }}>
         <Image
           source={logoImage}
@@ -92,6 +95,9 @@ export default function Step1({ content }: { content: OnboardingStepContent }) {
               marginTop: 18,
               textAlign: 'center',
               lineHeight: 38,
+              textShadowColor: 'rgba(7, 17, 31, 0.85)',
+              textShadowOffset: { width: 0, height: 2 },
+              textShadowRadius: 10,
             }}
           >
             Bienvenido a{' '}
@@ -107,21 +113,23 @@ export default function Step1({ content }: { content: OnboardingStepContent }) {
             lineHeight: 25,
             marginTop: 12,
             textAlign: 'center',
+            textShadowColor: 'rgba(7, 17, 31, 0.85)',
+            textShadowOffset: { width: 0, height: 1 },
+            textShadowRadius: 8,
           }}
         >
-          Tu compañero para{' '}
           <GradientText style={{ fontSize: 18, fontWeight: '900', lineHeight: 25 }}>
-            hablar
+            Habla,
           </GradientText>
           ,{' '}
           <GradientText style={{ fontSize: 18, fontWeight: '900', lineHeight: 25 }}>
-            aprender
+             conecta
           </GradientText>
-          {' y '}
+          {' y mejora tu '}
           <GradientText style={{ fontSize: 18, fontWeight: '900', lineHeight: 25 }}>
-            crecer
+            inglés
           </GradientText>
-          {' en inglés.'}
+          {' naturalmente'}
         </Text>
       </View>
 
@@ -318,29 +326,31 @@ export default function Step1({ content }: { content: OnboardingStepContent }) {
         })}
       </View>
 
-      <View style={{ alignItems: 'center', paddingHorizontal: 30, marginTop: 20 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <View
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: 21,
-              borderWidth: 1,
-              borderColor: 'rgba(34, 211, 238, 0.4)',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <MaterialIcons name="flash-on" size={24} color={COLORS.yellow} />
+      {showFeedbackTeaser ? (
+        <View style={{ alignItems: 'center', paddingHorizontal: 30, marginTop: 20 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <View
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: 21,
+                borderWidth: 1,
+                borderColor: 'rgba(34, 211, 238, 0.4)',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <MaterialIcons name="flash-on" size={24} color={COLORS.yellow} />
+            </View>
+            <Text style={{ color: COLORS.text, flex: 1, fontSize: 15, lineHeight: 21 }}>
+              <GradientText style={{ fontSize: 15, fontWeight: '900', lineHeight: 21 }}>
+                {content.eyebrow}
+              </GradientText>
+              {' mientras platicas con tu nuevo amigo.'}
+            </Text>
           </View>
-          <Text style={{ color: COLORS.text, flex: 1, fontSize: 15, lineHeight: 21 }}>
-            <GradientText style={{ fontSize: 15, fontWeight: '900', lineHeight: 21 }}>
-              {content.eyebrow}
-            </GradientText>
-            {' mientras platicas con tu nuevo amigo.'}
-          </Text>
         </View>
-      </View>
+      ) : null}
     </View>
   );
 }

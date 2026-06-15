@@ -1073,9 +1073,13 @@ function ResumeMissionCard({
 function CharacterVideoCard({
   item,
   onPress,
+  onOpenProfile,
+  onStartConversation,
 }: {
   item: CharacterVideoFeedItem;
   onPress: (item: CharacterVideoFeedItem) => void;
+  onOpenProfile: (item: CharacterVideoFeedItem) => void;
+  onStartConversation: (item: CharacterVideoFeedItem) => void;
 }) {
   const thumbnailUrl = (item.thumbnailUrl || item.imageUrl).trim();
   const avatarImageUrl = (item.avatarImageXsUrl || item.avatarImageUrl)?.trim();
@@ -1086,11 +1090,8 @@ function CharacterVideoCard({
   );
 
   return (
-    <Pressable
-      onPress={() => onPress(item)}
-      accessibilityRole="button"
-      accessibilityLabel={`Reproducir video de ${item.characterName}`}
-      style={({ pressed }) => ({
+    <View
+      style={{
         borderRadius: 18,
         overflow: 'hidden',
         backgroundColor: COLORS.surface,
@@ -1099,119 +1100,152 @@ function CharacterVideoCard({
         shadowColor: '#000',
         shadowOpacity: 0.14,
         shadowRadius: 12,
-        opacity: pressed ? 0.9 : 1,
-      })}
+      }}
     >
-      <View style={{ aspectRatio: CHARACTER_REEL_CARD_ASPECT_RATIO, backgroundColor: COLORS.surfaceAlt }}>
-        <Image
-          source={{ uri: thumbnailUrl }}
-          style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
-          resizeMode="cover"
-        />
-        <View
-          style={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0,
-            backgroundColor: 'rgba(11, 18, 36, 0.18)',
-          }}
-        />
-        <View
-          style={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
+      <Pressable
+        onPress={() => onPress(item)}
+        accessibilityRole="button"
+        accessibilityLabel={`Reproducir video de ${item.characterName}`}
+        style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
+      >
+        <View style={{ aspectRatio: CHARACTER_REEL_CARD_ASPECT_RATIO, backgroundColor: COLORS.surfaceAlt }}>
+          <Image
+            source={{ uri: thumbnailUrl }}
+            style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+            resizeMode="cover"
+          />
           <View
             style={{
-              width: 72,
-              height: 72,
-              borderRadius: 999,
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              left: 0,
+              backgroundColor: 'rgba(11, 18, 36, 0.18)',
+            }}
+          />
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              left: 0,
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: 'rgba(11, 18, 36, 0.82)',
-              borderWidth: 1,
-              borderColor: 'rgba(226, 232, 240, 0.28)',
             }}
           >
-            <MaterialIcons name="play-arrow" size={38} color="white" />
+            <View
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: 999,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'rgba(11, 18, 36, 0.82)',
+                borderWidth: 1,
+                borderColor: 'rgba(226, 232, 240, 0.28)',
+              }}
+            >
+              <MaterialIcons name="play-arrow" size={38} color="white" />
+            </View>
           </View>
         </View>
-        <View
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            paddingHorizontal: 12,
-            paddingVertical: 10,
-            backgroundColor: 'rgba(0, 0, 0, 0.34)',
-          }}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      </Pressable>
+      <View
+        style={{
+          paddingHorizontal: 12,
+          paddingVertical: 10,
+          backgroundColor: COLORS.surfaceAlt,
+          borderTopWidth: 1,
+          borderTopColor: COLORS.border,
+        }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Pressable
+            onPress={() => onOpenProfile(item)}
+            accessibilityRole="button"
+            accessibilityLabel={`Ver perfil de ${item.characterName}`}
+            style={({ pressed }) => ({
+              flex: 1,
+              flexDirection: 'row',
+              alignItems: 'center',
+              opacity: pressed ? 0.7 : 1,
+            })}
+          >
             {avatarImageUrl ? (
               <Image
                 source={{ uri: avatarImageUrl }}
-                style={{ width: 26, height: 26, borderRadius: 999, marginRight: 8 }}
+                style={{ width: 28, height: 28, borderRadius: 999, marginRight: 8 }}
                 resizeMode="cover"
               />
             ) : null}
             <Text
-              style={{ flex: 1, color: 'white', fontSize: 13, fontWeight: '900' }}
+              style={{ flex: 1, color: COLORS.text, fontSize: 13, fontWeight: '900' }}
               numberOfLines={1}
             >
               {item.characterName}
             </Text>
-            <Pressable
-              onPress={toggleLike}
-              accessibilityRole="button"
-              accessibilityLabel={userLiked ? 'Quitar me gusta' : 'Me gusta'}
-              hitSlop={8}
-              style={({ pressed }) => ({
-                marginLeft: 10,
-                flexDirection: 'row',
-                alignItems: 'center',
-                opacity: pressed ? 0.7 : 1,
-              })}
-            >
-              <MaterialIcons
-                name={userLiked ? 'favorite' : 'favorite-border'}
-                size={20}
-                color={userLiked ? '#f43f5e' : 'white'}
-              />
-              <Text
-                style={{
-                  marginLeft: 4,
-                  color: 'white',
-                  fontSize: 12,
-                  fontWeight: '800',
-                  minWidth: 22,
-                  textAlign: 'left',
-                }}
-                numberOfLines={1}
-              >
-                {displayedLabel}
-              </Text>
-            </Pressable>
-          </View>
-          {item.caption ? (
+          </Pressable>
+          <Pressable
+            onPress={toggleLike}
+            accessibilityRole="button"
+            accessibilityLabel={userLiked ? 'Quitar me gusta' : 'Me gusta'}
+            hitSlop={8}
+            style={({ pressed }) => ({
+              marginLeft: 10,
+              flexDirection: 'row',
+              alignItems: 'center',
+              opacity: pressed ? 0.7 : 1,
+            })}
+          >
+            <MaterialIcons
+              name={userLiked ? 'favorite' : 'favorite-border'}
+              size={20}
+              color={userLiked ? '#f43f5e' : COLORS.muted}
+            />
             <Text
-              style={{ color: '#e2e8f0', marginTop: 6, fontSize: 12, lineHeight: 16 }}
-              numberOfLines={2}
+              style={{
+                marginLeft: 4,
+                color: COLORS.muted,
+                fontSize: 12,
+                fontWeight: '800',
+                minWidth: 22,
+                textAlign: 'left',
+              }}
+              numberOfLines={1}
             >
-              {item.caption}
+              {displayedLabel}
             </Text>
-          ) : null}
+          </Pressable>
         </View>
+        {item.caption ? (
+          <Text
+            style={{ color: COLORS.muted, marginTop: 6, fontSize: 12, lineHeight: 16 }}
+            numberOfLines={2}
+          >
+            {item.caption}
+          </Text>
+        ) : null}
+        <Pressable
+          onPress={() => onStartConversation(item)}
+          accessibilityRole="button"
+          accessibilityLabel={`Empezar conversación con ${item.characterName}`}
+          style={({ pressed }) => ({
+            marginTop: 10,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingVertical: 9,
+            borderRadius: 10,
+            backgroundColor: pressed ? '#0ea5e9' : COLORS.accent,
+          })}
+        >
+          <MaterialIcons name="chat-bubble-outline" size={15} color="#0b1224" style={{ marginRight: 6 }} />
+          <Text style={{ color: '#0b1224', fontSize: 13, fontWeight: '900' }}>Empezar conversación</Text>
+        </Pressable>
       </View>
-    </Pressable>
+    </View>
   );
 }
 
@@ -4035,6 +4069,36 @@ export default function FeedScreen({ navigation, route }: Props) {
     [navigation]
   );
 
+  const handleOpenCharacterVideoProfileFromFeed = useCallback(
+    (item: CharacterVideoFeedItem) => {
+      void trackMixpanelFeedItemAction({
+        ...getFeedTrackingProperties(item),
+        action: 'open_character_profile_from_feed',
+      });
+      navigation.navigate('FriendProfile', { friendId: item.characterId });
+    },
+    [navigation]
+  );
+
+  const handleStartConversationFromFeed = useCallback(
+    (item: CharacterVideoFeedItem) => {
+      void trackMixpanelFeedItemAction({
+        ...getFeedTrackingProperties(item),
+        action: 'start_conversation_from_feed',
+      });
+      navigation.navigate('FriendChat', {
+        friendId: item.characterId,
+        postId: item.postId,
+        postImageUrl: item.imageUrl,
+        postVideoUrl: item.videoUrl,
+        postCaption: item.caption,
+        postContext: item.context || item.caption,
+        initialDraft: 'Hey there!',
+      });
+    },
+    [navigation]
+  );
+
   const handlePracticePost = useCallback(
     async (item: FeedPostItem) => {
       const practice = learningItems.find((learningItem) => String(learningItem.id) === String(item.practiceId));
@@ -4295,7 +4359,12 @@ export default function FeedScreen({ navigation, route }: Props) {
               playbackEnabled={videoPlaybackEnabled && activeFeedMediaId === item.id}
             />
           ) : item.kind === 'characterVideo' ? (
-            <CharacterVideoCard item={item} onPress={handleOpenCharacterVideo} />
+            <CharacterVideoCard
+              item={item}
+              onPress={handleOpenCharacterVideo}
+              onOpenProfile={handleOpenCharacterVideoProfileFromFeed}
+              onStartConversation={handleStartConversationFromFeed}
+            />
           ) : item.kind === 'vocab' ? (
             <VocabularyCard
               item={item}

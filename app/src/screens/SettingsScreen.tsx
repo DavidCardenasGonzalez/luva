@@ -6,8 +6,10 @@ import { MaterialIcons } from '@expo/vector-icons';
 import Purchases from 'react-native-purchases';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { api } from '../api/api';
 import { useRevenueCat } from '../purchases/RevenueCatProvider';
 import { useCoins } from '../purchases/CoinBalanceProvider';
+import { usePhotoRequestCredits } from '../purchases/PhotoRequestCreditsProvider';
 import { useCardProgress } from '../progress/CardProgressProvider';
 import { useStoryProgress } from '../progress/StoryProgressProvider';
 import { getRuntimeAppVersion } from '../version/appVersion';
@@ -45,6 +47,12 @@ export default function SettingsScreen({ navigation }: Props) {
   } =
     useRevenueCat();
   const { resetCoins } = useCoins();
+  const {
+    balance: photoRequestCredits,
+    maxCredits: maxPhotoRequestCredits,
+    loading: photoRequestCreditsLoading,
+    resetPhotoRequestCredits,
+  } = usePhotoRequestCredits();
   const { resetAll: resetCardProgress } = useCardProgress();
   const { resetAll: resetStoryProgress } = useStoryProgress();
   const { isSignedIn, user, updateCurrentUser, resetLocalSession } = useAuth();
@@ -52,6 +60,7 @@ export default function SettingsScreen({ navigation }: Props) {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [confirmText, setConfirmText] = useState('');
   const [resetting, setResetting] = useState(false);
+  const [resettingPhotoCredits, setResettingPhotoCredits] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingDifficulty, setSavingDifficulty] = useState<EnglishDifficulty | null>(null);
   const [localDifficulty, setLocalDifficulty] = useState<EnglishDifficulty | null>(null);
@@ -248,6 +257,23 @@ export default function SettingsScreen({ navigation }: Props) {
       setRedeemingCode(false);
     }
   }, [codeInput, redeemPromoCode]);
+
+  const handleResetPhotoCredits = useCallback(async () => {
+    if (resettingPhotoCredits) return;
+    try {
+      setResettingPhotoCredits(true);
+      if (isSignedIn) {
+        await api.post('/users/me/photo-request-credits/reset');
+      }
+      await resetPhotoRequestCredits();
+      Alert.alert('Listo', 'El conteo de fotos fue reiniciado.');
+    } catch (err) {
+      console.warn('[Settings] Error al reiniciar fotos', err);
+      Alert.alert('Error', 'No pudimos reiniciar el conteo de fotos.');
+    } finally {
+      setResettingPhotoCredits(false);
+    }
+  }, [isSignedIn, resetPhotoRequestCredits, resettingPhotoCredits]);
 
   return (
     <SafeAreaView
@@ -511,6 +537,50 @@ export default function SettingsScreen({ navigation }: Props) {
               </Text>
             </Pressable> */}
           </View>
+
+          {__DEV__ ? (
+            <View
+              style={{
+                marginTop: 14,
+                padding: 14,
+                borderRadius: 14,
+                backgroundColor: '#0b172b',
+                borderWidth: 1,
+                borderColor: '#1e293b',
+                shadowColor: '#000',
+                shadowOpacity: 0.06,
+                shadowRadius: 8,
+              }}
+            >
+              <Text style={{ color: '#a5f3fc', fontSize: 12, letterSpacing: 1, fontWeight: '700', textTransform: 'uppercase' }}>
+                Dev
+              </Text>
+              <Text style={{ color: '#e2e8f0', fontWeight: '800', fontSize: 16, marginTop: 6 }}>
+                Fotos en chat
+              </Text>
+              <Text style={{ color: '#94a3b8', marginTop: 6, lineHeight: 20 }}>
+                Créditos actuales:{' '}
+                {photoRequestCreditsLoading ? 'cargando...' : `${photoRequestCredits}/${maxPhotoRequestCredits}`}
+              </Text>
+              <Pressable
+                onPress={handleResetPhotoCredits}
+                disabled={resettingPhotoCredits}
+                style={({ pressed }) => ({
+                  marginTop: 10,
+                  paddingVertical: 12,
+                  borderRadius: 12,
+                  backgroundColor: resettingPhotoCredits ? '#1f2937' : pressed ? '#0e7490' : '#0891b2',
+                  borderWidth: 1,
+                  borderColor: '#155e75',
+                  opacity: resettingPhotoCredits ? 0.7 : 1,
+                })}
+              >
+                <Text style={{ color: 'white', fontWeight: '800', textAlign: 'center' }}>
+                  {resettingPhotoCredits ? 'Reiniciando...' : 'Reiniciar conteo de fotos'}
+                </Text>
+              </Pressable>
+            </View>
+          ) : null}
 
           {__DEV__ || Platform.OS === 'android' ? (
             <View

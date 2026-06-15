@@ -95,6 +95,12 @@ export type FriendshipImage = {
   falSeed?: number;
 };
 
+export type FriendImageCreditQuota = {
+  balance: number;
+  maxCredits: number;
+  nextRegenAt?: string;
+};
+
 export type FriendImagePayload = {
   friendId: string;
   imageId: string;
@@ -104,6 +110,7 @@ export type FriendImagePayload = {
   image?: FriendshipImage;
   errorMessage?: string;
   conversationSnapshot?: FriendConversationSnapshot;
+  photoRequestCredits?: FriendImageCreditQuota;
 };
 
 type FriendsListResponse = {

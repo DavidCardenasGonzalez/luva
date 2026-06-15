@@ -38,6 +38,7 @@ export type PaywallSource =
   | 'coin_chip'
   | 'deck_card_unlock'
   | 'friend_chat_message'
+  | 'friend_chat_photo'
   | 'friend_chat_recording'
   | 'home_banner'
   | 'onboarding_lite_offer'

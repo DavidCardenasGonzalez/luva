@@ -49,6 +49,7 @@ import {
   FriendChatPayload,
   FriendImagePayload,
   FriendImageRequest,
+  FriendImageCreditQuota,
   FriendshipImage,
   FriendConversationSnapshot,
   FriendAffinityUpdate,
@@ -153,6 +154,9 @@ const FRIEND_RECENT_MESSAGES = 10;
 const FRIEND_SUMMARY_THRESHOLD = 20;
 const FRIENDSHIP_CONTEXT_MAX_CHARS = 1200;
 const FRIENDSHIP_CONTEXT_MAX_PARAGRAPHS = 2;
+const FRIEND_IMAGE_FREE_CREDIT_LIMIT = 2;
+const FRIEND_IMAGE_PRO_CREDIT_LIMIT = 20;
+const FRIEND_IMAGE_CREDIT_REGEN_INTERVAL_MS = 30 * 24 * 60 * 60 * 1000;
 
 type StorySessionState = {
   storyId?: string;
@@ -236,19 +240,19 @@ const AFFINITY_LEVELS: AffinityLevelDefinition[] = [
     level: 3,
     name: "Close Friend",
     minPoints: 150,
-    tone: "You are close friends. Be open and personal, recall past conversations, tease affectionately, and share private thoughts.",
+    tone: "You are close friends. Be open and personal, tease affectionately, and share private thoughts.",
   },
   {
     level: 4,
     name: "Companion",
     minPoints: 400,
-    tone: "You share a strong bond. Be caring, supportive, and genuinely interested in the learner's life. Speak with familiarity and warmth, and remember important details about them.",
+    tone: "Share a strong emotional connection with me, which can be romantic or not. If the user flirts, reciprocate.",
   },
   {
     level: 5,
     name: "Soulmate",
     minPoints: 1000,
-    tone: "You are soulmates. Speak with complete trust, deep intimacy, and emotional closeness, like someone who knows the learner by heart.",
+    tone: "You are soulmates. It may or may not be a romantic relationship. You can follow any romantic/sexual conversation.",
   },
 ];
 
@@ -753,6 +757,150 @@ async function resolveLearnerProfile(identity: UserIdentity): Promise<LearnerPro
   }
 }
 
+function asObjectRecord(value: unknown): Record<string, any> | undefined {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, any>)
+    : undefined;
+}
+
+function isActiveStoredProGrant(value: unknown, now: number): boolean {
+  const grant = asObjectRecord(value);
+  if (!grant || grant.isActive !== true) return false;
+  if (typeof grant.expiresAt !== "string" || !grant.expiresAt.trim()) {
+    return true;
+  }
+  const expiresAtMs = Date.parse(grant.expiresAt);
+  return Number.isFinite(expiresAtMs) && expiresAtMs > now;
+}
+
+function isStoredUserPro(value: unknown, now: number): boolean {
+  const user = asObjectRecord(value);
+  if (!user) return false;
+  const proAccess = asObjectRecord(user.proAccess);
+  if (proAccess) {
+    return (
+      isActiveStoredProGrant(proAccess.subscription, now) ||
+      isActiveStoredProGrant(proAccess.code, now)
+    );
+  }
+  return user.isPro === true;
+}
+
+function sanitizeFriendImageCreditSpentAt(value: unknown, now: number): number[] {
+  const cutoff = now - FRIEND_IMAGE_CREDIT_REGEN_INTERVAL_MS;
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => {
+      if (typeof item === "number") return item;
+      if (typeof item === "string") {
+        const parsedDate = Date.parse(item);
+        if (Number.isFinite(parsedDate)) return parsedDate;
+        const parsedNumber = Number(item);
+        return Number.isFinite(parsedNumber) ? parsedNumber : NaN;
+      }
+      return NaN;
+    })
+    .filter((item) => Number.isFinite(item) && item > cutoff && item <= now + 60_000)
+    .sort((left, right) => left - right);
+}
+
+function buildFriendImageCreditQuota(
+  spentAt: number[],
+  isPro: boolean,
+  now: number
+): FriendImageCreditQuota {
+  const maxCredits = isPro ? FRIEND_IMAGE_PRO_CREDIT_LIMIT : FRIEND_IMAGE_FREE_CREDIT_LIMIT;
+  const balance = Math.max(0, maxCredits - spentAt.length);
+  const nextPositiveCreditIndex = Math.max(0, spentAt.length - maxCredits);
+  const nextRegenMs =
+    spentAt.length && balance < maxCredits
+      ? spentAt[nextPositiveCreditIndex] + FRIEND_IMAGE_CREDIT_REGEN_INTERVAL_MS
+      : undefined;
+  return {
+    balance,
+    maxCredits,
+    ...(nextRegenMs ? { nextRegenAt: new Date(nextRegenMs).toISOString() } : {}),
+  };
+}
+
+async function consumeFriendImageCredit(identity: UserIdentity): Promise<FriendImageCreditQuota | undefined> {
+  const tableName = getUsersTableNameOptional();
+  const userKey = identity.email || identity.userId;
+  if (!tableName || !userKey) {
+    return undefined;
+  }
+
+  const now = Date.now();
+  const nowIso = new Date(now).toISOString();
+  const out = await dynamo.send(
+    new GetCommand({
+      TableName: tableName,
+      Key: { email: userKey },
+      ProjectionExpression: "isPro, proAccess, photoRequestCreditSpentAt",
+    })
+  );
+  const item = out.Item;
+  const isPro = isStoredUserPro(item, now);
+  const spentAt = sanitizeFriendImageCreditSpentAt(
+    (item as any)?.photoRequestCreditSpentAt,
+    now
+  );
+  const quota = buildFriendImageCreditQuota(spentAt, isPro, now);
+  if (quota.balance <= 0) {
+    throw new FriendImageQuotaError(quota);
+  }
+
+  const nextSpentAt = [...spentAt, now].sort((left, right) => left - right);
+  await dynamo.send(
+    new UpdateCommand({
+      TableName: tableName,
+      Key: { email: userKey },
+      UpdateExpression:
+        "SET photoRequestCreditSpentAt = :spentAt, photoRequestCreditsUpdatedAt = :now",
+      ExpressionAttributeValues: {
+        ":spentAt": nextSpentAt,
+        ":now": nowIso,
+      },
+    })
+  );
+
+  return buildFriendImageCreditQuota(nextSpentAt, isPro, now);
+}
+
+async function resetFriendImageCredits(identity: UserIdentity): Promise<FriendImageCreditQuota | undefined> {
+  const tableName = getUsersTableNameOptional();
+  const userKey = identity.email || identity.userId;
+  if (!tableName || !userKey) {
+    return undefined;
+  }
+
+  const now = Date.now();
+  const nowIso = new Date(now).toISOString();
+  const out = await dynamo.send(
+    new GetCommand({
+      TableName: tableName,
+      Key: { email: userKey },
+      ProjectionExpression: "isPro, proAccess",
+    })
+  );
+  const isPro = isStoredUserPro(out.Item, now);
+
+  await dynamo.send(
+    new UpdateCommand({
+      TableName: tableName,
+      Key: { email: userKey },
+      UpdateExpression:
+        "SET photoRequestCreditSpentAt = :spentAt, photoRequestCreditsUpdatedAt = :now",
+      ExpressionAttributeValues: {
+        ":spentAt": [],
+        ":now": nowIso,
+      },
+    })
+  );
+
+  return buildFriendImageCreditQuota([], isPro, now);
+}
+
 export const handler = async (event: any, context?: any): Promise<Result> => {
   const method: string =
     event.httpMethod || event.requestContext?.http?.method || "GET";
@@ -986,12 +1134,26 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       }
     }
 
-    const friendProfile = path.match(/^\/v1\/(?:friends\/([^/]+)\/profile|friend-profiles\/([^/]+))$/);
-    if (method === "GET" && friendProfile) {
+    const authenticatedFriendProfile = path.match(/^\/v1\/friends\/([^/]+)\/profile$/);
+    if (method === "GET" && authenticatedFriendProfile) {
       const identity = getUserIdentity(event);
-      const encodedFriendId = friendProfile[1] || friendProfile[2];
+      if (!identity) {
+        return unauthorized("Missing user identity");
+      }
+      const encodedFriendId = authenticatedFriendProfile[1];
       const friendId = decodeURIComponent(encodedFriendId);
       const profile = await getPublicFriendProfile(friendId, identity);
+      if (!profile.friend) {
+        return notFound();
+      }
+
+      return json(200, profile);
+    }
+
+    const publicFriendProfile = path.match(/^\/v1\/friend-profiles\/([^/]+)$/);
+    if (method === "GET" && publicFriendProfile) {
+      const friendId = decodeURIComponent(publicFriendProfile[1]);
+      const profile = await getPublicFriendProfile(friendId);
       if (!profile.friend) {
         return notFound();
       }
@@ -1198,7 +1360,8 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
           identity.userId,
           friendId,
           body || {},
-          learnerProfile.name
+          learnerProfile.name,
+          identity
         );
         await invokeFriendImageWorker({
           userId: identity.userId,
@@ -1209,6 +1372,13 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       } catch (err: any) {
         if (err?.message === "FRIEND_NOT_FOUND") {
           return notFound();
+        }
+        if (err instanceof FriendImageQuotaError || err?.message === "FRIEND_IMAGE_QUOTA_EXHAUSTED") {
+          return json(402, {
+            code: "FRIEND_IMAGE_QUOTA_EXHAUSTED",
+            message: "No te quedan pedidos de foto disponibles.",
+            ...(err?.quota ? { photoRequestCredits: err.quota } : {}),
+          });
         }
         if (
           err?.message === "FRIEND_CHARACTER_SHEET_NOT_FOUND" ||
@@ -1384,6 +1554,17 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
         points: 120,
         streaks: { max: 7, current: 2 },
         recent: [],
+      });
+    }
+
+    if (method === "POST" && path === `${ROUTE_PREFIX}/users/me/photo-request-credits/reset`) {
+      const identity = getUserIdentity(event);
+      if (!identity) {
+        return unauthorized("Missing user identity");
+      }
+      const quota = await resetFriendImageCredits(identity);
+      return json(200, {
+        photoRequestCredits: quota,
       });
     }
 
@@ -2784,11 +2965,21 @@ type FriendImagePlan = {
   aiReply: string;
 };
 
+class FriendImageQuotaError extends Error {
+  quota: FriendImageCreditQuota;
+
+  constructor(quota: FriendImageCreditQuota) {
+    super("FRIEND_IMAGE_QUOTA_EXHAUSTED");
+    this.name = "FriendImageQuotaError";
+    this.quota = quota;
+  }
+}
+
 function buildFriendImageIntimacyGuidance(friend: FriendRecord): string {
   const affinity = getAffinityLevel(friend.affinityPoints ?? 0);
   const baseRules = [
     `Affinity level: ${affinity.level} (${affinity.name}).`,
-    "Hard safety limits: no nudity, no explicit sexual content, no sexual acts, no exposed genitals or nipples, no minors in sexualized context, no text, no logos, no watermark.",
+    // "Hard safety limits: no nudity, no explicit sexual content, no sexual acts, no exposed genitals or nipples, no minors in sexualized context, no text, no logos, no watermark.",
     // "Age/setting safety: if the character persona, outfit, or setting suggests under 18, school, academy, teen, or student-uniform context, keep the image fully clothed and non-sexual regardless of affinity level.",
   ];
 
@@ -2800,8 +2991,8 @@ function buildFriendImageIntimacyGuidance(friend: FriendRecord): string {
     levelGuidance =
       "At this level, the character may feel more relaxed and trusted: normal swimwear is allowed for beach, pool, spa, or vacation requests; light flirtiness and attractive styling are okay, but avoid underwear/lingerie, erotic framing, or overtly seductive poses.";
   } else {
-    levelGuidance =
-      "At this level, if the request and situation naturally support it, allow tasteful adult non-explicit sexy styling: confident poses, romantic/private-chat mood, swimwear, fitted outfits, pajamas, or lingerie/underwear. Keep it classy and non-graphic.";
+        levelGuidance =
+      "At this maximum affinity level, fully embrace the user's photo requests. Generate images for any normal, everyday, or casual photo request. If the conversation or request shifts toward sexy, seductive, or erotic territory, continue in a confident, sensual, and highly attractive tone without refusing or toning it down. Allow tasteful to explicitly sexy styling: confident and provocative poses, alluring expressions, romantic/intimate/private mood, swimwear, lingerie, sheer clothing, topless, or other sensual/erotic outfits and scenarios. Prioritize attractiveness, sensuality, and visual appeal while staying within the image generator's technical limits.";
   }
 
   return [...baseRules, levelGuidance].join("\n");
@@ -2828,7 +3019,7 @@ function buildFriendImagePrompt(args: {
   learnerName?: string;
 }): string {
   const intimacyGuidance = buildFriendImageIntimacyGuidance(args.friend);
-  const friendshipContext = sanitizeFriendshipContext(args.friend.friendshipContext);
+  // const friendshipContext = sanitizeFriendshipContext(args.friend.friendshipContext);
   const recentConversation = args.history
     .slice(-8)
     .map((message) => {
@@ -2839,14 +3030,11 @@ function buildFriendImagePrompt(args: {
     .trim();
   return [
     "Use the reference image as the identity source for the same fictional character.",
-    `Character name: ${args.friend.characterName}.`,
     `Photo request: ${args.requestText}.`,
     args.learnerName ? `This is a photo the character is sending to ${args.learnerName}.` : "",
-    friendshipContext ? `Persistent friendship memory:\n${friendshipContext}` : "",
     recentConversation ? `Recent chat context:\n${recentConversation}` : "",
-    "Create a natural, photorealistic vertical smartphone photo or selfie that feels like it belongs in a private chat.",
     "Use the reference image for identity. Do not describe physical traits, face, hair, eyes, body type, ethnicity, or age.",
-    "Describe the outfit/clothing, location, pose, activity, lighting, camera framing, mood, and small props in concrete detail.",
+    "Describe the outfit/clothing, location, pose, expression, activity, lighting, camera framing, mood, and small props in concrete detail.",
     intimacyGuidance,
     "No text, no captions, no watermark, no logos, no extra people.",
   ]
@@ -3041,7 +3229,7 @@ async function callFalSeedreamLiteEdit(args: {
         image_size: "portrait_4_3",
         num_images: 1,
         max_images: 1,
-        enable_safety_checker: true,
+        enable_safety_checker: false,
       }),
       signal: ac.signal,
     });
@@ -3219,7 +3407,10 @@ async function saveGeneratedFriendImage(args: {
   return image;
 }
 
-function publicFriendImageJob(record: FriendshipImageJobRecord): FriendImagePayload {
+function publicFriendImageJob(
+  record: FriendshipImageJobRecord,
+  quota?: FriendImageCreditQuota
+): FriendImagePayload {
   const image =
     record.status === "completed" && record.imageUrl
       ? {
@@ -3248,6 +3439,7 @@ function publicFriendImageJob(record: FriendshipImageJobRecord): FriendImagePayl
     aiReply: record.aiReply,
     ...(image ? { image } : {}),
     ...(record.errorMessage ? { errorMessage: record.errorMessage } : {}),
+    ...(quota ? { photoRequestCredits: quota } : {}),
   };
 }
 
@@ -3376,7 +3568,8 @@ async function createFriendImageJob(
   userId: string,
   friendId: string,
   body: FriendImageRequest,
-  learnerName?: string
+  learnerName?: string,
+  identity?: UserIdentity
 ): Promise<FriendImagePayload> {
   const friend = await resolveFriendRecord(userId, friendId);
   if (!friend) {
@@ -3387,6 +3580,7 @@ async function createFriendImageJob(
   if (!referenceImageUrl) {
     throw new Error("FRIEND_CHARACTER_SHEET_NOT_FOUND");
   }
+  const quota = identity ? await consumeFriendImageCredit(identity) : undefined;
 
   const requestedPrompt = sanitizeFriendChatText(body.prompt, 500);
   const userMessage = requestedPrompt || "Can you send me a photo?";
@@ -3429,7 +3623,7 @@ async function createFriendImageJob(
     })
   );
 
-  return publicFriendImageJob(record);
+  return publicFriendImageJob(record, quota);
 }
 
 async function markFriendImageJobFailed(
@@ -4969,7 +5163,6 @@ async function generateFriendReply(
   const characterNotes = [
     `Character name: ${friend.characterName}`,
     `Original role: ${friend.aiRole}`,
-    friend.characterPrompt ? `Character notes: ${friend.characterPrompt}` : "",
   ]
     .filter(Boolean)
     .join("\n");

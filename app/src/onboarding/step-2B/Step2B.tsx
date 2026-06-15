@@ -5,6 +5,7 @@ import {
   Pressable,
   ScrollView,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -75,11 +76,13 @@ type Props = {
 };
 
 export default function Step2B({ content, onNext }: Props) {
+  const { height } = useWindowDimensions();
   const { isSignedIn, updateCurrentUser, user } = useAuth();
   const [selectedDifficulty, setSelectedDifficulty] = useState<EnglishDifficulty>(
     user?.englishDifficulty || 'medium',
   );
   const [savingDifficulty, setSavingDifficulty] = useState<EnglishDifficulty | null>(null);
+  const compactLayout = height < 880;
 
   useEffect(() => {
     let mounted = true;
@@ -117,23 +120,52 @@ export default function Step2B({ content, onNext }: Props) {
   return (
     <ScrollView
       style={{ flex: 1 }}
-      contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 8 }}
+      contentContainerStyle={{
+        paddingHorizontal: compactLayout ? 18 : 20,
+        paddingBottom: compactLayout ? 2 : 8,
+      }}
       showsVerticalScrollIndicator={false}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: -18 }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          marginBottom: compactLayout ? -28 : -18,
+        }}
+      >
         <View style={{ flex: 1, paddingRight: 10 }}>
-          <Text style={{ color: COLORS.text, fontSize: 30, fontWeight: '900', lineHeight: 36 }}>
+          <Text
+            style={{
+              color: COLORS.text,
+              fontSize: compactLayout ? 27 : 30,
+              fontWeight: '900',
+              lineHeight: compactLayout ? 32 : 36,
+            }}
+          >
             {'Elige tu '}
-            <GradientText style={{ fontSize: 30, fontWeight: '900', lineHeight: 36 }}>
+            <GradientText
+              style={{
+                fontSize: compactLayout ? 27 : 30,
+                fontWeight: '900',
+                lineHeight: compactLayout ? 32 : 36,
+              }}
+            >
               nivel
             </GradientText>
           </Text>
-          <Text style={{ color: COLORS.muted, fontSize: 14, lineHeight: 20, marginTop: 10 }}>
+          <Text
+            style={{
+              color: COLORS.muted,
+              fontSize: compactLayout ? 13 : 14,
+              lineHeight: compactLayout ? 18 : 20,
+              marginTop: compactLayout ? 6 : 10,
+            }}
+          >
             {content.subtitle || 'Ajustaré la dificultad de las conversaciones para que practiques a tu ritmo.'}
           </Text>
         </View>
 
-        <View style={{ width: 136, alignItems: 'center' }}>
+        <View style={{ width: compactLayout ? 118 : 136, alignItems: 'center' }}>
           <MaterialIcons
             name="auto-awesome"
             size={15}
@@ -152,8 +184,8 @@ export default function Step2B({ content, onNext }: Props) {
               borderRadius: 14,
               borderWidth: 1,
               borderColor: 'rgba(148, 163, 184, 0.22)',
-              paddingHorizontal: 10,
-              paddingVertical: 8,
+              paddingHorizontal: compactLayout ? 8 : 10,
+              paddingVertical: compactLayout ? 6 : 8,
               marginBottom: -2,
               zIndex: 1,
             }}
@@ -161,9 +193,9 @@ export default function Step2B({ content, onNext }: Props) {
             <Text
               style={{
                 color: COLORS.text,
-                fontSize: 12,
+                fontSize: compactLayout ? 11 : 12,
                 fontWeight: '700',
-                lineHeight: 17,
+                lineHeight: compactLayout ? 15 : 17,
                 textAlign: 'center',
               }}
             >
@@ -173,7 +205,7 @@ export default function Step2B({ content, onNext }: Props) {
           <Image
             source={luviSayingHi}
             resizeMode="contain"
-            style={{ height: 156 }}
+            style={{ height: compactLayout ? 126 : 156 }}
             accessibilityLabel="Luvi"
           />
         </View>
@@ -185,37 +217,57 @@ export default function Step2B({ content, onNext }: Props) {
           borderRadius: 24,
           borderWidth: 1,
           borderColor: COLORS.cardBorder,
-          padding: 14,
-          marginTop: -18,
-          marginBottom: 14,
+          padding: compactLayout ? 11 : 14,
+          marginTop: compactLayout ? -22 : -18,
+          marginBottom: compactLayout ? 8 : 14,
           zIndex: 2,
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: compactLayout ? 8 : 12,
+          }}
+        >
           <View
             style={{
-              width: 42,
-              height: 42,
-              borderRadius: 21,
+              width: compactLayout ? 36 : 42,
+              height: compactLayout ? 36 : 42,
+              borderRadius: compactLayout ? 18 : 21,
               backgroundColor: 'rgba(37, 99, 235, 0.22)',
               borderWidth: 1,
               borderColor: 'rgba(96, 165, 250, 0.28)',
               alignItems: 'center',
               justifyContent: 'center',
-              marginRight: 10,
+              marginRight: compactLayout ? 8 : 10,
             }}
           >
-            <MaterialIcons name="tune" size={22} color="#60a5fa" />
+            <MaterialIcons name="tune" size={compactLayout ? 20 : 22} color="#60a5fa" />
           </View>
-          <Text style={{ color: COLORS.text, fontSize: 15, fontWeight: '900', lineHeight: 21, flex: 1 }}>
+          <Text
+            style={{
+              color: COLORS.text,
+              fontSize: compactLayout ? 14 : 15,
+              fontWeight: '900',
+              lineHeight: compactLayout ? 19 : 21,
+              flex: 1,
+            }}
+          >
             {'¿Qué dificultad quieres practicar '}
-            <GradientText style={{ fontSize: 15, fontWeight: '900', lineHeight: 21 }}>
+            <GradientText
+              style={{
+                fontSize: compactLayout ? 14 : 15,
+                fontWeight: '900',
+                lineHeight: compactLayout ? 19 : 21,
+              }}
+            >
               ahora?
             </GradientText>
           </Text>
         </View>
 
-        <View style={{ gap: 10 }}>
+        <View style={{ gap: compactLayout ? 7 : 10 }}>
           {difficultyOptions.map((option) => {
             const selected = selectedDifficulty === option.id;
             const saving = savingDifficulty === option.id;
@@ -231,20 +283,26 @@ export default function Step2B({ content, onNext }: Props) {
                   borderWidth: selected ? 1.5 : 1,
                   borderColor: selected ? COLORS.selectedBorder : 'rgba(148, 163, 184, 0.16)',
                   backgroundColor: selected ? COLORS.selectedCard : 'rgba(255, 255, 255, 0.04)',
-                  padding: 14,
+                  padding: compactLayout ? 10 : 14,
                   opacity: pressed ? 0.86 : 1,
                 })}
               >
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 9 }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginBottom: compactLayout ? 5 : 9,
+                  }}
+                >
                   <View
                     style={{
-                      width: 42,
-                      height: 42,
-                      borderRadius: 21,
+                      width: compactLayout ? 36 : 42,
+                      height: compactLayout ? 36 : 42,
+                      borderRadius: compactLayout ? 18 : 21,
                       backgroundColor: option.iconBg,
                       alignItems: 'center',
                       justifyContent: 'center',
-                      marginRight: 10,
+                      marginRight: compactLayout ? 8 : 10,
                     }}
                   >
                     {saving ? (
@@ -252,21 +310,35 @@ export default function Step2B({ content, onNext }: Props) {
                     ) : (
                       <MaterialIcons
                         name={option.iconName as any}
-                        size={23}
+                        size={compactLayout ? 21 : 23}
                         color={option.iconColor}
                       />
                     )}
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: COLORS.text, fontSize: 17, fontWeight: '900' }}>
+                    <Text
+                      style={{
+                        color: COLORS.text,
+                        fontSize: compactLayout ? 16 : 17,
+                        fontWeight: '900',
+                      }}
+                    >
                       {option.title}
                     </Text>
-                    <Text style={{ color: COLORS.cyan, fontSize: 12, fontWeight: '900', lineHeight: 16, marginTop: 2 }}>
+                    <Text
+                      style={{
+                        color: COLORS.cyan,
+                        fontSize: compactLayout ? 11 : 12,
+                        fontWeight: '900',
+                        lineHeight: compactLayout ? 15 : 16,
+                        marginTop: compactLayout ? 1 : 2,
+                      }}
+                    >
                       {option.summary}
                     </Text>
                   </View>
                   {selected ? (
-                    <MaterialIcons name="check-circle" size={23} color={COLORS.cyan} />
+                    <MaterialIcons name="check-circle" size={compactLayout ? 21 : 23} color={COLORS.cyan} />
                   ) : null}
                 </View>
 
@@ -276,11 +348,17 @@ export default function Step2B({ content, onNext }: Props) {
                     borderWidth: 1,
                     borderColor: 'rgba(148, 163, 184, 0.14)',
                     backgroundColor: 'rgba(7, 17, 31, 0.46)',
-                    padding: 10,
-                    marginTop: 10,
+                    padding: compactLayout ? 8 : 10,
+                    marginTop: compactLayout ? 6 : 10,
                   }}
                 >
-                  <Text style={{ color: COLORS.text, fontSize: 12, lineHeight: 17 }}>
+                  <Text
+                    style={{
+                      color: COLORS.text,
+                      fontSize: compactLayout ? 11 : 12,
+                      lineHeight: compactLayout ? 15 : 17,
+                    }}
+                  >
                     {option.example}
                   </Text>
                 </View>

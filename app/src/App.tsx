@@ -5,6 +5,7 @@ import { StoryProgressProvider } from './progress/StoryProgressProvider';
 import AppNavigator from './navigation/AppNavigator';
 import { RevenueCatProvider } from './purchases/RevenueCatProvider';
 import { CoinBalanceProvider } from './purchases/CoinBalanceProvider';
+import { PhotoRequestCreditsProvider } from './purchases/PhotoRequestCreditsProvider';
 import { AppVersionGateProvider } from './version/AppVersionGateProvider';
 import { MetaAdsProvider } from './marketing/MetaAdsProvider';
 import { MixpanelProvider } from './marketing/MixpanelProvider';
@@ -15,19 +16,21 @@ export default function App() {
     <AuthProvider>
       <RevenueCatProvider>
         <CoinBalanceProvider>
-          <MetaAdsProvider>
-            <MixpanelProvider>
-              <CardProgressProvider>
-                <StoryProgressProvider>
-                  <AppVersionGateProvider>
-                    <ShadowingPlayerProvider>
-                      <AppNavigator />
-                    </ShadowingPlayerProvider>
-                  </AppVersionGateProvider>
-                </StoryProgressProvider>
-              </CardProgressProvider>
-            </MixpanelProvider>
-          </MetaAdsProvider>
+          <PhotoRequestCreditsProvider>
+            <MetaAdsProvider>
+              <MixpanelProvider>
+                <CardProgressProvider>
+                  <StoryProgressProvider>
+                    <AppVersionGateProvider>
+                      <ShadowingPlayerProvider>
+                        <AppNavigator />
+                      </ShadowingPlayerProvider>
+                    </AppVersionGateProvider>
+                  </StoryProgressProvider>
+                </CardProgressProvider>
+              </MixpanelProvider>
+            </MetaAdsProvider>
+          </PhotoRequestCreditsProvider>
         </CoinBalanceProvider>
       </RevenueCatProvider>
     </AuthProvider>

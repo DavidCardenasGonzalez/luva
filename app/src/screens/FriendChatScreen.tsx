@@ -18,7 +18,9 @@ import {
   View,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as ImagePicker from 'expo-image-picker';
+import * as MediaLibrary from 'expo-media-library';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useIsFocused } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -28,11 +30,14 @@ import { Audio } from 'expo-av';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import CoinCountChip from '../components/CoinCountChip';
+import PhotoLoginModal from '../components/PhotoLoginModal';
 import StoryMessageComposer, { StoryFlowState } from '../components/StoryMessageComposer';
 import { useAuth } from '../auth/AuthProvider';
 import { api } from '../api/api';
 import { shouldRecordLikes } from '../config/likeRecording';
 import { RECORDING_COST, useCoins } from '../purchases/CoinBalanceProvider';
+import { usePhotoRequestCredits } from '../purchases/PhotoRequestCreditsProvider';
+import { useRevenueCat } from '../purchases/RevenueCatProvider';
 import useAudioRecorder from '../shared/useAudioRecorder';
 import useUploadToS3 from '../shared/useUploadToS3';
 import {
@@ -67,9 +72,10 @@ import { getChatAvatar } from '../chatimages/chatAvatarMap';
 import { readStoredEnglishDifficulty } from '../auth/englishDifficulty';
 import type { EnglishDifficulty } from '../auth/AuthProvider';
 import {
-  getOnboardingDraftProgress,
+  hasShownOnboardingAffinityPaywall,
   hasCompletedOnboarding,
-  saveOnboardingDraftProgress,
+  markOnboardingAffinityPaywallShown,
+  markOnboardingCompleted,
 } from '../onboarding/model/progress';
 import {
   AI_CONVERSATION_POINTS_PER_MESSAGE,
@@ -77,6 +83,10 @@ import {
 } from '../progress/journeyProgress';
 import { trackMixpanelFriendEvent } from '../marketing/mixpanelEvents';
 import { trackMetaFriendChatStarted } from '../marketing/metaAppEvents';
+import {
+  cancelConversationReminderAsync,
+  scheduleConversationReminderAsync,
+} from '../notifications/conversationReminders';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FriendChat'>;
 
@@ -143,6 +153,8 @@ const FRIEND_CHAT_VOICE_TOTAL_COST = FRIEND_CHAT_MESSAGE_COST + RECORDING_COST;
 const FRIEND_IMAGE_POLL_INTERVAL_MS = 2500;
 const FRIEND_IMAGE_POLL_TIMEOUT_MS = 120000;
 const FRIEND_CHAT_DRAFT_STORAGE_PREFIX = '@luva/friend-chat/draft';
+const STRANGER_AFFINITY_LEVEL = 1;
+const FRIEND_AFFINITY_LEVEL = 2;
 
 function friendChatDraftStorageKey(conversationKey: string) {
   return `${FRIEND_CHAT_DRAFT_STORAGE_PREFIX}:${conversationKey}`;
@@ -150,6 +162,21 @@ function friendChatDraftStorageKey(conversationKey: string) {
 
 function formatJourneyPoints(points: number) {
   return Number.isInteger(points) ? String(points) : points.toFixed(1);
+}
+
+function isStrangerToFriendAffinityTransition(affinity?: FriendAffinityUpdate | null) {
+  return Boolean(
+    affinity &&
+    affinity.previousLevel === STRANGER_AFFINITY_LEVEL &&
+    affinity.level >= FRIEND_AFFINITY_LEVEL
+  );
+}
+
+async function shouldShowStrangerToFriendOnboardingPaywall(affinity?: FriendAffinityUpdate | null) {
+  if (!isStrangerToFriendAffinityTransition(affinity)) return false;
+  if (await hasShownOnboardingAffinityPaywall()) return false;
+  await markOnboardingAffinityPaywallShown();
+  return true;
 }
 
 function removeLastUserExchange(currentMessages: ChatMessage[]): {
@@ -207,6 +234,16 @@ function getTouchDistance(touches: NativeTouchEvent[]) {
 
 function clampImageScale(value: number) {
   return Math.max(1, Math.min(6, value));
+}
+
+function getImageFileExtension(uri: string) {
+  const cleanUri = uri.split('?')[0] || '';
+  const match = cleanUri.match(/\.([a-zA-Z0-9]+)$/);
+  const ext = match?.[1]?.toLowerCase();
+  if (ext === 'jpg' || ext === 'jpeg' || ext === 'png' || ext === 'webp') {
+    return ext === 'jpeg' ? 'jpg' : ext;
+  }
+  return 'jpg';
 }
 
 function ZoomableChatImage({ uri }: { uri: string }) {
@@ -317,7 +354,6 @@ function AnalysisCard({
   retryDisabled?: boolean;
   englishDifficulty?: EnglishDifficulty;
 }) {
-  console.log('Rendering AnalysisCard with analysis:', englishDifficulty);
   const isEasy = englishDifficulty === 'easy';
   const isTranslationHelp = analysis.feedbackType === 'translation_help';
   const canRetry = !isEasy && analysis.result !== 'correct' && !!onRetry;
@@ -427,7 +463,7 @@ function CompletionCard({
       <Text style={{ marginTop: 6, color: '#166534', lineHeight: 20 }}>
         Terminaste tu práctica con {friendName}. Esta conversación quedó marcada como terminada.
       </Text>
-      <View
+      {/* <View
         style={{
           alignSelf: 'flex-start',
           marginTop: 10,
@@ -442,7 +478,7 @@ function CompletionCard({
         <Text style={{ color: '#166534', fontWeight: '900' }}>
           +{formatJourneyPoints(pointsEarned)} punto{pointsEarned === 1 ? '' : 's'} de Conversación AI
         </Text>
-      </View>
+      </View> */}
       {affinity ? (
         <View
           style={{
@@ -556,9 +592,16 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const { width: windowWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, user } = useAuth();
+  const { isPro } = useRevenueCat();
   const { friends, loading, loaded, error, reload } = useFriends();
   const { canSpend, spendCoins, loading: coinsLoading, isUnlimited, balance } = useCoins();
+  const {
+    balance: photoRequestCredits,
+    loading: photoRequestCreditsLoading,
+    spendPhotoRequestCredit,
+    refundPhotoRequestCredit,
+  } = usePhotoRequestCredits();
   const friend = useMemo(
     () => friends.find((item) => item.friendId === friendId),
     [friendId, friends]
@@ -616,9 +659,12 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const [showAssistanceModal, setShowAssistanceModal] = useState(false);
   const [showProfilePreview, setShowProfilePreview] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const [showPhotoLoginModal, setShowPhotoLoginModal] = useState(false);
   const [photoRequestMode, setPhotoRequestMode] = useState(false);
+  const [photoRetryPrompt, setPhotoRetryPrompt] = useState<string | null>(null);
   const [composerText, setComposerText] = useState('');
   const [selectedChatImageUri, setSelectedChatImageUri] = useState<string | null>(null);
+  const [savingChatImage, setSavingChatImage] = useState(false);
   const [assistanceQuestion, setAssistanceQuestion] = useState('');
   const [assistanceAnswer, setAssistanceAnswer] = useState('');
   const [assistanceLoading, setAssistanceLoading] = useState(false);
@@ -627,6 +673,13 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const recorder = useAudioRecorder();
   const uploader = useUploadToS3();
   const scrollRef = useRef<ScrollView>(null);
+
+  const resolveCurrentEnglishDifficulty = useCallback(async (): Promise<EnglishDifficulty> => {
+    if (isSignedIn && user?.englishDifficulty) {
+      return user.englishDifficulty;
+    }
+    return readStoredEnglishDifficulty();
+  }, [isSignedIn, user?.englishDifficulty]);
   const isStartingRecording = useRef(false);
   const stopRequestedWhileStarting = useRef(false);
   const skipExitPromptRef = useRef(false);
@@ -667,6 +720,14 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       scrollRef.current?.scrollToEnd({ animated });
     });
   }, []);
+
+  const handleGoBack = useCallback(() => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+    navigation.navigate('Feed');
+  }, [navigation]);
 
   const updateComposerText = useCallback(
     (nextText: string) => {
@@ -711,13 +772,13 @@ export default function FriendChatScreen({ navigation, route }: Props) {
 
   useEffect(() => {
     let mounted = true;
-    void readStoredEnglishDifficulty().then((value) => {
+    void resolveCurrentEnglishDifficulty().then((value) => {
       if (mounted) setEnglishDifficulty(value);
     });
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [resolveCurrentEnglishDifficulty]);
 
   useEffect(() => {
     if (friendId) {
@@ -945,6 +1006,19 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     };
   }, []);
 
+  // Schedule a 24h reminder when a conversation becomes active (first message sent or screen re-focused).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!isFocused || !hasStartedConversation || conversationEnded || !friend) return;
+    void scheduleConversationReminderAsync(localConversationKey, friend.characterName);
+  }, [isFocused, hasStartedConversation]); // intentional minimal deps: only react to focus/start transitions
+
+  // Cancel reminder when the conversation ends.
+  useEffect(() => {
+    if (!conversationEnded) return;
+    void cancelConversationReminderAsync(localConversationKey);
+  }, [conversationEnded, localConversationKey]);
+
   const handleEndConversationRef = useRef<() => void>(() => {});
 
   useEffect(() => {
@@ -1030,7 +1104,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         history_message_count: messages.length,
       });
       const historyPayload = messagesToHistoryPayload(messages);
-      const currentDifficulty = await readStoredEnglishDifficulty();
+      const currentDifficulty = await resolveCurrentEnglishDifficulty();
       setEnglishDifficulty(currentDifficulty);
       const payload = await finishFriendChat(
         friendId,
@@ -1122,6 +1196,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     messages,
     persistConversationSnapshot,
     reload,
+    resolveCurrentEnglishDifficulty,
     sourcePost,
   ]);
 
@@ -1142,21 +1217,33 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     });
     skipExitPromptRef.current = true;
 
+    const shouldShowAffinityPaywall = await shouldShowStrangerToFriendOnboardingPaywall(affinityUpdate);
     const onboardingCompleted = await hasCompletedOnboarding();
-    if (!onboardingCompleted) {
-      const existingDraft = await getOnboardingDraftProgress();
-      await saveOnboardingDraftProgress({
-        stepNumber: 5,
-        selectedCharacter: existingDraft?.selectedCharacter ?? null,
-        phraseSelections: existingDraft?.phraseSelections ?? [],
-        speakingSummary: {
-          messages: messagesToHistoryPayload(messages),
-          completedRequirementIds: [],
-        },
-      });
+    if (shouldShowAffinityPaywall) {
+      if (!onboardingCompleted) {
+        await markOnboardingCompleted();
+      }
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Onboarding', params: { startAtStep: 5 } }],
+        routes: [
+          {
+            name: 'Paywall',
+            params: {
+              source: 'onboarding_lite_offer',
+              variant: 'lite',
+              closeTarget: 'Feed',
+            },
+          },
+        ],
+      });
+      return;
+    }
+
+    if (!onboardingCompleted) {
+      await markOnboardingCompleted();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Feed' }],
       });
       return;
     }
@@ -1165,7 +1252,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       index: 0,
       routes: [{ name: 'Feed' }],
     });
-  }, [conversationEnded, friend, messages, navigation, sourcePost?.postId]);
+  }, [affinityUpdate, conversationEnded, friend, messages, navigation, sourcePost?.postId]);
 
   const handleRequestAssistance = useCallback(async () => {
     const trimmed = assistanceQuestion.trim();
@@ -1386,7 +1473,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       });
 
       try {
-        const currentDifficulty = await readStoredEnglishDifficulty();
+        const currentDifficulty = await resolveCurrentEnglishDifficulty();
         setEnglishDifficulty(currentDifficulty);
         const payload = await sendFriendChatMessage(friendId, {
           sessionId,
@@ -1465,6 +1552,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       navigation,
       persistConversationSnapshot,
       retryingLastExchange,
+      resolveCurrentEnglishDifficulty,
       sourcePost,
       spendCoins,
       updateComposerText,
@@ -1494,7 +1582,109 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     await handleAdvance('', undefined, 'image', { uri: asset.uri, base64: asset.base64 });
   }, [handleAdvance]);
 
-  const handleRequestPhoto = useCallback(async (photoPrompt: string): Promise<boolean> => {
+  const handleTakePhoto = useCallback(async () => {
+    setShowAttachMenu(false);
+    setPhotoRequestMode(false);
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      setErrorMessage('Necesitas permitir el acceso a la cámara para tomar fotos.');
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images'],
+      quality: 0.25,
+      base64: true,
+      allowsEditing: false,
+    });
+    if (result.canceled) return;
+    const asset = result.assets[0];
+    if (!asset.base64) {
+      setErrorMessage('No pudimos leer la foto tomada.');
+      return;
+    }
+    await handleAdvance('', undefined, 'image', { uri: asset.uri, base64: asset.base64 });
+  }, [handleAdvance]);
+
+  const handleSaveSelectedChatImage = useCallback(async () => {
+    const imageUri = selectedChatImageUri;
+    if (!imageUri || savingChatImage) return;
+
+    setSavingChatImage(true);
+    try {
+      const permission = await MediaLibrary.requestPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert('Permiso requerido', 'Necesitas permitir acceso a tus fotos para guardar la imagen.');
+        return;
+      }
+
+      let localUri = imageUri;
+      if (!localUri.startsWith('file://')) {
+        const extension = getImageFileExtension(localUri);
+        const targetUri = `${FileSystem.cacheDirectory}luva-chat-photo-${Date.now()}.${extension}`;
+        const downloaded = await FileSystem.downloadAsync(localUri, targetUri);
+        localUri = downloaded.uri;
+      }
+
+      await MediaLibrary.saveToLibraryAsync(localUri);
+      Alert.alert('Foto guardada', 'La imagen se guardó en tu galería.');
+    } catch (err: any) {
+      Alert.alert('No se pudo guardar', err?.message || 'Intenta de nuevo en un momento.');
+    } finally {
+      setSavingChatImage(false);
+    }
+  }, [savingChatImage, selectedChatImageUri]);
+
+  const handleOpenPhotoRequest = useCallback(() => {
+    setShowAttachMenu(false);
+    if (photoRequestMode) {
+      setPhotoRequestMode(false);
+      setErrorMessage(null);
+      return;
+    }
+    if (!isSignedIn) {
+      setErrorMessage(null);
+      setShowPhotoLoginModal(true);
+      return;
+    }
+    if (conversationEnded) {
+      setErrorMessage('Esta conversación ya terminó.');
+      return;
+    }
+    if (flowState !== 'idle' || retryingLastExchange) {
+      setErrorMessage('Espera a que termine la acción actual.');
+      return;
+    }
+    if (photoRequestCreditsLoading) {
+      setErrorMessage('Cargando tus pedidos de foto...');
+      return;
+    }
+    if (photoRequestCredits <= 0) {
+      if (isPro) {
+        setErrorMessage(null);
+        return;
+      }
+      setErrorMessage('No te quedan pedidos de foto disponibles.');
+      navigation.navigate('Paywall', { source: 'friend_chat_photo' });
+      return;
+    }
+    setPhotoRequestMode(true);
+    setErrorMessage(null);
+  }, [
+    conversationEnded,
+    flowState,
+    isSignedIn,
+    isPro,
+    navigation,
+    photoRequestMode,
+    photoRequestCredits,
+    photoRequestCreditsLoading,
+    retryingLastExchange,
+  ]);
+
+  const handleRequestPhoto = useCallback(async (
+    photoPrompt: string,
+    options?: { skipCreditConsumption?: boolean }
+  ): Promise<boolean> => {
     setShowAttachMenu(false);
     const trimmedPrompt = photoPrompt.trim();
     if (!trimmedPrompt) {
@@ -1506,7 +1696,8 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       return false;
     }
     if (!isSignedIn) {
-      setErrorMessage('Inicia sesión para pedir fotos.');
+      setErrorMessage(null);
+      setShowPhotoLoginModal(true);
       return false;
     }
     if (conversationEnded) {
@@ -1517,23 +1708,26 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       setErrorMessage('Espera a que termine la acción actual.');
       return false;
     }
-    if (coinsLoading) {
-      setErrorMessage('Cargando tus monedas...');
-      return false;
-    }
-    if (!isUnlimited) {
-      const ok = await spendCoins(
-        FRIEND_CHAT_MESSAGE_COST,
-        `friend-photo:${friendId}:${Date.now()}`
-      );
-      if (!ok) {
-        setErrorMessage('Necesitas 1 moneda para pedir una foto.');
+    if (!options?.skipCreditConsumption) {
+      if (photoRequestCreditsLoading) {
+        setErrorMessage('Cargando tus pedidos de foto...');
+        return false;
+      }
+      const spentPhotoCredit = await spendPhotoRequestCredit();
+      if (!spentPhotoCredit) {
+        if (isPro) {
+          setPhotoRequestMode(false);
+          setErrorMessage(null);
+          return false;
+        }
+        setErrorMessage('No te quedan pedidos de foto disponibles.');
         setPhotoRequestMode(true);
         updateComposerText(trimmedPrompt);
-        navigation.navigate('Paywall', { source: 'friend_chat_message' });
+        navigation.navigate('Paywall', { source: 'friend_chat_photo' });
         return false;
       }
     }
+    setPhotoRetryPrompt(null);
 
     const userMessage = trimmedPrompt;
     const pendingUserMessage: ChatMessage = {
@@ -1607,28 +1801,67 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       void reload();
       return true;
     } catch (err: any) {
-      setErrorMessage(err?.message || 'No pudimos generar la foto.');
+      if (err?.code === 'FRIEND_IMAGE_QUOTA_EXHAUSTED') {
+        setMessages(messages);
+        void persistConversationSnapshot({
+          nextMessages: messages,
+          nextAnalysis: null,
+          nextConversationEnded: false,
+          nextConversationFeedback: null,
+        });
+        if (isPro) {
+          setPhotoRequestMode(false);
+          setErrorMessage(null);
+          return false;
+        }
+        navigation.navigate('Paywall', { source: 'friend_chat_photo' });
+        setErrorMessage(err?.message || 'No pudimos generar la foto.');
+        return false;
+      }
+      try {
+        await refundPhotoRequestCredit();
+      } catch (refundErr: any) {
+        console.warn('[FriendChat] No se pudo devolver el pedido de foto:', refundErr?.message || refundErr);
+      }
+      setMessages(messages);
+      void persistConversationSnapshot({
+        nextMessages: messages,
+        nextAnalysis: null,
+        nextConversationEnded: false,
+        nextConversationFeedback: null,
+      });
+      setPhotoRetryPrompt(userMessage);
+      setErrorMessage('No pudimos generar tu foto esta vez. Te devolvimos tu pedido — toca Reintentar para volver a probar.');
       return false;
     } finally {
       setFlowState('idle');
     }
   }, [
-    coinsLoading,
     conversationEnded,
     flowState,
     friend,
     friendId,
     isSignedIn,
-    isUnlimited,
+    isPro,
     messages,
     navigation,
     persistConversationSnapshot,
+    photoRequestCreditsLoading,
+    refundPhotoRequestCredit,
     reload,
     retryingLastExchange,
     sourcePost?.postId,
-    spendCoins,
+    spendPhotoRequestCredit,
     updateComposerText,
   ]);
+
+  const handleRetryPhotoRequest = useCallback(async () => {
+    if (!photoRetryPrompt) return;
+    const prompt = photoRetryPrompt;
+    setPhotoRetryPrompt(null);
+    setErrorMessage(null);
+    await handleRequestPhoto(prompt, { skipCreditConsumption: true });
+  }, [handleRequestPhoto, photoRetryPrompt]);
 
   const handleSendText = useCallback(
     async (textToSend: string) => {
@@ -1831,7 +2064,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           {error || 'No encontramos este amigo.'}
         </Text>
         <Pressable
-          onPress={() => navigation.goBack()}
+          onPress={handleGoBack}
           style={({ pressed }) => ({
             marginTop: 16,
             paddingVertical: 12,
@@ -1876,7 +2109,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         <View style={{ backgroundColor: COLORS.header, paddingTop: headerTopPadding, paddingBottom: 12, paddingHorizontal: 16 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Pressable
-              onPress={() => navigation.goBack()}
+              onPress={handleGoBack}
               hitSlop={16}
               style={({ pressed }) => ({
                 width: 44,
@@ -1962,8 +2195,8 @@ export default function FriendChatScreen({ navigation, route }: Props) {
               {conversationEnded
                 ? 'Esta práctica ya terminó. Puedes revisar la conversación y el feedback final.'
                 : sourcePost
-                ? 'Responde en inglés usando el post como contexto. El avatar contestará tomando esa foto en cuenta.'
-                : 'Ahora puedes practicar sin requisitos. Mantén la conversación en inglés y revisa el feedback después de cada mensaje.'}
+                  ? 'Usa el post como inspiración para tu respuesta. Puedes escribir en inglés o español.'
+                  : 'Habla de forma natural. Puedes escribir en inglés, español o una mezcla de ambos.'}
             </Text>
           </View>
 
@@ -2184,6 +2417,34 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         {errorMessage ? (
           <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             <Text style={{ color: '#dc2626' }}>{errorMessage}</Text>
+            {photoRetryPrompt ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Reintentar pedir foto"
+                onPress={handleRetryPhotoRequest}
+                disabled={flowState !== 'idle' || retryingLastExchange}
+                style={({ pressed }) => ({
+                  alignSelf: 'flex-start',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginTop: 10,
+                  paddingHorizontal: 14,
+                  paddingVertical: 9,
+                  borderRadius: 999,
+                  backgroundColor:
+                    flowState !== 'idle' || retryingLastExchange
+                      ? '#e2e8f0'
+                      : pressed
+                      ? '#1d4ed8'
+                      : '#2563eb',
+                  opacity: flowState !== 'idle' || retryingLastExchange ? 0.65 : 1,
+                })}
+              >
+                <MaterialIcons name="replay" size={18} color="white" />
+                <Text style={{ color: 'white', fontWeight: '900' }}>Reintentar</Text>
+              </Pressable>
+            ) : null}
           </View>
         ) : null}
 
@@ -2281,11 +2542,22 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                 </Pressable>
                 <View style={{ height: 1, backgroundColor: '#e2e8f0' }} />
                 <Pressable
-                  onPress={() => {
-                    setShowAttachMenu(false);
-                    setPhotoRequestMode(true);
-                    setErrorMessage(null);
-                  }}
+                  onPress={handleTakePhoto}
+                  style={({ pressed }) => ({
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 10,
+                    paddingHorizontal: 16,
+                    paddingVertical: 12,
+                    backgroundColor: pressed ? '#f1f5f9' : 'white',
+                  })}
+                >
+                  <MaterialIcons name="photo-camera" size={20} color="#475569" />
+                  <Text style={{ color: '#1e293b', fontWeight: '600', fontSize: 14 }}>Abrir cámara</Text>
+                </Pressable>
+                <View style={{ height: 1, backgroundColor: '#e2e8f0' }} />
+                <Pressable
+                  onPress={handleOpenPhotoRequest}
                   disabled={flowState !== 'idle' || retryingLastExchange}
                   style={({ pressed }) => ({
                     flexDirection: 'row',
@@ -2297,8 +2569,37 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                     opacity: flowState !== 'idle' || retryingLastExchange ? 0.6 : 1,
                   })}
                 >
-                  <MaterialIcons name="add-photo-alternate" size={20} color="#475569" />
+                  <MaterialIcons
+                    name="add-photo-alternate"
+                    size={20}
+                    color={!photoRequestCreditsLoading && photoRequestCredits <= 0 ? '#dc2626' : '#475569'}
+                  />
                   <Text style={{ color: '#1e293b', fontWeight: '600', fontSize: 14 }}>Pedir foto</Text>
+                  <View
+                    style={{
+                      minWidth: 28,
+                      paddingHorizontal: 8,
+                      paddingVertical: 3,
+                      borderRadius: 999,
+                      alignItems: 'center',
+                      backgroundColor:
+                        !photoRequestCreditsLoading && photoRequestCredits <= 0 ? '#fee2e2' : '#ecfeff',
+                      borderWidth: 1,
+                      borderColor:
+                        !photoRequestCreditsLoading && photoRequestCredits <= 0 ? '#fecaca' : '#a5f3fc',
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color:
+                          !photoRequestCreditsLoading && photoRequestCredits <= 0 ? '#dc2626' : '#0f766e',
+                        fontWeight: '900',
+                        fontSize: 12,
+                      }}
+                    >
+                      {photoRequestCreditsLoading ? '...' : photoRequestCredits}
+                    </Text>
+                  </View>
                 </Pressable>
               </View>
             ) : null}
@@ -2314,6 +2615,10 @@ export default function FriendChatScreen({ navigation, route }: Props) {
               onRecordRelease={handleRecordRelease}
               onPlusPress={() => setShowAttachMenu((v) => !v)}
               photoRequestMode={photoRequestMode}
+              onCancelPhotoRequestMode={() => {
+                setPhotoRequestMode(false);
+                setErrorMessage(null);
+              }}
             />
           </View>
         )}
@@ -2402,6 +2707,15 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           </Pressable>
         </Modal>
 
+        <PhotoLoginModal
+          visible={showPhotoLoginModal}
+          onClose={() => setShowPhotoLoginModal(false)}
+          onCreateAccount={() => {
+            setShowPhotoLoginModal(false);
+            navigation.navigate('AccountAccess');
+          }}
+        />
+
         <Modal
           visible={!!selectedChatImageUri}
           transparent
@@ -2429,6 +2743,36 @@ export default function FriendChatScreen({ navigation, route }: Props) {
               })}
             >
               <MaterialIcons name="close" size={22} color="white" />
+            </Pressable>
+            <Pressable
+              onPress={handleSaveSelectedChatImage}
+              disabled={savingChatImage}
+              accessibilityRole="button"
+              accessibilityLabel="Guardar foto"
+              style={({ pressed }) => ({
+                position: 'absolute',
+                right: 16,
+                bottom: Math.max(insets.bottom, 16),
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 8,
+                paddingHorizontal: 14,
+                paddingVertical: 10,
+                borderRadius: 999,
+                backgroundColor: pressed ? 'rgba(37, 99, 235, 0.96)' : 'rgba(59, 130, 246, 0.9)',
+                borderWidth: 1,
+                borderColor: 'rgba(191, 219, 254, 0.45)',
+                opacity: savingChatImage ? 0.72 : 1,
+              })}
+            >
+              {savingChatImage ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <MaterialIcons name="file-download" size={20} color="white" />
+              )}
+              <Text style={{ color: 'white', fontWeight: '900' }}>
+                {savingChatImage ? 'Guardando...' : 'Guardar'}
+              </Text>
             </Pressable>
           </View>
         </Modal>

@@ -38,10 +38,11 @@ const appName = process.env.APP_DISPLAY_NAME?.trim() || (isProduction ? "Luva" :
 const appScheme = process.env.APP_SCHEME?.trim() || (isProduction ? "myapp" : "luvadev");
 const iosBundleIdentifier =
   process.env.IOS_BUNDLE_IDENTIFIER?.trim() ||
-  (isProduction ? "com.cardi7.luva" : "com.cardi7.luva.dev");
+  ("com.cardi7.luva");
+console.log(`Using app scheme: ${iosBundleIdentifier}`);
 const androidPackage =
   process.env.ANDROID_PACKAGE?.trim() ||
-  (isProduction ? "com.cardi7.luva" : "com.cardi7.luva.dev");
+  ("com.cardi7.luva");
 
 const plugins = [
   "expo-dev-client",

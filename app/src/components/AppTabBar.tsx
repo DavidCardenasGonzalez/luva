@@ -6,20 +6,19 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useShadowingPlayer } from '../shadowing/ShadowingPlayerProvider';
 import { trackMixpanelTabSelected } from '../marketing/mixpanelEvents';
 
-type AppTabKey = 'home' | 'practice' | 'missions' | 'lessons' | 'journey' | 'shadowing' | 'feed' | 'friends';
+type AppTabKey = 'home' | 'practice' | 'missions' | 'lessons' | 'journey' | 'shadowing' | 'feed' | 'friends' | 'settings';
 
 type TabConfig = {
   key: AppTabKey;
   label: string;
   icon: React.ComponentProps<typeof MaterialIcons>['name'];
-  route: 'Deck' | 'Lessons' | 'MyJourney' | 'Shadowing' | 'Feed' | 'Friends';
+  route: 'Deck' | 'Lessons' | 'MyJourney' | 'Shadowing' | 'Feed' | 'Friends' | 'Settings';
 };
 
 const TABS: TabConfig[] = [
   { key: 'feed', label: 'Feed', icon: 'rss-feed', route: 'Feed' },
-  { key: 'journey', label: 'My Journey', icon: 'timeline', route: 'MyJourney' },
-  { key: 'shadowing', label: 'Shadowing', icon: 'headphones', route: 'Shadowing' },
   { key: 'friends', label: 'Amigos', icon: 'people', route: 'Friends' },
+  { key: 'settings', label: 'Ajustes', icon: 'settings', route: 'Settings' },
 ];
 
 function formatMiniPlayerTime(seconds: number) {

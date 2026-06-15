@@ -94,6 +94,8 @@ type StoredUserRecord = Omit<UserRecord, 'proAccess'> & {
   proAccess?: StoredProAccess;
   appProgress?: UserProgressRecord;
   appProgressUpdatedAt?: string;
+  photoRequestCreditSpentAt?: number[];
+  photoRequestCreditsUpdatedAt?: string;
 };
 
 type UpsertUserPayload = {
@@ -625,6 +627,8 @@ async function upsertCurrentUser(
     proAccess: nextProAccess,
     appProgress: previous?.appProgress,
     appProgressUpdatedAt: previous?.appProgressUpdatedAt,
+    photoRequestCreditSpentAt: previous?.photoRequestCreditSpentAt,
+    photoRequestCreditsUpdatedAt: previous?.photoRequestCreditsUpdatedAt,
   };
 
   await dynamo.send(

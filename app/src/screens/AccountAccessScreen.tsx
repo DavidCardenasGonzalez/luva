@@ -102,8 +102,15 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
       setNotice(undefined);
       return;
     }
-    navigation.goBack();
-  }, [authMode, navigation]);
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+    navigation.reset({
+      index: 0,
+      routes: [{ name: fromOnboarding ? 'Onboarding' : 'Feed' }],
+    });
+  }, [authMode, fromOnboarding, navigation]);
 
   const handleContinueAnonymous = useCallback(async () => {
     void trackMixpanelEvent('anonymous_continue_selected', {

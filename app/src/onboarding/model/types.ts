@@ -138,13 +138,6 @@ export const DEFAULT_ONBOARDING_STEPS: OnboardingStepContent[] = [
   },
   {
     stepNumber: 2,
-    eyebrow: "Personalización",
-    title: "Creamos un plan para ti",
-    subtitle: "Selecciona las frases que más se parecen a ti para personalizar tu ruta de aprendizaje.",
-    primaryCta: "Continuar",
-  },
-  {
-    stepNumber: 2,
     stepKey: "step2B",
     eyebrow: "Nivel",
     title: "Elige tu nivel de inglés",

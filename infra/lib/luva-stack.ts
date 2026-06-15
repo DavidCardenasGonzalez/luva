@@ -535,7 +535,7 @@ export class LuvaStack extends Stack {
     table.grantReadWriteData(apiFn);
     friendshipsTable.grantReadWriteData(apiFn);
     friendshipImagesTable.grantReadWriteData(apiFn);
-    usersTable.grantReadData(apiFn);
+    usersTable.grantReadWriteData(apiFn);
     feedPostsTable.grantReadData(apiFn);
     characterPostsTable.grantReadWriteData(apiFn);
     lessonsTable.grantReadData(apiFn);
@@ -733,6 +733,8 @@ export class LuvaStack extends Stack {
     const usersMeDevices = usersMe.addResource('devices');
     const usersMeDeviceById = usersMeDevices.addResource('{deviceId}');
     const usersMeProgress = usersMe.addResource('progress');
+    const usersMePhotoRequestCredits = usersMe.addResource('photo-request-credits');
+    const usersMePhotoRequestCreditsReset = usersMePhotoRequestCredits.addResource('reset');
     const onboarding = v1.addResource('onboarding');
     const onboardingChat = onboarding.addResource('chat');
     const onboardingPlan = onboarding.addResource('plan');
@@ -776,6 +778,10 @@ export class LuvaStack extends Stack {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
     });
+    usersMePhotoRequestCreditsReset.addMethod('POST', lambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
     onboarding.addMethod('GET', onboardingLambdaIntegration);
     onboardingChat.addMethod('POST', onboardingLambdaIntegration);
     onboardingPlan.addMethod('POST', onboardingLambdaIntegration);
@@ -787,7 +793,10 @@ export class LuvaStack extends Stack {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
     });
-    friendProfile.addMethod('GET', lambdaIntegration);
+    friendProfile.addMethod('GET', lambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
     publicFriendProfileById.addMethod('GET', lambdaIntegration);
     friendChat.addMethod('POST', lambdaIntegration, {
       authorizer: usersAuthorizer,
@@ -822,7 +831,7 @@ export class LuvaStack extends Stack {
 
     const deployment = new Deployment(this, 'Deployment', { api });
     deployment.addToLogicalId({
-      routeManifestVersion: '2026-06-10-friendship-images-profile-tabs-v1',
+      routeManifestVersion: '2026-06-14-authenticated-friend-profile-v1',
       routes: {
         apiRoot: ['ANY /v1', 'ANY /v1/{proxy+}'],
         users: [
@@ -832,6 +841,7 @@ export class LuvaStack extends Stack {
           'DELETE /v1/users/me/devices/{deviceId}',
           'GET /v1/users/me/progress',
           'POST /v1/users/me/progress',
+          'POST /v1/users/me/photo-request-credits/reset',
         ],
         onboarding: [
           'GET /v1/onboarding',

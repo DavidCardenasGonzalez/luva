@@ -14,8 +14,8 @@ Ejecutar (Expo)
 Entornos
 - `APP_ENV=development` carga `.env.development`; no usa `.env` para evitar apuntar accidentalmente a produccion.
 - `APP_ENV=production` carga `.env.production` si existe; si no, usa `.env`.
-- Los perfiles `development`, `phone` y `preview` de EAS usan `APP_ENV=development`.
-- El perfil `production` de EAS usa `APP_ENV=production`.
+- El perfil `development` de EAS usa `APP_ENV=development`.
+- Los perfiles `phone`, `preview` y `production` de EAS usan `APP_ENV=production`, por lo que instalan el app normal `Luva`.
 
 Para trabajar sin tocar usuarios reales, crea `app/.env.development` con un backend/Cognito de dev:
 
@@ -37,7 +37,7 @@ Mantén `app/.env.production` con los valores reales. No uses el `API_BASE_URL` 
 
 Builds utiles:
 - Simulador iOS dev: `eas build --profile development --platform ios`
-- Telefono interno: `eas build --profile phone --platform ios` o `eas build --profile phone --platform android`
+- Telefono interno con app normal Luva: `eas build --profile phone --platform ios` o `eas build --profile phone --platform android`
 - Produccion: `eas build --profile production --platform all`
 
 Meta Ads

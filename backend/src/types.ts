@@ -261,6 +261,12 @@ export interface FriendshipImage {
   falSeed?: number;
 }
 
+export interface FriendImageCreditQuota {
+  balance: number;
+  maxCredits: number;
+  nextRegenAt?: string;
+}
+
 export interface FriendImagePayload {
   friendId: string;
   imageId: string;
@@ -270,6 +276,7 @@ export interface FriendImagePayload {
   image?: FriendshipImage;
   errorMessage?: string;
   conversationSnapshot?: FriendConversationSnapshot;
+  photoRequestCredits?: FriendImageCreditQuota;
 }
 
 export interface TranslationRequest {
