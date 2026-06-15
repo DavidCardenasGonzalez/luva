@@ -11,6 +11,7 @@ export type LocalFriendChatMessage = {
   text: string;
   imageUri?: string;
   imageUrl?: string;
+  imagePrompt?: string;
   sceneNarration?: string;
 };
 
@@ -68,6 +69,7 @@ function sanitizeMessage(input: unknown): LocalFriendChatMessage | null {
   const text = asString(raw.text) || '';
   const imageUri = asString(raw.imageUri);
   const imageUrl = asString(raw.imageUrl);
+  const imagePrompt = imageUrl ? asString(raw.imagePrompt) : undefined;
   const sceneNarration = asString(raw.sceneNarration);
   if (!id || !role || (!text && !imageUri && !imageUrl)) return null;
   return {
@@ -76,6 +78,7 @@ function sanitizeMessage(input: unknown): LocalFriendChatMessage | null {
     text,
     ...(imageUri ? { imageUri } : {}),
     ...(imageUrl ? { imageUrl } : {}),
+    ...(imagePrompt ? { imagePrompt } : {}),
     ...(role === 'assistant' && sceneNarration ? { sceneNarration } : {}),
   };
 }
@@ -213,6 +216,7 @@ export function toFriendConversationSnapshot(
       role: message.role,
       content: message.text || (message.imageUri || message.imageUrl ? '[Photo]' : ''),
       ...(message.imageUrl ? { imageUrl: message.imageUrl } : {}),
+      ...(message.imageUrl && message.imagePrompt ? { imagePrompt: message.imagePrompt } : {}),
     })),
     conversationEnded: snapshot.conversationEnded,
     conversationFeedback: snapshot.conversationFeedback ?? null,

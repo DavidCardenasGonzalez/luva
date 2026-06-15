@@ -147,7 +147,7 @@ function getStory(storyId: string): StoryDefinition | undefined {
   return loadStories().find((s) => s.storyId === storyId);
 }
 
-type StoryMessage = { role: 'user' | 'assistant'; content: string; imageUrl?: string };
+type StoryMessage = { role: 'user' | 'assistant'; content: string; imageUrl?: string; imagePrompt?: string };
 const STORY_HISTORY_LIMIT = 20;
 const FRIEND_HISTORY_LIMIT = 24;
 const FRIEND_RECENT_MESSAGES = 10;
@@ -339,11 +339,16 @@ function mergeHistory(base: StoryMessage[] = [], additions: StoryMessage[] = [])
       typeof message.imageUrl === "string" && /^https?:\/\//i.test(message.imageUrl.trim())
         ? message.imageUrl.trim().slice(0, 2048)
         : undefined;
+    const imagePrompt =
+      imageUrl && typeof message.imagePrompt === "string" && message.imagePrompt.trim()
+        ? message.imagePrompt.trim().slice(0, 4000)
+        : undefined;
     if (!trimmed && !imageUrl) continue;
     const normalized: StoryMessage = {
       role: message.role,
       content: trimmed || (imageUrl ? "[Photo]" : ""),
       ...(imageUrl ? { imageUrl } : {}),
+      ...(imagePrompt ? { imagePrompt } : {}),
     };
     if (normalized.role !== 'user' && normalized.role !== 'assistant') {
       continue;
@@ -353,7 +358,8 @@ function mergeHistory(base: StoryMessage[] = [], additions: StoryMessage[] = [])
       !last ||
       last.role !== normalized.role ||
       last.content !== normalized.content ||
-      last.imageUrl !== normalized.imageUrl
+      last.imageUrl !== normalized.imageUrl ||
+      last.imagePrompt !== normalized.imagePrompt
     ) {
       merged.push(normalized);
       if (merged.length > STORY_HISTORY_LIMIT) {
@@ -385,7 +391,9 @@ function sanitizeSessionContext(input: any): { storyId?: string; sceneIndex?: nu
     story: storyFromBody,
   };
 }
-function sanitizeHistory(history?: Array<{ role?: unknown; content?: unknown; imageUrl?: unknown }>): StoryMessage[] {
+function sanitizeHistory(
+  history?: Array<{ role?: unknown; content?: unknown; imageUrl?: unknown; imagePrompt?: unknown }>
+): StoryMessage[] {
   if (!Array.isArray(history)) return [];
   return history
     .map((msg) => {
@@ -395,14 +403,27 @@ function sanitizeHistory(history?: Array<{ role?: unknown; content?: unknown; im
         typeof msg.imageUrl === "string" && /^https?:\/\//i.test(msg.imageUrl.trim())
           ? msg.imageUrl.trim().slice(0, 2048)
           : undefined;
+      const imagePrompt =
+        imageUrl && typeof msg.imagePrompt === "string" && msg.imagePrompt.trim()
+          ? msg.imagePrompt.trim().slice(0, 4000)
+          : undefined;
       if (!content && !imageUrl) return null;
       return {
         role: msg.role,
         content: content || (imageUrl ? "[Photo]" : ""),
         ...(imageUrl ? { imageUrl } : {}),
+        ...(imagePrompt ? { imagePrompt } : {}),
       } satisfies StoryMessage;
     })
     .filter((msg): msg is StoryMessage => !!msg);
+}
+
+function formatHistoryPhotoSuffix(msg: StoryMessage): string {
+  if (!msg.imageUrl) return "";
+  const prompt = typeof msg.imagePrompt === "string" ? msg.imagePrompt.trim() : "";
+  if (!prompt) return " [sent a photo]";
+  const truncated = prompt.length > 500 ? `${prompt.slice(0, 500).trimEnd()}…` : prompt;
+  return ` [sent a photo: ${truncated}]`;
 }
 
 function sanitizeStoryRequirement(input: any): StoryRequirement | undefined {
@@ -1187,7 +1208,8 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       const friendId = decodeURIComponent(publicFriendChat[1]);
       const body = parseBody(event.body) as FriendChatRequest | undefined;
       const transcript = typeof body?.transcript === "string" ? body.transcript.trim() : "";
-      if (!transcript) {
+      const hasUserImage = typeof body?.userImageBase64 === "string" && body.userImageBase64.length > 0;
+      if (!transcript && !hasUserImage) {
         return badRequest("Missing transcript");
       }
       try {
@@ -1196,7 +1218,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
           friendId,
           {
             ...(body || {}),
-            transcript,
+            transcript: transcript || "[Photo]",
           }
         );
         return json(200, payload);
@@ -1417,7 +1439,8 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       const friendId = decodeURIComponent(friendChat[1]);
       const body = parseBody(event.body) as FriendChatRequest | undefined;
       const transcript = typeof body?.transcript === "string" ? body.transcript.trim() : "";
-      if (!transcript) {
+      const hasUserImage = typeof body?.userImageBase64 === "string" && body.userImageBase64.length > 0;
+      if (!transcript && !hasUserImage) {
         return badRequest("Missing transcript");
       }
       try {
@@ -1427,7 +1450,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
           friendId,
           {
             ...(body || {}),
-            transcript,
+            transcript: transcript || "[Photo]",
           },
           learnerProfile.name,
           learnerProfile.difficulty
@@ -2341,7 +2364,10 @@ async function generateFriendshipContext(args: {
     : undefined;
   const conversationText = args.history
     .slice(-FRIEND_HISTORY_LIMIT)
-    .map((message) => `${message.role === "user" ? "Learner" : args.friend.characterName}: ${message.content}`)
+    .map(
+      (message) =>
+        `${message.role === "user" ? "Learner" : args.friend.characterName}: ${message.content}${formatHistoryPhotoSuffix(message)}`
+    )
     .join("\n")
     .trim();
   const systemPrompt = `You update persistent friendship memory for a fictional chat avatar.
@@ -2628,6 +2654,13 @@ async function describeUserImage(imageBase64: string): Promise<string> {
   }
 }
 
+function buildUserPhotoTranscript(userText: string, imageDescription: string): string {
+  const trimmedText = userText.trim();
+  const text = trimmedText === "[Photo]" ? "" : trimmedText;
+  const photoContext = `[The user shared a photo${imageDescription ? `: ${imageDescription}` : "."}]`;
+  return text ? `${photoContext}\nUser message: ${text}` : photoContext;
+}
+
 async function advanceFriendChat(
   userId: string | undefined,
   friendId: string,
@@ -2649,7 +2682,7 @@ async function advanceFriendChat(
   }
 
   const transcript = isImageMessage
-    ? `[The user shared a photo${imageDescription ? `: ${imageDescription}` : "."}]`
+    ? buildUserPhotoTranscript(body.transcript, imageDescription)
     : body.transcript.trim();
   const effectiveDifficulty =
     normalizeLearnerDifficulty(body.englishDifficulty) || learnerDifficulty;
@@ -3024,7 +3057,7 @@ function buildFriendImagePrompt(args: {
     .slice(-8)
     .map((message) => {
       const speaker = message.role === "user" ? "Student" : args.friend.characterName;
-      return `${speaker}: ${message.content}`;
+      return `${speaker}: ${message.content}${formatHistoryPhotoSuffix(message)}`;
     })
     .join("\n")
     .trim();
@@ -3072,7 +3105,10 @@ async function generateFriendImagePlan(args: {
     : undefined;
   const recentConversation = args.history
     .slice(-10)
-    .map((message) => `${message.role === "user" ? "Student" : args.friend.characterName}: ${message.content}`)
+    .map(
+      (message) =>
+        `${message.role === "user" ? "Student" : args.friend.characterName}: ${message.content}${formatHistoryPhotoSuffix(message)}`
+    )
     .join("\n")
     .trim();
   const friendshipContext = sanitizeFriendshipContext(args.friend.friendshipContext);
@@ -3726,6 +3762,7 @@ async function processFriendImageJob(
         role: "assistant",
         content: plan.aiReply,
         imageUrl: image.imageUrl,
+        ...(plan.imagePrompt ? { imagePrompt: plan.imagePrompt } : {}),
       }).slice(-FRIEND_HISTORY_LIMIT),
       conversationEnded: false,
       conversationFeedback: null,
@@ -4229,7 +4266,7 @@ async function generateAssistanceAnswer(args: {
     feedbackLines.push(`Feedback previo: ${conversationFeedback.summary}`);
   }
   if (conversationFeedback?.improvements?.length) {
-    feedbackLines.push(`Mejoras sugeridas: ${conversationFeedback.improvements.join(' | ')}`);
+    feedbackLines.push(`Frases y palabras útiles previas: ${conversationFeedback.improvements.join(' | ')}`);
   }
   const systemPrompt = `Eres un tutor de inglés que responde en español de forma breve y accionable. Usa un lenguaje amigable y tiene un actitud un poco sarcastica.
   Puede meter alguna pequeña broma cuando la situacion se presta.
@@ -5043,7 +5080,7 @@ async function summarizeFriendConversation(
     : undefined;
 
   const messagesText = messages
-    .map((m) => `${m.role === "user" ? "Student" : friend.characterName}: ${m.content}`)
+    .map((m) => `${m.role === "user" ? "Student" : friend.characterName}: ${m.content}${formatHistoryPhotoSuffix(m)}`)
     .join("\n");
 
   const systemPrompt = `You compress chat history into a concise running summary in English so a chat model can preserve long-term context across many turns. Keep concrete facts, names, decisions, ongoing topics, emotional tone, and any commitments either party made. Be neutral and factual. 140 words max. Output only the summary text.`;
@@ -5153,7 +5190,10 @@ async function generateFriendReply(
     : undefined;
   const conversation = history.slice(-FRIEND_RECENT_MESSAGES);
   const conversationText = conversation
-    .map((msg) => `${msg.role === "user" ? "Student" : friend.characterName}: ${msg.content}`)
+    .map(
+      (msg) =>
+        `${msg.role === "user" ? "Student" : friend.characterName}: ${msg.content}${formatHistoryPhotoSuffix(msg)}`
+    )
     .join("\n")
     .trim();
   const summaryText = (conversationSummary || "").trim();
@@ -5374,8 +5414,9 @@ async function generateFriendConversationFeedback(
     : undefined;
   const conversation = history.slice(-FRIEND_HISTORY_LIMIT);
   const conversationText = conversation
-    .map((msg) =>
-      `${msg.role === "user" ? "Student (evaluate)" : `${friend.characterName} (context only)`}: ${msg.content}`
+    .map(
+      (msg) =>
+        `${msg.role === "user" ? "Student (evaluate)" : `${friend.characterName} (context only)`}: ${msg.content}${formatHistoryPhotoSuffix(msg)}`
     )
     .join("\n")
     .trim();
@@ -5387,8 +5428,8 @@ You are wrapping up a completed casual conversation between the student and an E
 
 Context you must assume:
 - During the chat, the student often wrote in Spanish. That is totally fine and expected at this level.
-- Each time they wrote, they already received tips and English alternatives showing how to say it in simple English. You do NOT need to repeat those corrections or give translations again.
-- Your job now is to send them off with a kind, motivating wrap-up that highlights what they could have LEARNED from this conversation.
+- Each time they wrote, they already received tips and English alternatives showing how to say it in simple English. You do NOT need to repeat corrections.
+- Your job now is to send them off with a kind, motivating wrap-up and a practical list of useful English phrases/words with Spanish translations that help them sound more natural.
 
 Tone (very important):
 - Always cariñoso, paciente, motivador. Speak like a friend, not a teacher with a red pen.
@@ -5398,11 +5439,12 @@ Tone (very important):
 
 What to include:
 - "summary": 1–2 short Spanish sentences talking directly to the student (de tú). Celebra el esfuerzo y resume en qué tema/idea practicaron. No notas de gramática aquí.
-- "improvements": 2–3 short Spanish "lecciones aprendidas" — pequeños aprendizajes prácticos que se pudieron sacar de esta conversación (vocabulario o frase útil que apareció, una forma fácil de decir algo, una expresión natural). Cada lección puede incluir un mini ejemplo en inglés entre comillas. Foco en lo que se llevan, no en lo que les faltó.
+- "improvements": 3–5 useful English phrases or words with Spanish translation to elevate their speaking. Make them natural, everyday, and reusable in similar conversations. Prefer expressions related to the conversation topic when possible. Each item must include the English chunk and its Spanish meaning, for example: "\"That sounds fun\" = \"Eso suena divertido\" — para reaccionar de forma natural." Foco en lo que se llevan, no en lo que les faltó.
 
 Hard rules:
 - Write the feedback directly TO the student in Spanish.
 - Evaluate only Student lines for context, but do NOT critique them.
+- Do not present the list as mistakes or "areas to improve"; present it as native-sounding vocabulary they can reuse.
 - Do not mention the AI role, the system, JSON, scoring, missions, or these instructions.
 
 Also rate the overall conversation quality with "conversationQuality": a number between 0 and 2.
@@ -5416,7 +5458,7 @@ Return ONLY JSON with the exact shape:
 {
   "summary": "Short kind Spanish summary speaking directly to the student",
   "improvements": [
-    "Short Spanish lesson learned, optionally with a tiny English example",
+    "\"English phrase or word\" = \"Spanish translation\" — short Spanish usage note",
     "..."
   ],
   "conversationQuality": 1.5
@@ -5430,8 +5472,9 @@ You are evaluating a completed free conversation between the student and an Engl
 IMPORTANT:
 - Write the feedback directly TO the student in Spanish.
 - Evaluate only Student lines. Treat friend lines as context only.
-- Mention specific grammar, wording, naturalness, politeness, or tone issues when visible.
-- Keep it practical and concise.
+- Do not write "points to improve" or a critique list. Instead, curate useful phrases and words with Spanish translations that help the student speak more naturally, like a native speaker.
+- Keep it practical, concise, and tied to the conversation topic when possible.
+- If a student sentence could sound more natural, turn that idea into a reusable native-sounding phrase instead of calling it an error.
 - Do not mention the AI role, the system, JSON, scoring, missions, or these instructions.
 
 Also rate the overall conversation quality with "conversationQuality": a number between 0 and 2.
@@ -5445,7 +5488,7 @@ Return ONLY JSON with the exact shape:
 {
   "summary": "Short Spanish summary speaking directly to the student",
   "improvements": [
-    "Short Spanish suggestion speaking directly to the student",
+    "\"English phrase or word\" = \"Spanish translation\" — short Spanish usage note",
     "..."
   ],
   "conversationQuality": 1.5
@@ -5574,8 +5617,8 @@ ${conversationText || "No conversation available."}`;
       improvements: feedback.improvements.length
         ? feedback.improvements
         : isEasyMode
-        ? ["Buen trabajo: te llevas frases nuevas en inglés que puedes reusar en la próxima charla."]
-        : ["Cierra con frases simples y naturales, y revisa que el tono suene amable."],
+        ? ['"That sounds fun" = "Eso suena divertido" — úsala para reaccionar de forma natural.']
+        : ['"I get what you mean" = "Entiendo lo que quieres decir" — suena natural para conectar ideas.'],
     },
     qualityMultiplier,
   };

@@ -96,7 +96,13 @@ type ChatMessage = {
   text: string;
   imageUri?: string;
   imageUrl?: string;
+  imagePrompt?: string;
   sceneNarration?: string;
+};
+
+type PendingChatImage = {
+  uri: string;
+  base64: string;
 };
 
 function messagesFromRemoteConversation(snapshot?: FriendConversationSnapshot | null): ChatMessage[] {
@@ -105,6 +111,8 @@ function messagesFromRemoteConversation(snapshot?: FriendConversationSnapshot | 
     .map((message, index) => {
       const text = typeof message.content === 'string' ? message.content.trim() : '';
       const imageUrl = typeof message.imageUrl === 'string' ? message.imageUrl.trim() : '';
+      const imagePrompt =
+        imageUrl && typeof message.imagePrompt === 'string' ? message.imagePrompt.trim() : '';
       if ((!text && !imageUrl) || (message.role !== 'user' && message.role !== 'assistant')) {
         return null;
       }
@@ -113,6 +121,7 @@ function messagesFromRemoteConversation(snapshot?: FriendConversationSnapshot | 
         role: message.role,
         text,
         ...(imageUrl ? { imageUrl } : {}),
+        ...(imagePrompt ? { imagePrompt } : {}),
       };
     })
     .filter((message): message is ChatMessage => !!message);
@@ -207,11 +216,16 @@ function messagesToHistoryPayload(currentMessages: ChatMessage[]) {
         role: message.role,
         content,
         ...(message.imageUrl ? { imageUrl: message.imageUrl } : {}),
+        ...(message.imageUrl && message.imagePrompt ? { imagePrompt: message.imagePrompt } : {}),
       };
     })
     .filter(
-      (message): message is { role: 'user' | 'assistant'; content: string; imageUrl?: string } =>
-        Boolean(message)
+      (message): message is {
+        role: 'user' | 'assistant';
+        content: string;
+        imageUrl?: string;
+        imagePrompt?: string;
+      } => Boolean(message)
     );
 }
 
@@ -504,7 +518,9 @@ function CompletionCard({
           ) : null}
           {feedback.improvements.length ? (
             <View style={{ marginTop: 8 }}>
-              <Text style={{ fontWeight: '700', color: '#166534', marginBottom: 4 }}>Puntos a mejorar</Text>
+              <Text style={{ fontWeight: '700', color: '#166534', marginBottom: 4 }}>
+                Frases para sonar más nativo
+              </Text>
               {feedback.improvements.map((item, index) => (
                 <Text key={`${item}-${index}`} style={{ color: '#166534', marginBottom: 2, lineHeight: 20 }}>
                   - {item}
@@ -663,6 +679,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const [photoRequestMode, setPhotoRequestMode] = useState(false);
   const [photoRetryPrompt, setPhotoRetryPrompt] = useState<string | null>(null);
   const [composerText, setComposerText] = useState('');
+  const [pendingChatImage, setPendingChatImage] = useState<PendingChatImage | null>(null);
   const [selectedChatImageUri, setSelectedChatImageUri] = useState<string | null>(null);
   const [savingChatImage, setSavingChatImage] = useState(false);
   const [assistanceQuestion, setAssistanceQuestion] = useState('');
@@ -817,6 +834,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     setAffinityUpdate(null);
     setCompletionConfettiKey(null);
     setErrorMessage(null);
+    setPendingChatImage(null);
 
     void loadLocalFriendConversation(localConversationKey).then((snapshot) => {
       if (!mounted || !snapshot) return;
@@ -1415,11 +1433,10 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       setErrorMessage(null);
       setAnalysis(null);
       setFlowState('evaluating');
-      const messageText = imageData ? '' : trimmed;
       const pendingUserMessage: ChatMessage = {
         id: `user-${Date.now()}`,
         role: 'user',
-        text: messageText,
+        text: trimmed,
         ...(imageData ? { imageUri: imageData.uri } : {}),
       };
       // For images, exclude the current message from history — the backend adds it
@@ -1477,7 +1494,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         setEnglishDifficulty(currentDifficulty);
         const payload = await sendFriendChatMessage(friendId, {
           sessionId,
-          transcript: imageData ? '[Photo]' : trimmed,
+          transcript: imageData ? trimmed || '[Photo]' : trimmed,
           englishDifficulty: currentDifficulty,
           ...(imageData ? { userImageBase64: imageData.base64 } : {}),
           ...(sourcePost?.postId ? { postId: sourcePost.postId } : {}),
@@ -1529,7 +1546,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           nextConversationFeedback: null,
         });
         if (friend) {
-          void recordLocalFriendMessageSent(friend, imageData ? '[Photo]' : trimmed).catch((err: any) => {
+          void recordLocalFriendMessageSent(friend, trimmed || (imageData ? '[Photo]' : '')).catch((err: any) => {
             console.warn('[FriendChat] No se pudo guardar el mensaje local:', err?.message || err);
           });
         }
@@ -1579,8 +1596,9 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       setErrorMessage('No pudimos leer la imagen seleccionada.');
       return;
     }
-    await handleAdvance('', undefined, 'image', { uri: asset.uri, base64: asset.base64 });
-  }, [handleAdvance]);
+    setPendingChatImage({ uri: asset.uri, base64: asset.base64 });
+    setErrorMessage(null);
+  }, []);
 
   const handleTakePhoto = useCallback(async () => {
     setShowAttachMenu(false);
@@ -1602,8 +1620,9 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       setErrorMessage('No pudimos leer la foto tomada.');
       return;
     }
-    await handleAdvance('', undefined, 'image', { uri: asset.uri, base64: asset.base64 });
-  }, [handleAdvance]);
+    setPendingChatImage({ uri: asset.uri, base64: asset.base64 });
+    setErrorMessage(null);
+  }, []);
 
   const handleSaveSelectedChatImage = useCallback(async () => {
     const imageUri = selectedChatImageUri;
@@ -1667,6 +1686,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       navigation.navigate('Paywall', { source: 'friend_chat_photo' });
       return;
     }
+    setPendingChatImage(null);
     setPhotoRequestMode(true);
     setErrorMessage(null);
   }, [
@@ -1782,6 +1802,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         role: 'assistant',
         text: payload.aiReply,
         imageUrl: payload.image.imageUrl,
+        ...(payload.image.prompt ? { imagePrompt: payload.image.prompt } : {}),
       };
       const messagesWithPhoto = [...messagesWithRequest, assistantMessage];
       setMessages(messagesWithPhoto);
@@ -1874,9 +1895,16 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           }
           return success;
         }
-        const success = await handleAdvance(textToSend);
+        const imageData = pendingChatImage ?? undefined;
+        const success = await handleAdvance(
+          textToSend,
+          undefined,
+          imageData ? 'image' : 'text',
+          imageData,
+        );
         if (success) {
           clearComposerDraft();
+          setPendingChatImage(null);
         }
         return success;
       } catch (err: any) {
@@ -1885,7 +1913,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         return false;
       }
     },
-    [clearComposerDraft, handleAdvance, handleRequestPhoto, photoRequestMode]
+    [clearComposerDraft, handleAdvance, handleRequestPhoto, pendingChatImage, photoRequestMode]
   );
 
   useEffect(() => {
@@ -2614,6 +2642,8 @@ export default function FriendChatScreen({ navigation, route }: Props) {
               onRecordPressIn={handleRecordPressIn}
               onRecordRelease={handleRecordRelease}
               onPlusPress={() => setShowAttachMenu((v) => !v)}
+              pendingAttachment={pendingChatImage ? { uri: pendingChatImage.uri } : null}
+              onRemoveAttachment={() => setPendingChatImage(null)}
               photoRequestMode={photoRequestMode}
               onCancelPhotoRequestMode={() => {
                 setPhotoRequestMode(false);

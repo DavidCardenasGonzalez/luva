@@ -80,11 +80,11 @@ function getTimerParts(totalSeconds: number) {
 }
 
 const BENEFITS = [
-  'Acceso ilimitado a todas las funciones (sin usar monedas)',
-  'Chats con avatares IA sin límites',
-  'Lecciones completas sin restricciones',
-  'Shadowing ilimitado en todos los capítulos',
+  'Chats ilimitados con tus avatares IA',
   'Sin publicidad',
+  'Hasta 20 imágenes al mes',
+  'Mejor memoria para conversaciones más personales',
+  'Acceso prioritario a nuevas funciones',
 ];
 
 export default function Step7({

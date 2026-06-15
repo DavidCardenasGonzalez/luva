@@ -15,6 +15,7 @@ import { useStoryProgress } from '../progress/StoryProgressProvider';
 import { getRuntimeAppVersion } from '../version/appVersion';
 import { trackMixpanelPremiumActivated } from '../marketing/mixpanelEvents';
 import AccountProgressCard from '../components/AccountProgressCard';
+import AppTabBar from '../components/AppTabBar';
 import { useAuth, type EnglishDifficulty } from '../auth/AuthProvider';
 import { readStoredEnglishDifficulty, writeStoredEnglishDifficulty } from '../auth/englishDifficulty';
 
@@ -36,6 +37,7 @@ async function clearLocalLuvaStorage(): Promise<void> {
 
 export default function SettingsScreen({ navigation }: Props) {
   const appVersion = getRuntimeAppVersion();
+  const canGoBack = navigation.canGoBack();
   const {
     isPro,
     customerInfo,
@@ -280,28 +282,30 @@ export default function SettingsScreen({ navigation }: Props) {
       edges={['top', 'left', 'right']}
       style={{ flex: 1, backgroundColor: '#0b1224' }}
     >
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 32 }}>
+      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 128 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 18 }}>
-          <Pressable
-            onPress={() => navigation.goBack()}
-            style={({ pressed }) => ({
-              width: 42,
-              height: 42,
-              borderRadius: 12,
-              backgroundColor: '#0f172a',
-              borderWidth: 1,
-              borderColor: '#1f2937',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: 12,
-              opacity: pressed ? 0.9 : 1,
-              shadowColor: '#000',
-              shadowOpacity: 0.12,
-              shadowRadius: 8,
-            })}
-          >
-            <MaterialIcons name="arrow-back" size={20} color="#e2e8f0" />
-          </Pressable>
+          {canGoBack ? (
+            <Pressable
+              onPress={() => navigation.goBack()}
+              style={({ pressed }) => ({
+                width: 42,
+                height: 42,
+                borderRadius: 12,
+                backgroundColor: '#0f172a',
+                borderWidth: 1,
+                borderColor: '#1f2937',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginRight: 12,
+                opacity: pressed ? 0.9 : 1,
+                shadowColor: '#000',
+                shadowOpacity: 0.12,
+                shadowRadius: 8,
+              })}
+            >
+              <MaterialIcons name="arrow-back" size={20} color="#e2e8f0" />
+            </Pressable>
+          ) : null}
           <View style={{ flex: 1 }}>
             <Text style={{ color: '#e2e8f0', fontSize: 22, fontWeight: '800' }}>Configuración</Text>
             <Text style={{ color: '#94a3b8', marginTop: 2 }}>Ajusta tu experiencia en Luva.</Text>
@@ -947,6 +951,8 @@ export default function SettingsScreen({ navigation }: Props) {
           </View>
         </View>
       </Modal>
+
+      <AppTabBar active="settings" />
     </SafeAreaView>
   );
 }

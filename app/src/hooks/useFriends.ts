@@ -45,7 +45,7 @@ export type FriendAffinityUpdate = {
 };
 
 export type FriendConversationSnapshot = {
-  messages: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
+  messages: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string; imagePrompt?: string }>;
   conversationEnded: boolean;
   conversationFeedback?: FriendConversationFeedback | null;
   updatedAt: string;
@@ -177,7 +177,7 @@ export async function sendFriendChatMessage(
     postVideoUrl?: string;
     englishDifficulty?: 'easy' | 'medium' | 'hard';
     friendshipContext?: string;
-    history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
+    history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string; imagePrompt?: string }>;
   },
   options?: FriendChatRequestOptions,
 ): Promise<FriendChatPayload> {
@@ -191,7 +191,7 @@ export async function finishFriendChat(
     postId?: string;
     englishDifficulty?: 'easy' | 'medium' | 'hard';
     friendshipContext?: string;
-    history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
+    history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string; imagePrompt?: string }>;
   },
   options?: FriendChatRequestOptions,
 ): Promise<{
@@ -208,7 +208,7 @@ export async function finishFriendChat(
 export async function retryFriendChatMessage(
   friendId: string,
   payload: {
-    history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
+    history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string; imagePrompt?: string }>;
   },
 ): Promise<{
   friendId: string;
@@ -221,7 +221,7 @@ export async function requestFriendPhoto(
   friendId: string,
   payload: {
     prompt?: string;
-    history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
+    history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string; imagePrompt?: string }>;
   },
 ): Promise<FriendImagePayload> {
   return api.post<FriendImagePayload>(`/friends/${encodeURIComponent(friendId)}/images`, payload);

@@ -180,7 +180,7 @@ export interface FriendAffinityUpdate {
 }
 
 export interface FriendConversationSnapshot {
-  messages: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
+  messages: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string; imagePrompt?: string }>;
   conversationEnded: boolean;
   conversationFeedback?: {
     summary: string;
@@ -219,7 +219,7 @@ export interface FriendChatRequest {
   postVideoUrl?: string;
   englishDifficulty?: 'easy' | 'medium' | 'hard';
   friendshipContext?: string;
-  history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
+  history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string; imagePrompt?: string }>;
 }
 
 export interface FriendChatPayload {
@@ -240,7 +240,7 @@ export interface FriendChatPayload {
 
 export interface FriendImageRequest {
   prompt?: string;
-  history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string }>;
+  history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string; imagePrompt?: string }>;
 }
 
 export interface FriendshipImage {

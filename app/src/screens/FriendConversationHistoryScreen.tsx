@@ -334,6 +334,11 @@ export default function FriendConversationHistoryScreen({ navigation, route }: P
                     {selectedConversation.conversationFeedback.summary}
                   </Text>
                 ) : null}
+                {selectedConversation.conversationFeedback.improvements.length ? (
+                  <Text style={{ color: '#166534', fontWeight: '800', lineHeight: 20, marginTop: 10 }}>
+                    Frases para sonar más nativo
+                  </Text>
+                ) : null}
                 {selectedConversation.conversationFeedback.improvements.map((item, index) => (
                   <Text key={`${item}-${index}`} style={{ color: '#166534', lineHeight: 20, marginTop: 6 }}>
                     - {item}
