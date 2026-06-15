@@ -429,11 +429,10 @@ export class LuvaStack extends Stack {
       stringValue: 'SET_IN_SSM',
       description: 'OpenAI API key (placeholder, override in SSM)',
     });
-    const falKeyParam = new StringParameter(this, 'FalKeyParam', {
-      parameterName: ssmPath('fal/apiKey'),
-      stringValue: 'SET_IN_SSM',
-      description: 'fal.ai API key (placeholder, override in SSM)',
-    });
+    // fal.ai API key lives in SSM as a SecureString, managed outside CDK.
+    // Reference by name/ARN only (do not create the resource) to avoid clobbering it.
+    const falKeyParamName = ssmPath('fal/apiKey');
+    const falKeyParamArn = `arn:aws:ssm:${this.region}:${this.account}:parameter${falKeyParamName}`;
     const googleTranslateKeyParamName = ssmPath('google/translateApiKey');
     const googleTranslateKeyParamArn = `arn:aws:ssm:${this.region}:${this.account}:parameter${googleTranslateKeyParamName}`;
     const geminiKeyParam = new StringParameter(this, 'GeminiKeyParam', {
@@ -480,7 +479,7 @@ export class LuvaStack extends Stack {
         ASSETS_CLOUDFRONT_URL: assetsCloudFrontUrl,
         OPENAI_KEY_PARAM: openAiKeyParam.parameterName,
         OPENAI_CHAT_MODEL: 'gpt-5.4-nano',
-        FAL_KEY_PARAM: falKeyParam.parameterName,
+        FAL_KEY_PARAM: falKeyParamName,
         FAL_IMAGE_TIMEOUT_MS: '105000',
         FAL_IMAGE_DOWNLOAD_TIMEOUT_MS: '10000',
         FRIEND_IMAGE_PLAN_TIMEOUT_MS: '15000',
@@ -492,7 +491,7 @@ export class LuvaStack extends Stack {
     assetsBucket.grantReadWrite(friendImageWorkerFn);
     friendImageWorkerFn.addToRolePolicy(new PolicyStatement({
       actions: ['ssm:GetParameter', 'ssm:GetParameters', 'ssm:GetParameterHistory'],
-      resources: [falKeyParam.parameterArn, openAiKeyParam.parameterArn],
+      resources: [falKeyParamArn, openAiKeyParam.parameterArn],
     }));
 
     // Lambda: API
@@ -521,7 +520,7 @@ export class LuvaStack extends Stack {
         ASSETS_CLOUDFRONT_DOMAIN_NAME: assetsDistribution.domainName,
         ASSETS_CLOUDFRONT_URL: assetsCloudFrontUrl,
         OPENAI_KEY_PARAM: openAiKeyParam.parameterName,
-        FAL_KEY_PARAM: falKeyParam.parameterName,
+        FAL_KEY_PARAM: falKeyParamName,
         GOOGLE_TRANSLATE_API_KEY_PARAM: googleTranslateKeyParamName,
         OPENAI_CHAT_MODEL: 'gpt-5.4-nano',
         EVAL_TIMEOUT_MS: '20000',
@@ -547,7 +546,7 @@ export class LuvaStack extends Stack {
     friendImageWorkerFn.grantInvoke(apiFn);
     apiFn.addToRolePolicy(new PolicyStatement({
       actions: ['ssm:GetParameter', 'ssm:GetParameters', 'ssm:GetParameterHistory'],
-      resources: [openAiKeyParam.parameterArn, falKeyParam.parameterArn, googleTranslateKeyParamArn],
+      resources: [openAiKeyParam.parameterArn, falKeyParamArn, googleTranslateKeyParamArn],
     }));
 
     const usersFnLogGroup = new LogGroup(this, 'UsersFnLogs', { retention: RetentionDays.ONE_WEEK });
