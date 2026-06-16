@@ -9,6 +9,7 @@ export type LocalFriendChatMessage = {
   id: string;
   role: 'user' | 'assistant';
   text: string;
+  historyContent?: string;
   imageUri?: string;
   imageUrl?: string;
   imagePrompt?: string;
@@ -67,6 +68,7 @@ function sanitizeMessage(input: unknown): LocalFriendChatMessage | null {
   const id = asString(raw.id);
   const role = raw.role === 'user' || raw.role === 'assistant' ? raw.role : undefined;
   const text = asString(raw.text) || '';
+  const historyContent = asString(raw.historyContent);
   const imageUri = asString(raw.imageUri);
   const imageUrl = asString(raw.imageUrl);
   const imagePrompt = imageUrl ? asString(raw.imagePrompt) : undefined;
@@ -76,6 +78,7 @@ function sanitizeMessage(input: unknown): LocalFriendChatMessage | null {
     id,
     role,
     text,
+    ...(historyContent ? { historyContent } : {}),
     ...(imageUri ? { imageUri } : {}),
     ...(imageUrl ? { imageUrl } : {}),
     ...(imagePrompt ? { imagePrompt } : {}),
@@ -214,7 +217,7 @@ export function toFriendConversationSnapshot(
   return {
     messages: snapshot.messages.map((message) => ({
       role: message.role,
-      content: message.text || (message.imageUri || message.imageUrl ? '[Photo]' : ''),
+      content: message.historyContent || message.text || (message.imageUri || message.imageUrl ? '[Photo]' : ''),
       ...(message.imageUrl ? { imageUrl: message.imageUrl } : {}),
       ...(message.imageUrl && message.imagePrompt ? { imagePrompt: message.imagePrompt } : {}),
     })),

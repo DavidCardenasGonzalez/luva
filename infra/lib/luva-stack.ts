@@ -384,6 +384,7 @@ export class LuvaStack extends Stack {
         teamId: appleTeamId,
         keyId: appleKeyId,
         privateKeyValue: SecretValue.unsafePlainText(applePrivateKey),
+        scopes: ['email', 'name'],
         userPool,
         attributeMapping: {
           email: ProviderAttribute.APPLE_EMAIL,

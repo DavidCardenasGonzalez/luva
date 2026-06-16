@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, TextInput, Pressable, Keyboard, Image } from 'react-native';
+import { ActivityIndicator, View, Text, TextInput, Pressable, Keyboard, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -19,6 +19,7 @@ type Props = {
   text?: string;
   onTextChange?: (text: string) => void;
   pendingAttachment?: { uri: string } | null;
+  attachmentLoading?: boolean;
   onRemoveAttachment?: () => void;
 };
 
@@ -36,6 +37,7 @@ export default function StoryMessageComposer({
   text: controlledText,
   onTextChange,
   pendingAttachment,
+  attachmentLoading,
   onRemoveAttachment,
 }: Props) {
   const [internalText, setInternalText] = useState('');
@@ -55,15 +57,15 @@ export default function StoryMessageComposer({
 
   const handleSendPress = useCallback(async () => {
     const trimmed = text.trim();
-    if (!trimmed && !pendingAttachment) return;
+    if (attachmentLoading || (!trimmed && !pendingAttachment)) return;
     setText('');
     const success = await onSendText(trimmed);
     if (!success) {
       setText(trimmed);
     }
-  }, [onSendText, pendingAttachment, text]);
+  }, [attachmentLoading, onSendText, pendingAttachment, text]);
 
-  const sendDisabled = flowState !== 'idle' || retryBlocked || (!text.trim().length && !pendingAttachment);
+  const sendDisabled = flowState !== 'idle' || retryBlocked || attachmentLoading || (!text.trim().length && !pendingAttachment);
   const micBlocked = recordBlocked ?? retryBlocked;
   // While actively recording we must keep release enabled to avoid a stuck recording state.
   const recordDisabled = flowState === 'recording' ? false : micBlocked || flowState !== 'idle';
@@ -79,7 +81,29 @@ export default function StoryMessageComposer({
         borderTopColor: '#e2e8f0',
       }}
     >
-      {pendingAttachment ? (
+      {attachmentLoading ? (
+        <View
+          style={{
+            marginBottom: 8,
+            marginLeft: 46,
+            alignSelf: 'flex-start',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+            paddingHorizontal: 12,
+            paddingVertical: 10,
+            borderRadius: 14,
+            backgroundColor: 'white',
+            borderWidth: 1,
+            borderColor: '#e2e8f0',
+          }}
+        >
+          <ActivityIndicator size="small" color="#2563eb" />
+          <Text style={{ color: '#475569', fontWeight: '700', fontSize: 13 }}>
+            Cargando foto...
+          </Text>
+        </View>
+      ) : pendingAttachment ? (
         <View style={{ marginBottom: 8, alignSelf: 'flex-start', marginLeft: 46 }}>
           <Image
             source={{ uri: pendingAttachment.uri }}

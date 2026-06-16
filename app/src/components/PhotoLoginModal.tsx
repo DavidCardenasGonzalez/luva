@@ -43,6 +43,33 @@ export default function PhotoLoginModal({ visible, onClose, onCreateAccount }: P
     void signInWithEmail(email, password);
   }, [email, password, signInWithEmail]);
 
+  // En iOS, lanzar la sesión de autenticación web (ASWebAuthenticationSession)
+  // mientras este Modal de React Native sigue presentado provoca un conflicto de
+  // presentación que congela la pantalla al volver del navegador. Cerramos el
+  // modal primero y esperamos a que termine la animación antes de abrir OAuth.
+  // La sesión vive en AuthProvider, así que cerrar el modal no cancela el login.
+  const launchProviderSignIn = useCallback(
+    (signIn: () => Promise<void>) => {
+      onClose();
+      if (Platform.OS === 'ios') {
+        setTimeout(() => {
+          void signIn();
+        }, 350);
+      } else {
+        void signIn();
+      }
+    },
+    [onClose]
+  );
+
+  const handleGoogleSignIn = useCallback(() => {
+    launchProviderSignIn(signInWithGoogle);
+  }, [launchProviderSignIn, signInWithGoogle]);
+
+  const handleAppleSignIn = useCallback(() => {
+    launchProviderSignIn(signInWithApple);
+  }, [launchProviderSignIn, signInWithApple]);
+
   const handleCreateAccount = useCallback(() => {
     onCreateAccount?.(email.trim() || undefined);
   }, [email, onCreateAccount]);
@@ -100,7 +127,7 @@ export default function PhotoLoginModal({ visible, onClose, onCreateAccount }: P
               <View style={{ marginTop: 18 }}>
                 <Pressable
                   disabled={authLoading || !isConfigured}
-                  onPress={signInWithGoogle}
+                  onPress={handleGoogleSignIn}
                   style={({ pressed }) => ({
                     paddingVertical: 14,
                     borderRadius: 14,
@@ -116,7 +143,7 @@ export default function PhotoLoginModal({ visible, onClose, onCreateAccount }: P
                 {Platform.OS === 'ios' ? (
                   <Pressable
                     disabled={authLoading || !isConfigured}
-                    onPress={signInWithApple}
+                    onPress={handleAppleSignIn}
                     style={({ pressed }) => ({
                       marginTop: 10,
                       paddingVertical: 14,

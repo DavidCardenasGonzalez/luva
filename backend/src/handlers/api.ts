@@ -1405,6 +1405,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
         if (
           err?.message === "FRIEND_CHARACTER_SHEET_NOT_FOUND" ||
           err?.message === "FAL_KEY not set" ||
+          err?.message?.startsWith?.("FAL_KEY_PARAM_NOT_FOUND:") ||
           err?.message === "FRIENDSHIP_IMAGES_TABLE_NAME not set" ||
           err?.message === "ASSETS_BUCKET_NAME not set" ||
           err?.message === "ASSETS_CLOUDFRONT_DOMAIN_NAME not set" ||
@@ -1711,7 +1712,26 @@ async function getFalKey(): Promise<string> {
   if (!paramName) {
     throw new Error("FAL_KEY not set");
   }
-  const out = await ssm.send(new GetParameterCommand({ Name: paramName, WithDecryption: true }));
+  let out;
+  try {
+    out = await ssm.send(new GetParameterCommand({ Name: paramName, WithDecryption: true }));
+  } catch (err: any) {
+    const code = err?.name || err?.__type || err?.Code || "unknown";
+    console.error(
+      JSON.stringify({
+        scope: "friends.images.fal_key.ssm_error",
+        code,
+        paramName,
+        stage: process.env.STAGE || "unknown",
+        region: process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || "unknown",
+        message: err?.message || "unknown",
+      })
+    );
+    if (code === "ParameterNotFound") {
+      throw new Error(`FAL_KEY_PARAM_NOT_FOUND:${paramName}`);
+    }
+    throw err;
+  }
   const value = out.Parameter?.Value?.trim();
   if (!value || value === "SET_IN_SSM") {
     throw new Error("FAL_KEY not set");
@@ -2824,6 +2844,7 @@ async function advanceFriendChat(
   return {
     friendId,
     aiReply,
+    ...(isImageMessage ? { userMessageForHistory: transcript } : {}),
     ...(sceneNarration ? { sceneNarration } : {}),
     correctness,
     result,

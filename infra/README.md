@@ -47,12 +47,13 @@ Deploy de ambiente dev
    `ApiBaseUrl` → `API_BASE_URL`
    `HostedUiDomain` → `COGNITO_DOMAIN`
    `UserPoolClientId` → `COGNITO_CLIENT_ID`
-   `us-east-1` → `COGNITO_REGION`, salvo que cambies la region
+   La region del stack, actualmente `us-west-2` → `COGNITO_REGION`
    `luvadev://callback` → `REDIRECT_URI`
 6) Si usas endpoints con IA, guarda las claves dev en SSM:
-   `aws ssm put-parameter --name /luva/dev/openai/apiKey --type SecureString --value 'sk-...' --overwrite --profile david --region us-east-1`
-   `aws ssm put-parameter --name /luva/dev/gemini/apiKey --type SecureString --value '...' --overwrite --profile david --region us-east-1`
-   `aws ssm put-parameter --name /luva/dev/google/translateApiKey --type SecureString --value '...' --overwrite --profile david --region us-east-1`
+   `aws ssm put-parameter --name /luva/dev/openai/apiKey --type SecureString --value 'sk-...' --overwrite --profile david --region us-west-2`
+   `aws ssm put-parameter --name /luva/dev/fal/apiKey --type SecureString --value 'fal-...' --overwrite --profile david --region us-west-2`
+   `aws ssm put-parameter --name /luva/dev/gemini/apiKey --type SecureString --value '...' --overwrite --profile david --region us-west-2`
+   `aws ssm put-parameter --name /luva/dev/google/translateApiKey --type SecureString --value '...' --overwrite --profile david --region us-west-2`
 
 Con `LUVA_STAGE=dev`, el stack usa tabla `Luva-dev`, stage de API `/dev`, SSM bajo `/luva/dev/...`, Cognito propio y buckets/CloudFront generados por CloudFormation. Produccion permanece en `LuvaStack`, tabla `Luva`, API `/prod` y SSM `/luva/...`.
 
