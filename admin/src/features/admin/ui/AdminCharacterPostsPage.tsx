@@ -21,9 +21,12 @@ type CharacterPostFormState = {
   mediaMode: 'image' | 'video'
   caption: string
   context: string
+  conversationNarration: string
+  initialMessage: string
   suggestedReplies: string[]
   imageUrl: string
   thumbnailUrl: string
+  thumbnailMdUrl: string
   videoUrl: string
   order: string
 }
@@ -89,9 +92,12 @@ function buildEmptyForm(nextOrder: number): CharacterPostFormState {
     mediaMode: 'image',
     caption: '',
     context: '',
+    conversationNarration: '',
+    initialMessage: '',
     suggestedReplies: DEFAULT_REEL_SUGGESTED_REPLIES,
     imageUrl: '',
     thumbnailUrl: '',
+    thumbnailMdUrl: '',
     videoUrl: '',
     order: String(Math.max(1, nextOrder)),
   }
@@ -102,9 +108,12 @@ function formFromPost(post: AdminCharacterPost): CharacterPostFormState {
     mediaMode: post.videoUrl ? 'video' : 'image',
     caption: post.caption,
     context: post.context || '',
+    conversationNarration: post.conversationNarration || '',
+    initialMessage: post.initialMessage || '',
     suggestedReplies: normalizeSuggestedRepliesForForm(post.suggestedReplies),
     imageUrl: post.imageUrl,
     thumbnailUrl: post.thumbnailUrl || (post.videoUrl ? post.imageUrl : ''),
+    thumbnailMdUrl: post.thumbnailMdUrl || '',
     videoUrl: post.videoUrl || '',
     order: String(post.order),
   }
@@ -127,6 +136,7 @@ function buildPayload(form: CharacterPostFormState): AdminCharacterPostWritePayl
   const thumbnailUrl = form.mediaMode === 'video'
     ? trimOptional(form.thumbnailUrl) || trimOptional(form.imageUrl)
     : undefined
+  const thumbnailMdUrl = form.mediaMode === 'video' ? trimOptional(form.thumbnailMdUrl) : undefined
   const imageUrl = form.mediaMode === 'video'
     ? thumbnailUrl || ''
     : form.imageUrl.trim()
@@ -134,8 +144,11 @@ function buildPayload(form: CharacterPostFormState): AdminCharacterPostWritePayl
   return {
     caption: form.caption.trim(),
     context: form.context.trim(),
+    conversationNarration: form.conversationNarration.trim(),
+    initialMessage: form.initialMessage.trim(),
     imageUrl,
     ...(thumbnailUrl ? { thumbnailUrl } : {}),
+    ...(thumbnailMdUrl ? { thumbnailMdUrl } : {}),
     ...(videoUrl ? { videoUrl } : {}),
     ...(Number.isFinite(order) && order >= 1 ? { order: Math.floor(order) } : {}),
     suggestedReplies: normalizeSuggestedRepliesForForm(form.suggestedReplies),
@@ -220,7 +233,30 @@ function getContainedSize(width: number, height: number, maxWidth: number, maxHe
   }
 }
 
-async function compressImageToWebp(file: File) {
+type WebpVariant = { blob: Blob; width: number; height: number }
+
+async function drawSourceToWebpVariant(
+  draw: (context: CanvasRenderingContext2D, size: { width: number; height: number }) => void,
+  sourceWidth: number,
+  sourceHeight: number,
+  maxWidth: number,
+  maxHeight: number,
+  quality: number,
+): Promise<WebpVariant> {
+  const size = getContainedSize(sourceWidth, sourceHeight, maxWidth, maxHeight)
+  const canvas = document.createElement('canvas')
+  canvas.width = size.width
+  canvas.height = size.height
+  const context = canvas.getContext('2d')
+  if (!context) {
+    throw new Error('No pudimos preparar el compresor de imagen.')
+  }
+  draw(context, size)
+  const blob = await canvasToBlob(canvas, 'image/webp', quality)
+  return { blob, width: size.width, height: size.height }
+}
+
+async function compressImageToWebpVariants(file: File) {
   const objectUrl = URL.createObjectURL(file)
   try {
     const image = await new Promise<HTMLImageElement>((resolve, reject) => {
@@ -229,22 +265,25 @@ async function compressImageToWebp(file: File) {
       element.onerror = () => reject(new Error('No pudimos leer la imagen seleccionada.'))
       element.src = objectUrl
     })
-    const size = getContainedSize(image.naturalWidth, image.naturalHeight, 720, 1280)
-    const canvas = document.createElement('canvas')
-    canvas.width = size.width
-    canvas.height = size.height
-    const context = canvas.getContext('2d')
-    if (!context) {
-      throw new Error('No pudimos preparar el compresor de imagen.')
+    const sourceWidth = image.naturalWidth
+    const sourceHeight = image.naturalHeight
+    const draw = (context: CanvasRenderingContext2D, size: { width: number; height: number }) => {
+      context.drawImage(image, 0, 0, size.width, size.height)
     }
-    context.drawImage(image, 0, 0, size.width, size.height)
-    return canvasToBlob(canvas, 'image/webp', 0.82)
+    const full = await drawSourceToWebpVariant(draw, sourceWidth, sourceHeight, 720, 1280, 0.82)
+    const md = await drawSourceToWebpVariant(draw, sourceWidth, sourceHeight, 360, 640, 0.78)
+    return { full, md }
   } finally {
     URL.revokeObjectURL(objectUrl)
   }
 }
 
-async function captureVideoThumbnail(videoBlob: Blob) {
+async function compressImageToWebp(file: File) {
+  const variants = await compressImageToWebpVariants(file)
+  return variants.full.blob
+}
+
+async function captureVideoThumbnailVariants(videoBlob: Blob) {
   const objectUrl = URL.createObjectURL(videoBlob)
   try {
     const video = document.createElement('video')
@@ -273,16 +312,14 @@ async function captureVideoThumbnail(videoBlob: Blob) {
       })
     }
 
-    const size = getContainedSize(video.videoWidth || 720, video.videoHeight || 1280, 720, 1280)
-    const canvas = document.createElement('canvas')
-    canvas.width = size.width
-    canvas.height = size.height
-    const context = canvas.getContext('2d')
-    if (!context) {
-      throw new Error('No pudimos preparar el thumbnail.')
+    const sourceWidth = video.videoWidth || 720
+    const sourceHeight = video.videoHeight || 1280
+    const draw = (context: CanvasRenderingContext2D, size: { width: number; height: number }) => {
+      context.drawImage(video, 0, 0, size.width, size.height)
     }
-    context.drawImage(video, 0, 0, size.width, size.height)
-    return canvasToBlob(canvas, 'image/webp', 0.82)
+    const full = await drawSourceToWebpVariant(draw, sourceWidth, sourceHeight, 720, 1280, 0.82)
+    const md = await drawSourceToWebpVariant(draw, sourceWidth, sourceHeight, 360, 640, 0.78)
+    return { full, md }
   } finally {
     URL.revokeObjectURL(objectUrl)
   }
@@ -421,6 +458,7 @@ export function AdminCharacterPostsPage() {
             ...nextForm,
             imageUrl,
             thumbnailUrl: '',
+            thumbnailMdUrl: '',
             videoUrl: '',
           }
         }
@@ -469,26 +507,33 @@ export function AdminCharacterPostsPage() {
         }
 
         if (thumbnailFile) {
-          setStage('Comprimiendo thumbnail...')
-          const thumbnailBlob = await compressImageToWebp(thumbnailFile)
-          setStage(`Subiendo thumbnail optimizado (${formatBytes(thumbnailBlob.size)})...`)
-          const thumbnailUrl = await uploadAvatarPostAsset(
-            thumbnailBlob,
-            makeOutputName(thumbnailFile, 'thumbnail', 'webp'),
+          setStage('Comprimiendo thumbnail (full + md)...')
+          const variants = await compressImageToWebpVariants(thumbnailFile)
+          setStage(
+            `Subiendo thumbnail full (${formatBytes(variants.full.blob.size)}) y md (${formatBytes(variants.md.blob.size)})...`,
           )
-          nextForm = { ...nextForm, imageUrl: thumbnailUrl, thumbnailUrl }
+          const [thumbnailUrl, thumbnailMdUrl] = await Promise.all([
+            uploadAvatarPostAsset(variants.full.blob, makeOutputName(thumbnailFile, 'thumbnail', 'webp')),
+            uploadAvatarPostAsset(variants.md.blob, makeOutputName(thumbnailFile, 'thumbnail-md', 'webp')),
+          ])
+          nextForm = { ...nextForm, imageUrl: thumbnailUrl, thumbnailUrl, thumbnailMdUrl }
         } else if (optimizedVideoBlob) {
-          setStage('Generando thumbnail desde el segundo 1...')
-          const generatedThumbnailBlob = await captureVideoThumbnail(optimizedVideoBlob)
-          setStage(`Subiendo thumbnail generado (${formatBytes(generatedThumbnailBlob.size)})...`)
+          setStage('Generando thumbnail desde el segundo 1 (full + md)...')
+          const variants = await captureVideoThumbnailVariants(optimizedVideoBlob)
+          setStage(
+            `Subiendo thumbnail full (${formatBytes(variants.full.blob.size)}) y md (${formatBytes(variants.md.blob.size)})...`,
+          )
           const thumbnailFileName = videoFile
             ? makeOutputName(videoFile, 'thumbnail', 'webp')
             : 'avatar-post-thumbnail.webp'
-          const thumbnailUrl = await uploadAvatarPostAsset(
-            generatedThumbnailBlob,
-            thumbnailFileName,
-          )
-          nextForm = { ...nextForm, imageUrl: thumbnailUrl, thumbnailUrl }
+          const thumbnailMdFileName = videoFile
+            ? makeOutputName(videoFile, 'thumbnail-md', 'webp')
+            : 'avatar-post-thumbnail-md.webp'
+          const [thumbnailUrl, thumbnailMdUrl] = await Promise.all([
+            uploadAvatarPostAsset(variants.full.blob, thumbnailFileName),
+            uploadAvatarPostAsset(variants.md.blob, thumbnailMdFileName),
+          ])
+          nextForm = { ...nextForm, imageUrl: thumbnailUrl, thumbnailUrl, thumbnailMdUrl }
         } else if (nextForm.thumbnailUrl && !nextForm.imageUrl) {
           nextForm = { ...nextForm, imageUrl: nextForm.thumbnailUrl }
         }
@@ -696,6 +741,26 @@ export function AdminCharacterPostsPage() {
                 value={form.context}
                 onChange={(event) => setForm((current) => ({ ...current, context: event.target.value }))}
                 placeholder="Describe lo que el avatar debe saber cuando alguien responda este post. Si queda vacio se usara el caption."
+                disabled={isSaving}
+              />
+            </label>
+
+            <label className="admin-grant-field">
+              <span>Narracion inicial</span>
+              <textarea
+                value={form.conversationNarration}
+                onChange={(event) => setForm((current) => ({ ...current, conversationNarration: event.target.value }))}
+                placeholder="Accion breve antes del primer mensaje, por ejemplo: Zoe looks up from her phone."
+                disabled={isSaving}
+              />
+            </label>
+
+            <label className="admin-grant-field">
+              <span>Primer mensaje</span>
+              <textarea
+                value={form.initialMessage}
+                onChange={(event) => setForm((current) => ({ ...current, initialMessage: event.target.value }))}
+                placeholder="Mensaje en ingles que vera el usuario al abrir Conversar."
                 disabled={isSaving}
               />
             </label>
@@ -913,6 +978,12 @@ export function AdminCharacterPostsPage() {
                     </p>
                   )}
                   {post.context && <p className="admin-video-row-time">Contexto: {post.context}</p>}
+                  {post.conversationNarration && (
+                    <p className="admin-video-row-time">Narracion: {post.conversationNarration}</p>
+                  )}
+                  {post.initialMessage && (
+                    <p className="admin-video-row-time">Primer mensaje: {post.initialMessage}</p>
+                  )}
                   {post.suggestedReplies?.length ? (
                     <p className="admin-video-row-time">
                       Respuestas: {post.suggestedReplies.join(' / ')}

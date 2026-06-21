@@ -198,6 +198,8 @@ type FriendChatPostContext = {
   postId?: string;
   context?: string;
   caption?: string;
+  conversationNarration?: string;
+  initialMessage?: string;
   imageUrl?: string;
   videoUrl?: string;
 };
@@ -2543,6 +2545,8 @@ function buildFriendChatPostContextFromPost(post: CharacterPost): FriendChatPost
     postId: post.postId,
     context: post.context || post.caption,
     caption: post.caption,
+    ...(post.conversationNarration ? { conversationNarration: post.conversationNarration } : {}),
+    ...(post.initialMessage ? { initialMessage: post.initialMessage } : {}),
     imageUrl: post.imageUrl,
     ...(post.videoUrl ? { videoUrl: post.videoUrl } : {}),
   };
@@ -2574,6 +2578,8 @@ async function resolveFriendChatPostContext(
 
   const context = sanitizeFriendChatText(body.postContext, 3000);
   const caption = sanitizeFriendChatText(body.postCaption, 2200);
+  const conversationNarration = sanitizeFriendChatText(body.postConversationNarration, 180);
+  const initialMessage = sanitizeFriendChatText(body.postInitialMessage, 600);
   const imageUrl = sanitizeFriendChatText(body.postImageUrl, 2048);
   const videoUrl = sanitizeFriendChatText(body.postVideoUrl, 2048);
   const fallbackContext = context || caption;
@@ -2585,6 +2591,8 @@ async function resolveFriendChatPostContext(
     ...(postId ? { postId } : {}),
     ...(fallbackContext ? { context: fallbackContext } : {}),
     ...(caption ? { caption } : {}),
+    ...(conversationNarration ? { conversationNarration } : {}),
+    ...(initialMessage ? { initialMessage } : {}),
     ...(imageUrl && /^https?:\/\//i.test(imageUrl) ? { imageUrl } : {}),
     ...(videoUrl && /^https?:\/\//i.test(videoUrl) ? { videoUrl } : {}),
   };
@@ -5241,6 +5249,8 @@ async function generateFriendReply(
         postContext.caption && postContext.caption !== postContext.context
           ? `Visible caption: ${postContext.caption}`
           : "",
+        postContext.conversationNarration ? `Opening narration: ${postContext.conversationNarration}` : "",
+        postContext.initialMessage ? `Opening message: ${postContext.initialMessage}` : "",
         postContext.videoUrl ? "Post media: video." : "",
       ]
         .filter(Boolean)

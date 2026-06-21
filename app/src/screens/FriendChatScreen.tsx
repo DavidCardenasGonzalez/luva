@@ -184,6 +184,32 @@ function isFinishedConversationWithFeedback(
   return Boolean(snapshot?.conversationEnded && snapshot.conversationFeedback);
 }
 
+function buildInitialPostAssistantMessage(sourcePost?: FriendChatSourcePost): ChatMessage | undefined {
+  const text = sourcePost?.initialMessage?.trim();
+  if (!text) return undefined;
+  const postId = sourcePost?.postId?.trim() || 'post';
+  const sceneNarration = sourcePost?.conversationNarration?.trim();
+  return {
+    id: `post-initial:${postId}`,
+    role: 'assistant',
+    text,
+    ...(sceneNarration ? { sceneNarration } : {}),
+  };
+}
+
+function isOnlyInitialPostMessage(
+  currentMessages: ChatMessage[],
+  initialPostAssistantMessage?: ChatMessage,
+) {
+  if (!initialPostAssistantMessage || currentMessages.length !== 1) return false;
+  const [message] = currentMessages;
+  return (
+    message.id === initialPostAssistantMessage.id &&
+    message.role === initialPostAssistantMessage.role &&
+    message.text === initialPostAssistantMessage.text
+  );
+}
+
 type TranslationResponse = {
   translatedText: string;
   sourceLanguage?: string;
@@ -206,6 +232,8 @@ type FriendChatSourcePost = {
   videoUrl?: string;
   caption?: string;
   context?: string;
+  conversationNarration?: string;
+  initialMessage?: string;
 };
 
 const FRIEND_CHAT_MESSAGE_COST = 1;
@@ -401,6 +429,7 @@ const COLORS = {
   header: '#0b1224',
   background: '#f8fafc',
   border: '#e2e8f0',
+  luvaBlue: '#2563eb',
   userBubble: '#4f46e5',
   assistantText: '#0f172a',
   muted: '#475569',
@@ -681,7 +710,9 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     const videoUrl = route.params?.postVideoUrl?.trim();
     const caption = route.params?.postCaption?.trim();
     const context = route.params?.postContext?.trim() || caption;
-    if (!postId && !imageUrl && !videoUrl && !caption && !context) {
+    const conversationNarration = route.params?.postConversationNarration?.trim();
+    const initialMessage = route.params?.postInitialMessage?.trim();
+    if (!postId && !imageUrl && !videoUrl && !caption && !context && !conversationNarration && !initialMessage) {
       return undefined;
     }
     return {
@@ -690,14 +721,26 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       ...(videoUrl ? { videoUrl } : {}),
       ...(caption ? { caption } : {}),
       ...(context ? { context } : {}),
+      ...(conversationNarration ? { conversationNarration } : {}),
+      ...(initialMessage ? { initialMessage } : {}),
     };
   }, [
     route.params?.postCaption,
     route.params?.postContext,
+    route.params?.postConversationNarration,
     route.params?.postId,
     route.params?.postImageUrl,
+    route.params?.postInitialMessage,
     route.params?.postVideoUrl,
   ]);
+  const initialPostAssistantMessage = useMemo(
+    () => buildInitialPostAssistantMessage(sourcePost),
+    [
+      sourcePost?.conversationNarration,
+      sourcePost?.initialMessage,
+      sourcePost?.postId,
+    ]
+  );
   const chatContextKey = `${friendId || ''}:${sourcePost?.postId || ''}:${sourcePost?.context || ''}`;
   const localConversationKey = useMemo(
     () => buildLocalFriendConversationKey(friendId, sourcePost),
@@ -891,7 +934,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     let mounted = true;
     remoteHydratedKeyRef.current = undefined;
     skipExitPromptRef.current = false;
-    setMessages([]);
+    setMessages(initialPostAssistantMessage ? [initialPostAssistantMessage] : []);
     setMessageTranslations({});
     setAnalysis(null);
     setConversationEnded(false);
@@ -904,7 +947,11 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     setPreparingChatImage(false);
 
     void loadLocalFriendConversation(localConversationKey).then((snapshot) => {
-      if (!mounted || !snapshot) return;
+      if (!mounted) return;
+      if (!snapshot) {
+        setMessages(initialPostAssistantMessage ? [initialPostAssistantMessage] : []);
+        return;
+      }
       if (isFinishedConversationWithFeedback(snapshot)) {
         void archiveLocalFriendConversation(snapshot);
         return;
@@ -919,11 +966,11 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     return () => {
       mounted = false;
     };
-  }, [chatContextKey, localConversationKey]);
+  }, [chatContextKey, initialPostAssistantMessage, localConversationKey]);
 
   useEffect(() => {
     if (remoteHydratedKeyRef.current === localConversationKey) return;
-    if (messages.length > 0) {
+    if (messages.length > 0 && !isOnlyInitialPostMessage(messages, initialPostAssistantMessage)) {
       remoteHydratedKeyRef.current = localConversationKey;
       return;
     }
@@ -937,7 +984,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     setMessages(remoteMessages);
     setConversationEnded(Boolean(friend?.conversationSnapshot?.conversationEnded));
     setConversationFeedback(friend?.conversationSnapshot?.conversationFeedback ?? null);
-  }, [friend?.conversationSnapshot, localConversationKey, messages.length]);
+  }, [friend?.conversationSnapshot, initialPostAssistantMessage, localConversationKey, messages]);
 
   const persistConversationSnapshot = useCallback(
     async ({
@@ -1522,9 +1569,10 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       });
 
       const sourcePostId = sourcePost?.postId;
+      const existingUserMessageCount = messages.filter((message) => message.role === 'user').length;
       if (
         sourcePostId &&
-        messages.length === 0 &&
+        existingUserMessageCount === 0 &&
         likeRecordedForPostRef.current !== `${friendId}:${sourcePostId}` &&
         shouldRecordLikes()
       ) {
@@ -1539,9 +1587,9 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           });
       }
 
-      const isFirstUserMessage = messages.length === 0;
+      const isFirstUserMessage = existingUserMessageCount === 0;
       const transcriptWordCount = trimmed.split(/\s+/).filter(Boolean).length;
-      const userMessageIndex = messages.filter((message) => message.role === 'user').length + 1;
+      const userMessageIndex = existingUserMessageCount + 1;
       void trackMixpanelFriendEvent('friend_chat_message_submitted', {
         friend_id: friendId,
         character_name: friend?.characterName,
@@ -1567,6 +1615,8 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           ...(sourcePost?.postId ? { postId: sourcePost.postId } : {}),
           ...(sourcePost?.context ? { postContext: sourcePost.context } : {}),
           ...(sourcePost?.caption ? { postCaption: sourcePost.caption } : {}),
+          ...(sourcePost?.conversationNarration ? { postConversationNarration: sourcePost.conversationNarration } : {}),
+          ...(sourcePost?.initialMessage ? { postInitialMessage: sourcePost.initialMessage } : {}),
           ...(sourcePost?.imageUrl ? { postImageUrl: sourcePost.imageUrl } : {}),
           ...(sourcePost?.videoUrl ? { postVideoUrl: sourcePost.videoUrl } : {}),
           ...(friend?.friendshipContext ? { friendshipContext: friend.friendshipContext } : {}),
@@ -2013,7 +2063,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     if (conversationEnded) return;
     if (retryingLastExchange) return;
     if (flowState !== 'idle') return;
-    if (messages.length > 0) return;
+    if (messages.some((message) => message.role === 'user')) return;
     const autoSendKey = `${chatContextKey}:${draft}`;
     if (autoSentDraftKeyRef.current === autoSendKey) return;
     autoSentDraftKeyRef.current = autoSendKey;
@@ -2026,7 +2076,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     flowState,
     friend,
     handleSendText,
-    messages.length,
+    messages,
     navigation,
     retryingLastExchange,
     route.params?.initialDraft,
@@ -2354,153 +2404,169 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                   const translationState = messageTranslations[msg.id];
                   const narrationTranslationState = messageTranslations[`${msg.id}:scene`];
                   const isAssistant = msg.role === 'assistant';
+                  const sceneNarrationText = msg.sceneNarration?.trim() || '';
+                  const hasSceneNarration = isAssistant && sceneNarrationText.length > 0;
                   const messageImageUri = msg.imageUrl || msg.imageUri;
                   const canUseTextActions = isAssistant && msg.text.trim().length > 0;
                   return (
                     <View key={msg.id} style={{ alignSelf: isAssistant ? 'flex-start' : 'flex-end' }}>
-                      {isAssistant && msg.sceneNarration ? (
-                        <Pressable
-                          onPress={() => translateAssistantMessage(`${msg.id}:scene`, msg.sceneNarration || '')}
-                          disabled={!!narrationTranslationState?.loading}
-                          accessibilityRole="button"
-                          accessibilityLabel="Traducir narración"
-                          style={({ pressed }) => ({
-                            maxWidth: '80%',
-                            marginBottom: 6,
-                            paddingHorizontal: 8,
-                            opacity: pressed ? 0.7 : 1,
-                          })}
-                        >
-                          <Text
-                            style={{
-                              color: COLORS.muted,
-                              fontSize: 13,
-                              fontStyle: 'italic',
-                              lineHeight: 18,
-                            }}
-                          >
-                            {msg.sceneNarration}
-                          </Text>
-                          {narrationTranslationState?.loading ? (
-                            <ActivityIndicator
-                              size="small"
-                              color={COLORS.muted}
-                              style={{ alignSelf: 'flex-start', marginTop: 4 }}
-                            />
-                          ) : null}
-                          {narrationTranslationState?.text ? (
-                            <Text style={{ color: COLORS.muted, fontSize: 13, lineHeight: 18, marginTop: 4 }}>
-                              {narrationTranslationState.text}
-                            </Text>
-                          ) : null}
-                          {narrationTranslationState?.error ? (
-                            <Text style={{ color: '#dc2626', fontSize: 12, marginTop: 4 }}>
-                              {narrationTranslationState.error}
-                            </Text>
-                          ) : null}
-                        </Pressable>
-                      ) : null}
                       <View
                         style={{
                           backgroundColor: isAssistant ? 'white' : COLORS.userBubble,
                           borderRadius: 16,
-                          paddingVertical: messageImageUri ? 8 : 10,
-                          paddingHorizontal: messageImageUri ? 8 : 14,
                           maxWidth: '80%',
                           borderWidth: isAssistant ? 1 : 0,
                           borderColor: COLORS.border,
+                          overflow: hasSceneNarration ? 'hidden' : 'visible',
                         }}
                       >
-                        {messageImageUri ? (
+                        {hasSceneNarration ? (
                           <Pressable
-                            onPress={() => setSelectedChatImageUri(messageImageUri)}
-                            accessibilityRole="imagebutton"
-                            accessibilityLabel="Ver foto en pantalla completa"
+                            onPress={() => translateAssistantMessage(`${msg.id}:scene`, sceneNarrationText)}
+                            disabled={!!narrationTranslationState?.loading}
+                            accessibilityRole="button"
+                            accessibilityLabel="Traducir narración"
                             style={({ pressed }) => ({
-                              opacity: pressed ? 0.88 : 1,
+                              backgroundColor: pressed ? '#1d4ed8' : COLORS.luvaBlue,
+                              paddingHorizontal: 14,
+                              paddingVertical: 10,
+                              opacity: pressed ? 0.86 : 1,
                             })}
                           >
-                            <Image
-                              source={{ uri: messageImageUri }}
+                            <Text
                               style={{
-                                width: 220,
-                                height: 280,
-                                borderRadius: 12,
-                                backgroundColor: '#e2e8f0',
+                                color: 'white',
+                                fontSize: 13,
+                                fontStyle: 'italic',
+                                fontWeight: '700',
+                                lineHeight: 18,
                               }}
-                              resizeMode="cover"
-                            />
+                            >
+                              {sceneNarrationText}
+                            </Text>
+                            {narrationTranslationState?.loading ? (
+                              <ActivityIndicator
+                                size="small"
+                                color="white"
+                                style={{ alignSelf: 'flex-start', marginTop: 5 }}
+                              />
+                            ) : null}
+                            {narrationTranslationState?.text ? (
+                              <Text
+                                style={{
+                                  color: 'rgba(255,255,255,0.88)',
+                                  fontSize: 13,
+                                  lineHeight: 18,
+                                  marginTop: 5,
+                                }}
+                              >
+                                {narrationTranslationState.text}
+                              </Text>
+                            ) : null}
+                            {narrationTranslationState?.error ? (
+                              <Text style={{ color: '#fecaca', fontSize: 12, marginTop: 5 }}>
+                                {narrationTranslationState.error}
+                              </Text>
+                            ) : null}
                           </Pressable>
                         ) : null}
-                        {msg.text.trim() ? (
-                          <Text
-                            style={{
-                              color: isAssistant ? COLORS.assistantText : 'white',
-                              lineHeight: 20,
-                              marginTop: messageImageUri ? 8 : 0,
-                              paddingHorizontal: messageImageUri ? 4 : 0,
-                            }}
-                          >
-                            {msg.text}
-                          </Text>
-                        ) : null}
-                        {isAssistant && translationState?.text ? (
-                          <>
-                            <View style={{ height: 1, backgroundColor: COLORS.border, marginVertical: 10 }} />
-                            <Text style={{ color: COLORS.muted, lineHeight: 20 }}>{translationState.text}</Text>
-                          </>
-                        ) : null}
-                        {isAssistant && translationState?.error ? (
-                          <Text style={{ marginTop: 8, color: '#dc2626', fontSize: 12 }}>{translationState.error}</Text>
-                        ) : null}
-                        {canUseTextActions ? (
-                          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 10 }}>
+                        <View
+                          style={{
+                            paddingVertical: messageImageUri ? 8 : 10,
+                            paddingHorizontal: messageImageUri ? 8 : 14,
+                          }}
+                        >
+                          {messageImageUri ? (
                             <Pressable
-                              accessibilityLabel="Reproducir mensaje"
-                              onPress={() => speakAssistantMessage(msg.text)}
-                              hitSlop={8}
+                              onPress={() => setSelectedChatImageUri(messageImageUri)}
+                              accessibilityRole="imagebutton"
+                              accessibilityLabel="Ver foto en pantalla completa"
                               style={({ pressed }) => ({
-                                width: 34,
-                                height: 34,
-                                borderRadius: 999,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: pressed ? '#dbeafe' : '#eff6ff',
-                                borderWidth: 1,
-                                borderColor: '#bfdbfe',
+                                opacity: pressed ? 0.88 : 1,
                               })}
                             >
-                              <MaterialIcons name="volume-up" size={18} color="#1d4ed8" />
+                              <Image
+                                source={{ uri: messageImageUri }}
+                                style={{
+                                  width: 220,
+                                  height: 280,
+                                  borderRadius: 12,
+                                  backgroundColor: '#e2e8f0',
+                                }}
+                                resizeMode="cover"
+                              />
                             </Pressable>
-                            <Pressable
-                              accessibilityLabel="Traducir mensaje"
-                              onPress={() => translateAssistantMessage(msg.id, msg.text)}
-                              disabled={!!translationState?.loading}
-                              hitSlop={8}
-                              style={({ pressed }) => ({
-                                width: 34,
-                                height: 34,
-                                borderRadius: 999,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: translationState?.loading
-                                  ? '#f1f5f9'
-                                  : pressed
-                                  ? '#dcfce7'
-                                  : '#f0fdf4',
-                                borderWidth: 1,
-                                borderColor: '#bbf7d0',
-                                opacity: translationState?.loading ? 0.75 : 1,
-                              })}
+                          ) : null}
+                          {msg.text.trim() ? (
+                            <Text
+                              style={{
+                                color: isAssistant ? COLORS.assistantText : 'white',
+                                lineHeight: 20,
+                                marginTop: messageImageUri ? 8 : 0,
+                                paddingHorizontal: messageImageUri ? 4 : 0,
+                              }}
                             >
-                              {translationState?.loading ? (
-                                <ActivityIndicator size="small" color="#15803d" />
-                              ) : (
-                                <MaterialIcons name="translate" size={18} color="#15803d" />
-                              )}
-                            </Pressable>
-                          </View>
-                        ) : null}
+                              {msg.text}
+                            </Text>
+                          ) : null}
+                          {isAssistant && translationState?.text ? (
+                            <>
+                              <View style={{ height: 1, backgroundColor: COLORS.border, marginVertical: 10 }} />
+                              <Text style={{ color: COLORS.muted, lineHeight: 20 }}>{translationState.text}</Text>
+                            </>
+                          ) : null}
+                          {isAssistant && translationState?.error ? (
+                            <Text style={{ marginTop: 8, color: '#dc2626', fontSize: 12 }}>{translationState.error}</Text>
+                          ) : null}
+                          {canUseTextActions ? (
+                            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 10 }}>
+                              <Pressable
+                                accessibilityLabel="Reproducir mensaje"
+                                onPress={() => speakAssistantMessage(msg.text)}
+                                hitSlop={8}
+                                style={({ pressed }) => ({
+                                  width: 34,
+                                  height: 34,
+                                  borderRadius: 999,
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  backgroundColor: pressed ? '#dbeafe' : '#eff6ff',
+                                  borderWidth: 1,
+                                  borderColor: '#bfdbfe',
+                                })}
+                              >
+                                <MaterialIcons name="volume-up" size={18} color="#1d4ed8" />
+                              </Pressable>
+                              <Pressable
+                                accessibilityLabel="Traducir mensaje"
+                                onPress={() => translateAssistantMessage(msg.id, msg.text)}
+                                disabled={!!translationState?.loading}
+                                hitSlop={8}
+                                style={({ pressed }) => ({
+                                  width: 34,
+                                  height: 34,
+                                  borderRadius: 999,
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  backgroundColor: translationState?.loading
+                                    ? '#f1f5f9'
+                                    : pressed
+                                    ? '#dcfce7'
+                                    : '#f0fdf4',
+                                  borderWidth: 1,
+                                  borderColor: '#bbf7d0',
+                                  opacity: translationState?.loading ? 0.75 : 1,
+                                })}
+                              >
+                                {translationState?.loading ? (
+                                  <ActivityIndicator size="small" color="#15803d" />
+                                ) : (
+                                  <MaterialIcons name="translate" size={18} color="#15803d" />
+                                )}
+                              </Pressable>
+                            </View>
+                          ) : null}
+                        </View>
                       </View>
                     </View>
                   );

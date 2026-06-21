@@ -57,8 +57,11 @@ export type AdminCharacterPostWritePayload = {
   postId?: string
   caption: string
   context?: string
+  conversationNarration?: string
+  initialMessage?: string
   imageUrl: string
   thumbnailUrl?: string
+  thumbnailMdUrl?: string
   videoUrl?: string
   order?: number
   suggestedReplies?: string[]

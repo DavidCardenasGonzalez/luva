@@ -174,6 +174,8 @@ export async function sendFriendChatMessage(
     postId?: string;
     postContext?: string;
     postCaption?: string;
+    postConversationNarration?: string;
+    postInitialMessage?: string;
     postImageUrl?: string;
     postVideoUrl?: string;
     englishDifficulty?: 'easy' | 'medium' | 'hard';

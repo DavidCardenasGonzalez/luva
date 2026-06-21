@@ -222,8 +222,11 @@ export type AdminCharacterPost = {
   characterName: string
   caption: string
   context?: string
+  conversationNarration?: string
+  initialMessage?: string
   imageUrl: string
   thumbnailUrl?: string
+  thumbnailMdUrl?: string
   videoUrl?: string
   subtitlesUrl?: string
   subtitlesKey?: string

@@ -22,6 +22,8 @@ export type LocalFriendConversationSourcePost = {
   videoUrl?: string;
   caption?: string;
   context?: string;
+  conversationNarration?: string;
+  initialMessage?: string;
 };
 
 export type LocalFriendConversationSnapshot = {
@@ -95,6 +97,8 @@ function sanitizeSourcePost(input: unknown): LocalFriendConversationSourcePost |
     ...(asString(raw.videoUrl) ? { videoUrl: asString(raw.videoUrl) } : {}),
     ...(asString(raw.caption) ? { caption: asString(raw.caption) } : {}),
     ...(asString(raw.context) ? { context: asString(raw.context) } : {}),
+    ...(asString(raw.conversationNarration) ? { conversationNarration: asString(raw.conversationNarration) } : {}),
+    ...(asString(raw.initialMessage) ? { initialMessage: asString(raw.initialMessage) } : {}),
   };
   return Object.keys(post).length ? post : undefined;
 }

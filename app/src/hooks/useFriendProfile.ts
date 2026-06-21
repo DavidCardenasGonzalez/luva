@@ -10,6 +10,8 @@ export type CharacterProfilePost = {
   characterName: string;
   caption: string;
   context?: string;
+  conversationNarration?: string;
+  initialMessage?: string;
   imageUrl: string;
   thumbnailUrl?: string;
   videoUrl?: string;
@@ -100,6 +102,8 @@ function sanitizeProfilePost(input: unknown): CharacterProfilePost | null {
     characterName,
     caption,
     context: asString(raw.context),
+    conversationNarration: asString(raw.conversationNarration),
+    initialMessage: asString(raw.initialMessage),
     imageUrl,
     thumbnailUrl: thumbnailUrl || (videoUrl ? imageUrl : undefined),
     videoUrl,

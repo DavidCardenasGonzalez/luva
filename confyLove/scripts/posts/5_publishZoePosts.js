@@ -244,6 +244,8 @@ async function main() {
       avatarImageUrl: CHARACTER.avatarImageUrl,
       caption: post.caption,
       context: post.context,
+      ...(post.conversationNarration ? { conversationNarration: post.conversationNarration } : {}),
+      ...(post.initialMessage ? { initialMessage: post.initialMessage } : {}),
       imageUrl,
       order: day,
       createdAt: now,

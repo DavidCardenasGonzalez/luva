@@ -7,13 +7,10 @@ import {
   Image,
   ImageBackground,
   ImageSourcePropType,
-  KeyboardAvoidingView,
   Modal,
-  Platform,
   Pressable,
   ScrollView,
   Text,
-  TextInput,
   useWindowDimensions,
   View,
   type ViewToken,
@@ -200,6 +197,16 @@ type FeedItem =
   | PendingLesson
   | FeedPostItem;
 
+type FeedGridItem = CharacterVideoFeedItem | FeedPostItem;
+
+type FeedGridRowItem = {
+  kind: 'feedGridRow';
+  feedId: string;
+  items: FeedGridItem[];
+};
+
+type RenderedFeedItem = Exclude<FeedItem, FeedGridItem> | FeedGridRowItem;
+
 const COLORS = {
   background: '#0b1224',
   surface: '#0f172a',
@@ -213,7 +220,8 @@ const COLORS = {
   warning: '#f59e0b',
 };
 
-const CHARACTER_VIDEO_BATCH_SIZE = 1;
+const CHARACTER_VIDEO_INITIAL_COUNT = 8;
+const CHARACTER_VIDEO_LOAD_MORE_COUNT = 8;
 const ONBOARDING_REELS_PRELOAD_COUNT = 3;
 const ONBOARDING_REELS_PRELOAD_TIMEOUT_MS = 1400;
 const VOCABULARY_BATCH_SIZE = 3;
@@ -285,6 +293,7 @@ async function preloadOnboardingReelPreviewAssets(videos: CharacterVideoFeedItem
     new Set(
       videos
         .flatMap((item) => [
+          item.thumbnailMdUrl,
           item.thumbnailUrl,
           item.imageUrl,
           item.avatarImageXsUrl,
@@ -395,6 +404,47 @@ function getFeedMediaId(item: FeedItem) {
     return item.feedId;
   }
   return undefined;
+}
+
+function canRenderInFeedGrid(item: FeedItem): item is FeedGridItem {
+  return item.kind === 'characterVideo' || item.kind === 'post';
+}
+
+function groupFeedGridItemsIntoRows(items: FeedItem[]): RenderedFeedItem[] {
+  const grouped: RenderedFeedItem[] = [];
+  let index = 0;
+
+  while (index < items.length) {
+    const item = items[index];
+    if (!canRenderInFeedGrid(item)) {
+      grouped.push(item);
+      index += 1;
+      continue;
+    }
+
+    const rowItems: FeedGridItem[] = [item];
+    const next = items[index + 1];
+    if (next && canRenderInFeedGrid(next)) {
+      rowItems.push(next);
+      index += 1;
+    }
+
+    grouped.push({
+      kind: 'feedGridRow',
+      feedId: `feed-grid-row:${rowItems.map((rowItem) => rowItem.feedId).join(':')}`,
+      items: rowItems,
+    });
+    index += 1;
+  }
+
+  return grouped;
+}
+
+function getRenderedFeedMediaId(item: RenderedFeedItem) {
+  if (item.kind === 'feedGridRow') {
+    return item.items.map((gridItem) => getFeedMediaId(gridItem)).find((mediaId): mediaId is string => !!mediaId);
+  }
+  return getFeedMediaId(item);
 }
 
 function getFeedTrackingProperties(item: FeedItem) {
@@ -847,143 +897,164 @@ function MissionCard({
 
 function PendingConversationCard({
   item,
+  showHeader = false,
+  showViewAllBadge = false,
   onContinue,
   onDiscard,
+  onViewAll,
 }: {
   item: PendingConversationItem;
+  showHeader?: boolean;
+  showViewAllBadge?: boolean;
   onContinue: (item: PendingConversationItem) => void;
   onDiscard: (item: PendingConversationItem) => void;
+  onViewAll?: () => void;
 }) {
   const avatarSource = useMemo<ImageSourcePropType | undefined>(() => {
     const trimmed = item.avatarImageUrl?.trim();
     return trimmed ? { uri: trimmed } : getChatAvatar(item.friendId);
   }, [item.avatarImageUrl, item.friendId]);
   const avatarInitial = (item.friendName.trim().charAt(0) || '?').toUpperCase();
-  const messageLabel = `${item.userMessageCount} mensaje${item.userMessageCount === 1 ? '' : 's'}`;
 
   return (
-    <View
-      style={{
-        borderRadius: 18,
-        backgroundColor: COLORS.surface,
-        borderWidth: 1,
-        borderColor: '#1d4ed8',
-        overflow: 'hidden',
-        shadowColor: '#000',
-        shadowOpacity: 0.18,
-        shadowRadius: 12,
-      }}
-    >
-      <View
-        style={{
+    <View style={{ gap: 7 }}>
+      {showHeader ? (
+        <Text style={{ color: '#64748b', fontSize: 11, fontWeight: '800' }} numberOfLines={1}>
+          Continue your conversation
+        </Text>
+      ) : null}
+      <Pressable
+        onPress={() => onContinue(item)}
+        onLongPress={() => onDiscard(item)}
+        accessibilityRole="button"
+        accessibilityLabel={`Continuar conversación con ${item.friendName}`}
+        accessibilityHint="Mantén presionado para descartar esta conversación."
+        style={({ pressed }) => ({
           flexDirection: 'row',
           alignItems: 'center',
-          paddingHorizontal: 16,
-          paddingTop: 14,
-          paddingBottom: 10,
-        }}
+          minHeight: 72,
+          paddingVertical: 10,
+          paddingLeft: 10,
+          paddingRight: 9,
+          borderRadius: 16,
+          backgroundColor: pressed ? '#111c33' : '#0f172a',
+          borderWidth: 1,
+          borderColor: pressed ? 'rgba(34, 211, 238, 0.24)' : 'rgba(148, 163, 184, 0.08)',
+          shadowColor: '#000',
+          shadowOpacity: 0.2,
+          shadowRadius: 14,
+        })}
       >
         <View
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingHorizontal: 10,
-            paddingVertical: 5,
+            width: 56,
+            height: 56,
             borderRadius: 999,
-            backgroundColor: 'rgba(37, 99, 235, 0.16)',
+            backgroundColor: '#07111f',
             borderWidth: 1,
-            borderColor: 'rgba(96, 165, 250, 0.4)',
+            borderColor: COLORS.accent,
+            padding: 3,
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
           <View
             style={{
-              width: 7,
-              height: 7,
+              width: '100%',
+              height: '100%',
               borderRadius: 999,
-              backgroundColor: '#60a5fa',
-              marginRight: 7,
+              overflow: 'hidden',
+              backgroundColor: 'rgba(11, 18, 36, 0.78)',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {avatarSource ? (
+              <Image source={avatarSource} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+            ) : (
+              <Text style={{ color: 'white', fontSize: 20, fontWeight: '900' }}>{avatarInitial}</Text>
+            )}
+          </View>
+          <View
+            style={{
+              position: 'absolute',
+              right: 1,
+              bottom: 2,
+              width: 12,
+              height: 12,
+              borderRadius: 999,
+              backgroundColor: '#00d68f',
+              borderWidth: 2,
+              borderColor: '#0f172a',
             }}
           />
-          <Text style={{ color: '#bfdbfe', fontSize: 11, fontWeight: '800', textTransform: 'uppercase' }}>
-            Conversación sin terminar
-          </Text>
         </View>
-      </View>
-
-      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16 }}>
-        <View
-          style={{
-            width: 52,
-            height: 52,
-            borderRadius: 999,
-            overflow: 'hidden',
-            backgroundColor: 'rgba(11, 18, 36, 0.78)',
-            borderWidth: 1,
-            borderColor: 'rgba(96, 165, 250, 0.45)',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {avatarSource ? (
-            <Image source={avatarSource} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-          ) : (
-            <Text style={{ color: 'white', fontSize: 20, fontWeight: '900' }}>{avatarInitial}</Text>
-          )}
-        </View>
-        <View style={{ flex: 1, marginLeft: 14, minWidth: 0 }}>
-          <Text style={{ color: 'white', fontSize: 17, fontWeight: '900' }} numberOfLines={1}>
+        <View style={{ flex: 1, marginLeft: 12, minWidth: 0 }}>
+          <Text style={{ color: 'white', fontSize: 15, fontWeight: '900' }} numberOfLines={1}>
             {item.friendName}
           </Text>
-          <Text style={{ color: COLORS.muted, fontSize: 12, fontWeight: '700', marginTop: 3 }} numberOfLines={1}>
-            {messageLabel}
+          <Text style={{ color: '#94a3b8', fontSize: 12, fontWeight: '700', marginTop: 4 }} numberOfLines={1}>
+            {item.preview}
           </Text>
         </View>
-      </View>
-
-      <Text style={{ color: '#cbd5e1', lineHeight: 20, marginHorizontal: 16, marginTop: 12 }} numberOfLines={2}>
-        {item.preview}
-      </Text>
-
-      <View style={{ flexDirection: 'row', gap: 8, padding: 16, paddingTop: 14 }}>
-        <Pressable
-          onPress={() => onContinue(item)}
-          accessibilityRole="button"
-          accessibilityLabel={`Continuar conversación con ${item.friendName}`}
-          style={({ pressed }) => ({
-            flex: 2,
+        <View
+          style={{
+            flexShrink: 0,
             flexDirection: 'row',
-            paddingVertical: 13,
-            borderRadius: 12,
             alignItems: 'center',
-            justifyContent: 'center',
-            gap: 7,
-            backgroundColor: pressed ? '#1d4ed8' : COLORS.accentStrong,
-            shadowColor: COLORS.accentStrong,
-            shadowOpacity: 0.25,
-            shadowRadius: 10,
-          })}
+            marginLeft: 10,
+          }}
         >
-          <MaterialIcons name="chat-bubble-outline" size={18} color="white" />
-          <Text style={{ color: 'white', fontWeight: '900' }}>Continuar</Text>
-        </Pressable>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 7,
+              minWidth: 102,
+              minHeight: 42,
+              paddingHorizontal: 13,
+              paddingVertical: 10,
+              borderRadius: 12,
+              backgroundColor: 'rgba(15, 23, 42, 0.92)',
+              borderWidth: 1,
+              borderColor: 'rgba(148, 163, 184, 0.14)',
+            }}
+          >
+            <MaterialIcons name="chat-bubble-outline" size={17} color={COLORS.accent} />
+            <Text style={{ color: COLORS.accent, fontSize: 12, fontWeight: '900' }} numberOfLines={1}>
+              Continue
+            </Text>
+          </View>
+          <MaterialIcons name="chevron-right" size={23} color="#64748b" style={{ marginLeft: 3 }} />
+        </View>
+      </Pressable>
+      {showViewAllBadge ? (
         <Pressable
-          onPress={() => onDiscard(item)}
+          onPress={onViewAll}
           accessibilityRole="button"
-          accessibilityLabel={`Descartar conversación con ${item.friendName}`}
+          accessibilityLabel="Ver todas las conversaciones pendientes"
+          hitSlop={8}
           style={({ pressed }) => ({
-            flex: 1,
-            paddingVertical: 13,
-            borderRadius: 12,
+            alignSelf: 'flex-end',
+            flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: pressed ? '#1e293b' : '#0f172a',
+            gap: 4,
+            marginTop: -2,
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+            borderRadius: 999,
+            backgroundColor: pressed ? 'rgba(34, 211, 238, 0.18)' : 'rgba(34, 211, 238, 0.1)',
             borderWidth: 1,
-            borderColor: COLORS.border,
+            borderColor: 'rgba(34, 211, 238, 0.26)',
           })}
         >
-          <Text style={{ color: COLORS.muted, fontWeight: '800' }}>Descartar</Text>
+          <Text style={{ color: COLORS.accent, fontSize: 11, fontWeight: '900' }} numberOfLines={1}>
+            Ver todas
+          </Text>
+          <MaterialIcons name="expand-more" size={15} color={COLORS.accent} />
         </Pressable>
-      </View>
+      ) : null}
     </View>
   );
 }
@@ -1075,13 +1146,17 @@ function CharacterVideoCard({
   onPress,
   onOpenProfile,
   onStartConversation,
+  compact = false,
 }: {
   item: CharacterVideoFeedItem;
   onPress: (item: CharacterVideoFeedItem) => void;
   onOpenProfile: (item: CharacterVideoFeedItem) => void;
   onStartConversation: (item: CharacterVideoFeedItem) => void;
+  compact?: boolean;
 }) {
-  const thumbnailUrl = (item.thumbnailUrl || item.imageUrl).trim();
+  const thumbnailUrl = (
+    (compact ? item.thumbnailMdUrl : undefined) || item.thumbnailUrl || item.imageUrl
+  ).trim();
   const avatarImageUrl = (item.avatarImageXsUrl || item.avatarImageUrl)?.trim();
   const { userLiked, displayedLabel, toggleLike } = useCharacterPostLike(
     item.characterId,
@@ -1092,7 +1167,7 @@ function CharacterVideoCard({
   return (
     <View
       style={{
-        borderRadius: 18,
+        borderRadius: compact ? 14 : 18,
         overflow: 'hidden',
         backgroundColor: COLORS.surface,
         borderWidth: 1,
@@ -1102,63 +1177,74 @@ function CharacterVideoCard({
         shadowRadius: 12,
       }}
     >
-      <Pressable
-        onPress={() => onPress(item)}
-        accessibilityRole="button"
-        accessibilityLabel={`Reproducir video de ${item.characterName}`}
-        style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
-      >
-        <View style={{ aspectRatio: CHARACTER_REEL_CARD_ASPECT_RATIO, backgroundColor: COLORS.surfaceAlt }}>
-          <Image
-            source={{ uri: thumbnailUrl }}
-            style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
-            resizeMode="cover"
-          />
+      <View style={{ aspectRatio: CHARACTER_REEL_CARD_ASPECT_RATIO, backgroundColor: COLORS.surfaceAlt }}>
+        <Image
+          source={{ uri: thumbnailUrl }}
+          style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+          resizeMode="cover"
+        />
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            backgroundColor: 'rgba(11, 18, 36, 0.12)',
+          }}
+        />
+        <Pressable
+          onPress={() => onPress(item)}
+          accessibilityRole="button"
+          accessibilityLabel={`Reproducir video de ${item.characterName}`}
+          style={({ pressed }) => ({
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            backgroundColor: pressed ? 'rgba(15, 23, 42, 0.18)' : 'transparent',
+          })}
+        />
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           <View
             style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              bottom: 0,
-              left: 0,
-              backgroundColor: 'rgba(11, 18, 36, 0.18)',
-            }}
-          />
-          <View
-            style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              bottom: 0,
-              left: 0,
+              width: compact ? 52 : 72,
+              height: compact ? 52 : 72,
+              borderRadius: 999,
               alignItems: 'center',
               justifyContent: 'center',
+              backgroundColor: 'rgba(11, 18, 36, 0.82)',
+              borderWidth: 1,
+              borderColor: 'rgba(226, 232, 240, 0.28)',
             }}
           >
-            <View
-              style={{
-                width: 72,
-                height: 72,
-                borderRadius: 999,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: 'rgba(11, 18, 36, 0.82)',
-                borderWidth: 1,
-                borderColor: 'rgba(226, 232, 240, 0.28)',
-              }}
-            >
-              <MaterialIcons name="play-arrow" size={38} color="white" />
-            </View>
+            <MaterialIcons name="play-arrow" size={compact ? 30 : 38} color="white" />
           </View>
         </View>
-      </Pressable>
       <View
         style={{
-          paddingHorizontal: 12,
-          paddingVertical: 10,
-          backgroundColor: COLORS.surfaceAlt,
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          paddingHorizontal: compact ? 10 : 12,
+          paddingVertical: compact ? 9 : 10,
+          backgroundColor: compact ? 'rgba(15, 23, 42, 0.78)' : 'rgba(15, 23, 42, 0.82)',
           borderTopWidth: 1,
-          borderTopColor: COLORS.border,
+          borderTopColor: 'rgba(226, 232, 240, 0.14)',
         }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -1176,12 +1262,17 @@ function CharacterVideoCard({
             {avatarImageUrl ? (
               <Image
                 source={{ uri: avatarImageUrl }}
-                style={{ width: 28, height: 28, borderRadius: 999, marginRight: 8 }}
+                style={{
+                  width: compact ? 24 : 28,
+                  height: compact ? 24 : 28,
+                  borderRadius: 999,
+                  marginRight: compact ? 6 : 8,
+                }}
                 resizeMode="cover"
               />
             ) : null}
             <Text
-              style={{ flex: 1, color: COLORS.text, fontSize: 13, fontWeight: '900' }}
+              style={{ flex: 1, color: 'white', fontSize: compact ? 12 : 13, fontWeight: '900' }}
               numberOfLines={1}
             >
               {item.characterName}
@@ -1193,7 +1284,7 @@ function CharacterVideoCard({
             accessibilityLabel={userLiked ? 'Quitar me gusta' : 'Me gusta'}
             hitSlop={8}
             style={({ pressed }) => ({
-              marginLeft: 10,
+              marginLeft: compact ? 6 : 10,
               flexDirection: 'row',
               alignItems: 'center',
               opacity: pressed ? 0.7 : 1,
@@ -1201,16 +1292,16 @@ function CharacterVideoCard({
           >
             <MaterialIcons
               name={userLiked ? 'favorite' : 'favorite-border'}
-              size={20}
-              color={userLiked ? '#f43f5e' : COLORS.muted}
+              size={compact ? 18 : 20}
+              color={userLiked ? '#f43f5e' : 'rgba(226, 232, 240, 0.86)'}
             />
             <Text
               style={{
-                marginLeft: 4,
-                color: COLORS.muted,
-                fontSize: 12,
+                marginLeft: compact ? 3 : 4,
+                color: 'rgba(226, 232, 240, 0.86)',
+                fontSize: compact ? 11 : 12,
                 fontWeight: '800',
-                minWidth: 22,
+                minWidth: compact ? 18 : 22,
                 textAlign: 'left',
               }}
               numberOfLines={1}
@@ -1221,8 +1312,13 @@ function CharacterVideoCard({
         </View>
         {item.caption ? (
           <Text
-            style={{ color: COLORS.muted, marginTop: 6, fontSize: 12, lineHeight: 16 }}
-            numberOfLines={2}
+            style={{
+              color: 'rgba(226, 232, 240, 0.88)',
+              marginTop: compact ? 5 : 6,
+              fontSize: compact ? 11 : 12,
+              lineHeight: compact ? 15 : 16,
+            }}
+            numberOfLines={compact ? 1 : 2}
           >
             {item.caption}
           </Text>
@@ -1232,18 +1328,30 @@ function CharacterVideoCard({
           accessibilityRole="button"
           accessibilityLabel={`Empezar conversación con ${item.characterName}`}
           style={({ pressed }) => ({
-            marginTop: 10,
+            marginTop: compact ? 8 : 10,
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
-            paddingVertical: 9,
-            borderRadius: 10,
+            paddingVertical: compact ? 8 : 9,
+            paddingHorizontal: compact ? 6 : 0,
+            borderRadius: compact ? 9 : 10,
             backgroundColor: pressed ? '#0ea5e9' : COLORS.accent,
           })}
         >
-          <MaterialIcons name="chat-bubble-outline" size={15} color="#0b1224" style={{ marginRight: 6 }} />
-          <Text style={{ color: '#0b1224', fontSize: 13, fontWeight: '900' }}>Empezar conversación</Text>
+          <MaterialIcons
+            name="chat-bubble-outline"
+            size={compact ? 14 : 15}
+            color="#0b1224"
+            style={{ marginRight: compact ? 4 : 6 }}
+          />
+          <Text
+            style={{ color: '#0b1224', fontSize: compact ? 12 : 13, fontWeight: '900', textAlign: 'center' }}
+            numberOfLines={1}
+          >
+            {compact ? 'Conversar' : 'Empezar conversación'}
+          </Text>
         </Pressable>
+      </View>
       </View>
     </View>
   );
@@ -1255,14 +1363,14 @@ function CharacterVideoPage({
   bottomInset,
   playbackEnabled,
   onOpenProfile,
-  onReply,
+  onStartConversation,
 }: {
   item: CharacterVideoFeedItem;
   height: number;
   bottomInset: number;
   playbackEnabled: boolean;
   onOpenProfile: (item: CharacterVideoFeedItem) => void;
-  onReply: (item: CharacterVideoFeedItem, draft: string) => void;
+  onStartConversation: (item: CharacterVideoFeedItem) => void;
 }) {
   const videoRef = useRef<Video | null>(null);
   const posterUrl = (item.thumbnailUrl || item.imageUrl).trim();
@@ -1270,11 +1378,9 @@ function CharacterVideoPage({
   const avatarImageUrl = (item.avatarImageXsUrl || item.avatarImageUrl)?.trim();
   const [isVideoReadyForDisplay, setIsVideoReadyForDisplay] = useState(false);
   const [paused, setPaused] = useState(false);
-  const [replyText, setReplyText] = useState('');
   const [playbackPositionSeconds, setPlaybackPositionSeconds] = useState(0);
   const [subtitleCues, setSubtitleCues] = useState<CharacterVideoSubtitleCue[]>([]);
   const [subtitleTranslations, setSubtitleTranslations] = useState<Record<string, SubtitleTranslationState>>({});
-  const replyInputRef = useRef<TextInput | null>(null);
   const videoSource = useMemo(() => ({ uri: videoUrl }), [videoUrl]);
   const activeSubtitle = useMemo(
     () => findActiveVideoSubtitle(subtitleCues, playbackPositionSeconds),
@@ -1282,15 +1388,7 @@ function CharacterVideoPage({
   );
   const activeSubtitleKey = useMemo(() => getVideoSubtitleKey(activeSubtitle), [activeSubtitle]);
   const activeTranslation = activeSubtitleKey ? subtitleTranslations[activeSubtitleKey] : undefined;
-  const subtitleBottomOffset = bottomInset + 252;
-  const suggestedReplies = useMemo(() => item.suggestedReplies.slice(0, 3), [item.suggestedReplies]);
-
-  useEffect(() => {
-    if (!playbackEnabled) {
-      setReplyText('');
-      replyInputRef.current?.blur();
-    }
-  }, [playbackEnabled]);
+  const subtitleBottomOffset = bottomInset + 218;
 
   const { userLiked, displayedLabel, toggleLike, ensureLiked } = useCharacterPostLike(
     item.characterId,
@@ -1298,19 +1396,11 @@ function CharacterVideoPage({
     item.likeCount,
   );
 
-  const handleSendReply = useCallback((draft: string) => {
-    const trimmed = draft.trim();
-    if (!trimmed) return;
-    replyInputRef.current?.blur();
-    setReplyText('');
+  const handleStartConversation = useCallback(() => {
     ensureLiked();
     recordVideoPostMetric(item.characterId, item.postId, 'conversation');
-    onReply(item, trimmed);
-  }, [ensureLiked, item, onReply]);
-
-  const handleSubmitReply = useCallback(() => {
-    handleSendReply(replyText);
-  }, [handleSendReply, replyText]);
+    onStartConversation(item);
+  }, [ensureLiked, item, onStartConversation]);
 
   const handleTranslateSubtitle = useCallback(async () => {
     const subtitle = activeSubtitle?.text.trim();
@@ -1564,161 +1654,119 @@ function CharacterVideoPage({
           </View>
         </View>
       ) : null}
-      <KeyboardAvoidingView
+      <View
         pointerEvents="box-none"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={{
           position: 'absolute',
           left: 0,
           right: 0,
           bottom: 0,
+          paddingHorizontal: 18,
+          paddingTop: 16,
+          paddingBottom: Math.max(18, bottomInset + 14),
+          backgroundColor: 'rgba(0, 0, 0, 0.42)',
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(255, 255, 255, 0.08)',
         }}
       >
-        <View
-          pointerEvents="box-none"
-          style={{
-            paddingHorizontal: 18,
-            paddingTop: 14,
-            paddingBottom: 12,
-            backgroundColor: 'rgba(0, 0, 0, 0.34)',
-          }}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Pressable
-              onPress={() => onOpenProfile(item)}
-              accessibilityRole="button"
-              accessibilityLabel={`Abrir perfil de ${item.characterName}`}
-              style={({ pressed }) => ({
-                flex: 1,
-                flexDirection: 'row',
-                alignItems: 'center',
-                opacity: pressed ? 0.75 : 1,
-              })}
-            >
-              {avatarImageUrl ? (
-                <Image
-                  source={{ uri: avatarImageUrl }}
-                  style={{ width: 34, height: 34, borderRadius: 999, marginRight: 10 }}
-                  resizeMode="cover"
-                />
-              ) : null}
-              <Text style={{ color: 'white', fontSize: 16, fontWeight: '900', flexShrink: 1 }} numberOfLines={1}>
-                {item.characterName}
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={toggleLike}
-              accessibilityRole="button"
-              accessibilityLabel={userLiked ? 'Quitar me gusta' : 'Me gusta'}
-              hitSlop={8}
-              style={({ pressed }) => ({
-                marginLeft: 12,
-                flexDirection: 'row',
-                alignItems: 'center',
-                opacity: pressed ? 0.7 : 1,
-              })}
-            >
-              <MaterialIcons
-                name={userLiked ? 'favorite' : 'favorite-border'}
-                size={26}
-                color={userLiked ? '#f43f5e' : 'white'}
-              />
-              <Text
-                style={{
-                  marginLeft: 6,
-                  color: 'white',
-                  fontSize: 14,
-                  fontWeight: '800',
-                  minWidth: 28,
-                  textAlign: 'left',
-                }}
-                numberOfLines={1}
-              >
-                {displayedLabel}
-              </Text>
-            </Pressable>
-          </View>
-          <Text style={{ color: '#e2e8f0', marginTop: 10, fontSize: 14, lineHeight: 20 }} numberOfLines={3}>
-            {item.caption}
-          </Text>
-        </View>
-        <View
-          style={{
-            paddingHorizontal: 14,
-            paddingTop: 10,
-            paddingBottom: Math.max(14, bottomInset + 10),
-            backgroundColor: 'rgba(0, 0, 0, 0.34)',
-          }}
-        >
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
-            {suggestedReplies.map((reply, index) => (
-              <Pressable
-                key={`${index}:${reply}`}
-                onPress={() => handleSendReply(reply)}
-                accessibilityRole="button"
-                accessibilityLabel={`Enviar ${reply}`}
-                style={({ pressed }) => ({
-                  maxWidth: '100%',
-                  paddingHorizontal: 12,
-                  paddingVertical: 8,
-                  borderRadius: 999,
-                  backgroundColor: pressed ? 'rgba(226, 232, 240, 0.3)' : 'rgba(226, 232, 240, 0.18)',
-                  borderWidth: 1,
-                  borderColor: 'rgba(226, 232, 240, 0.32)',
-                })}
-              >
-                <Text style={{ color: 'white', fontSize: 13, fontWeight: '800' }} numberOfLines={1}>
-                  {reply}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-          <View
-            style={{
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Pressable
+            onPress={() => onOpenProfile(item)}
+            accessibilityRole="button"
+            accessibilityLabel={`Abrir perfil de ${item.characterName}`}
+            style={({ pressed }) => ({
+              flex: 1,
               flexDirection: 'row',
               alignItems: 'center',
-              borderRadius: 999,
-              borderWidth: 1,
-              borderColor: 'rgba(226, 232, 240, 0.45)',
-              backgroundColor: 'rgba(15, 23, 42, 0.55)',
-              paddingHorizontal: 16,
-              paddingVertical: Platform.OS === 'ios' ? 10 : 6,
-            }}
+              opacity: pressed ? 0.75 : 1,
+            })}
           >
-            <TextInput
-              ref={replyInputRef}
-              value={replyText}
-              onChangeText={setReplyText}
-              placeholder={`Enviar mensaje a ${item.characterName.split(' ')[0]}...`}
-              placeholderTextColor="rgba(226, 232, 240, 0.7)"
+            {avatarImageUrl ? (
+              <Image
+                source={{ uri: avatarImageUrl }}
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 999,
+                  marginRight: 10,
+                  borderWidth: 1,
+                  borderColor: 'rgba(255, 255, 255, 0.32)',
+                }}
+                resizeMode="cover"
+              />
+            ) : null}
+            <Text style={{ color: 'white', fontSize: 16, fontWeight: '900', flexShrink: 1 }} numberOfLines={1}>
+              {item.characterName}
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={toggleLike}
+            accessibilityRole="button"
+            accessibilityLabel={userLiked ? 'Quitar me gusta' : 'Me gusta'}
+            hitSlop={8}
+            style={({ pressed }) => ({
+              marginLeft: 12,
+              flexDirection: 'row',
+              alignItems: 'center',
+              opacity: pressed ? 0.7 : 1,
+            })}
+          >
+            <MaterialIcons
+              name={userLiked ? 'favorite' : 'favorite-border'}
+              size={26}
+              color={userLiked ? '#f43f5e' : 'white'}
+            />
+            <Text
               style={{
-                flex: 1,
+                marginLeft: 6,
                 color: 'white',
                 fontSize: 14,
-                paddingVertical: 0,
-                paddingRight: 8,
+                fontWeight: '800',
+                minWidth: 28,
+                textAlign: 'left',
               }}
-              returnKeyType="send"
-              blurOnSubmit
-              onSubmitEditing={handleSubmitReply}
-            />
-            {replyText.trim().length ? (
-              <Pressable
-                onPress={handleSubmitReply}
-                accessibilityRole="button"
-                accessibilityLabel="Enviar respuesta"
-                hitSlop={8}
-                style={({ pressed }) => ({
-                  marginLeft: 6,
-                  opacity: pressed ? 0.7 : 1,
-                })}
-              >
-                <Text style={{ color: '#38bdf8', fontWeight: '800', fontSize: 14 }}>Enviar</Text>
-              </Pressable>
-            ) : null}
-          </View>
+              numberOfLines={1}
+            >
+              {displayedLabel}
+            </Text>
+          </Pressable>
         </View>
-      </KeyboardAvoidingView>
+        <Text style={{ color: '#e2e8f0', marginTop: 10, fontSize: 14, lineHeight: 20 }} numberOfLines={3}>
+          {item.caption}
+        </Text>
+        <Pressable
+          onPress={handleStartConversation}
+          accessibilityRole="button"
+          accessibilityLabel={`Empezar conversación con ${item.characterName}`}
+          style={({ pressed }) => ({
+            minHeight: 58,
+            marginTop: 14,
+            borderRadius: 18,
+            backgroundColor: pressed ? '#67e8f9' : '#22d3ee',
+            borderWidth: 1,
+            borderColor: 'rgba(255, 255, 255, 0.72)',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'row',
+            gap: 8,
+            shadowColor: '#22d3ee',
+            shadowOpacity: pressed ? 0.18 : 0.32,
+            shadowRadius: 18,
+            shadowOffset: { width: 0, height: 8 },
+            elevation: pressed ? 3 : 6,
+            transform: [{ scale: pressed ? 0.99 : 1 }],
+          })}
+        >
+          <MaterialIcons name="chat-bubble-outline" size={21} color="#07111f" />
+          <Text
+            style={{ color: '#07111f', fontSize: 16, fontWeight: '900', textAlign: 'center' }}
+            numberOfLines={1}
+          >
+            Empezar conversación
+          </Text>
+          <MaterialIcons name="arrow-forward" size={21} color="#07111f" />
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -1729,7 +1777,7 @@ function CharacterVideoDumbscrollModal({
   initialFeedId,
   onClose,
   onOpenProfile,
-  onReply,
+  onStartConversation,
   overlay,
 }: {
   visible: boolean;
@@ -1737,7 +1785,7 @@ function CharacterVideoDumbscrollModal({
   initialFeedId?: string;
   onClose: () => void;
   onOpenProfile: (item: CharacterVideoFeedItem) => void;
-  onReply: (item: CharacterVideoFeedItem, draft: string) => void;
+  onStartConversation: (item: CharacterVideoFeedItem) => void;
   overlay?: React.ReactNode;
 }) {
   const { height } = useWindowDimensions();
@@ -1802,7 +1850,7 @@ function CharacterVideoDumbscrollModal({
               bottomInset={insets.bottom}
               playbackEnabled={visible && focusedFeedId === item.feedId}
               onOpenProfile={onOpenProfile}
-              onReply={onReply}
+              onStartConversation={onStartConversation}
             />
           )}
           initialScrollIndex={initialIndex}
@@ -2287,6 +2335,7 @@ function FeedPostCard({
   onClaimExtra,
   claiming,
   playbackEnabled,
+  compact = false,
 }: {
   item: FeedPostItem;
   onPractice: (item: FeedPostItem) => void;
@@ -2294,6 +2343,7 @@ function FeedPostCard({
   onClaimExtra: (item: FeedPostItem) => void;
   claiming: boolean;
   playbackEnabled: boolean;
+  compact?: boolean;
 }) {
   const imageUrl = item.imageUrl?.trim();
   const videoUrl = item.videoUrl?.trim();
@@ -2358,7 +2408,7 @@ function FeedPostCard({
   return (
     <View
       style={{
-        borderRadius: 18,
+        borderRadius: compact ? 14 : 18,
         overflow: 'hidden',
         backgroundColor: COLORS.surface,
         borderWidth: 1,
@@ -2407,11 +2457,20 @@ function FeedPostCard({
         </View>
       ) : null}
 
-      <View style={{ padding: 16 }}>
-        <Text style={{ color: '#a5f3fc', fontSize: 11, fontWeight: '800', textTransform: 'uppercase' }}>
+      <View style={{ padding: compact ? 12 : 16 }}>
+        <Text style={{ color: '#a5f3fc', fontSize: compact ? 10 : 11, fontWeight: '800', textTransform: 'uppercase' }}>
           {getPostTypeLabel(item)}
         </Text>
-        <Text style={{ color: COLORS.text, marginTop: 10, fontSize: 18, lineHeight: 26, fontWeight: '800' }}>
+        <Text
+          style={{
+            color: COLORS.text,
+            marginTop: compact ? 8 : 10,
+            fontSize: compact ? 14 : 18,
+            lineHeight: compact ? 20 : 26,
+            fontWeight: '800',
+          }}
+          numberOfLines={compact ? 5 : undefined}
+        >
           {item.text}
         </Text>
 
@@ -2420,9 +2479,10 @@ function FeedPostCard({
             onPress={action.onPress}
             disabled={action.disabled}
             style={({ pressed }) => ({
-              marginTop: 14,
-              paddingVertical: 13,
-              borderRadius: 12,
+              marginTop: compact ? 10 : 14,
+              paddingVertical: compact ? 10 : 13,
+              paddingHorizontal: compact ? 8 : 0,
+              borderRadius: compact ? 10 : 12,
               alignItems: 'center',
               backgroundColor: action.disabled
                 ? '#334155'
@@ -2434,7 +2494,12 @@ function FeedPostCard({
               opacity: action.disabled ? 0.72 : 1,
             })}
           >
-            <Text style={{ color: 'white', fontWeight: '900' }}>{action.label}</Text>
+            <Text
+              style={{ color: 'white', fontSize: compact ? 12 : 14, fontWeight: '900', textAlign: 'center' }}
+              numberOfLines={2}
+            >
+              {action.label}
+            </Text>
           </Pressable>
         ) : null}
       </View>
@@ -2908,7 +2973,7 @@ function ReelsStartupOverlay() {
 
 const SWIPE_UP_TOUR_STORAGE_KEY = '@luva/feedSwipeUpTourSeen';
 
-type FeedTourStep = 'swipeUp' | 'sendMessage';
+type FeedTourStep = 'swipeUp' | 'startConversation';
 
 function FeedTourOverlay({
   step,
@@ -2986,7 +3051,7 @@ function FeedTourOverlay({
         >
           {isSwipeUp
             ? 'Desliza hacia arriba para encontrar tu compañero de práctica'
-            : 'Envía un mensaje para seguir practicando'}
+            : 'Toca Empezar conversación para seguir practicando'}
         </Text>
         <Animated.Image
           source={
@@ -3080,7 +3145,7 @@ export default function FeedScreen({ navigation, route }: Props) {
   const isMissionCompleted = useCallback((_storyId?: string, _missionId?: string) => false, []);
   const { addCoins, canSpend, loading: coinsLoading, isUnlimited } = useCoins();
   const [feedSeed, setFeedSeed] = useState(() => `${Date.now()}:${Math.random()}`);
-  const [visibleCharacterVideoCount, setVisibleCharacterVideoCount] = useState(CHARACTER_VIDEO_BATCH_SIZE);
+  const [visibleCharacterVideoCount, setVisibleCharacterVideoCount] = useState(CHARACTER_VIDEO_INITIAL_COUNT);
   const [visibleVocabularyCount, setVisibleVocabularyCount] = useState(VOCABULARY_BATCH_SIZE);
   const [visibleShadowingCount, setVisibleShadowingCount] = useState(SHADOWING_BATCH_SIZE);
   const [visibleLessonsCount, setVisibleLessonsCount] = useState(LESSON_BATCH_SIZE);
@@ -3103,6 +3168,7 @@ export default function FeedScreen({ navigation, route }: Props) {
   const [discardedConversationKeys, setDiscardedConversationKeys] = useState<Set<string>>(
     () => new Set()
   );
+  const [showAllPendingConversations, setShowAllPendingConversations] = useState(false);
   const [characterVideoViewerVisible, setCharacterVideoViewerVisible] = useState(false);
   useEffect(() => {
     if (characterVideoViewerVisible && feedTourPending && feedTourStep === null) {
@@ -3122,11 +3188,20 @@ export default function FeedScreen({ navigation, route }: Props) {
     minimumViewTime: 120,
   });
   const handleViewableItemsChangedRef = useRef(
-    ({ viewableItems }: { viewableItems: ViewToken<FeedItem>[] }) => {
+    ({ viewableItems }: { viewableItems: ViewToken<RenderedFeedItem>[] }) => {
       viewableItems
         .filter((entry) => entry.isViewable)
         .forEach((entry) => {
           const item = entry.item;
+          if (item.kind === 'feedGridRow') {
+            item.items.forEach((gridItem) => {
+              if (viewedFeedItemIdsRef.current.has(gridItem.feedId)) return;
+              viewedFeedItemIdsRef.current.add(gridItem.feedId);
+              void trackMixpanelFeedItemViewed(getFeedTrackingProperties(gridItem));
+            });
+            return;
+          }
+
           const feedItemId = item.kind === 'mission' ? item.id : item.feedId;
           if (viewedFeedItemIdsRef.current.has(feedItemId)) return;
           viewedFeedItemIdsRef.current.add(feedItemId);
@@ -3135,7 +3210,7 @@ export default function FeedScreen({ navigation, route }: Props) {
 
       const nextMediaId = viewableItems
         .filter((entry) => entry.isViewable)
-        .map((entry) => getFeedMediaId(entry.item))
+        .map((entry) => getRenderedFeedMediaId(entry.item))
         .find((mediaId): mediaId is string => !!mediaId);
       setActiveFeedMediaId((current) => (current === nextMediaId ? current : nextMediaId));
     }
@@ -3178,7 +3253,7 @@ export default function FeedScreen({ navigation, route }: Props) {
       const isInitialFocus = !hasFocusedFeedOnceRef.current;
       hasFocusedFeedOnceRef.current = true;
       setFeedSeed(`${Date.now()}:${Math.random()}`);
-      setVisibleCharacterVideoCount(CHARACTER_VIDEO_BATCH_SIZE);
+      setVisibleCharacterVideoCount(CHARACTER_VIDEO_INITIAL_COUNT);
       setVisibleVocabularyCount(VOCABULARY_BATCH_SIZE);
       setVisibleShadowingCount(SHADOWING_BATCH_SIZE);
       setVisibleLessonsCount(LESSON_BATCH_SIZE);
@@ -3412,6 +3487,18 @@ export default function FeedScreen({ navigation, route }: Props) {
       .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
   }, [discardedConversationKeys, friendsById, pendingConversationSnapshots]);
 
+  const hasHiddenPendingConversations = pendingConversationItems.length > 2 && !showAllPendingConversations;
+  const visiblePendingConversationItems = useMemo(
+    () => (showAllPendingConversations ? pendingConversationItems : pendingConversationItems.slice(0, 2)),
+    [pendingConversationItems, showAllPendingConversations]
+  );
+
+  useEffect(() => {
+    if (pendingConversationItems.length <= 2 && showAllPendingConversations) {
+      setShowAllPendingConversations(false);
+    }
+  }, [pendingConversationItems.length, showAllPendingConversations]);
+
   const pendingMissions = useMemo<PendingMission[]>(() => {
     return stories.flatMap((story) =>
       story.missions
@@ -3589,7 +3676,7 @@ export default function FeedScreen({ navigation, route }: Props) {
           lessons: [],
           posts: [],
         });
-        return [...pendingConversationItems, ...reels];
+        return [...visiblePendingConversationItems, ...reels];
       }
 
       const promo = showLitePromoTimer
@@ -3608,14 +3695,14 @@ export default function FeedScreen({ navigation, route }: Props) {
         posts: feedPostItems,
       });
       const withResume = resumeMission ? [resumeMission, ...next] : next;
-      return [...pendingConversationItems, ...withResume];
+      return [...visiblePendingConversationItems, ...withResume];
     },
     [
       feedPostItems,
       litePromoRemainingSeconds,
-      pendingConversationItems,
       resumeMission,
       showLitePromoTimer,
+      visiblePendingConversationItems,
       visibleCharacterVideos,
       visibleLessons,
       visibleShadowing,
@@ -3626,6 +3713,7 @@ export default function FeedScreen({ navigation, route }: Props) {
   const imageUrlsToPrefetch = useMemo(() => {
     if (SHOW_ONLY_CHARACTER_REELS_IN_FEED) {
       return visibleCharacterVideos.flatMap((item) => [
+        item.thumbnailMdUrl,
         item.thumbnailUrl,
         item.imageUrl,
         item.avatarImageXsUrl,
@@ -3635,9 +3723,10 @@ export default function FeedScreen({ navigation, route }: Props) {
 
     const upcomingCharacterVideos = shuffledCharacterVideos.slice(
       0,
-      Math.min(shuffledCharacterVideos.length, visibleCharacterVideoCount + CHARACTER_VIDEO_BATCH_SIZE)
+      Math.min(shuffledCharacterVideos.length, visibleCharacterVideoCount + CHARACTER_VIDEO_LOAD_MORE_COUNT)
     );
     const characterVideoUrls = upcomingCharacterVideos.flatMap((item) => [
+      item.thumbnailMdUrl,
       item.thumbnailUrl,
       item.imageUrl,
       item.avatarImageXsUrl,
@@ -3697,7 +3786,10 @@ export default function FeedScreen({ navigation, route }: Props) {
     }
   }, [feedItems, initialFeedResolved, loading]);
 
-  const renderedFeedItems = showInitialFeedSkeleton ? [] : loading ? stableFeedItems : feedItems;
+  const renderedFeedItems = useMemo(
+    () => groupFeedGridItemsIntoRows(showInitialFeedSkeleton ? [] : loading ? stableFeedItems : feedItems),
+    [feedItems, loading, showInitialFeedSkeleton, stableFeedItems]
+  );
 
   const hasMoreFeedItems =
     SHOW_ONLY_CHARACTER_REELS_IN_FEED
@@ -3727,7 +3819,7 @@ export default function FeedScreen({ navigation, route }: Props) {
       shuffledLessons.length
     );
     const nextCharacterVideosCount = Math.min(
-      visibleCharacterVideoCount + CHARACTER_VIDEO_BATCH_SIZE,
+      visibleCharacterVideoCount + CHARACTER_VIDEO_LOAD_MORE_COUNT,
       shuffledCharacterVideos.length
     );
     const nextVocabularyCount = SHOW_ONLY_CHARACTER_REELS_IN_FEED
@@ -3944,6 +4036,8 @@ export default function FeedScreen({ navigation, route }: Props) {
         ...(sourcePost?.videoUrl ? { postVideoUrl: sourcePost.videoUrl } : {}),
         ...(sourcePost?.caption ? { postCaption: sourcePost.caption } : {}),
         ...(sourcePost?.context ? { postContext: sourcePost.context } : {}),
+        ...(sourcePost?.conversationNarration ? { postConversationNarration: sourcePost.conversationNarration } : {}),
+        ...(sourcePost?.initialMessage ? { postInitialMessage: sourcePost.initialMessage } : {}),
       });
     },
     [navigation, stopFeedVideos]
@@ -4049,12 +4143,12 @@ export default function FeedScreen({ navigation, route }: Props) {
     [navigation]
   );
 
-  const handleReplyToCharacterVideo = useCallback(
-    (item: CharacterVideoFeedItem, draft: string) => {
+  const handleStartConversationFromCharacterVideoViewer = useCallback(
+    (item: CharacterVideoFeedItem) => {
       setCharacterVideoViewerVisible(false);
       void trackMixpanelFeedItemAction({
         ...getFeedTrackingProperties(item),
-        action: 'reply_to_character_video',
+        action: 'start_conversation_from_character_video',
       });
       navigation.navigate('FriendChat', {
         friendId: item.characterId,
@@ -4063,7 +4157,8 @@ export default function FeedScreen({ navigation, route }: Props) {
         postVideoUrl: item.videoUrl,
         postCaption: item.caption,
         postContext: item.context || item.caption,
-        initialDraft: draft,
+        ...(item.conversationNarration ? { postConversationNarration: item.conversationNarration } : {}),
+        ...(item.initialMessage ? { postInitialMessage: item.initialMessage } : {}),
       });
     },
     [navigation]
@@ -4093,7 +4188,8 @@ export default function FeedScreen({ navigation, route }: Props) {
         postVideoUrl: item.videoUrl,
         postCaption: item.caption,
         postContext: item.context || item.caption,
-        initialDraft: 'Hey there!',
+        ...(item.conversationNarration ? { postConversationNarration: item.conversationNarration } : {}),
+        ...(item.initialMessage ? { postInitialMessage: item.initialMessage } : {}),
       });
     },
     [navigation]
@@ -4187,7 +4283,7 @@ export default function FeedScreen({ navigation, route }: Props) {
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: COLORS.background }}>
-      <FlatList<FeedItem>
+      <FlatList<RenderedFeedItem>
         data={renderedFeedItems}
         keyExtractor={(item) => (item.kind === 'mission' ? item.id : item.feedId)}
         initialNumToRender={6}
@@ -4334,7 +4430,7 @@ export default function FeedScreen({ navigation, route }: Props) {
             ) : null}
           </View>
         }
-        renderItem={({ item }) =>
+        renderItem={({ item, index }) =>
           item.kind === 'promo' ? (
             <PromoTimerCard
               remainingSeconds={item.remainingSeconds}
@@ -4346,8 +4442,14 @@ export default function FeedScreen({ navigation, route }: Props) {
           ) : item.kind === 'pendingConversation' ? (
             <PendingConversationCard
               item={item}
+              showHeader={index === 0}
+              showViewAllBadge={
+                hasHiddenPendingConversations &&
+                item.conversationKey === visiblePendingConversationItems[1]?.conversationKey
+              }
               onContinue={handleContinueConversation}
               onDiscard={handleDiscardConversation}
+              onViewAll={() => setShowAllPendingConversations(true)}
             />
           ) : item.kind === 'resumeMission' ? (
             <ResumeMissionCard item={item} onContinue={handleContinueMission} />
@@ -4357,13 +4459,6 @@ export default function FeedScreen({ navigation, route }: Props) {
               onStart={handleStartMission}
               onViewAll={() => navigation.navigate('Friends')}
               playbackEnabled={videoPlaybackEnabled && activeFeedMediaId === item.id}
-            />
-          ) : item.kind === 'characterVideo' ? (
-            <CharacterVideoCard
-              item={item}
-              onPress={handleOpenCharacterVideo}
-              onOpenProfile={handleOpenCharacterVideoProfileFromFeed}
-              onStartConversation={handleStartConversationFromFeed}
             />
           ) : item.kind === 'vocab' ? (
             <VocabularyCard
@@ -4385,16 +4480,40 @@ export default function FeedScreen({ navigation, route }: Props) {
               onPlay={handlePlayLesson}
               onViewAll={() => navigation.navigate('Lessons')}
             />
-          ) : (
-            <FeedPostCard
-              item={item}
-              onPractice={handlePracticePost}
-              onMission={handleMissionPost}
-              onClaimExtra={handleClaimExtraPost}
-              claiming={claimingPostId === item.postId}
-              playbackEnabled={videoPlaybackEnabled && activeFeedMediaId === item.feedId}
-            />
-          )
+          ) : item.kind === 'feedGridRow' ? (
+            <View style={{ flexDirection: 'row' }}>
+              {item.items.map((gridItem, gridItemIndex) => (
+                <View
+                  key={gridItem.feedId}
+                  style={{
+                    flex: 1,
+                    marginRight: gridItemIndex === 0 && item.items.length > 1 ? 12 : 0,
+                  }}
+                >
+                  {gridItem.kind === 'characterVideo' ? (
+                    <CharacterVideoCard
+                      item={gridItem}
+                      onPress={handleOpenCharacterVideo}
+                      onOpenProfile={handleOpenCharacterVideoProfileFromFeed}
+                      onStartConversation={handleStartConversationFromFeed}
+                      compact
+                    />
+                  ) : (
+                    <FeedPostCard
+                      item={gridItem}
+                      onPractice={handlePracticePost}
+                      onMission={handleMissionPost}
+                      onClaimExtra={handleClaimExtraPost}
+                      claiming={claimingPostId === gridItem.postId}
+                      playbackEnabled={videoPlaybackEnabled && activeFeedMediaId === gridItem.feedId}
+                      compact
+                    />
+                  )}
+                </View>
+              ))}
+              {item.items.length === 1 ? <View style={{ flex: 1, marginLeft: 12 }} /> : null}
+            </View>
+          ) : null
         }
         ItemSeparatorComponent={() => <View style={{ height: 14 }} />}
         ListEmptyComponent={
@@ -4432,14 +4551,14 @@ export default function FeedScreen({ navigation, route }: Props) {
         initialFeedId={selectedCharacterVideoFeedId}
         onClose={handleCloseCharacterVideoViewer}
         onOpenProfile={handleOpenCharacterVideoProfile}
-        onReply={handleReplyToCharacterVideo}
+        onStartConversation={handleStartConversationFromCharacterVideoViewer}
         overlay={
           feedTourStep ? (
             <FeedTourOverlay
               step={feedTourStep}
               onDismiss={() => {
                 if (feedTourStep === 'swipeUp') {
-                  setFeedTourStep('sendMessage');
+                  setFeedTourStep('startConversation');
                 } else {
                   setFeedTourStep(null);
                   void AsyncStorage.setItem(SWIPE_UP_TOUR_STORAGE_KEY, '1').catch(() => {});

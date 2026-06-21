@@ -432,6 +432,8 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
         postVideoUrl: post.videoUrl,
         postCaption: post.caption,
         postContext: post.context || post.caption,
+        ...(post.conversationNarration ? { postConversationNarration: post.conversationNarration } : {}),
+        ...(post.initialMessage ? { postInitialMessage: post.initialMessage } : {}),
       });
     },
     [friend, navigation]

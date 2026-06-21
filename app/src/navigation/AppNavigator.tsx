@@ -78,6 +78,8 @@ export type RootStackParamList = {
     postVideoUrl?: string;
     postCaption?: string;
     postContext?: string;
+    postConversationNarration?: string;
+    postInitialMessage?: string;
     initialDraft?: string;
   };
   FriendProfile: { friendId: string };

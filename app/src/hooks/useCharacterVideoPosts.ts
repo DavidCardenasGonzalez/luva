@@ -8,8 +8,11 @@ export type CharacterVideoPost = {
   characterName: string;
   caption: string;
   context?: string;
+  conversationNarration?: string;
+  initialMessage?: string;
   imageUrl: string;
   thumbnailUrl?: string;
+  thumbnailMdUrl?: string;
   videoUrl: string;
   subtitlesUrl?: string;
   order: number;
@@ -89,6 +92,7 @@ function sanitizeCharacterVideoPost(input: unknown): CharacterVideoPost | null {
   const characterName = asString(raw.characterName);
   const caption = asString(raw.caption);
   const thumbnailUrl = normalizeUrl(raw.thumbnailUrl);
+  const thumbnailMdUrl = normalizeUrl(raw.thumbnailMdUrl);
   const videoUrl = normalizeUrl(raw.videoUrl);
   const imageUrl = normalizeUrl(raw.imageUrl) || thumbnailUrl;
   const order = normalizeOrder(raw.order);
@@ -103,8 +107,11 @@ function sanitizeCharacterVideoPost(input: unknown): CharacterVideoPost | null {
     characterName,
     caption,
     context: asString(raw.context),
+    conversationNarration: asString(raw.conversationNarration),
+    initialMessage: asString(raw.initialMessage),
     imageUrl,
     thumbnailUrl: thumbnailUrl || imageUrl,
+    thumbnailMdUrl,
     videoUrl,
     subtitlesUrl: normalizeUrl(raw.subtitlesUrl),
     order,

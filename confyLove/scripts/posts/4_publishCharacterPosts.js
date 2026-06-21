@@ -290,6 +290,11 @@ function writeJsonFile(filePath, value) {
   fs.writeFileSync(filePath, JSON.stringify(value, null, 2) + "\n", "utf8");
 }
 
+function normalizeOptionalText(value, maxLength) {
+  const text = typeof value === "string" ? value.trim() : "";
+  return text ? text.slice(0, maxLength) : undefined;
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -392,6 +397,20 @@ async function main() {
 
     const imageUrl = `${cdnBase}/${s3Key}`;
     const context = buildPostContext(character.characterName, imagePrompt, caption);
+    const conversationNarration = normalizeOptionalText(
+      comfyResults[jobKey]?.conversationNarration ??
+        submitted[jobKey]?.conversationNarration ??
+        comfyResults[jobKey]?.narration ??
+        submitted[jobKey]?.narration,
+      180
+    );
+    const initialMessage = normalizeOptionalText(
+      comfyResults[jobKey]?.initialMessage ??
+        submitted[jobKey]?.initialMessage ??
+        comfyResults[jobKey]?.firstMessage ??
+        submitted[jobKey]?.firstMessage,
+      600
+    );
 
     // 4. Guardar CharacterPost en DynamoDB
     const now = new Date().toISOString();
@@ -408,6 +427,8 @@ async function main() {
       ...(character.avatarImageUrl ? { avatarImageUrl: character.avatarImageUrl } : {}),
       caption,
       context,
+      ...(conversationNarration ? { conversationNarration } : {}),
+      ...(initialMessage ? { initialMessage } : {}),
       imageUrl,
       order: day,
       createdAt: now,

@@ -51,10 +51,14 @@ export type StoredCharacterPostRecord = {
   avatarImageMdUrl?: unknown;
   caption?: unknown;
   context?: unknown;
+  conversationNarration?: unknown;
+  initialMessage?: unknown;
   imageUrl?: unknown;
   imageURL?: unknown;
   thumbnailUrl?: unknown;
   thumbnailURL?: unknown;
+  thumbnailMdUrl?: unknown;
+  thumbnailMdURL?: unknown;
   videoUrl?: unknown;
   videoURL?: unknown;
   subtitlesUrl?: unknown;
@@ -77,8 +81,11 @@ export type CharacterPost = {
   characterName: string;
   caption: string;
   context?: string;
+  conversationNarration?: string;
+  initialMessage?: string;
   imageUrl: string;
   thumbnailUrl?: string;
+  thumbnailMdUrl?: string;
   videoUrl?: string;
   subtitlesUrl?: string;
   subtitlesKey?: string;
@@ -151,10 +158,16 @@ type CharacterPostWriteInput = {
   caption?: unknown;
   text?: unknown;
   context?: unknown;
+  conversationNarration?: unknown;
+  narration?: unknown;
+  initialMessage?: unknown;
+  firstMessage?: unknown;
   imageUrl?: unknown;
   imageURL?: unknown;
   thumbnailUrl?: unknown;
   thumbnailURL?: unknown;
+  thumbnailMdUrl?: unknown;
+  thumbnailMdURL?: unknown;
   videoUrl?: unknown;
   videoURL?: unknown;
   subtitlesUrl?: unknown;
@@ -482,11 +495,27 @@ export function buildCharacterPostRecord(
   }
   const hasContextInput = Object.prototype.hasOwnProperty.call(input, 'context');
   const context = hasContextInput ? normalizeContext(input.context) : options?.existing?.context;
+  const hasConversationNarrationInput =
+    Object.prototype.hasOwnProperty.call(input, 'conversationNarration') ||
+    Object.prototype.hasOwnProperty.call(input, 'narration');
+  const conversationNarration = hasConversationNarrationInput
+    ? normalizeConversationNarration(input.conversationNarration ?? input.narration)
+    : options?.existing?.conversationNarration;
+  const hasInitialMessageInput =
+    Object.prototype.hasOwnProperty.call(input, 'initialMessage') ||
+    Object.prototype.hasOwnProperty.call(input, 'firstMessage');
+  const initialMessage = hasInitialMessageInput
+    ? normalizeInitialMessage(input.initialMessage ?? input.firstMessage)
+    : options?.existing?.initialMessage;
 
   const videoUrl = normalizeOptionalUrl(input.videoUrl ?? input.videoURL, 'INVALID_CHARACTER_POST_VIDEO_URL');
   const thumbnailUrl = normalizeOptionalUrl(
     input.thumbnailUrl ?? input.thumbnailURL,
     'INVALID_CHARACTER_POST_THUMBNAIL_URL',
+  );
+  const thumbnailMdUrl = normalizeOptionalUrl(
+    input.thumbnailMdUrl ?? input.thumbnailMdURL,
+    'INVALID_CHARACTER_POST_THUMBNAIL_MD_URL',
   );
   const imageUrl = normalizeOptionalUrl(
     input.imageUrl ?? input.imageURL ?? thumbnailUrl,
@@ -533,8 +562,11 @@ export function buildCharacterPostRecord(
     ...(character.avatarImageMdUrl ? { avatarImageMdUrl: character.avatarImageMdUrl } : {}),
     caption,
     ...(context ? { context } : {}),
+    ...(conversationNarration ? { conversationNarration } : {}),
+    ...(initialMessage ? { initialMessage } : {}),
     imageUrl,
     ...(thumbnailUrl || videoUrl ? { thumbnailUrl: thumbnailUrl || imageUrl } : {}),
+    ...(thumbnailMdUrl ? { thumbnailMdUrl } : {}),
     ...(videoUrl ? { videoUrl } : {}),
     ...(subtitlesUrl ? { subtitlesUrl } : {}),
     ...(subtitlesKey ? { subtitlesKey } : {}),
@@ -558,8 +590,11 @@ export function toCharacterPost(input: unknown): CharacterPost | undefined {
     normalizeLabel(raw?.characterName) || normalizeLabel(raw?.missionTitle) || 'Personaje';
   const caption = normalizeCaption(raw?.caption);
   const context = normalizeContext(raw?.context);
+  const conversationNarration = normalizeConversationNarration(raw?.conversationNarration);
+  const initialMessage = normalizeInitialMessage(raw?.initialMessage);
   const videoUrl = normalizeStoredOptionalUrl(raw?.videoUrl ?? raw?.videoURL);
   const thumbnailUrl = normalizeStoredOptionalUrl(raw?.thumbnailUrl ?? raw?.thumbnailURL);
+  const thumbnailMdUrl = normalizeStoredOptionalUrl(raw?.thumbnailMdUrl ?? raw?.thumbnailMdURL);
   const subtitlesUrl = normalizeStoredOptionalUrl(raw?.subtitlesUrl ?? raw?.subtitlesURL);
   const subtitlesKey = normalizeSubtitleKey(raw?.subtitlesKey);
   const imageUrl = normalizeStoredOptionalUrl(raw?.imageUrl ?? raw?.imageURL ?? thumbnailUrl);
@@ -590,8 +625,11 @@ export function toCharacterPost(input: unknown): CharacterPost | undefined {
     ...(avatarImageMdUrl ? { avatarImageMdUrl } : {}),
     caption,
     ...(context ? { context } : {}),
+    ...(conversationNarration ? { conversationNarration } : {}),
+    ...(initialMessage ? { initialMessage } : {}),
     imageUrl,
     ...(thumbnailUrl || videoUrl ? { thumbnailUrl: thumbnailUrl || imageUrl } : {}),
+    ...(thumbnailMdUrl ? { thumbnailMdUrl } : {}),
     ...(videoUrl ? { videoUrl } : {}),
     ...(subtitlesUrl ? { subtitlesUrl } : {}),
     ...(subtitlesKey ? { subtitlesKey } : {}),
@@ -988,6 +1026,24 @@ function normalizeContext(value: unknown): string | undefined {
   }
 
   return normalized.slice(0, 3000);
+}
+
+function normalizeConversationNarration(value: unknown): string | undefined {
+  const normalized = asString(value)?.replace(/\s+/g, ' ').trim();
+  if (!normalized) {
+    return undefined;
+  }
+
+  return normalized.slice(0, 180);
+}
+
+function normalizeInitialMessage(value: unknown): string | undefined {
+  const normalized = asString(value)?.trim().replace(/\s+\n/g, '\n');
+  if (!normalized) {
+    return undefined;
+  }
+
+  return normalized.slice(0, 600);
 }
 
 function normalizeSubtitleKey(value: unknown): string | undefined {
