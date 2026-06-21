@@ -776,6 +776,18 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       ? { uri: avatarUrl }
       : getChatAvatar(friend.friendId);
   }, [friend]);
+  const chatBackgroundSource = useMemo(() => {
+    if (!friend) return undefined;
+    const profilePhotoUrl = (
+      friend.avatarImageMdUrl ||
+      friend.avatarImageUrl ||
+      friend.avatarImageXsUrl ||
+      friend.characterSheetImageUrl
+    )?.trim();
+    return profilePhotoUrl
+      ? { uri: profilePhotoUrl }
+      : getChatAvatar(friend.friendId);
+  }, [friend]);
   const avatarInitial = (friend?.characterName.trim().charAt(0) || '?').toUpperCase();
   const headerTopPadding = Math.max(insets.top, 48) + 10;
   const hasStartedConversation = useMemo(
@@ -2280,12 +2292,31 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           </View>
         </View>
 
-        <ScrollView
-          ref={scrollRef}
-          style={{ flex: 1 }}
-          contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
-          keyboardShouldPersistTaps="handled"
-        >
+        <View style={{ flex: 1, backgroundColor: COLORS.background }}>
+          {chatBackgroundSource ? (
+            <>
+              <Image
+                source={chatBackgroundSource}
+                style={StyleSheet.absoluteFillObject}
+                resizeMode="cover"
+                blurRadius={Platform.OS === 'ios' ? 3 : 2}
+              />
+              <View
+                pointerEvents="none"
+                style={[
+                  StyleSheet.absoluteFillObject,
+                  { backgroundColor: 'rgba(248, 250, 252, 0.25)' },
+                ]}
+              />
+            </>
+          ) : null}
+
+          <ScrollView
+            ref={scrollRef}
+            style={{ flex: 1 }}
+            contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+            keyboardShouldPersistTaps="handled"
+          >
           {sourcePost ? (
             <SourcePostCard
               post={sourcePost}
@@ -2517,219 +2548,220 @@ export default function FriendChatScreen({ navigation, route }: Props) {
               affinity={affinityUpdate}
             />
           ) : null}
-        </ScrollView>
+          </ScrollView>
 
-        {errorMessage ? (
-          <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
-            <Text style={{ color: '#dc2626' }}>{errorMessage}</Text>
-            {photoRetryPrompt ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Reintentar pedir foto"
-                onPress={handleRetryPhotoRequest}
-                disabled={flowState !== 'idle' || retryingLastExchange}
-                style={({ pressed }) => ({
-                  alignSelf: 'flex-start',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 8,
-                  marginTop: 10,
-                  paddingHorizontal: 14,
-                  paddingVertical: 9,
-                  borderRadius: 999,
-                  backgroundColor:
-                    flowState !== 'idle' || retryingLastExchange
-                      ? '#e2e8f0'
-                      : pressed
-                      ? '#1d4ed8'
-                      : '#2563eb',
-                  opacity: flowState !== 'idle' || retryingLastExchange ? 0.65 : 1,
-                })}
-              >
-                <MaterialIcons name="replay" size={18} color="white" />
-                <Text style={{ color: 'white', fontWeight: '900' }}>Reintentar</Text>
-              </Pressable>
-            ) : null}
-          </View>
-        ) : null}
-
-        {conversationEnded ? (
-          <View
-            style={{
-              paddingHorizontal: 16,
-              paddingTop: 12,
-              paddingBottom: Math.max(insets.bottom, 8),
-              backgroundColor: '#f8fafc',
-              borderTopWidth: 1,
-              borderTopColor: COLORS.border,
-            }}
-          >
-            <Text style={{ color: '#15803d', fontWeight: '800' }}>Conversación terminada</Text>
-            <Text style={{ color: COLORS.muted, marginTop: 4 }}>
-              El chat quedó cerrado. Vuelve al feed para seguir practicando.
-            </Text>
-            <Pressable
-              onPress={handleFinishConversation}
-              style={({ pressed }) => ({
-                marginTop: 10,
-                paddingVertical: 11,
-                borderRadius: 999,
-                alignItems: 'center',
-                backgroundColor: pressed ? '#047857' : '#10b981',
-              })}
-            >
-              <Text style={{ color: 'white', fontWeight: '900' }}>Finalizar</Text>
-            </Pressable>
-          </View>
-        ) : (
-          <View>
-            {hasStartedConversation ? (
-              <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
+          {errorMessage ? (
+            <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
+              <Text style={{ color: '#dc2626' }}>{errorMessage}</Text>
+              {photoRetryPrompt ? (
                 <Pressable
-                  accessibilityLabel="Finalizar conversación y recibir feedback"
-                  onPress={handleEndConversation}
-                  disabled={endingConversation || flowState !== 'idle' || retryingLastExchange}
-                  style={({ pressed }) => ({
-                    alignSelf: 'flex-end',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 6,
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
-                    borderRadius: 999,
-                    backgroundColor: pressed ? '#dcfce7' : '#f0fdf4',
-                    borderWidth: 1,
-                    borderColor: '#bbf7d0',
-                    opacity: endingConversation || flowState !== 'idle' || retryingLastExchange ? 0.6 : 1,
-                  })}
-                >
-                  {endingConversation ? (
-                    <ActivityIndicator size="small" color="#15803d" />
-                  ) : (
-                    <MaterialIcons name="flag" size={16} color="#15803d" />
-                  )}
-                  <Text style={{ color: '#15803d', fontWeight: '800', fontSize: 13 }}>
-                    {endingConversation ? 'Finalizando…' : 'Finalizar y recibir feedback'}
-                  </Text>
-                </Pressable>
-              </View>
-            ) : null}
-            {showAttachMenu ? (
-              <View
-                style={{
-                  marginHorizontal: 12,
-                  marginBottom: 6,
-                  backgroundColor: 'white',
-                  borderRadius: 12,
-                  borderWidth: 1,
-                  borderColor: '#e2e8f0',
-                  overflow: 'hidden',
-                  alignSelf: 'flex-start',
-                  shadowColor: '#0f172a',
-                  shadowOpacity: 0.08,
-                  shadowRadius: 8,
-                  elevation: 3,
-                }}
-              >
-                <Pressable
-                  onPress={handlePickPhoto}
-                  style={({ pressed }) => ({
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 10,
-                    paddingHorizontal: 16,
-                    paddingVertical: 12,
-                    backgroundColor: pressed ? '#f1f5f9' : 'white',
-                  })}
-                >
-                  <MaterialIcons name="photo" size={20} color="#475569" />
-                  <Text style={{ color: '#1e293b', fontWeight: '600', fontSize: 14 }}>Enviar foto</Text>
-                </Pressable>
-                <View style={{ height: 1, backgroundColor: '#e2e8f0' }} />
-                <Pressable
-                  onPress={handleTakePhoto}
-                  style={({ pressed }) => ({
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 10,
-                    paddingHorizontal: 16,
-                    paddingVertical: 12,
-                    backgroundColor: pressed ? '#f1f5f9' : 'white',
-                  })}
-                >
-                  <MaterialIcons name="photo-camera" size={20} color="#475569" />
-                  <Text style={{ color: '#1e293b', fontWeight: '600', fontSize: 14 }}>Abrir cámara</Text>
-                </Pressable>
-                <View style={{ height: 1, backgroundColor: '#e2e8f0' }} />
-                <Pressable
-                  onPress={handleOpenPhotoRequest}
+                  accessibilityRole="button"
+                  accessibilityLabel="Reintentar pedir foto"
+                  onPress={handleRetryPhotoRequest}
                   disabled={flowState !== 'idle' || retryingLastExchange}
                   style={({ pressed }) => ({
+                    alignSelf: 'flex-start',
                     flexDirection: 'row',
                     alignItems: 'center',
-                    gap: 10,
-                    paddingHorizontal: 16,
-                    paddingVertical: 12,
-                    backgroundColor: pressed ? '#f1f5f9' : 'white',
-                    opacity: flowState !== 'idle' || retryingLastExchange ? 0.6 : 1,
+                    gap: 8,
+                    marginTop: 10,
+                    paddingHorizontal: 14,
+                    paddingVertical: 9,
+                    borderRadius: 999,
+                    backgroundColor:
+                      flowState !== 'idle' || retryingLastExchange
+                        ? '#e2e8f0'
+                        : pressed
+                        ? '#1d4ed8'
+                        : '#2563eb',
+                    opacity: flowState !== 'idle' || retryingLastExchange ? 0.65 : 1,
                   })}
                 >
-                  <MaterialIcons
-                    name="add-photo-alternate"
-                    size={20}
-                    color={!photoRequestCreditsLoading && photoRequestCredits <= 0 ? '#dc2626' : '#475569'}
-                  />
-                  <Text style={{ color: '#1e293b', fontWeight: '600', fontSize: 14 }}>Pedir foto</Text>
-                  <View
-                    style={{
-                      minWidth: 28,
-                      paddingHorizontal: 8,
-                      paddingVertical: 3,
-                      borderRadius: 999,
+                  <MaterialIcons name="replay" size={18} color="white" />
+                  <Text style={{ color: 'white', fontWeight: '900' }}>Reintentar</Text>
+                </Pressable>
+              ) : null}
+            </View>
+          ) : null}
+
+          {conversationEnded ? (
+            <View
+              style={{
+                paddingHorizontal: 16,
+                paddingTop: 12,
+                paddingBottom: Math.max(insets.bottom, 8),
+                backgroundColor: '#f8fafc',
+                borderTopWidth: 1,
+                borderTopColor: COLORS.border,
+              }}
+            >
+              <Text style={{ color: '#15803d', fontWeight: '800' }}>Conversación terminada</Text>
+              <Text style={{ color: COLORS.muted, marginTop: 4 }}>
+                El chat quedó cerrado. Vuelve al feed para seguir practicando.
+              </Text>
+              <Pressable
+                onPress={handleFinishConversation}
+                style={({ pressed }) => ({
+                  marginTop: 10,
+                  paddingVertical: 11,
+                  borderRadius: 999,
+                  alignItems: 'center',
+                  backgroundColor: pressed ? '#047857' : '#10b981',
+                })}
+              >
+                <Text style={{ color: 'white', fontWeight: '900' }}>Finalizar</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View>
+              {hasStartedConversation ? (
+                <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
+                  <Pressable
+                    accessibilityLabel="Finalizar conversación y recibir feedback"
+                    onPress={handleEndConversation}
+                    disabled={endingConversation || flowState !== 'idle' || retryingLastExchange}
+                    style={({ pressed }) => ({
+                      alignSelf: 'flex-end',
+                      flexDirection: 'row',
                       alignItems: 'center',
-                      backgroundColor:
-                        !photoRequestCreditsLoading && photoRequestCredits <= 0 ? '#fee2e2' : '#ecfeff',
+                      gap: 6,
+                      paddingHorizontal: 12,
+                      paddingVertical: 8,
+                      borderRadius: 999,
+                      backgroundColor: pressed ? '#dcfce7' : '#f0fdf4',
                       borderWidth: 1,
-                      borderColor:
-                        !photoRequestCreditsLoading && photoRequestCredits <= 0 ? '#fecaca' : '#a5f3fc',
-                    }}
+                      borderColor: '#bbf7d0',
+                      opacity: endingConversation || flowState !== 'idle' || retryingLastExchange ? 0.6 : 1,
+                    })}
                   >
-                    <Text
+                    {endingConversation ? (
+                      <ActivityIndicator size="small" color="#15803d" />
+                    ) : (
+                      <MaterialIcons name="flag" size={16} color="#15803d" />
+                    )}
+                    <Text style={{ color: '#15803d', fontWeight: '800', fontSize: 13 }}>
+                      {endingConversation ? 'Finalizando…' : 'Finalizar y recibir feedback'}
+                    </Text>
+                  </Pressable>
+                </View>
+              ) : null}
+              {showAttachMenu ? (
+                <View
+                  style={{
+                    marginHorizontal: 12,
+                    marginBottom: 6,
+                    backgroundColor: 'white',
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: '#e2e8f0',
+                    overflow: 'hidden',
+                    alignSelf: 'flex-start',
+                    shadowColor: '#0f172a',
+                    shadowOpacity: 0.08,
+                    shadowRadius: 8,
+                    elevation: 3,
+                  }}
+                >
+                  <Pressable
+                    onPress={handlePickPhoto}
+                    style={({ pressed }) => ({
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 10,
+                      paddingHorizontal: 16,
+                      paddingVertical: 12,
+                      backgroundColor: pressed ? '#f1f5f9' : 'white',
+                    })}
+                  >
+                    <MaterialIcons name="photo" size={20} color="#475569" />
+                    <Text style={{ color: '#1e293b', fontWeight: '600', fontSize: 14 }}>Enviar foto</Text>
+                  </Pressable>
+                  <View style={{ height: 1, backgroundColor: '#e2e8f0' }} />
+                  <Pressable
+                    onPress={handleTakePhoto}
+                    style={({ pressed }) => ({
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 10,
+                      paddingHorizontal: 16,
+                      paddingVertical: 12,
+                      backgroundColor: pressed ? '#f1f5f9' : 'white',
+                    })}
+                  >
+                    <MaterialIcons name="photo-camera" size={20} color="#475569" />
+                    <Text style={{ color: '#1e293b', fontWeight: '600', fontSize: 14 }}>Abrir cámara</Text>
+                  </Pressable>
+                  <View style={{ height: 1, backgroundColor: '#e2e8f0' }} />
+                  <Pressable
+                    onPress={handleOpenPhotoRequest}
+                    disabled={flowState !== 'idle' || retryingLastExchange}
+                    style={({ pressed }) => ({
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 10,
+                      paddingHorizontal: 16,
+                      paddingVertical: 12,
+                      backgroundColor: pressed ? '#f1f5f9' : 'white',
+                      opacity: flowState !== 'idle' || retryingLastExchange ? 0.6 : 1,
+                    })}
+                  >
+                    <MaterialIcons
+                      name="add-photo-alternate"
+                      size={20}
+                      color={!photoRequestCreditsLoading && photoRequestCredits <= 0 ? '#dc2626' : '#475569'}
+                    />
+                    <Text style={{ color: '#1e293b', fontWeight: '600', fontSize: 14 }}>Pedir foto</Text>
+                    <View
                       style={{
-                        color:
-                          !photoRequestCreditsLoading && photoRequestCredits <= 0 ? '#dc2626' : '#0f766e',
-                        fontWeight: '900',
-                        fontSize: 12,
+                        minWidth: 28,
+                        paddingHorizontal: 8,
+                        paddingVertical: 3,
+                        borderRadius: 999,
+                        alignItems: 'center',
+                        backgroundColor:
+                          !photoRequestCreditsLoading && photoRequestCredits <= 0 ? '#fee2e2' : '#ecfeff',
+                        borderWidth: 1,
+                        borderColor:
+                          !photoRequestCreditsLoading && photoRequestCredits <= 0 ? '#fecaca' : '#a5f3fc',
                       }}
                     >
-                      {photoRequestCreditsLoading ? '...' : photoRequestCredits}
-                    </Text>
-                  </View>
-                </Pressable>
-              </View>
-            ) : null}
-            <StoryMessageComposer
-              flowState={flowState}
-              retryBlocked={retryingLastExchange}
-              recordBlocked={retryingLastExchange || (!isUnlimited && coinsLoading) || voiceCoinLocked}
-              statusLabel={statusLabel}
-              text={composerText}
-              onTextChange={updateComposerText}
-              onSendText={handleSendText}
-              onRecordPressIn={handleRecordPressIn}
-              onRecordRelease={handleRecordRelease}
-              onPlusPress={() => setShowAttachMenu((v) => !v)}
-              pendingAttachment={pendingChatImage ? { uri: pendingChatImage.uri } : null}
-              attachmentLoading={preparingChatImage}
-              onRemoveAttachment={() => setPendingChatImage(null)}
-              photoRequestMode={photoRequestMode}
-              onCancelPhotoRequestMode={() => {
-                setPhotoRequestMode(false);
-                setErrorMessage(null);
-              }}
-            />
-          </View>
-        )}
+                      <Text
+                        style={{
+                          color:
+                            !photoRequestCreditsLoading && photoRequestCredits <= 0 ? '#dc2626' : '#0f766e',
+                          fontWeight: '900',
+                          fontSize: 12,
+                        }}
+                      >
+                        {photoRequestCreditsLoading ? '...' : photoRequestCredits}
+                      </Text>
+                    </View>
+                  </Pressable>
+                </View>
+              ) : null}
+              <StoryMessageComposer
+                flowState={flowState}
+                retryBlocked={retryingLastExchange}
+                recordBlocked={retryingLastExchange || (!isUnlimited && coinsLoading) || voiceCoinLocked}
+                statusLabel={statusLabel}
+                text={composerText}
+                onTextChange={updateComposerText}
+                onSendText={handleSendText}
+                onRecordPressIn={handleRecordPressIn}
+                onRecordRelease={handleRecordRelease}
+                onPlusPress={() => setShowAttachMenu((v) => !v)}
+                pendingAttachment={pendingChatImage ? { uri: pendingChatImage.uri } : null}
+                attachmentLoading={preparingChatImage}
+                onRemoveAttachment={() => setPendingChatImage(null)}
+                photoRequestMode={photoRequestMode}
+                onCancelPhotoRequestMode={() => {
+                  setPhotoRequestMode(false);
+                  setErrorMessage(null);
+                }}
+              />
+            </View>
+          )}
+        </View>
 
         <Modal
           visible={showProfilePreview}

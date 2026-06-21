@@ -209,7 +209,6 @@ function buildPostContext(characterName, imagePrompt, caption) {
   return [
     `The learner is replying to ${characterName}'s profile post.`,
     imagePrompt ? `Photo context: ${String(imagePrompt).trim()}` : "",
-    caption ? `Visible caption: ${String(caption).trim()}` : "",
   ]
     .filter(Boolean)
     .join("\n")
