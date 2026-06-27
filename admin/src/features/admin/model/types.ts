@@ -231,6 +231,11 @@ export type AdminCharacterPost = {
   subtitlesUrl?: string
   subtitlesKey?: string
   order: number
+  likeCount?: number
+  playCount?: number
+  watched3sCount?: number
+  conversationCount?: number
+  messageCount?: number
   suggestedReplies: string[]
   avatarImageUrl?: string
   createdAt: string

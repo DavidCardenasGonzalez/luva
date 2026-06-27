@@ -19,13 +19,14 @@ import {
 import { trackOnboardingStepViewed } from './model/tracking';
 import { getStoredJourneyPlan, saveJourneyPlan } from '../progress/journeyProgress';
 import {
-  DEFAULT_ONBOARDING_STEPS,
+  getDefaultOnboardingSteps,
   OnboardingCharacterId,
   OnboardingPhraseSelection,
   OnboardingPlanResponse,
   OnboardingSpeakingSummary,
   OnboardingStepContent,
 } from './model/types';
+import { useLanguage } from '../i18n/LanguageProvider';
 import Step1 from './step-1/Step1';
 import Step2 from './step-2/Step2';
 import Step2B from './step-2B/Step2B';
@@ -137,11 +138,14 @@ function renderStep(
 }
 
 export default function OnboardingScreen({ navigation, route }: Props) {
+  const { language } = useLanguage();
+  const defaultSteps = getDefaultOnboardingSteps(language);
+  const existingAccountText = language === 'es' ? 'Ya tengo una cuenta' : 'I already have an account';
   const initialStartAtStepRef = useRef(route.params?.startAtStep);
-  const [steps, setSteps] = useState(DEFAULT_ONBOARDING_STEPS);
+  const [steps, setSteps] = useState(defaultSteps);
   const [stepIndex, setStepIndex] = useState(() => (
     getStepIndexForStepNumber(
-      DEFAULT_ONBOARDING_STEPS,
+      defaultSteps,
       getDisplayableOnboardingStepNumber(initialStartAtStepRef.current),
     )
   ));
@@ -154,7 +158,7 @@ export default function OnboardingScreen({ navigation, route }: Props) {
   });
   const [onboardingPlan, setOnboardingPlan] = useState<OnboardingPlanResponse | null>(null);
   const trackedStepsRef = useRef<Set<string>>(new Set());
-  const activeStep = steps[stepIndex] || DEFAULT_ONBOARDING_STEPS[0];
+  const activeStep = steps[stepIndex] || defaultSteps[0];
   const isLastStep = stepIndex >= steps.length - 1;
   const visibleStepCount = activeStep.stepNumber <= 3
     ? steps.filter((step) => step.stepNumber <= 3).length
@@ -168,7 +172,7 @@ export default function OnboardingScreen({ navigation, route }: Props) {
     const startAtStep = initialStartAtStepRef.current;
 
     Promise.all([
-      fetchOnboardingContent(),
+      fetchOnboardingContent(language),
       startAtStep ? Promise.resolve(null) : getOnboardingDraftProgress(),
       getStoredJourneyPlan(),
     ])
@@ -203,7 +207,7 @@ export default function OnboardingScreen({ navigation, route }: Props) {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     if (loadingContent) return;
@@ -486,7 +490,7 @@ export default function OnboardingScreen({ navigation, route }: Props) {
               <Pressable
                 onPress={openAccountAccess}
                 accessibilityRole="button"
-                accessibilityLabel="Ya tengo una cuenta"
+                accessibilityLabel={existingAccountText}
                 style={({ pressed }) => ({
                   minHeight: 38,
                   alignItems: 'center',
@@ -501,7 +505,7 @@ export default function OnboardingScreen({ navigation, route }: Props) {
                     fontWeight: '800',
                   }}
                 >
-                  Ya tengo una cuenta
+                  {existingAccountText}
                 </Text>
               </Pressable>
             ) : null}

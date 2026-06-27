@@ -5,20 +5,21 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useShadowingPlayer } from '../shadowing/ShadowingPlayerProvider';
 import { trackMixpanelTabSelected } from '../marketing/mixpanelEvents';
+import { useLanguage } from '../i18n/LanguageProvider';
 
 type AppTabKey = 'home' | 'practice' | 'missions' | 'lessons' | 'journey' | 'shadowing' | 'feed' | 'friends' | 'settings';
 
 type TabConfig = {
   key: AppTabKey;
-  label: string;
+  labelKey: string;
   icon: React.ComponentProps<typeof MaterialIcons>['name'];
   route: 'Deck' | 'Lessons' | 'MyJourney' | 'Shadowing' | 'Feed' | 'Friends' | 'Settings';
 };
 
 const TABS: TabConfig[] = [
-  { key: 'feed', label: 'Feed', icon: 'rss-feed', route: 'Feed' },
-  { key: 'friends', label: 'Amigos', icon: 'people', route: 'Friends' },
-  { key: 'settings', label: 'Ajustes', icon: 'settings', route: 'Settings' },
+  { key: 'feed', labelKey: 'tabs.feed', icon: 'rss-feed', route: 'Feed' },
+  { key: 'friends', labelKey: 'tabs.friends', icon: 'people', route: 'Friends' },
+  { key: 'settings', labelKey: 'tabs.settings', icon: 'settings', route: 'Settings' },
 ];
 
 function formatMiniPlayerTime(seconds: number) {
@@ -39,6 +40,7 @@ export default function AppTabBar({
 }) {
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
+  const { t } = useLanguage();
   const {
     currentChapter,
     positionSeconds,
@@ -88,7 +90,7 @@ export default function AppTabBar({
         <Pressable
           onPress={onShadowingMiniPlayerPress || (() => navigation.navigate('Shadowing'))}
           accessibilityRole="button"
-          accessibilityLabel="Abrir reproductor de Shadowing"
+          accessibilityLabel={t('tabs.shadowingPlayer')}
           style={({ pressed }) => ({
             minHeight: 52,
             marginBottom: 8,
@@ -118,7 +120,7 @@ export default function AppTabBar({
               }}
               disabled={audioLoading}
               accessibilityRole="button"
-              accessibilityLabel={isPlaying ? 'Pausar Shadowing' : 'Reproducir Shadowing'}
+              accessibilityLabel={isPlaying ? t('tabs.pauseShadowing') : t('tabs.playShadowing')}
               style={({ pressed }) => ({
                 width: 36,
                 height: 36,
@@ -146,12 +148,13 @@ export default function AppTabBar({
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         {TABS.map((tab) => {
           const isActive = tab.key === active;
+          const label = t(tab.labelKey);
           return (
             <Pressable
               key={tab.key}
               onPress={() => navigateToTab(tab)}
               accessibilityRole="button"
-              accessibilityLabel={tab.label}
+              accessibilityLabel={label}
               style={({ pressed }) => ({
                 flex: 1,
                 minHeight: 54,
@@ -176,7 +179,7 @@ export default function AppTabBar({
                 }}
                 numberOfLines={1}
               >
-                {tab.label}
+                {label}
               </Text>
             </Pressable>
           );

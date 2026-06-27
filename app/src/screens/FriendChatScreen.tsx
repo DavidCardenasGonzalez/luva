@@ -88,6 +88,7 @@ import {
   cancelConversationReminderAsync,
   scheduleConversationReminderAsync,
 } from '../notifications/conversationReminders';
+import { useLanguage } from '../i18n/LanguageProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FriendChat'>;
 
@@ -687,6 +688,7 @@ function SourcePostCard({
 
 export default function FriendChatScreen({ navigation, route }: Props) {
   const friendId = route.params?.friendId;
+  const { language, supportLanguage, t } = useLanguage();
   const { width: windowWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
@@ -757,6 +759,29 @@ export default function FriendChatScreen({ navigation, route }: Props) {
   const [englishDifficulty, setEnglishDifficulty] = useState<EnglishDifficulty | undefined>(undefined);
   const [conversationEnded, setConversationEnded] = useState(false);
   const [conversationFeedback, setConversationFeedback] = useState<FriendConversationFeedback | null>(null);
+  const chatIntroText = conversationEnded
+    ? language === 'es'
+      ? 'Esta práctica ya terminó. Puedes revisar la conversación y el feedback final.'
+      : 'This practice is finished. You can review the conversation and final feedback.'
+    : sourcePost
+      ? language === 'es'
+        ? 'Usa el post como inspiración para tu respuesta. Puedes escribir en inglés o en tu idioma nativo.'
+        : 'Use the post as inspiration for your reply. You can write in English or your native language.'
+      : language === 'es'
+        ? 'Habla de forma natural. Puedes escribir en inglés, tu idioma nativo o una mezcla de ambos.'
+        : 'Speak naturally. You can write in English, your native language, or a mix of both.';
+  const conversationTitleText = language === 'es' ? 'Conversación' : 'Conversation';
+  const emptyConversationText = conversationEnded
+    ? language === 'es'
+      ? 'Esta conversación ya fue marcada como terminada.'
+      : 'This conversation has already been marked as finished.'
+    : sourcePost
+      ? language === 'es'
+        ? 'Escríbele o graba una respuesta al post para empezar.'
+        : 'Write or record a reply to the post to start.'
+      : language === 'es'
+        ? 'Escríbele o graba tu primer mensaje para empezar una práctica libre.'
+        : 'Write or record your first message to start free practice.';
   const [conversationStartedAt, setConversationStartedAt] = useState(() => new Date().toISOString());
   const [affinityUpdate, setAffinityUpdate] = useState<FriendAffinityUpdate | null>(null);
   const affinityStatusLabel = useMemo(() => {
@@ -1159,12 +1184,12 @@ export default function FriendChatScreen({ navigation, route }: Props) {
       if (!hasStartedConversation || conversationEnded) return;
       event.preventDefault();
       Alert.alert(
-        '¿Quieres terminar la conversación?',
-        `Antes de salir puedes recibir feedback sobre tu práctica con ${friend?.characterName || 'tu amigo'}.`,
+        t('friendChat.exitPrompt.title'),
+        t('friendChat.exitPrompt.message', { name: friend?.characterName || '' }),
         [
-          { text: 'Seguir hablando', style: 'cancel' },
+          { text: t('friendChat.exitPrompt.keepTalking'), style: 'cancel' },
           {
-            text: 'Salir sin feedback',
+            text: t('friendChat.exitPrompt.exitWithoutFeedback'),
             style: 'destructive',
             onPress: () => {
               skipExitPromptRef.current = true;
@@ -1172,7 +1197,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
             },
           },
           {
-            text: 'Recibir feedback',
+            text: t('friendChat.exitPrompt.getFeedback'),
             onPress: () => {
               handleEndConversationRef.current();
             },
@@ -1469,10 +1494,17 @@ export default function FriendChatScreen({ navigation, route }: Props) {
     }));
 
     try {
+      if (supportLanguage === 'en') {
+        setMessageTranslations((current) => ({
+          ...current,
+          [messageId]: { text: trimmed, loading: false },
+        }));
+        return;
+      }
       const payload = await api.post<TranslationResponse>('/translate', {
         text: trimmed,
         source: 'en',
-        target: 'es',
+        target: supportLanguage,
       });
       void trackMixpanelFriendEvent('friend_chat_message_translated', {
         friend_id: friend?.friendId,
@@ -1492,7 +1524,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
         },
       }));
     }
-  }, [friend, messageTranslations]);
+  }, [friend, messageTranslations, supportLanguage]);
 
   const handleAdvance = useCallback(
     async (
@@ -2378,24 +2410,16 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           <View style={{ padding: 14, borderRadius: 12, backgroundColor: 'white', borderWidth: 1, borderColor: COLORS.border, marginTop: sourcePost ? 12 : 0 }}>
             <Text style={{ fontWeight: '800', color: '#1e293b' }}>{friend.characterName}</Text>
             <Text style={{ color: COLORS.muted, marginTop: 6, lineHeight: 20 }}>
-              {conversationEnded
-                ? 'Esta práctica ya terminó. Puedes revisar la conversación y el feedback final.'
-                : sourcePost
-                  ? 'Usa el post como inspiración para tu respuesta. Puedes escribir en inglés o español.'
-                  : 'Habla de forma natural. Puedes escribir en inglés, español o una mezcla de ambos.'}
+              {chatIntroText}
             </Text>
           </View>
 
           <View style={{ marginTop: 16 }}>
-            <Text style={{ fontWeight: '700', color: '#1e293b', marginBottom: 8 }}>Conversación</Text>
+            <Text style={{ fontWeight: '700', color: '#1e293b', marginBottom: 8 }}>{conversationTitleText}</Text>
             {messages.length === 0 ? (
               <View style={{ padding: 16, borderRadius: 12, backgroundColor: 'white', borderWidth: 1, borderColor: COLORS.border }}>
                 <Text style={{ color: COLORS.muted }}>
-                  {conversationEnded
-                    ? 'Esta conversación ya fue marcada como terminada.'
-                    : sourcePost
-                    ? 'Escríbele o graba una respuesta al post para empezar.'
-                    : 'Escríbele o graba tu primer mensaje para empezar una práctica libre.'}
+                  {emptyConversationText}
                 </Text>
               </View>
             ) : (
@@ -2675,7 +2699,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                   backgroundColor: pressed ? '#047857' : '#10b981',
                 })}
               >
-                <Text style={{ color: 'white', fontWeight: '900' }}>Finalizar</Text>
+                <Text style={{ color: 'white', fontWeight: '900' }}>{t('friendChat.end')}</Text>
               </Pressable>
             </View>
           ) : (
@@ -2683,7 +2707,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
               {hasStartedConversation ? (
                 <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
                   <Pressable
-                    accessibilityLabel="Finalizar conversación y recibir feedback"
+                    accessibilityLabel={t('friendChat.endConversationA11y')}
                     onPress={handleEndConversation}
                     disabled={endingConversation || flowState !== 'idle' || retryingLastExchange}
                     style={({ pressed }) => ({
@@ -2706,7 +2730,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
                       <MaterialIcons name="flag" size={16} color="#15803d" />
                     )}
                     <Text style={{ color: '#15803d', fontWeight: '800', fontSize: 13 }}>
-                      {endingConversation ? 'Finalizando…' : 'Finalizar y recibir feedback'}
+                      {endingConversation ? t('friendChat.ending') : t('friendChat.endAndGetFeedback')}
                     </Text>
                   </Pressable>
                 </View>

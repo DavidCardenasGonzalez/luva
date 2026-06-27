@@ -24,6 +24,7 @@ import { useShadowingPlayer } from '../shadowing/ShadowingPlayerProvider';
 import { SHADOWING_CHAPTER_COST, useCoins } from '../purchases/CoinBalanceProvider';
 import { LITE_PROMO_EXPIRES_AT_KEY } from '../purchases/litePromo';
 import { trackMixpanelShadowingEvent } from '../marketing/mixpanelEvents';
+import { useLanguage } from '../i18n/LanguageProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Shadowing'>;
 
@@ -372,6 +373,7 @@ function ContinueListeningCard({
 }
 
 export default function ShadowingScreen({ navigation, route }: Props) {
+  const { supportLanguage } = useLanguage();
   const { lists, loading, error, reload } = useShadowing();
   const { width: windowWidth } = useWindowDimensions();
   const [selectedListId, setSelectedListId] = useState<string>();
@@ -672,10 +674,17 @@ export default function ShadowingScreen({ navigation, route }: Props) {
       if (isPlaying) {
         await playPause();
       }
+      if (supportLanguage === 'en') {
+        setSubtitleTranslations((current) => ({
+          ...current,
+          [subtitleKey]: { text: subtitle, loading: false },
+        }));
+        return;
+      }
       const payload = await api.post<TranslationResponse>('/translate', {
         text: subtitle,
         source: 'en',
-        target: 'es',
+        target: supportLanguage,
       });
       void trackMixpanelShadowingEvent('shadowing_subtitle_translated', {
         list_id: selectedChapter?.listId,
@@ -696,7 +705,7 @@ export default function ShadowingScreen({ navigation, route }: Props) {
         },
       }));
     }
-  }, [activeSubtitle, activeSubtitleKey, isPlaying, playPause, positionSeconds, selectedChapter, subtitleTranslations]);
+  }, [activeSubtitle, activeSubtitleKey, isPlaying, playPause, positionSeconds, selectedChapter, subtitleTranslations, supportLanguage]);
 
   const measureProgressBar = useCallback(() => {
     progressBarRef.current?.measureInWindow((x, _y, width) => {

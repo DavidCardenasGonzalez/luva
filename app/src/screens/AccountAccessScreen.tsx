@@ -19,6 +19,7 @@ import { useAuth } from '../auth/AuthProvider';
 import { markOnboardingCompleted } from '../onboarding/model/progress';
 import { GradientText } from '../onboarding/components/GradientText';
 import { trackMixpanelEvent } from '../marketing/mixpanelEvents';
+import { useLanguage } from '../i18n/LanguageProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AccountAccess'>;
 type AuthMode = 'login' | 'signup' | 'confirm';
@@ -41,6 +42,77 @@ const COLORS = {
   danger: '#fca5a5',
 };
 
+const COPY = {
+  en: {
+    back: 'Back',
+    eyebrow: 'ACCESS',
+    titlePrefix: 'I already have an',
+    titleHighlight: 'account',
+    mascot: 'Glad to see you!',
+    continueGoogle: 'Continue with Google',
+    continueApple: 'Continue with Apple',
+    divider: 'or continue with your email',
+    email: 'Email',
+    emailPlaceholder: 'you@email.com',
+    password: 'Password',
+    passwordPlaceholder: 'Your password',
+    newPasswordPlaceholder: 'Minimum 8 characters',
+    verificationCode: 'Verification code',
+    signInEmail: 'Sign in with email',
+    signingIn: 'Signing in...',
+    signIn: 'Sign in',
+    createAccount: 'Create account',
+    creatingAccount: 'Creating account...',
+    verifyCode: 'Verify code and enter',
+    verifying: 'Verifying...',
+    verifyAndEnter: 'Verify and enter',
+    resendCode: 'Resend code',
+    continueAnonymous: 'Start anonymously',
+    codeSent: (destination?: string) => destination
+      ? `We sent a code to ${destination}.`
+      : 'We sent a code to your email.',
+    codeResent: (destination?: string) => destination
+      ? `We resent the code to ${destination}.`
+      : 'We resent the code to your email.',
+    emailConfigWarning: 'Configure COGNITO_DOMAIN, COGNITO_CLIENT_ID, and COGNITO_REGION to enable email and code access.',
+    socialConfigWarning: 'Configure COGNITO_DOMAIN, COGNITO_CLIENT_ID, and REDIRECT_URI to use Google and Apple.',
+  },
+  es: {
+    back: 'Volver',
+    eyebrow: 'ACCESO',
+    titlePrefix: 'Ya tengo una',
+    titleHighlight: 'cuenta',
+    mascot: '¡Me alegra verte!',
+    continueGoogle: 'Continuar con Google',
+    continueApple: 'Continuar con Apple',
+    divider: 'o continúa con tu correo',
+    email: 'Correo',
+    emailPlaceholder: 'tu@correo.com',
+    password: 'Contraseña',
+    passwordPlaceholder: 'Tu contraseña',
+    newPasswordPlaceholder: 'Mínimo 8 caracteres',
+    verificationCode: 'Código de verificación',
+    signInEmail: 'Iniciar sesión con correo',
+    signingIn: 'Entrando...',
+    signIn: 'Iniciar sesión',
+    createAccount: 'Crear cuenta',
+    creatingAccount: 'Creando cuenta...',
+    verifyCode: 'Verificar código y entrar',
+    verifying: 'Verificando...',
+    verifyAndEnter: 'Verificar y entrar',
+    resendCode: 'Reenviar código',
+    continueAnonymous: 'Empezar anónimamente',
+    codeSent: (destination?: string) => destination
+      ? `Te enviamos un código a ${destination}.`
+      : 'Te enviamos un código a tu correo.',
+    codeResent: (destination?: string) => destination
+      ? `Te reenviamos el código a ${destination}.`
+      : 'Te reenviamos el código a tu correo.',
+    emailConfigWarning: 'Configura COGNITO_DOMAIN, COGNITO_CLIENT_ID y COGNITO_REGION para habilitar correo y código.',
+    socialConfigWarning: 'Configura COGNITO_DOMAIN, COGNITO_CLIENT_ID y REDIRECT_URI para usar Google y Apple.',
+  },
+};
+
 export default function AccountAccessScreen({ navigation, route }: Props) {
   const {
     isConfigured,
@@ -55,6 +127,8 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
     confirmEmailSignUp,
     resendEmailSignUpCode,
   } = useAuth();
+  const { language } = useLanguage();
+  const copy = COPY[language];
   const { width } = useWindowDimensions();
   const fromOnboarding = Boolean(route.params?.fromOnboarding);
   const isCompact = width < 370;
@@ -169,15 +243,11 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
 
       setDeliveryHint(result.destination);
       setAuthMode('confirm');
-      setNotice(
-        result.destination
-          ? `Te enviamos un código a ${result.destination}.`
-          : 'Te enviamos un código a tu correo.'
-      );
+      setNotice(copy.codeSent(result.destination));
     } catch {
       // AuthProvider exposes the concrete message through authError.
     }
-  }, [email, fromOnboarding, password, signUpWithEmail]);
+  }, [copy, email, fromOnboarding, password, signUpWithEmail]);
 
   const handleConfirmCode = useCallback(async () => {
     setNotice(undefined);
@@ -195,15 +265,11 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
 
     try {
       await resendEmailSignUpCode(email);
-      setNotice(
-        deliveryHint
-          ? `Te reenviamos el código a ${deliveryHint}.`
-          : 'Te reenviamos el código a tu correo.'
-      );
+      setNotice(copy.codeResent(deliveryHint));
     } catch {
       // AuthProvider exposes the concrete message through authError.
     }
-  }, [deliveryHint, email, resendEmailSignUpCode]);
+  }, [copy, deliveryHint, email, resendEmailSignUpCode]);
 
   const showSocialLogin = authMode === 'login';
   return (
@@ -223,7 +289,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
               onPress={handleBack}
               hitSlop={10}
               accessibilityRole="button"
-              accessibilityLabel="Volver"
+              accessibilityLabel={copy.back}
               style={({ pressed }) => ({
                 width: 44,
                 height: 44,
@@ -244,7 +310,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <MaterialIcons name="auto-awesome" size={17} color={COLORS.cyan} />
                 <Text style={{ color: COLORS.cyan, fontSize: 12, fontWeight: '900', letterSpacing: 0.7 }}>
-                  ACCESO
+                  {copy.eyebrow}
                 </Text>
               </View>
               <Text
@@ -256,9 +322,9 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
                   marginTop: 8,
                 }}
               >
-                Ya tengo una{' '}
+                {copy.titlePrefix}{' '}
                 <GradientText style={{ fontSize: isCompact ? 31 : 36, lineHeight: isCompact ? 36 : 41, fontWeight: '900' }}>
-                  cuenta
+                  {copy.titleHighlight}
                 </GradientText>
               </Text>
             </View>
@@ -276,7 +342,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
                 }}
               >
                 <Text style={{ color: COLORS.text, fontSize: 11, lineHeight: 14, textAlign: 'center', fontWeight: '800' }}>
-                  ¡Me alegra verte!
+                  {copy.mascot}
                 </Text>
               </View>
               <Image
@@ -304,7 +370,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
                   disabled={authLoading || !isConfigured}
                   onPress={handleGoogleSignIn}
                   accessibilityRole="button"
-                  accessibilityLabel="Continuar con Google"
+                  accessibilityLabel={copy.continueGoogle}
                   style={({ pressed }) => ({
                     minHeight: 52,
                     borderRadius: 15,
@@ -334,7 +400,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
                     minimumFontScale={0.82}
                     style={{ color: '#0f172a', fontSize: 16, fontWeight: '900', textAlign: 'center' }}
                   >
-                    Continuar con Google
+                    {copy.continueGoogle}
                   </Text>
                 </Pressable>
 
@@ -343,7 +409,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
                     disabled={authLoading || !isConfigured}
                     onPress={handleAppleSignIn}
                     accessibilityRole="button"
-                    accessibilityLabel="Continuar con Apple"
+                    accessibilityLabel={copy.continueApple}
                     style={({ pressed }) => ({
                       minHeight: 52,
                       borderRadius: 15,
@@ -359,21 +425,21 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
                   >
                     <FontAwesome name="apple" size={21} color="#ffffff" />
                     <Text style={{ color: '#ffffff', fontSize: 16, fontWeight: '900' }}>
-                      Continuar con Apple
+                      {copy.continueApple}
                     </Text>
                   </Pressable>
                 ) : null}
 
-                <Divider label="o continúa con tu correo" />
+                <Divider label={copy.divider} />
               </View>
             ) : null}
 
             <View style={{ gap: 8 }}>
-              <FieldLabel label="Correo" />
+              <FieldLabel label={copy.email} />
               <TextInput
                 value={email}
                 onChangeText={setEmail}
-                placeholder="tu@correo.com"
+                placeholder={copy.emailPlaceholder}
                 placeholderTextColor="#64748b"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -383,11 +449,11 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
                 style={inputStyle}
               />
 
-              <FieldLabel label="Contraseña" />
+              <FieldLabel label={copy.password} />
               <TextInput
                 value={password}
                 onChangeText={setPassword}
-                placeholder={authMode === 'signup' ? 'Mínimo 8 caracteres' : 'Tu contraseña'}
+                placeholder={authMode === 'signup' ? copy.newPasswordPlaceholder : copy.passwordPlaceholder}
                 placeholderTextColor="#64748b"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -399,7 +465,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
 
               {authMode === 'confirm' ? (
                 <>
-                  <FieldLabel label="Código de verificación" />
+                  <FieldLabel label={copy.verificationCode} />
                   <TextInput
                     value={code}
                     onChangeText={setCode}
@@ -428,13 +494,13 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
 
             {!isEmailAuthConfigured ? (
               <Text style={{ color: '#fdba74', lineHeight: 18, fontSize: 12 }}>
-                Configura COGNITO_DOMAIN, COGNITO_CLIENT_ID y COGNITO_REGION para habilitar correo y código.
+                {copy.emailConfigWarning}
               </Text>
             ) : null}
 
             {!isConfigured && showSocialLogin ? (
               <Text style={{ color: '#fdba74', lineHeight: 18, fontSize: 12 }}>
-                Configura COGNITO_DOMAIN, COGNITO_CLIENT_ID y REDIRECT_URI para usar Google y Apple.
+                {copy.socialConfigWarning}
               </Text>
             ) : null}
 
@@ -444,7 +510,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
                   disabled={authLoading || !isEmailAuthConfigured}
                   onPress={handleEmailSignIn}
                   accessibilityRole="button"
-                  accessibilityLabel="Iniciar sesión con correo"
+                  accessibilityLabel={copy.signInEmail}
                   style={({ pressed }) => ({
                     minHeight: 54,
                     borderRadius: 15,
@@ -455,7 +521,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
                   })}
                 >
                   <Text style={{ color: '#ffffff', fontSize: 17, fontWeight: '900' }}>
-                    {authLoading ? 'Entrando...' : 'Iniciar sesión'}
+                    {authLoading ? copy.signingIn : copy.signIn}
                   </Text>
                 </Pressable>
 
@@ -466,7 +532,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
                     setNotice(undefined);
                   }}
                   accessibilityRole="button"
-                  accessibilityLabel="Crear cuenta"
+                  accessibilityLabel={copy.createAccount}
                   style={({ pressed }) => ({
                     minHeight: 58,
                     borderRadius: 16,
@@ -482,7 +548,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
                 >
                   <MaterialIcons name="person-add-alt-1" size={22} color="#052e2b" />
                   <Text style={{ color: '#052e2b', fontSize: 18, fontWeight: '900' }}>
-                    Crear cuenta
+                    {copy.createAccount}
                   </Text>
                 </Pressable>
               </>
@@ -494,7 +560,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
                   disabled={authLoading || !isEmailAuthConfigured}
                   onPress={handleCreateAccount}
                   accessibilityRole="button"
-                  accessibilityLabel="Crear cuenta"
+                  accessibilityLabel={copy.createAccount}
                   style={({ pressed }) => ({
                     minHeight: 58,
                     borderRadius: 16,
@@ -510,7 +576,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
                 >
                   <MaterialIcons name="person-add-alt-1" size={22} color="#052e2b" />
                   <Text style={{ color: '#052e2b', fontSize: 18, fontWeight: '900' }}>
-                    {authLoading ? 'Creando cuenta...' : 'Crear cuenta'}
+                    {authLoading ? copy.creatingAccount : copy.createAccount}
                   </Text>
                 </Pressable>
               </>
@@ -522,7 +588,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
                   disabled={authLoading || !isEmailAuthConfigured}
                   onPress={handleConfirmCode}
                   accessibilityRole="button"
-                  accessibilityLabel="Verificar código y entrar"
+                  accessibilityLabel={copy.verifyCode}
                   style={({ pressed }) => ({
                     minHeight: 54,
                     borderRadius: 15,
@@ -533,7 +599,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
                   })}
                 >
                   <Text style={{ color: '#ffffff', fontSize: 17, fontWeight: '900' }}>
-                    {authLoading ? 'Verificando...' : 'Verificar y entrar'}
+                    {authLoading ? copy.verifying : copy.verifyAndEnter}
                   </Text>
                 </Pressable>
 
@@ -552,7 +618,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
                   })}
                 >
                   <Text style={{ color: COLORS.text, fontWeight: '800' }}>
-                    Reenviar código
+                    {copy.resendCode}
                   </Text>
                 </Pressable>
               </>
@@ -562,7 +628,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
           <Pressable
             onPress={handleContinueAnonymous}
             accessibilityRole="button"
-            accessibilityLabel="Empezar anónimamente"
+            accessibilityLabel={copy.continueAnonymous}
             style={({ pressed }) => ({
               minHeight: 42,
               alignItems: 'center',
@@ -571,7 +637,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
             })}
           >
             <Text style={{ color: COLORS.muted, fontSize: 15, fontWeight: '800' }}>
-              Empezar anónimamente
+              {copy.continueAnonymous}
             </Text>
           </Pressable>
         </ScrollView>

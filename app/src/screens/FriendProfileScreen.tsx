@@ -23,6 +23,7 @@ import { getChatAvatar } from '../chatimages/chatAvatarMap';
 import { trackMixpanelFriendEvent } from '../marketing/mixpanelEvents';
 import { AffinityBar } from '../components/AffinityBar';
 import { addLocalFriendAffinityPoints } from '../friends/localFriends';
+import { useLanguage } from '../i18n/LanguageProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FriendProfile'>;
 type ProfileTab = 'posts' | 'photos';
@@ -162,12 +163,14 @@ function ProfileFeedPost({
   avatarInitial,
   playbackEnabled,
   onReply,
+  t,
 }: {
   item: CharacterProfilePost;
   avatarSource?: ImageSourcePropType;
   avatarInitial: string;
   playbackEnabled: boolean;
   onReply: (post: CharacterProfilePost) => void;
+  t: (key: string, params?: Record<string, string | number>) => string;
 }) {
   const videoUrl = item.videoUrl?.trim();
   const imageUrl = item.imageUrl?.trim();
@@ -312,7 +315,7 @@ function ProfileFeedPost({
             <Pressable
               onPress={() => onReply(item)}
               accessibilityRole="button"
-              accessibilityLabel={`Responder al post de ${item.characterName}`}
+              accessibilityLabel={t('friendProfile.replyA11y', { name: item.characterName })}
               style={({ pressed }) => ({
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -323,7 +326,7 @@ function ProfileFeedPost({
               })}
             >
               <MaterialIcons name="reply" size={18} color="white" />
-              <Text style={{ color: 'white', fontWeight: '900', marginLeft: 8 }}>Responder</Text>
+              <Text style={{ color: 'white', fontWeight: '900', marginLeft: 8 }}>{t('friendProfile.reply')}</Text>
             </Pressable>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 12 }}>
               <MaterialIcons name="chat-bubble-outline" size={17} color={COLORS.muted} />
@@ -339,6 +342,7 @@ function ProfileFeedPost({
 }
 
 export default function FriendProfileScreen({ navigation, route }: Props) {
+  const { t } = useLanguage();
   const friendId = route.params?.friendId;
   const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
@@ -444,10 +448,10 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
     setDevAffinityMessage(undefined);
     try {
       const nextFriend = await addLocalFriendAffinityPoints(friend, DEV_AFFINITY_POINTS_BONUS);
-      setDevAffinityMessage(`+${DEV_AFFINITY_POINTS_BONUS} afinidad (${nextFriend.affinityPoints ?? 0} total)`);
+      setDevAffinityMessage(t('friendProfile.devAffinityAdded', { points: DEV_AFFINITY_POINTS_BONUS, total: nextFriend.affinityPoints ?? 0 }));
       await reload();
     } catch (err: any) {
-      setDevAffinityMessage(err?.message || 'No se pudo sumar afinidad.');
+      setDevAffinityMessage(err?.message || t('friendProfile.devAffinityError'));
     } finally {
       setDevAffinityLoading(false);
     }
@@ -457,7 +461,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.background }}>
         <ActivityIndicator size="large" color={COLORS.accent} />
-        <Text style={{ color: COLORS.muted, marginTop: 10 }}>Cargando perfil...</Text>
+        <Text style={{ color: COLORS.muted, marginTop: 10 }}>{t('friendProfile.loading')}</Text>
       </View>
     );
   }
@@ -466,7 +470,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
     return (
       <View style={{ flex: 1, padding: 20, justifyContent: 'center', backgroundColor: COLORS.background }}>
         <Text style={{ color: '#fecdd3', textAlign: 'center', fontWeight: '800' }}>
-          {error || 'No encontramos este perfil.'}
+          {error || t('friendProfile.notFound')}
         </Text>
         <Pressable
           onPress={() => navigation.goBack()}
@@ -478,7 +482,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
             backgroundColor: pressed ? '#1d4ed8' : COLORS.action,
           })}
         >
-          <Text style={{ color: 'white', fontWeight: '900' }}>Volver</Text>
+          <Text style={{ color: 'white', fontWeight: '900' }}>{t('friendProfile.back')}</Text>
         </Pressable>
       </View>
     );
@@ -521,7 +525,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
               {friend.characterName}
             </Text>
             <Text style={{ color: COLORS.muted, fontSize: 12, fontWeight: '700', marginTop: 2 }} numberOfLines={1}>
-              Posts
+              {t('friendProfile.posts')}
             </Text>
           </View>
           <Pressable
@@ -567,6 +571,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
               avatarInitial={avatarInitial}
               playbackEnabled={(focusedPostId || selectedPost.postId) === item.postId}
               onReply={handleReplyToPost}
+              t={t}
             />
           )}
         />
@@ -650,7 +655,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
                     }
                   }}
                   accessibilityRole="button"
-                  accessibilityLabel={`Ver foto de perfil de ${friend.characterName}`}
+                  accessibilityLabel={t('friendProfile.viewAvatarA11y', { name: friend.characterName })}
                   disabled={!avatarUri}
                   style={({ pressed }) => ({
                     width: 92,
@@ -673,9 +678,9 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
                 </Pressable>
 
                 <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-around', marginLeft: 18 }}>
-                  <StatBlock label="posts" value={posts.length} />
-                  <StatBlock label="fotos" value={images.length} />
-                  <StatBlock label="mensajes" value={friend.messageCount ?? 0} />
+                  <StatBlock label={t('friendProfile.stat.posts')} value={posts.length} />
+                  <StatBlock label={t('friendProfile.stat.photos')} value={images.length} />
+                  <StatBlock label={t('friendProfile.stat.messages')} value={friend.messageCount ?? 0} />
                 </View>
               </View>
 
@@ -708,7 +713,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
                     onPress={handleAddDevAffinityPoints}
                     disabled={devAffinityLoading}
                     accessibilityRole="button"
-                    accessibilityLabel={`Sumar ${DEV_AFFINITY_POINTS_BONUS} puntos de afinidad en desarrollo`}
+                    accessibilityLabel={t('friendProfile.devAffinityA11y', { points: DEV_AFFINITY_POINTS_BONUS })}
                     style={({ pressed }) => ({
                       flexDirection: 'row',
                       alignItems: 'center',
@@ -727,7 +732,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
                       <MaterialIcons name="science" size={18} color="white" />
                     )}
                     <Text style={{ color: 'white', fontWeight: '900', marginLeft: 8 }}>
-                      Dev: +{DEV_AFFINITY_POINTS_BONUS} afinidad
+                      {t('friendProfile.devAffinity', { points: DEV_AFFINITY_POINTS_BONUS })}
                     </Text>
                   </Pressable>
                   {devAffinityMessage ? (
@@ -757,7 +762,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
                     backgroundColor: pressed ? '#1d4ed8' : COLORS.action,
                   })}
                 >
-                  <Text style={{ color: 'white', fontWeight: '900' }}>Conversar</Text>
+                  <Text style={{ color: 'white', fontWeight: '900' }}>{t('friendProfile.chat')}</Text>
                 </Pressable>
                 <Pressable
                   onPress={() => {
@@ -782,7 +787,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
                     backgroundColor: pressed ? '#111827' : COLORS.surface,
                   })}
                 >
-                  <Text style={{ color: COLORS.text, fontWeight: '900' }}>Recuerdos</Text>
+                  <Text style={{ color: COLORS.text, fontWeight: '900' }}>{t('friendProfile.memories')}</Text>
                 </Pressable>
               </View>
             </View>
@@ -907,7 +912,7 @@ export default function FriendProfileScreen({ navigation, route }: Props) {
               color={COLORS.muted}
             />
             <Text style={{ color: COLORS.text, fontWeight: '900', marginTop: 12 }}>
-              {activeTab === 'posts' ? 'Sin posts todavía' : 'Sin fotos todavía'}
+              {activeTab === 'posts' ? t('friendProfile.emptyPosts') : t('friendProfile.emptyPhotos')}
             </Text>
           </View>
         }

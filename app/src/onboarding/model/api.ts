@@ -1,7 +1,7 @@
 import { api } from '../../api/api';
 import {
   OnboardingChatPayload,
-  DEFAULT_ONBOARDING_STEPS,
+  getDefaultOnboardingSteps,
   OnboardingCharacterId,
   OnboardingContentResponse,
   OnboardingConversationMessage,
@@ -11,6 +11,7 @@ import {
   OnboardingStepContent,
   OnboardingStepNumber,
 } from './types';
+import type { AppLanguage } from '../../i18n/language';
 
 function asString(value: unknown): string | undefined {
   return typeof value === 'string' ? value.trim() || undefined : undefined;
@@ -91,8 +92,8 @@ function sanitizeStep(input: unknown): OnboardingStepContent | null {
   };
 }
 
-function mergeWithDefaults(steps: OnboardingStepContent[]) {
-  return DEFAULT_ONBOARDING_STEPS.map((fallback) => {
+function mergeWithDefaults(steps: OnboardingStepContent[], language: AppLanguage) {
+  return getDefaultOnboardingSteps(language).map((fallback) => {
     const remote = steps.find((step) => (
       fallback.stepKey
         ? step.stepKey === fallback.stepKey
@@ -102,16 +103,17 @@ function mergeWithDefaults(steps: OnboardingStepContent[]) {
   });
 }
 
-export async function fetchOnboardingContent(): Promise<OnboardingStepContent[]> {
+export async function fetchOnboardingContent(language: AppLanguage): Promise<OnboardingStepContent[]> {
+  const fallbackSteps = getDefaultOnboardingSteps(language);
   try {
     const response = await api.get<OnboardingContentResponse>('/onboarding');
     const remoteSteps = Array.isArray(response?.steps)
       ? response.steps.map(sanitizeStep).filter((step): step is OnboardingStepContent => Boolean(step))
       : [];
 
-    return remoteSteps.length ? mergeWithDefaults(remoteSteps) : DEFAULT_ONBOARDING_STEPS;
+    return remoteSteps.length ? mergeWithDefaults(remoteSteps, language) : fallbackSteps;
   } catch {
-    return DEFAULT_ONBOARDING_STEPS;
+    return fallbackSteps;
   }
 }
 

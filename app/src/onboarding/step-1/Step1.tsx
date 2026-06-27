@@ -10,6 +10,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { OnboardingStepContent } from '../model/types';
 import { GradientText } from '../components/GradientText';
 import { AvatarMarqueeBackdrop } from './AvatarMarqueeBackdrop';
+import { useLanguage } from '../../i18n/LanguageProvider';
 
 const luviSayingHi = require('../../image/luvi-saying-hi.gif');
 const logoImage = require('../../image/logo.png');
@@ -28,11 +29,23 @@ const COLORS = {
 
 export default function Step1({ content }: { content: OnboardingStepContent }) {
   const { height, width } = useWindowDimensions();
+  const { language } = useLanguage();
   const floatProgress = useRef(new Animated.Value(0)).current;
   const [visibleMessageIds, setVisibleMessageIds] = useState<string[]>([]);
   const messages = useMemo(() => content.conversation || [], [content.conversation]);
   const showLargeScreenTitle = height >= 880 || width >= 420;
   const showFeedbackTeaser = height >= 880;
+  const titleParts = content.title.split('Luva');
+  const subtitleText = content.subtitle || (
+    language === 'es'
+      ? 'Habla, conecta y mejora tu inglés naturalmente'
+      : 'Speak, connect, and improve your English naturally'
+  );
+  const subtitleHighlightPattern = language === 'es'
+    ? /(Habla|conecta|inglés)/i
+    : /(Speak|connect|English)/i;
+  const mascotText = language === 'es' ? 'Soy Luvi,\ntu asistente virtual' : "I'm Luvi,\nyour virtual assistant";
+  const teaserSuffix = language === 'es' ? ' mientras platicas con tu nuevo amigo.' : ' while you practice with your new friend.';
 
   useEffect(() => {
     const animation = Animated.loop(
@@ -100,10 +113,13 @@ export default function Step1({ content }: { content: OnboardingStepContent }) {
               textShadowRadius: 10,
             }}
           >
-            Bienvenido a{' '}
-            <GradientText style={{ fontSize: 32, fontWeight: '900', lineHeight: 38 }}>
-              Luva
-            </GradientText>
+            {titleParts[0]}
+            {titleParts.length > 1 ? (
+              <GradientText style={{ fontSize: 32, fontWeight: '900', lineHeight: 38 }}>
+                Luva
+              </GradientText>
+            ) : null}
+            {titleParts.slice(1).join('Luva')}
           </Text>
         ) : null}
         <Text
@@ -118,18 +134,15 @@ export default function Step1({ content }: { content: OnboardingStepContent }) {
             textShadowRadius: 8,
           }}
         >
-          <GradientText style={{ fontSize: 18, fontWeight: '900', lineHeight: 25 }}>
-            Habla,
-          </GradientText>
-          ,{' '}
-          <GradientText style={{ fontSize: 18, fontWeight: '900', lineHeight: 25 }}>
-             conecta
-          </GradientText>
-          {' y mejora tu '}
-          <GradientText style={{ fontSize: 18, fontWeight: '900', lineHeight: 25 }}>
-            inglés
-          </GradientText>
-          {' naturalmente'}
+          {subtitleText.split(subtitleHighlightPattern).map((part, index) => (
+            subtitleHighlightPattern.test(part) ? (
+              <GradientText key={`${part}-${index}`} style={{ fontSize: 18, fontWeight: '900', lineHeight: 25 }}>
+                {part}
+              </GradientText>
+            ) : (
+              <Text key={`${part}-${index}`}>{part}</Text>
+            )
+          ))}
         </Text>
       </View>
 
@@ -176,7 +189,7 @@ export default function Step1({ content }: { content: OnboardingStepContent }) {
                 textAlign: 'center',
               }}
             >
-              {'Soy Luvi,\ntu asistente virtual'}
+              {mascotText}
             </Text>
           </View>
           <Image
@@ -346,7 +359,7 @@ export default function Step1({ content }: { content: OnboardingStepContent }) {
               <GradientText style={{ fontSize: 15, fontWeight: '900', lineHeight: 21 }}>
                 {content.eyebrow}
               </GradientText>
-              {' mientras platicas con tu nuevo amigo.'}
+              {teaserSuffix}
             </Text>
           </View>
         </View>

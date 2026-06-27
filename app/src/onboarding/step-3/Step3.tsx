@@ -79,13 +79,18 @@ function SidePreviewCard({ image, side, width, height }: SidePreviewProps) {
   );
 }
 
-export default function Step3({ content: _content, onStart, onSkip }: Props) {
+export default function Step3({ content, onStart, onSkip: _onSkip }: Props) {
   const { height, width } = useWindowDimensions();
   const isCompact = height < 860 || width < 380;
   const titleSize = isCompact ? 30 : 36;
   const titleLineHeight = isCompact ? 35 : 41;
   const previewWidth = Math.min(width - 102, isCompact ? 196 : 238);
   const previewHeight = previewWidth * (649 / 300);
+  const titleWords = content.title.trim().split(/\s+/);
+  const titleFirstLine = titleWords.slice(0, 2).join(' ') || content.title;
+  const titleHighlight = titleWords.slice(2).join(' ');
+  const subtitle = content.subtitle.trim();
+  const subtitleParts = subtitle.split(/(characters|reply|personajes|responde)/i);
 
   return (
     <ScrollView
@@ -112,18 +117,20 @@ export default function Step3({ content: _content, onStart, onSkip }: Props) {
             textAlign: 'center',
           }}
         >
-          Encuentra tu
+          {titleFirstLine}
         </Text>
-        <GradientText
-          style={{
-            fontSize: titleSize,
-            fontWeight: '900',
-            lineHeight: titleLineHeight,
-            textAlign: 'center',
-          }}
-        >
-          compañero ideal
-        </GradientText>
+        {titleHighlight ? (
+          <GradientText
+            style={{
+              fontSize: titleSize,
+              fontWeight: '900',
+              lineHeight: titleLineHeight,
+              textAlign: 'center',
+            }}
+          >
+            {titleHighlight}
+          </GradientText>
+        ) : null}
       </View>
 
       <View
@@ -189,18 +196,27 @@ export default function Step3({ content: _content, onStart, onSkip }: Props) {
           <MaterialIcons name="auto-awesome" size={16} color={COLORS.purple} />
         </View>
         <Text style={{ color: COLORS.muted, fontSize: 15, fontWeight: '800' }}>
-          Desliza hacia arriba para descubrir{' '}
-          <Text style={{ color: COLORS.purple, fontWeight: '800' }}>personajes</Text>
-          {' y '}
-          <Text style={{ color: COLORS.cyan, fontWeight: '800' }}>responde</Text>
-          {' para empezar nuevas conversaciones.'}
+          {subtitleParts.map((part, index) => {
+            const normalized = part.toLowerCase();
+            const color =
+              normalized === 'characters' || normalized === 'personajes'
+                ? COLORS.purple
+                : normalized === 'reply' || normalized === 'responde'
+                  ? COLORS.cyan
+                  : COLORS.muted;
+            return (
+              <Text key={`${part}-${index}`} style={{ color, fontWeight: '800' }}>
+                {part}
+              </Text>
+            );
+          })}
         </Text>
       </View>
 
       <Pressable
         onPress={onStart}
         accessibilityRole="button"
-        accessibilityLabel="Explorar reels"
+        accessibilityLabel={content.primaryCta}
         style={({ pressed }) => ({
           width: '100%',
           minHeight: 58,
@@ -212,7 +228,7 @@ export default function Step3({ content: _content, onStart, onSkip }: Props) {
           opacity: pressed ? 0.92 : 1,
         })}
       >
-        <Text style={{ color: '#ffffff', fontSize: 23, fontWeight: '900' }}>Explorar</Text>
+        <Text style={{ color: '#ffffff', fontSize: 23, fontWeight: '900' }}>{content.primaryCta}</Text>
       </Pressable>
     </ScrollView>
   );

@@ -11,6 +11,7 @@ import { AdminUsersPage } from '@/features/admin/ui/AdminUsersPage'
 import { AdminVideosPage } from '@/features/admin/ui/AdminVideosPage'
 import { AdminLessonsPage } from '@/features/admin/ui/AdminLessonsPage'
 import { AdminLessonEditorPage } from '@/features/admin/ui/AdminLessonEditorPage'
+import { AdminAllCharacterPostsPage } from '@/features/admin/ui/AdminAllCharacterPostsPage'
 import { AdminShadowingPage } from '@/features/admin/ui/AdminShadowingPage'
 import { LoadingPage } from '@/features/auth/ui/LoadingPage'
 import { LoginPage } from '@/features/auth/ui/LoginPage'
@@ -97,6 +98,18 @@ export function AppRouter() {
             deniedMessage="Asigna el grupo o rol admin en Cognito y vuelve a iniciar sesión."
           >
             <AdminStoryCharactersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={appPaths.characterPosts}
+        element={
+          <ProtectedRoute
+            requiredRoles={ADMIN_ROLES}
+            deniedTitle="Tu cuenta no tiene acceso al portal administrativo."
+            deniedMessage="Asigna el grupo o rol admin en Cognito y vuelve a iniciar sesión."
+          >
+            <AdminAllCharacterPostsPage />
           </ProtectedRoute>
         }
       />

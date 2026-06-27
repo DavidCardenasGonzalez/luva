@@ -4,6 +4,7 @@ export const appPaths = {
   assets: '/assets',
   posts: '/posts',
   characters: '/characters',
+  characterPosts: '/character-posts',
   users: '/users',
   videos: '/videos',
   lessons: '/lessons',

@@ -58,6 +58,7 @@ import { LITE_PROMO_EXPIRES_AT_KEY } from '../purchases/litePromo';
 import { getLearnedLessonIds } from '../progress/lessonProgress';
 import { recordJourneyVocabularyQuickGuessCorrect } from '../progress/journeyProgress';
 import { useShadowingPlayer } from '../shadowing/ShadowingPlayerProvider';
+import { useLanguage } from '../i18n/LanguageProvider';
 import { api } from '../api/api';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Feed'>;
@@ -1154,9 +1155,15 @@ function CharacterVideoCard({
   onStartConversation: (item: CharacterVideoFeedItem) => void;
   compact?: boolean;
 }) {
+  const { language } = useLanguage();
   const thumbnailUrl = (
     (compact ? item.thumbnailMdUrl : undefined) || item.thumbnailUrl || item.imageUrl
   ).trim();
+  const startConversationText = language === 'es' ? 'Empezar conversación' : 'Start conversation';
+  const compactStartConversationText = language === 'es' ? 'Conversar' : 'Chat';
+  const startConversationLabel = language === 'es'
+    ? `Empezar conversación con ${item.characterName}`
+    : `Start conversation with ${item.characterName}`;
   const avatarImageUrl = (item.avatarImageXsUrl || item.avatarImageUrl)?.trim();
   const { userLiked, displayedLabel, toggleLike } = useCharacterPostLike(
     item.characterId,
@@ -1326,7 +1333,7 @@ function CharacterVideoCard({
         <Pressable
           onPress={() => onStartConversation(item)}
           accessibilityRole="button"
-          accessibilityLabel={`Empezar conversación con ${item.characterName}`}
+          accessibilityLabel={startConversationLabel}
           style={({ pressed }) => ({
             marginTop: compact ? 8 : 10,
             flexDirection: 'row',
@@ -1348,7 +1355,7 @@ function CharacterVideoCard({
             style={{ color: '#0b1224', fontSize: compact ? 12 : 13, fontWeight: '900', textAlign: 'center' }}
             numberOfLines={1}
           >
-            {compact ? 'Conversar' : 'Empezar conversación'}
+            {compact ? compactStartConversationText : startConversationText}
           </Text>
         </Pressable>
       </View>
@@ -1373,6 +1380,14 @@ function CharacterVideoPage({
   onStartConversation: (item: CharacterVideoFeedItem) => void;
 }) {
   const videoRef = useRef<Video | null>(null);
+  const { language, supportLanguage } = useLanguage();
+  const startConversationText = language === 'es' ? 'Empezar conversación' : 'Start conversation';
+  const startConversationLabel = language === 'es'
+    ? `Empezar conversación con ${item.characterName}`
+    : `Start conversation with ${item.characterName}`;
+  const translateSubtitleError = language === 'es'
+    ? 'No pudimos traducir este subtitulo.'
+    : 'We could not translate this subtitle.';
   const posterUrl = (item.thumbnailUrl || item.imageUrl).trim();
   const videoUrl = item.videoUrl.trim();
   const avatarImageUrl = (item.avatarImageXsUrl || item.avatarImageUrl)?.trim();
@@ -1417,10 +1432,17 @@ function CharacterVideoPage({
     setPaused(true);
 
     try {
+      if (supportLanguage === 'en') {
+        setSubtitleTranslations((current) => ({
+          ...current,
+          [subtitleKey]: { text: subtitle, loading: false },
+        }));
+        return;
+      }
       const payload = await api.post<TranslationResponse>('/translate', {
         text: subtitle,
         source: 'en',
-        target: 'es',
+        target: supportLanguage,
       });
       setSubtitleTranslations((current) => ({
         ...current,
@@ -1431,11 +1453,11 @@ function CharacterVideoPage({
         ...current,
         [subtitleKey]: {
           loading: false,
-          error: err?.message || 'No pudimos traducir este subtitulo.',
+          error: err?.message || translateSubtitleError,
         },
       }));
     }
-  }, [activeSubtitle, activeSubtitleKey, subtitleTranslations]);
+  }, [activeSubtitle, activeSubtitleKey, subtitleTranslations, supportLanguage, translateSubtitleError]);
 
   const handlePlaybackStatusUpdate = useCallback((status: AVPlaybackStatus) => {
     if (!status.isLoaded) return;
@@ -1737,7 +1759,7 @@ function CharacterVideoPage({
         <Pressable
           onPress={handleStartConversation}
           accessibilityRole="button"
-          accessibilityLabel={`Empezar conversación con ${item.characterName}`}
+          accessibilityLabel={startConversationLabel}
           style={({ pressed }) => ({
             minHeight: 58,
             marginTop: 14,
@@ -1762,7 +1784,7 @@ function CharacterVideoPage({
             style={{ color: '#07111f', fontSize: 16, fontWeight: '900', textAlign: 'center' }}
             numberOfLines={1}
           >
-            Empezar conversación
+            {startConversationText}
           </Text>
           <MaterialIcons name="arrow-forward" size={21} color="#07111f" />
         </Pressable>
@@ -2916,6 +2938,10 @@ function TimerText({ value }: { value: string }) {
 }
 
 function ReelsStartupOverlay() {
+  const { language } = useLanguage();
+  const title = language === 'es' ? 'Preparando reels...' : 'Preparing reels...';
+  const subtitle = language === 'es' ? 'Cargando la primera conversación.' : 'Loading your first conversation.';
+
   return (
     <View
       pointerEvents="auto"
@@ -2954,7 +2980,7 @@ function ReelsStartupOverlay() {
           textAlign: 'center',
         }}
       >
-        Preparando reels...
+        {title}
       </Text>
       <Text
         style={{
@@ -2965,7 +2991,7 @@ function ReelsStartupOverlay() {
           textAlign: 'center',
         }}
       >
-        Cargando la primera conversación.
+        {subtitle}
       </Text>
     </View>
   );
@@ -2982,10 +3008,19 @@ function FeedTourOverlay({
   step: FeedTourStep;
   onDismiss: () => void;
 }) {
+  const { language } = useLanguage();
   const translateY = useRef(new Animated.Value(0)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const isSwipeUp = step === 'swipeUp';
   const toValue = isSwipeUp ? -90 : 40;
+  const instructionText = isSwipeUp
+    ? language === 'es'
+      ? 'Desliza hacia arriba para encontrar tu compañero de práctica'
+      : 'Swipe up to find your practice companion'
+    : language === 'es'
+      ? 'Toca Empezar conversación para seguir practicando'
+      : 'Tap Start conversation to keep practicing';
+  const continueText = language === 'es' ? 'Toca para continuar' : 'Tap to continue';
 
   useEffect(() => {
     opacity.setValue(0);
@@ -3049,9 +3084,7 @@ function FeedTourOverlay({
             lineHeight: 28,
           }}
         >
-          {isSwipeUp
-            ? 'Desliza hacia arriba para encontrar tu compañero de práctica'
-            : 'Toca Empezar conversación para seguir practicando'}
+          {instructionText}
         </Text>
         <Animated.Image
           source={
@@ -3074,7 +3107,7 @@ function FeedTourOverlay({
             marginTop: isSwipeUp ? 32 : 20,
           }}
         >
-          Toca para continuar
+          {continueText}
         </Text>
       </Animated.View>
     </Pressable>

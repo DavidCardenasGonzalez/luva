@@ -1,3 +1,5 @@
+import type { AppLanguage } from '../../i18n/language';
+
 export type OnboardingStepNumber = 1 | 2 | 3 | 4 | 5 | 6;
 export type OnboardingStepKey = "step2B";
 
@@ -173,3 +175,73 @@ export const DEFAULT_ONBOARDING_STEPS: OnboardingStepContent[] = [
     primaryCta: "Entrar a Luva",
   },
 ];
+
+export const DEFAULT_ONBOARDING_STEPS_EN: OnboardingStepContent[] = [
+  {
+    stepNumber: 1,
+    eyebrow: "Instant feedback",
+    title: "Welcome to Luva",
+    subtitle: "Your companion for speaking, learning, and growing in English.",
+    primaryCta: "Start",
+    conversation: [
+      {
+        id: "learner-rain",
+        role: "learner",
+        text: "I'm very tired",
+        delayMs: 350,
+      },
+      {
+        id: "luvi-rain",
+        role: "luvi",
+        text: "Sounds like you need a break.",
+        delayMs: 1100,
+      },
+      {
+        id: "feedback-rain",
+        role: "feedback",
+        text: "Correctness: 98% (Correct)\nSuggested reformulations\n- I'm exhausted.\n- I'm drained.",
+        delayMs: 1850,
+      },
+    ],
+  },
+  {
+    stepNumber: 2,
+    stepKey: "step2B",
+    eyebrow: "Level",
+    title: "Choose your English level",
+    subtitle: "I will adjust conversation difficulty so you can practice at your pace.",
+    primaryCta: "Continue",
+  },
+  {
+    stepNumber: 3,
+    eyebrow: "Reels",
+    title: "Find your ideal companion",
+    subtitle: "Swipe up to discover characters and conversations you will enjoy.",
+    primaryCta: "Start",
+  },
+  {
+    stepNumber: 4,
+    eyebrow: "Your first conversation",
+    title: "Introduce yourself in English",
+    subtitle: "Tell us who you are and why you want to learn English.",
+    primaryCta: "",
+  },
+  {
+    stepNumber: 5,
+    eyebrow: "Analyzing answers",
+    title: "Creating your personalized plan",
+    subtitle: "We are analyzing your answers to design the best path for you.",
+    primaryCta: "",
+  },
+  {
+    stepNumber: 6,
+    eyebrow: "Plan ready",
+    title: "Your progress path is ready",
+    subtitle: "Level up by earning points through missions, vocabulary, messages, lessons, and shadowing.",
+    primaryCta: "Enter Luva",
+  },
+];
+
+export function getDefaultOnboardingSteps(language: AppLanguage): OnboardingStepContent[] {
+  return language === 'es' ? DEFAULT_ONBOARDING_STEPS : DEFAULT_ONBOARDING_STEPS_EN;
+}

@@ -15,6 +15,11 @@ import {
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
+import {
+  DEFAULT_APP_LANGUAGE,
+  getPromptLanguageContext,
+  normalizeSupportLanguageCode,
+} from '../language';
 
 const dynamo = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
   marshallOptions: { removeUndefinedValues: true },
@@ -440,6 +445,7 @@ export async function answerLessonHelp(input: {
   currentCaptionEnglish?: unknown;
   currentCaptionSpanish?: unknown;
   subtitles?: unknown;
+  appLanguage?: unknown;
 }): Promise<LessonHelpResponse> {
   const lessonId = asString(input.lessonId)?.trim();
   if (!lessonId) throw new Error('INVALID_LESSON_ID');
@@ -455,6 +461,8 @@ export async function answerLessonHelp(input: {
   const subtitleMode = asString(input.subtitleMode)?.trim() === 'en_es' ? 'en_es' : 'en';
   const currentCaptionEnglish = asString(input.currentCaptionEnglish)?.trim().slice(0, 600);
   const currentCaptionSpanish = asString(input.currentCaptionSpanish)?.trim().slice(0, 600);
+  const appLanguage = normalizeSupportLanguageCode(input.appLanguage) || DEFAULT_APP_LANGUAGE;
+  const lang = getPromptLanguageContext(appLanguage);
   const cues = normalizeLessonHelpCues(input.subtitles);
 
   const apiKey = await getOpenAiKey();
@@ -463,9 +471,10 @@ export async function answerLessonHelp(input: {
     Number.isFinite(currentTimeSeconds) ? `${Math.max(0, Math.floor(currentTimeSeconds || 0))}s` : 'unknown';
   const cueContext = buildLessonHelpContext(cues);
 
-  const systemPrompt = `Eres Luvi, una tutora de inglés para hispanohablantes. Responde en español, breve y accionable.
-Usa el subtítulo actual, el segundo del video y el guion de la lección para explicar dudas de vocabulario, gramática, pronunciación o comprensión.
-Si conviene, incluye un ejemplo corto en inglés. No inventes contenido fuera de la lección. No uses JSON ni emojis.`;
+  const systemPrompt = `You are Luvi, an English tutor. ${lang.appLanguageDescription}
+Answer in ${lang.feedbackLanguageName}, briefly and actionably.
+Use the current subtitle, video timestamp, and lesson script to explain vocabulary, grammar, pronunciation, or comprehension questions.
+When helpful, include one short English example. Do not invent content outside the lesson. Do not use JSON or emojis.`;
 
   const userPrompt = `Lección: ${lesson.title}
 Tema de la lección: ${lesson.prompt}

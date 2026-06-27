@@ -27,6 +27,7 @@ import { addFriendFromMission } from '../../hooks/useFriends';
 import { useStoryProgress } from '../../progress/StoryProgressProvider';
 import useAudioRecorder from '../../shared/useAudioRecorder';
 import useUploadToS3 from '../../shared/useUploadToS3';
+import { useLanguage } from '../../i18n/LanguageProvider';
 import {
   trackMetaOnboardingStep4FirstMessage,
   trackMetaOnboardingStep5ReachedFromStep4,
@@ -243,6 +244,7 @@ function renderAssistantText(text: string, onSkip: () => void) {
 export default function Step4({ content: _content, selectedCharacter, onNext, onComplete }: Props) {
   const { width: windowWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const { supportLanguage } = useLanguage();
   const scrollRef = useRef<ScrollView>(null);
   const isStartingRecording = useRef(false);
   const stopRequestedWhileStarting = useRef(false);
@@ -453,10 +455,17 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
     }));
 
     try {
+      if (supportLanguage === 'en') {
+        setMessageTranslations((current) => ({
+          ...current,
+          [messageId]: { text: trimmed, loading: false },
+        }));
+        return;
+      }
       const payload = await api.post<TranslationResponse>('/translate', {
         text: trimmed,
         source: 'en',
-        target: 'es',
+        target: supportLanguage,
       });
       setMessageTranslations((current) => ({
         ...current,
@@ -471,7 +480,7 @@ export default function Step4({ content: _content, selectedCharacter, onNext, on
         },
       }));
     }
-  }, [messageTranslations]);
+  }, [messageTranslations, supportLanguage]);
 
   // Detect newly-met requirements and trigger celebration
   useEffect(() => {

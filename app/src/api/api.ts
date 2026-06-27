@@ -1,4 +1,5 @@
 import Constants from 'expo-constants';
+import { getCurrentAppLanguage, getCurrentSupportLanguage } from '../i18n/language';
 
 type ApiError = { code?: string; message: string; retryable?: boolean; status?: number };
 
@@ -72,12 +73,18 @@ async function requestOnce<T>(
   if (!API_BASE_URL) throw new Error('API_BASE_URL is not set');
   const url = path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
   const authToken = await resolveBearer();
+  const appLanguage = getCurrentAppLanguage();
+  const supportLanguage = getCurrentSupportLanguage();
   let res: Response;
   try {
     res = await fetch(url, {
       method,
       headers: {
         'Content-Type': body ? 'application/json' : 'application/json',
+        'Accept-Language': appLanguage,
+        'X-Luva-UI-Language': appLanguage,
+        'X-Luva-App-Language': appLanguage,
+        'X-Luva-Support-Language': supportLanguage,
         ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         ...(headers || {}),
       },

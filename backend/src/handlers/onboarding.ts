@@ -1,5 +1,12 @@
 import type { APIGatewayProxyResultV2 as Result } from "aws-lambda";
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
+import {
+  DEFAULT_APP_LANGUAGE,
+  getPromptLanguageContext,
+  getRequestAppLanguage,
+  getRequestSupportLanguage,
+} from "../language";
+import type { AppLanguage, SupportLanguageCode } from "../language";
 
 const ROUTE_PREFIX = "/v1";
 const DEFAULT_OPENAI_CHAT_MODEL = "gpt-5.4-nano";
@@ -193,6 +200,75 @@ const ONBOARDING_STEPS = [
   },
 ];
 
+const ONBOARDING_STEPS_EN = [
+  {
+    stepNumber: 1,
+    eyebrow: "Instant feedback",
+    title: "Welcome to Luva",
+    subtitle: "Your companion for speaking, learning, and growing in English.",
+    primaryCta: "Start",
+    conversation: [
+      {
+        id: "learner-rain",
+        role: "learner",
+        text: "I'm very tired",
+        delayMs: 350,
+      },
+      {
+        id: "luvi-rain",
+        role: "luvi",
+        text: "Sounds like you need a break.",
+        delayMs: 1100,
+      },
+      {
+        id: "feedback-rain",
+        role: "feedback",
+        text: "Correctness: 98% (Correct)\nSuggested reformulations\n- I'm exhausted.\n- I'm drained.",
+        delayMs: 1850,
+      },
+    ],
+  },
+  {
+    stepNumber: 2,
+    eyebrow: "Personalization",
+    title: "We build a plan for you",
+    subtitle: "Select the phrases that sound most like you so we can personalize your learning path.",
+    primaryCta: "Continue",
+  },
+  {
+    stepNumber: 3,
+    eyebrow: "Reels",
+    title: "Find your ideal companion",
+    subtitle: "Swipe up to discover characters and conversations you will enjoy.",
+    primaryCta: "Start",
+  },
+  {
+    stepNumber: 4,
+    eyebrow: "Your first conversation",
+    title: "Introduce yourself in English",
+    subtitle: "Tell us who you are and why you want to learn English.",
+    primaryCta: "",
+  },
+  {
+    stepNumber: 5,
+    eyebrow: "Analyzing answers",
+    title: "Creating your personalized plan",
+    subtitle: "We are analyzing your answers to design the best path for you.",
+    primaryCta: "",
+  },
+  {
+    stepNumber: 6,
+    eyebrow: "Plan ready",
+    title: "Your progress path is ready",
+    subtitle: "Level up by earning points through missions, vocabulary, messages, lessons, and shadowing.",
+    primaryCta: "Enter Luva",
+  },
+];
+
+function getOnboardingSteps(appLanguage: AppLanguage) {
+  return appLanguage === "es" ? ONBOARDING_STEPS : ONBOARDING_STEPS_EN;
+}
+
 const CHARACTER_PROFILES: Record<OnboardingCharacterId, CharacterProfile> = {
   zoe: {
     characterName: "Zoe",
@@ -226,14 +302,16 @@ export const handler = async (event: any): Promise<Result> => {
   }
 
   if (method === "GET" && path === `${ROUTE_PREFIX}/onboarding`) {
+    const appLanguage = getRequestAppLanguage(event);
     return json(200, {
       version: "2026-04-27-onboarding-v1",
-      steps: ONBOARDING_STEPS,
+      steps: getOnboardingSteps(appLanguage),
     });
   }
 
   if (method === "POST" && path === `${ROUTE_PREFIX}/onboarding/chat`) {
     const body = parseBody(event.body) as OnboardingChatRequest | undefined;
+    const supportLanguage = getRequestSupportLanguage(event, body);
     const transcript = typeof body?.transcript === "string" ? body.transcript.trim() : "";
     if (!transcript) {
       return json(400, { code: "BAD_REQUEST", message: "Missing transcript" });
@@ -255,7 +333,7 @@ export const handler = async (event: any): Promise<Result> => {
     let onboardingProfile: OnboardingProfile | undefined;
 
     const [englishEval, objectiveEval] = await Promise.allSettled([
-      evaluateEnglish(historyWithUser, transcript),
+      evaluateEnglish(historyWithUser, transcript, supportLanguage),
       evaluateOnboardingObjective(historyWithUser),
     ]);
     if (englishEval.status === "fulfilled") {
@@ -296,7 +374,7 @@ export const handler = async (event: any): Promise<Result> => {
 
     let aiReply = "That's great! Tell me more.";
     try {
-      aiReply = await generateCompanionReply(profile, historyWithUser, { result, correctness }, requirements);
+      aiReply = await generateCompanionReply(profile, historyWithUser, { result, correctness }, requirements, supportLanguage);
     } catch (err) {
       console.error(
         JSON.stringify({
@@ -323,7 +401,8 @@ export const handler = async (event: any): Promise<Result> => {
 
   if (method === "POST" && path === `${ROUTE_PREFIX}/onboarding/plan`) {
     const body = parseBody(event.body) as OnboardingPlanRequest | undefined;
-    const plan = await createOnboardingPlan(body);
+    const appLanguage = getRequestAppLanguage(event, body);
+    const plan = await createOnboardingPlan(body, appLanguage);
     return json(200, plan);
   }
 
@@ -414,6 +493,41 @@ const DEFAULT_TRAINING_FOCUS: OnboardingTrainingFocus[] = [
   },
 ];
 
+const DEFAULT_TRAINING_FOCUS_EN: OnboardingTrainingFocus[] = [
+  {
+    id: "aiConversation",
+    title: "AI conversations",
+    percentage: 45,
+    description:
+      "To help you lose the fear of speaking and build real fluency through everyday situations.",
+    badge: "Top priority",
+  },
+  {
+    id: "shadowing",
+    title: "Shadowing",
+    percentage: 25,
+    description:
+      "To train your ear and get used to the rhythm, accent, and intonation of real English.",
+    badge: "Boost listening",
+  },
+  {
+    id: "vocabulary",
+    title: "Useful vocabulary",
+    percentage: 20,
+    description:
+      "To give you the words you actually need so you can express yourself without freezing.",
+    badge: "Express ideas",
+  },
+  {
+    id: "structures",
+    title: "Key structures",
+    percentage: 10,
+    description:
+      "To fix common patterns and speak with more precision and naturalness.",
+    badge: "Speak clearly",
+  },
+];
+
 const PROGRESS_ACTIVITIES: OnboardingProgressActivity[] = [
   {
     id: "mission",
@@ -452,17 +566,66 @@ const PROGRESS_ACTIVITIES: OnboardingProgressActivity[] = [
   },
 ];
 
-async function createOnboardingPlan(input?: OnboardingPlanRequest): Promise<OnboardingPlanResponse> {
+const PROGRESS_ACTIVITIES_EN: OnboardingProgressActivity[] = [
+  {
+    id: "mission",
+    label: "Mission",
+    points: 10,
+    unit: "per mission",
+    description: "Guided conversations with clear goals.",
+  },
+  {
+    id: "vocabularyWord",
+    label: "Vocabulary word",
+    points: 1,
+    unit: "per word",
+    description: "Each word learned adds to your progress.",
+  },
+  {
+    id: "freeTextMessage",
+    label: "Messages with AI friends",
+    points: 1,
+    unit: "per message",
+    description: "Free text with avatars to practice naturally.",
+  },
+  {
+    id: "lesson",
+    label: "Lesson",
+    points: 10,
+    unit: "per lesson + quiz",
+    description: "A completed English lesson together with its quiz.",
+  },
+  {
+    id: "shadowingChapter",
+    label: "Shadowing chapter",
+    points: 5,
+    unit: "per chapter",
+    description: "Practice listening, rhythm, and pronunciation.",
+  },
+];
+
+function getDefaultTrainingFocus(appLanguage: AppLanguage): OnboardingTrainingFocus[] {
+  return appLanguage === "es" ? DEFAULT_TRAINING_FOCUS : DEFAULT_TRAINING_FOCUS_EN;
+}
+
+function getProgressActivities(appLanguage: AppLanguage): OnboardingProgressActivity[] {
+  return appLanguage === "es" ? PROGRESS_ACTIVITIES : PROGRESS_ACTIVITIES_EN;
+}
+
+async function createOnboardingPlan(
+  input?: OnboardingPlanRequest,
+  appLanguage: AppLanguage = DEFAULT_APP_LANGUAGE
+): Promise<OnboardingPlanResponse> {
   const phraseSelections = sanitizePhraseSelections(input?.phraseSelections);
   const speaking = input?.speaking || {};
   const profile = sanitizeOnboardingProfile(speaking.profile);
   const completedRequirementIds = sanitizeRequirementIds(speaking.completedRequirementIds);
   const messageCount = sanitizeHistory(speaking.messages).filter((msg) => msg.role === "user").length;
   const selectedIds = new Set(phraseSelections.map((item) => item.id));
-  const focusAreas = getPlanFocusAreas(selectedIds, profile, completedRequirementIds);
-  const heroGoal = getHeroGoal(selectedIds, profile);
-  const recommendedStartingPoint = getRecommendedStartingPoint(selectedIds, profile);
-  const fallbackDistribution = getFallbackTrainingDistribution(selectedIds);
+  const focusAreas = getPlanFocusAreas(selectedIds, profile, completedRequirementIds, appLanguage);
+  const heroGoal = getHeroGoal(selectedIds, profile, appLanguage);
+  const recommendedStartingPoint = getRecommendedStartingPoint(selectedIds, profile, appLanguage);
+  const fallbackDistribution = getFallbackTrainingDistribution(selectedIds, appLanguage);
   let trainingDistribution = fallbackDistribution;
   try {
     trainingDistribution = await generatePersonalizedTrainingDistribution({
@@ -470,6 +633,7 @@ async function createOnboardingPlan(input?: OnboardingPlanRequest): Promise<Onbo
       profile,
       heroGoal,
       fallbackDistribution,
+      appLanguage,
     });
   } catch (err) {
     console.error(
@@ -489,9 +653,11 @@ async function createOnboardingPlan(input?: OnboardingPlanRequest): Promise<Onbo
   );
 
   return {
-    title: "Este es tu enfoque personalizado",
+    title: appLanguage === "es" ? "Este es tu enfoque personalizado" : "This is your personalized focus",
     summary:
-      "Creamos este plan basado en tus objetivos y en lo que nos contaste que se te dificulta del inglés.",
+      appLanguage === "es"
+        ? "Creamos este plan basado en tus objetivos y en lo que nos contaste que se te dificulta del inglés."
+        : "We built this plan from your goals and what you told us feels difficult in English.",
     ...(profile?.name ? { learnerName: profile.name } : {}),
     heroGoal,
     recommendedStartingPoint,
@@ -501,12 +667,15 @@ async function createOnboardingPlan(input?: OnboardingPlanRequest): Promise<Onbo
       pointsPerLevel: 120,
       currentLevel: 1,
       pointsInCurrentLevel,
-      activities: PROGRESS_ACTIVITIES,
+      activities: getProgressActivities(appLanguage),
     },
   };
 }
 
-function getFallbackTrainingDistribution(selectedIds: Set<string>): OnboardingTrainingFocus[] {
+function getFallbackTrainingDistribution(
+  selectedIds: Set<string>,
+  appLanguage: AppLanguage
+): OnboardingTrainingFocus[] {
   const weights: Record<OnboardingTrainingFocusId, number> = {
     aiConversation: 45,
     shadowing: 25,
@@ -530,7 +699,7 @@ function getFallbackTrainingDistribution(selectedIds: Set<string>): OnboardingTr
   }
 
   const percentages = normalizeFocusWeights(weights);
-  return DEFAULT_TRAINING_FOCUS.map((item) => ({
+  return getDefaultTrainingFocus(appLanguage).map((item) => ({
     ...item,
     percentage: percentages[item.id],
   }));
@@ -559,9 +728,17 @@ function normalizeFocusWeights(
 
 function getHeroGoal(
   selectedIds: Set<string>,
-  profile: OnboardingProfile | undefined
+  profile: OnboardingProfile | undefined,
+  appLanguage: AppLanguage
 ): string {
   if (profile?.goal) return profile.goal;
+  if (appLanguage !== "es") {
+    if (selectedIds.has("travel")) return "Travel and speak with confidence";
+    if (selectedIds.has("work")) return "Grow professionally in English";
+    if (selectedIds.has("embarrassed") || selectedIds.has("freeze")) return "Speak with confidence";
+    if (selectedIds.has("accent") || selectedIds.has("subtitles")) return "Understand real English";
+    return "Speak English with more confidence";
+  }
   if (selectedIds.has("travel")) return "Viajar y hablar con confianza";
   if (selectedIds.has("work")) return "Crecer profesionalmente en inglés";
   if (selectedIds.has("embarrassed") || selectedIds.has("freeze")) return "Hablar con confianza";
@@ -599,12 +776,27 @@ function sanitizeRequirementIds(input: unknown): OnboardingRequirementId[] {
 function getPlanFocusAreas(
   selectedIds: Set<string>,
   profile: OnboardingProfile | undefined,
-  completedRequirementIds: OnboardingRequirementId[]
+  completedRequirementIds: OnboardingRequirementId[],
+  appLanguage: AppLanguage
 ): string[] {
   const areas: string[] = [];
   const add = (area: string) => {
     if (!areas.includes(area)) areas.push(area);
   };
+
+  if (appLanguage !== "es") {
+    if (selectedIds.has("freeze") || selectedIds.has("embarrassed")) add("Speaking confidence");
+    if (selectedIds.has("accent") || selectedIds.has("subtitles")) add("Listening and comprehension");
+    if (selectedIds.has("phrases")) add("Sentence building");
+    if (selectedIds.has("work")) add("English for work");
+    if (selectedIds.has("travel")) add("English for travel");
+    if (selectedIds.has("studied")) add("Consistency and follow-up");
+    if (profile?.goal && areas.length < 4) add("Personal goal");
+    if (completedRequirementIds.length >= 3) add("AI friend conversation");
+    if (areas.length === 0) add("Daily speaking");
+    if (!areas.includes("Useful vocabulary")) add("Useful vocabulary");
+    return areas.slice(0, 4);
+  }
 
   if (selectedIds.has("freeze") || selectedIds.has("embarrassed")) add("Confianza al hablar");
   if (selectedIds.has("accent") || selectedIds.has("subtitles")) add("Listening y comprensión");
@@ -622,8 +814,28 @@ function getPlanFocusAreas(
 
 function getRecommendedStartingPoint(
   selectedIds: Set<string>,
-  profile: OnboardingProfile | undefined
+  profile: OnboardingProfile | undefined,
+  appLanguage: AppLanguage
 ): string {
+  if (appLanguage !== "es") {
+    if (selectedIds.has("work")) {
+      return "Start with work and interview missions, reinforcing professional vocabulary before conversations.";
+    }
+    if (selectedIds.has("travel")) {
+      return "Start with travel situations and short messages to build confidence in real conversations.";
+    }
+    if (selectedIds.has("accent") || selectedIds.has("subtitles")) {
+      return "Start by alternating shadowing and short lessons to improve listening, rhythm, and comprehension.";
+    }
+    if (selectedIds.has("freeze") || selectedIds.has("embarrassed")) {
+      return "Start with free messages and short missions to practice without pressure and build fluency.";
+    }
+    if (profile?.goal) {
+      return `Start with a mission connected to your goal: ${profile.goal}.`;
+    }
+    return "Start with a short mission and reinforce vocabulary before your next conversation.";
+  }
+
   if (selectedIds.has("work")) {
     return "Empieza con misiones de trabajo y entrevistas, reforzando vocabulario profesional antes de conversar.";
   }
@@ -647,9 +859,11 @@ async function generatePersonalizedTrainingDistribution(input: {
   profile?: OnboardingProfile;
   heroGoal: string;
   fallbackDistribution: OnboardingTrainingFocus[];
+  appLanguage: AppLanguage;
 }): Promise<OnboardingTrainingFocus[]> {
   const apiKey = await getOpenAIKey();
   const { model, timeoutMs, useResponses, reasoningConfig } = getModelConfig();
+  const lang = getPromptLanguageContext(input.appLanguage);
   const painText = input.phraseSelections
     .map((item) => `- ${item.id}: ${item.text}`)
     .join("\n") || "- No selected pains.";
@@ -661,7 +875,7 @@ async function generatePersonalizedTrainingDistribution(input: {
     input.profile?.goal ? `Goal: ${input.profile.goal}` : "",
     input.profile?.bio ? `Bio: ${input.profile.bio}` : "",
   ].filter(Boolean).join("\n") || "No profile details.";
-  const systemPrompt = `You personalize a Spanish onboarding plan for an English learning app.
+  const systemPrompt = `You personalize an onboarding plan for an English learning app. ${lang.appLanguageDescription}
 Return ONLY JSON with this exact shape:{
   "trainingDistribution": [
     { "id": "aiConversation", "percentage": number, "description": string, "badge": string },
@@ -675,7 +889,7 @@ Rules:
 - The AI decision is the percentage distribution. Base it ONLY on the selected pain phrases.
 - Percentages must be multiples of 5 and sum exactly 100.
 - Keep each category useful: minimum 10%, maximum 55%.
-- Use Spanish for descriptions and badges.
+- Use ${lang.feedbackLanguageName} for descriptions and badges.
 - You may personalize descriptions with the learner's stated name, goal, or bio when it naturally fits.
 - Do not invent facts, do not mention internal points, and do not add extra keys.
 - Descriptions must be concise: max 24 words.
@@ -833,7 +1047,8 @@ function extractResponsesText(payload: any): string {
 
 async function evaluateEnglish(
   history: StoryMessage[],
-  transcript: string
+  transcript: string,
+  appLanguage: SupportLanguageCode = DEFAULT_APP_LANGUAGE
 ): Promise<{
   score: number;
   result?: string;
@@ -846,6 +1061,7 @@ async function evaluateEnglish(
 }> {
   const apiKey = await getOpenAIKey();
   const { model, timeoutMs, useResponses, reasoningConfig } = getModelConfig();
+  const lang = getPromptLanguageContext(appLanguage);
   const conversationText = history
     .slice(-HISTORY_LIMIT)
     .map((msg) => `${msg.role === "user" ? "Student" : "Guide"}: ${msg.content}`)
@@ -863,7 +1079,9 @@ Rules:
 - Evaluate ONLY grammar, word order, word choice, and naturalness of the latest student message.
 - NEVER penalize because the message is short, simple, or does not match the conversation topic.
 - A single valid English word or phrase is grammatically correct and must score 90-100.
-- Use Spanish for errors and feedback texts.
+- ${lang.supportLanguageInstruction}
+- ${lang.nonEnglishMessageInstruction}
+- For non-English, mostly native-language, or mixed latest messages, do not treat the native-language text as a grammar error. Teach how to say that idea in English in ${lang.feedbackLanguageName}, and provide 1-2 natural English alternatives.
 - Link errors only to actual grammar/usage issues in the last message (max 3).
 - Always provide 1-2 natural English alternatives.
 - Do not include any extra keys or commentary.`;
@@ -1056,16 +1274,18 @@ async function generateCompanionReply(
   profile: CharacterProfile,
   history: StoryMessage[],
   evaluation: { result: EvalResult; correctness: number },
-  requirements: OnboardingRequirementStatus[]
+  requirements: OnboardingRequirementStatus[],
+  appLanguage: SupportLanguageCode = DEFAULT_APP_LANGUAGE
 ): Promise<string> {
   const apiKey = await getOpenAIKey();
   const { model, timeoutMs, useResponses, reasoningConfig } = getModelConfig();
+  const lang = getPromptLanguageContext(appLanguage);
   const conversationText = history
     .slice(-HISTORY_LIMIT)
     .map((msg) => `${msg.role === "user" ? "Student" : profile.characterName}: ${msg.content}`)
     .join("\n")
     .trim();
-  const systemPrompt = `You are continuing the onboarding conversation in English with a Spanish-speaking learner.
+  const systemPrompt = `You are continuing the onboarding conversation in English with a learner practicing English. ${lang.appLanguageDescription}
 
 Persona:
 Character name: ${profile.characterName}

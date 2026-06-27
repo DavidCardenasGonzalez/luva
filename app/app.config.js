@@ -46,6 +46,7 @@ const androidPackage =
 
 const plugins = [
   "expo-dev-client",
+  "expo-localization",
   "expo-secure-store",
   "expo-web-browser",
   [

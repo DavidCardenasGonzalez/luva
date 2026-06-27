@@ -72,6 +72,12 @@ import {
 } from "../admin/lessons";
 import { listPublicShadowingCatalog } from "../shadowing";
 import { validatePromoCode } from "../promo-codes";
+import {
+  DEFAULT_APP_LANGUAGE,
+  getPromptLanguageContext,
+  getRequestSupportLanguage,
+  SupportLanguageCode,
+} from "../language";
 
 const s3 = new S3Client({});
 const ssm = new SSMClient({});
@@ -987,6 +993,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
     if (method === "POST" && sessionEvaluate) {
       const sessionId = sessionEvaluate[1];
       const body = parseBody(event.body);
+      const appLanguage = getRequestSupportLanguage(event, body);
       const transcript = body?.transcript ?? "";
       const label = body?.label as string | undefined;
       const example = body?.example as string | undefined;
@@ -997,7 +1004,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
         tLen: transcript?.length || 0,
       });
       const t0 = Date.now();
-      const evalResponse = await evaluateAI(transcript, { label, example });
+      const evalResponse = await evaluateAI(transcript, { label, example }, appLanguage);
       log("sessions.evaluate.success", {
         sessionId,
         ms: Date.now() - t0,
@@ -1107,10 +1114,12 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
 
     const lessonHelp = path.match(/^\/v1\/lessons\/([^/]+)\/help$/);
     if (method === "POST" && lessonHelp) {
+      const body = parseBody(event.body) || {};
       try {
         return json(200, await answerLessonHelp({
           lessonId: decodeURIComponent(lessonHelp[1]),
-          ...(parseBody(event.body) || {}),
+          ...body,
+          appLanguage: getRequestSupportLanguage(event, body),
         }));
       } catch (err: any) {
         if (err?.message === 'LESSON_NOT_FOUND') {
@@ -1188,8 +1197,9 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
     if (method === "POST" && publicFriendFinish) {
       const friendId = decodeURIComponent(publicFriendFinish[1]);
       const body = parseBody(event.body) as FriendChatFinishRequest | undefined;
+      const appLanguage = getRequestSupportLanguage(event, body);
       try {
-        const { feedback, affinity, friendshipContext } = await finishFriendChat(undefined, friendId, body || {});
+        const { feedback, affinity, friendshipContext } = await finishFriendChat(undefined, friendId, body || {}, undefined, appLanguage);
         return json(200, {
           friendId,
           conversationEnded: true,
@@ -1209,6 +1219,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
     if (method === "POST" && publicFriendChat) {
       const friendId = decodeURIComponent(publicFriendChat[1]);
       const body = parseBody(event.body) as FriendChatRequest | undefined;
+      const appLanguage = getRequestSupportLanguage(event, body);
       const transcript = typeof body?.transcript === "string" ? body.transcript.trim() : "";
       const hasUserImage = typeof body?.userImageBase64 === "string" && body.userImageBase64.length > 0;
       if (!transcript && !hasUserImage) {
@@ -1221,7 +1232,10 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
           {
             ...(body || {}),
             transcript: transcript || "[Photo]",
-          }
+          },
+          undefined,
+          undefined,
+          appLanguage
         );
         return json(200, payload);
       } catch (err: any) {
@@ -1236,6 +1250,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
     if (method === "POST" && publicFriendAssist) {
       const friendId = decodeURIComponent(publicFriendAssist[1]);
       const body = parseBody(event.body) as any;
+      const appLanguage = getRequestSupportLanguage(event, body);
       const question = typeof body?.question === "string" ? body.question.trim() : "";
       if (!question) {
         return badRequest("Missing question");
@@ -1244,7 +1259,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
         const answer = await answerFriendAssistance(undefined, friendId, {
           ...(body || {}),
           question,
-        });
+        }, appLanguage);
         return json(200, { answer });
       } catch (err: any) {
         if (err?.message === "FRIEND_NOT_FOUND") {
@@ -1268,13 +1283,15 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       }
       const friendId = decodeURIComponent(friendFinish[1]);
       const body = parseBody(event.body) as FriendChatFinishRequest | undefined;
+      const appLanguage = getRequestSupportLanguage(event, body);
       try {
         const learnerProfile = await resolveLearnerProfile(identity);
         const { feedback, affinity, friendshipContext } = await finishFriendChat(
           identity.userId,
           friendId,
           body || {},
-          learnerProfile.difficulty
+          learnerProfile.difficulty,
+          appLanguage
         );
         return json(200, {
           friendId,
@@ -1441,6 +1458,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       }
       const friendId = decodeURIComponent(friendChat[1]);
       const body = parseBody(event.body) as FriendChatRequest | undefined;
+      const appLanguage = getRequestSupportLanguage(event, body);
       const transcript = typeof body?.transcript === "string" ? body.transcript.trim() : "";
       const hasUserImage = typeof body?.userImageBase64 === "string" && body.userImageBase64.length > 0;
       if (!transcript && !hasUserImage) {
@@ -1456,7 +1474,8 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
             transcript: transcript || "[Photo]",
           },
           learnerProfile.name,
-          learnerProfile.difficulty
+          learnerProfile.difficulty,
+          appLanguage
         );
         return json(200, payload);
       } catch (err: any) {
@@ -1475,6 +1494,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       }
       const friendId = decodeURIComponent(friendAssist[1]);
       const body = parseBody(event.body) as any;
+      const appLanguage = getRequestSupportLanguage(event, body);
       const question = typeof body?.question === "string" ? body.question.trim() : "";
       if (!question) {
         return badRequest("Missing question");
@@ -1483,7 +1503,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
         const answer = await answerFriendAssistance(identity.userId, friendId, {
           ...(body || {}),
           question,
-        });
+        }, appLanguage);
         return json(200, { answer });
       } catch (err: any) {
         if (err?.message === "FRIEND_NOT_FOUND") {
@@ -1501,6 +1521,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
 
     if (method === "POST" && path === `${ROUTE_PREFIX}/practice/assist`) {
       const body = parseBody(event.body) as StoryAssistanceRequest;
+      const appLanguage = getRequestSupportLanguage(event, body);
       const question = typeof body?.question === "string" ? body.question.trim() : "";
       if (!question) {
         return badRequest("Missing question");
@@ -1518,10 +1539,11 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
           mission,
           history: sanitizeHistory(body?.history).slice(-STORY_HISTORY_LIMIT),
           requirements: Array.isArray(body?.requirements)
-            ? alignRequirementStates(mission, body.requirements)
+            ? alignRequirementStates(mission, body.requirements, appLanguage)
             : [],
           question,
           conversationFeedback: body?.conversationFeedback || null,
+          appLanguage,
         });
         return json(200, { answer } as StoryAssistanceResponse);
       } catch (err: any) {
@@ -1544,7 +1566,8 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
       if (text.length > 5000) {
         return badRequest("Text is too long");
       }
-      const target = normalizeLanguageCode(body?.target, "es");
+      const appLanguage = getRequestSupportLanguage(event, body);
+      const target = normalizeLanguageCode(body?.target, appLanguage);
       const source = normalizeLanguageCode(body?.source, "en");
       log("translate.begin", {
         tLen: text.length,
@@ -2133,7 +2156,8 @@ async function resolveFriendRecordForChat(
 async function answerFriendAssistance(
   userId: string | undefined,
   friendId: string,
-  body: { question: string; history?: StoryMessage[]; postContext?: string }
+  body: { question: string; history?: StoryMessage[]; postContext?: string },
+  appLanguage: SupportLanguageCode = DEFAULT_APP_LANGUAGE
 ): Promise<string> {
   const friend = await resolveFriendRecordForChat(userId, friendId);
   if (!friend) {
@@ -2176,6 +2200,7 @@ async function answerFriendAssistance(
     requirements: [],
     question: body.question,
     conversationFeedback: null,
+    appLanguage,
   });
 }
 
@@ -2294,18 +2319,30 @@ function buildFriendConversationFeedbackFallback(args: {
   result: EvalResult;
   errors: string[];
   reformulations: string[];
+  appLanguage?: SupportLanguageCode;
 }): FriendConversationFeedback {
+  const appLanguage = args.appLanguage || DEFAULT_APP_LANGUAGE;
   const summary =
-    args.result === "correct"
-      ? `Cerraste la conversación de forma natural y clara. Tu último mensaje quedó fuerte: ${args.correctness}/100.`
+    appLanguage === "es"
+      ? args.result === "correct"
+        ? `Cerraste la conversación de forma natural y clara. Tu último mensaje quedó fuerte: ${args.correctness}/100.`
+        : args.result === "partial"
+        ? `Cerraste la conversación bien, con algunos detalles de inglés por pulir. Tu último mensaje obtuvo ${args.correctness}/100.`
+        : `La despedida se entendió, pero conviene ajustar gramática o naturalidad. Tu último mensaje obtuvo ${args.correctness}/100.`
+      : args.result === "correct"
+      ? `You closed the conversation naturally and clearly. Your last message was strong: ${args.correctness}/100.`
       : args.result === "partial"
-      ? `Cerraste la conversación bien, con algunos detalles de inglés por pulir. Tu último mensaje obtuvo ${args.correctness}/100.`
-      : `La despedida se entendió, pero conviene ajustar gramática o naturalidad. Tu último mensaje obtuvo ${args.correctness}/100.`;
+      ? `You closed the conversation well, with a few English details to polish. Your last message scored ${args.correctness}/100.`
+      : `The goodbye was understandable, but grammar or naturalness could be smoother. Your last message scored ${args.correctness}/100.`;
   const improvements = args.reformulations.length
     ? args.reformulations
     : args.errors.length
-    ? args.errors.map((item) => `Revisa este punto: ${item}`)
-    : ["Sigue usando despedidas breves y naturales como \"See you later\" o \"Talk to you soon\"."];
+    ? args.errors.map((item) => appLanguage === "es" ? `Revisa este punto: ${item}` : `Review this point: ${item}`)
+    : [
+        appLanguage === "es"
+          ? 'Sigue usando despedidas breves y naturales como "See you later" o "Talk to you soon".'
+          : 'Keep using short, natural goodbyes like "See you later" or "Talk to you soon".',
+      ];
 
   return {
     summary,
@@ -2694,7 +2731,8 @@ async function advanceFriendChat(
   friendId: string,
   body: FriendChatRequest,
   learnerName?: string,
-  learnerDifficulty?: LearnerDifficulty
+  learnerDifficulty?: LearnerDifficulty,
+  appLanguage: SupportLanguageCode = DEFAULT_APP_LANGUAGE
 ): Promise<FriendChatPayload> {
   const friend = await resolveFriendRecordForChat(userId, friendId);
   if (!friend) {
@@ -2761,8 +2799,8 @@ async function advanceFriendChat(
     ? []
     : await Promise.allSettled([
         isEasyMode
-          ? evaluateEasyEnglish(conversationHistory, transcript)
-          : evaluateStoryEnglish(conversationHistory, transcript),
+          ? evaluateEasyEnglish(conversationHistory, transcript, appLanguage)
+          : evaluateStoryEnglish(conversationHistory, transcript, appLanguage),
       ]);
 
   const englishEval = englishEvalResult[0];
@@ -2812,7 +2850,8 @@ async function advanceFriendChat(
       postContext,
       effectiveDifficulty,
       conversationSummary,
-      friendshipContext
+      friendshipContext,
+      appLanguage
     );
   } catch (err) {
     console.log(
@@ -2868,7 +2907,8 @@ async function finishFriendChat(
   userId: string | undefined,
   friendId: string,
   body: FriendChatFinishRequest,
-  learnerDifficulty?: LearnerDifficulty
+  learnerDifficulty?: LearnerDifficulty,
+  appLanguage: SupportLanguageCode = DEFAULT_APP_LANGUAGE
 ): Promise<{
   feedback: FriendConversationFeedback;
   affinity: FriendAffinityUpdate;
@@ -2888,7 +2928,7 @@ async function finishFriendChat(
   let feedback: FriendConversationFeedback;
   let qualityMultiplier = 1;
   try {
-    const generated = await generateFriendConversationFeedback(friend, history, effectiveDifficulty);
+    const generated = await generateFriendConversationFeedback(friend, history, effectiveDifficulty, appLanguage);
     feedback = generated.feedback;
     qualityMultiplier = generated.qualityMultiplier;
   } catch (err) {
@@ -2903,6 +2943,7 @@ async function finishFriendChat(
       result: "partial",
       errors: [],
       reformulations: [],
+      appLanguage,
     });
   }
   let friendshipContext = priorFriendshipContext;
@@ -3957,7 +3998,7 @@ async function getGoogleTranslateApiKey(): Promise<string> {
 
 function normalizeLanguageCode(value: unknown, fallback: string): string {
   if (typeof value !== "string") return fallback;
-  const normalized = value.trim().toLowerCase();
+  const normalized = value.trim().replace(/_/g, "-");
   return /^[a-z]{2,3}(-[a-z0-9]{2,8})?$/i.test(normalized)
     ? normalized
     : fallback;
@@ -4054,7 +4095,8 @@ async function translateTextWithGoogle(
 
 async function evaluateAI(
   transcript: string,
-  context: { label?: string; example?: string }
+  context: { label?: string; example?: string },
+  appLanguage: SupportLanguageCode = DEFAULT_APP_LANGUAGE
 ): Promise<
   EvaluationResponse & { errors?: string[]; improvements?: string[] }
 > {
@@ -4066,15 +4108,16 @@ async function evaluateAI(
   const reasoningConfig = isGpt5
     ? { effort: process.env.OPENAI_REASONING_EFFORT || "low" }
     : undefined;
-  const sys = `Eres un profesor de inglÃ©s que habla espaÃ±ol. 
-  El alumno va a dar un ejemplo del uso de ${context.label}; debes evaluar su respuesta.
+  const lang = getPromptLanguageContext(appLanguage);
+  const sys = `You are an English teacher. ${lang.appLanguageDescription}
+The learner will give an example using ${context.label || "the target English item"}; evaluate their answer.
 
-Devuelve SOLO JSON (sin texto extra) con estas claves:
-  - correctness: nÃºmero 0-100 que indique quÃ© tan correcta es la respuesta.
-  - errors: arreglo con hasta 3 mensajes cortos en español, escritos de forma muy sencilla y amable, como si le explicaras a un niño de 10 años (solo si hay errores reales, no inventes errores). Sin términos técnicos de gramática: di qué salió un poquito mal con palabras simples y agrega un pequeño consejo positivo para mejorar.
-  - improvements: arreglo con 1 reformulaciÃ³n mÃ¡s natural para un nativo en inglÃ©s (frase concisa), sin explicaciones. Opcional si ya estÃ¡ perfecto.
+Return ONLY JSON (no extra text) with these keys:
+  - correctness: number 0-100 indicating how correct the answer is.
+  - errors: array with up to 3 short messages in ${lang.feedbackLanguageName}, written simply and kindly, as if explaining to a 10-year-old (only for real errors; do not invent errors). Avoid technical grammar terms: say what went a little wrong in plain words and add a small positive tip.
+  - improvements: array with 1 more natural English reformulation for a native speaker (concise phrase), without explanations. Optional if it is already perfect.
 
-Responde Ãºnicamente el JSON, da tu respuesta de una forma amable.`;
+Respond only with JSON, kindly.`;
 
   const user = `${transcript}`;
   // Use Responses API for GPT-5 family, else fallback to Chat Completions
@@ -4268,8 +4311,11 @@ async function generateAssistanceAnswer(args: {
   requirements: StoryAdvanceRequirementState[];
   question: string;
   conversationFeedback?: { summary?: string; improvements?: string[] } | null;
+  appLanguage?: SupportLanguageCode;
 }): Promise<string> {
   const { story, mission, history, requirements, question, conversationFeedback } = args;
+  const appLanguage = args.appLanguage || DEFAULT_APP_LANGUAGE;
+  const lang = getPromptLanguageContext(appLanguage);
   const apiKey = await getOpenAIKey();
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
@@ -4297,11 +4343,13 @@ async function generateAssistanceAnswer(args: {
   if (conversationFeedback?.improvements?.length) {
     feedbackLines.push(`Frases y palabras útiles previas: ${conversationFeedback.improvements.join(' | ')}`);
   }
-  const systemPrompt = `Eres un tutor de inglés que responde en español de forma breve y accionable. Usa un lenguaje amigable y tiene un actitud un poco sarcastica.
-  Puede meter alguna pequeña broma cuando la situacion se presta.
-Con el contexto de la misión, la conversación y los objetivos, ofrece orientación clara para que el alumno avance.
-Devuelve 2-4 viñetas en español (máx 3 líneas en total) y, si es útil, agrega un solo ejemplo en inglés de hasta 15 palabras con el prefijo "Ejemplo:".
-No incluyas formato extra, JSON ni emojis.`;
+  const examplePrefix = appLanguage === "es" ? "Ejemplo" : "Example";
+  const systemPrompt = `You are an English tutor. ${lang.appLanguageDescription}
+Answer in ${lang.feedbackLanguageName}, briefly and actionably. Use a friendly tone with a slightly sarcastic attitude when it fits.
+You may include a small joke when the situation calls for it.
+Using the mission, conversation, and objectives, give clear guidance so the learner can move forward.
+Return 2-4 bullets in ${lang.feedbackLanguageName} (max 3 total lines) and, if useful, add one English example up to 15 words with the prefix "${examplePrefix}:".
+Do not include extra formatting, JSON, or emojis.`;
   const userPrompt = `Historia: ${story.title}
 Misión: ${mission.title}
 Resumen: ${mission.sceneSummary || 'N/D'}
@@ -4416,7 +4464,8 @@ Resuelve su pregunta con ayuda concreta para cumplir la misión. Si consideras n
 
 async function evaluateStoryEnglish(
   history: StoryMessage[],
-  transcript: string
+  transcript: string,
+  appLanguage: SupportLanguageCode = DEFAULT_APP_LANGUAGE
 ): Promise<{
   score: number;
   result?: string;
@@ -4437,6 +4486,7 @@ async function evaluateStoryEnglish(
   const reasoningConfig = isGpt5
     ? { effort: process.env.OPENAI_REASONING_EFFORT || 'low' }
     : undefined;
+  const lang = getPromptLanguageContext(appLanguage);
   const conversation = history.slice(-STORY_HISTORY_LIMIT);
   const conversationText = conversation
     .map((msg) => `${msg.role === 'user' ? 'Student' : 'Guide'}: ${msg.content}`)
@@ -4459,11 +4509,11 @@ Rules:
 - A single valid English word or phrase (e.g. "Hello", "Hi", "Yes", "I see") is grammatically correct and must score 90–100.
 - Brevity is not an English error. A short message with no grammar mistakes is always "correct".
 - Mission objectives and task completion are evaluated separately by another system; do not consider them here.
-- Use Spanish for errors and feedback texts.
+- ${lang.supportLanguageInstruction}
 - Use the full conversation only to understand meaning and pronoun references, not to judge relevance.
-- If the latest message is in Spanish, mostly Spanish, or Spanglish with a clear Spanish base, assume the learner did not know how to express that idea in English.
-- For a Spanish/mostly Spanish latest message, do NOT treat it as a failed English sentence and do NOT list it as a grammar error. Set "feedbackType" to "translation_help", set "result" to "partial", use a score from 60 to 75, write 1-2 explanatory Spanish notes in "errors" that teach how to say that idea in English, and provide 1-2 natural English versions in "alternatives".
-- Spanish-message explanatory notes should be phrased like: "Para decir esa idea en inglés, puedes usar..." or "Una forma natural de decirlo sería..."; avoid scolding or saying they wrote in the wrong language.
+- ${lang.nonEnglishMessageInstruction}
+- For a non-English, mostly native-language, or mixed latest message, do NOT treat it as a failed English sentence and do NOT list it as a grammar error. Set "feedbackType" to "translation_help", set "result" to "partial", use a score from 60 to 75, write 1-2 explanatory ${lang.feedbackLanguageName} notes in "errors" that teach how to say that idea in English, and provide 1-2 natural English versions in "alternatives".
+- ${lang.translationHelpInstruction}
 - For English latest messages, set "feedbackType" to "correction".
 - Do not mark obvious typos, capitalization, or apostrophe mistakes as errors unless they change the meaning.
 - Mark malformed questions as errors. Example: "the dish is spicy?" should be partial; the natural correction is "Is the dish spicy?"
@@ -4615,7 +4665,8 @@ Scoring:
 
 async function evaluateEasyEnglish(
   history: StoryMessage[],
-  transcript: string
+  transcript: string,
+  appLanguage: SupportLanguageCode = DEFAULT_APP_LANGUAGE
 ): Promise<{
   score: number;
   result?: string;
@@ -4636,12 +4687,25 @@ async function evaluateEasyEnglish(
   const reasoningConfig = isGpt5
     ? { effort: process.env.OPENAI_REASONING_EFFORT || 'low' }
     : undefined;
+  const lang = getPromptLanguageContext(appLanguage);
+  const nativeLanguageTipExample =
+    appLanguage === "es"
+      ? 'Example: "Para decir eso en inglés, puedes usar \'I like pizza\'."'
+      : 'Example: "To say that in English, you can use \'I like pizza\'."';
+  const englishMessageTipExample =
+    appLanguage === "es"
+      ? 'Example: "Para preguntar cómo está alguien, puedes decir \'How are you?\'."'
+      : 'Example: "To ask how someone is, you can say \'How are you?\'."';
+  const positiveTipExample =
+    appLanguage === "es"
+      ? 'e.g. "Otra forma fácil de decirlo: \'That sounds great!\'."'
+      : 'e.g. "Another easy way to say it: \'That sounds great!\'."';
   const conversation = history.slice(-STORY_HISTORY_LIMIT);
   const conversationText = conversation
     .map((msg) => `${msg.role === 'user' ? 'Student' : 'Friend'}: ${msg.content}`)
     .join('\n')
     .trim();
-  const systemPrompt = `You are a warm, encouraging English coach for a Spanish-speaking learner at A1 (easy) level.
+  const systemPrompt = `You are a warm, encouraging English coach for a learner at A1 (easy) level. ${lang.appLanguageDescription}
 The learner is practicing English in a casual chat. Your job is to help — never to grade or correct.
 
 Return ONLY JSON with this exact shape:
@@ -4654,24 +4718,24 @@ General tone:
 - Always kind, patient, motivating. Speak like a friend, not a teacher with a red pen.
 - Never use words like "error", "wrong", "incorrect", "mistake" or negative judgements.
 - No grammar jargon (no "subject", "verb tense", "auxiliary"). Use simple, everyday words.
-- Tips are written in Spanish. Alternatives are written in English.
+- Tips are written in ${lang.feedbackLanguageName}. Alternatives are written in English.
 
-If the learner's last message is in Spanish (or mostly Spanish / mixed):
+If the learner's last message is not English, mostly their native language, or mixed:
 - Do NOT say anything negative. Treat it as normal: they are still learning.
-- Tips: 1–2 short, friendly hints in Spanish that teach how to say the same idea in easy English. Example: "Para decir eso en inglés, puedes usar 'I like pizza'." Include a tiny example whenever you can.
+- Tips: 1–2 short, friendly hints in ${lang.feedbackLanguageName} that teach how to say the same idea in easy English. ${nativeLanguageTipExample} Include a tiny example whenever you can.
 - Alternatives: 1–2 simple, natural English versions of what they wanted to say.
 
 If the learner's last message is in English:
 - Do NOT correct directly. Instead, teach a small, friendly lesson that helps them say what they wanted.
-- Tips: 1–2 short lessons/tips in Spanish, focused on how to express the idea, with a tiny English example. Example: "Para preguntar cómo está alguien, puedes decir 'How are you?'."
+- Tips: 1–2 short lessons/tips in ${lang.feedbackLanguageName}, focused on how to express the idea, with a tiny English example. ${englishMessageTipExample}
 - Alternatives: 1–2 simple, natural ways a native would say the same idea in easy English.
 
 If the message is already a perfectly fine simple sentence:
-- Tips can be empty, or contain one short positive hint with a small example (e.g. "Otra forma fácil de decirlo: 'That sounds great!'.").
+- Tips can be empty, or contain one short positive hint with a small example (${positiveTipExample}).
 - Always still return at least 1 alternative in "alternatives".
 
 Hard limits:
-- "tips": maximum 2 items. Each tip is one short sentence in Spanish, simple words, optionally with a tiny English example inside quotes.
+- "tips": maximum 2 items. Each tip is one short sentence in ${lang.feedbackLanguageName}, simple words, optionally with a tiny English example inside quotes.
 - "alternatives": 1–2 items. Each one is a short, simple English sentence (A1/A2 level), natural and friendly.
 - Do not include any other keys or commentary.
 `;
@@ -4800,7 +4864,8 @@ Hard limits:
 async function evaluateStoryRequirementProgress(
   story: StoryDefinition,
   mission: StoryMission,
-  history: StoryMessage[]
+  history: StoryMessage[],
+  appLanguage: SupportLanguageCode = DEFAULT_APP_LANGUAGE
 ): Promise<{
   requirements: any[];
   objectivesMet: boolean;
@@ -4814,6 +4879,11 @@ async function evaluateStoryRequirementProgress(
   const reasoningConfig = isGpt5
     ? { effort: process.env.OPENAI_REASONING_EFFORT || 'low' }
     : undefined;
+  const lang = getPromptLanguageContext(appLanguage);
+  const unmetFeedbackExamples =
+    appLanguage === "es"
+      ? '"Pendiente" or "Todavia no se ha cubierto"'
+      : '"Pending" or "Not covered yet"';
   const conversation = history.slice(-STORY_HISTORY_LIMIT);
   const conversationText = conversation
     .map((msg) => `${msg.role === 'user' ? 'Student' : 'Guide'}: ${msg.content}`)
@@ -4834,8 +4904,8 @@ Rules:
 - Do not grade English grammar, spelling, word order, or naturalness. English quality is evaluated separately.
 - Mark a requirement as met when the student's intention clearly satisfies it anywhere in the conversation, even if the English has small mistakes.
 - Keep the requirements array in the original order and include every requirement exactly once.
-- Use Spanish for feedback texts.
-- For unmet requirements, use neutral progress feedback like "Pendiente" or "Todavia no se ha cubierto"; do not call it an English error.
+- Use ${lang.feedbackLanguageName} for feedback texts.
+- For unmet requirements, use neutral progress feedback like ${unmetFeedbackExamples}; do not call it an English error.
 - objectives_met must be true only if every requirement is met across the conversation.
 - Do not include any extra keys or commentary.
 `;
@@ -5206,7 +5276,8 @@ async function generateFriendReply(
   postContext?: FriendChatPostContext,
   learnerDifficulty?: LearnerDifficulty,
   conversationSummary?: string,
-  friendshipContext?: string
+  friendshipContext?: string,
+  appLanguage: SupportLanguageCode = DEFAULT_APP_LANGUAGE
 ): Promise<FriendReplyPlan> {
   const apiKey = await getOpenAIKey();
   const model =
@@ -5217,6 +5288,7 @@ async function generateFriendReply(
   const reasoningConfig = isGpt5
     ? { effort: process.env.OPENAI_REASONING_EFFORT || "low" }
     : undefined;
+  const lang = getPromptLanguageContext(appLanguage);
   const conversation = history.slice(-FRIEND_RECENT_MESSAGES);
   const conversationText = conversation
     .map(
@@ -5257,7 +5329,7 @@ async function generateFriendReply(
         .join("\n")
     : "";
   const systemPrompt = `
-You are continuing a free conversation in English with a Spanish-speaking learner.
+You are continuing a free conversation in English with a learner practicing English. ${lang.appLanguageDescription}
 
 Persona:
 ${characterNotes}
@@ -5423,9 +5495,11 @@ Rules:
 async function generateFriendConversationFeedback(
   friend: FriendRecord,
   history: StoryMessage[],
-  learnerDifficulty?: LearnerDifficulty
+  learnerDifficulty?: LearnerDifficulty,
+  appLanguage: SupportLanguageCode = DEFAULT_APP_LANGUAGE
 ): Promise<{ feedback: FriendConversationFeedback; qualityMultiplier: number }> {
   const isEasyMode = learnerDifficulty === 'easy';
+  const lang = getPromptLanguageContext(appLanguage);
   console.log(
     JSON.stringify({
       scope: "friends.feedback.generate.begin",
@@ -5453,27 +5527,27 @@ async function generateFriendConversationFeedback(
     .trim();
   const systemPrompt = isEasyMode
     ? `
-You are a warm, encouraging English coach for a Spanish-speaking learner at A1 (easy) level.
+You are a warm, encouraging English coach for a learner at A1 (easy) level. ${lang.appLanguageDescription}
 
 You are wrapping up a completed casual conversation between the student and an English-speaking friend.
 
 Context you must assume:
-- During the chat, the student often wrote in Spanish. That is totally fine and expected at this level.
+- During the chat, the student may have written in their native language or mixed language. That is totally fine and expected at this level.
 - Each time they wrote, they already received tips and English alternatives showing how to say it in simple English. You do NOT need to repeat corrections.
-- Your job now is to send them off with a kind, motivating wrap-up and a practical list of useful English phrases/words with Spanish translations that help them sound more natural.
+- Your job now is to send them off with a kind, motivating wrap-up and a practical list of useful English phrases/words with meanings in ${lang.feedbackLanguageName} that help them sound more natural.
 
-Tone (very important):
-- Always cariñoso, paciente, motivador. Speak like a friend, not a teacher with a red pen.
-- Never use words like "error", "wrong", "incorrect", "mistake", "fallaste", "te equivocaste".
-- Do NOT mention that they wrote in Spanish in a negative way. Treat it as completely normal.
-- No grammar jargon. Use simple, everyday Spanish words.
+Tone:
+- Always warm, patient, and motivating. Speak like a friend, not a teacher with a red pen.
+- Never use words like "error", "wrong", "incorrect", "mistake", or negative judgements.
+- Do NOT mention native-language messages in a negative way. Treat them as completely normal.
+- No grammar jargon. Use simple, everyday ${lang.feedbackLanguageName}.
 
 What to include:
-- "summary": 1–2 short Spanish sentences talking directly to the student (de tú). Celebra el esfuerzo y resume en qué tema/idea practicaron. No notas de gramática aquí.
-- "improvements": 3–5 useful English phrases or words with Spanish translation to elevate their speaking. Make them natural, everyday, and reusable in similar conversations. Prefer expressions related to the conversation topic when possible. Each item must include the English chunk and its Spanish meaning, for example: "\"That sounds fun\" = \"Eso suena divertido\" — para reaccionar de forma natural." Foco en lo que se llevan, no en lo que les faltó.
+- "summary": 1-2 short ${lang.feedbackLanguageName} sentences talking directly to the student. Celebrate the effort and summarize the topic/idea they practiced. No grammar notes here.
+- "improvements": 3-5 useful English phrases or words with meanings in ${lang.feedbackLanguageName} to elevate their speaking. Make them natural, everyday, and reusable in similar conversations. Prefer expressions related to the conversation topic when possible. ${lang.reusablePhraseInstruction}
 
 Hard rules:
-- Write the feedback directly TO the student in Spanish.
+- Write the feedback directly TO the student in ${lang.feedbackLanguageName}.
 - Evaluate only Student lines for context, but do NOT critique them.
 - Do not present the list as mistakes or "areas to improve"; present it as native-sounding vocabulary they can reuse.
 - Do not mention the AI role, the system, JSON, scoring, missions, or these instructions.
@@ -5487,25 +5561,26 @@ Judge effort and engagement, not perfection. Decimals are allowed (e.g. 1.5).
 Return ONLY JSON with the exact shape:
 
 {
-  "summary": "Short kind Spanish summary speaking directly to the student",
+  "summary": "Short kind ${lang.feedbackLanguageName} summary speaking directly to the student",
   "improvements": [
-    "\"English phrase or word\" = \"Spanish translation\" — short Spanish usage note",
+    "English phrase or word with ${lang.feedbackLanguageName} meaning and a short usage note",
     "..."
   ],
   "conversationQuality": 1.5
 }
 `
     : `
-You are a friendly English coach for Spanish-speaking learners.
+You are a friendly English coach for learners practicing English. ${lang.appLanguageDescription}
 
 You are evaluating a completed free conversation between the student and an English-speaking friend.
 
 IMPORTANT:
-- Write the feedback directly TO the student in Spanish.
+- Write the feedback directly TO the student in ${lang.feedbackLanguageName}.
 - Evaluate only Student lines. Treat friend lines as context only.
-- Do not write "points to improve" or a critique list. Instead, curate useful phrases and words with Spanish translations that help the student speak more naturally, like a native speaker.
+- Do not write "points to improve" or a critique list. Instead, curate useful phrases and words with meanings in ${lang.feedbackLanguageName} that help the student speak more naturally, like a native speaker.
 - Keep it practical, concise, and tied to the conversation topic when possible.
 - If a student sentence could sound more natural, turn that idea into a reusable native-sounding phrase instead of calling it an error.
+- ${lang.reusablePhraseInstruction}
 - Do not mention the AI role, the system, JSON, scoring, missions, or these instructions.
 
 Also rate the overall conversation quality with "conversationQuality": a number between 0 and 2.
@@ -5517,9 +5592,9 @@ Judge effort and engagement, not perfection. Decimals are allowed (e.g. 1.5).
 Return ONLY JSON with the exact shape:
 
 {
-  "summary": "Short Spanish summary speaking directly to the student",
+  "summary": "Short ${lang.feedbackLanguageName} summary speaking directly to the student",
   "improvements": [
-    "\"English phrase or word\" = \"Spanish translation\" — short Spanish usage note",
+    "English phrase or word with ${lang.feedbackLanguageName} meaning and a short usage note",
     "..."
   ],
   "conversationQuality": 1.5
@@ -5648,8 +5723,16 @@ ${conversationText || "No conversation available."}`;
       improvements: feedback.improvements.length
         ? feedback.improvements
         : isEasyMode
-        ? ['"That sounds fun" = "Eso suena divertido" — úsala para reaccionar de forma natural.']
-        : ['"I get what you mean" = "Entiendo lo que quieres decir" — suena natural para conectar ideas.'],
+        ? [
+            appLanguage === "es"
+              ? '"That sounds fun" = "Eso suena divertido" — usala para reaccionar de forma natural.'
+              : '"That sounds fun" — use it to react naturally.',
+          ]
+        : [
+            appLanguage === "es"
+              ? '"I get what you mean" = "Entiendo lo que quieres decir" — suena natural para conectar ideas.'
+              : '"I get what you mean" — use it to connect ideas naturally.',
+          ],
     },
     qualityMultiplier,
   };
@@ -5659,7 +5742,8 @@ ${conversationText || "No conversation available."}`;
 async function generateStoryMissionFeedback(
   story: StoryDefinition,
   mission: StoryMission,
-  history: StoryMessage[]
+  history: StoryMessage[],
+  appLanguage: SupportLanguageCode = DEFAULT_APP_LANGUAGE
 ): Promise<{ summary: string; improvements: string[] }> {
   console.log(
     JSON.stringify({
@@ -5677,20 +5761,21 @@ async function generateStoryMissionFeedback(
   const reasoningConfig = isGpt5
     ? { effort: process.env.OPENAI_REASONING_EFFORT || 'low' }
     : undefined;
+  const lang = getPromptLanguageContext(appLanguage);
   const conversation = history.slice(-STORY_HISTORY_LIMIT);
   const conversationText = conversation
     .map((msg) => `${msg.role === 'user' ? 'Student (evaluate)' : 'Guide (context only)'}: ${msg.content}`)
     .join('\n')
     .trim();
   const systemPrompt = `
-You are a friendly but slightly sarcastic English coach.
+You are a friendly but slightly sarcastic English coach. ${lang.appLanguageDescription}
 
-You are evaluating a full conversation of a Spanish-speaking student
+You are evaluating a full conversation of a student practicing English
 who is completing a mission in a story-based English learning app
 (B1 to C1 progression).
 
 IMPORTANT:
-- Write the feedback directly TO the student (use "you").
+- Write the feedback directly TO the student in ${lang.feedbackLanguageName} (use "you").
 - Do NOT talk about the student in third person.
 - Be warm, encouraging, a little playful or sarcastic when appropriate,
   but never rude or discouraging.
@@ -5706,9 +5791,9 @@ IMPORTANT:
 Return ONLY JSON with the exact shape:
 
 {
-  "summary": "Short Spanish summary speaking directly to the student",
+  "summary": "Short ${lang.feedbackLanguageName} summary speaking directly to the student",
   "improvements": [
-    "Short Spanish suggestion speaking directly to the student",
+    "Short ${lang.feedbackLanguageName} suggestion speaking directly to the student",
     "..."
   ]
 }
@@ -5848,7 +5933,13 @@ ${conversationText || 'No conversation available.'}`;
   }
   return {
     summary,
-    improvements: improvements.length ? improvements : ['Sigue practicando para mantener tu progreso.'],
+    improvements: improvements.length
+      ? improvements
+      : [
+          appLanguage === "es"
+            ? "Sigue practicando para mantener tu progreso."
+            : "Keep practicing to maintain your progress.",
+        ],
   };
 }
 
@@ -5881,7 +5972,8 @@ function mergeRequirementProgress(
 
 function alignRequirementStates(
   mission: StoryMission,
-  rawStates: any[]
+  rawStates: any[],
+  appLanguage: SupportLanguageCode = DEFAULT_APP_LANGUAGE
 ): StoryAdvanceRequirementState[] {
   return (mission.requirements || []).map((req, index) => {
     const match = Array.isArray(rawStates)
@@ -5896,8 +5988,12 @@ function alignRequirementStates(
     if (typeof match?.feedback === 'string') feedback = match.feedback;
     else if (typeof match?.note === 'string') feedback = match.note;
     else if (typeof match?.explanation === 'string') feedback = match.explanation;
-    if (!feedback && met) feedback = 'Listo, requisito cubierto.';
-    if (!feedback && !met) feedback = 'Aun falta mencionar este punto.';
+    if (!feedback && met) {
+      feedback = appLanguage === "es" ? "Listo, requisito cubierto." : "Done, requirement covered.";
+    }
+    if (!feedback && !met) {
+      feedback = appLanguage === "es" ? "Aun falta mencionar este punto." : "This point is not covered yet.";
+    }
     return {
       requirementId: req.requirementId,
       text: req.text,

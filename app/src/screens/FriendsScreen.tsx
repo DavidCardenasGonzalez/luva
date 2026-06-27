@@ -22,6 +22,7 @@ import { getChatAvatar } from '../chatimages/chatAvatarMap';
 import { trackMixpanelFriendEvent } from '../marketing/mixpanelEvents';
 import { AffinityBar } from '../components/AffinityBar';
 import { getAffinityLevel } from '../friends/affinity';
+import { useLanguage } from '../i18n/LanguageProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Friends'>;
 
@@ -47,10 +48,12 @@ function FriendCard({
   friend,
   onOpenChat,
   onOpenProfile,
+  t,
 }: {
   friend: FriendCharacter;
   onOpenChat: (friend: FriendCharacter) => void;
   onOpenProfile: (friend: FriendCharacter) => void;
+  t: (key: string, params?: Record<string, string | number>) => string;
 }) {
   const avatarSource = useMemo<ImageSourcePropType | undefined>(() => {
     return friend.avatarImageUrl?.trim()
@@ -123,13 +126,13 @@ function FriendCard({
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                 <MaterialIcons name="chat-bubble-outline" size={13} color={COLORS.muted} />
                 <Text style={{ color: COLORS.muted, fontSize: 12, fontWeight: '700' }}>
-                  {conversationCount} conv.
+                  {t('friends.card.conversations', { count: conversationCount })}
                 </Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                 <MaterialIcons name="forum" size={13} color={COLORS.muted} />
                 <Text style={{ color: COLORS.muted, fontSize: 12, fontWeight: '700' }}>
-                  {messageCount} msgs
+                  {t('friends.card.messages', { count: messageCount })}
                 </Text>
               </View>
             </View>
@@ -155,7 +158,7 @@ function FriendCard({
           <Pressable
             onPress={() => onOpenProfile(friend)}
             accessibilityRole="button"
-            accessibilityLabel={`Ver perfil de ${friend.characterName}`}
+            accessibilityLabel={t('friends.card.profileA11y', { name: friend.characterName })}
             style={({ pressed }) => ({
               flex: 1,
               flexDirection: 'row',
@@ -170,13 +173,13 @@ function FriendCard({
             })}
           >
             <MaterialIcons name="person-outline" size={18} color={COLORS.muted} />
-            <Text style={{ color: COLORS.muted, fontWeight: '800', fontSize: 14 }}>Perfil</Text>
+            <Text style={{ color: COLORS.muted, fontWeight: '800', fontSize: 14 }}>{t('friends.card.profile')}</Text>
           </Pressable>
 
           <Pressable
             onPress={() => onOpenChat(friend)}
             accessibilityRole="button"
-            accessibilityLabel={`Conversar con ${friend.characterName}`}
+            accessibilityLabel={t('friends.card.chatA11y', { name: friend.characterName })}
             style={({ pressed }) => ({
               flex: 2,
               flexDirection: 'row',
@@ -189,7 +192,7 @@ function FriendCard({
             })}
           >
             <MaterialIcons name="chat-bubble-outline" size={18} color="white" />
-            <Text style={{ color: 'white', fontWeight: '900', fontSize: 15 }}>Conversar</Text>
+            <Text style={{ color: 'white', fontWeight: '900', fontSize: 15 }}>{t('friends.card.chat')}</Text>
           </Pressable>
         </View>
       </View>
@@ -198,6 +201,7 @@ function FriendCard({
 }
 
 export default function FriendsScreen({ navigation }: Props) {
+  const { t } = useLanguage();
   const { isSignedIn } = useAuth();
   const { friends, loading, error, reload } = useFriends();
 
@@ -286,21 +290,21 @@ export default function FriendsScreen({ navigation }: Props) {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <MaterialIcons name="favorite" size={16} color="#f472b6" />
             <Text style={{ color: '#f472b6', fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.8 }}>
-              Tus Amigos
+              {t('friends.eyebrow')}
             </Text>
           </View>
           <Text style={{ color: COLORS.text, fontSize: 22, fontWeight: '900', marginTop: 6 }}>
-            Personajes disponibles
+            {t('friends.title')}
           </Text>
           <Text style={{ color: COLORS.muted, lineHeight: 21, marginTop: 6, fontSize: 14 }}>
-            Sube tu nivel de afinidad hablando con ellos para desbloquear nuevas conversaciones.
+            {t('friends.description')}
           </Text>
         </View>
 
         {loading ? (
           <View style={{ paddingVertical: 40, alignItems: 'center' }}>
             <ActivityIndicator size="large" color={COLORS.accent} />
-            <Text style={{ color: COLORS.muted, marginTop: 10 }}>Cargando amigos...</Text>
+            <Text style={{ color: COLORS.muted, marginTop: 10 }}>{t('friends.loading')}</Text>
           </View>
         ) : error ? (
           <View
@@ -323,7 +327,7 @@ export default function FriendsScreen({ navigation }: Props) {
                 backgroundColor: pressed ? '#0f172a' : '#1f2937',
               })}
             >
-              <Text style={{ color: COLORS.text, fontWeight: '800' }}>Reintentar</Text>
+              <Text style={{ color: COLORS.text, fontWeight: '800' }}>{t('friends.retry')}</Text>
             </Pressable>
           </View>
         ) : friends.length ? (
@@ -334,6 +338,7 @@ export default function FriendsScreen({ navigation }: Props) {
                 friend={friend}
                 onOpenChat={handleOpenFriend}
                 onOpenProfile={handleOpenProfile}
+                t={t}
               />
             ))}
           </View>
@@ -349,10 +354,10 @@ export default function FriendsScreen({ navigation }: Props) {
             }}
           >
             <Text style={{ color: COLORS.text, fontWeight: '900', textAlign: 'center' }}>
-              No encontramos personajes.
+              {t('friends.emptyTitle')}
             </Text>
             <Text style={{ color: COLORS.muted, marginTop: 6, textAlign: 'center', lineHeight: 20 }}>
-              Intenta recargar el catálogo para iniciar una conversación libre.
+              {t('friends.emptyDescription')}
             </Text>
             <Pressable
               onPress={() => navigation.navigate('Feed')}
@@ -364,7 +369,7 @@ export default function FriendsScreen({ navigation }: Props) {
                 backgroundColor: pressed ? '#1d4ed8' : COLORS.action,
               })}
             >
-              <Text style={{ color: 'white', fontWeight: '900' }}>Ir al feed</Text>
+              <Text style={{ color: 'white', fontWeight: '900' }}>{t('friends.goToFeed')}</Text>
             </Pressable>
           </View>
         )}

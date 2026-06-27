@@ -12,6 +12,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import type { EnglishDifficulty } from '../../auth/AuthProvider';
 import { useAuth } from '../../auth/AuthProvider';
 import { readStoredEnglishDifficulty, writeStoredEnglishDifficulty } from '../../auth/englishDifficulty';
+import { useLanguage } from '../../i18n/LanguageProvider';
+import type { AppLanguage } from '../../i18n/language';
 import { GradientText } from '../components/GradientText';
 import type { OnboardingStepContent } from '../model/types';
 
@@ -37,38 +39,42 @@ type DifficultyOption = {
   iconColor: string;
 };
 
-const difficultyOptions: DifficultyOption[] = [
-  {
-    id: 'easy',
-    title: 'Fácil',
-    summary: 'Inglés básico, pero te entiendo aunque escribas en español',
-    example:
-      'Hi! My name is Zoe.\nI like pizza.\nWhat food do you like?',
-    iconName: 'spa',
-    iconBg: 'rgba(16, 185, 129, 0.18)',
-    iconColor: '#34d399',
-  },
-  {
-    id: 'medium',
-    title: 'Medio',
-    summary: 'Conversaciones simples y naturales',
-    example:
-      'I usually go out with my friends on weekends, but today I just want to stay home and relax.\nWhat do you usually do on Saturdays?',
-    iconName: 'trending-up',
-    iconBg: 'rgba(37, 99, 235, 0.20)',
-    iconColor: '#60a5fa',
-  },
-  {
-    id: 'hard',
-    title: 'Difícil',
-    summary: 'Inglés nativo, casual y coloquial',
-    example:
-      'Honestly, I was supposed to be productive today, but I ended up scrolling for an hour and pretending it was research.\nHas that ever happened to you?',
-    iconName: 'bolt',
-    iconBg: 'rgba(217, 119, 6, 0.20)',
-    iconColor: '#fb923c',
-  },
-];
+function getDifficultyOptions(language: AppLanguage): DifficultyOption[] {
+  return [
+    {
+      id: 'easy',
+      title: language === 'es' ? 'Fácil' : 'Easy',
+      summary: language === 'es'
+        ? 'Inglés básico, pero te entiendo aunque escribas en tu idioma nativo'
+        : 'Basic English, and I can still help if you write in your native language',
+      example:
+        'Hi! My name is Zoe.\nI like pizza.\nWhat food do you like?',
+      iconName: 'spa',
+      iconBg: 'rgba(16, 185, 129, 0.18)',
+      iconColor: '#34d399',
+    },
+    {
+      id: 'medium',
+      title: language === 'es' ? 'Medio' : 'Medium',
+      summary: language === 'es' ? 'Conversaciones simples y naturales' : 'Simple, natural conversations',
+      example:
+        'I usually go out with my friends on weekends, but today I just want to stay home and relax.\nWhat do you usually do on Saturdays?',
+      iconName: 'trending-up',
+      iconBg: 'rgba(37, 99, 235, 0.20)',
+      iconColor: '#60a5fa',
+    },
+    {
+      id: 'hard',
+      title: language === 'es' ? 'Difícil' : 'Hard',
+      summary: language === 'es' ? 'Inglés nativo, casual y coloquial' : 'Native, casual, conversational English',
+      example:
+        'Honestly, I was supposed to be productive today, but I ended up scrolling for an hour and pretending it was research.\nHas that ever happened to you?',
+      iconName: 'bolt',
+      iconBg: 'rgba(217, 119, 6, 0.20)',
+      iconColor: '#fb923c',
+    },
+  ];
+}
 
 type Props = {
   content: OnboardingStepContent;
@@ -77,7 +83,18 @@ type Props = {
 
 export default function Step2B({ content, onNext }: Props) {
   const { height } = useWindowDimensions();
+  const { language } = useLanguage();
   const { isSignedIn, updateCurrentUser, user } = useAuth();
+  const difficultyOptions = getDifficultyOptions(language);
+  const choosePrefix = language === 'es' ? 'Elige tu ' : 'Choose your ';
+  const chooseHighlight = language === 'es' ? 'nivel' : 'level';
+  const subtitleFallback = language === 'es'
+    ? 'Ajustaré la dificultad de las conversaciones para que practiques a tu ritmo.'
+    : 'I will adjust conversation difficulty so you can practice at your pace.';
+  const badgeText = language === 'es' ? 'Lo adapto\na ti' : 'Built around\nyou';
+  const practiceQuestionPrefix = language === 'es' ? '¿Qué dificultad quieres practicar ' : 'What difficulty do you want to practice ';
+  const practiceQuestionHighlight = language === 'es' ? 'ahora?' : 'now?';
+  const chooseDifficultyLabel = language === 'es' ? 'Elegir dificultad' : 'Choose difficulty';
   const [selectedDifficulty, setSelectedDifficulty] = useState<EnglishDifficulty>(
     user?.englishDifficulty || 'medium',
   );
@@ -142,7 +159,7 @@ export default function Step2B({ content, onNext }: Props) {
               lineHeight: compactLayout ? 32 : 36,
             }}
           >
-            {'Elige tu '}
+            {choosePrefix}
             <GradientText
               style={{
                 fontSize: compactLayout ? 27 : 30,
@@ -150,7 +167,7 @@ export default function Step2B({ content, onNext }: Props) {
                 lineHeight: compactLayout ? 32 : 36,
               }}
             >
-              nivel
+              {chooseHighlight}
             </GradientText>
           </Text>
           <Text
@@ -161,7 +178,7 @@ export default function Step2B({ content, onNext }: Props) {
               marginTop: compactLayout ? 6 : 10,
             }}
           >
-            {content.subtitle || 'Ajustaré la dificultad de las conversaciones para que practiques a tu ritmo.'}
+            {content.subtitle || subtitleFallback}
           </Text>
         </View>
 
@@ -199,7 +216,7 @@ export default function Step2B({ content, onNext }: Props) {
                 textAlign: 'center',
               }}
             >
-              {'Lo adapto\na ti'}
+              {badgeText}
             </Text>
           </View>
           <Image
@@ -254,7 +271,7 @@ export default function Step2B({ content, onNext }: Props) {
               flex: 1,
             }}
           >
-            {'¿Qué dificultad quieres practicar '}
+            {practiceQuestionPrefix}
             <GradientText
               style={{
                 fontSize: compactLayout ? 14 : 15,
@@ -262,7 +279,7 @@ export default function Step2B({ content, onNext }: Props) {
                 lineHeight: compactLayout ? 19 : 21,
               }}
             >
-              ahora?
+              {practiceQuestionHighlight}
             </GradientText>
           </Text>
         </View>
@@ -277,7 +294,7 @@ export default function Step2B({ content, onNext }: Props) {
                 key={option.id}
                 onPress={() => void handleSelectDifficulty(option.id)}
                 accessibilityRole="button"
-                accessibilityLabel={`Elegir dificultad ${option.title}`}
+                accessibilityLabel={`${chooseDifficultyLabel} ${option.title}`}
                 style={({ pressed }) => ({
                   borderRadius: 18,
                   borderWidth: selected ? 1.5 : 1,

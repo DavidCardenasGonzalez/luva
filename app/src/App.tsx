@@ -10,29 +10,32 @@ import { AppVersionGateProvider } from './version/AppVersionGateProvider';
 import { MetaAdsProvider } from './marketing/MetaAdsProvider';
 import { MixpanelProvider } from './marketing/MixpanelProvider';
 import { ShadowingPlayerProvider } from './shadowing/ShadowingPlayerProvider';
+import { LanguageProvider } from './i18n/LanguageProvider';
 
 export default function App() {
   return (
-    <AuthProvider>
-      <RevenueCatProvider>
-        <CoinBalanceProvider>
-          <PhotoRequestCreditsProvider>
-            <MetaAdsProvider>
-              <MixpanelProvider>
-                <CardProgressProvider>
-                  <StoryProgressProvider>
-                    <AppVersionGateProvider>
-                      <ShadowingPlayerProvider>
-                        <AppNavigator />
-                      </ShadowingPlayerProvider>
-                    </AppVersionGateProvider>
-                  </StoryProgressProvider>
-                </CardProgressProvider>
-              </MixpanelProvider>
-            </MetaAdsProvider>
-          </PhotoRequestCreditsProvider>
-        </CoinBalanceProvider>
-      </RevenueCatProvider>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <RevenueCatProvider>
+          <CoinBalanceProvider>
+            <PhotoRequestCreditsProvider>
+              <MetaAdsProvider>
+                <MixpanelProvider>
+                  <CardProgressProvider>
+                    <StoryProgressProvider>
+                      <AppVersionGateProvider>
+                        <ShadowingPlayerProvider>
+                          <AppNavigator />
+                        </ShadowingPlayerProvider>
+                      </AppVersionGateProvider>
+                    </StoryProgressProvider>
+                  </CardProgressProvider>
+                </MixpanelProvider>
+              </MetaAdsProvider>
+            </PhotoRequestCreditsProvider>
+          </CoinBalanceProvider>
+        </RevenueCatProvider>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }

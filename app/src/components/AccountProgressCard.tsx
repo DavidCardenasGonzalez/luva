@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { Platform, Pressable, Text, TextInput, View } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { useAuth } from '../auth/AuthProvider';
+import { useLanguage } from '../i18n/LanguageProvider';
 
 type AccountProgressCardMode = 'auto' | 'signed-in' | 'signed-out';
 
@@ -28,6 +29,7 @@ export default function AccountProgressCard({
     signInWithEmail,
     signOut,
   } = useAuth();
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -45,20 +47,20 @@ export default function AccountProgressCard({
   if (isSignedIn) {
     return (
       <View style={[cardStyle, style]}>
-        <Text style={eyebrowStyle}>Cuenta</Text>
-        <Text style={titleStyle}>No pierdas tu avance!</Text>
+        <Text style={eyebrowStyle}>{t('account.eyebrow')}</Text>
+        <Text style={titleStyle}>{t('account.title')}</Text>
         <Text style={bodyStyle}>
-          Tu progreso queda vinculado a esta cuenta para recuperarlo desde cualquier dispositivo.
+          {t('account.signedInDescription')}
         </Text>
 
         <View style={{ marginTop: 14 }}>
           <View style={sessionBoxStyle}>
-            <Text style={{ color: '#7c2d12', fontSize: 12, fontWeight: '700' }}>Sesión activa</Text>
+            <Text style={{ color: '#7c2d12', fontSize: 12, fontWeight: '700' }}>{t('account.activeSession')}</Text>
             <Text style={{ color: '#431407', marginTop: 4, fontSize: 16, fontWeight: '800' }}>
-              {user?.displayName || user?.email || 'Cuenta autenticada'}
+              {user?.displayName || user?.email || t('account.authenticated')}
             </Text>
             <Text style={{ color: '#9a3412', marginTop: 4 }}>
-              {user?.email || 'Tu usuario ya quedó vinculado a Cognito.'}
+              {user?.email || t('account.linkedUser')}
             </Text>
           </View>
 
@@ -74,7 +76,7 @@ export default function AccountProgressCard({
             })}
           >
             <Text style={{ color: '#fff', fontWeight: '800' }}>
-              {authLoading ? 'Cerrando sesión...' : 'Cerrar sesión'}
+              {authLoading ? t('account.signingOut') : t('account.signOut')}
             </Text>
           </Pressable>
         </View>
@@ -84,10 +86,10 @@ export default function AccountProgressCard({
 
   return (
     <View style={[cardStyle, style]}>
-      <Text style={eyebrowStyle}>Cuenta</Text>
-      <Text style={titleStyle}>No pierdas tu avance!</Text>
+      <Text style={eyebrowStyle}>{t('account.eyebrow')}</Text>
+      <Text style={titleStyle}>{t('account.title')}</Text>
       <Text style={bodyStyle}>
-        Crea una cuenta o inicia sesión. Así podrás guardar tu progreso, acceder desde cualquier dispositivo y recuperar tu cuenta si cambias de teléfono.
+        {t('account.signedOutDescription')}
       </Text>
 
       <View style={{ marginTop: 14 }}>
@@ -102,7 +104,7 @@ export default function AccountProgressCard({
           })}
         >
           <Text style={{ color: authLoading || !isConfigured ? '#9a3412' : '#fff', fontWeight: '800' }}>
-            {authLoading ? 'Conectando...' : 'Continuar con Google'}
+            {authLoading ? t('account.connecting') : t('account.continueGoogle')}
           </Text>
         </Pressable>
 
@@ -119,19 +121,19 @@ export default function AccountProgressCard({
             })}
           >
             <Text style={{ color: authLoading || !isConfigured ? '#9a3412' : '#fff', fontWeight: '800' }}>
-              {authLoading ? 'Conectando...' : 'Continuar con Apple'}
+              {authLoading ? t('account.connecting') : t('account.continueApple')}
             </Text>
           </Pressable>
         ) : null}
 
         <View style={emailBoxStyle}>
           <Text style={{ color: '#7c2d12', fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.4 }}>
-            Correo y contraseña
+            {t('account.emailPassword')}
           </Text>
           <TextInput
             value={email}
             onChangeText={setEmail}
-            placeholder="tu@correo.com"
+            placeholder={t('account.emailPlaceholder')}
             placeholderTextColor="#c2410c88"
             autoCapitalize="none"
             autoCorrect={false}
@@ -143,7 +145,7 @@ export default function AccountProgressCard({
           <TextInput
             value={password}
             onChangeText={setPassword}
-            placeholder="Contraseña"
+            placeholder={t('account.password')}
             placeholderTextColor="#c2410c88"
             autoCapitalize="none"
             autoCorrect={false}
@@ -165,7 +167,7 @@ export default function AccountProgressCard({
             })}
           >
             <Text style={{ color: authLoading || !isEmailAuthConfigured ? '#9a3412' : '#fff', fontWeight: '800' }}>
-              {authLoading ? 'Entrando...' : 'Continuar con correo'}
+              {authLoading ? t('account.signingIn') : t('account.continueEmail')}
             </Text>
           </Pressable>
 
@@ -183,7 +185,7 @@ export default function AccountProgressCard({
               opacity: authLoading || !isEmailAuthConfigured || !onCreateAccount ? 0.6 : 1,
             })}
           >
-            <Text style={{ color: '#c2410c', fontWeight: '800' }}>Crear cuenta</Text>
+            <Text style={{ color: '#c2410c', fontWeight: '800' }}>{t('account.create')}</Text>
           </Pressable>
         </View>
 
