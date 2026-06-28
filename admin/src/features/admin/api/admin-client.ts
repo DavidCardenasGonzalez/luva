@@ -144,6 +144,25 @@ export function deleteAdminCharacterPost(characterId: string, postId: string) {
   )
 }
 
+export type AdminCharacterBiographyResponse = {
+  characterId: string
+  biography: string
+  updatedAt?: string
+}
+
+export function getAdminCharacterBiography(characterId: string) {
+  return adminApi.get<AdminCharacterBiographyResponse>(
+    `/story-characters/${encodeURIComponent(characterId)}/biography`,
+  )
+}
+
+export function saveAdminCharacterBiography(characterId: string, biography: string) {
+  return adminApi.post<AdminCharacterBiographyResponse>(
+    `/story-characters/${encodeURIComponent(characterId)}/biography`,
+    { biography },
+  )
+}
+
 export type AdminCharacterPurgeResponse = {
   characterId: string
   posts: { scanned: number; deleted: number }

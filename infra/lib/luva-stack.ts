@@ -233,6 +233,15 @@ export class LuvaStack extends Stack {
       removalPolicy: RemovalPolicy.RETAIN,
     });
 
+    // Source of truth for admin-managed long-term character biographies. The
+    // embedding lives in Pinecone (see backend MemoryService); this stores the
+    // editable text so the admin portal can load and re-embed it.
+    const characterBiographiesTable = new Table(this, 'CharacterBiographiesTable', {
+      partitionKey: { name: 'characterId', type: AttributeType.STRING },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.RETAIN,
+    });
+
     // S3 Buckets
     const audioRawBucket = new Bucket(this, 'AudioRawBucket', {
       bucketName: undefined, // Let AWS name it; set if needed
@@ -434,6 +443,18 @@ export class LuvaStack extends Stack {
     // Reference by name/ARN only (do not create the resource) to avoid clobbering it.
     const falKeyParamName = ssmPath('fal/apiKey');
     const falKeyParamArn = `arn:aws:ssm:${this.region}:${this.account}:parameter${falKeyParamName}`;
+    // Pinecone API key (long-term memory). SecureString managed outside CDK —
+    // create it once with: aws ssm put-parameter --type SecureString --name <name>
+    const pineconeKeyParamName = ssmPath('pinecone/apiKey');
+    const pineconeKeyParamArn = `arn:aws:ssm:${this.region}:${this.account}:parameter${pineconeKeyParamName}`;
+    // Shared Pinecone/embedding config for every Lambda that touches memory.
+    const memoryEnv: Record<string, string> = {
+      PINECONE_KEY_PARAM: pineconeKeyParamName,
+      PINECONE_INDEX_NAME: process.env.PINECONE_INDEX_NAME || 'luva-memory',
+      PINECONE_CLOUD: process.env.PINECONE_CLOUD || 'aws',
+      PINECONE_REGION: process.env.PINECONE_REGION || 'us-east-1',
+      OPENAI_EMBED_MODEL: process.env.OPENAI_EMBED_MODEL || 'text-embedding-3-small',
+    };
     const googleTranslateKeyParamName = ssmPath('google/translateApiKey');
     const googleTranslateKeyParamArn = `arn:aws:ssm:${this.region}:${this.account}:parameter${googleTranslateKeyParamName}`;
     const geminiKeyParam = new StringParameter(this, 'GeminiKeyParam', {
@@ -524,6 +545,7 @@ export class LuvaStack extends Stack {
         FAL_KEY_PARAM: falKeyParamName,
         GOOGLE_TRANSLATE_API_KEY_PARAM: googleTranslateKeyParamName,
         OPENAI_CHAT_MODEL: 'gpt-5.4-nano',
+        ...memoryEnv,
         EVAL_TIMEOUT_MS: '20000',
         FAL_IMAGE_TIMEOUT_MS: '25000',
         FAL_IMAGE_DOWNLOAD_TIMEOUT_MS: '3500',
@@ -547,7 +569,7 @@ export class LuvaStack extends Stack {
     friendImageWorkerFn.grantInvoke(apiFn);
     apiFn.addToRolePolicy(new PolicyStatement({
       actions: ['ssm:GetParameter', 'ssm:GetParameters', 'ssm:GetParameterHistory'],
-      resources: [openAiKeyParam.parameterArn, falKeyParamArn, googleTranslateKeyParamArn],
+      resources: [openAiKeyParam.parameterArn, falKeyParamArn, googleTranslateKeyParamArn, pineconeKeyParamArn],
     }));
 
     const usersFnLogGroup = new LogGroup(this, 'UsersFnLogs', { retention: RetentionDays.ONE_WEEK });
@@ -629,6 +651,8 @@ export class LuvaStack extends Stack {
         GOOGLE_TRANSLATE_API_KEY_PARAM: googleTranslateKeyParamName,
         GOOGLE_TTS_API_KEY_PARAM: googleTranslateKeyParamName,
         OPENAI_CHAT_MODEL: 'gpt-5.4-nano',
+        ...memoryEnv,
+        CHARACTER_BIOGRAPHIES_TABLE_NAME: characterBiographiesTable.tableName,
         ASSETS_BUCKET_NAME: assetsBucket.bucketName,
         ASSETS_CLOUDFRONT_DOMAIN_NAME: assetsDistribution.domainName,
         ASSETS_CLOUDFRONT_URL: assetsCloudFrontUrl,
@@ -636,6 +660,7 @@ export class LuvaStack extends Stack {
       },
     });
     usersTable.grantReadWriteData(adminFn);
+    characterBiographiesTable.grantReadWriteData(adminFn);
     generatedVideosTable.grantReadWriteData(adminFn);
     feedPostsTable.grantReadWriteData(adminFn);
     characterPostsTable.grantReadWriteData(adminFn);
@@ -654,6 +679,7 @@ export class LuvaStack extends Stack {
         openAiKeyParam.parameterArn,
         geminiKeyParam.parameterArn,
         googleTranslateKeyParamArn,
+        pineconeKeyParamArn,
       ],
     }));
     adminFn.addToRolePolicy(new PolicyStatement({

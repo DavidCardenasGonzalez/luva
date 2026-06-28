@@ -73,6 +73,11 @@ import {
 import { listPublicShadowingCatalog } from "../shadowing";
 import { validatePromoCode } from "../promo-codes";
 import {
+  getMemoryService,
+  type FriendshipMemoryInput,
+  type RetrievedFriendshipMemory,
+} from "../memory/memory-service";
+import {
   DEFAULT_APP_LANGUAGE,
   getPromptLanguageContext,
   getRequestSupportLanguage,
@@ -2549,6 +2554,171 @@ Return the updated friendshipContext.`;
   return sanitizeFriendshipContext(nextContext) || fallback;
 }
 
+// Extracts concise, durable long-term memories about the learner from a
+// completed conversation. These are embedded and stored in Pinecone (see
+// MemoryService) so the avatar can recall them in future sessions. Only
+// semantic facts are stored — never the raw transcript.
+async function extractFriendshipMemories(
+  friend: FriendRecord,
+  history: StoryMessage[]
+): Promise<FriendshipMemoryInput[]> {
+  const conversationText = history
+    .slice(-FRIEND_HISTORY_LIMIT)
+    .map(
+      (message) =>
+        `${message.role === "user" ? "Learner" : friend.characterName}: ${message.content}${formatHistoryPhotoSuffix(message)}`
+    )
+    .join("\n")
+    .trim();
+  if (!conversationText) return [];
+
+  const apiKey = await getOpenAIKey();
+  const model =
+    process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
+  const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
+  const isGpt5 = /gpt-5/i.test(model);
+  const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
+  const reasoningConfig = isGpt5
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || "low" }
+    : undefined;
+
+  const systemPrompt = `You extract durable long-term memories about a learner from a completed conversation with a fictional chat avatar.
+
+These memories are stored in a vector database and retrieved in future conversations so the avatar can remember the learner across sessions.
+
+Prioritize:
+- Personal facts (name, age, location, job, family)
+- Preferences (likes, dislikes, hobbies, tastes)
+- Relationships (friends, partner, family, pets)
+- Goals and long-term plans
+- Important events (past or upcoming)
+
+Ignore:
+- Greetings and small talk
+- Temporary questions
+- Generic or filler conversation
+- Anything about English learning, grammar, vocabulary, corrections, scores, or tutoring
+
+Rules:
+- Output ONLY JSON with this exact shape: { "memories": [{ "text": "...", "importance": 1 }] }
+- Each "text" is ONE concise, self-contained fact in English, third person, e.g. "David moved to Madrid in June 2026."
+- Use the learner's name when known; otherwise refer to "the learner".
+- "importance" is an integer from 1 to 5 (5 = highly defining and durable, 1 = minor).
+- Do NOT store the raw conversation. Store only distinct semantic facts.
+- Do not invent facts. Only include information the learner actually stated.
+- If there is nothing worth remembering, return { "memories": [] }.
+- Return at most 8 memories.`;
+
+  const userPrompt = `Learner's completed conversation with ${friend.characterName}:
+${conversationText}
+
+Extract the durable long-term memories about the learner as JSON.`;
+
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), timeoutMs);
+  let raw = "";
+  try {
+    if (useResponses) {
+      const body: Record<string, any> = {
+        model,
+        instructions: systemPrompt,
+        input: [
+          {
+            role: "user",
+            content: [{ type: "input_text", text: userPrompt }],
+          },
+        ],
+        max_output_tokens: Number(process.env.MEMORY_EXTRACT_MAX_OUTPUT_TOKENS || 600),
+      };
+      if (reasoningConfig) body.reasoning = reasoningConfig;
+      const res = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(body),
+        signal: ac.signal,
+      });
+      const payload: any = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const reason = payload?.error?.message || res.statusText;
+        throw new Error(`MEMORY_EXTRACT_HTTP_${res.status}_${reason}`);
+      }
+      if (Array.isArray(payload?.output)) {
+        for (const item of payload.output) {
+          if (item?.type === "message" && Array.isArray(item.content)) {
+            const texts = item.content
+              .filter((c: any) => c?.type === "output_text" && typeof c.text === "string")
+              .map((c: any) => c.text);
+            if (texts.length) {
+              raw = texts.join("\n");
+              break;
+            }
+          }
+        }
+      }
+      if (!raw && typeof payload?.output_text === "string") {
+        raw = payload.output_text;
+      }
+    } else {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          max_tokens: Number(process.env.MEMORY_EXTRACT_MAX_OUTPUT_TOKENS || 600),
+        }),
+        signal: ac.signal,
+      });
+      if (!res.ok) {
+        const bodyTxt = await res.text();
+        throw new Error(`MEMORY_EXTRACT_HTTP_${res.status}_${bodyTxt.slice(0, 120)}`);
+      }
+      const data: any = await res.json();
+      raw = data.choices?.[0]?.message?.content || "";
+    }
+  } catch (err) {
+    if ((err as any)?.name === "AbortError") {
+      throw new Error("MEMORY_EXTRACT_TIMEOUT");
+    }
+    throw err;
+  } finally {
+    clearTimeout(to);
+  }
+
+  const cleaned = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+  const jsonStart = cleaned.indexOf("{");
+  const jsonEnd = cleaned.lastIndexOf("}");
+  const jsonText = jsonStart >= 0 && jsonEnd > jsonStart ? cleaned.slice(jsonStart, jsonEnd + 1) : cleaned;
+
+  const memories: FriendshipMemoryInput[] = [];
+  try {
+    const parsed = JSON.parse(jsonText);
+    const list = Array.isArray(parsed?.memories) ? parsed.memories : [];
+    for (const item of list) {
+      const text = typeof item?.text === "string" ? item.text.trim() : "";
+      if (!text) continue;
+      const rawImportance = Number(item?.importance);
+      const importance = Number.isFinite(rawImportance)
+        ? Math.max(1, Math.min(5, Math.round(rawImportance)))
+        : 1;
+      memories.push({ text: text.slice(0, 500), importance });
+      if (memories.length >= 8) break;
+    }
+  } catch {
+    return [];
+  }
+  return memories;
+}
+
 function sanitizeFriendChatText(value: unknown, maxLength: number): string | undefined {
   if (typeof value !== "string") {
     return undefined;
@@ -2837,6 +3007,44 @@ async function advanceFriendChat(
     );
   }
 
+  // Best-effort long-term memory retrieval from Pinecone. Failures never block
+  // the reply: we just fall back to no biography / no retrieved memories.
+  let biographyMemory: string | undefined;
+  let retrievedMemories: RetrievedFriendshipMemory[] = [];
+  if (userId) {
+    const friendshipId = `${userId}#${friendId}`;
+    try {
+      const memory = getMemoryService();
+      const [biography, memories] = await Promise.all([
+        memory.getCharacterBiography(friendId),
+        memory.retrieveFriendshipMemories({
+          friendshipId,
+          queryText: transcript,
+          topK: 5,
+        }),
+      ]);
+      biographyMemory = biography;
+      retrievedMemories = memories;
+      console.log(
+        JSON.stringify({
+          scope: "friends.memory.read",
+          userId,
+          friendId,
+          hasBiography: Boolean(biographyMemory),
+          memoryCount: retrievedMemories.length,
+        })
+      );
+    } catch (err) {
+      console.error(
+        JSON.stringify({
+          scope: "friends.memory.read_error",
+          friendId,
+          message: (err as Error)?.message || "unknown",
+        })
+      );
+    }
+  }
+
   let replyPlan: FriendReplyPlan = { aiReply: "Tell me more about that." };
   try {
     replyPlan = await generateFriendReply(
@@ -2851,7 +3059,9 @@ async function advanceFriendChat(
       effectiveDifficulty,
       conversationSummary,
       friendshipContext,
-      appLanguage
+      appLanguage,
+      biographyMemory,
+      retrievedMemories.map((memory) => memory.text)
     );
   } catch (err) {
     console.log(
@@ -2965,6 +3175,37 @@ async function finishFriendChat(
         priorContext: priorFriendshipContext,
         history,
       });
+    }
+  }
+  // Extract durable long-term memories from the finished conversation and store
+  // them in Pinecone. Best-effort: failures never block finishing the chat.
+  if (userId && history.length) {
+    try {
+      const extracted = await extractFriendshipMemories(friend, history);
+      if (extracted.length) {
+        await getMemoryService().storeFriendshipMemories({
+          friendshipId: `${userId}#${friendId}`,
+          characterId: friendId,
+          userId,
+          memories: extracted,
+        });
+      }
+      console.log(
+        JSON.stringify({
+          scope: "friends.memory.write",
+          userId,
+          friendId,
+          storedCount: extracted.length,
+        })
+      );
+    } catch (err) {
+      console.error(
+        JSON.stringify({
+          scope: "friends.memory.write_error",
+          friendId,
+          message: (err as Error)?.message || "unknown",
+        })
+      );
     }
   }
   const affinity = buildFriendAffinityUpdate(
@@ -5277,7 +5518,9 @@ async function generateFriendReply(
   learnerDifficulty?: LearnerDifficulty,
   conversationSummary?: string,
   friendshipContext?: string,
-  appLanguage: SupportLanguageCode = DEFAULT_APP_LANGUAGE
+  appLanguage: SupportLanguageCode = DEFAULT_APP_LANGUAGE,
+  biography?: string,
+  retrievedMemories: string[] = []
 ): Promise<FriendReplyPlan> {
   const apiKey = await getOpenAIKey();
   const model =
@@ -5328,21 +5571,37 @@ async function generateFriendReply(
         .filter(Boolean)
         .join("\n")
     : "";
+  // Long-term memory retrieved from Pinecone (see MemoryService). Injected as
+  // two factual sections the model should treat as true background context.
+  const biographyText = (biography || "").trim();
+  const memoryLines = retrievedMemories
+    .map((memory) => (memory || "").trim())
+    .filter(Boolean);
+  const biographySection = biographyText
+    ? `\nCharacter Biography (factual background about you; treat as true):\n${biographyText}`
+    : "";
+  const previousMemoriesSection = memoryLines.length
+    ? `\nPrevious Memories (facts you remember about this learner; treat as true):\n${memoryLines
+        .map((line) => `- ${line}`)
+        .join("\n")}`
+    : "";
   const systemPrompt = `
 You are continuing a free conversation in English with a learner practicing English. ${lang.appLanguageDescription}
 
 Persona:
 ${characterNotes}
+${biographySection}
 
 Relationship with the learner:
 ${affinityNotes}
-${friendshipContextText ? `\nPersistent friendship memory:\n${friendshipContextText}` : ""}
+${friendshipContextText ? `\nPersistent friendship memory:\n${friendshipContextText}` : ""}${previousMemoriesSection}
 ${learnerNotes ? `\nLearner:\n${learnerNotes}` : ""}
 ${postNotes ? `\nProfile post being discussed:\n${postNotes}` : ""}
 
 Rules:
 - Stay in character, but keep the conversation natural and casual.
 - Match the warmth and familiarity of your friendship level with the learner; do not act closer or more distant than that level.
+- Use your Character Biography and Previous Memories as factual context: weave them in naturally when relevant, but do not recite them or force references.
 - Use persistent friendship memory naturally when it is relevant, but do not recite it or force references to it.
 - ${
   hasRelationshipContinuity
@@ -5382,6 +5641,8 @@ Rules:
       historyCount: conversation.length,
       summaryChars: summaryText.length,
       friendshipContextChars: friendshipContextText.length,
+      biographyChars: biographyText.length,
+      retrievedMemoryCount: memoryLines.length,
       hasRelationshipContinuity,
     })
   );

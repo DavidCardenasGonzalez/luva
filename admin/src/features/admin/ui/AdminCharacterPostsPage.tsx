@@ -16,6 +16,7 @@ import type { AdminCharacterPostWritePayload } from '@/features/admin/api/admin-
 import { useAdminCharacterPosts } from '@/features/admin/model/use-admin-character-posts'
 import type { AdminCharacterPost } from '@/features/admin/model/types'
 import { AdminLayout } from '@/features/admin/ui/AdminLayout'
+import { CharacterBiographyPanel } from '@/features/admin/ui/CharacterBiographyPanel'
 
 type CharacterPostFormState = {
   mediaMode: 'image' | 'video'
@@ -651,6 +652,8 @@ export function AdminCharacterPostsPage() {
           <p>{hasImages} thumbnails o imagenes con URL publica.</p>
         </article>
       </section>
+
+      {characterId && <CharacterBiographyPanel characterId={characterId} />}
 
       {error && (
         <section className="admin-inline-alert">

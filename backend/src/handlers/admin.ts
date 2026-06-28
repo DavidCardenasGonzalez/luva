@@ -69,6 +69,10 @@ import {
 } from '../shadowing';
 import { CHARACTERS } from '../data/characters';
 import { purgeCharacterEverywhere } from '../admin/purge-character';
+import {
+  getCharacterBiographyRecord,
+  saveCharacterBiography,
+} from '../admin/biography';
 
 const ROUTE_PREFIX = '/v1';
 const LESSON_AUDIO_WORKER_SOURCE = 'luva.admin.lessons.audio';
@@ -223,6 +227,45 @@ export const handler = async (event: any): Promise<Result> => {
         return json(500, {
           code: 'CHARACTER_PURGE_FAILED',
           message: 'No pudimos eliminar al personaje y sus referencias.',
+        });
+      }
+    }
+
+    const characterBiography = path.match(/^\/v1\/admin\/story-characters\/([^/]+)\/biography$/);
+    if (characterBiography && (method === 'GET' || method === 'POST')) {
+      const characterId = decodeURIComponent(characterBiography[1]);
+      const character = findStoryCharacter(CHARACTERS, characterId);
+      if (!character) {
+        return json(404, {
+          code: 'STORY_CHARACTER_NOT_FOUND',
+          message: 'No encontramos ese personaje en las stories.',
+        });
+      }
+      try {
+        if (method === 'GET') {
+          return json(200, await getCharacterBiographyRecord(character.characterId));
+        }
+        const body = parseBody(event.body) || {};
+        return json(200, await saveCharacterBiography(character.characterId, body.biography));
+      } catch (error: any) {
+        console.error(
+          JSON.stringify({
+            scope: 'admin.character.biography.error',
+            characterId,
+            method,
+            message: error?.message || 'UnknownError',
+            name: error?.name,
+            code: error?.code,
+            statusCode: error?.$metadata?.httpStatusCode,
+            stack: error?.stack?.split('\n').slice(0, 5),
+            envCharBioTable: process.env.CHARACTER_BIOGRAPHIES_TABLE_NAME || 'NOT_SET',
+            envPineconeKeyParam: process.env.PINECONE_KEY_PARAM || 'NOT_SET',
+            envPineconeIndex: process.env.PINECONE_INDEX_NAME || 'NOT_SET',
+          }),
+        );
+        return json(500, {
+          code: 'CHARACTER_BIOGRAPHY_FAILED',
+          message: 'No pudimos guardar la biografía del personaje.',
         });
       }
     }
