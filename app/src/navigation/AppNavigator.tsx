@@ -9,7 +9,8 @@ import {
   useNavigationContainerRef,
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeScreen from '../screens/HomeScreen';
+import HomeScreen from '../screens/MicrodramaCatalogScreen';
+import LearningHomeScreen from '../screens/HomeScreen';
 import DeckScreen from '../screens/DeckScreen';
 import PracticeScreen from '../screens/PracticeScreen';
 import LessonsScreen from '../screens/LessonsScreen';
@@ -33,6 +34,10 @@ import * as Linking from 'expo-linking';
 import * as Notifications from 'expo-notifications';
 import { trackScreenViewed } from '../marketing/mixpanelEvents';
 import { hasCompletedOnboarding } from '../onboarding/model/progress';
+import MicrodramaPlayerScreen from '../screens/MicrodramaPlayerScreen';
+import MicrodramaDiscoveryScreen from '../screens/MicrodramaDiscoveryScreen';
+import ReviewListScreen from '../screens/ReviewListScreen';
+import ReviewDetailScreen from '../screens/ReviewDetailScreen';
 
 export type PaywallSource =
   | 'coin_chip'
@@ -52,6 +57,11 @@ export type PaywallSource =
 export type RootStackParamList = {
   Onboarding: { startAtStep?: number } | undefined;
   Home: undefined;
+  LearningHome: undefined;
+  ReviewList: undefined;
+  ReviewDetail: { itemId: string };
+  Discovery: undefined;
+  MicrodramaPlayer: { seriesId: string; episodeId?: string };
   Deck: undefined;
   Practice: {
     cardId?: string;
@@ -81,6 +91,7 @@ export type RootStackParamList = {
     postConversationNarration?: string;
     postInitialMessage?: string;
     initialDraft?: string;
+    microdramaContext?: { seriesId: string; episodeId: string; positionMs: number };
   };
   FriendProfile: { friendId: string };
   FriendConversationHistory: { friendId: string; friendName?: string };
@@ -93,7 +104,7 @@ export type RootStackParamList = {
     asModal?: boolean;
     source?: PaywallSource;
     variant?: 'pro' | 'lite';
-    closeTarget?: 'Feed';
+    closeTarget?: 'Feed' | 'Home';
   } | undefined;
 };
 
@@ -141,14 +152,14 @@ const linking = {
 export default function AppNavigator() {
   const navigationRef = useNavigationContainerRef<RootStackParamList>();
   const routeNameRef = useRef<string | undefined>(undefined);
-  const [initialRouteName, setInitialRouteName] = useState<'Onboarding' | 'Feed'>();
+  const [initialRouteName, setInitialRouteName] = useState<'Onboarding' | 'Home'>();
 
   useEffect(() => {
     let mounted = true;
 
     hasCompletedOnboarding().then((completed) => {
       if (mounted) {
-        setInitialRouteName(completed ? 'Feed' : 'Onboarding');
+        setInitialRouteName(completed ? 'Home' : 'Onboarding');
       }
     });
 
@@ -201,6 +212,11 @@ export default function AppNavigator() {
       <Stack.Navigator initialRouteName={initialRouteName}>
         <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="LearningHome" component={LearningHomeScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="ReviewList" component={ReviewListScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="ReviewDetail" component={ReviewDetailScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Discovery" component={MicrodramaDiscoveryScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="MicrodramaPlayer" component={MicrodramaPlayerScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Deck" component={DeckScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Practice" component={PracticeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Lessons" component={LessonsScreen} options={{ headerShown: false }} />

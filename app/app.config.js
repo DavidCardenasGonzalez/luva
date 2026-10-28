@@ -92,7 +92,7 @@ module.exports = {
     name: appName,
     slug: "luva",
     scheme: appScheme,
-    version: "1.3.1",
+    version: "1.4.2",
     orientation: "portrait",
     updates: { fallbackToCacheTimeout: 0 },
     assetBundlePatterns: ["**/*"],
@@ -105,7 +105,7 @@ module.exports = {
     ios: {
       supportsTablet: true,
       bundleIdentifier: iosBundleIdentifier,
-      buildNumber: "1.3.1",
+      buildNumber: "1.3.2",
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
         UIBackgroundModes: ["audio"],
@@ -131,7 +131,7 @@ module.exports = {
         backgroundColor: "#0b1224",
       },
       package: androidPackage,
-      versionCode: 15,
+      versionCode: 16,
       permissions: ["android.permission.CAMERA"],
       blockedPermissions: [
         "android.permission.READ_MEDIA_IMAGES",

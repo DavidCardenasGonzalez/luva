@@ -5,6 +5,7 @@ import {
   PutCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { getMemoryService } from '../memory/memory-service';
+import { splitBiographyIntoFacts } from './biography-split';
 
 // Source of truth for the admin-managed long-term biography. The text lives in
 // DynamoDB (so the editor can load + re-embed it); the embedding itself lives in
@@ -63,25 +64,18 @@ export async function saveCharacterBiography(
     }),
   );
 
-  console.log(JSON.stringify({ scope: 'admin.character.biography.dynamo_ok', characterId }));
-
   const memory = getMemoryService();
-  try {
-    if (biography) {
-      await memory.upsertCharacterBiography(characterId, biography);
-    } else {
-      await memory.deleteCharacterBiography(characterId);
-    }
-    console.log(JSON.stringify({ scope: 'admin.character.biography.pinecone_ok', characterId }));
-  } catch (pineconeErr: any) {
-    console.error(JSON.stringify({
-      scope: 'admin.character.biography.pinecone_error',
-      characterId,
-      message: pineconeErr?.message,
-      name: pineconeErr?.name,
-      stack: pineconeErr?.stack?.split('\n').slice(0, 5),
-    }));
-    throw pineconeErr;
+  if (biography) {
+    // Split into atomic facts (GPT), then store each as its own vector so chat
+    // can semantically retrieve only the relevant parts of the biography.
+    const facts = await splitBiographyIntoFacts(biography);
+    await memory.replaceCharacterBiographyChunks(characterId, facts);
+    console.log(
+      JSON.stringify({ scope: 'admin.character.biography.saved', characterId, factCount: facts.length }),
+    );
+  } else {
+    await memory.deleteCharacterBiography(characterId);
+    console.log(JSON.stringify({ scope: 'admin.character.biography.cleared', characterId }));
   }
 
   return { characterId, biography, updatedAt };

@@ -199,11 +199,37 @@ export class MemoryIndex {
   }
 
   async deleteOne(params: { id: string }): Promise<void> {
+    await this.deleteMany([params.id]);
+  }
+
+  async deleteMany(ids: string[]): Promise<void> {
+    if (!ids.length) return;
     await pineconeFetch(`https://${this.host}/vectors/delete`, {
       method: "POST",
       apiKey: this.apiKey,
-      body: JSON.stringify({ ids: [params.id] }),
+      body: JSON.stringify({ ids }),
     });
+  }
+
+  // Lists vector ids whose id starts with `prefix` (serverless list endpoint),
+  // following pagination. Used to enumerate a character's biography chunks so
+  // they can be replaced atomically on re-save.
+  async listIds(prefix: string): Promise<string[]> {
+    const ids: string[] = [];
+    let next: string | undefined;
+    do {
+      const params = new URLSearchParams({ prefix, limit: "100" });
+      if (next) params.set("paginationToken", next);
+      const res = await pineconeFetch(`https://${this.host}/vectors/list?${params.toString()}`, {
+        method: "GET",
+        apiKey: this.apiKey,
+      });
+      for (const v of res?.vectors || []) {
+        if (v?.id) ids.push(v.id as string);
+      }
+      next = res?.pagination?.next;
+    } while (next);
+    return ids;
   }
 }
 

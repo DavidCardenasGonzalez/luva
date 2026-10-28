@@ -156,7 +156,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
     await markOnboardingCompleted();
     navigation.reset({
       index: 0,
-      routes: [{ name: 'Feed' }],
+      routes: [{ name: 'Home' }],
     });
   }, [fromOnboarding, navigation]);
 
@@ -182,7 +182,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
     }
     navigation.reset({
       index: 0,
-      routes: [{ name: fromOnboarding ? 'Onboarding' : 'Feed' }],
+      routes: [{ name: fromOnboarding ? 'Onboarding' : 'Home' }],
     });
   }, [authMode, fromOnboarding, navigation]);
 
@@ -194,7 +194,7 @@ export default function AccountAccessScreen({ navigation, route }: Props) {
     await markOnboardingCompleted();
     navigation.reset({
       index: 0,
-      routes: [{ name: 'Feed' }],
+      routes: [{ name: 'Home' }],
     });
   }, [fromOnboarding, navigation]);
 

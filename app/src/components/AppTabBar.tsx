@@ -7,17 +7,19 @@ import { useShadowingPlayer } from '../shadowing/ShadowingPlayerProvider';
 import { trackMixpanelTabSelected } from '../marketing/mixpanelEvents';
 import { useLanguage } from '../i18n/LanguageProvider';
 
-type AppTabKey = 'home' | 'practice' | 'missions' | 'lessons' | 'journey' | 'shadowing' | 'feed' | 'friends' | 'settings';
+type AppTabKey = 'home' | 'discovery' | 'learn' | 'feed' | 'friends' | 'settings' | 'practice' | 'lessons' | 'journey' | 'shadowing' | 'missions';
 
 type TabConfig = {
   key: AppTabKey;
   labelKey: string;
   icon: React.ComponentProps<typeof MaterialIcons>['name'];
-  route: 'Deck' | 'Lessons' | 'MyJourney' | 'Shadowing' | 'Feed' | 'Friends' | 'Settings';
+  route: 'Home' | 'Discovery' | 'Feed' | 'LearningHome' | 'ReviewList' | 'Friends' | 'Settings';
 };
 
 const TABS: TabConfig[] = [
-  { key: 'feed', labelKey: 'tabs.feed', icon: 'rss-feed', route: 'Feed' },
+  { key: 'home', labelKey: 'tabs.home', icon: 'home-filled', route: 'Home' },
+  { key: 'discovery', labelKey: 'tabs.discovery', icon: 'movie', route: 'Discovery' },
+  { key: 'learn', labelKey: 'tabs.learn', icon: 'school', route: 'ReviewList' },
   { key: 'friends', labelKey: 'tabs.friends', icon: 'people', route: 'Friends' },
   { key: 'settings', labelKey: 'tabs.settings', icon: 'settings', route: 'Settings' },
 ];

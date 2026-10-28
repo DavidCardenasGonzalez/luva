@@ -13,6 +13,8 @@ import { AdminLessonsPage } from '@/features/admin/ui/AdminLessonsPage'
 import { AdminLessonEditorPage } from '@/features/admin/ui/AdminLessonEditorPage'
 import { AdminAllCharacterPostsPage } from '@/features/admin/ui/AdminAllCharacterPostsPage'
 import { AdminShadowingPage } from '@/features/admin/ui/AdminShadowingPage'
+import { AdminSeriesPage } from '@/features/admin/ui/AdminSeriesPage'
+import { AdminSeriesEditorPage } from '@/features/admin/ui/AdminSeriesEditorPage'
 import { LoadingPage } from '@/features/auth/ui/LoadingPage'
 import { LoginPage } from '@/features/auth/ui/LoginPage'
 import { ADMIN_ROLES } from '@/features/auth/model/roles'
@@ -198,6 +200,9 @@ export function AppRouter() {
         }
       />
       <Route path="*" element={<Navigate to={appPaths.home} replace />} />
+      <Route path={appPaths.series} element={<ProtectedRoute requiredRoles={ADMIN_ROLES}><AdminSeriesPage /></ProtectedRoute>} />
+      <Route path={appPaths.seriesNew} element={<ProtectedRoute requiredRoles={ADMIN_ROLES}><AdminSeriesEditorPage /></ProtectedRoute>} />
+      <Route path="/series/:seriesId" element={<ProtectedRoute requiredRoles={ADMIN_ROLES}><AdminSeriesEditorPage /></ProtectedRoute>} />
     </Routes>
   )
 }

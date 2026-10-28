@@ -11,11 +11,14 @@ import { MetaAdsProvider } from './marketing/MetaAdsProvider';
 import { MixpanelProvider } from './marketing/MixpanelProvider';
 import { ShadowingPlayerProvider } from './shadowing/ShadowingPlayerProvider';
 import { LanguageProvider } from './i18n/LanguageProvider';
+import { MicrodramaProgressProvider } from './microdramas/MicrodramaProgressProvider';
+import { ReviewProvider } from './review/ReviewProvider';
 
 export default function App() {
   return (
     <LanguageProvider>
       <AuthProvider>
+        <ReviewProvider>
         <RevenueCatProvider>
           <CoinBalanceProvider>
             <PhotoRequestCreditsProvider>
@@ -25,7 +28,9 @@ export default function App() {
                     <StoryProgressProvider>
                       <AppVersionGateProvider>
                         <ShadowingPlayerProvider>
-                          <AppNavigator />
+                          <MicrodramaProgressProvider>
+                            <AppNavigator />
+                          </MicrodramaProgressProvider>
                         </ShadowingPlayerProvider>
                       </AppVersionGateProvider>
                     </StoryProgressProvider>
@@ -35,6 +40,7 @@ export default function App() {
             </PhotoRequestCreditsProvider>
           </CoinBalanceProvider>
         </RevenueCatProvider>
+        </ReviewProvider>
       </AuthProvider>
     </LanguageProvider>
   );

@@ -1269,6 +1269,7 @@ export default function FriendChatScreen({ navigation, route }: Props) {
           ...(sourcePost?.postId ? { postId: sourcePost.postId } : {}),
           englishDifficulty: currentDifficulty,
           ...(friend?.friendshipContext ? { friendshipContext: friend.friendshipContext } : {}),
+          ...(route.params?.microdramaContext ? { microdramaContext: route.params.microdramaContext } : {}),
           history: historyPayload,
         },
         { anonymous: !isSignedIn },

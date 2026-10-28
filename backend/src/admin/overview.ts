@@ -33,6 +33,12 @@ export type AdminOverviewResponse = {
 
 const INITIAL_MODULES: AdminModuleSummary[] = [
   {
+    id: 'series',
+    label: 'Series de microdramas',
+    description: 'Crea series, sube portadas y episodios, selecciona personajes y administra la publicación en la app.',
+    status: 'ready',
+  },
+  {
     id: 'dashboard',
     label: 'Dashboard base',
     description: 'Portal admin separado, look claro y overview conectado a su propia lambda.',

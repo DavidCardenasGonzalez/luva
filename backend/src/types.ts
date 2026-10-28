@@ -221,6 +221,7 @@ export interface FriendChatRequest {
   postVideoUrl?: string;
   englishDifficulty?: 'easy' | 'medium' | 'hard';
   friendshipContext?: string;
+  microdramaContext?: { seriesId: string; episodeId: string; positionMs: number };
   history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string; imagePrompt?: string }>;
 }
 
@@ -292,6 +293,30 @@ export interface TranslationResponse {
   translatedText: string;
   sourceLanguage?: string;
   targetLanguage: string;
+}
+
+export interface ReviewItemSource {
+  type: 'microdrama' | 'feed_video';
+  seriesId?: string;
+  episodeId?: string;
+  characterId?: string;
+  postId?: string;
+  positionMs?: number;
+  title?: string;
+}
+
+export interface ReviewItem {
+  id: string;
+  originalText: string;
+  translatedText: string;
+  sourceLanguage: string;
+  targetLanguage: string;
+  contextText?: string;
+  source: ReviewItemSource;
+  status: 'pending' | 'completed';
+  createdAt: string;
+  updatedAt: string;
+  completedAt?: string;
 }
 
 export interface PromoCodeValidationRequest {

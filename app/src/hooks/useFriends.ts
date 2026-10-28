@@ -180,6 +180,7 @@ export async function sendFriendChatMessage(
     postVideoUrl?: string;
     englishDifficulty?: 'easy' | 'medium' | 'hard';
     friendshipContext?: string;
+    microdramaContext?: { seriesId: string; episodeId: string; positionMs: number };
     history?: Array<{ role: 'user' | 'assistant'; content: string; imageUrl?: string; imagePrompt?: string }>;
   },
   options?: FriendChatRequestOptions,

@@ -32,6 +32,14 @@ test('normalizeAdminAssetUploadRequest accepts configured image folder and image
   );
 });
 
+test('series uploads accept covers, videos and SRT, and reject mismatched files', () => {
+  for (const [folder, fileName, expected] of [['microdramaCovers', 'cover.webp', 'image/webp'], ['microdramaVideos', 'video.mp4', 'video/mp4'], ['microdramaSubtitles', 'english.srt', 'application/x-subrip']]) {
+    assert.equal(normalizeAdminAssetUploadRequest({ folder, fileName }).contentType, expected);
+  }
+  assert.throws(() => normalizeAdminAssetUploadRequest({ folder: 'microdramaSubtitles', fileName: 'not-subtitles.exe', contentType: 'application/octet-stream' }), /INVALID_ASSET_CONTENT_TYPE/);
+  assert.throws(() => normalizeAdminAssetUploadRequest({ folder: 'microdramaCovers', fileName: 'video.mp4', contentType: 'video/mp4' }), /INVALID_ASSET_CONTENT_TYPE/);
+});
+
 test('normalizeAdminAssetUploadRequest accepts mission intro video folder and video types', () => {
   assert.deepEqual(
     normalizeAdminAssetUploadRequest({

@@ -15,6 +15,7 @@ const navigationItems = [
   { to: appPaths.users, label: 'Usuarios' },
   { to: appPaths.assets, label: 'Assets' },
   { to: appPaths.characters, label: 'Personajes' },
+  { to: appPaths.series, label: 'Series' },
   { to: appPaths.characterPosts, label: 'Posts personajes' },
   { to: appPaths.posts, label: 'Posts feed' },
   { to: appPaths.videos, label: 'Videos' },

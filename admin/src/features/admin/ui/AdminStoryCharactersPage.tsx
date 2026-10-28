@@ -5,9 +5,11 @@ import { useAdminStoryCharacters } from '@/features/admin/model/use-admin-story-
 import type { AdminStoryCharacter } from '@/features/admin/model/types'
 import { AdminLayout } from '@/features/admin/ui/AdminLayout'
 import {
+  createAdminStoryCharacter,
   createAdminAssetUpload,
   createAdminAvatarVariantUploads,
   purgeAdminCharacter,
+  updateAdminStoryCharacter,
   type AdminCharacterPurgeResponse,
 } from '@/features/admin/api/admin-client'
 
@@ -53,29 +55,6 @@ const EMPTY_NEW_CHARACTER: NewCharacterForm = {
   avatarImageMdUrl: '',
 }
 
-function buildCharacterJson(form: NewCharacterForm): string {
-  const ordered: Record<string, unknown> = {}
-  ordered.characterId = form.characterId.trim()
-  if (form.storyIsInitial) ordered.storyIsInitial = true
-  const tags = form.characterTags
-    .split(',')
-    .map((tag) => tag.trim())
-    .filter(Boolean)
-  if (tags.length) ordered.characterTags = tags
-  ordered.aiRole = form.aiRole.trim()
-  if (form.caracterName.trim()) ordered.caracterName = form.caracterName.trim()
-  if (form.caracterPrompt.trim()) ordered.caracterPrompt = form.caracterPrompt.trim()
-  if (form.characterBio.trim()) ordered.characterBio = form.characterBio.trim()
-  if (form.avatarImageUrl.trim()) ordered.avatarImageUrl = form.avatarImageUrl.trim()
-  if (form.avatarImageXsUrl.trim()) ordered.avatarImageXsUrl = form.avatarImageXsUrl.trim()
-  if (form.avatarImageMdUrl.trim()) ordered.avatarImageMdUrl = form.avatarImageMdUrl.trim()
-  const body = JSON.stringify(ordered, null, 2)
-    .split('\n')
-    .map((line, index) => (index === 0 ? line : `  ${line}`))
-    .join('\n')
-  return `  ${body},`
-}
-
 export function AdminStoryCharactersPage() {
   const navigate = useNavigate()
   const { data, error, isLoading, reload } = useAdminStoryCharacters()
@@ -86,9 +65,10 @@ export function AdminStoryCharactersPage() {
   const [deleteError, setDeleteError] = useState<string | undefined>()
   const [deleteResult, setDeleteResult] = useState<AdminCharacterPurgeResponse | undefined>()
   const [isNewOpen, setIsNewOpen] = useState(false)
+  const [editingCharacter, setEditingCharacter] = useState<AdminStoryCharacter | null>(null)
   const [newCharacter, setNewCharacter] = useState<NewCharacterForm>(EMPTY_NEW_CHARACTER)
-  const [generatedJson, setGeneratedJson] = useState<string | undefined>()
-  const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')
+  const [isSavingCharacter, setIsSavingCharacter] = useState(false)
+  const [saveCharacterError, setSaveCharacterError] = useState<string | undefined>()
   const [avatarFile, setAvatarFile] = useState<File | undefined>()
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | undefined>()
   const [avatarStage, setAvatarStage] = useState<string | undefined>()
@@ -136,9 +116,28 @@ export function AdminStoryCharactersPage() {
   }
 
   function openNewModal() {
+    setEditingCharacter(null)
     setNewCharacter(EMPTY_NEW_CHARACTER)
-    setGeneratedJson(undefined)
-    setCopyState('idle')
+    setSaveCharacterError(undefined)
+    resetAvatarUpload()
+    setIsNewOpen(true)
+  }
+
+  function openEditModal(character: AdminStoryCharacter) {
+    setEditingCharacter(character)
+    setNewCharacter({
+      characterId: character.characterId,
+      storyIsInitial: Boolean(character.storyIsInitial),
+      characterTags: (character.characterTags || []).join(', '),
+      aiRole: character.aiRole || '',
+      caracterName: character.caracterName || character.characterName || '',
+      caracterPrompt: character.caracterPrompt || '',
+      characterBio: character.characterBio || '',
+      avatarImageUrl: character.avatarImageUrl || '',
+      avatarImageXsUrl: character.avatarImageXsUrl || '',
+      avatarImageMdUrl: character.avatarImageMdUrl || '',
+    })
+    setSaveCharacterError(undefined)
     resetAvatarUpload()
     setIsNewOpen(true)
   }
@@ -167,11 +166,6 @@ export function AdminStoryCharactersPage() {
 
     setIsUploadingAvatar(true)
     setAvatarError(undefined)
-    if (generatedJson) {
-      setGeneratedJson(undefined)
-      setCopyState('idle')
-    }
-
     try {
       setAvatarStage('Preparando URL de carga...')
       const original = await createAdminAssetUpload(
@@ -256,25 +250,35 @@ export function AdminStoryCharactersPage() {
 
   function updateNewField<K extends keyof NewCharacterForm>(key: K, value: NewCharacterForm[K]) {
     setNewCharacter((prev) => ({ ...prev, [key]: value }))
-    if (generatedJson) {
-      setGeneratedJson(undefined)
-      setCopyState('idle')
-    }
   }
 
-  function handleGenerateJson() {
-    setGeneratedJson(buildCharacterJson(newCharacter))
-    setCopyState('idle')
-  }
-
-  async function handleCopyJson() {
-    if (!generatedJson) return
+  async function handleSaveCharacter() {
+    if (!canGenerate || isSavingCharacter) return
+    setIsSavingCharacter(true)
+    setSaveCharacterError(undefined)
     try {
-      await navigator.clipboard.writeText(generatedJson)
-      setCopyState('copied')
-      setTimeout(() => setCopyState('idle'), 1500)
-    } catch {
-      setCopyState('idle')
+      const payload = {
+        storyIsInitial: newCharacter.storyIsInitial,
+        characterTags: newCharacter.characterTags.split(',').map(tag => tag.trim()).filter(Boolean),
+        aiRole: newCharacter.aiRole.trim(),
+        ...(newCharacter.caracterName.trim() ? { caracterName: newCharacter.caracterName.trim() } : {}),
+        ...(newCharacter.caracterPrompt.trim() ? { caracterPrompt: newCharacter.caracterPrompt.trim() } : {}),
+        ...(newCharacter.characterBio.trim() ? { characterBio: newCharacter.characterBio.trim() } : {}),
+        ...(newCharacter.avatarImageUrl.trim() ? { avatarImageUrl: newCharacter.avatarImageUrl.trim() } : {}),
+        ...(newCharacter.avatarImageXsUrl.trim() ? { avatarImageXsUrl: newCharacter.avatarImageXsUrl.trim() } : {}),
+        ...(newCharacter.avatarImageMdUrl.trim() ? { avatarImageMdUrl: newCharacter.avatarImageMdUrl.trim() } : {}),
+      }
+      if (editingCharacter) {
+        await updateAdminStoryCharacter(editingCharacter.characterId, payload, editingCharacter.version)
+      } else {
+        await createAdminStoryCharacter({ characterId: newCharacter.characterId.trim(), ...payload })
+      }
+      await reload()
+      closeNewModal()
+    } catch (error: any) {
+      setSaveCharacterError(error?.message || 'No pudimos guardar al personaje.')
+    } finally {
+      setIsSavingCharacter(false)
     }
   }
 
@@ -506,6 +510,13 @@ export function AdminStoryCharactersPage() {
                 />
                 <button
                   type="button"
+                  className="btn secondary"
+                  onClick={() => openEditModal(character)}
+                >
+                  Editar
+                </button>
+                <button
+                  type="button"
                   onClick={() => navigate(appPaths.character(character.characterId))}
                   style={{
                     flex: 1,
@@ -628,8 +639,7 @@ export function AdminStoryCharactersPage() {
               <li>Entradas de progreso en todos los usuarios</li>
             </ul>
             <p style={{ marginTop: 12, color: '#64748b' }}>
-              Recuerda quitar el personaje del archivo <code>characters.ts</code> después de
-              ejecutar esto. Para confirmar, escribe el <strong>characterId</strong> exacto abajo.
+              Para confirmar, escribe el <strong>characterId</strong> exacto abajo.
             </p>
             <code
               style={{
@@ -767,7 +777,7 @@ export function AdminStoryCharactersPage() {
             <p style={{ marginTop: 8, color: '#475569', fontSize: 13 }}>
               Vas a eliminar <strong>{selectedIds.size}</strong> personaje(s). Esta acción borrará
               permanentemente posts, videos, friendships y entradas de progreso de cada uno.
-              Recuerda quitarlos también de <code>characters.ts</code>.
+              Estos IDs se eliminarán de la base de datos después de confirmar el borrado.
             </p>
 
             <div
@@ -962,10 +972,9 @@ export function AdminStoryCharactersPage() {
               overflow: 'auto',
             }}
           >
-            <h3 style={{ margin: 0, fontSize: 20 }}>Nuevo personaje</h3>
+            <h3 style={{ margin: 0, fontSize: 20 }}>{editingCharacter ? 'Editar personaje' : 'Nuevo personaje'}</h3>
             <p style={{ marginTop: 8, color: '#64748b', fontSize: 13 }}>
-              Completa el formulario y genera el JSON listo para pegar en{' '}
-              <code>backend/src/data/characters.ts</code>.
+              Completa los datos del personaje para guardarlo en la base de datos.
             </p>
 
             <div
@@ -982,6 +991,7 @@ export function AdminStoryCharactersPage() {
                 </span>
                 <input
                   value={newCharacter.characterId}
+                  disabled={Boolean(editingCharacter)}
                   onChange={(event) => updateNewField('characterId', event.target.value)}
                   placeholder="initials:meet_someone_first_mission"
                   style={inputStyle}
@@ -1161,7 +1171,9 @@ export function AdminStoryCharactersPage() {
               </div>
             </div>
 
-            {generatedJson && (
+            {saveCharacterError && <p role="alert" style={{ color: '#b91c1c' }}>{saveCharacterError}</p>}
+
+            {canGenerate && (
               <div style={{ marginTop: 16 }}>
                 <div
                   style={{
@@ -1172,16 +1184,8 @@ export function AdminStoryCharactersPage() {
                   }}
                 >
                   <span style={{ fontSize: 12, color: '#475569', fontWeight: 600 }}>
-                    JSON para characters.ts
+                    Resumen del personaje
                   </span>
-                  <button
-                    type="button"
-                    className="btn secondary"
-                    onClick={handleCopyJson}
-                    style={{ padding: '4px 10px', fontSize: 12 }}
-                  >
-                    {copyState === 'copied' ? 'Copiado' : 'Copiar'}
-                  </button>
                 </div>
                 <pre
                   style={{
@@ -1195,7 +1199,7 @@ export function AdminStoryCharactersPage() {
                     whiteSpace: 'pre',
                   }}
                 >
-                  {generatedJson}
+                  {editingCharacter ? 'Los cambios se guardarán en la base de datos.' : JSON.stringify({ characterId: newCharacter.characterId.trim(), caracterName: newCharacter.caracterName.trim() || undefined }, null, 2)}
                 </pre>
               </div>
             )}
@@ -1207,10 +1211,10 @@ export function AdminStoryCharactersPage() {
               <button
                 type="button"
                 className="btn primary"
-                onClick={handleGenerateJson}
-                disabled={!canGenerate}
+                onClick={() => void handleSaveCharacter()}
+                disabled={!canGenerate || isSavingCharacter}
               >
-                Generar JSON
+                {isSavingCharacter ? 'Guardando...' : editingCharacter ? 'Guardar cambios' : 'Guardar personaje'}
               </button>
             </div>
           </div>

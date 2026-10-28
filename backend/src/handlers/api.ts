@@ -55,7 +55,11 @@ import {
   FriendAffinityUpdate,
   FriendsListResponse,
 } from "../types";
-import { CHARACTERS } from "../data/characters";
+import { createCharactersRepository } from "../characters";
+import { createMicrodramasRepository } from "../microdramas";
+import { createMicrodramaProgressRepository, MicrodramaProgressConflict } from "../microdramas-progress";
+import { createReviewItemsRepository, type ReviewSource } from "../review-items";
+import { answerReviewQuestion, type ReviewChatMessage } from "../review-tutor";
 import {
   type CharacterPost,
   incrementCharacterPostConversationMessages,
@@ -92,6 +96,10 @@ const dynamo = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
     removeUndefinedValues: true,
   },
 });
+const charactersRepository = createCharactersRepository();
+const microdramasRepository = createMicrodramasRepository();
+const microdramaProgressRepository = createMicrodramaProgressRepository();
+const reviewItemsRepository = createReviewItemsRepository();
 let OPENAI_API_KEY_CACHE: string | undefined;
 let GOOGLE_TRANSLATE_API_KEY_CACHE: string | undefined;
 let FAL_API_KEY_CACHE: string | undefined;
@@ -163,6 +171,9 @@ const STORY_HISTORY_LIMIT = 20;
 const FRIEND_HISTORY_LIMIT = 24;
 const FRIEND_RECENT_MESSAGES = 10;
 const FRIEND_SUMMARY_THRESHOLD = 20;
+// How many recent messages to feed the memory-search query rewriter. Kept small
+// so the query stays focused on the current topic instead of going "blurry".
+const FRIEND_RECENT_MESSAGES_FOR_QUERY = 6;
 const FRIENDSHIP_CONTEXT_MAX_CHARS = 1200;
 const FRIENDSHIP_CONTEXT_MAX_PARAGRAPHS = 2;
 const FRIEND_IMAGE_FREE_CREDIT_LIMIT = 2;
@@ -1028,7 +1039,143 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
     }
 
     if (method === "GET" && path === `${ROUTE_PREFIX}/characters`) {
-      return json(200, { items: listCatalogFriends() });
+      return json(200, { items: await listCatalogFriends() });
+    }
+
+    if (method === 'GET' && (path === `${ROUTE_PREFIX}/microdramas` || path === `${ROUTE_PREFIX}/microdramas/discovery`)) {
+      const query = event.queryStringParameters || {};
+      const result = await microdramasRepository.listSeries({
+        q: typeof query.q === 'string' ? query.q : '',
+        cursor: typeof query.cursor === 'string' ? query.cursor : undefined,
+        seed: typeof query.seed === 'string' ? query.seed : undefined,
+        limit: query.limit ? Number(query.limit) : 20,
+        discovery: path === `${ROUTE_PREFIX}/microdramas/discovery`,
+      });
+      return json(200, result);
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/microdramas/progress/batch`) {
+      const identity = getUserIdentity(event);
+      if (!identity) return unauthorized('Missing user identity');
+      const body = parseBody(event.body) || {};
+      return json(200, await microdramaProgressRepository.getBatch(identity.userId, body.seriesIds));
+    }
+
+    const microdramaProgress = path.match(/^\/v1\/microdramas\/([^/]+)\/progress$/);
+    if ((method === 'GET' || method === 'PUT') && microdramaProgress) {
+      const identity = getUserIdentity(event);
+      if (!identity) return unauthorized('Missing user identity');
+      const seriesId = decodeURIComponent(microdramaProgress[1]);
+      try {
+        if (method === 'GET') return json(200, await microdramaProgressRepository.get(identity.userId, seriesId));
+        const body = parseBody(event.body) || {};
+        const progress = await microdramaProgressRepository.save(identity.userId, seriesId, body);
+        return json(200, progress);
+      } catch (error: any) {
+        if (error instanceof MicrodramaProgressConflict) {
+          return json(409, { code: error.message, message: 'El progreso cambió en otro dispositivo.', current: error.current });
+        }
+        if (error?.message === 'MICRODRAMA_EPISODE_NOT_FOUND') return notFound();
+        if (error?.message?.startsWith('INVALID_') || error?.message === 'MICRODRAMA_EPISODE_NOT_ENDED') return badRequest(error.message);
+        throw error;
+      }
+    }
+
+    if (path === `${ROUTE_PREFIX}/review-items` && method === 'POST') {
+      const identity = getUserIdentity(event);
+      if (!identity) return unauthorized('Missing user identity');
+      const body = parseBody(event.body) || {};
+      const text = typeof body.originalText === 'string' ? body.originalText.trim() : '';
+      const translatedText = typeof body.translatedText === 'string' ? body.translatedText.trim() : '';
+      const sourceLanguage = typeof body.sourceLanguage === 'string' ? body.sourceLanguage.trim() : '';
+      const targetLanguage = typeof body.targetLanguage === 'string' ? body.targetLanguage.trim() : '';
+      const source = body.source;
+      if (!text || !translatedText || text.length > 5000 || translatedText.length > 5000 ||
+          !/^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8})*$/.test(sourceLanguage) ||
+          !/^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8})*$/.test(targetLanguage) ||
+          !source || !['microdrama', 'feed_video'].includes(source.type)) return badRequest('Invalid review item');
+      const safeId = (value: unknown) => typeof value === 'string' && /^[a-zA-Z0-9_-]{1,100}$/.test(value) ? value : undefined;
+      const reviewSource: ReviewSource = {
+        type: source.type,
+        ...(safeId(source.seriesId) ? { seriesId: safeId(source.seriesId) } : {}),
+        ...(safeId(source.episodeId) ? { episodeId: safeId(source.episodeId) } : {}),
+        ...(safeId(source.characterId) ? { characterId: safeId(source.characterId) } : {}),
+        ...(safeId(source.postId) ? { postId: safeId(source.postId) } : {}),
+        ...(Number.isFinite(source.positionMs) && source.positionMs >= 0 ? { positionMs: Math.floor(source.positionMs) } : {}),
+        ...(typeof source.title === 'string' ? { title: source.title.trim().slice(0, 160) } : {}),
+      };
+      const contextText = typeof body.contextText === 'string' ? body.contextText.trim() : '';
+      if (contextText.length > 5000) return badRequest('Context is too long');
+      const result = await reviewItemsRepository.save(identity.userId, {
+        originalText: text, translatedText,
+        sourceLanguage: sourceLanguage.toLowerCase(), targetLanguage,
+        ...(contextText ? { contextText } : {}), source: reviewSource,
+      });
+      return json(result.created ? 201 : 200, result);
+    }
+
+    if (path === `${ROUTE_PREFIX}/review-items` && method === 'GET') {
+      const identity = getUserIdentity(event);
+      if (!identity) return unauthorized('Missing user identity');
+      const query = event.queryStringParameters || {};
+      const status = query.status;
+      if (status && status !== 'pending' && status !== 'completed') return badRequest('Invalid status');
+      const limit = query.limit === undefined ? 30 : Number(query.limit);
+      if (!Number.isInteger(limit) || limit < 1 || limit > 100) return badRequest('Invalid limit');
+      try {
+        return json(200, await reviewItemsRepository.list(identity.userId, {
+          status, limit, cursor: typeof query.cursor === 'string' ? query.cursor : undefined,
+        }));
+      } catch (error: any) {
+        if (error?.message === 'INVALID_CURSOR') return badRequest('Invalid cursor');
+        throw error;
+      }
+    }
+
+    const reviewItemRoute = path.match(/^\/v1\/review-items\/([^/]+)(?:\/(status|ask))?$/);
+    if (reviewItemRoute) {
+      const identity = getUserIdentity(event);
+      if (!identity) return unauthorized('Missing user identity');
+      let itemId: string;
+      try { itemId = decodeURIComponent(reviewItemRoute[1]); } catch { return badRequest('Invalid item id'); }
+      const subroute = reviewItemRoute[2];
+      if (!subroute && method === 'GET') {
+        const item = await reviewItemsRepository.get(identity.userId, itemId);
+        return item ? json(200, { item }) : notFound();
+      }
+      if (subroute === 'status' && method === 'PUT') {
+        const body = parseBody(event.body) || {};
+        if (body.status !== 'pending' && body.status !== 'completed') return badRequest('Invalid status');
+        const item = await reviewItemsRepository.setStatus(identity.userId, itemId, body.status);
+        return item ? json(200, { item }) : notFound();
+      }
+      if (subroute === 'ask' && method === 'POST') {
+        const body = parseBody(event.body) || {};
+        const question = typeof body.question === 'string' ? body.question.trim() : '';
+        const history = Array.isArray(body.history) ? body.history : [];
+        if (!question || question.length > 2000 || history.length > 12 || history.some((message: any) =>
+          !message || !['user', 'assistant'].includes(message.role) || typeof message.content !== 'string' || !message.content.trim() || message.content.length > 2000
+        ) || history.reduce((sum: number, message: any) => sum + message.content.length, 0) > 12000) return badRequest('Invalid tutor request');
+        const item = await reviewItemsRepository.get(identity.userId, itemId);
+        if (!item) return notFound();
+        const language = getRequestSupportLanguage(event, body);
+        try {
+          const answer = await answerReviewQuestion({
+            apiKey: await getOpenAIKey(), model: process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL,
+            item, question, history: history as ReviewChatMessage[], language,
+          });
+          return json(200, { answer });
+        } catch (error: any) {
+          console.error(JSON.stringify({ scope: 'review.tutor.error', message: error?.message || 'unknown' }));
+          return json(502, { code: 'REVIEW_TUTOR_FAILED', message: 'No pudimos responder ahora. Intenta de nuevo.' });
+        }
+      }
+    }
+
+    const microdramaSeries = path.match(/^\/v1\/microdramas\/([^/]+)$/);
+    if (method === 'GET' && microdramaSeries) {
+      const detail = await microdramasRepository.getSeriesDetail(decodeURIComponent(microdramaSeries[1]));
+      return detail ? json(200, detail) : notFound();
     }
 
     if (method === "GET" && path === `${ROUTE_PREFIX}/feed/posts`) {
@@ -1036,7 +1183,7 @@ export const handler = async (event: any, context?: any): Promise<Result> => {
     }
 
     if (method === "GET" && path === `${ROUTE_PREFIX}/feed/character-videos`) {
-      return json(200, { posts: await listPublicCharacterVideoPosts(80, CHARACTERS) });
+      return json(200, { posts: await listPublicCharacterVideoPosts(80, await charactersRepository.listCharacters()) });
     }
 
     const characterVideoMetric = path.match(
@@ -1872,20 +2019,21 @@ function friendFromCharacter(character: CharacterDefinition): FriendCharacter {
   };
 }
 
-function findCharacter(characterId: string): CharacterDefinition | undefined {
+async function findCharacter(characterId: string): Promise<CharacterDefinition | undefined> {
   const trimmed = typeof characterId === "string" ? characterId.trim() : "";
   if (!trimmed) return undefined;
-  return CHARACTERS.find((character) => character.characterId === trimmed);
+  return charactersRepository.getCharacter(trimmed);
 }
 
-function publicCatalogFriend(friendIdInput: string): FriendCharacter | undefined {
-  const character = findCharacter(friendIdInput);
+async function publicCatalogFriend(friendIdInput: string): Promise<FriendCharacter | undefined> {
+  const character = await findCharacter(friendIdInput);
   return character ? friendFromCharacter(character) : undefined;
 }
 
-function listCatalogFriends(): FriendCharacter[] {
-  const initials = CHARACTERS.filter((character) => character.storyIsInitial);
-  const rest = CHARACTERS.filter((character) => !character.storyIsInitial);
+async function listCatalogFriends(): Promise<FriendCharacter[]> {
+  const characters = await charactersRepository.listCharacters();
+  const initials = characters.filter((character) => character.storyIsInitial);
+  const rest = characters.filter((character) => !character.storyIsInitial);
   return [...initials, ...rest].map(friendFromCharacter);
 }
 
@@ -1914,7 +2062,7 @@ async function getPublicFriendProfile(
   identity?: UserIdentity
 ): Promise<{ friend?: FriendCharacter; posts: CharacterPost[] }> {
   const storedFriend = identity ? await getFriendRecord(identity.userId, friendId) : undefined;
-  const catalogFriend = publicCatalogFriend(friendId);
+  const catalogFriend = await publicCatalogFriend(friendId);
   let friend = storedFriend ? publicFriend(storedFriend) : catalogFriend;
   if (friend && !friend.characterBio && catalogFriend?.characterBio) {
     friend = { ...friend, characterBio: catalogFriend.characterBio };
@@ -2023,7 +2171,7 @@ function latestTimestamp(...values: Array<string | undefined>): string | undefin
     .sort((left, right) => Date.parse(right) - Date.parse(left))[0];
 }
 
-function resolveCharacterFromBody(body: CreateFriendRequest): CharacterDefinition | undefined {
+async function resolveCharacterFromBody(body: CreateFriendRequest): Promise<CharacterDefinition | undefined> {
   const characterId =
     typeof body.characterId === "string" && body.characterId.trim()
       ? body.characterId.trim()
@@ -2037,7 +2185,7 @@ async function createFriendFromMission(
   userId: string,
   body: CreateFriendRequest
 ): Promise<FriendCharacter> {
-  const character = resolveCharacterFromBody(body);
+  const character = await resolveCharacterFromBody(body);
   if (!character) {
     throw new Error("FRIEND_CHARACTER_NOT_FOUND");
   }
@@ -2108,7 +2256,7 @@ async function resolveFriendRecord(userId: string, friendId: string): Promise<Fr
     return friend;
   }
 
-  const catalogFriend = publicCatalogFriend(friendId);
+  const catalogFriend = await publicCatalogFriend(friendId);
   if (!catalogFriend) {
     return undefined;
   }
@@ -2141,7 +2289,7 @@ function publicFriendRecord(friend: FriendCharacter, userId = "anonymous"): Frie
 }
 
 async function resolvePublicFriendRecord(friendId: string): Promise<FriendRecord | undefined> {
-  const catalogFriend = publicCatalogFriend(friendId);
+  const catalogFriend = await publicCatalogFriend(friendId);
   if (catalogFriend) {
     return publicFriendRecord(catalogFriend);
   }
@@ -2719,6 +2867,126 @@ Extract the durable long-term memories about the learner as JSON.`;
   return memories;
 }
 
+// Rewrites the learner's latest message into an optimized semantic-search query
+// for retrieving long-term friendship memories. Using the raw last message is
+// weak for short/referential turns ("yes, exactly", "what does he think?"); the
+// LLM resolves references against recent context and surfaces the real topic.
+// Best-effort: on any failure we fall back to the raw transcript. This is run in
+// parallel with the English evaluation so it adds little wall-clock latency.
+async function buildMemorySearchQuery(
+  friend: FriendRecord,
+  history: StoryMessage[],
+  latestMessage: string
+): Promise<string> {
+  const fallback = latestMessage.trim();
+  const recent = history
+    .slice(-FRIEND_RECENT_MESSAGES_FOR_QUERY)
+    .map(
+      (message) =>
+        `${message.role === "user" ? "Learner" : friend.characterName}: ${message.content}${formatHistoryPhotoSuffix(message)}`
+    )
+    .join("\n")
+    .trim();
+  if (!recent) return fallback;
+
+  const apiKey = await getOpenAIKey();
+  const model = process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
+  const timeoutMs = Number(process.env.MEMORY_QUERY_TIMEOUT_MS || 8000);
+  const isGpt5 = /gpt-5/i.test(model);
+  const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
+  const reasoningConfig = isGpt5
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || "minimal" }
+    : undefined;
+
+  const systemPrompt = `You build a search query to retrieve long-term memories about a language learner from a vector database, based on their latest chat message and recent context.
+
+Rules:
+- Resolve pronouns and references using the context (e.g. "what does he think?" -> name the person if known).
+- Capture the topic, entities, and intent of what the learner is talking about.
+- Ignore anything about English learning, grammar, vocabulary, or corrections.
+- Output ONLY the search query text: one short sentence or a few keywords, in English, no quotes, no explanation.
+- If the latest message has no meaningful topic to search (pure greeting/filler), output the latest message as-is.`;
+
+  const userPrompt = `Recent conversation with ${friend.characterName}:
+${recent}
+
+Latest learner message: "${latestMessage}"
+
+Write the best semantic-search query to find relevant memories about the learner.`;
+
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), timeoutMs);
+  let raw = "";
+  try {
+    if (useResponses) {
+      const body: Record<string, any> = {
+        model,
+        instructions: systemPrompt,
+        input: [{ role: "user", content: [{ type: "input_text", text: userPrompt }] }],
+        max_output_tokens: Number(process.env.MEMORY_QUERY_MAX_OUTPUT_TOKENS || 120),
+      };
+      if (reasoningConfig) body.reasoning = reasoningConfig;
+      const res = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify(body),
+        signal: ac.signal,
+      });
+      const payload: any = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(`MEMORY_QUERY_HTTP_${res.status}`);
+      if (Array.isArray(payload?.output)) {
+        for (const item of payload.output) {
+          if (item?.type === "message" && Array.isArray(item.content)) {
+            const texts = item.content
+              .filter((c: any) => c?.type === "output_text" && typeof c.text === "string")
+              .map((c: any) => c.text);
+            if (texts.length) {
+              raw = texts.join("\n");
+              break;
+            }
+          }
+        }
+      }
+      if (!raw && typeof payload?.output_text === "string") raw = payload.output_text;
+    } else {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          max_tokens: Number(process.env.MEMORY_QUERY_MAX_OUTPUT_TOKENS || 120),
+        }),
+        signal: ac.signal,
+      });
+      if (!res.ok) throw new Error(`MEMORY_QUERY_HTTP_${res.status}`);
+      const data: any = await res.json();
+      raw = data.choices?.[0]?.message?.content || "";
+    }
+  } catch (err) {
+    console.error(
+      JSON.stringify({
+        scope: "friends.memory.query_rewrite_error",
+        message: (err as Error)?.message || "unknown",
+      })
+    );
+    return fallback;
+  } finally {
+    clearTimeout(to);
+  }
+
+  const cleaned = raw
+    .trim()
+    .replace(/^```(?:\w+)?\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .replace(/^["']|["']$/g, "")
+    .trim();
+  return cleaned || fallback;
+}
+
 function sanitizeFriendChatText(value: unknown, maxLength: number): string | undefined {
   if (typeof value !== "string") {
     return undefined;
@@ -2925,6 +3193,18 @@ async function advanceFriendChat(
   const friendshipContext =
     sanitizeFriendshipContext(body.friendshipContext) || friend.friendshipContext || "";
   const postContext = await resolveFriendChatPostContext(friend, body);
+  const microdrama = body.microdramaContext;
+  let microdramaContext: string | undefined;
+  if (microdrama && typeof microdrama.seriesId === 'string' && typeof microdrama.episodeId === 'string'
+      && /^[a-zA-Z0-9][a-zA-Z0-9_:-]{0,99}$/.test(microdrama.seriesId)
+      && /^[a-zA-Z0-9][a-zA-Z0-9_:-]{0,99}$/.test(microdrama.episodeId)
+      && Number.isFinite(microdrama.positionMs) && microdrama.positionMs >= 0 && microdrama.positionMs <= 86400000) {
+    const detail = await createMicrodramasRepository().getSeriesDetail(microdrama.seriesId);
+    const episode = detail?.episodes.find(item => item.episodeId === microdrama.episodeId);
+    if (episode && detail?.series.chatCharacters.some(character => character.characterId === friend.friendId)) {
+      microdramaContext = `The learner paused ${detail!.series.title} episode ${episode.episodeNumber} at ${Math.floor(microdrama.positionMs / 1000)} seconds. Continue naturally in character; do not claim knowledge of unseen events.`;
+    }
+  }
   const fullHistory = appendHistoryEntry(sanitizeHistory(body.history), {
     role: "user",
     content: transcript,
@@ -2958,6 +3238,15 @@ async function advanceFriendChat(
   }
 
   const conversationHistory = fullHistory.slice(-FRIEND_HISTORY_LIMIT);
+
+  // Kick off the memory-search query rewrite NOW so it runs in parallel with the
+  // English evaluation below (both are LLM calls), hiding its latency. Only when
+  // we'll actually read memories (userId present, not an image turn). Falls back
+  // to the raw transcript on any failure.
+  const memorySearchQueryPromise: Promise<string> =
+    userId && !isImageMessage
+      ? buildMemorySearchQuery(friend, conversationHistory, transcript).catch(() => transcript)
+      : Promise.resolve(transcript);
 
   const isEasyMode = effectiveDifficulty === 'easy';
   let correctness = isEasyMode || isImageMessage ? 100 : 0;
@@ -3009,29 +3298,37 @@ async function advanceFriendChat(
 
   // Best-effort long-term memory retrieval from Pinecone. Failures never block
   // the reply: we just fall back to no biography / no retrieved memories.
-  let biographyMemory: string | undefined;
+  let biographyMemory: string[] = [];
   let retrievedMemories: RetrievedFriendshipMemory[] = [];
   if (userId) {
     const friendshipId = `${userId}#${friendId}`;
     try {
       const memory = getMemoryService();
-      const [biography, memories] = await Promise.all([
-        memory.getCharacterBiography(friendId),
+      // Resolves to the LLM-rewritten search query (or the raw transcript on
+      // fallback). Already in flight since before the English eval above.
+      const searchQuery = await memorySearchQueryPromise;
+      const [biographyFacts, memories] = await Promise.all([
+        memory.retrieveCharacterBiography({
+          characterId: friendId,
+          queryText: searchQuery,
+          topK: 5,
+        }),
         memory.retrieveFriendshipMemories({
           friendshipId,
-          queryText: transcript,
+          queryText: searchQuery,
           topK: 5,
         }),
       ]);
-      biographyMemory = biography;
+      biographyMemory = biographyFacts;
       retrievedMemories = memories;
       console.log(
         JSON.stringify({
           scope: "friends.memory.read",
           userId,
           friendId,
-          hasBiography: Boolean(biographyMemory),
+          biographyFactCount: biographyMemory.length,
           memoryCount: retrievedMemories.length,
+          rewroteQuery: searchQuery !== transcript,
         })
       );
     } catch (err) {
@@ -3056,6 +3353,7 @@ async function advanceFriendChat(
       },
       learnerName,
       postContext,
+      microdramaContext,
       effectiveDifficulty,
       conversationSummary,
       friendshipContext,
@@ -3342,8 +3640,8 @@ function buildFriendImageIntimacyGuidance(friend: FriendRecord): string {
   return [...baseRules, levelGuidance].join("\n");
 }
 
-function resolveFriendCharacterSheetUrl(friend: FriendRecord): string | undefined {
-  const character = findCharacter(friend.friendId);
+async function resolveFriendCharacterSheetUrl(friend: FriendRecord): Promise<string | undefined> {
+  const character = await findCharacter(friend.friendId);
   return (
     character?.characterSheetImageUrl ||
     friend.characterSheetImageUrl ||
@@ -3923,7 +4221,7 @@ async function createFriendImageJob(
     throw new Error("FRIEND_NOT_FOUND");
   }
 
-  const referenceImageUrl = resolveFriendCharacterSheetUrl(friend);
+  const referenceImageUrl = await resolveFriendCharacterSheetUrl(friend);
   if (!referenceImageUrl) {
     throw new Error("FRIEND_CHARACTER_SHEET_NOT_FOUND");
   }
@@ -5515,11 +5813,12 @@ async function generateFriendReply(
   evaluation: { result: EvalResult; correctness: number },
   learnerName?: string,
   postContext?: FriendChatPostContext,
+  microdramaContext?: string,
   learnerDifficulty?: LearnerDifficulty,
   conversationSummary?: string,
   friendshipContext?: string,
   appLanguage: SupportLanguageCode = DEFAULT_APP_LANGUAGE,
-  biography?: string,
+  biography: string[] = [],
   retrievedMemories: string[] = []
 ): Promise<FriendReplyPlan> {
   const apiKey = await getOpenAIKey();
@@ -5571,14 +5870,17 @@ async function generateFriendReply(
         .filter(Boolean)
         .join("\n")
     : "";
+  const microdramaNotes = microdramaContext ? `Recent microdrama context: ${microdramaContext}` : "";
   // Long-term memory retrieved from Pinecone (see MemoryService). Injected as
   // two factual sections the model should treat as true background context.
-  const biographyText = (biography || "").trim();
+  const biographyLines = biography.map((fact) => (fact || "").trim()).filter(Boolean);
   const memoryLines = retrievedMemories
     .map((memory) => (memory || "").trim())
     .filter(Boolean);
-  const biographySection = biographyText
-    ? `\nCharacter Biography (factual background about you; treat as true):\n${biographyText}`
+  const biographySection = biographyLines.length
+    ? `\nCharacter Biography (factual background about you; treat as true):\n${biographyLines
+        .map((line) => `- ${line}`)
+        .join("\n")}`
     : "";
   const previousMemoriesSection = memoryLines.length
     ? `\nPrevious Memories (facts you remember about this learner; treat as true):\n${memoryLines
@@ -5597,6 +5899,7 @@ ${affinityNotes}
 ${friendshipContextText ? `\nPersistent friendship memory:\n${friendshipContextText}` : ""}${previousMemoriesSection}
 ${learnerNotes ? `\nLearner:\n${learnerNotes}` : ""}
 ${postNotes ? `\nProfile post being discussed:\n${postNotes}` : ""}
+${microdramaNotes ? `\nCurrent story scene:\n${microdramaNotes}` : ""}
 
 Rules:
 - Stay in character, but keep the conversation natural and casual.
@@ -5641,7 +5944,7 @@ Rules:
       historyCount: conversation.length,
       summaryChars: summaryText.length,
       friendshipContextChars: friendshipContextText.length,
-      biographyChars: biographyText.length,
+      biographyFactCount: biographyLines.length,
       retrievedMemoryCount: memoryLines.length,
       hasRelationshipContinuity,
     })

@@ -1,4 +1,23 @@
 import { adminApi } from '@/shared/api/client'
+import type { SeriesDetail, SeriesManifest, SeriesSummary } from '@/features/admin/model/microdramas'
+
+export function getAdminSeries() {
+  return adminApi.get<{ items: SeriesSummary[]; generatedAt: string }>('/microdramas')
+}
+
+export function getAdminSeriesDetail(seriesId: string) {
+  return adminApi.get<SeriesDetail>(`/microdramas/${encodeURIComponent(seriesId)}`)
+}
+
+export function saveAdminSeries(manifest: SeriesManifest, expectedVersion: number) {
+  return expectedVersion
+    ? adminApi.put<SeriesDetail>(`/microdramas/${encodeURIComponent(manifest.series.seriesId)}`, { manifest, expectedVersion })
+    : adminApi.post<SeriesDetail>('/microdramas', { manifest })
+}
+
+export function deleteAdminSeries(seriesId: string, expectedVersion: number) {
+  return adminApi.post<{ deleted: boolean }>(`/microdramas/${encodeURIComponent(seriesId)}/delete`, { expectedVersion })
+}
 import type {
   AdminAssetFolder,
   AdminAssetUploadResponse,
@@ -20,6 +39,7 @@ import type {
   AdminVideoReplaceUploadResponse,
   AdminRevenueCatVerificationResponse,
   AdminStoryCharactersResponse,
+  AdminStoryCharacter,
   AdminVideoStatus,
   AdminVideoUpdateResponse,
   AdminVideosResponse,
@@ -109,6 +129,25 @@ export function getAdminFeedPosts() {
 
 export function getAdminStoryCharacters() {
   return adminApi.get<AdminStoryCharactersResponse>('/story-characters')
+}
+
+export function createAdminStoryCharacter(payload: {
+  characterId: string
+  storyIsInitial: boolean
+  characterTags?: string[]
+  aiRole: string
+  caracterName?: string
+  caracterPrompt?: string
+  characterBio?: string
+  avatarImageUrl?: string
+  avatarImageXsUrl?: string
+  avatarImageMdUrl?: string
+}) {
+  return adminApi.post<{ character: AdminStoryCharacter; version: number }>('/story-characters', payload)
+}
+
+export function updateAdminStoryCharacter(characterId: string, patch: Record<string, unknown>, expectedVersion: number) {
+  return adminApi.put<{ character: AdminStoryCharacter; version: number }>(`/story-characters/${encodeURIComponent(characterId)}`, { patch, expectedVersion })
 }
 
 export function getAdminCharacterPosts(characterId: string) {

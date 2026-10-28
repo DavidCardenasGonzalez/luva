@@ -60,6 +60,7 @@ import { recordJourneyVocabularyQuickGuessCorrect } from '../progress/journeyPro
 import { useShadowingPlayer } from '../shadowing/ShadowingPlayerProvider';
 import { useLanguage } from '../i18n/LanguageProvider';
 import { api } from '../api/api';
+import SaveReviewButton from '../review/SaveReviewButton';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Feed'>;
 
@@ -1393,6 +1394,7 @@ function CharacterVideoPage({
   const avatarImageUrl = (item.avatarImageXsUrl || item.avatarImageUrl)?.trim();
   const [isVideoReadyForDisplay, setIsVideoReadyForDisplay] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const [playbackPositionSeconds, setPlaybackPositionSeconds] = useState(0);
   const [subtitleCues, setSubtitleCues] = useState<CharacterVideoSubtitleCue[]>([]);
   const [subtitleTranslations, setSubtitleTranslations] = useState<Record<string, SubtitleTranslationState>>({});
@@ -1473,6 +1475,7 @@ function CharacterVideoPage({
   useEffect(() => {
     setIsVideoReadyForDisplay(false);
     setPaused(false);
+    setIsMuted(true);
     setPlaybackPositionSeconds(0);
     setSubtitleTranslations({});
   }, [videoUrl]);
@@ -1547,6 +1550,7 @@ function CharacterVideoPage({
         }}
         resizeMode={ResizeMode.COVER}
         shouldPlay={playbackEnabled && !paused}
+        isMuted={isMuted}
         isLooping
         useNativeControls={false}
         progressUpdateIntervalMillis={500}
@@ -1569,6 +1573,14 @@ function CharacterVideoPage({
         accessibilityLabel={paused ? 'Reproducir video' : 'Pausar video'}
         style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
       />
+      <Pressable
+        onPress={() => setIsMuted((current) => !current)}
+        accessibilityRole="button"
+        accessibilityLabel={isMuted ? (language === 'es' ? 'Activar sonido' : 'Unmute video') : (language === 'es' ? 'Silenciar video' : 'Mute video')}
+        style={{ position: 'absolute', top: 56, right: 18, width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.58)' }}
+      >
+        <MaterialIcons name={isMuted ? 'volume-off' : 'volume-up'} size={24} color="white" />
+      </Pressable>
       {!isVideoReadyForDisplay || paused ? (
         <View
           pointerEvents="none"
@@ -1672,6 +1684,19 @@ function CharacterVideoPage({
               <Text style={{ marginTop: 8, color: '#fecaca', fontSize: 13, lineHeight: 18 }} numberOfLines={2}>
                 {activeTranslation.error}
               </Text>
+            ) : null}
+            {activeTranslation?.text && activeSubtitle ? (
+              <SaveReviewButton
+                key={`${item.postId}:${activeSubtitleKey}:${supportLanguage}`}
+                originalText={activeSubtitle.text}
+                translatedText={activeTranslation.text}
+                targetLanguage={supportLanguage}
+                contextText={activeSubtitle.text}
+                source={{
+                  type: 'feed_video', characterId: item.characterId, postId: item.postId,
+                  positionMs: Math.round(activeSubtitle.startSeconds * 1000), title: item.caption || item.characterName,
+                }}
+              />
             ) : null}
           </View>
         </View>
@@ -3116,6 +3141,7 @@ function FeedTourOverlay({
 
 export default function FeedScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
+  const { language } = useLanguage();
   const isFeedFocused = useIsFocused();
   const { items: learningItems } = useLearningItems();
   const stories = useMemo<StoryCatalogItem[]>(() => [], []);
@@ -4346,6 +4372,18 @@ export default function FeedScreen({ navigation, route }: Props) {
                 source={require('../image/logo.png')}
                 style={{ width: 180, height: 48, resizeMode: 'contain' }}
               />
+              <Pressable
+                onPress={() => {
+                  stopFeedVideos();
+                  navigation.navigate('ReviewList');
+                }}
+                hitSlop={12}
+                accessibilityRole="button"
+                accessibilityLabel={language === 'es' ? 'Aprender' : 'Learn'}
+                style={({ pressed }) => ({ position: 'absolute', right: 44, top: 7, opacity: pressed ? 0.8 : 1, padding: 6 })}
+              >
+                <MaterialIcons name="menu-book" size={26} color="#cbd5e1" />
+              </Pressable>
               <Pressable
                 onPress={() => {
                   stopFeedVideos();

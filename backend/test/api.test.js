@@ -1,6 +1,18 @@
 // Builds in npm test now; uses CommonJS
 const test = require('node:test');
 const assert = require('node:assert/strict');
+process.env.CHARACTERS_TABLE_NAME = 'test-characters';
+const { DynamoDBDocumentClient } = require('@aws-sdk/lib-dynamodb');
+const { CHARACTERS } = require('../dist/data/characters');
+const originalDynamoSend = DynamoDBDocumentClient.prototype.send;
+DynamoDBDocumentClient.prototype.send = function (command) {
+  if (command.input?.TableName === process.env.CHARACTERS_TABLE_NAME) {
+    const id = command.input?.Key?.characterId;
+    if (id) return Promise.resolve({ Item: CHARACTERS.find(character => character.characterId === id) });
+    return Promise.resolve({ Items: CHARACTERS });
+  }
+  return originalDynamoSend.call(this, command);
+};
 const { handler } = require('../dist/handlers/api.js');
 
 test('GET /v1/cards returns items', async () => {

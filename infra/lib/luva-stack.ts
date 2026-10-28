@@ -242,6 +242,35 @@ export class LuvaStack extends Stack {
       removalPolicy: RemovalPolicy.RETAIN,
     });
 
+    // Canonical character definitions. Character biographies for memory remain
+    // in CharacterBiographiesTable; this table stores the chat agent definition
+    // and its presentation fields under the stable characterId.
+    const charactersTable = new Table(this, 'CharactersTable', {
+      partitionKey: { name: 'characterId', type: AttributeType.STRING },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.RETAIN,
+      pointInTimeRecovery: true,
+    });
+
+    const microdramasTable = new Table(this, 'MicrodramasTable', {
+      partitionKey: { name: 'pk', type: AttributeType.STRING },
+      sortKey: { name: 'sk', type: AttributeType.STRING },
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.RETAIN,
+      pointInTimeRecovery: true,
+    });
+    microdramasTable.addGlobalSecondaryIndex({
+      indexName: 'CatalogIndex',
+      partitionKey: { name: 'catalogPk', type: AttributeType.STRING },
+      sortKey: { name: 'catalogSk', type: AttributeType.STRING },
+      projectionType: ProjectionType.INCLUDE,
+      nonKeyAttributes: [
+        'seriesId', 'title', 'searchTitle', 'synopsis', 'coverUrl',
+        'publicationStatus', 'chatCharacterIds', 'episodeCount', 'firstEpisodeId',
+        'catalogOrder', 'version',
+      ],
+    });
+
     // S3 Buckets
     const audioRawBucket = new Bucket(this, 'AudioRawBucket', {
       bucketName: undefined, // Let AWS name it; set if needed
@@ -534,6 +563,8 @@ export class LuvaStack extends Stack {
         FEED_POSTS_TABLE_NAME: feedPostsTable.tableName,
         FEED_POSTS_BY_ORDER_INDEX_NAME: 'FeedPostsByOrderIndex',
         CHARACTER_POSTS_TABLE_NAME: characterPostsTable.tableName,
+        CHARACTERS_TABLE_NAME: charactersTable.tableName,
+        MICRODRAMAS_TABLE_NAME: microdramasTable.tableName,
         LESSONS_TABLE_NAME: lessonsTable.tableName,
         SHADOWING_LISTS_TABLE_NAME: shadowingListsTable.tableName,
         SHADOWING_CHAPTERS_TABLE_NAME: shadowingChaptersTable.tableName,
@@ -560,6 +591,8 @@ export class LuvaStack extends Stack {
     usersTable.grantReadWriteData(apiFn);
     feedPostsTable.grantReadData(apiFn);
     characterPostsTable.grantReadWriteData(apiFn);
+    charactersTable.grantReadData(apiFn);
+    microdramasTable.grantReadData(apiFn);
     lessonsTable.grantReadData(apiFn);
     shadowingListsTable.grantReadData(apiFn);
     shadowingChaptersTable.grantReadData(apiFn);
@@ -632,6 +665,8 @@ export class LuvaStack extends Stack {
         FEED_POSTS_TABLE_NAME: feedPostsTable.tableName,
         FEED_POSTS_BY_ORDER_INDEX_NAME: 'FeedPostsByOrderIndex',
         CHARACTER_POSTS_TABLE_NAME: characterPostsTable.tableName,
+        CHARACTERS_TABLE_NAME: charactersTable.tableName,
+        MICRODRAMAS_TABLE_NAME: microdramasTable.tableName,
         FRIENDSHIPS_TABLE_NAME: friendshipsTable.tableName,
         REVENUECAT_SECRET_KEY: process.env.REVENUECAT_SECRET_KEY || '',
         REVENUECAT_ENTITLEMENT_ID: process.env.REVENUECAT_ENTITLEMENT_ID || 'Luva Pro',
@@ -661,6 +696,8 @@ export class LuvaStack extends Stack {
     });
     usersTable.grantReadWriteData(adminFn);
     characterBiographiesTable.grantReadWriteData(adminFn);
+    charactersTable.grantReadWriteData(adminFn);
+    microdramasTable.grantReadWriteData(adminFn);
     generatedVideosTable.grantReadWriteData(adminFn);
     feedPostsTable.grantReadWriteData(adminFn);
     characterPostsTable.grantReadWriteData(adminFn);
@@ -771,6 +808,15 @@ export class LuvaStack extends Stack {
     const friendFinish = friendById.addResource('finish');
     const friendImages = friendById.addResource('images');
     const friendImageById = friendImages.addResource('{imageId}');
+    const microdramas = v1.addResource('microdramas');
+    const microdramaSeries = microdramas.addResource('{seriesId}');
+    const microdramaSeriesProgress = microdramaSeries.addResource('progress');
+    const microdramaProgress = microdramas.addResource('progress');
+    const microdramaProgressBatch = microdramaProgress.addResource('batch');
+    const reviewItems = v1.addResource('review-items');
+    const reviewItemById = reviewItems.addResource('{itemId}');
+    const reviewItemStatus = reviewItemById.addResource('status');
+    const reviewItemAsk = reviewItemById.addResource('ask');
     const friendProfiles = v1.addResource('friend-profiles');
     const publicFriendProfileById = friendProfiles.addResource('{friendId}');
     const admin = v1.addResource('admin');
@@ -844,6 +890,38 @@ export class LuvaStack extends Stack {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
     });
+    microdramaProgressBatch.addMethod('POST', lambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    microdramaSeriesProgress.addMethod('GET', lambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    microdramaSeriesProgress.addMethod('PUT', lambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    reviewItems.addMethod('GET', lambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    reviewItems.addMethod('POST', lambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    reviewItemById.addMethod('GET', lambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    reviewItemStatus.addMethod('PUT', lambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    reviewItemAsk.addMethod('POST', lambdaIntegration, {
+      authorizer: usersAuthorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
     admin.addMethod('ANY', adminLambdaIntegration, {
       authorizer: usersAuthorizer,
       authorizationType: AuthorizationType.COGNITO,
@@ -857,7 +935,7 @@ export class LuvaStack extends Stack {
 
     const deployment = new Deployment(this, 'Deployment', { api });
     deployment.addToLogicalId({
-      routeManifestVersion: '2026-06-14-authenticated-friend-profile-v1',
+      routeManifestVersion: '2026-10-23-microdramas-catalog-v1',
       routes: {
         apiRoot: ['ANY /v1', 'ANY /v1/{proxy+}'],
         users: [
@@ -884,6 +962,18 @@ export class LuvaStack extends Stack {
           'POST /v1/friends/{friendId}/images',
           'GET /v1/friends/{friendId}/images',
           'GET /v1/friends/{friendId}/images/{imageId}',
+        ],
+        microdramaProgress: [
+          'POST /v1/microdramas/progress/batch (Cognito)',
+          'GET /v1/microdramas/{seriesId}/progress (Cognito)',
+          'PUT /v1/microdramas/{seriesId}/progress (Cognito)',
+        ],
+        reviewItems: [
+          'GET /v1/review-items (Cognito)',
+          'POST /v1/review-items (Cognito)',
+          'GET /v1/review-items/{itemId} (Cognito)',
+          'PUT /v1/review-items/{itemId}/status (Cognito)',
+          'POST /v1/review-items/{itemId}/ask (Cognito)',
         ],
         admin: [
           'ANY /v1/admin',

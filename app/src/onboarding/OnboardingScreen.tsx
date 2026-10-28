@@ -253,7 +253,7 @@ export default function OnboardingScreen({ navigation, route }: Props) {
             params: {
               source: 'onboarding_lite_offer',
               variant: 'lite',
-              closeTarget: 'Feed',
+              closeTarget: 'Home',
             },
           },
         ],
@@ -264,9 +264,7 @@ export default function OnboardingScreen({ navigation, route }: Props) {
     navigation.reset({
       index: 0,
       routes: [
-        openReels
-          ? { name: 'Feed', params: { openReels: true } }
-          : { name: 'Feed' },
+        { name: 'Home' },
       ],
     });
   }, [navigation, onboardingPlan]);

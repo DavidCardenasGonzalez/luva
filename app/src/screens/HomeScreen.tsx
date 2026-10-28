@@ -23,7 +23,7 @@ import TourOverlay, { TourHighlight } from '../components/TourOverlay';
 import { hasSeenTour, markTourAsSeen } from '../tour/tourProgress';
 import AccountProgressCard from '../components/AccountProgressCard';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'LearningHome'>;
 
 const STATUS_ORDER: CardProgressStatus[] = ['learned', 'learning', 'todo'];
 const STATUS_COLORS: Record<CardProgressStatus, string> = {

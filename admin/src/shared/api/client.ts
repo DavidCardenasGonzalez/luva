@@ -6,7 +6,7 @@ export type ApiError = {
   message: string
 }
 
-type HttpMethod = 'GET' | 'POST'
+type HttpMethod = 'GET' | 'POST' | 'PUT'
 
 function getApiBaseUrl() {
   const baseUrl = env.adminApiBaseUrl?.replace(/\/+$/, '')
@@ -57,5 +57,6 @@ async function request<T>(method: HttpMethod, path: string, body?: unknown): Pro
 export const adminApi = {
   get: <T>(path: string) => request<T>('GET', path),
   post: <T>(path: string, body?: unknown) => request<T>('POST', path, body),
+  put: <T>(path: string, body?: unknown) => request<T>('PUT', path, body),
 }
 

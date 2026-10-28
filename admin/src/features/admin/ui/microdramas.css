@@ -1,0 +1,45 @@
+.series-section { padding: 24px; min-width: 0; }
+.series-section h2 { margin: 0 0 12px; font-size: 1.2rem; }
+.series-form fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+.series-form fieldset:disabled { opacity: .75; }
+.series-section label { display: flex; flex-direction: column; gap: 7px; font-weight: 650; font-size: .9rem; margin: 0 0 16px; }
+.series-section input:not([type=checkbox]), .series-section textarea, .series-section select { width: 100%; box-sizing: border-box; border: 1px solid #d9e0eb; border-radius: 9px; padding: 10px 12px; background: #fff; color: #17243b; font: inherit; font-weight: 400; min-width: 0; }
+.series-section input:focus, .series-section select:focus, .series-section textarea:focus { outline: 2px solid #8fcfd6; outline-offset: 2px; }
+.series-section small, .series-muted { color: #617086; font-size: .85rem; font-weight: 400; line-height: 1.5; }
+.series-toolbar, .series-actions, .series-save-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.series-toolbar { justify-content: space-between; margin-bottom: 20px; }
+.series-toolbar label { flex: 1; min-width: 180px; margin-bottom: 0; }
+.series-toolbar p { margin: 0; }
+.series-catalog { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 20px; }
+.series-catalog-card { display: grid; grid-template-columns: 110px 1fr; align-items: start; gap: 20px; border: 1px solid #e2e7ef; border-radius: 14px; padding: 18px; }
+.series-catalog-card img, .series-cover-empty { width: 110px; aspect-ratio: 2/3; object-fit: cover; border-radius: 9px; background: #edf1f6; }
+.series-cover-empty { display: grid; place-items: center; color: #617086; font-size: .8rem; }
+.series-catalog-card h2 { margin-top: 12px; }
+.series-catalog-card p { line-height: 1.5; overflow-wrap: anywhere; }
+.series-status { display: inline-flex; padding: 4px 9px; border-radius: 20px; background: #edf1f6; color: #52617a; font-size: .75rem; font-weight: 700; white-space: nowrap; }
+.series-status.published { background: #e1f5ed; color: #207652; }
+.series-empty { text-align: center; padding: 36px 12px; color: #617086; }
+.series-editor-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 24px; align-items: start; margin-bottom: 24px; }
+.series-sidebar { display: grid; gap: 24px; }
+.series-cover-preview { display: block; max-height: 280px; max-width: 100%; object-fit: contain; border-radius: 12px; }
+.series-character-list { max-height: 320px; overflow-y: auto; }
+.series-section .series-character { display: flex; flex-direction: row; align-items: center; gap: 10px; font-weight: 500; padding: 9px 0; margin: 0; }
+.series-character img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+.series-character span { min-width: 0; overflow-wrap: anywhere; }
+.series-character small { display: block; font-size: .7rem; }
+.series-file input { font-size: .8rem !important; }
+.series-episode { border: 1px solid #e1e6ee; border-radius: 12px; margin-bottom: 12px; }
+.series-episode summary { cursor: pointer; padding: 18px; font-weight: 650; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+.series-episode summary::before { content: '▸'; color: #617086; }
+.series-episode[open] summary::before { content: '▾'; }
+.series-episode summary > span:first-of-type { flex: 1; overflow-wrap: anywhere; }
+.series-episode-body { border-top: 1px solid #e1e6ee; padding: 20px; }
+.series-fields { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+.series-video-preview { display: block; max-width: 100%; width: 240px; max-height: 380px; margin: 0 0 20px; border-radius: 10px; background: #111; }
+.series-error, .series-success, .series-notice { padding: 14px 18px; border-radius: 10px; line-height: 1.5; }
+.series-error { color: #a22a33; background: #fff0f1; }
+.series-success { color: #207652; background: #e5f5ed; }
+.series-notice { color: #365b87; background: #edf4ff; }
+.series-save-bar { padding: 20px 0; }
+.series-save-bar > button:last-child:not(:first-child) { margin-left: auto; }
+@media (max-width: 820px) { .series-editor-grid, .series-fields { grid-template-columns: 1fr; } .series-section { padding: 18px; } .series-catalog-card { grid-template-columns: 80px 1fr; gap: 14px; } .series-catalog-card img, .series-cover-empty { width: 80px; } .series-episode-body { padding: 14px; } }

@@ -32,6 +32,7 @@ Seguridad
 Docs rápidas
 - Endpoints bajo `/v1` (ver `docs/luva.postman_collection.json`).
 - Contratos principales: `/cards`, `/sessions/start|transcribe|evaluate`, `/stories`, `/me/progress`.
+- Producción y programación de microdramas de Luba: [docs/microdramas/PUBLISHING.md](docs/microdramas/PUBLISHING.md).
 
 Sandbox evaluación local
 - Ejecuta evaluaciones fuera de Lambda para probar prompts/modelos:

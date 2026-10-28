@@ -46,7 +46,7 @@ export default function EmailSignUpScreen({ navigation, route }: Props) {
     if (!isSignedIn) return;
     navigation.reset({
       index: 0,
-      routes: [{ name: 'Feed' }],
+      routes: [{ name: 'Home' }],
     });
   }, [isSignedIn, navigation]);
 
@@ -75,7 +75,7 @@ export default function EmailSignUpScreen({ navigation, route }: Props) {
       if (!result.requiresConfirmation) {
         navigation.reset({
           index: 0,
-          routes: [{ name: 'Feed' }],
+          routes: [{ name: 'Home' }],
         });
         return;
       }
@@ -98,7 +98,7 @@ export default function EmailSignUpScreen({ navigation, route }: Props) {
       await confirmEmailSignUp(email, code, password);
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Feed' }],
+        routes: [{ name: 'Home' }],
       });
     } catch {
       // The provider already exposes the message through authError.

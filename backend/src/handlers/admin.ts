@@ -1,4 +1,5 @@
 import type { APIGatewayProxyResultV2 as Result } from 'aws-lambda';
+import type { CharacterDefinition } from '../types';
 import { createAdminAssetUpload, createAdminAvatarVariantUploads } from '../admin/assets';
 import { buildAdminOverview } from '../admin/overview';
 import {
@@ -48,7 +49,6 @@ import {
   deleteAdminCharacterPost,
   findStoryCharacter,
   listCharacterPosts,
-  listStoryCharacters,
   updateAdminCharacterPost,
 } from '../character-posts';
 import {
@@ -67,7 +67,8 @@ import {
   updateAdminShadowingChapter,
   updateAdminShadowingList,
 } from '../shadowing';
-import { CHARACTERS } from '../data/characters';
+import { createCharactersRepository } from '../characters';
+import { AdminMicrodramaError, createAdminMicrodramasRepository } from '../admin/microdramas';
 import { purgeCharacterEverywhere } from '../admin/purge-character';
 import {
   getCharacterBiographyRecord,
@@ -75,6 +76,8 @@ import {
 } from '../admin/biography';
 
 const ROUTE_PREFIX = '/v1';
+const charactersRepository = createCharactersRepository();
+const microdramasRepository = createAdminMicrodramasRepository();
 const LESSON_AUDIO_WORKER_SOURCE = 'luva.admin.lessons.audio';
 const lambdaSdkModuleName = ['@aws-sdk', 'client-lambda'].join('/');
 const { InvokeCommand, LambdaClient } = require(lambdaSdkModuleName);
@@ -117,6 +120,30 @@ export const handler = async (event: any): Promise<Result> => {
       }));
     }
 
+    if (path === `${ROUTE_PREFIX}/admin/microdramas` || path.startsWith(`${ROUTE_PREFIX}/admin/microdramas/`)) {
+      try {
+        if (path === `${ROUTE_PREFIX}/admin/microdramas`) {
+          if (method === 'GET') return json(200, await microdramasRepository.list());
+          if (method === 'POST') return json(201, await microdramasRepository.save(parseBody(event.body)?.manifest, 0));
+        }
+        const match = path.match(/^\/v1\/admin\/microdramas\/([^/]+)(\/delete)?$/);
+        if (match) {
+          const seriesId = decodeURIComponent(match[1]);
+          if (method === 'GET' && !match[2]) return json(200, await microdramasRepository.get(seriesId));
+          const body = parseBody(event.body) || {};
+          if (method === 'PUT' && !match[2]) {
+            if (!Number.isInteger(body.expectedVersion) || Number(body.expectedVersion) < 1) return json(400, { code: 'INVALID_MICRODRAMA_VERSION', message: 'Falta la versión actual de la serie.' });
+            return json(200, await microdramasRepository.save(body.manifest, Number(body.expectedVersion), seriesId));
+          }
+          if (method === 'POST' && match[2]) return json(200, await microdramasRepository.delete(seriesId, Number(body.expectedVersion)));
+        }
+        return json(404, { message: 'Ruta de series no encontrada.' });
+      } catch (error) {
+        if (error instanceof AdminMicrodramaError) return json(error.statusCode, { code: error.code, message: error.message, details: error.details });
+        throw error;
+      }
+    }
+
     if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/users`) {
       const search = normalizeSearch(event);
       return json(200, await listAdminUsers({ search }));
@@ -137,12 +164,46 @@ export const handler = async (event: any): Promise<Result> => {
     }
 
     if (method === 'GET' && path === `${ROUTE_PREFIX}/admin/story-characters`) {
-      return json(200, listStoryCharacters(CHARACTERS));
+      const characters = await charactersRepository.listCharacters();
+      return json(200, { characters: characters.map(character => ({ ...character, characterName: character.caracterName || 'Personaje' })), generatedAt: new Date().toISOString() });
+    }
+
+    if (method === 'POST' && path === `${ROUTE_PREFIX}/admin/story-characters`) {
+      const body = parseBody(event.body) || {};
+      try {
+        const character = await charactersRepository.createCharacter(body as unknown as CharacterDefinition);
+        return json(201, { character: findStoryCharacter([character], character.characterId), version: character.version });
+      } catch (error: any) {
+        if (error?.name === 'ConditionalCheckFailedException') {
+          return json(409, { code: 'CHARACTER_ALREADY_EXISTS', message: 'Ese characterId ya está en uso.' });
+        }
+        if (error?.message === 'INVALID_CHARACTER_ID' || error?.message === 'INVALID_CHARACTER_AI_ROLE') {
+          return json(400, { code: error.message, message: 'Falta el ID o la personalidad del personaje.' });
+        }
+        throw error;
+      }
+    }
+
+    const characterUpdate = path.match(/^\/v1\/admin\/story-characters\/([^/]+)$/);
+    if (method === 'PUT' && characterUpdate) {
+      const characterId = decodeURIComponent(characterUpdate[1]);
+      const body = parseBody(event.body) || {};
+      try {
+        const patch = body.patch && typeof body.patch === 'object' && !Array.isArray(body.patch)
+          ? body.patch as Record<string, unknown> : {};
+        const character = await charactersRepository.updateCharacter(characterId, patch, Number(body.expectedVersion));
+        return json(200, { character: findStoryCharacter([character], characterId), version: character.version });
+      } catch (error: any) {
+        if (error?.message === 'CHARACTER_NOT_FOUND') return json(404, { code: error.message });
+        if (error?.message === 'CHARACTER_VERSION_CONFLICT') return json(409, { code: error.message });
+        if (error?.message?.startsWith('INVALID_') || error?.message === 'EMPTY_CHARACTER_PATCH') return json(400, { code: error.message });
+        throw error;
+      }
     }
 
     const characterPosts = path.match(/^\/v1\/admin\/story-characters\/([^/]+)\/posts$/);
     if (method === 'GET' && characterPosts) {
-      const character = findStoryCharacter(CHARACTERS, decodeURIComponent(characterPosts[1]));
+      const character = findStoryCharacter(await charactersRepository.listCharacters(), decodeURIComponent(characterPosts[1]));
       if (!character) {
         return json(404, {
           code: 'STORY_CHARACTER_NOT_FOUND',
@@ -160,7 +221,7 @@ export const handler = async (event: any): Promise<Result> => {
     }
 
     if (method === 'POST' && characterPosts) {
-      const character = findStoryCharacter(CHARACTERS, decodeURIComponent(characterPosts[1]));
+      const character = findStoryCharacter(await charactersRepository.listCharacters(), decodeURIComponent(characterPosts[1]));
       if (!character) {
         return json(404, {
           code: 'STORY_CHARACTER_NOT_FOUND',
@@ -179,7 +240,7 @@ export const handler = async (event: any): Promise<Result> => {
 
     const characterPostUpdate = path.match(/^\/v1\/admin\/story-characters\/([^/]+)\/posts\/update$/);
     if (method === 'POST' && characterPostUpdate) {
-      const character = findStoryCharacter(CHARACTERS, decodeURIComponent(characterPostUpdate[1]));
+      const character = findStoryCharacter(await charactersRepository.listCharacters(), decodeURIComponent(characterPostUpdate[1]));
       if (!character) {
         return json(404, {
           code: 'STORY_CHARACTER_NOT_FOUND',
@@ -234,7 +295,7 @@ export const handler = async (event: any): Promise<Result> => {
     const characterBiography = path.match(/^\/v1\/admin\/story-characters\/([^/]+)\/biography$/);
     if (characterBiography && (method === 'GET' || method === 'POST')) {
       const characterId = decodeURIComponent(characterBiography[1]);
-      const character = findStoryCharacter(CHARACTERS, characterId);
+      const character = await charactersRepository.getCharacter(characterId);
       if (!character) {
         return json(404, {
           code: 'STORY_CHARACTER_NOT_FOUND',

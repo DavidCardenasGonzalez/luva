@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { getMemoryIndex } from "./pinecone";
+import { getMemoryIndex, type UpsertRecord } from "./pinecone";
 import { embedText } from "./embeddings";
 
 // Memory record types stored in Pinecone metadata. Adding new memory types
@@ -32,7 +32,21 @@ export interface RetrieveFriendshipMemoriesParams {
   topK?: number;
 }
 
-function biographyVectorId(characterId: string): string {
+// Prefix for all of a character's biography chunk vectors. The biography is
+// split (by GPT, upstream) into atomic facts, each stored as its own vector so
+// chat can semantically retrieve only the relevant facts. Listing by this prefix
+// lets us delete the previous chunks when the biography is re-saved.
+function biographyVectorPrefix(characterId: string): string {
+  return `${MEMORY_TYPE_BIOGRAPHY}#${characterId}#`;
+}
+
+function biographyChunkVectorId(characterId: string, index: number): string {
+  return `${biographyVectorPrefix(characterId)}${index}`;
+}
+
+// Legacy id from the single-vector biography design; deleted on replace so old
+// data does not linger alongside the new chunked vectors.
+function legacyBiographyVectorId(characterId: string): string {
   return `${MEMORY_TYPE_BIOGRAPHY}#${characterId}`;
 }
 
@@ -42,44 +56,67 @@ function biographyVectorId(characterId: string): string {
  * LlamaIndex layer) can change without touching callers.
  */
 export class MemoryService {
-  // --- Character biography (one document per character) ---
+  // --- Character biography (split into atomic facts, one vector each) ---
 
-  // Deterministic id means re-saving replaces the previous embedding instead of
-  // creating duplicates.
-  async upsertCharacterBiography(characterId: string, text: string): Promise<void> {
-    const trimmed = (text || "").trim();
-    if (!characterId || !trimmed) return;
+  // Replaces ALL of a character's biography chunks: deletes the previous ones
+  // (and any legacy single vector) and upserts the new facts. Each fact is its
+  // own vector so chat can semantically retrieve only the relevant ones.
+  async replaceCharacterBiographyChunks(characterId: string, chunks: string[]): Promise<void> {
+    if (!characterId) return;
     const index = await getMemoryIndex();
-    const values = await embedText(trimmed);
-    await index.upsert({
-      records: [
-        {
-          id: biographyVectorId(characterId),
-          values,
-          metadata: {
-            type: MEMORY_TYPE_BIOGRAPHY,
-            characterId,
-            text: trimmed,
-            updatedAt: new Date().toISOString(),
-          },
+    await this.deleteCharacterBiography(characterId);
+
+    const facts = chunks.map((c) => (c || "").trim()).filter(Boolean);
+    if (!facts.length) return;
+
+    const updatedAt = new Date().toISOString();
+    const records: UpsertRecord[] = await Promise.all(
+      facts.map(async (text, i) => ({
+        id: biographyChunkVectorId(characterId, i),
+        values: await embedText(text),
+        metadata: {
+          type: MEMORY_TYPE_BIOGRAPHY,
+          characterId,
+          text,
+          chunkIndex: i,
+          updatedAt,
         },
-      ],
-    });
+      }))
+    );
+    await index.upsert({ records });
   }
 
-  async getCharacterBiography(characterId: string): Promise<string | undefined> {
-    if (!characterId) return undefined;
-    const id = biographyVectorId(characterId);
+  // Semantic retrieval of the biography facts most relevant to the query.
+  async retrieveCharacterBiography(params: {
+    characterId: string;
+    queryText: string;
+    topK?: number;
+  }): Promise<string[]> {
+    const { characterId, queryText, topK = 5 } = params;
+    if (!characterId || !(queryText || "").trim()) return [];
     const index = await getMemoryIndex();
-    const res = await index.fetch({ ids: [id] });
-    const text = res.records?.[id]?.metadata?.text;
-    return typeof text === "string" && text.trim() ? text.trim() : undefined;
+    const vector = await embedText(queryText);
+    const res = await index.query({
+      vector,
+      topK,
+      includeMetadata: true,
+      filter: { type: MEMORY_TYPE_BIOGRAPHY, characterId },
+    });
+    const out: string[] = [];
+    for (const match of res.matches || []) {
+      const md = (match.metadata || {}) as Record<string, unknown>;
+      const text = typeof md.text === "string" ? md.text.trim() : "";
+      if (text) out.push(text);
+    }
+    return out;
   }
 
   async deleteCharacterBiography(characterId: string): Promise<void> {
     if (!characterId) return;
     const index = await getMemoryIndex();
-    await index.deleteOne({ id: biographyVectorId(characterId) });
+    const ids = await index.listIds(biographyVectorPrefix(characterId));
+    ids.push(legacyBiographyVectorId(characterId)); // also drop legacy single vector
+    await index.deleteMany(ids);
   }
 
   // --- Friendship memory (per user + character) ---

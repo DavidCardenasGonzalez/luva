@@ -140,7 +140,7 @@ export type AdminVideoReplaceUploadResponse = {
   contentType: string
 }
 
-export type AdminAssetFolder = 'storiesProfile' | 'avatarPosts' | 'missionIntroVideos' | 'feedPostImages' | 'feedPostVideos'
+export type AdminAssetFolder = 'storiesProfile' | 'avatarPosts' | 'missionIntroVideos' | 'feedPostImages' | 'feedPostVideos' | 'microdramaCovers' | 'microdramaVideos' | 'microdramaSubtitles'
 
 export type AdminAssetUploadResponse = {
   folder: AdminAssetFolder
@@ -206,6 +206,13 @@ export type AdminFeedPostDeleteResponse = {
 export type AdminStoryCharacter = {
   characterId: string
   characterName: string
+  version: number
+  storyIsInitial?: boolean
+  characterTags?: string[]
+  aiRole?: string
+  caracterName?: string
+  caracterPrompt?: string
+  characterBio?: string
   avatarImageUrl?: string
   avatarImageXsUrl?: string
   avatarImageMdUrl?: string

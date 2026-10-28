@@ -181,10 +181,10 @@ export default function PaywallScreen() {
     isCoinDepletionPaywall && !isLitePaywall && !coinsLoading && canShowReviewReward;
 
   const dismissPaywall = useCallback(() => {
-    if (closeTarget === "Feed") {
+    if (closeTarget === "Feed" || closeTarget === "Home") {
       navigation.reset({
         index: 0,
-        routes: [{ name: "Feed" }],
+        routes: [{ name: closeTarget }],
       });
       return;
     }
@@ -194,7 +194,7 @@ export default function PaywallScreen() {
       return;
     }
 
-    navigation.navigate("Feed");
+    navigation.navigate("Home");
   }, [closeTarget, navigation]);
 
   const openExternal = async (url: string) => {

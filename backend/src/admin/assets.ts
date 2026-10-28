@@ -10,6 +10,9 @@ export const ADMIN_ASSET_FOLDERS = [
   'missionIntroVideos',
   'feedPostImages',
   'feedPostVideos',
+  'microdramaCovers',
+  'microdramaVideos',
+  'microdramaSubtitles',
 ] as const;
 
 export type AdminAssetFolder = (typeof ADMIN_ASSET_FOLDERS)[number];
@@ -63,6 +66,18 @@ const ASSET_CONTENT_TYPE_CONFIG: Record<
     contentTypeByExtension: Record<string, string>;
   }
 > = {
+  microdramaCovers: {
+    contentTypes: IMAGE_CONTENT_TYPES,
+    contentTypeByExtension: buildContentTypeByExtension(IMAGE_CONTENT_TYPES, { jpg: 'image/jpeg', jpeg: 'image/jpeg' }),
+  },
+  microdramaVideos: {
+    contentTypes: VIDEO_CONTENT_TYPES,
+    contentTypeByExtension: buildContentTypeByExtension(VIDEO_CONTENT_TYPES, { mov: 'video/quicktime', m4v: 'video/x-m4v' }),
+  },
+  microdramaSubtitles: {
+    contentTypes: { 'application/x-subrip': 'srt', 'text/plain': 'srt', 'text/srt': 'srt' },
+    contentTypeByExtension: { srt: 'application/x-subrip' },
+  },
   storiesProfile: {
     contentTypes: IMAGE_CONTENT_TYPES,
     contentTypeByExtension: buildContentTypeByExtension(IMAGE_CONTENT_TYPES, {

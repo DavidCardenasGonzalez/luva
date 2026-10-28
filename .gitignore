@@ -20,6 +20,9 @@ coverage/
 **/coverage/
 *.tsbuildinfo
 
+# Generated microdrama media and other production output
+output/
+
 # Env files
 # .env
 .env.*
