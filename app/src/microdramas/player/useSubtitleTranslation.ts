@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../../api/api';
+import type { SubtitleRange } from './SelectableSubtitle';
 
 type Options = {
   episodeId?: string;
@@ -14,6 +15,7 @@ type Selection = {
   subtitle: string;
   text: string;
   target: string;
+  range?: SubtitleRange;
 };
 
 export function useSubtitleTranslation({ episodeId, subtitle, supportLanguage, paused, onPause }: Options) {
@@ -32,10 +34,6 @@ export function useSubtitleTranslation({ episodeId, subtitle, supportLanguage, p
     return () => { requestId.current += 1; };
   }, [episodeId, supportLanguage]);
 
-  useEffect(() => {
-    if (!paused) setSelection(undefined);
-  }, [paused]);
-
   const pinned = paused && selection?.episodeId === episodeId && selection?.target === supportLanguage
     ? selection : undefined;
   const displayedSubtitle = pinned?.subtitle ?? subtitle;
@@ -49,18 +47,32 @@ export function useSubtitleTranslation({ episodeId, subtitle, supportLanguage, p
     setError(false);
   }, []);
 
-  const translate = useCallback(async (word?: string) => {
-    if (!displayedSubtitle || loading) return;
-    const text = word?.trim() || displayedSubtitle;
+  useEffect(() => {
+    if (!paused) clear();
+  }, [clear, paused]);
+
+  const hold = useCallback(() => {
+    if (!displayedSubtitle) return;
+    if (!pinned) setSelection({ episodeId, subtitle: displayedSubtitle, text: displayedSubtitle, target: supportLanguage });
+    onPause();
+  }, [displayedSubtitle, episodeId, onPause, pinned, supportLanguage]);
+
+  const translate = useCallback(async (fragment?: string, range?: SubtitleRange) => {
+    if (!displayedSubtitle) return;
+    const text = fragment === undefined ? displayedSubtitle : fragment.trim();
+    if (!text) return;
     const key = `${supportLanguage}:${text}`;
+    const currentRequest = ++requestId.current;
     // Pin both the caption and requested text before awaiting pause/network work.
     // The last playback update may advance to a different caption while pausing.
-    setSelection({ episodeId, subtitle: displayedSubtitle, text, target: supportLanguage });
+    setSelection({ episodeId, subtitle: displayedSubtitle, text, target: supportLanguage, range });
     onPause();
     setError(false);
-    if (translations[key]) return;
+    if (translations[key]) {
+      setLoading(false);
+      return;
+    }
 
-    const currentRequest = ++requestId.current;
     setLoading(true);
     try {
       const result = supportLanguage === 'en'
@@ -77,7 +89,7 @@ export function useSubtitleTranslation({ episodeId, subtitle, supportLanguage, p
     } finally {
       if (requestId.current === currentRequest) setLoading(false);
     }
-  }, [displayedSubtitle, episodeId, loading, onPause, supportLanguage, translations]);
+  }, [displayedSubtitle, episodeId, onPause, supportLanguage, translations]);
 
-  return { displayedSubtitle, selectedText, translatedText, loading, error, translate, clear };
+  return { displayedSubtitle, selectedText, range: pinned?.range, translatedText, loading, error, hold, translate, clear };
 }

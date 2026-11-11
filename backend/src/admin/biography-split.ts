@@ -4,7 +4,7 @@ import { getSsmSecret } from '../memory/secrets';
 // Each fact becomes its own vector in Pinecone so the chat can semantically
 // retrieve only the parts relevant to the current message, instead of dumping
 // the whole biography into every prompt.
-const DEFAULT_MODEL = 'gpt-5.4-nano';
+const DEFAULT_MODEL = 'gpt-6-luna';
 
 async function getOpenAiKey(): Promise<string> {
   const direct = process.env.OPENAI_KEY || process.env.OPENAI_API_KEY;
@@ -21,10 +21,10 @@ export async function splitBiographyIntoFacts(biography: string): Promise<string
   const apiKey = await getOpenAiKey();
   const model = process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_MODEL;
   const timeoutMs = Number(process.env.BIOGRAPHY_SPLIT_TIMEOUT_MS || 60000);
-  const isGpt5 = /gpt-5/i.test(model);
+  const isGpt5 = /gpt-[56]/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
   const reasoningConfig = isGpt5
-    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'low' }
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'none' }
     : undefined;
 
   const systemPrompt = `You split a fictional character's biography into atomic, self-contained facts for a vector memory database.

@@ -4,6 +4,7 @@ import type { MicrodramaProgressSummary } from './types';
 export type LocalMicrodramaProgress = {
   summaries: Record<string, MicrodramaProgressSummary>;
   updatedAt: string;
+  watchedEpisodes?: Record<string, Record<string, boolean>>;
 };
 
 function storageKey(owner: string) {
@@ -19,8 +20,8 @@ export async function readMicrodramaProgress(owner: string): Promise<LocalMicrod
   return { summaries: {}, updatedAt: new Date(0).toISOString() };
 }
 
-export async function writeMicrodramaProgress(owner: string, summaries: Record<string, MicrodramaProgressSummary>) {
-  await AsyncStorage.setItem(storageKey(owner), JSON.stringify({ summaries, updatedAt: new Date().toISOString() }));
+export async function writeMicrodramaProgress(owner: string, summaries: Record<string, MicrodramaProgressSummary>, watchedEpisodes: Record<string, Record<string, boolean>> = {}) {
+  await AsyncStorage.setItem(storageKey(owner), JSON.stringify({ summaries, watchedEpisodes, updatedAt: new Date().toISOString() }));
 }
 
 export async function clearMicrodramaProgress(owner: string) {

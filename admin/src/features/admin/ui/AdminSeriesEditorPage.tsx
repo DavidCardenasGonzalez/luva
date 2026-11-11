@@ -225,11 +225,11 @@ export function AdminSeriesEditorPage() {
               <label>Estado de la serie<select value={series.publicationStatus} onChange={event => changeSeries({ publicationStatus: event.target.value as SeriesStatus })}><option value="draft">Borrador · Oculta en la app</option><option value="published">Publicada · Visible en la app</option></select></label>
               <label>Orden en el catálogo<input type="number" min={0} max={99999999} step={1} required value={series.catalogOrder} onChange={event => changeSeries({ catalogOrder: Number(event.target.value) })} /><small>El número menor aparece primero.</small></label>
               <p className="series-muted">{publishedCount} {publishedCount === 1 ? 'publicado' : 'publicados'} de {manifest.episodes.length} {manifest.episodes.length === 1 ? 'episodio' : 'episodios'}.</p>
-              <p className="series-muted">Para publicar necesitas portada, sinopsis, al menos un personaje y un episodio publicado con video y duración. Puedes preparar episodios futuros como borrador.</p>
+              <p className="series-muted">Para publicar necesitas portada, sinopsis y un episodio publicado con video y duración. Los personajes son opcionales. Puedes preparar episodios futuros como borrador.</p>
               <button className="btn primary" type="submit">{busy ? 'Guardando…' : 'Guardar serie'}</button>
               <span className="series-muted">{dirty ? 'Hay cambios sin guardar.' : version ? 'Cambios guardados.' : 'Nueva serie sin guardar.'}</span>
             </section>
-            <section className="admin-panel series-section"><h2>Personajes para conversar</h2><p className="series-muted">Elige de uno a cinco personajes existentes. Se mostrarán en el reproductor.</p>
+            <section className="admin-panel series-section"><h2>Personajes para conversar</h2><p className="series-muted">Opcional: elige hasta cinco personajes existentes. Se mostrarán en el reproductor.</p>
               <label>Buscar personaje<input type="search" value={characterSearch} onChange={event => setCharacterSearch(event.target.value)} placeholder="Nombre o identificador" /></label>
               <div className="series-character-list">{visibleCharacters.map(character => {
                 const selected = series.chatCharacterIds.includes(character.characterId)

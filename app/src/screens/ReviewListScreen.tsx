@@ -50,6 +50,20 @@ export default function ReviewListScreen({ navigation }: Props) {
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 132 }}>
         <Text style={{ color: '#67e8f9', fontSize: 12, fontWeight: '900', letterSpacing: 1.2, textTransform: 'uppercase' }}>{t('review.eyebrow')}</Text>
         <Text style={{ color: 'white', fontSize: 30, fontWeight: '900', marginTop: 5 }}>{t('review.title')}</Text>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => navigation.navigate('ReviewPractice')}
+          style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 18, padding: 12, borderRadius: 18, backgroundColor: pressed ? '#a5f3fc' : '#67e8f9' })}
+        >
+          <View style={{ width: 42, height: 42, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: '#cffafe' }}>
+            <MaterialIcons name="edit" size={22} color="#155e75" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: BG, fontSize: 17, fontWeight: '900' }}>{t('review.practice.title')}</Text>
+            <Text style={{ color: '#164e63', marginTop: 2 }}>{t('review.practice.subtitle')}</Text>
+          </View>
+          <MaterialIcons name="arrow-forward" size={22} color="#164e63" />
+        </Pressable>
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 20, marginBottom: 16 }}>
           {(['pending', 'completed'] as ReviewStatus[]).map(value => (
             <Pressable key={value} onPress={() => { setStatus(value); setItems([]); setCursor(undefined); }} style={{ borderRadius: 20, paddingHorizontal: 15, paddingVertical: 9, backgroundColor: value === status ? '#0e7490' : '#142238' }}>

@@ -2,8 +2,8 @@ import { api } from '../api/api';
 import type { ReviewHistoryMessage, ReviewItem, ReviewPage, ReviewSource, ReviewStatus } from './types';
 
 export const reviewApi = {
-  list: (status: ReviewStatus, cursor?: string) => api.get<ReviewPage>(
-    `/review-items?status=${status}&limit=30${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
+  list: (status?: ReviewStatus, cursor?: string) => api.get<ReviewPage>(
+    `/review-items?limit=30${status ? `&status=${status}` : ''}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
   ),
   get: async (id: string) => (await api.get<{ item: ReviewItem }>(`/review-items/${encodeURIComponent(id)}`)).item,
   save: (input: {

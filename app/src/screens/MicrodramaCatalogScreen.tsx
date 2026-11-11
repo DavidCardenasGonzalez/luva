@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, Pressable, Text, TextInput, View, useWindowDimensions } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, FlatList, Image, Pressable, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -9,23 +9,37 @@ import { getMicrodramaDetail, getMicrodramas } from '../microdramas/api';
 import { useMicrodramaProgress } from '../microdramas/MicrodramaProgressProvider';
 import type { MicrodramaSeries } from '../microdramas/types';
 import { useLanguage } from '../i18n/LanguageProvider';
+import { useIsFocused } from '@react-navigation/native';
+import MicrodramaTour from '../microdramas/MicrodramaTour';
+import { useMicrodramaTour } from '../tour/useMicrodramaTour';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+
+const normalizeSearch = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
 export default function MicrodramaCatalogScreen({ navigation }: Props) {
   const { width } = useWindowDimensions();
   const { language } = useLanguage();
+  const focused = useIsFocused();
   const { summaries, loadBatch } = useMicrodramaProgress();
   const [query, setQuery] = useState('');
   const [items, setItems] = useState<MicrodramaSeries[]>([]);
   const [cursor, setCursor] = useState<string>();
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [searchPending, setSearchPending] = useState(false);
   const [error, setError] = useState<string>();
   const [resumeEpisodeNumbers, setResumeEpisodeNumbers] = useState<Record<string, number>>({});
   const request = useRef(0);
   const debounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const lookedUpResumeNumbers = useRef(new Set<string>());
+  const focusAnimation = useRef(new Animated.Value(0)).current;
+  const resultsAnimation = useRef(new Animated.Value(1)).current;
+  const visibleItems = useMemo(() => {
+    const normalized = normalizeSearch(query);
+    return normalized ? items.filter(item => normalizeSearch(item.title).includes(normalized)) : items;
+  }, [items, query]);
+  const welcomeTour = useMicrodramaTour('dramasWelcome', focused, !loading && items.length > 0);
 
   const load = useCallback(async (search: string, nextCursor?: string, append = false) => {
     const requestId = ++request.current;
@@ -39,7 +53,7 @@ export default function MicrodramaCatalogScreen({ navigation }: Props) {
     } catch (loadError: any) {
       if (requestId === request.current) setError(loadError?.message || (language === 'es' ? 'No pudimos cargar las series.' : 'Could not load series.'));
     } finally {
-      if (requestId === request.current) { setLoading(false); setLoadingMore(false); }
+      if (requestId === request.current) { setLoading(false); setLoadingMore(false); setSearchPending(false); }
     }
   }, [language]);
 
@@ -74,9 +88,22 @@ export default function MicrodramaCatalogScreen({ navigation }: Props) {
 
   const search = useCallback((text: string) => {
     setQuery(text);
+    request.current += 1;
+    setSearchPending(true);
+    setLoadingMore(false);
+    setError(undefined);
     if (debounce.current) clearTimeout(debounce.current);
-    debounce.current = setTimeout(() => { void load(text.trim()); }, 300);
+    debounce.current = setTimeout(() => { void load(text.trim()); }, 200);
   }, [load]);
+
+  useEffect(() => {
+    resultsAnimation.setValue(0.85);
+    Animated.timing(resultsAnimation, { toValue: 1, duration: 220, useNativeDriver: true }).start();
+  }, [items, resultsAnimation]);
+
+  const animateFocus = (focused: boolean) => {
+    Animated.timing(focusAnimation, { toValue: focused ? 1 : 0, duration: 200, useNativeDriver: false }).start();
+  };
 
   const renderItem = ({ item, index }: { item: MicrodramaSeries; index: number }) => {
     const progress = summaries[item.seriesId];
@@ -93,17 +120,19 @@ export default function MicrodramaCatalogScreen({ navigation }: Props) {
   return <SafeAreaView style={{ flex: 1, backgroundColor: '#07111f' }} edges={['top']}>
     <View style={{ paddingHorizontal: 18, paddingTop: 8, paddingBottom: 12 }}>
       <Text style={{ color: 'white', fontSize: 28, fontWeight: '900' }}>Luva Dramas</Text>
-      <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#132136', borderRadius: 14, paddingHorizontal: 12, marginTop: 14 }}>
+      <Animated.View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#132136', borderRadius: 14, paddingHorizontal: 12, marginTop: 14, borderWidth: 1, borderColor: focusAnimation.interpolate({ inputRange: [0, 1], outputRange: ['#24354c', '#22d3ee'] }) }}>
         <MaterialIcons name="search" size={22} color="#94a3b8" />
-        <TextInput value={query} onChangeText={search} placeholder={language === 'es' ? 'Buscar series' : 'Search series'} placeholderTextColor="#94a3b8" style={{ color: 'white', flex: 1, height: 46, paddingHorizontal: 8 }} returnKeyType="search" />
-      </View>
+        <TextInput value={query} onChangeText={search} onFocus={() => animateFocus(true)} onBlur={() => animateFocus(false)} placeholder={language === 'es' ? 'Buscar series' : 'Search series'} placeholderTextColor="#94a3b8" style={{ color: 'white', flex: 1, height: 46, paddingHorizontal: 8 }} returnKeyType="search" />
+        {searchPending ? <ActivityIndicator size="small" color="#22d3ee" /> : query ? <Pressable accessibilityRole="button" accessibilityLabel={language === 'es' ? 'Borrar búsqueda' : 'Clear search'} onPress={() => search('')} hitSlop={10}><MaterialIcons name="close" size={20} color="#94a3b8" /></Pressable> : null}
+      </Animated.View>
     </View>
-    {loading && !items.length ? <ActivityIndicator style={{ marginTop: 50 }} color="#22d3ee" /> : error && !items.length ? <View style={{ alignItems: 'center', padding: 24 }}><Text style={{ color: '#fda4af' }}>{error}</Text><Pressable onPress={() => void load(query)} style={{ padding: 12 }}><Text style={{ color: '#22d3ee' }}>{language === 'es' ? 'Reintentar' : 'Retry'}</Text></Pressable></View> : items.length ? <FlatList
-      data={items} keyExtractor={item => item.seriesId} renderItem={renderItem} numColumns={2}
+    {error ? <View style={{ alignItems: 'center', padding: 24 }}><Text style={{ color: '#fda4af' }}>{error}</Text><Pressable onPress={() => void load(query.trim())} style={{ padding: 12 }}><Text style={{ color: '#22d3ee' }}>{language === 'es' ? 'Reintentar' : 'Retry'}</Text></Pressable></View> : (loading || searchPending) && !visibleItems.length ? <ActivityIndicator style={{ marginTop: 50 }} color="#22d3ee" /> : visibleItems.length ? <Animated.View style={{ flex: 1, opacity: resultsAnimation }}><FlatList
+      data={visibleItems} keyExtractor={item => item.seriesId} renderItem={renderItem} numColumns={2}
       contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 135 }} columnWrapperStyle={{ justifyContent: 'space-between' }}
-      onEndReached={() => { if (cursor && !loadingMore && !loading) void load(query, cursor, true); }} onEndReachedThreshold={0.4}
+      onEndReached={() => { if (cursor && !searchPending && !loadingMore && !loading) void load(query.trim(), cursor, true); }} onEndReachedThreshold={0.4}
       ListFooterComponent={loadingMore ? <ActivityIndicator color="#22d3ee" style={{ padding: 12 }} /> : null}
-    /> : <Text style={{ color: '#94a3b8', textAlign: 'center', marginTop: 50 }}>{language === 'es' ? 'No encontramos series.' : 'No series found.'}</Text>}
+    /></Animated.View> : <Text style={{ color: '#94a3b8', textAlign: 'center', marginTop: 50 }}>{language === 'es' ? 'No encontramos series.' : 'No series found.'}</Text>}
     <AppTabBar active="home" />
+    {welcomeTour.visible ? <MicrodramaTour kind="welcome" onDismiss={welcomeTour.dismiss} /> : null}
   </SafeAreaView>;
 }

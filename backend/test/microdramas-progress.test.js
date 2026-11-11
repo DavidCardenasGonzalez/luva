@@ -44,3 +44,24 @@ test('progress rejects a stale expected revision before writing', async () => {
     if (prior === undefined) delete process.env.TABLE_NAME; else process.env.TABLE_NAME = prior;
   }
 });
+
+test('watched progress marks the episode without advancing its resume position', async () => {
+  const prior = process.env.TABLE_NAME;
+  process.env.TABLE_NAME = 'users-test';
+  const client = { async send(command) {
+    if (command.constructor.name === 'GetCommand') return {};
+    if (command.constructor.name === 'TransactWriteCommand') return {};
+    throw new Error(`Unexpected ${command.constructor.name}`);
+  } };
+  try {
+    const repo = createMicrodramaProgressRepository(client, async () => ({ episodeId: 'ep1', seriesId: 's1', episodeNumber: 1, title: 'One', durationMs: 90000 }));
+    const result = await repo.save('u1', 's1', { episodeId: 'ep1', positionMs: 35000, event: 'watched', expectedRevision: 0 });
+    assert.equal(result.episode.completed, true);
+    assert.equal(result.episode.positionMs, 35000);
+    assert.equal(result.summary.resumeEpisodeId, 'ep1');
+    assert.equal(result.summary.resumePositionMs, 35000);
+    assert.equal(result.summary.completedAt, undefined);
+  } finally {
+    if (prior === undefined) delete process.env.TABLE_NAME; else process.env.TABLE_NAME = prior;
+  }
+});

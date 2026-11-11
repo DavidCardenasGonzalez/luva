@@ -12,7 +12,8 @@ export function getMicrodramas(options: { q?: string; cursor?: string; discovery
   if (options.cursor) query.set('cursor', options.cursor);
   if (options.seed) query.set('seed', options.seed);
   const route = options.discovery ? '/microdramas/discovery' : '/microdramas';
-  const suffix = query.size ? `?${query.toString()}` : '';
+  const params = query.toString();
+  const suffix = params ? `?${params}` : '';
   return api.get<MicrodramaPage>(`${route}${suffix}`);
 }
 
@@ -32,7 +33,7 @@ export function getMicrodramaProgressBatch(seriesIds: string[]) {
 
 export function saveMicrodramaProgress(
   seriesId: string,
-  progress: { episodeId: string; positionMs: number; event: 'position' | 'ended'; expectedRevision: number },
+  progress: { episodeId: string; positionMs: number; event: 'position' | 'watched' | 'ended'; expectedRevision: number },
 ) {
   return api.put<{ summary: MicrodramaProgressSummary; episode: MicrodramaEpisodeProgress }>(
     `/microdramas/${encodeURIComponent(seriesId)}/progress`,

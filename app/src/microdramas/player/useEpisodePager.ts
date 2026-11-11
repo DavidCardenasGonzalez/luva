@@ -3,6 +3,7 @@ import { Animated, PanResponder } from 'react-native';
 
 type Options = {
   enabled: boolean;
+  canStartSwipe: () => boolean;
   episodeIndex: number;
   episodeCount: number;
   height: number;
@@ -29,7 +30,8 @@ export function useEpisodePager(options: Options) {
   // its gesture state alive, and read current episode/callback data through refs.
   const responder = useMemo(() => PanResponder.create({
     onMoveShouldSetPanResponderCapture: (_event, gesture) =>
-      latest.current.enabled && !settling.current && Math.abs(gesture.dy) > 8 && Math.abs(gesture.dy) > Math.abs(gesture.dx) * 1.2,
+      latest.current.enabled && latest.current.canStartSwipe() && !settling.current &&
+      Math.abs(gesture.dy) > 8 && Math.abs(gesture.dy) > Math.abs(gesture.dx) * 1.2,
     onPanResponderGrant: () => {
       if (!latest.current.enabled) return;
       translateY.stopAnimation();

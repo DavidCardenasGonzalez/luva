@@ -156,7 +156,13 @@ def main() -> int:
     if args.chapter < 1:
         raise PublishError("Chapter number must be a positive integer")
     when = scheduled_time(args)
-    caption = args.caption or f"It's a Date! — Chapter {args.chapter} 💕 A love story in two languages."
+    caption = args.caption or (
+        f"💕 It's a Date! — Chapter {args.chapter}\n"
+        "A love story in two languages. ❤️\n"
+        "📚 Learn English with stories you’ll love!\n"
+        "📱 Download Luva and improve your English while enjoying every episode.\n"
+        "#LearnEnglish #EnglishWithStories #LearnEnglishWithLuva"
+    )
 
     api_key = load_api_key()
     account_ids, account_names = resolve_accounts(api_key, args.platforms)

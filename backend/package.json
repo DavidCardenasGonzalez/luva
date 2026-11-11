@@ -9,6 +9,7 @@
     "stories:optimize-media": "node scripts/optimize-story-media.js",
     "characters:migrate": "npm run build && node scripts/migrate-characters.js",
     "microdramas:import": "npm run build && node scripts/import-microdramas.js",
+    "microdramas:admin": "node scripts/admin-microdramas.js",
     "watch": "tsc -w -p tsconfig.json",
     "test": "npm run build && node --test"
   },

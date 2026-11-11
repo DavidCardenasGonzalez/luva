@@ -35,6 +35,7 @@ output/
 
 # Local sandbox secrets
 scripts/environment.local.json
+backend/scripts/environment.local.json
 confyLove/scripts/manifests/
 confyLove/scripts/shadowings/.generated/
 

@@ -34,8 +34,8 @@ export function validateMicrodramaManifest(
   if (!validHttpsUrl(series?.coverUrl)) errors.push('Invalid coverUrl');
   if (!Number.isFinite(series?.catalogOrder) || series.catalogOrder < 0) errors.push('Invalid catalogOrder');
   if (!['draft', 'published'].includes(series?.publicationStatus)) errors.push('Invalid series publicationStatus');
-  if (!Array.isArray(series?.chatCharacterIds) || series.chatCharacterIds.length < 1 || series.chatCharacterIds.length > 5) {
-    errors.push('A series must have 1-5 chat characters');
+  if (!Array.isArray(series?.chatCharacterIds) || series.chatCharacterIds.length > 5) {
+    errors.push('A series may have up to 5 chat characters');
   } else {
     const available = new Set(characters.map(character => character.characterId));
     if (new Set(series.chatCharacterIds).size !== series.chatCharacterIds.length) errors.push('Duplicate chat characters');

@@ -278,7 +278,7 @@ export default function SettingsScreen({ navigation }: Props) {
       setShowResetModal(false);
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Onboarding' }],
+        routes: [{ name: 'Home' }],
       });
       Alert.alert(t('settings.danger.deletedTitle'), t('settings.danger.deletedMessage'));
     } catch (err) {

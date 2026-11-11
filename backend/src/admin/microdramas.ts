@@ -149,7 +149,7 @@ export function createAdminMicrodramasRepository(client = dynamo, characters = c
       if (manifest.series.chatCharacterIds.some(id => !known.has(id))) invalid('Uno de los personajes seleccionados ya no existe.');
       if (manifest.series.publicationStatus === 'published') {
         const errors = validateMicrodramaManifest({ ...manifest, episodes: manifest.episodes.filter(episode => episode.publicationStatus === 'published') }, available);
-        if (errors.length) throw new AdminMicrodramaError(400, 'MICRODRAMA_NOT_READY', 'Para publicar completa la portada, sinopsis, personajes y videos con duración. Publica al menos un episodio y mantén su numeración consecutiva.', errors);
+        if (errors.length) throw new AdminMicrodramaError(400, 'MICRODRAMA_NOT_READY', 'Para publicar completa la portada, sinopsis y videos con duración. Publica al menos un episodio y mantén su numeración consecutiva.', errors);
       }
       const oldRows = await read(manifest.series.seriesId);
       const meta = oldRows.find(row => row.sk === 'META');

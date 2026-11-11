@@ -11,16 +11,17 @@ import MicrodramaPlayer from '../microdramas/player/MicrodramaPlayer';
 import type { MicrodramaDetail, MicrodramaProgressSummary, MicrodramaSeries } from '../microdramas/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Discovery'>;
-type DiscoveryItem = { series: MicrodramaSeries; detail?: MicrodramaDetail; progress?: MicrodramaProgressSummary };
+type DiscoveryItem = { series: MicrodramaSeries; detail?: MicrodramaDetail; progress?: MicrodramaProgressSummary; progressLoaded?: boolean };
 
 export default function MicrodramaDiscoveryScreen({ navigation }: Props) {
   const isFocused = useIsFocused();
   const { height } = useWindowDimensions();
-  const { loadProgress, saveProgress } = useMicrodramaProgress();
+  const { watchedEpisodes, loadProgress, saveProgress } = useMicrodramaProgress();
   const seed = useRef(`${Date.now()}-${Math.random().toString(36).slice(2)}`).current;
   const [items, setItems] = useState<DiscoveryItem[]>([]);
   const [cursor, setCursor] = useState<string>();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [selectingSubtitle, setSelectingSubtitle] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
   const loadingRef = useRef(false);
@@ -50,11 +51,11 @@ export default function MicrodramaDiscoveryScreen({ navigation }: Props) {
   const activeSeriesId = items[activeIndex]?.series.seriesId;
 
   useEffect(() => {
-    if (!activeSeriesId || items[activeIndex]?.detail) return;
+    if (!activeSeriesId || (items[activeIndex]?.detail && items[activeIndex]?.progressLoaded)) return;
     let cancelled = false;
     const seriesId = activeSeriesId;
     void Promise.all([getMicrodramaDetail(seriesId), loadProgress(seriesId)]).then(([detail, progress]) => {
-      if (!cancelled) setItems(current => current.map(item => item.series.seriesId === seriesId ? { ...item, detail, progress } : item));
+      if (!cancelled) setItems(current => current.map(item => item.series.seriesId === seriesId ? { ...item, detail, progress, progressLoaded: true } : item));
     }).catch(loadError => { if (!cancelled) setError(loadError?.message || 'No pudimos cargar el episodio.'); });
     const next = items[activeIndex + 1];
     if (next && !next.detail) {
@@ -74,12 +75,14 @@ export default function MicrodramaDiscoveryScreen({ navigation }: Props) {
       {isFocused && item.detail ? <MicrodramaPlayer
         key={item.series.seriesId}
         detail={item.detail}
+        watchedEpisodes={watchedEpisodes[item.series.seriesId]}
         active={isFocused && index === activeIndex}
         initialEpisodeId={item.progress?.resumeEpisodeId}
         initialPositionMs={item.progress?.resumePositionMs || 0}
         onProgress={(episode, position, event) => void saveProgress(item.series.seriesId, episode, position, event)}
         onStartConversation={(characterId, episode, position) => startConversation(characterId, episode, position)}
         onBack={() => navigation.navigate('Home')}
+        onSubtitleGestureChange={setSelectingSubtitle}
         bottomInsetExtra={100}
       /> : isFocused ? <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}><ActivityIndicator color="#22d3ee" /><Text style={{ color: 'white', marginTop: 12 }}>{item.series.title}</Text></View> : null}
     </View>
@@ -88,6 +91,7 @@ export default function MicrodramaDiscoveryScreen({ navigation }: Props) {
   return <SafeAreaView style={{ flex: 1, backgroundColor: '#030712' }} edges={[]}>
     {items.length ? <FlatList
       data={items} keyExtractor={item => item.series.seriesId} renderItem={renderItem}
+      scrollEnabled={!selectingSubtitle}
       pagingEnabled snapToInterval={height} decelerationRate="fast" showsVerticalScrollIndicator={false}
       initialNumToRender={1} maxToRenderPerBatch={2} windowSize={3}
       onViewableItemsChanged={onViewableItemsChanged}

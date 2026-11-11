@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TOUR_STORAGE_KEY = 'luva_seen_tours_v1';
 
-export type TourScreenId = 'home' | 'deck' | 'practice' | 'stories' | 'storyScene';
+export type TourScreenId = 'home' | 'deck' | 'practice' | 'stories' | 'storyScene' | 'dramasWelcome' | 'dramasSubtitles';
 
 type SeenToursMap = Partial<Record<TourScreenId, true>>;
 

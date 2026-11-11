@@ -5,12 +5,13 @@ import { getMicrodramaProgress, getMicrodramaProgressBatch, saveMicrodramaProgre
 import { clearMicrodramaProgress, readMicrodramaProgress, writeMicrodramaProgress } from './progressStorage';
 import type { MicrodramaEpisode, MicrodramaProgressSummary } from './types';
 
-type SaveEvent = { episode: MicrodramaEpisode; episodeId: string; positionMs: number; event: 'position' | 'ended' };
+type SaveEvent = { episode: MicrodramaEpisode; episodeId: string; positionMs: number; event: 'position' | 'watched' | 'ended' };
 type ProgressContextValue = {
   summaries: Record<string, MicrodramaProgressSummary>;
+  watchedEpisodes: Record<string, Record<string, boolean>>;
   loadBatch: (seriesIds: string[]) => Promise<void>;
   loadProgress: (seriesId: string) => Promise<MicrodramaProgressSummary | undefined>;
-  saveProgress: (seriesId: string, episode: MicrodramaEpisode, positionMs: number, event?: 'position' | 'ended') => Promise<void>;
+  saveProgress: (seriesId: string, episode: MicrodramaEpisode, positionMs: number, event?: 'position' | 'watched' | 'ended') => Promise<void>;
 };
 const ProgressContext = createContext<ProgressContextValue | null>(null);
 const ANONYMOUS = 'anonymous';
@@ -20,8 +21,10 @@ export function MicrodramaProgressProvider({ children }: { children: React.React
   const owner = isSignedIn ? (user?.email?.trim().toLowerCase() || user?.cognitoSub || 'unknown') : ANONYMOUS;
   const [summaries, setSummaries] = useState<Record<string, MicrodramaProgressSummary>>({});
   const summariesRef = useRef(summaries);
+  const [watchedEpisodes, setWatchedEpisodes] = useState<Record<string, Record<string, boolean>>>({});
+  const watchedRef = useRef(watchedEpisodes);
   const revisions = useRef<Record<string, number>>({});
-  const pending = useRef<Record<string, SaveEvent>>({});
+  const pending = useRef<Record<string, SaveEvent[]>>({});
   const running = useRef(new Set<string>());
   const generation = useRef(0);
 
@@ -31,7 +34,7 @@ export function MicrodramaProgressProvider({ children }: { children: React.React
     const next = { ...summariesRef.current, [seriesId]: summary };
     summariesRef.current = next;
     setSummaries(next);
-    void writeMicrodramaProgress(owner, next).catch(() => undefined);
+    void writeMicrodramaProgress(owner, next, watchedRef.current).catch(() => undefined);
   }, [owner]);
 
   useEffect(() => {
@@ -39,9 +42,15 @@ export function MicrodramaProgressProvider({ children }: { children: React.React
     revisions.current = {};
     pending.current = {};
     running.current.clear();
-    void Promise.all([readMicrodramaProgress(owner), isSignedIn ? readMicrodramaProgress(ANONYMOUS) : Promise.resolve({ summaries: {} as Record<string, MicrodramaProgressSummary>, updatedAt: '' })]).then(([accountLocal, anonymousLocal]) => {
+    void Promise.all([readMicrodramaProgress(owner), isSignedIn ? readMicrodramaProgress(ANONYMOUS) : Promise.resolve({ summaries: {} as Record<string, MicrodramaProgressSummary>, watchedEpisodes: {} as Record<string, Record<string, boolean>>, updatedAt: '' })]).then(([accountLocal, anonymousLocal]) => {
       if (generation.current !== currentGeneration) return;
       const localSummaries: Record<string, MicrodramaProgressSummary> = { ...anonymousLocal.summaries, ...accountLocal.summaries };
+      const localWatched = { ...anonymousLocal.watchedEpisodes };
+      for (const [seriesId, episodes] of Object.entries(accountLocal.watchedEpisodes || {})) {
+        localWatched[seriesId] = { ...localWatched[seriesId], ...episodes };
+      }
+      watchedRef.current = localWatched;
+      setWatchedEpisodes(localWatched);
       summariesRef.current = localSummaries;
       setSummaries(localSummaries);
       for (const [seriesId, summary] of Object.entries(localSummaries)) revisions.current[seriesId] = summary.revision;
@@ -72,7 +81,7 @@ export function MicrodramaProgressProvider({ children }: { children: React.React
           summariesRef.current = merged;
           setSummaries(merged);
           for (const [seriesId, summary] of Object.entries(merged)) revisions.current[seriesId] = summary.revision;
-          void writeMicrodramaProgress(owner, merged).catch(() => undefined);
+          void writeMicrodramaProgress(owner, merged, watchedRef.current).catch(() => undefined);
           if (anonymousImported && Object.keys(anonymousLocal.summaries).length) {
             void clearMicrodramaProgress(ANONYMOUS).catch(() => undefined);
           }
@@ -85,6 +94,13 @@ export function MicrodramaProgressProvider({ children }: { children: React.React
     if (isSignedIn) {
       try {
         const response = await getMicrodramaProgress(seriesId);
+        const completed = Object.fromEntries((response.episodes || []).filter(episode => episode.completed).map(episode => [episode.episodeId, true]));
+        if (Object.keys(completed).length) {
+          const next = { ...watchedRef.current, [seriesId]: { ...watchedRef.current[seriesId], ...completed } };
+          watchedRef.current = next;
+          setWatchedEpisodes(next);
+          void writeMicrodramaProgress(owner, summariesRef.current, next).catch(() => undefined);
+        }
         if (response.summary) {
           revisions.current[seriesId] = response.summary.revision;
           storeSummary(seriesId, response.summary);
@@ -94,7 +110,7 @@ export function MicrodramaProgressProvider({ children }: { children: React.React
       } catch {}
     }
     return summariesRef.current[seriesId];
-  }, [isSignedIn, storeSummary]);
+  }, [isSignedIn, owner, storeSummary]);
 
   const loadBatch = useCallback(async (seriesIds: string[]) => {
     if (!isSignedIn || !seriesIds.length) return;
@@ -113,9 +129,14 @@ export function MicrodramaProgressProvider({ children }: { children: React.React
     seriesId: string,
     episode: MicrodramaEpisode,
     positionMs: number,
-    event: 'position' | 'ended' = 'position',
+    event: 'position' | 'watched' | 'ended' = 'position',
   ) => {
     const position = Math.max(0, Math.min(Math.floor(positionMs), episode.durationMs));
+    if (event === 'watched') {
+      const next = { ...watchedRef.current, [seriesId]: { ...watchedRef.current[seriesId], [episode.episodeId]: true } };
+      watchedRef.current = next;
+      setWatchedEpisodes(next);
+    }
     const current = summariesRef.current[seriesId];
     const optimistic: MicrodramaProgressSummary = {
       seriesId,
@@ -126,14 +147,17 @@ export function MicrodramaProgressProvider({ children }: { children: React.React
       ...(current?.completedAt ? { completedAt: current.completedAt } : {}),
     };
     storeSummary(seriesId, optimistic);
-    pending.current[seriesId] = { episode, episodeId: episode.episodeId, positionMs: position, event };
+    const queue = pending.current[seriesId] || [];
+    const sample: SaveEvent = { episode, episodeId: episode.episodeId, positionMs: position, event };
+    if (event === 'position' && queue.length && queue[queue.length - 1].event === 'position') queue[queue.length - 1] = sample;
+    else queue.push(sample);
+    pending.current[seriesId] = queue;
     if (!isSignedIn || running.current.has(seriesId)) return;
     running.current.add(seriesId);
     const startGeneration = generation.current;
     try {
-      while (pending.current[seriesId] && generation.current === startGeneration) {
-        const sample = pending.current[seriesId];
-        delete pending.current[seriesId];
+      while (pending.current[seriesId]?.length && generation.current === startGeneration) {
+        const sample = pending.current[seriesId].shift()!;
         try {
           const response = await saveMicrodramaProgress(seriesId, {
             episodeId: sample.episodeId,
@@ -154,7 +178,7 @@ export function MicrodramaProgressProvider({ children }: { children: React.React
             delete pending.current[seriesId];
             break;
           }
-          pending.current[seriesId] = sample;
+          pending.current[seriesId].unshift(sample);
           break;
         }
       }
@@ -166,17 +190,18 @@ export function MicrodramaProgressProvider({ children }: { children: React.React
   useEffect(() => {
     const subscription = AppState.addEventListener('change', state => {
       if (state !== 'active') {
-        void writeMicrodramaProgress(owner, summariesRef.current).catch(() => undefined);
+        void writeMicrodramaProgress(owner, summariesRef.current, watchedRef.current).catch(() => undefined);
       } else if (isSignedIn) {
-        for (const [seriesId, sample] of Object.entries(pending.current)) {
-          void saveProgress(seriesId, sample.episode, sample.positionMs, sample.event);
+        for (const [seriesId, queue] of Object.entries(pending.current)) {
+          const sample = queue[queue.length - 1];
+          if (sample) void saveProgress(seriesId, sample.episode, sample.positionMs, sample.event);
         }
       }
     });
     return () => subscription.remove();
   }, [isSignedIn, owner, saveProgress]);
 
-  const value = useMemo(() => ({ summaries, loadProgress, loadBatch, saveProgress }), [summaries, loadProgress, loadBatch, saveProgress]);
+  const value = useMemo(() => ({ summaries, watchedEpisodes, loadProgress, loadBatch, saveProgress }), [summaries, watchedEpisodes, loadProgress, loadBatch, saveProgress]);
   return <ProgressContext.Provider value={value}>{children}</ProgressContext.Provider>;
 }
 

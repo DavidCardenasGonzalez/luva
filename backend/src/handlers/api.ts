@@ -103,7 +103,7 @@ const reviewItemsRepository = createReviewItemsRepository();
 let OPENAI_API_KEY_CACHE: string | undefined;
 let GOOGLE_TRANSLATE_API_KEY_CACHE: string | undefined;
 let FAL_API_KEY_CACHE: string | undefined;
-const DEFAULT_OPENAI_CHAT_MODEL = "gpt-5.4-nano";
+const DEFAULT_OPENAI_CHAT_MODEL = "gpt-6-luna";
 const FAL_SEEDREAM_LITE_EDIT_MODEL =
   "fal-ai/bytedance/seedream/v5/lite/edit";
 const STORIES_PATH_CANDIDATES: (string | undefined)[] = [
@@ -2569,10 +2569,10 @@ async function generateFriendshipContext(args: {
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
-  const isGpt5 = /gpt-5/i.test(model);
+  const isGpt5 = /gpt-[56]/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
   const reasoningConfig = isGpt5
-    ? { effort: process.env.OPENAI_REASONING_EFFORT || "low" }
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || "none" }
     : undefined;
   const conversationText = args.history
     .slice(-FRIEND_HISTORY_LIMIT)
@@ -2724,10 +2724,10 @@ async function extractFriendshipMemories(
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
-  const isGpt5 = /gpt-5/i.test(model);
+  const isGpt5 = /gpt-[56]/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
   const reasoningConfig = isGpt5
-    ? { effort: process.env.OPENAI_REASONING_EFFORT || "low" }
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || "none" }
     : undefined;
 
   const systemPrompt = `You extract durable long-term memories about a learner from a completed conversation with a fictional chat avatar.
@@ -2892,10 +2892,10 @@ async function buildMemorySearchQuery(
   const apiKey = await getOpenAIKey();
   const model = process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.MEMORY_QUERY_TIMEOUT_MS || 8000);
-  const isGpt5 = /gpt-5/i.test(model);
+  const isGpt5 = /gpt-[56]/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
   const reasoningConfig = isGpt5
-    ? { effort: process.env.OPENAI_REASONING_EFFORT || "minimal" }
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || "none" }
     : undefined;
 
   const systemPrompt = `You build a search query to retrieve long-term memories about a language learner from a vector database, based on their latest chat message and recent context.
@@ -3076,7 +3076,7 @@ async function resolveFriendChatPostContext(
 async function describeUserImage(imageBase64: string): Promise<string> {
   const apiKey = await getOpenAIKey();
   const model = process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
-  const isGpt5 = /gpt-5/i.test(model);
+  const isGpt5 = /gpt-[56]/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
   const imageDataUrl = `data:image/jpeg;base64,${imageBase64}`;
   const prompt = "Briefly describe what is in this image in 1-2 sentences in English.";
@@ -3707,10 +3707,10 @@ async function generateFriendImagePlan(args: {
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.FRIEND_IMAGE_PLAN_TIMEOUT_MS || 15000);
-  const isGpt5 = /gpt-5/i.test(model);
+  const isGpt5 = /gpt-[56]/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
   const reasoningConfig = isGpt5
-    ? { effort: process.env.OPENAI_REASONING_EFFORT || "low" }
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || "none" }
     : undefined;
   const recentConversation = args.history
     .slice(-10)
@@ -4642,10 +4642,10 @@ async function evaluateAI(
   const apiKey = await getOpenAIKey();
   const model = process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.EVAL_TIMEOUT_MS || 8000);
-  const isGpt5 = /gpt-5/i.test(model);
+  const isGpt5 = /gpt-[56]/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
   const reasoningConfig = isGpt5
-    ? { effort: process.env.OPENAI_REASONING_EFFORT || "low" }
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || "none" }
     : undefined;
   const lang = getPromptLanguageContext(appLanguage);
   const sys = `You are an English teacher. ${lang.appLanguageDescription}
@@ -4659,7 +4659,7 @@ Return ONLY JSON (no extra text) with these keys:
 Respond only with JSON, kindly.`;
 
   const user = `${transcript}`;
-  // Use Responses API for GPT-5 family, else fallback to Chat Completions
+  // Use Responses API for GPT-5 or GPT-6 family, else fallback to Chat Completions
   console.log(
     JSON.stringify({
       scope: "evaluate.openai.begin",
@@ -4859,10 +4859,10 @@ async function generateAssistanceAnswer(args: {
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
-  const isGpt5 = /gpt-5/i.test(model);
+  const isGpt5 = /gpt-[56]/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
   const reasoningConfig = isGpt5
-    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'low' }
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'none' }
     : undefined;
   const conversation = history.slice(-STORY_HISTORY_LIMIT);
   const conversationText = conversation
@@ -5020,10 +5020,10 @@ async function evaluateStoryEnglish(
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
-  const isGpt5 = /gpt-5/i.test(model);
+  const isGpt5 = /gpt-[56]/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
   const reasoningConfig = isGpt5
-    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'low' }
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'none' }
     : undefined;
   const lang = getPromptLanguageContext(appLanguage);
   const conversation = history.slice(-STORY_HISTORY_LIMIT);
@@ -5221,10 +5221,10 @@ async function evaluateEasyEnglish(
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
-  const isGpt5 = /gpt-5/i.test(model);
+  const isGpt5 = /gpt-[56]/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
   const reasoningConfig = isGpt5
-    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'low' }
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'none' }
     : undefined;
   const lang = getPromptLanguageContext(appLanguage);
   const nativeLanguageTipExample =
@@ -5413,10 +5413,10 @@ async function evaluateStoryRequirementProgress(
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
-  const isGpt5 = /gpt-5/i.test(model);
+  const isGpt5 = /gpt-[56]/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
   const reasoningConfig = isGpt5
-    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'low' }
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'none' }
     : undefined;
   const lang = getPromptLanguageContext(appLanguage);
   const unmetFeedbackExamples =
@@ -5575,10 +5575,10 @@ async function generateStoryReply(
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
-  const isGpt5 = /gpt-5/i.test(model);
+  const isGpt5 = /gpt-[56]/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
   const reasoningConfig = isGpt5
-    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'low' }
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'none' }
     : undefined;
   const conversation = history.slice(-STORY_HISTORY_LIMIT);
   const conversationText = conversation
@@ -5711,10 +5711,10 @@ async function summarizeFriendConversation(
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
-  const isGpt5 = /gpt-5/i.test(model);
+  const isGpt5 = /gpt-[56]/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
   const reasoningConfig = isGpt5
-    ? { effort: process.env.OPENAI_REASONING_EFFORT || "low" }
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || "none" }
     : undefined;
 
   const messagesText = messages
@@ -5825,10 +5825,10 @@ async function generateFriendReply(
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
-  const isGpt5 = /gpt-5/i.test(model);
+  const isGpt5 = /gpt-[56]/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
   const reasoningConfig = isGpt5
-    ? { effort: process.env.OPENAI_REASONING_EFFORT || "low" }
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || "none" }
     : undefined;
   const lang = getPromptLanguageContext(appLanguage);
   const conversation = history.slice(-FRIEND_RECENT_MESSAGES);
@@ -6076,10 +6076,10 @@ async function generateFriendConversationFeedback(
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
-  const isGpt5 = /gpt-5/i.test(model);
+  const isGpt5 = /gpt-[56]/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === "1";
   const reasoningConfig = isGpt5
-    ? { effort: process.env.OPENAI_REASONING_EFFORT || "low" }
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || "none" }
     : undefined;
   const conversation = history.slice(-FRIEND_HISTORY_LIMIT);
   const conversationText = conversation
@@ -6320,10 +6320,10 @@ async function generateStoryMissionFeedback(
   const model =
     process.env.OPENAI_STORY_MODEL || process.env.OPENAI_CHAT_MODEL || DEFAULT_OPENAI_CHAT_MODEL;
   const timeoutMs = Number(process.env.STORY_TIMEOUT_MS || 80000);
-  const isGpt5 = /gpt-5/i.test(model);
+  const isGpt5 = /gpt-[56]/i.test(model);
   const useResponses = isGpt5 || process.env.OPENAI_USE_RESPONSES === '1';
   const reasoningConfig = isGpt5
-    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'low' }
+    ? { effort: process.env.OPENAI_REASONING_EFFORT || 'none' }
     : undefined;
   const lang = getPromptLanguageContext(appLanguage);
   const conversation = history.slice(-STORY_HISTORY_LIMIT);

@@ -33,8 +33,9 @@ Docs rápidas
 - Endpoints bajo `/v1` (ver `docs/luva.postman_collection.json`).
 - Contratos principales: `/cards`, `/sessions/start|transcribe|evaluate`, `/stories`, `/me/progress`.
 - Producción y programación de microdramas de Luba: [docs/microdramas/PUBLISHING.md](docs/microdramas/PUBLISHING.md).
+- Carga de episodios e instalación de series en la app desde consola: [docs/microdramas/ADMIN.md](docs/microdramas/ADMIN.md#consola).
 
 Sandbox evaluación local
 - Ejecuta evaluaciones fuera de Lambda para probar prompts/modelos:
-  `node scripts/evaluate-sandbox.js --text "I would like some water" --label "by contrast" --example "By contrast, sales fell" --model gpt-5-nano`
+  `node scripts/evaluate-sandbox.js --text "I would like some water" --label "by contrast" --example "By contrast, sales fell" --model gpt-6-luna`
 - API key: exporta `OPENAI_API_KEY` o reemplaza el placeholder en el archivo (solo local, no lo subas).

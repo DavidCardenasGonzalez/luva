@@ -4,6 +4,78 @@ La sección **Series** del portal administra el mismo catálogo de microdramas q
 
 Disponible en Dev: [Series](https://d2y8wpnkj90e8w.cloudfront.net/series).
 
+## Consola
+
+Desde la raíz del repositorio, usa Node 22.12 o posterior. Instala las dependencias del backend con `npm --prefix backend ci` y compila con `npm --prefix backend run build`.
+
+El comando toma la URL y el cliente Cognito de `admin/.env` para `--stage prod` y de `admin/.env.development` para `--stage dev`. Configura esos archivos a partir de `admin/.env.example` y los outputs del stack correspondiente. Puedes proporcionar `LUVA_ADMIN_API_BASE_URL`, `LUVA_ADMIN_COGNITO_CLIENT_ID` y `LUVA_ADMIN_COGNITO_REGION` en el entorno.
+
+La consola lee credenciales locales de `backend/scripts/environment.local.json`, si existe, sin imprimirlas. El ID token `LUVA_ADMIN_ID_TOKEN` sirve hasta que vence, una hora después de emitirse. Cuando venza, la terminal solicita la contraseña una vez y en macOS guarda el refresh token rotativo en el Llavero. Después renueva la sesión automáticamente. El refresh token tiene una validez máxima configurada de 1460 días. Usa `--email` o `LUVA_ADMIN_EMAIL` para fijar el correo durante el inicio de sesión. Para cuentas federadas, MFA o ejecución sin terminal interactiva, proporciona credenciales de sesión mediante el entorno del proceso. Mantén los tokens fuera del chat, comandos y logs. El archivo local está excluido de Git.
+
+### Agregar episodios a una serie existente
+
+Localiza la serie con `list` y consulta sus números, estados y versión con `show`:
+
+```sh
+npm --prefix backend run microdramas:admin -- list --stage prod
+npm --prefix backend run microdramas:admin -- show --stage prod --series mi-serie
+```
+
+Pasa los videos en orden. `--first` debe coincidir con el siguiente número disponible. Cada video usa su duración medida con FFmpeg y, si existe, su SRT hermano en inglés. Por ejemplo, `episode_06.mp4` usa `episode_06_en.srt`. Para un solo video puedes indicar `--title` y `--subtitles` de forma explícita.
+
+```sh
+npm --prefix backend run microdramas:admin -- append --stage prod \
+  --series mi-serie --first 6 --publish \
+  /ruta/episode_06.mp4 /ruta/episode_07.mp4
+```
+
+Repite con `--apply` cuando corresponda aplicar la solicitud del usuario. `--publish` marca los nuevos episodios como publicados si la serie ya está publicada y los episodios visibles siguen siendo consecutivos. Si omites la opción, se guardan como borradores. El comando conserva los identificadores, archivos y estados de los episodios existentes.
+
+### Instalar una serie completa
+
+Prepara un JSON con los datos de catálogo y los archivos originales de la app. Las rutas de archivo son relativas al manifiesto. El orden del arreglo determina la numeración predeterminada.
+
+```json
+{
+  "series": {
+    "seriesId": "mi-serie",
+    "title": "Mi serie",
+    "synopsis": "Sinopsis de la serie.",
+    "coverFile": "portada.png",
+    "catalogOrder": 20,
+    "chatCharacterIds": []
+  },
+  "episodes": [
+    {
+      "title": "El primer episodio",
+      "videoFile": "episode_01.mp4",
+      "subtitlesFile": "episode_01_en.srt"
+    },
+    {
+      "videoFile": "episode_02.mp4"
+    }
+  ]
+}
+```
+
+También puedes usar `coverUrl`, `videoUrl` o `subtitlesUrl` HTTPS en lugar del archivo correspondiente. Incluye `durationMs` si proporcionas `videoUrl`. Los subtítulos son opcionales y solo en inglés. `install` admite `episodeId` y `episodeNumber` explícitos. La portada local se ajusta a 480 × 682 y se sube en WebP.
+
+```sh
+npm --prefix backend run microdramas:admin -- install --stage prod \
+  --manifest /ruta/serie.json --publish
+```
+
+El plan de `install` valida los archivos y metadatos localmente. Repite con `--apply` para subir los archivos, validar los personajes contra el ambiente y guardar la serie en una sola operación de catálogo. Si el identificador ya existe, consulta `show`. Si la solicitud es instalar como borrador, omite `--publish`.
+
+Para publicar una serie guardada y sus episodios, usa `publish`. `--through N` publica hasta el episodio N y conserva los estados de los episodios posteriores.
+
+```sh
+npm --prefix backend run microdramas:admin -- publish --stage prod \
+  --series mi-serie --through 5 --apply
+```
+
+Después de guardar, la consola vuelve a leer la serie y, si está publicada, comprueba el detalle que consume la app. Si la verificación falla o se corta la conexión, usa `show` antes de repetir. Una carga interrumpida puede dejar archivos sin referencia. Si otra sesión guarda primero, revisa la nueva versión y vuelve a preparar el plan.
+
 ## Crear y publicar
 
 1. Abre **Series → Nueva serie** y escribe el título. Se propone un identificador; puedes editarlo antes del primer guardado. Después es permanente.

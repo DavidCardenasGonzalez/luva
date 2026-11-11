@@ -9,7 +9,7 @@ import {
 import type { AppLanguage, SupportLanguageCode } from "../language";
 
 const ROUTE_PREFIX = "/v1";
-const DEFAULT_OPENAI_CHAT_MODEL = "gpt-5.4-nano";
+const DEFAULT_OPENAI_CHAT_MODEL = "gpt-6-luna";
 const HISTORY_LIMIT = 24;
 
 const ssm = new SSMClient({});
@@ -1023,12 +1023,12 @@ function getModelConfig() {
     process.env.OPENAI_STORY_MODEL ||
     process.env.OPENAI_CHAT_MODEL ||
     DEFAULT_OPENAI_CHAT_MODEL;
-  const isGpt5 = /gpt-5/i.test(model);
+  const isGpt5 = /gpt-[56]/i.test(model);
   return {
     model,
     timeoutMs: Number(process.env.ONBOARDING_TIMEOUT_MS || process.env.STORY_TIMEOUT_MS || 8000),
     useResponses: isGpt5 || process.env.OPENAI_USE_RESPONSES === "1",
-    reasoningConfig: isGpt5 ? { effort: process.env.OPENAI_REASONING_EFFORT || "low" } : undefined,
+    reasoningConfig: isGpt5 ? { effort: process.env.OPENAI_REASONING_EFFORT || "none" } : undefined,
   };
 }
 

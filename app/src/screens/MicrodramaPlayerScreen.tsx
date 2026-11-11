@@ -13,7 +13,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'MicrodramaPlayer'>;
 export default function MicrodramaPlayerScreen({ navigation, route }: Props) {
   const { seriesId } = route.params;
   const focused = useIsFocused();
-  const { loadProgress, saveProgress } = useMicrodramaProgress();
+  const { watchedEpisodes, loadProgress, saveProgress } = useMicrodramaProgress();
   const [detail, setDetail] = useState<MicrodramaDetail>();
   const [startEpisodeId, setStartEpisodeId] = useState(route.params.episodeId);
   const [startPositionMs, setStartPositionMs] = useState(0);
@@ -38,7 +38,7 @@ export default function MicrodramaPlayerScreen({ navigation, route }: Props) {
     return () => { cancelled = true; };
   }, [loadProgress, route.params.episodeId, seriesId]);
 
-  const handleProgress = useCallback((episode: MicrodramaEpisode, positionMs: number, event: 'position' | 'ended' = 'position') => {
+  const handleProgress = useCallback((episode: MicrodramaEpisode, positionMs: number, event: 'position' | 'watched' | 'ended' = 'position') => {
     void saveProgress(seriesId, episode, positionMs, event);
   }, [saveProgress, seriesId]);
 
@@ -57,6 +57,7 @@ export default function MicrodramaPlayerScreen({ navigation, route }: Props) {
       <MicrodramaPlayer
         key={detail.series.seriesId}
         detail={detail}
+        watchedEpisodes={watchedEpisodes[seriesId]}
         active={focused}
         initialEpisodeId={startEpisodeId}
         initialPositionMs={startPositionMs}

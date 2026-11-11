@@ -122,10 +122,10 @@ export function createMicrodramaProgressRepository(
     },
 
     async save(userId: string, seriesId: string, input: {
-      episodeId: string; positionMs: number; event: 'position' | 'ended'; expectedRevision: number;
+      episodeId: string; positionMs: number; event: 'position' | 'watched' | 'ended'; expectedRevision: number;
     }) {
       if (!validId(seriesId) || !validId(input.episodeId)) throw new Error('INVALID_MICRODRAMA_ID');
-      if (!Number.isFinite(input.positionMs) || input.positionMs < 0 || !Number.isInteger(input.expectedRevision) || input.expectedRevision < 0 || !['position', 'ended'].includes(input.event)) {
+      if (!Number.isFinite(input.positionMs) || input.positionMs < 0 || !Number.isInteger(input.expectedRevision) || input.expectedRevision < 0 || !['position', 'watched', 'ended'].includes(input.event)) {
         throw new Error('INVALID_MICRODRAMA_PROGRESS');
       }
       const episode = await getPublicEpisode(seriesId, input.episodeId);
@@ -165,7 +165,7 @@ export function createMicrodramaProgressRepository(
         pk: partition(userId), sk: episodeKey(seriesId, input.episodeId), seriesId,
         episodeId: input.episodeId,
         positionMs: ending ? episode.durationMs : positionMs,
-        completed: Boolean(oldEpisode?.completed || ending),
+        completed: Boolean(oldEpisode?.completed || input.event === 'watched'),
         updatedAt: now,
       };
       const summaryCondition = oldSummary

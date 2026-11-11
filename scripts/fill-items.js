@@ -121,8 +121,8 @@ async function chatJSON(messages, { maxTries = 5 } = {}) {
           Authorization: `Bearer ${API_KEY}`,
         },
         body: JSON.stringify({
-          model: "gpt-5-nano",
-          reasoning: { effort: "low" },
+          model: "gpt-6-luna",
+          reasoning: { effort: "none" },
           text: { format: { type: "json_object" } },
           instructions: systemMsg ? systemMsg.content : undefined,
           input: [

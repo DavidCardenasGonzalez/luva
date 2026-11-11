@@ -7,7 +7,7 @@
  *     --text "I would like some water" \
  *     --label "by contrast" \
  *     --example "By contrast, sales fell in Q2" \
- *     --model gpt-5-nano
+ *     --model gpt-6-luna
  *
  * API Key:
  *   - Lee de la variable de entorno OPENAI_API_KEY
@@ -54,7 +54,7 @@ async function main() {
   const text = "I would like some made up water"; // arg('text', 't');
   const label = "make up";
   const example = "They made up after the argument.";
-  // const model = "gpt-5-nano";
+  // const model = "gpt-6-luna";
   const model = "gpt-4.1-nano";
 
   const timeoutMs = Number(process.env.EVAL_TIMEOUT_MS || 20000);

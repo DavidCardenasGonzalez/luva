@@ -54,6 +54,7 @@ import {
   trackMixpanelFeedLoadMore,
 } from '../marketing/mixpanelEvents';
 import { prefetchImageUrls } from '../shared/imagePrefetch';
+import { useVideoSoundPreference } from '../shared/useVideoSoundPreference';
 import { LITE_PROMO_EXPIRES_AT_KEY } from '../purchases/litePromo';
 import { getLearnedLessonIds } from '../progress/lessonProgress';
 import { recordJourneyVocabularyQuickGuessCorrect } from '../progress/journeyProgress';
@@ -1394,7 +1395,7 @@ function CharacterVideoPage({
   const avatarImageUrl = (item.avatarImageXsUrl || item.avatarImageUrl)?.trim();
   const [isVideoReadyForDisplay, setIsVideoReadyForDisplay] = useState(false);
   const [paused, setPaused] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const { isMuted, toggleMuted } = useVideoSoundPreference();
   const [playbackPositionSeconds, setPlaybackPositionSeconds] = useState(0);
   const [subtitleCues, setSubtitleCues] = useState<CharacterVideoSubtitleCue[]>([]);
   const [subtitleTranslations, setSubtitleTranslations] = useState<Record<string, SubtitleTranslationState>>({});
@@ -1475,7 +1476,6 @@ function CharacterVideoPage({
   useEffect(() => {
     setIsVideoReadyForDisplay(false);
     setPaused(false);
-    setIsMuted(true);
     setPlaybackPositionSeconds(0);
     setSubtitleTranslations({});
   }, [videoUrl]);
@@ -1574,7 +1574,10 @@ function CharacterVideoPage({
         style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
       />
       <Pressable
-        onPress={() => setIsMuted((current) => !current)}
+        onPress={(event) => {
+          event.stopPropagation();
+          toggleMuted();
+        }}
         accessibilityRole="button"
         accessibilityLabel={isMuted ? (language === 'es' ? 'Activar sonido' : 'Unmute video') : (language === 'es' ? 'Silenciar video' : 'Mute video')}
         style={{ position: 'absolute', top: 56, right: 18, width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.58)' }}

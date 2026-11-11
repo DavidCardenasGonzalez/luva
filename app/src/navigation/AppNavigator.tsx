@@ -1,8 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  View,
-} from 'react-native';
+import React, { useCallback, useRef } from 'react';
 import {
   NavigationContainer,
   DefaultTheme,
@@ -33,10 +29,10 @@ import OnboardingScreen from '../onboarding/OnboardingScreen';
 import * as Linking from 'expo-linking';
 import * as Notifications from 'expo-notifications';
 import { trackScreenViewed } from '../marketing/mixpanelEvents';
-import { hasCompletedOnboarding } from '../onboarding/model/progress';
 import MicrodramaPlayerScreen from '../screens/MicrodramaPlayerScreen';
 import MicrodramaDiscoveryScreen from '../screens/MicrodramaDiscoveryScreen';
 import ReviewListScreen from '../screens/ReviewListScreen';
+import ReviewPracticeScreen from '../screens/ReviewPracticeScreen';
 import ReviewDetailScreen from '../screens/ReviewDetailScreen';
 
 export type PaywallSource =
@@ -59,6 +55,7 @@ export type RootStackParamList = {
   Home: undefined;
   LearningHome: undefined;
   ReviewList: undefined;
+  ReviewPractice: undefined;
   ReviewDetail: { itemId: string };
   Discovery: undefined;
   MicrodramaPlayer: { seriesId: string; episodeId?: string };
@@ -152,21 +149,6 @@ const linking = {
 export default function AppNavigator() {
   const navigationRef = useNavigationContainerRef<RootStackParamList>();
   const routeNameRef = useRef<string | undefined>(undefined);
-  const [initialRouteName, setInitialRouteName] = useState<'Onboarding' | 'Home'>();
-
-  useEffect(() => {
-    let mounted = true;
-
-    hasCompletedOnboarding().then((completed) => {
-      if (mounted) {
-        setInitialRouteName(completed ? 'Home' : 'Onboarding');
-      }
-    });
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   const handleReady = useCallback(() => {
     const currentRoute = navigationRef.getCurrentRoute();
@@ -193,14 +175,6 @@ export default function AppNavigator() {
     routeNameRef.current = currentRouteName;
   }, [navigationRef]);
 
-  if (!initialRouteName) {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#07111f' }}>
-        <ActivityIndicator color="#22d3ee" />
-      </View>
-    );
-  }
-
   return (
     <NavigationContainer
       ref={navigationRef}
@@ -209,11 +183,13 @@ export default function AppNavigator() {
       onReady={handleReady}
       onStateChange={handleStateChange}
     >
-      <Stack.Navigator initialRouteName={initialRouteName}>
+      {/* The full onboarding stays available in code while Dramas is the entry point. */}
+      <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="LearningHome" component={LearningHomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ReviewList" component={ReviewListScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="ReviewPractice" component={ReviewPracticeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ReviewDetail" component={ReviewDetailScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Discovery" component={MicrodramaDiscoveryScreen} options={{ headerShown: false }} />
         <Stack.Screen name="MicrodramaPlayer" component={MicrodramaPlayerScreen} options={{ headerShown: false }} />
